@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+
+hoistPattern:
+  - "*"
+  - "!@strapi/*"
+
+onlyBuiltDependencies:
+  - "@apollo/protobufjs"
+  - "@parcel/watcher"
+  - "@swc/core"
+  - "better-sqlite3"
+  - "esbuild"

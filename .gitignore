@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build & Strapi artifacts
+dist/
+build/
+.strapi/
+.turbo/
+.cache/
+.tmp/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs & OS
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+.DS_Store
+coverage/
