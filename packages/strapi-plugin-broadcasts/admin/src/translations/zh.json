@@ -1,0 +1,5 @@
+{
+  "plugin.name": "社区多渠道广播",
+  "settings.section": "社区多渠道广播",
+  "settings.page": "邮件、Telegram 与 WhatsApp 传输配置"
+}

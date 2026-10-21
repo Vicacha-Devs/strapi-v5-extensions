@@ -1,0 +1,87 @@
+{
+  "kind": "collectionType",
+  "collectionName": "broadcast_automation_rules",
+  "info": {
+    "singularName": "automation-rule",
+    "pluralName": "automation-rules",
+    "displayName": "Broadcast Automation Rule",
+    "description": "EventHub-driven automated multi-channel broadcast rule"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "eventName": {
+      "type": "string",
+      "required": true
+    },
+    "targetContentType": {
+      "type": "string"
+    },
+    "topic": {
+      "type": "string",
+      "default": "announcements",
+      "required": true
+    },
+    "channels": {
+      "type": "json",
+      "required": true,
+      "default": ["telegram"]
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "priority": {
+      "type": "enumeration",
+      "enum": ["low", "normal", "high", "urgent"],
+      "default": "normal"
+    },
+    "subjectTemplate": {
+      "type": "string",
+      "required": true
+    },
+    "bodyTextTemplate": {
+      "type": "text",
+      "required": true
+    },
+    "bodyHtmlTemplate": {
+      "type": "richtext"
+    },
+    "ctaLabelTemplate": {
+      "type": "string"
+    },
+    "ctaUrlTemplate": {
+      "type": "string"
+    },
+    "translations": {
+      "type": "json",
+      "default": {}
+    },
+    "lastTriggeredAt": {
+      "type": "datetime"
+    },
+    "triggerCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    }
+  }
+}
