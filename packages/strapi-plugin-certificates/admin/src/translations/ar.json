@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "الشهادات الرسمية",
+  "certificates.settings.section": "هيئة تصديق الشهادات",
+  "certificates.settings.page": "مفاتيح التوقيع والقوالب",
+  "certificates.header.title": "الشهادات الرسمية والسجل المشفر",
+  "certificates.header.subtitle": "شهادات موقعة رقمياً بـ Ed25519 مع توثيق الشهود والتاريخ الهجري والتحقق عبر رمز QR",
+  "certificates.actions.issue": "إصدار شهادة موقعة",
+  "certificates.actions.approve": "اعتماد وتوقيع",
+  "certificates.actions.revoke": "إلغاء الشهادة",
+  "certificates.actions.print": "طباعة / PDF",
+  "certificates.status.issued": "صادرة",
+  "certificates.status.pending_approval": "بانتظار الاعتماد",
+  "certificates.status.revoked": "ملغاة",
+  "certificates.status.expired": "منتهية الصلاحية"
+}

@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "Certificates",
+  "certificates.settings.section": "Certificates Authority",
+  "certificates.settings.page": "Signing Keys & Templates",
+  "certificates.header.title": "Official Certificates & Cryptographic Registry",
+  "certificates.header.subtitle": "Ed25519 digitally signed certificates, witness attestation, Hijri dual-calendar dates, and QR verification",
+  "certificates.actions.issue": "Issue Signed Certificate",
+  "certificates.actions.approve": "Approve & Sign",
+  "certificates.actions.revoke": "Revoke",
+  "certificates.actions.print": "Print / PDF",
+  "certificates.status.issued": "Issued",
+  "certificates.status.pending_approval": "Pending Approval",
+  "certificates.status.revoked": "Revoked",
+  "certificates.status.expired": "Expired"
+}

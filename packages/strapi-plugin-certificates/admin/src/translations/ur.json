@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "سرٹیفکیٹس",
+  "certificates.settings.section": "سرٹیفکیٹ اتھارٹی",
+  "certificates.settings.page": "دستخطی کلیدیں اور ٹیمپلیٹس",
+  "certificates.header.title": "سرکاری سرٹیفکیٹس اور کرپٹوگرافک رجسٹری",
+  "certificates.header.subtitle": "Ed25519 ڈیجیٹل دستخط شدہ سرٹیفکیٹس، گواہوں کی تصدیق، ہجری تاریخ اور QR تصدیق",
+  "certificates.actions.issue": "دستخط شدہ سرٹیفکیٹ جاری کریں",
+  "certificates.actions.approve": "منظور اور دستخط کریں",
+  "certificates.actions.revoke": "منسوخ کریں",
+  "certificates.actions.print": "پرنٹ / PDF",
+  "certificates.status.issued": "جاری کردہ",
+  "certificates.status.pending_approval": "منظوری کا منتظر",
+  "certificates.status.revoked": "منسوخ شدہ",
+  "certificates.status.expired": "میعاد ختم"
+}

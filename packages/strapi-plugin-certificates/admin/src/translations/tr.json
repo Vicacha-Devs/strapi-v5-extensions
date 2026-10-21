@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "Sertifikalar",
+  "certificates.settings.section": "Sertifika Yetkilisi",
+  "certificates.settings.page": "İmza Anahtarları ve Şablonlar",
+  "certificates.header.title": "Resmi Sertifikalar ve Kriptografik Kayıt",
+  "certificates.header.subtitle": "Ed25519 dijital imzalı sertifikalar, şahit onayı, Hicri takvim tarihleri ve QR doğrulama",
+  "certificates.actions.issue": "İmzalı Sertifika Düzenle",
+  "certificates.actions.approve": "Onayla ve İmzala",
+  "certificates.actions.revoke": "İptal Et",
+  "certificates.actions.print": "Yazdır / PDF",
+  "certificates.status.issued": "Düzenlendi",
+  "certificates.status.pending_approval": "Onay Bekliyor",
+  "certificates.status.revoked": "İptal Edildi",
+  "certificates.status.expired": "Süresi Doldu"
+}

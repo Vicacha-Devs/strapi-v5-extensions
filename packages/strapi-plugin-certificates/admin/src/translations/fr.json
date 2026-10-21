@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "Certificats",
+  "certificates.settings.section": "Autorité de Certification",
+  "certificates.settings.page": "Clés de Signature et Modèles",
+  "certificates.header.title": "Certificats Officiels et Registre Cryptographique",
+  "certificates.header.subtitle": "Certificats signés numériquement Ed25519, attestation des témoins, calendrier Hégirien et vérification QR",
+  "certificates.actions.issue": "Émettre un Certificat Signé",
+  "certificates.actions.approve": "Approuver et Signer",
+  "certificates.actions.revoke": "Révoquer",
+  "certificates.actions.print": "Imprimer / PDF",
+  "certificates.status.issued": "Émis",
+  "certificates.status.pending_approval": "En attente d'approbation",
+  "certificates.status.revoked": "Révoqué",
+  "certificates.status.expired": "Expiré"
+}

@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "Certificados",
+  "certificates.settings.section": "Autoridade de Certificação",
+  "certificates.settings.page": "Chaves de Assinatura e Modelos",
+  "certificates.header.title": "Certificados Oficiais e Registro Criptográfico",
+  "certificates.header.subtitle": "Certificados assinados digitalmente com Ed25519, atestação de testemunhas, datas Hijri e verificação QR",
+  "certificates.actions.issue": "Emitir Certificado Assinado",
+  "certificates.actions.approve": "Aprovar e Assinar",
+  "certificates.actions.revoke": "Revogar",
+  "certificates.actions.print": "Imprimir / PDF",
+  "certificates.status.issued": "Emitido",
+  "certificates.status.pending_approval": "Pendente de Aprovação",
+  "certificates.status.revoked": "Revogado",
+  "certificates.status.expired": "Expirado"
+}

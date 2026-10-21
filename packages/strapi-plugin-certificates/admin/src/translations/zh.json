@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "官方证书",
+  "certificates.settings.section": "证书签发机构",
+  "certificates.settings.page": "签名密钥与模板",
+  "certificates.header.title": "官方证书与加密注册表",
+  "certificates.header.subtitle": "Ed25519 数字签名证书、见证人公证、伊斯兰历双日历日期与二维码核验",
+  "certificates.actions.issue": "签发数字签名证书",
+  "certificates.actions.approve": "批准并签名",
+  "certificates.actions.revoke": "吊销",
+  "certificates.actions.print": "打印 / PDF",
+  "certificates.status.issued": "已签发",
+  "certificates.status.pending_approval": "待审批",
+  "certificates.status.revoked": "已吊销",
+  "certificates.status.expired": "已过期"
+}
