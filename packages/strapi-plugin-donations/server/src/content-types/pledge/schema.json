@@ -1,0 +1,113 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vicacha_donation_pledges",
+  "info": {
+    "singularName": "pledge",
+    "pluralName": "pledges",
+    "displayName": "Donation Pledge & Contribution",
+    "description": "Donor pledge, utility bill payment, or verified donation record"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "referenceCode": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "donorName": {
+      "type": "string",
+      "required": true
+    },
+    "donorEmail": {
+      "type": "email",
+      "required": true
+    },
+    "donorPhone": {
+      "type": "string"
+    },
+    "donorTaxId": {
+      "type": "string"
+    },
+    "donorTaxIdType": {
+      "type": "string"
+    },
+    "isAnonymous": {
+      "type": "boolean",
+      "default": false
+    },
+    "amount": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "COP",
+      "required": true
+    },
+    "convertedBaseAmount": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "categoryKey": {
+      "type": "string",
+      "default": "general_fund",
+      "required": true
+    },
+    "campaignSlug": {
+      "type": "string"
+    },
+    "campaignKind": {
+      "type": "enumeration",
+      "enum": ["major_campaign", "utility_invoice", "micro_need"],
+      "default": "major_campaign"
+    },
+    "coversRemainingBalance": {
+      "type": "boolean",
+      "default": false
+    },
+    "paymentChannel": {
+      "type": "enumeration",
+      "enum": ["bank_transfer", "digital_wallet", "card_gateway", "qr_code", "cash", "other"],
+      "default": "bank_transfer",
+      "required": true
+    },
+    "paymentProvider": {
+      "type": "string"
+    },
+    "transactionReference": {
+      "type": "string"
+    },
+    "receiptProofUrl": {
+      "type": "string"
+    },
+    "donorNotes": {
+      "type": "text"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "verified", "rejected", "certificate_issued"],
+      "default": "pending",
+      "required": true
+    },
+    "verifiedAt": {
+      "type": "datetime"
+    },
+    "verifiedBy": {
+      "type": "string"
+    },
+    "certificateSerialNumber": {
+      "type": "string"
+    },
+    "certificateVerifyUrl": {
+      "type": "string"
+    },
+    "locale": {
+      "type": "string",
+      "default": "en"
+    }
+  }
+}
