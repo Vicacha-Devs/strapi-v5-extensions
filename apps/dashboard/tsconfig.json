@@ -1,0 +1,8 @@
+{
+  "extends": "../../packages/typescript-config/strapi-server.json",
+  "compilerOptions": {
+    "rootDir": "."
+  },
+  "include": ["config/**/*", "src/**/*"],
+  "exclude": ["node_modules", "build", "dist", ".strapi"]
+}

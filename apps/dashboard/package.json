@@ -1,0 +1,41 @@
+{
+  "name": "@vicacha-devs/dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Strapi v5 host dashboard app for developing and testing @vicacha-devs/strapi-plugin-calendar, @vicacha-devs/strapi-plugin-events, and other extensions",
+  "author": "Vicacha Devs",
+  "license": "MIT",
+  "scripts": {
+    "build": "strapi build",
+    "develop": "strapi develop",
+    "dev": "strapi develop --watch-admin",
+    "start": "strapi start",
+    "strapi": "strapi",
+    "test:ts": "tsc --noEmit",
+    "clean": "rm -rf dist .strapi build"
+  },
+  "dependencies": {
+    "@strapi/plugin-cloud": "5.39.0",
+    "@strapi/plugin-users-permissions": "5.39.0",
+    "@strapi/strapi": "5.39.0",
+    "@vicacha-devs/strapi-plugin-bookings": "workspace:*",
+    "@vicacha-devs/strapi-plugin-calendar": "workspace:*",
+    "@vicacha-devs/strapi-plugin-events": "workspace:*",
+    "better-sqlite3": "11.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.3",
+    "styled-components": "^6.3.11"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
