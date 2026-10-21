@@ -1,0 +1,95 @@
+export default {
+  type: 'admin',
+  routes: [
+    {
+      method: 'GET',
+      path: '/settings',
+      handler: 'inboxController.getSettings',
+      config: { policies: [] },
+    },
+    {
+      method: 'PUT',
+      path: '/settings',
+      handler: 'inboxController.updateSettings',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/templates',
+      handler: 'inboxController.listTemplates',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/forms',
+      handler: 'inboxController.listForms',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/forms',
+      handler: 'inboxController.saveForm',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/forms/from-template',
+      handler: 'inboxController.createFromTemplate',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/submissions',
+      handler: 'inboxController.listSubmissions',
+      config: { policies: [] },
+    },
+    {
+      method: 'PUT',
+      path: '/submissions/:documentId/casework',
+      handler: 'inboxController.updateCasework',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/submissions/:documentId/schedule-booking',
+      handler: 'inboxController.scheduleBooking',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/submissions/:documentId/issue-certificate',
+      handler: 'inboxController.issueCertificate',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/submissions/export-csv',
+      handler: 'inboxController.exportCsv',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/captcha/test',
+      handler: 'inboxController.testCaptcha',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/subscribers',
+      handler: 'inboxController.listSubscribers',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
+      path: '/alerts',
+      handler: 'inboxController.getActiveAlerts',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/alerts',
+      handler: 'inboxController.upsertAlertBanner',
+      config: { policies: [] },
+    },
+  ],
+};

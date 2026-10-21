@@ -1,0 +1,125 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inbox_submissions",
+  "info": {
+    "singularName": "submission",
+    "pluralName": "submissions",
+    "displayName": "Inbox Submission",
+    "description": "Form submission & Service-Desk Casework ticket"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "referenceCode": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "formSlug": {
+      "type": "string",
+      "required": true
+    },
+    "formTitle": {
+      "type": "string"
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": [
+        "contact",
+        "service_desk",
+        "inquiry",
+        "application",
+        "volunteer",
+        "custom"
+      ],
+      "default": "contact"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "new",
+        "read",
+        "under_review",
+        "scheduled",
+        "completed",
+        "rejected",
+        "archived"
+      ],
+      "default": "new",
+      "required": true
+    },
+    "priority": {
+      "type": "enumeration",
+      "enum": [
+        "low",
+        "normal",
+        "high",
+        "urgent"
+      ],
+      "default": "normal",
+      "required": true
+    },
+    "department": {
+      "type": "string",
+      "default": "general"
+    },
+    "locale": {
+      "type": "string",
+      "default": "es"
+    },
+    "applicantName": {
+      "type": "string"
+    },
+    "applicantEmail": {
+      "type": "email"
+    },
+    "applicantPhone": {
+      "type": "string"
+    },
+    "data": {
+      "type": "json",
+      "required": true,
+      "default": {}
+    },
+    "checklistItems": {
+      "type": "json",
+      "default": []
+    },
+    "staffNotes": {
+      "type": "text"
+    },
+    "assignedTo": {
+      "type": "string"
+    },
+    "linkedBookingId": {
+      "type": "string"
+    },
+    "linkedCertificateNumber": {
+      "type": "string"
+    },
+    "ipAddress": {
+      "type": "string",
+      "private": true
+    },
+    "userAgent": {
+      "type": "string",
+      "private": true
+    },
+    "submittedAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "secondaryDate": {
+      "type": "json"
+    }
+  }
+}
