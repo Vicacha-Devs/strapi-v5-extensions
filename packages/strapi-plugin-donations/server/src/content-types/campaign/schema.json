@@ -1,0 +1,121 @@
+{
+  "kind": "collectionType",
+  "collectionName": "vicacha_donation_campaigns",
+  "info": {
+    "singularName": "campaign",
+    "pluralName": "campaigns",
+    "displayName": "Donation Campaign & Invoice",
+    "description": "Generic fundraising campaign, operational utility invoice, or micro-need"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "description": {
+      "type": "richtext",
+      "required": true,
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "campaignKind": {
+      "type": "enumeration",
+      "enum": ["major_campaign", "utility_invoice", "micro_need"],
+      "default": "major_campaign",
+      "required": true
+    },
+    "categoryKey": {
+      "type": "string",
+      "default": "general_fund",
+      "required": true
+    },
+    "goalAmount": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "raisedAmount": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "COP",
+      "required": true
+    },
+    "donorCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "isUrgent": {
+      "type": "boolean",
+      "default": false
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "startDate": {
+      "type": "date"
+    },
+    "endDate": {
+      "type": "date"
+    },
+    "dueDate": {
+      "type": "date"
+    },
+    "billingPeriod": {
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "invoiceReference": {
+      "type": "string"
+    },
+    "invoiceProvider": {
+      "type": "string"
+    },
+    "invoiceStatus": {
+      "type": "enumeration",
+      "enum": ["open", "partially_funded", "paid", "overdue"],
+      "default": "open"
+    },
+    "suggestedAmounts": {
+      "type": "json"
+    },
+    "allowCustomAmount": {
+      "type": "boolean",
+      "default": true
+    },
+    "allowFullBalancePayoff": {
+      "type": "boolean",
+      "default": true
+    },
+    "coverUrl": {
+      "type": "string"
+    },
+    "invoiceDocumentUrl": {
+      "type": "string"
+    },
+    "paymentGatewayUrl": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string"
+    }
+  }
+}
