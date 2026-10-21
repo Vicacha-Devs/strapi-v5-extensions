@@ -1,0 +1,75 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inbox_alert_banners",
+  "info": {
+    "singularName": "alert-banner",
+    "pluralName": "alert-banners",
+    "displayName": "Inbox Alert Banner",
+    "description": "Time-bounded multi-language urgent announcement ticker / banner"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "code": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "message": {
+      "type": "text",
+      "required": true
+    },
+    "severity": {
+      "type": "enumeration",
+      "enum": [
+        "info",
+        "warning",
+        "urgent",
+        "celebration"
+      ],
+      "default": "info",
+      "required": true
+    },
+    "ctaLabel": {
+      "type": "string"
+    },
+    "ctaUrl": {
+      "type": "string"
+    },
+    "dismissible": {
+      "type": "boolean",
+      "default": true
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "priority": {
+      "type": "integer",
+      "default": 10
+    },
+    "startsAt": {
+      "type": "datetime"
+    },
+    "endsAt": {
+      "type": "datetime"
+    },
+    "translations": {
+      "type": "json",
+      "default": {}
+    }
+  }
+}

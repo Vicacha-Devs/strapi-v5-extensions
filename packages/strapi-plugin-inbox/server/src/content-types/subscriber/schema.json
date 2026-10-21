@@ -1,0 +1,70 @@
+{
+  "kind": "collectionType",
+  "collectionName": "inbox_subscribers",
+  "info": {
+    "singularName": "subscriber",
+    "pluralName": "subscribers",
+    "displayName": "Inbox Subscriber",
+    "description": "Double Opt-In newsletter and community topic subscriber"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "fullName": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "locale": {
+      "type": "string",
+      "default": "es"
+    },
+    "topics": {
+      "type": "json",
+      "default": ["announcements"]
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "pending",
+        "confirmed",
+        "unsubscribed"
+      ],
+      "default": "pending",
+      "required": true
+    },
+    "confirmToken": {
+      "type": "string",
+      "private": true
+    },
+    "unsubscribeToken": {
+      "type": "string",
+      "required": true,
+      "private": true
+    },
+    "confirmedAt": {
+      "type": "datetime"
+    },
+    "unsubscribedAt": {
+      "type": "datetime"
+    },
+    "sourceFormSlug": {
+      "type": "string"
+    }
+  }
+}
