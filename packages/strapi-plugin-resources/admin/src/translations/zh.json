@@ -1,0 +1,6 @@
+{
+  "resources.plugin.name": "资源与媒体",
+  "resources.plugin.description": "数字图书馆出版物、媒体库相册与互动术语表。",
+  "resources.settings.section": "资源与媒体库",
+  "resources.settings.page.title": "目录与媒体库设置"
+}
