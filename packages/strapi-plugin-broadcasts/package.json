@@ -1,0 +1,102 @@
+{
+  "name": "@vicacha-devs/strapi-plugin-broadcasts",
+  "version": "0.1.0",
+  "description": "Omnichannel community broadcasts (Email newsletters, Telegram Bot & Channel/Forum topics, WhatsApp Cloud API / OpenWA / Evolution, EventHub automation rules, and double opt-in subscriber segmentation) for Strapi v5 with multi-language and multi-calendar support.",
+  "keywords": [
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5",
+    "broadcasts",
+    "newsletter",
+    "telegram",
+    "whatsapp",
+    "email",
+    "notifications",
+    "omnichannel",
+    "i18n",
+    "multi-calendar",
+    "hijri"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Vicacha Devs",
+    "email": "devs@vicacha.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vicacha-devs/strapi-v5-extensions.git",
+    "directory": "packages/strapi-plugin-broadcasts"
+  },
+  "files": [
+    "dist",
+    "strapi-admin.js",
+    "strapi-server.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "source": "./admin/src/index.ts",
+      "types": "./dist/admin/src/index.d.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./server/src/index.ts",
+      "types": "./dist/server/src/index.d.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./shared": {
+      "source": "./shared/index.ts",
+      "types": "./dist/server/shared/index.d.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js"
+    }
+  },
+  "strapi": {
+    "name": "broadcasts",
+    "displayName": "Community Broadcasts",
+    "description": "Omnichannel Email, Telegram & WhatsApp broadcasts, EventHub automation rules, and segmented subscriber dispatch",
+    "kind": "plugin",
+    "required": false
+  },
+  "scripts": {
+    "build": "strapi-plugin build",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link",
+    "verify": "strapi-plugin verify",
+    "test": "node --import ./tests/register-ts-resolver.mjs --test tests/*.test.ts",
+    "test:ts": "tsc --noEmit -p admin/tsconfig.json && tsc --noEmit -p server/tsconfig.json",
+    "test:ts:admin": "tsc --noEmit -p admin/tsconfig.json",
+    "test:ts:server": "tsc --noEmit -p server/tsconfig.json"
+  },
+  "dependencies": {
+    "@strapi/design-system": "^2.0.0-rc.21",
+    "@strapi/icons": "^2.0.0-rc.21",
+    "@vicacha-devs/strapi-plugin-calendar": "workspace:*",
+    "react-intl": "^6.6.8"
+  },
+  "devDependencies": {
+    "@strapi/sdk-plugin": "^5.2.4",
+    "@strapi/strapi": "^5.39.0",
+    "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "prettier": "^3.3.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "styled-components": "^6.1.13",
+    "typescript": "^5.5.4"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  }
+}
