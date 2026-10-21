@@ -1,0 +1,69 @@
+{
+  "kind": "collectionType",
+  "collectionName": "islam_scripture_entries",
+  "info": {
+    "singularName": "scripture-entry",
+    "pluralName": "scripture-entries",
+    "displayName": "Islam Scripture & Dua Entry",
+    "description": "Custom curated Quranic Ayah, Prophetic Hadith, or Hisnul Muslim Dua/Adhkar entry"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "entryKind": {
+      "type": "enumeration",
+      "enum": ["ayah", "hadith", "dua"],
+      "default": "dua",
+      "required": true
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "referenceKey": {
+      "type": "string",
+      "required": true
+    },
+    "arabicText": {
+      "type": "text",
+      "required": true
+    },
+    "transliteration": {
+      "type": "text"
+    },
+    "translations": {
+      "type": "json",
+      "required": true
+    },
+    "reflections": {
+      "type": "json"
+    },
+    "gradingOrCategory": {
+      "type": "string"
+    },
+    "recommendedRepetitions": {
+      "type": "integer",
+      "default": 1
+    },
+    "audioUrl": {
+      "type": "string"
+    },
+    "topicTags": {
+      "type": "json"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
