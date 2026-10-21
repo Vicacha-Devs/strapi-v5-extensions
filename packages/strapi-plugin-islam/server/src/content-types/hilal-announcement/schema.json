@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "islam_hilal_announcements",
+  "info": {
+    "singularName": "hilal-announcement",
+    "pluralName": "hilal-announcements",
+    "displayName": "Islam Hilal Moon-Sighting Announcement",
+    "description": "Official Mosque Hilal Moon-Sighting confirmations for Ramadan, Eid al-Fitr, and Dhu al-Hijjah"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "occasion": {
+      "type": "enumeration",
+      "enum": ["ramadan", "eid_al_fitr", "dhul_hijjah_eid_al_adha", "monthly_hilal"],
+      "default": "ramadan",
+      "required": true
+    },
+    "hijriYear": {
+      "type": "integer",
+      "required": true
+    },
+    "hijriMonth": {
+      "type": "integer",
+      "required": true
+    },
+    "confirmedGregorianDate": {
+      "type": "string",
+      "required": true
+    },
+    "shiftingApplied": {
+      "type": "string",
+      "default": "0"
+    },
+    "approvedByImam": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "json"
+    },
+    "broadcastDispatched": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}
