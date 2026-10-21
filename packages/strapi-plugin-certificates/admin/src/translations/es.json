@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "Certificados",
+  "certificates.settings.section": "Autoridad de Certificación",
+  "certificates.settings.page": "Llaves de Firma y Plantillas",
+  "certificates.header.title": "Certificados Oficiales y Registro Criptográfico",
+  "certificates.header.subtitle": "Certificados firmados digitalmente con Ed25519, atestación de testigos, fechas en calendario Hijri y verificación QR",
+  "certificates.actions.issue": "Emitir Certificado Firmado",
+  "certificates.actions.approve": "Aprobar y Firmar",
+  "certificates.actions.revoke": "Revocar",
+  "certificates.actions.print": "Imprimir / PDF",
+  "certificates.status.issued": "Emitido",
+  "certificates.status.pending_approval": "Pendiente de Aprobación",
+  "certificates.status.revoked": "Revocado",
+  "certificates.status.expired": "Expirado"
+}

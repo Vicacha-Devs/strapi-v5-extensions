@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "Zertifikate",
+  "certificates.settings.section": "Zertifizierungsstelle",
+  "certificates.settings.page": "Signaturschlüssel & Vorlagen",
+  "certificates.header.title": "Offizielle Zertifikate & Kryptografisches Register",
+  "certificates.header.subtitle": "Ed25519-signierte Zertifikate, Zeugenbeglaubigung, Hidschri-Kalenderdaten und QR-Verifizierung",
+  "certificates.actions.issue": "Signiertes Zertifikat ausstellen",
+  "certificates.actions.approve": "Genehmigen & Signieren",
+  "certificates.actions.revoke": "Widerrufen",
+  "certificates.actions.print": "Drucken / PDF",
+  "certificates.status.issued": "Ausgestellt",
+  "certificates.status.pending_approval": "Ausstehende Genehmigung",
+  "certificates.status.revoked": "Widerrufen",
+  "certificates.status.expired": "Abgelaufen"
+}

@@ -1,0 +1,15 @@
+{
+  "certificates.plugin.name": "Sertifikat Resmi",
+  "certificates.settings.section": "Otoritas Sertifikat",
+  "certificates.settings.page": "Kunci Tanda Tangan & Templat",
+  "certificates.header.title": "Sertifikat Resmi & Registri Kriptografi",
+  "certificates.header.subtitle": "Sertifikat bertanda tangan digital Ed25519, kesaksian resmi, tanggal Hijriah, dan verifikasi QR",
+  "certificates.actions.issue": "Terbitkan Sertifikat Bertanda Tangan",
+  "certificates.actions.approve": "Setujui & Tandatangani",
+  "certificates.actions.revoke": "Cabut",
+  "certificates.actions.print": "Cetak / PDF",
+  "certificates.status.issued": "Diterbitkan",
+  "certificates.status.pending_approval": "Menunggu Persetujuan",
+  "certificates.status.revoked": "Dicabut",
+  "certificates.status.expired": "Kedaluwarsa"
+}
