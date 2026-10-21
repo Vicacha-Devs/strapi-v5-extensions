@@ -1,0 +1,83 @@
+{
+  "kind": "collectionType",
+  "collectionName": "plugin_events_registrations",
+  "info": {
+    "singularName": "registration",
+    "pluralName": "registrations",
+    "displayName": "Event Registration (RSVP)",
+    "description": "Attendee RSVPs, waitlists, and check-ins managed by strapi-plugin-events"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "eventUid": {
+      "type": "string",
+      "required": true,
+      "default": "plugin::events.event"
+    },
+    "eventDocumentId": {
+      "type": "string",
+      "required": true
+    },
+    "eventTitle": {
+      "type": "string"
+    },
+    "occurrenceDate": {
+      "type": "string",
+      "required": true
+    },
+    "attendeeName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 160
+    },
+    "attendeeEmail": {
+      "type": "email",
+      "required": true
+    },
+    "attendeePhone": {
+      "type": "string",
+      "maxLength": 50
+    },
+    "guestsCount": {
+      "type": "integer",
+      "required": true,
+      "min": 1,
+      "max": 50,
+      "default": 1
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["confirmed", "waitlisted", "cancelled", "checked_in"],
+      "default": "confirmed",
+      "required": true
+    },
+    "checkInToken": {
+      "type": "string",
+      "private": true
+    },
+    "checkedInAt": {
+      "type": "datetime"
+    },
+    "locale": {
+      "type": "string",
+      "default": "es"
+    },
+    "notes": {
+      "type": "text",
+      "maxLength": 2000
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}
