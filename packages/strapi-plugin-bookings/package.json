@@ -1,0 +1,108 @@
+{
+  "name": "@vicacha-devs/strapi-plugin-bookings",
+  "version": "1.0.0",
+  "description": "Generic Strapi v5 Bookings, Appointments, Resource Scheduling & Time-Slot Availability Engine powered by @vicacha-devs/strapi-plugin-calendar",
+  "author": "Vicacha Devs",
+  "keywords": [
+    "strapi",
+    "strapi-v5",
+    "strapi-plugin",
+    "bookings",
+    "appointments",
+    "reservations",
+    "availability",
+    "time-slots",
+    "scheduling",
+    "calendar"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vicacha-devs/strapi-v5-extensions.git",
+    "directory": "packages/strapi-plugin-bookings"
+  },
+  "files": [
+    "dist",
+    "strapi-admin.js",
+    "strapi-server.js"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "source": "./admin/src/index.ts",
+      "types": "./dist/admin/src/index.d.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "source": "./server/src/index.ts",
+      "types": "./dist/server/src/index.d.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./shared": {
+      "source": "./shared/index.ts",
+      "types": "./dist/shared/index.d.ts",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
+      "default": "./dist/shared/index.js"
+    }
+  },
+  "scripts": {
+    "build": "strapi-plugin build",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link",
+    "verify": "strapi-plugin verify",
+    "test:ts": "npm run test:ts:front && npm run test:ts:back",
+    "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
+    "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
+    "test": "node --import ./tests/register-ts-resolver.mjs --test tests/*.test.ts",
+    "test:vitest": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@strapi/design-system": "2.2.0",
+    "@strapi/icons": "2.2.0",
+    "@vicacha-devs/strapi-plugin-calendar": "workspace:*",
+    "react-intl": "8.1.3"
+  },
+  "devDependencies": {
+    "@strapi/sdk-plugin": "6.1.1",
+    "@strapi/strapi": "5.39.0",
+    "@strapi/typescript-utils": "5.39.0",
+    "@types/node": "22.10.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "prettier": "3.8.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.30.3",
+    "styled-components": "6.3.11",
+    "typescript": "5.9.3",
+    "vitest": "4.1.0"
+  },
+  "peerDependencies": {
+    "@strapi/sdk-plugin": "^5.0.0 || ^6.0.0",
+    "@strapi/strapi": "^5.0.0",
+    "@vicacha-devs/strapi-plugin-calendar": "^1.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "strapi": {
+    "kind": "plugin",
+    "name": "bookings",
+    "displayName": "Bookings & Scheduling",
+    "description": "Manage bookable resources, operating schedules, time-slot availability, staff assignment, and reservations in Strapi v5 powered by @vicacha-devs/strapi-plugin-calendar"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
