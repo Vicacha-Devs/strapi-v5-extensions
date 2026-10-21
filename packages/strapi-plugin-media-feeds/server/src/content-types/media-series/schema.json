@@ -1,0 +1,84 @@
+{
+  "kind": "collectionType",
+  "collectionName": "media_feed_series",
+  "info": {
+    "singularName": "media-series",
+    "pluralName": "media-series-list",
+    "displayName": "Media Series & Podcast Show",
+    "description": "Generic multi-language podcast show, video playlist, or lecture series"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    },
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "description": {
+      "type": "text",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "author": {
+      "type": "string"
+    },
+    "coverImageUrl": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "default": "Education"
+    },
+    "defaultType": {
+      "type": "string",
+      "default": "podcast"
+    },
+    "spokenLanguages": {
+      "type": "json",
+      "default": ["es", "en", "ar", "tr"]
+    },
+    "rssEnabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "youtubePlaylistId": {
+      "type": "string"
+    },
+    "spotifyShowUrl": {
+      "type": "string"
+    },
+    "applePodcastsUrl": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}
