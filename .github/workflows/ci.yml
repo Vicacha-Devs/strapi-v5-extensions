@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  verify-plugins:
+    name: Build, Typecheck, SDK Verify & Test (10 Plugins)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check 500-line file modularity limit
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const path = require("node:path");
+            const MAX_LINES = 500;
+            const violations = [];
+            function walk(dir) {
+              if (!fs.existsSync(dir)) return;
+              for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                if (entry.name === "node_modules" || entry.name === "dist") continue;
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) walk(full);
+                else if (/\.(ts|tsx)$/.test(entry.name)) {
+                  const lines = fs.readFileSync(full, "utf8").split("\n").length;
+                  if (lines > MAX_LINES) violations.push(full + " (" + lines + " lines)");
+                }
+              }
+            }
+            walk("packages");
+            if (violations.length) {
+              console.error("Files exceeding 500-line limit:\n" + violations.join("\n"));
+              process.exit(1);
+            }
+            console.log("All plugin source files comply with the <= 500 lines modularity rule.");
+          '
+
+      - name: Check formatting (Prettier)
+        run: pnpm format:check
+
+      - name: Build all plugins (Turborepo)
+        run: pnpm build
+
+      - name: Run dual TypeScript checks (admin + server)
+        run: pnpm test:ts
+
+      - name: Verify plugins with @strapi/sdk-plugin
+        run: pnpm verify
+
+      - name: Run Vitest unit tests
+        run: pnpm test

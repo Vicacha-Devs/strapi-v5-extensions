@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Strapi v5 Plugin SDK Documentation
+    url: https://docs.strapi.io/dev-docs/plugins/development
+    about: Official Strapi v5 plugin development reference.

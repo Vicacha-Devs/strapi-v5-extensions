@@ -1,0 +1,33 @@
+# <type>(<scope>): <short summary in imperative mood>
+# |<----                Keep header under 72 characters               ---->|
+
+# Explain WHY this change is being made and how it impacts Strapi v5 admin/server:
+# |<----                  Wrap body lines at 100 chars                ---->|
+
+# Footer (optional):
+# Closes #123
+# BREAKING CHANGE: <description of breaking change and migration steps>
+
+# --- COMMIT CONVENTIONS (@vicacha-devs/strapi-v5-extensions) ---
+# Allowed <type> values:
+#   feat     - New plugin capability, Strapi v5 content-type, admin view, or REST route
+#   fix      - Bug fix in admin UI, server controller/service, lifecycles, or types
+#   docs     - Documentation and README updates
+#   style    - Code formatting or Strapi Design System v2 styling adjustments
+#   refactor - Refactoring code (e.g., splitting files to stay < 500 lines)
+#   perf     - Query, caching, or bundle performance improvements
+#   test     - Adding or updating Vitest unit tests (server or admin)
+#   build    - @strapi/sdk-plugin build, tsup, Turborepo, or dependency updates
+#   ci       - GitHub Actions, Changesets, or monorepo scripts
+#   chore    - Routine maintenance tasks
+#   revert   - Revert a previous commit
+#
+# Allowed <scope> values (package/plugin name):
+#   bookings, broadcasts, calendar, certificates, donations, events,
+#   inbox, islam, media-feeds, resources, dashboard, eslint-config,
+#   typescript-config, repo, deps
+#
+# Examples:
+#   feat(bookings): add configurable capacity buffer to reservation service
+#   fix(islam): handle leap-year Hijri date conversion edge case
+#   refactor(donations): split campaign controller into modular handlers (<500 lines)

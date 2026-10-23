@@ -1,0 +1,48 @@
+name: Feature Request
+description: Propose a new feature for an existing Strapi v5 plugin or suggest a new plugin package
+title: "[Feat]: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: Target Plugin / Scope
+      options:
+        - "@vicacha-devs/strapi-plugin-bookings"
+        - "@vicacha-devs/strapi-plugin-broadcasts"
+        - "@vicacha-devs/strapi-plugin-calendar"
+        - "@vicacha-devs/strapi-plugin-certificates"
+        - "@vicacha-devs/strapi-plugin-donations"
+        - "@vicacha-devs/strapi-plugin-events"
+        - "@vicacha-devs/strapi-plugin-inbox"
+        - "@vicacha-devs/strapi-plugin-islam"
+        - "@vicacha-devs/strapi-plugin-media-feeds"
+        - "@vicacha-devs/strapi-plugin-resources"
+        - "New Strapi v5 Plugin Proposal"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Use Case / Problem Statement
+      description: Describe the use case this feature solves for Strapi v5 administrators or API consumers.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Admin & Server Design
+      description: Describe any new content-types, REST endpoints, admin views, or plugin configuration options.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Plugin Standards Alignment
+      options:
+        - label: "Uses Strapi v5 Document Service API (strapi.documents)"
+        - label: "Includes 10-locale admin translations (en, es, fr, de, pt, it, nl, pl, tr, ar)"
+        - label: "Includes Vitest unit tests for server services/controllers and admin components"

@@ -1,0 +1,54 @@
+name: PR Hygiene & Changeset Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-hygiene:
+    name: Validate PR Title & Changeset Status
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate Conventional Commit PR Title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          node -e '
+            const title = process.env.PR_TITLE || "";
+            const re = /^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?!?: .+$/;
+            if (!re.test(title)) {
+              console.error("Invalid PR title: " + title);
+              console.error("Expected format: <type>(<scope>): <subject> (e.g. feat(bookings): add capacity check)");
+              process.exit(1);
+            }
+            console.log("Valid Conventional Commit PR title:", title);
+          '
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Changeset status
+        run: npx changeset status --since=origin/main
