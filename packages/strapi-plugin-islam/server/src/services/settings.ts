@@ -135,14 +135,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
             merged.defaultLat = coords.lat;
             merged.defaultLon = coords.lon;
           }
-          if (Array.isArray(doc[f.iqamahRules]) && doc[f.iqamahRules].length > 0) {
-            merged.iqamahRules = doc[f.iqamahRules] as IqamahRule[];
+          const rawRules = doc[f.iqamahRules];
+          if (Array.isArray(rawRules) && rawRules.length > 0) {
+            merged.iqamahRules = rawRules as IqamahRule[];
           }
           if (typeof doc[f.ramadanBannerActive] === 'boolean') {
             merged.ramadan.bannerActive = Boolean(doc[f.ramadanBannerActive]);
           }
-          if (typeof doc[f.ramadanNotes] === 'string' && doc[f.ramadanNotes].trim()) {
-            merged.ramadan.notes[merged.defaultLocale] = doc[f.ramadanNotes] as string;
+          const rawNotes = doc[f.ramadanNotes];
+          if (typeof rawNotes === 'string' && rawNotes.trim()) {
+            merged.ramadan.notes[merged.defaultLocale] = rawNotes;
           }
         }
       } catch {

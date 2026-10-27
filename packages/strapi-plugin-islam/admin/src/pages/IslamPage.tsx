@@ -1,13 +1,17 @@
+import { useIntl } from 'react-intl';
 import React, { useEffect, useState } from 'react';
 import {
   Main,
   Box,
+  Field,
   Flex,
   Typography,
   Button,
   Badge,
   TextInput,
   Checkbox,
+  SingleSelect,
+  SingleSelectOption,
   Table,
   Thead,
   Tbody,
@@ -34,6 +38,9 @@ type CockpitTab = 'salah' | 'hilal' | 'scripture' | 'fiqh';
 const ORDERED_PRAYERS: DailyFivePrayerId[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 export const IslamPage: React.FC = () => {
+  const { formatMessage } = useIntl();
+  const t = (id: string, defaultMessage: string) =>
+    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
   const { get, post } = useFetchClient();
   const [activeTab, setActiveTab] = useState<CockpitTab>('salah');
   const [loading, setLoading] = useState(true);
@@ -132,45 +139,49 @@ export const IslamPage: React.FC = () => {
   return (
     <Main>
       <Box padding={8}>
-        <Flex justifyContent="space-between" alignItems="center" marginBottom={6}>
-          <Box>
-            <Typography variant="alpha" as="h1">
-              Islam Liturgical, Scriptural & Fiqh Cockpit
-            </Typography>
+        <Flex
+          justifyContent="space-between"
+          alignItems="flex-start"
+          marginBottom={6}
+          wrap="wrap"
+          gap={4}
+        >
+          <Flex direction="column" alignItems="flex-start" gap={1}>
+            <Typography variant="alpha" tag="h1">{t('page.ui.islam_liturgical_scriptural_fiqh_cockpit', 'Islam Liturgical, Scriptural & Fiqh Cockpit')}</Typography>
             <Typography variant="epsilon" textColor="neutral600">
               {settings?.mosqueName || 'Mosque Control Center'} •{' '}
               {timetable?.hijri?.formatted || 'Hijri Calendar'} • Qibla{' '}
               {timetable?.qibla?.direction?.degrees ?? 65.24}° (
               {timetable?.qibla?.direction?.cardinal ?? 'ENE'})
             </Typography>
-          </Box>
-          <Flex gap={2}>
+          </Flex>
+          <Flex gap={2} wrap="wrap">
             <Button
               variant={activeTab === 'salah' ? 'default' : 'tertiary'}
               onClick={() => setActiveTab('salah')}
             >
-              1. Salah, Adhan & Iqamah
+              {t('page.ui.1_salah_adhan_iqamah', 'Salah, Adhan & Iqamah')}
             </Button>
             <Button
               variant={activeTab === 'hilal' ? 'default' : 'tertiary'}
               onClick={() => setActiveTab('hilal')}
             >
-              2. Hilal, Ramadan & Eid
+              {t('page.ui.2_hilal_ramadan_eid', 'Hilal, Ramadan & Eid')}
             </Button>
             <Button
               variant={activeTab === 'scripture' ? 'default' : 'tertiary'}
               onClick={() => setActiveTab('scripture')}
             >
-              3. Quran, Hadith & Dua
+              {t('page.ui.3_quran_hadith_dua', 'Quran, Hadith & Dua')}
             </Button>
             <Button
               variant={activeTab === 'fiqh' ? 'default' : 'tertiary'}
               onClick={() => setActiveTab('fiqh')}
             >
-              4. Zakat, Nisab & Qibla
+              {t('page.ui.4_zakat_nisab_qibla', 'Zakat, Nisab & Qibla')}
             </Button>
             <Button variant="secondary" onClick={() => void loadOverview()} loading={loading}>
-              Refresh
+              {t('page.ui.refresh', 'Refresh')}
             </Button>
           </Flex>
         </Flex>
@@ -197,17 +208,17 @@ export const IslamPage: React.FC = () => {
               hasRadius
               shadow="filterShadow"
             >
-              <Flex justifyContent="space-between" alignItems="center" marginBottom={4}>
-                <Box>
-                  <Typography variant="delta" as="h2">
+              <Flex justifyContent="space-between" alignItems="center" marginBottom={4} style={{ marginBottom: 16 }}>
+                <Flex direction="column" alignItems="flex-start" gap={1}>
+                  <Typography variant="delta" tag="h2">
                     Today’s Salah, Adhan & Iqamah Schedule ({timetable.dateGregorian})
                   </Typography>
                   <Typography variant="pi" textColor="neutral600">
                     Method: {timetable.calculation.methodName} • Asr:{' '}
-                    {timetable.calculation.schoolName} •Sunrise:{' '}
+                    {timetable.calculation.schoolName} • Sunrise:{' '}
                     {timetable.times.sunrise} • Imsak: {timetable.times.imsak}
                   </Typography>
-                </Box>
+                </Flex>
                 <Flex gap={2}>
                   <Badge active={!timetable.prohibitedTimes.isCurrentlyProhibited}>
                     Active: {(timetable.activePrayer || 'None').toUpperCase()}
@@ -223,19 +234,19 @@ export const IslamPage: React.FC = () => {
                 <Thead>
                   <Tr>
                     <Th>
-                      <Typography variant="sigma">Prayer (Salah)</Typography>
+                      <Typography variant="sigma">{t('page.ui.prayer_salah', 'Prayer (Salah)')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Adhan Time</Typography>
+                      <Typography variant="sigma">{t('page.ui.adhan_time', 'Adhan Time')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Congregation (Iqamah)</Typography>
+                      <Typography variant="sigma">{t('page.ui.congregation_iqamah', 'Congregation (Iqamah)')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Window Status</Typography>
+                      <Typography variant="sigma">{t('page.ui.window_status', 'Window Status')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Notes</Typography>
+                      <Typography variant="sigma">{t('page.ui.notes', 'Notes')}</Typography>
                     </Th>
                   </Tr>
                 </Thead>
@@ -256,13 +267,11 @@ export const IslamPage: React.FC = () => {
                         </Td>
                         <Td>
                           {p.isActive ? (
-                            <Badge active>CURRENT WINDOW</Badge>
+                            <Badge active>{t('page.ui.current_window', 'CURRENT WINDOW')}</Badge>
                           ) : p.isNext ? (
-                            <Badge>NEXT PRAYER</Badge>
+                            <Badge>{t('page.ui.next_prayer', 'NEXT PRAYER')}</Badge>
                           ) : (
-                            <Typography variant="pi" textColor="neutral500">
-                              Scheduled
-                            </Typography>
+                            <Typography variant="pi" textColor="neutral500">{t('page.ui.scheduled', 'Scheduled')}</Typography>
                           )}
                         </Td>
                         <Td>
@@ -283,44 +292,44 @@ export const IslamPage: React.FC = () => {
               hasRadius
               shadow="filterShadow"
             >
-              <Typography variant="delta" as="h2" marginBottom={3}>
-                Jumu’ah Congregation & Prohibited (Makruh) Windows
-              </Typography>
-              <Flex gap={6} wrap="wrap">
-                <Box>
-                  <Typography fontWeight="bold">Jumu’ah Khutbah & Salah</Typography>
+              <Box marginBottom={4} style={{ marginBottom: 16 }}>
+                <Typography variant="delta" tag="h2">{t('page.ui.jumu_ah_congregation_prohibited_makruh_windows', 'Jumu’ah Congregation & Prohibited (Makruh) Windows')}</Typography>
+              </Box>
+              <Flex gap={4} wrap="wrap" alignItems="stretch">
+                <Flex direction="column" alignItems="flex-start" gap={1} padding={3} background="neutral100" hasRadius style={{ flex: 1, minWidth: 200 }}>
+                  <Typography fontWeight="bold">{t('page.ui.jumu_ah_khutbah_salah', 'Jumu’ah Khutbah & Salah')}</Typography>
                   <Typography variant="pi" textColor="neutral600">
                     Khutbah: {timetable.jumuah.primaryKhutbahTime} • Salah:{' '}
                     {timetable.jumuah.primaryPrayerTime}
                   </Typography>
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold">Sunrise Window (Ishraq)</Typography>
+                </Flex>
+                <Flex direction="column" alignItems="flex-start" gap={1} padding={3} background="neutral100" hasRadius style={{ flex: 1, minWidth: 200 }}>
+                  <Typography fontWeight="bold">{t('page.ui.sunrise_window_ishraq', 'Sunrise Window (Ishraq)')}</Typography>
                   <Typography variant="pi" textColor="neutral600">
                     {timetable.prohibitedTimes.sunrise.start} –{' '}
                     {timetable.prohibitedTimes.sunrise.end}
                   </Typography>
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold">Zawal (Solar Zenith)</Typography>
+                </Flex>
+                <Flex direction="column" alignItems="flex-start" gap={1} padding={3} background="neutral100" hasRadius style={{ flex: 1, minWidth: 200 }}>
+                  <Typography fontWeight="bold">{t('page.ui.zawal_solar_zenith', 'Zawal (Solar Zenith)')}</Typography>
                   <Typography variant="pi" textColor="neutral600">
                     {timetable.prohibitedTimes.zawal.start} –{' '}
                     {timetable.prohibitedTimes.zawal.end}
                   </Typography>
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold">Sunset Window (Ghurub)</Typography>
+                </Flex>
+                <Flex direction="column" alignItems="flex-start" gap={1} padding={3} background="neutral100" hasRadius style={{ flex: 1, minWidth: 200 }}>
+                  <Typography fontWeight="bold">{t('page.ui.sunset_window_ghurub', 'Sunset Window (Ghurub)')}</Typography>
                   <Typography variant="pi" textColor="neutral600">
                     {timetable.prohibitedTimes.sunset.start} –{' '}
                     {timetable.prohibitedTimes.sunset.end}
                   </Typography>
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold">Last Third of the Night (Tahajjud)</Typography>
+                </Flex>
+                <Flex direction="column" alignItems="flex-start" gap={1} padding={3} background="neutral100" hasRadius style={{ flex: 1, minWidth: 200 }}>
+                  <Typography fontWeight="bold">{t('page.ui.last_third_of_the_night_tahajjud', 'Last Third of the Night (Tahajjud)')}</Typography>
                   <Typography variant="pi" textColor="neutral600">
                     Starts at {timetable.times.lastThird} (Midnight: {timetable.times.midnight})
                   </Typography>
-                </Box>
+                </Flex>
               </Flex>
             </Box>
           </Box>
@@ -334,62 +343,86 @@ export const IslamPage: React.FC = () => {
               padding={5}
               hasRadius
               shadow="filterShadow"
+              style={{ border: '1px solid rgba(128, 128, 128, 0.22)' }}
             >
-              <Typography variant="delta" as="h2" marginBottom={4}>
-                Imam Hilal Moon-Sighting Confirmation & Ecosystem Bridge
-              </Typography>
-              <Flex gap={4} wrap="wrap" alignItems="flex-end" marginBottom={4}>
-                <Box>
-                  <Typography variant="pi" fontWeight="bold">
-                    Occasion (ramadan | eid_al_fitr | dhul_hijjah_eid_al_adha)
-                  </Typography>
-                  <TextInput
-                    name="hilalOccasion"
-                    value={hilalOccasion}
-                    onChange={(e: any) => setHilalOccasion(e.target.value)}
-                  />
+              <Flex direction="column" alignItems="stretch" gap={4}>
+                <Box style={{ marginBottom: 4 }}>
+                  <Typography variant="delta" tag="h2">{t('page.ui.imam_hilal_moon_sighting_confirmation_ecosystem_', 'Imam Hilal Moon-Sighting Confirmation & Ecosystem Bridge')}</Typography>
                 </Box>
-                <Box>
-                  <Typography variant="pi" fontWeight="bold">
-                    Confirmed Gregorian Date (YYYY-MM-DD)
-                  </Typography>
-                  <TextInput
-                    name="hilalGregorianDate"
-                    value={hilalGregorianDate}
-                    onChange={(e: any) => setHilalGregorianDate(e.target.value)}
-                  />
-                </Box>
-                <Box>
-                  <Typography variant="pi" fontWeight="bold">
-                    Hijri Moon-Sighting Offset (-2 to +2 days)
-                  </Typography>
-                  <TextInput
-                    name="hilalShifting"
-                    value={hilalShifting}
-                    onChange={(e: any) => setHilalShifting(e.target.value)}
-                  />
-                </Box>
-                <Box>
-                  <Typography variant="pi" fontWeight="bold">
-                    Approved By (Imam / Religious Authority)
-                  </Typography>
-                  <TextInput
-                    name="hilalImamName"
-                    value={hilalImamName}
-                    onChange={(e: any) => setHilalImamName(e.target.value)}
-                  />
-                </Box>
-              </Flex>
-              <Flex justifyContent="space-between" alignItems="center">
-                <Checkbox
-                  checked={hilalActivateBanner}
-                  onCheckedChange={(val: boolean) => setHilalActivateBanner(Boolean(val))}
-                >
-                  Activate Ramadan / Eid Banner & Sync Calendar Hijri Offset
-                </Checkbox>
-                <Button onClick={() => void handleConfirmHilal()} loading={savingAction}>
-                  Confirm Hilal Sighting
-                </Button>
+                <Flex gap={4} wrap="wrap" alignItems="flex-start">
+                  <Box style={{ flex: 1, minWidth: 220 }}>
+                    <Field.Root hint={t('page.ui.select_the_crescent_sighting_announcement_type', 'Select the crescent sighting announcement type.')}>
+                      <Field.Label>{t('field.liturgical_occasion', 'Liturgical Occasion')}</Field.Label>
+                      <SingleSelect
+                        placeholder={t('placeholder.select_occasion', 'Select occasion')}
+                        value={hilalOccasion}
+                        onChange={(val: string | number) => setHilalOccasion(String(val))}
+                      >
+                        <SingleSelectOption value="ramadan">{t('page.ui.ramadan_start_of_ramadan_1st', 'ramadan (Start of Ramadan 1st)')}</SingleSelectOption>
+                        <SingleSelectOption value="eid_al_fitr">{t('page.ui.eid_al_fitr_eid_al_fitr_1_shawwal', 'eid_al_fitr (Eid al-Fitr — 1 Shawwal)')}</SingleSelectOption>
+                        <SingleSelectOption value="dhul_hijjah_eid_al_adha">{t('page.ui.dhul_hijjah_eid_al_adha_dhul_hijjah_eid_al_adha', 'dhul_hijjah_eid_al_adha (Dhul Hijjah & Eid al-Adha)')}</SingleSelectOption>
+                      </SingleSelect>
+                      <Field.Hint />
+                    </Field.Root>
+                  </Box>
+                  <Box style={{ flex: 1, minWidth: 220 }}>
+                    <Field.Root hint={t('page.ui.official_gregorian_date_corresponding_to_the_1st', 'Official Gregorian date corresponding to the 1st of the Hijri month.')}>
+                      <Field.Label>{t('field.confirmed_gregorian_date_yyyy_mm_dd', 'Confirmed Gregorian Date (YYYY-MM-DD)')}</Field.Label>
+                      <TextInput
+                        name="hilalGregorianDate"
+                        placeholder={t('placeholder.e_g_2026_02_18', 'e.g., 2026-02-18')}
+                        value={hilalGregorianDate}
+                        onChange={(e: any) => setHilalGregorianDate(e.target.value)}
+                      />
+                      <Field.Hint />
+                    </Field.Root>
+                  </Box>
+                  <Box style={{ flex: 1, minWidth: 220 }}>
+                    <Field.Root hint={t('page.ui.propagated_to_the_calendar_eventhub_plugins_if_e', 'Propagated to the Calendar & EventHub plugins if enabled below.')}>
+                      <Field.Label>{t('field.hijri_moon_sighting_offset_2_to_2_days', 'Hijri Moon-Sighting Offset (-2 to +2 days)')}</Field.Label>
+                      <SingleSelect
+                        placeholder={t('placeholder.select_day_offset', 'Select day offset')}
+                        value={String(hilalShifting)}
+                        onChange={(val: string | number) => setHilalShifting(String(val))}
+                      >
+                        <SingleSelectOption value="-2">{t('page.ui.2_days', '-2 days')}</SingleSelectOption>
+                        <SingleSelectOption value="-1">{t('page.ui.1_day', '-1 day')}</SingleSelectOption>
+                        <SingleSelectOption value="0">{t('page.ui.0_days_astronomical_umm_al_qura', '0 days (Astronomical / Umm al-Qura)')}</SingleSelectOption>
+                        <SingleSelectOption value="1">{t('page.ui.1_day', '+1 day')}</SingleSelectOption>
+                        <SingleSelectOption value="2">{t('page.ui.2_days', '+2 days')}</SingleSelectOption>
+                      </SingleSelect>
+                      <Field.Hint />
+                    </Field.Root>
+                  </Box>
+                  <Box style={{ flex: 1, minWidth: 220 }}>
+                    <Field.Root hint={t('page.ui.signatory_recorded_on_the_public_hilal_announcem', 'Signatory recorded on the public Hilal announcement banner.')}>
+                      <Field.Label>{t('field.approved_by_imam_religious_authority', 'Approved By (Imam / Religious Authority)')}</Field.Label>
+                      <TextInput
+                        name="hilalImamName"
+                        placeholder={t('placeholder.e_g_sheikh_principal_de_la_mezquita', 'e.g., Head Imam of the Mosque')}
+                        value={hilalImamName}
+                        onChange={(e: any) => setHilalImamName(e.target.value)}
+                      />
+                      <Field.Hint />
+                    </Field.Root>
+                  </Box>
+                </Flex>
+                <Flex justifyContent="space-between" alignItems="center">
+                  <Checkbox
+                    checked={hilalActivateBanner}
+                    onCheckedChange={(val: boolean) =>
+                      setHilalActivateBanner(Boolean(val))
+                    }
+                  >
+                    {t(
+                      'checkbox.activate_ramadan_eid_banner',
+                      'Activate Ramadan / Eid Banner & Sync Calendar Hijri Offset'
+                    )}
+                  </Checkbox>
+                  <Button onClick={() => void handleConfirmHilal()} loading={savingAction}>
+                    Confirm Hilal Sighting
+                  </Button>
+                </Flex>
               </Flex>
             </Box>
 
@@ -398,27 +431,30 @@ export const IslamPage: React.FC = () => {
               padding={5}
               hasRadius
               shadow="filterShadow"
+              style={{ border: '1px solid rgba(128, 128, 128, 0.22)' }}
             >
-              <Typography variant="delta" as="h2" marginBottom={4}>
-                Upcoming Islamic Observances, Ramadan & Eid Dates ({observances.length})
-              </Typography>
+              <Box marginBottom={4} style={{ marginBottom: 16 }}>
+                <Typography variant="delta" tag="h2">
+                  Upcoming Islamic Observances, Ramadan & Eid Dates ({observances.length})
+                </Typography>
+              </Box>
               <Table colCount={5} rowCount={observances.length}>
                 <Thead>
                   <Tr>
                     <Th>
-                      <Typography variant="sigma">Observance</Typography>
+                      <Typography variant="sigma">{t('page.ui.observance', 'Observance')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Hijri Date</Typography>
+                      <Typography variant="sigma">{t('page.ui.hijri_date', 'Hijri Date')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Est. Gregorian Date</Typography>
+                      <Typography variant="sigma">{t('page.ui.est_gregorian_date', 'Est. Gregorian Date')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Countdown</Typography>
+                      <Typography variant="sigma">{t('page.ui.countdown', 'Countdown')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Fasting Ruling</Typography>
+                      <Typography variant="sigma">{t('page.ui.fasting_ruling', 'Fasting Ruling')}</Typography>
                     </Th>
                   </Tr>
                 </Thead>
@@ -460,8 +496,8 @@ export const IslamPage: React.FC = () => {
                 hasRadius
                 shadow="filterShadow"
               >
-                <Flex justifyContent="space-between" alignItems="center" marginBottom={3}>
-                  <Typography variant="delta" as="h2">
+                <Flex justifyContent="space-between" alignItems="center" marginBottom={4} style={{ marginBottom: 16 }}>
+                  <Typography variant="delta" tag="h2">
                     Today’s Featured Inspiration ({dailyInspiration.date})
                   </Typography>
                   <Button
@@ -477,36 +513,75 @@ export const IslamPage: React.FC = () => {
                     Reset All Pins to Automatic Daily Rotation
                   </Button>
                 </Flex>
-                <Flex gap={4} direction="column">
+                <Flex gap={4} direction="column" alignItems="stretch">
                   <Box padding={3} background="neutral100" hasRadius>
-                    <Typography fontWeight="bold">
-                      Ayah of the Day ({dailyInspiration.ayahOfTheDay.referenceKey}){' '}
-                      {dailyInspiration.isPinnedOverride.ayah ? '[PINNED]' : ''}
-                    </Typography>
-                    <Typography>{dailyInspiration.ayahOfTheDay.arabicUthmani}</Typography>
-                    <Typography variant="pi" textColor="neutral600">
-                      {dailyInspiration.ayahOfTheDay.translations.es}
-                    </Typography>
+                    <Box marginBottom={1}>
+                      <Typography fontWeight="bold">
+                        Ayah of the Day ({dailyInspiration.ayahOfTheDay.referenceKey}){' '}
+                        {dailyInspiration.isPinnedOverride.ayah ? '[PINNED]' : ''}
+                      </Typography>
+                    </Box>
+                    <Box style={{ whiteSpace: 'normal', lineHeight: 1.7 }}>
+                      <Typography>{dailyInspiration.ayahOfTheDay.arabicUthmani}</Typography>
+                    </Box>
+                    {dailyInspiration.ayahOfTheDay.transliteration && (
+                      <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                        <Typography variant="pi" textColor="neutral500" style={{ fontStyle: 'italic' }}>
+                          {dailyInspiration.ayahOfTheDay.transliteration}
+                        </Typography>
+                      </Box>
+                    )}
+                    <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                      <Typography variant="pi" textColor="neutral600">
+                        {dailyInspiration.ayahOfTheDay.translations.es}
+                      </Typography>
+                    </Box>
                   </Box>
                   <Box padding={3} background="neutral100" hasRadius>
-                    <Typography fontWeight="bold">
-                      Hadith of the Day ({dailyInspiration.hadithOfTheDay.collectionNames.es}){' '}
-                      {dailyInspiration.isPinnedOverride.hadith ? '[PINNED]' : ''}
-                    </Typography>
-                    <Typography>{dailyInspiration.hadithOfTheDay.arabicText}</Typography>
-                    <Typography variant="pi" textColor="neutral600">
-                      {dailyInspiration.hadithOfTheDay.translations.es}
-                    </Typography>
+                    <Box marginBottom={1}>
+                      <Typography fontWeight="bold">
+                        Hadith of the Day ({dailyInspiration.hadithOfTheDay.collectionNames.es}){' '}
+                        {dailyInspiration.isPinnedOverride.hadith ? '[PINNED]' : ''}
+                      </Typography>
+                    </Box>
+                    <Box style={{ whiteSpace: 'normal', lineHeight: 1.7 }}>
+                      <Typography>{dailyInspiration.hadithOfTheDay.arabicText}</Typography>
+                    </Box>
+                    {dailyInspiration.hadithOfTheDay.transliteration && (
+                      <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                        <Typography variant="pi" textColor="neutral500" style={{ fontStyle: 'italic' }}>
+                          {dailyInspiration.hadithOfTheDay.transliteration}
+                        </Typography>
+                      </Box>
+                    )}
+                    <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                      <Typography variant="pi" textColor="neutral600">
+                        {dailyInspiration.hadithOfTheDay.translations.es}
+                      </Typography>
+                    </Box>
                   </Box>
                   <Box padding={3} background="neutral100" hasRadius>
-                    <Typography fontWeight="bold">
-                      Dua of the Day ({dailyInspiration.duaOfTheDay.titles.es}){' '}
-                      {dailyInspiration.isPinnedOverride.dua ? '[PINNED]' : ''}
-                    </Typography>
-                    <Typography>{dailyInspiration.duaOfTheDay.arabicText}</Typography>
-                    <Typography variant="pi" textColor="neutral600">
-                      {dailyInspiration.duaOfTheDay.translations.es}
-                    </Typography>
+                    <Box marginBottom={1}>
+                      <Typography fontWeight="bold">
+                        Dua of the Day ({dailyInspiration.duaOfTheDay.titles.es}){' '}
+                        {dailyInspiration.isPinnedOverride.dua ? '[PINNED]' : ''}
+                      </Typography>
+                    </Box>
+                    <Box style={{ whiteSpace: 'normal', lineHeight: 1.7 }}>
+                      <Typography>{dailyInspiration.duaOfTheDay.arabicText}</Typography>
+                    </Box>
+                    {dailyInspiration.duaOfTheDay.transliteration && (
+                      <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                        <Typography variant="pi" textColor="neutral500" style={{ fontStyle: 'italic' }}>
+                          {dailyInspiration.duaOfTheDay.transliteration}
+                        </Typography>
+                      </Box>
+                    )}
+                    <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                      <Typography variant="pi" textColor="neutral600">
+                        {dailyInspiration.duaOfTheDay.translations.es}
+                      </Typography>
+                    </Box>
                   </Box>
                 </Flex>
               </Box>
@@ -519,23 +594,25 @@ export const IslamPage: React.FC = () => {
               hasRadius
               shadow="filterShadow"
             >
-              <Typography variant="delta" as="h2" marginBottom={4}>
-                Curated Quranic Ayat ({ayat.length}) • 114 Surahs Indexed
-              </Typography>
+              <Box marginBottom={4} style={{ marginBottom: 16 }}>
+                <Typography variant="delta" tag="h2">
+                  Curated Quranic Ayat ({ayat.length}) • 114 Surahs Indexed
+                </Typography>
+              </Box>
               <Table colCount={4} rowCount={ayat.length}>
                 <Thead>
                   <Tr>
                     <Th>
-                      <Typography variant="sigma">Ref</Typography>
+                      <Typography variant="sigma">{t('page.ui.ref', 'Ref')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Arabic & Translation</Typography>
+                      <Typography variant="sigma">{t('page.ui.arabic_translation', 'Arabic & Translation')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Topics</Typography>
+                      <Typography variant="sigma">{t('page.ui.topics', 'Topics')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Action</Typography>
+                      <Typography variant="sigma">{t('page.ui.action', 'Action')}</Typography>
                     </Th>
                   </Tr>
                 </Thead>
@@ -547,11 +624,22 @@ export const IslamPage: React.FC = () => {
                           {item.surahNameTranslit} ({item.referenceKey})
                         </Typography>
                       </Td>
-                      <Td>
-                        <Typography>{item.arabicUthmani}</Typography>
-                        <Typography variant="pi" textColor="neutral600">
-                          {item.translations.es}
-                        </Typography>
+                      <Td style={{ whiteSpace: 'normal', maxWidth: 680 }}>
+                        <Box style={{ whiteSpace: 'normal', lineHeight: 1.7 }}>
+                          <Typography>{item.arabicUthmani}</Typography>
+                        </Box>
+                        {item.transliteration && (
+                          <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                            <Typography variant="pi" textColor="neutral500" style={{ fontStyle: 'italic' }}>
+                              {item.transliteration}
+                            </Typography>
+                          </Box>
+                        )}
+                        <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                          <Typography variant="pi" textColor="neutral600">
+                            {item.translations.es}
+                          </Typography>
+                        </Box>
                       </Td>
                       <Td>
                         <Typography variant="pi">{item.topicTags.join(', ')}</Typography>
@@ -578,40 +666,57 @@ export const IslamPage: React.FC = () => {
               hasRadius
               shadow="filterShadow"
             >
-              <Typography variant="delta" as="h2" marginBottom={4}>
-                Prophetic Hadiths ({hadiths.length}) & Hisnul Muslim Duas ({duas.length})
-              </Typography>
+              <Box marginBottom={4} style={{ marginBottom: 16 }}>
+                <Typography variant="delta" tag="h2">
+                  Prophetic Hadiths ({hadiths.length}) & Hisnul Muslim Duas ({duas.length})
+                </Typography>
+              </Box>
               <Table colCount={4} rowCount={duas.length}>
                 <Thead>
                   <Tr>
                     <Th>
-                      <Typography variant="sigma">Dua / Supplication</Typography>
+                      <Typography variant="sigma">{t('page.ui.dua_supplication', 'Dua / Supplication')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Arabic & Meaning</Typography>
+                      <Typography variant="sigma">{t('page.ui.arabic_meaning', 'Arabic & Meaning')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Repetitions</Typography>
+                      <Typography variant="sigma">{t('page.ui.repetitions', 'Repetitions')}</Typography>
                     </Th>
                     <Th>
-                      <Typography variant="sigma">Action</Typography>
+                      <Typography variant="sigma">{t('page.ui.action', 'Action')}</Typography>
                     </Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {duas.map((dua) => (
                     <Tr key={dua.id}>
-                      <Td>
-                        <Typography fontWeight="bold">{dua.titles.es}</Typography>
-                        <Typography variant="pi" textColor="neutral600">
-                          {dua.categoryLabels.es}
-                        </Typography>
+                      <Td style={{ whiteSpace: 'normal', maxWidth: 240 }}>
+                        <Box style={{ whiteSpace: 'normal' }}>
+                          <Typography fontWeight="bold">{dua.titles.es}</Typography>
+                        </Box>
+                        <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                          <Typography variant="pi" textColor="neutral600">
+                            {dua.categoryLabels.es}
+                          </Typography>
+                        </Box>
                       </Td>
-                      <Td>
-                        <Typography>{dua.arabicText}</Typography>
-                        <Typography variant="pi" textColor="neutral600">
-                          {dua.translations.es}
-                        </Typography>
+                      <Td style={{ whiteSpace: 'normal', maxWidth: 680 }}>
+                        <Box style={{ whiteSpace: 'normal', lineHeight: 1.7 }}>
+                          <Typography>{dua.arabicText}</Typography>
+                        </Box>
+                        {dua.transliteration && (
+                          <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                            <Typography variant="pi" textColor="neutral500" style={{ fontStyle: 'italic' }}>
+                              {dua.transliteration}
+                            </Typography>
+                          </Box>
+                        )}
+                        <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                          <Typography variant="pi" textColor="neutral600">
+                            {dua.translations.es}
+                          </Typography>
+                        </Box>
                       </Td>
                       <Td>
                         <Badge>{dua.recommendedRepetitions}x</Badge>
@@ -642,12 +747,12 @@ export const IslamPage: React.FC = () => {
               hasRadius
               shadow="filterShadow"
             >
-              <Typography variant="delta" as="h2" marginBottom={4}>
-                Zakat al-Mal Nisab Thresholds & Gold Carat Purity Rates
-              </Typography>
-              <Flex gap={6} wrap="wrap">
+              <Box marginBottom={4} style={{ marginBottom: 16 }}>
+                <Typography variant="delta" tag="h2">{t('page.ui.zakat_al_mal_nisab_thresholds_gold_carat_purity_', 'Zakat al-Mal Nisab Thresholds & Gold Carat Purity Rates')}</Typography>
+              </Box>
+              <Flex gap={6} wrap="wrap" alignItems="stretch">
                 {nisabCop && (
-                  <Box padding={4} background="neutral100" hasRadius>
+                  <Flex direction="column" alignItems="flex-start" gap={1} padding={4} background="neutral100" hasRadius style={{ flex: 1, minWidth: 280 }}>
                     <Typography fontWeight="bold">
                       Colombian Peso (COP) — {nisabCop.standard.toUpperCase()} Standard
                     </Typography>
@@ -664,10 +769,10 @@ export const IslamPage: React.FC = () => {
                       22K: {nisabCop.gold.caratPricesPerGram['22K']?.toLocaleString()} COP/g •
                       18K: {nisabCop.gold.caratPricesPerGram['18K']?.toLocaleString()} COP/g
                     </Typography>
-                  </Box>
+                  </Flex>
                 )}
                 {nisabUsd && (
-                  <Box padding={4} background="neutral100" hasRadius>
+                  <Flex direction="column" alignItems="flex-start" gap={1} padding={4} background="neutral100" hasRadius style={{ flex: 1, minWidth: 280 }}>
                     <Typography fontWeight="bold">
                       US Dollar (USD) — {nisabUsd.standard.toUpperCase()} Standard
                     </Typography>
@@ -684,7 +789,7 @@ export const IslamPage: React.FC = () => {
                       {nisabUsd.gold.caratPricesPerGram['22K']} USD/g • 18K: $
                       {nisabUsd.gold.caratPricesPerGram['18K']} USD/g
                     </Typography>
-                  </Box>
+                  </Flex>
                 )}
               </Flex>
             </Box>
@@ -695,34 +800,34 @@ export const IslamPage: React.FC = () => {
               hasRadius
               shadow="filterShadow"
             >
-              <Typography variant="delta" as="h2" marginBottom={4}>
-                Zakat al-Fitr (Fitrana), Fidyah, Kaffarah & Qibla Geodesic Summary
-              </Typography>
-              <Flex gap={6} wrap="wrap">
-                <Box>
-                  <Typography fontWeight="bold">Zakat al-Fitr (Per Person)</Typography>
+              <Box marginBottom={4} style={{ marginBottom: 16 }}>
+                <Typography variant="delta" tag="h2">{t('page.ui.zakat_al_fitr_fitrana_fidyah_kaffarah_qibla_geod', 'Zakat al-Fitr (Fitrana), Fidyah, Kaffarah & Qibla Geodesic Summary')}</Typography>
+              </Box>
+              <Flex gap={4} wrap="wrap" alignItems="stretch">
+                <Flex direction="column" alignItems="flex-start" gap={1} padding={4} background="neutral100" hasRadius style={{ flex: 1, minWidth: 220 }}>
+                  <Typography fontWeight="bold">{t('page.ui.zakat_al_fitr_per_person', 'Zakat al-Fitr (Per Person)')}</Typography>
                   <Typography variant="pi" textColor="neutral600">
                     {settings?.fiqhRates.zakatAlFitrPerPersonByCurrency.COP.toLocaleString()}{' '}
                     COP / ${settings?.fiqhRates.zakatAlFitrPerPersonByCurrency.USD} USD (≈{' '}
                     {settings?.fiqhRates.stapleFoodWeightKg} kg staple food)
                   </Typography>
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold">Fidyah (Per Missed Fast Day)</Typography>
+                </Flex>
+                <Flex direction="column" alignItems="flex-start" gap={1} padding={4} background="neutral100" hasRadius style={{ flex: 1, minWidth: 220 }}>
+                  <Typography fontWeight="bold">{t('page.ui.fidyah_per_missed_fast_day', 'Fidyah (Per Missed Fast Day)')}</Typography>
                   <Typography variant="pi" textColor="neutral600">
                     {settings?.fiqhRates.fidyahPerDayByCurrency.COP.toLocaleString()} COP / $
                     {settings?.fiqhRates.fidyahPerDayByCurrency.USD} USD
                   </Typography>
-                </Box>
-                <Box>
-                  <Typography fontWeight="bold">Qibla Bearing & Distance to Makkah</Typography>
+                </Flex>
+                <Flex direction="column" alignItems="flex-start" gap={1} padding={4} background="neutral100" hasRadius style={{ flex: 1, minWidth: 220 }}>
+                  <Typography fontWeight="bold">{t('page.ui.qibla_bearing_distance_to_makkah', 'Qibla Bearing & Distance to Makkah')}</Typography>
                   <Typography variant="pi" textColor="neutral600">
                     {timetable?.qibla.direction.degrees}° clockwise from True North (
                     {timetable?.qibla.direction.cardinal}) •{' '}
                     {timetable?.qibla.distance.kilometers.toLocaleString()} km (
                     {timetable?.qibla.distance.miles.toLocaleString()} mi)
                   </Typography>
-                </Box>
+                </Flex>
               </Flex>
             </Box>
           </Box>

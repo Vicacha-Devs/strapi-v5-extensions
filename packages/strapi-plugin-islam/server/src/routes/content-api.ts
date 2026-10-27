@@ -51,6 +51,12 @@ export default {
     },
     {
       method: 'GET',
+      path: '/daily-inspiration',
+      handler: 'content-api.getDailyInspiration',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
       path: '/quran/chapters',
       handler: 'content-api.getQuranChapters',
       config: { policies: [] },

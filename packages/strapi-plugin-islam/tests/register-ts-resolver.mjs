@@ -11,6 +11,12 @@ const intlDateShimUrl = pathToFileURL(
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
+    if (specifier === 'react') {
+      return {
+        url: 'data:text/javascript,export const createElement = (type, props, ...children) => ({ type, props: { ...props, children } }); export default { createElement };',
+        shortCircuit: true,
+      };
+    }
     if (specifier === '@internationalized/date') {
       return { url: intlDateShimUrl, shortCircuit: true };
     }
