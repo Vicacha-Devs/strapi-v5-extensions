@@ -151,3 +151,69 @@ export function generateDonationReferenceCode(prefix = 'DON'): string {
   const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
   return `${prefix.toUpperCase()}-${datePart}-${randomPart}`;
 }
+
+function extractNodeText(node: any): string {
+  if (!node) return '';
+  if (typeof node === 'string') return node;
+  if (typeof node.text === 'string') return node.text;
+  const children = Array.isArray(node.content)
+    ? node.content
+    : Array.isArray(node.children)
+      ? node.children
+      : [];
+  const joined = children.map(extractNodeText).filter(Boolean).join(node.type === 'doc' ? '\n\n' : '');
+  if (node.type === 'heading' || node.type === 'paragraph' || node.type === 'blockquote') {
+    return `${joined}\n`;
+  }
+  if (node.type === 'listItem' || node.type === 'list-item') {
+    return `• ${joined.trim()}\n`;
+  }
+  return joined;
+}
+
+/**
+ * Normalizes a Rich Text field value from Strapi default Richtext (Markdown),
+ * Tiptap Editor (Markdown, HTML, or ProseMirror JSON), CKEditor (HTML), or Strapi Blocks.
+ */
+export function normalizeRichTextValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object') {
+    const obj = value as Record<string, any>;
+    if (obj.type === 'doc' && Array.isArray(obj.content)) {
+      return extractNodeText(obj).trim();
+    }
+    if (Array.isArray(value)) {
+      return value.map(extractNodeText).join('\n').trim();
+    }
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return String(value);
+}
+
+/**
+ * Extracts human-readable text from any Rich Text representation (Markdown, HTML, Tiptap JSON, or Blocks).
+ */
+export function extractRichTextPlainText(value: unknown): string {
+  const raw = normalizeRichTextValue(value).trim();
+  if (!raw) return '';
+  if (raw.startsWith('{') || raw.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed && (parsed.type === 'doc' || Array.isArray(parsed))) {
+        return extractNodeText(parsed).trim();
+      }
+    } catch {
+      // treat as regular string
+    }
+  }
+  return raw
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+

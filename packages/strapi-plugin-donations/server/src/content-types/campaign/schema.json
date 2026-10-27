@@ -11,6 +11,12 @@
     "draftAndPublish": true
   },
   "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    },
     "i18n": {
       "localized": true
     }
@@ -24,11 +30,16 @@
     "slug": {
       "type": "uid",
       "targetField": "title",
-      "required": true
+      "required": true,
+      "pluginOptions": { "i18n": { "localized": true } }
     },
     "description": {
-      "type": "richtext",
+      "type": "text",
       "required": true,
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "body": {
+      "type": "richtext",
       "pluginOptions": { "i18n": { "localized": true } }
     },
     "campaignKind": {
@@ -63,6 +74,10 @@
       "min": 0
     },
     "isUrgent": {
+      "type": "boolean",
+      "default": false
+    },
+    "isFeatured": {
       "type": "boolean",
       "default": false
     },
@@ -105,6 +120,14 @@
       "type": "boolean",
       "default": true
     },
+    "ctaLabel": {
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
+    "ctaHref": {
+      "type": "string",
+      "pluginOptions": { "i18n": { "localized": true } }
+    },
     "coverUrl": {
       "type": "string"
     },
@@ -116,6 +139,10 @@
     },
     "icon": {
       "type": "string"
+    },
+    "evidences": {
+      "type": "json",
+      "pluginOptions": { "i18n": { "localized": true } }
     }
   }
 }

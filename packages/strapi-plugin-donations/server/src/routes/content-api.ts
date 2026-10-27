@@ -15,6 +15,12 @@ export default {
     },
     {
       method: 'GET',
+      path: '/utility-invoices',
+      handler: 'content-api.listUtilityInvoices',
+      config: { auth: false },
+    },
+    {
+      method: 'GET',
       path: '/campaigns/:slug',
       handler: 'content-api.getCampaignBySlug',
       config: { auth: false },
