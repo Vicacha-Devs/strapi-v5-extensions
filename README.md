@@ -24,6 +24,7 @@ strapi-v5-extensions/
 │   ├── strapi-plugin-islam/            # @vicacha-devs/strapi-plugin-islam — Salah, Qibla, Hijri/Hilal, Quran/Hadith & Zakat suite
 │   ├── strapi-plugin-media-feeds/      # @vicacha-devs/strapi-plugin-media-feeds — Audio/video archive, YouTube sync & Podcast RSS 2.0
 │   ├── strapi-plugin-resources/        # @vicacha-devs/strapi-plugin-resources — Publications library, photo galleries & glossary
+│   └── strapi-plugin-seo/              # @vicacha-devs/strapi-plugin-seo — Strapi v5 SEO metadata, social previews & SERP analyzer
 ├── package.json                        # Monorepo root scripts (build, dev, test, test:ts, verify, release)
 ├── pnpm-workspace.yaml                 # Workspace globs + hoistPattern: ["*", "!@strapi/*"]
 └── turbo.json                          # Turborepo task pipeline & dependency graph
@@ -31,7 +32,7 @@ strapi-v5-extensions/
 
 ---
 
-## Included Strapi v5 Plugins (10 Packages)
+## Included Strapi v5 Plugins (11 Packages)
 
 | Package | Strapi Plugin ID | Summary |
 | :--- | :--- | :--- |
@@ -45,6 +46,7 @@ strapi-v5-extensions/
 | [`@vicacha-devs/strapi-plugin-media-feeds`](./packages/strapi-plugin-media-feeds) | `media-feeds` | Multi-language audio/video episodes (`plugin::media-feeds.media-item`, `plugin::media-feeds.media-series`), YouTube/OEmbed enricher, Apple/Spotify Podcast RSS 2.0, and live stream status |
 | [`@vicacha-devs/strapi-plugin-broadcasts`](./packages/strapi-plugin-broadcasts) | `broadcasts` | Omnichannel campaigns (`plugin::broadcasts.campaign`), event-driven automation rules (`plugin::broadcasts.automation-rule`), and delivery logs (`plugin::broadcasts.delivery-log`) |
 | [`@vicacha-devs/strapi-plugin-resources`](./packages/strapi-plugin-resources) | `resources` | Downloadable publications (`plugin::resources.publication`), photo gallery albums (`plugin::resources.gallery-album`), and bilingual/phonetic glossary (`plugin::resources.glossary-term`) |
+| [`@vicacha-devs/strapi-plugin-seo`](./packages/strapi-plugin-seo) | `seo` | SEO component management, meta/Open Graph social previews, structured data, and keyword density analysis with `ar`, `en`, `es`, `fr`, `pt-BR`, and `tr` translations |
 
 ---
 
