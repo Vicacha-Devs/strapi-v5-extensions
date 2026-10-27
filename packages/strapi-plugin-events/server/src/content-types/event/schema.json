@@ -4,7 +4,7 @@
   "info": {
     "singularName": "event",
     "pluralName": "events",
-    "displayName": "Event (Plugin)",
+    "displayName": "Event",
     "description": "Recurring & single events managed by strapi-plugin-events"
   },
   "options": {
@@ -143,6 +143,22 @@
     "category": {
       "type": "string",
       "default": "general",
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      }
+    },
+    "speaker": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "speakerSlug": {
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": false

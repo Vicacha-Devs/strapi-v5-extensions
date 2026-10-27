@@ -53,7 +53,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     if (Array.isArray(userConfig.recurrencePresets)) {
       for (const preset of userConfig.recurrencePresets) {
         if (!preset || !preset.id || !preset.rrule) continue;
-        const idx = mergedPresets.findIndex((p) => p.id === preset.id);
+        const idx = mergedPresets.findIndex(
+          (p) => p.id === preset.id || p.rrule === preset.rrule
+        );
         if (idx >= 0) {
           mergedPresets[idx] = { ...mergedPresets[idx], ...preset };
         } else {
@@ -69,6 +71,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       secondaryCalendars: mergedCalendars,
       recurrencePresets: mergedPresets,
     };
+  };
+
+  const mergePresetLists = (
+    defaults: EventsPluginSettings['recurrencePresets'],
+    stored: EventsPluginSettings['recurrencePresets']
+  ) => {
+    const result = [...(defaults ?? [])];
+    if (Array.isArray(stored)) {
+      for (const item of stored) {
+        if (!item || !item.id || !item.rrule) continue;
+        const idx = result.findIndex(
+          (p) => p.id === item.id || p.rrule === item.rrule
+        );
+        if (idx >= 0) {
+          result[idx] = { ...result[idx], ...item };
+        } else {
+          result.push(item);
+        }
+      }
+    }
+    return result;
   };
 
   return {
@@ -98,14 +121,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      const storedPresets = Array.isArray(existing.recurrencePresets)
-        ? [...existing.recurrencePresets]
-        : [];
-      for (const defPreset of defaults.recurrencePresets ?? []) {
-        if (!storedPresets.some((p) => p.id === defPreset.id)) {
-          storedPresets.push(defPreset);
-        }
-      }
+      const storedPresets = mergePresetLists(
+        defaults.recurrencePresets,
+        existing.recurrencePresets
+      );
 
       const merged: EventsPluginSettings = {
         ...defaults,
@@ -136,10 +155,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           Array.isArray(stored.secondaryCalendars) && stored.secondaryCalendars.length > 0
             ? stored.secondaryCalendars
             : defaults.secondaryCalendars ?? [],
-        recurrencePresets:
-          Array.isArray(stored.recurrencePresets) && stored.recurrencePresets.length > 0
-            ? stored.recurrencePresets
-            : defaults.recurrencePresets ?? [],
+        recurrencePresets: mergePresetLists(
+          defaults.recurrencePresets,
+          stored.recurrencePresets
+        ),
       };
     },
 

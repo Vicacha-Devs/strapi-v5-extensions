@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useFetchClient } from '@strapi/strapi/admin';
 import { Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
+import type { CalendarPluginSettings } from '@vicacha-devs/strapi-plugin-calendar/shared';
 import { PLUGIN_ID } from '../../../shared/pluginId';
 import type {
   EventsPluginSettings,
@@ -39,6 +40,17 @@ export const CalendarPage: React.FC = () => {
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [calendarOverlayId, setCalendarOverlayId] = useState<string>('configured');
+  const [activeLocale, setActiveLocale] = useState<string>(() =>
+    locale && locale !== 'en' ? locale : 'es'
+  );
+  const [secondaryCalendarLanguage, setSecondaryCalendarLanguage] = useState<
+    'local' | 'ar' | 'off'
+  >('local');
+  const [activeTheme, setActiveTheme] = useState<
+    'breeze' | 'emerald' | 'sand' | 'midnight' | 'classic'
+  >('breeze');
+  const [calendarSettings, setCalendarSettings] =
+    useState<CalendarPluginSettings | null>(null);
 
   const [occurrences, setOccurrences] = useState<ExpandedOccurrence[]>([]);
   const [settings, setSettings] = useState<EventsPluginSettings | null>(null);
@@ -80,25 +92,45 @@ export const CalendarPage: React.FC = () => {
       const params = new URLSearchParams({
         from: dateWindow.from,
         to: dateWindow.to,
-        locale: locale || 'en',
+        locale: activeLocale && activeLocale !== 'auto' ? activeLocale : 'es',
       });
       if (sourceFilter !== 'all') params.set('sourceId', sourceFilter);
       if (categoryFilter !== 'all') params.set('category', categoryFilter);
 
-      const res = await get(`/${PLUGIN_ID}/calendar?${params.toString()}`);
+      const [res, calSettingsRes] = await Promise.all([
+        get(`/${PLUGIN_ID}/calendar?${params.toString()}`),
+        get('/calendar/settings').catch(() => null),
+      ]);
+      const centralCal = calSettingsRes?.data?.data as
+        | CalendarPluginSettings
+        | undefined;
+      if (centralCal) {
+        setCalendarSettings(centralCal);
+        if (centralCal.theme) {
+          setActiveTheme(centralCal.theme);
+        }
+        if (centralCal.defaultLocale && centralCal.defaultLocale !== 'auto') {
+          setActiveLocale(centralCal.defaultLocale);
+        }
+        if (centralCal.secondaryCalendarLanguage) {
+          setSecondaryCalendarLanguage(centralCal.secondaryCalendarLanguage);
+        }
+      }
       const payload = res?.data?.data as
         | { occurrences?: ExpandedOccurrence[]; settings?: EventsPluginSettings }
         | undefined;
       if (payload) {
         setOccurrences(Array.isArray(payload.occurrences) ? payload.occurrences : []);
         if (payload.settings) setSettings(payload.settings);
+        const loadErrorMsg = t('calendar.error.load', 'Could not load calendar occurrences.');
+        setBannerMessage((prev) => (prev === loadErrorMsg ? null : prev));
       }
     } catch {
       setBannerMessage(t('calendar.error.load', 'Could not load calendar occurrences.'));
     } finally {
       setLoading(false);
     }
-  }, [dateWindow.from, dateWindow.to, locale, sourceFilter, categoryFilter, get, t]);
+  }, [dateWindow.from, dateWindow.to, activeLocale, sourceFilter, categoryFilter, get, t]);
 
   const fetchRegistrations = useCallback(async () => {
     try {
@@ -132,10 +164,23 @@ export const CalendarPage: React.FC = () => {
     () => extractAvailableCategories(occurrences),
     [occurrences]
   );
-  const activeSecondaryCalendars = useMemo(
-    () => resolveActiveSecondaryCalendars(calendarOverlayId, settings),
-    [calendarOverlayId, settings]
-  );
+  const activeSecondaryCalendars = useMemo(() => {
+    if (secondaryCalendarLanguage === 'off') {
+      return [];
+    }
+    const centralConfigured = (calendarSettings?.secondaryCalendars ?? []).filter(
+      (c) => c.enabled
+    );
+    if (centralConfigured.length > 0) {
+      return centralConfigured;
+    }
+    return resolveActiveSecondaryCalendars(calendarOverlayId, settings);
+  }, [
+    calendarOverlayId,
+    calendarSettings?.secondaryCalendars,
+    settings,
+    secondaryCalendarLanguage,
+  ]);
   const recurrencePresets = useMemo(
     () =>
       settings?.recurrencePresets && settings.recurrencePresets.length > 0
@@ -308,23 +353,46 @@ export const CalendarPage: React.FC = () => {
     [post, t, fetchRegistrations]
   );
 
+  const safeLocale =
+    activeLocale && activeLocale !== 'auto'
+      ? activeLocale
+      : locale && locale !== 'en' && locale !== 'auto'
+        ? locale
+        : 'es';
+
   const monthDays = useMemo(
     () => buildMonthGridDays(anchorDate.getUTCFullYear(), anchorDate.getUTCMonth()),
     [anchorDate]
   );
   const weekDays = useMemo(() => buildWeekDays(anchorDate), [anchorDate]);
-  const monthLabel = useMemo(
-    () =>
-      new Intl.DateTimeFormat(locale || 'en', {
+  const monthLabel = useMemo(() => {
+    try {
+      const raw = new Intl.DateTimeFormat(safeLocale, {
         month: 'long',
         year: 'numeric',
         timeZone: 'UTC',
-      }).format(anchorDate),
-    [anchorDate, locale]
-  );
+      }).format(anchorDate);
+      return raw.toUpperCase();
+    } catch {
+      return new Intl.DateTimeFormat('es', {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      })
+        .format(anchorDate)
+        .toUpperCase();
+    }
+  }, [anchorDate, safeLocale]);
   const secondaryHeaderLabel = useMemo(
-    () => formatSecondaryHeaderLabel(activeSecondaryCalendars, anchorDate, locale || 'en'),
-    [activeSecondaryCalendars, anchorDate, locale]
+    () =>
+      secondaryCalendarLanguage === 'off'
+        ? ''
+        : formatSecondaryHeaderLabel(
+            activeSecondaryCalendars,
+            anchorDate,
+            secondaryCalendarLanguage === 'ar' ? 'ar-SA' : safeLocale
+          ),
+    [activeSecondaryCalendars, anchorDate, safeLocale, secondaryCalendarLanguage]
   );
 
   const todayKey = new Date().toISOString().slice(0, 10);
@@ -339,7 +407,12 @@ export const CalendarPage: React.FC = () => {
             </Typography>
             <Box paddingTop={1}>
               <Flex gap={2} alignItems="center" wrap="wrap">
-                <Typography variant="epsilon" textColor="neutral600">
+                <Typography
+                  variant="epsilon"
+                  fontWeight="bold"
+                  textColor="neutral800"
+                  style={{ textTransform: 'uppercase', letterSpacing: '0.03em' }}
+                >
                   {monthLabel}
                 </Typography>
                 {secondaryHeaderLabel && (
@@ -372,14 +445,13 @@ export const CalendarPage: React.FC = () => {
         </Flex>
 
         {bannerMessage && (
-          <Box padding={3} background="primary100" hasRadius style={{ border: '1px solid #0D9488' }}>
+          <Box padding={3} background="primary100" hasRadius style={{ border: '1px solid #0284C7' }}>
             <Flex justifyContent="space-between" alignItems="center">
               <Typography variant="omega" fontWeight="bold" textColor="primary700">
                 {bannerMessage}
               </Typography>
               <Button variant="tertiary" size="S" onClick={() => setBannerMessage(null)}>
-                ×
-              </Button>
+                ×</Button>
             </Flex>
           </Box>
         )}
@@ -395,6 +467,10 @@ export const CalendarPage: React.FC = () => {
           onCategoryFilterChange={setCategoryFilter}
           calendarOverlayId={calendarOverlayId}
           onCalendarOverlayChange={setCalendarOverlayId}
+          activeLocale={safeLocale}
+          onLocaleChange={setActiveLocale}
+          secondaryCalendarLanguage={secondaryCalendarLanguage}
+          onSecondaryCalendarLanguageChange={setSecondaryCalendarLanguage}
           sources={settings?.sources ?? []}
           totalOccurrencesCount={occurrences.length}
           availableCategories={availableCategories}
@@ -437,7 +513,10 @@ export const CalendarPage: React.FC = () => {
         {viewMode !== 'attendees' && (
           <EventsGridCanvas
             t={t}
-            locale={locale || 'en'}
+            locale={safeLocale}
+            theme={activeTheme}
+            calendarSettings={calendarSettings}
+            secondaryCalendarLanguage={secondaryCalendarLanguage}
             viewMode={viewMode}
             anchorDate={anchorDate}
             todayKey={todayKey}

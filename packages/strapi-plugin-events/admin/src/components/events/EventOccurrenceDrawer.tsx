@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Checkbox,
+  Field,
   Flex,
   TextInput,
   Typography,
@@ -106,17 +107,22 @@ export const EventOccurrenceDrawer: React.FC<EventOccurrenceDrawerProps> = ({
         </Box>
 
         <Flex direction="column" gap={2} style={{ minWidth: 260 }}>
-          <Typography variant="pi" fontWeight="bold">
-            {t('calendar.rescheduleTo', 'Reschedule Date')}
-          </Typography>
-          <Flex gap={2} alignItems="center">
-            <TextInput
-              type="date"
-              value={rescheduleDate}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                onRescheduleDateChange(e.target.value)
-              }
-            />
+          <Flex gap={2} alignItems="flex-end">
+            <Box style={{ flex: 1 }}>
+              <Field.Root>
+                <Field.Label>
+                  {t('calendar.rescheduleTo', 'Reschedule Date')}
+                </Field.Label>
+                <TextInput
+                  type="date"
+                  placeholder={t('placeholder.yyyy_mm_dd', 'YYYY-MM-DD')}
+                  value={rescheduleDate}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onRescheduleDateChange(e.target.value)
+                  }
+                />
+              </Field.Root>
+            </Box>
             <Button size="S" variant="secondary" onClick={() => onRescheduleSave(false)}>
               {t('common.save', 'Save')}
             </Button>

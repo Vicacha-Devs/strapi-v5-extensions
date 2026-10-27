@@ -3,6 +3,7 @@ import {
   Badge,
   Box,
   Button,
+  Field,
   Flex,
   SingleSelect,
   SingleSelectOption,
@@ -43,32 +44,37 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
         <Flex justifyContent="space-between" alignItems="flex-end" wrap="wrap" gap={3}>
           <Flex gap={3} wrap="wrap" alignItems="flex-end">
             <Box style={{ minWidth: 240 }}>
-              <Typography variant="pi" fontWeight="bold">
-                {t('attendees.search', 'Search Attendee or Event')}
-              </Typography>
-              <TextInput
-                value={rsvpSearch}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  onRsvpSearchChange(e.target.value)
-                }
-                placeholder="Name, email, or event title..."
-              />
+              <Field.Root>
+                <Field.Label>
+                  {t('attendees.search', 'Search Attendee or Event')}
+                </Field.Label>
+                <TextInput
+                  value={rsvpSearch}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    onRsvpSearchChange(e.target.value)
+                  }
+                  placeholder={t('placeholder.name_email_or_event_title', 'Name, email, or event title...')}
+                />
+              </Field.Root>
             </Box>
 
             <Box style={{ minWidth: 160 }}>
-              <Typography variant="pi" fontWeight="bold">
-                {t('attendees.statusFilter', 'Status')}
-              </Typography>
-              <SingleSelect
-                value={rsvpStatusFilter}
-                onChange={(val: string) => onRsvpStatusFilterChange(val)}
-              >
-                <SingleSelectOption value="all">All Statuses</SingleSelectOption>
-                <SingleSelectOption value="confirmed">Confirmed</SingleSelectOption>
-                <SingleSelectOption value="checked_in">Checked In</SingleSelectOption>
-                <SingleSelectOption value="waitlisted">Waitlisted</SingleSelectOption>
-                <SingleSelectOption value="cancelled">Cancelled</SingleSelectOption>
-              </SingleSelect>
+              <Field.Root>
+                <Field.Label>
+                  {t('attendees.statusFilter', 'Status')}
+                </Field.Label>
+                <SingleSelect
+                  placeholder={t('placeholder.all_statuses', 'All Statuses')}
+                  value={rsvpStatusFilter}
+                  onChange={(val: string) => onRsvpStatusFilterChange(val)}
+                >
+                  <SingleSelectOption value="all">All Statuses</SingleSelectOption>
+                  <SingleSelectOption value="confirmed">Confirmed</SingleSelectOption>
+                  <SingleSelectOption value="checked_in">Checked In</SingleSelectOption>
+                  <SingleSelectOption value="waitlisted">Waitlisted</SingleSelectOption>
+                  <SingleSelectOption value="cancelled">Cancelled</SingleSelectOption>
+                </SingleSelect>
+              </Field.Root>
             </Box>
 
             {rsvpEventFilter && (
@@ -154,7 +160,7 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
                     </Box>
                   </Box>
 
-                  <Flex gap={2} alignItems="center">
+                  <Flex gap={2} alignItems="flex-end">
                     {reg.status !== 'checked_in' && reg.status !== 'cancelled' && (
                       <Button
                         size="S"
@@ -165,18 +171,24 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
                       </Button>
                     )}
 
-                    <Box style={{ minWidth: 145 }}>
-                      <SingleSelect
-                        value={reg.status}
-                        onChange={(nextSt: string) =>
-                          onStatusChange(reg.documentId, nextSt as RsvpStatus)
-                        }
-                      >
-                        <SingleSelectOption value="confirmed">Confirmed</SingleSelectOption>
-                        <SingleSelectOption value="checked_in">Checked In</SingleSelectOption>
-                        <SingleSelectOption value="waitlisted">Waitlisted</SingleSelectOption>
-                        <SingleSelectOption value="cancelled">Cancelled</SingleSelectOption>
-                      </SingleSelect>
+                    <Box style={{ minWidth: 155 }}>
+                      <Field.Root>
+                        <Field.Label>
+                          {t('attendees.rowStatus', 'Registration Status')}
+                        </Field.Label>
+                        <SingleSelect
+                          placeholder={t('placeholder.select_status', 'Select status')}
+                          value={reg.status}
+                          onChange={(nextSt: string) =>
+                            onStatusChange(reg.documentId, nextSt as RsvpStatus)
+                          }
+                        >
+                          <SingleSelectOption value="confirmed">Confirmed</SingleSelectOption>
+                          <SingleSelectOption value="checked_in">Checked In</SingleSelectOption>
+                          <SingleSelectOption value="waitlisted">Waitlisted</SingleSelectOption>
+                          <SingleSelectOption value="cancelled">Cancelled</SingleSelectOption>
+                        </SingleSelect>
+                      </Field.Root>
                     </Box>
                   </Flex>
                 </Flex>
