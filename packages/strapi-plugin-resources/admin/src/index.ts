@@ -18,10 +18,10 @@ export default {
         id: `${PLUGIN_ID}.plugin.name`,
         defaultMessage: 'Resources & Media',
       },
-      Component: async () => {
-        const { ResourcesHomePage } = await import('./pages/ResourcesHomePage');
-        return ResourcesHomePage;
-      },
+      Component: () =>
+        import('./pages/ResourcesHomePage').then((mod) => ({
+          default: mod.ResourcesHomePage,
+        })),
       permissions: [],
     });
 
@@ -40,11 +40,11 @@ export default {
             defaultMessage: 'Media Library & Catalog Settings',
           },
           id: `${PLUGIN_ID}-settings`,
-          to: `settings/${PLUGIN_ID}`,
-          Component: async () => {
-            const { SettingsPage } = await import('./pages/SettingsPage');
-            return SettingsPage;
-          },
+          to: `${PLUGIN_ID}`,
+          Component: () =>
+            import('./pages/SettingsPage').then((mod) => ({
+              default: mod.SettingsPage,
+            })),
           permissions: [],
         },
       ]
@@ -58,19 +58,23 @@ export default {
     });
   },
 
-  async registerTrads({ locales }: { locales: string[] }) {
-    const importedTrads = await Promise.all(
-      locales.map(async (locale) => {
+  async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
+    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    return Promise.all(
+      allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(
-            `./translations/${locale}.json`
-          );
-          return { data, locale };
+          const { default: data } = await import(`./translations/${locale}.json`);
+          const prefixed: Record<string, string> = {};
+          for (const [k, v] of Object.entries(data as Record<string, string>)) {
+            prefixed[k] = v;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            prefixed[fullKey] = v;
+          }
+          return { data: prefixed, locale };
         } catch {
           return { data: {}, locale };
         }
       })
     );
-    return importedTrads;
   },
 };
