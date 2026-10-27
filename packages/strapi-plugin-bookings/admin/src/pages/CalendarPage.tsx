@@ -5,15 +5,21 @@ import {
   Badge,
   Box,
   Button,
+  Field,
   Flex,
-  Layouts,
   SingleSelect,
   SingleSelectOption,
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/strapi/admin';
-import type { ExpandedCalendarOccurrence } from '@vicacha-devs/strapi-plugin-calendar/shared';
+import { Layouts, useFetchClient, useNotification } from '@strapi/strapi/admin';
+import {
+  SUPPORTED_INTL_CALENDARS,
+  type CalendarPluginSettings,
+  type CalendarThemePreset,
+  type ExpandedCalendarOccurrence,
+  type SecondaryCalendarLanguageMode,
+} from '@vicacha-devs/strapi-plugin-calendar/shared';
 import type {
   BookingRecord,
   BookingResource,
@@ -42,7 +48,7 @@ const EMPTY_STATS: BookingStats = {
 };
 
 export const CalendarPage: React.FC = () => {
-  const { formatMessage, locale } = useIntl();
+  const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { get, post, put } = useFetchClient();
   const { toggleNotification } = useNotification();
@@ -58,10 +64,16 @@ export const CalendarPage: React.FC = () => {
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
   const [resources, setResources] = useState<BookingResource[]>([]);
   const [settings, setSettings] = useState<BookingsPluginSettings | null>(null);
+  const [calendarSettings, setCalendarSettings] =
+    useState<CalendarPluginSettings | null>(null);
   const [stats, setStats] = useState<BookingStats>(EMPTY_STATS);
   const [selectedResourceId, setSelectedResourceId] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [search, setSearch] = useState<string>('');
+  const [calendarLocale, setCalendarLocale] = useState<string>('es');
+  const [theme, setTheme] = useState<CalendarThemePreset>('breeze');
+  const [secondaryLangMode, setSecondaryLangMode] =
+    useState<SecondaryCalendarLanguageMode>('local');
   const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(
     null
   );
@@ -81,15 +93,40 @@ export const CalendarPage: React.FC = () => {
       if (search.trim()) {
         params.set('search', search.trim());
       }
-      const res = await get(
-        `/${PLUGIN_ID}/calendar?${params.toString()}`
-      );
+      const [res, calSettingsRes] = await Promise.all([
+        get(`/${PLUGIN_ID}/calendar?${params.toString()}`),
+        get('/calendar/settings').catch(() => null),
+      ]);
+      const centralCal = calSettingsRes?.data?.data as
+        | CalendarPluginSettings
+        | undefined;
+      if (centralCal) {
+        setCalendarSettings(centralCal);
+      }
       const payload = res.data?.data;
       if (payload) {
         setOccurrences(payload.occurrences ?? []);
         setBookings(payload.bookings ?? []);
         setResources(payload.resources ?? []);
-        setSettings(payload.settings ?? null);
+        const loadedSettings = payload.settings as BookingsPluginSettings | null;
+        setSettings(loadedSettings);
+        const effectiveTheme = centralCal?.theme ?? loadedSettings?.theme;
+        if (effectiveTheme) {
+          setTheme(effectiveTheme);
+        }
+        const effectiveLocale =
+          centralCal?.defaultLocale && centralCal.defaultLocale !== 'auto'
+            ? centralCal.defaultLocale
+            : loadedSettings?.defaultLocale;
+        if (effectiveLocale && effectiveLocale !== 'auto') {
+          setCalendarLocale(effectiveLocale);
+        }
+        const effectiveSecondaryLang =
+          centralCal?.secondaryCalendarLanguage ??
+          loadedSettings?.secondaryCalendarLanguage;
+        if (effectiveSecondaryLang) {
+          setSecondaryLangMode(effectiveSecondaryLang);
+        }
         setStats(payload.stats ?? EMPTY_STATS);
       }
     } catch {
@@ -177,9 +214,40 @@ export const CalendarPage: React.FC = () => {
     navigate(`/content-manager/collection-types/${uid}/${booking.documentId}`);
   };
 
-  const activeSecondaryCalendars = (settings?.secondaryCalendars ?? []).filter(
-    (c) => c.enabled
-  );
+  const activeSecondaryCalendars = React.useMemo(() => {
+    if (secondaryLangMode === 'off') {
+      return [];
+    }
+    const centralConfigured = (calendarSettings?.secondaryCalendars ?? []).filter(
+      (c) => c.enabled
+    );
+    if (centralConfigured.length > 0) {
+      return centralConfigured;
+    }
+    const configured = (settings?.secondaryCalendars ?? []).filter(
+      (c) => c.enabled
+    );
+    if (configured.length > 0) {
+      return configured;
+    }
+    const hijri = SUPPORTED_INTL_CALENDARS.find(
+      (c) => c.id === 'islamic-umalqura'
+    );
+    return hijri
+      ? [
+          {
+            id: 'hijri',
+            label: hijri.defaultLabel,
+            intlCalendar: hijri.intlCalendar,
+            enabled: true,
+          },
+        ]
+      : [];
+  }, [
+    secondaryLangMode,
+    calendarSettings?.secondaryCalendars,
+    settings?.secondaryCalendars,
+  ]);
 
   return (
     <Layouts.Root>
@@ -191,6 +259,12 @@ export const CalendarPage: React.FC = () => {
         )}
         primaryAction={
           <Flex gap={2}>
+            <Button
+              variant="tertiary"
+              onClick={() => navigate(`/settings/${PLUGIN_ID}`)}
+            >
+              {t('actions.settings', 'Settings')}
+            </Button>
             <Button
               variant="secondary"
               onClick={() => window.open(`/${PLUGIN_ID}/export.csv`, '_blank')}
@@ -258,24 +332,28 @@ export const CalendarPage: React.FC = () => {
             ))}
           </Flex>
 
-          {/* Toolbar & Filters */}
+          {/* Toolbar & Filters with Visible Field Labels */}
           <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
-            <Flex
-              justifyContent="space-between"
-              alignItems="flex-end"
-              wrap="wrap"
-              gap={3}
-            >
-              <Flex gap={3} wrap="wrap" alignItems="flex-end">
-                <Box style={{ minWidth: '200px' }}>
+            <Flex direction="column" alignItems="stretch" gap={3}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gap: 12,
+                }}
+              >
+                <Field.Root>
+                  <Field.Label>
+                    {t('filters.resource', 'Bookable Resource')}
+                  </Field.Label>
                   <SingleSelect
-                    label={t('filters.resource', 'Resource')}
-                    value={selectedResourceId}
+                    placeholder={t('placeholder.all_resources', 'All Resources')}
+                    value={selectedResourceId || 'all'}
                     onChange={(val: string | number) =>
-                      setSelectedResourceId(String(val))
+                      setSelectedResourceId(String(val) === 'all' ? '' : String(val))
                     }
                   >
-                    <SingleSelectOption value="">
+                    <SingleSelectOption value="all">
                       {t('filters.allResources', 'All Resources')}
                     </SingleSelectOption>
                     {resources.map((res) => (
@@ -287,30 +365,35 @@ export const CalendarPage: React.FC = () => {
                       </SingleSelectOption>
                     ))}
                   </SingleSelect>
-                </Box>
+                </Field.Root>
 
-                <Box style={{ minWidth: '160px' }}>
+                <Field.Root>
+                  <Field.Label>
+                    {t('filters.status', 'Booking Status')}
+                  </Field.Label>
                   <SingleSelect
-                    label={t('filters.status', 'Status')}
-                    value={selectedStatus}
+                    placeholder={t('placeholder.all_statuses', 'All Statuses')}
+                    value={selectedStatus || 'all'}
                     onChange={(val: string | number) =>
-                      setSelectedStatus(String(val))
+                      setSelectedStatus(String(val) === 'all' ? '' : String(val))
                     }
                   >
-                    <SingleSelectOption value="">
+                    <SingleSelectOption value="all">
                       {t('filters.allStatuses', 'All Statuses')}
                     </SingleSelectOption>
-                    <SingleSelectOption value="pending">PENDING</SingleSelectOption>
-                    <SingleSelectOption value="confirmed">CONFIRMED</SingleSelectOption>
-                    <SingleSelectOption value="completed">COMPLETED</SingleSelectOption>
-                    <SingleSelectOption value="cancelled">CANCELLED</SingleSelectOption>
-                    <SingleSelectOption value="no_show">NO SHOW</SingleSelectOption>
+                    <SingleSelectOption value="pending">{t('page.ui.pending', 'PENDING')}</SingleSelectOption>
+                    <SingleSelectOption value="confirmed">{t('page.ui.confirmed', 'CONFIRMED')}</SingleSelectOption>
+                    <SingleSelectOption value="completed">{t('page.ui.completed', 'COMPLETED')}</SingleSelectOption>
+                    <SingleSelectOption value="cancelled">{t('page.ui.cancelled', 'CANCELLED')}</SingleSelectOption>
+                    <SingleSelectOption value="no_show">{t('page.ui.no_show', 'NO SHOW')}</SingleSelectOption>
                   </SingleSelect>
-                </Box>
+                </Field.Root>
 
-                <Box style={{ minWidth: '220px' }}>
+                <Field.Root>
+                  <Field.Label>
+                    {t('filters.search', 'Search Reservations')}
+                  </Field.Label>
                   <TextInput
-                    label={t('filters.search', 'Search')}
                     placeholder={t(
                       'filters.searchPlaceholder',
                       'Code, customer, host, org...'
@@ -320,10 +403,10 @@ export const CalendarPage: React.FC = () => {
                       setSearch(e.target.value)
                     }
                   />
-                </Box>
-              </Flex>
+                </Field.Root>
+              </div>
 
-              <Flex gap={2} wrap="wrap">
+              <Flex justifyContent="flex-end" gap={2} wrap="wrap">
                 {(
                   ['month', 'week', 'day', 'agenda', 'list'] as BookingsViewMode[]
                 ).map((mode) => (
@@ -345,7 +428,10 @@ export const CalendarPage: React.FC = () => {
             <Box style={{ flex: 1, minWidth: 0 }}>
               <BookingsGridCanvas
                 t={t}
-                locale={locale || 'en'}
+                locale={calendarLocale}
+                theme={theme}
+                calendarSettings={calendarSettings}
+                secondaryCalendarLanguage={secondaryLangMode}
                 viewMode={viewMode}
                 occurrences={occurrences}
                 bookings={bookings}

@@ -34,10 +34,10 @@ export default {
         id: `${PLUGIN_ID}.plugin.name`,
         defaultMessage: 'Bookings',
       },
-      Component: async () => {
-        const { App } = await import('./pages/App');
-        return App;
-      },
+      Component: () =>
+        import('./pages/App').then((mod) => ({
+          default: mod.App,
+        })),
       permissions: [],
     });
 
@@ -57,10 +57,10 @@ export default {
           },
           id: `${PLUGIN_ID}-settings`,
           to: `${PLUGIN_ID}`,
-          Component: async () => {
-            const { SettingsPage } = await import('./pages/SettingsPage');
-            return SettingsPage;
-          },
+          Component: () =>
+            import('./pages/SettingsPage').then((mod) => ({
+              default: mod.SettingsPage,
+            })),
           permissions: [],
         },
       ]
@@ -76,16 +76,17 @@ export default {
 
   bootstrap() {},
 
-  async registerTrads() {
-    const importedTrads = await Promise.all(
-      LOCALES.map(async (locale) => {
+  async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
+    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    return Promise.all(
+      allLocales.map(async (locale) => {
         try {
-          const { default: data } = (await import(
-            `./translations/${locale}.json`
-          )) as { default: Record<string, string> };
+          const { default: data } = await import(`./translations/${locale}.json`);
           const prefixed: Record<string, string> = {};
-          for (const [key, value] of Object.entries(data)) {
-            prefixed[`${PLUGIN_ID}.${key}`] = value;
+          for (const [k, v] of Object.entries(data as Record<string, string>)) {
+            prefixed[k] = v;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            prefixed[fullKey] = v;
           }
           return { data: prefixed, locale };
         } catch {
@@ -93,6 +94,5 @@ export default {
         }
       })
     );
-    return importedTrads;
   },
 };

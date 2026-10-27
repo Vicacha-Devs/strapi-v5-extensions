@@ -4,19 +4,15 @@ import {
   Box,
   Button,
   Checkbox,
-  Divider,
+  Field,
   Flex,
-  Layouts,
   NumberInput,
+  Tabs,
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/strapi/admin';
-import { SUPPORTED_INTL_CALENDARS } from '../../../shared/calendarSystems';
-import type {
-  BookingsPluginSettings,
-  SecondaryCalendarConfig,
-} from '../../../shared/types';
+import { Layouts, useFetchClient, useNotification } from '@strapi/strapi/admin';
+import type { BookingsPluginSettings } from '../../../shared/types';
 import { PLUGIN_ID } from '../pluginId';
 import { getTranslation } from '../utils/getTranslation';
 
@@ -32,7 +28,10 @@ export const SettingsPage: React.FC = () => {
   );
 
   const [settings, setSettings] = useState<BookingsPluginSettings>({
-    defaultTimezone: 'UTC',
+    theme: 'breeze',
+    defaultLocale: 'es',
+    secondaryCalendarLanguage: 'local',
+    defaultTimezone: 'America/Bogota',
     defaultSlotDurationMinutes: 60,
     defaultBufferBeforeMinutes: 0,
     defaultBufferAfterMinutes: 0,
@@ -59,32 +58,6 @@ export const SettingsPage: React.FC = () => {
     };
     void load();
   }, [get]);
-
-  const handleToggleSecondaryCalendar = (
-    calId: string,
-    intlCalendar: string,
-    defaultLabel: string
-  ) => {
-    const existing = settings.secondaryCalendars.find((c) => c.id === calId);
-    let nextCalendars: SecondaryCalendarConfig[];
-    if (existing) {
-      nextCalendars = settings.secondaryCalendars.map((c) =>
-        c.id === calId ? { ...c, enabled: !c.enabled } : c
-      );
-    } else {
-      nextCalendars = [
-        ...settings.secondaryCalendars,
-        {
-          id: calId,
-          label: defaultLabel,
-          intlCalendar,
-          dayOffset: 0,
-          enabled: true,
-        },
-      ];
-    }
-    setSettings({ ...settings, secondaryCalendars: nextCalendars });
-  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -113,7 +86,7 @@ export const SettingsPage: React.FC = () => {
         title={t('settings.title', 'Bookings & Availability Settings')}
         subtitle={t(
           'settings.subtitle',
-          'Configure default slot durations, buffer times, lead times, approval rules, and secondary calendars'
+          'Configure default slot durations, capacity limits, buffer times, lead times, and reservation approval rules. Visual calendar themes and secondary calendars are managed centrally in Calendar Settings.'
         )}
         primaryAction={
           <Button loading={saving} onClick={handleSave}>
@@ -123,192 +96,342 @@ export const SettingsPage: React.FC = () => {
       />
 
       <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={5}>
-          <Box background="neutral0" hasRadius shadow="tableShadow" padding={5}>
-            <Flex direction="column" alignItems="stretch" gap={4}>
-              <Typography variant="delta" tag="h2">
-                {t('settings.defaultsHeading', 'Default Slot & Scheduling Rules')}
-              </Typography>
+        <Tabs.Root defaultValue="slots">
+          <Tabs.List aria-label={t('settings.title', 'Bookings & Availability Settings')}>
+            <Tabs.Trigger value="slots">
+              {t('settings.defaultsHeading', 'Default Slot & Scheduling Rules')}
+            </Tabs.Trigger>
+            <Tabs.Trigger value="approvals">
+              {t('settings.approvalsHeading', 'Approval Workflow & Email Notifications')}
+            </Tabs.Trigger>
+          </Tabs.List>
 
-              <Flex gap={4} wrap="wrap">
-                <Box style={{ flex: '1 1 200px' }}>
-                  <TextInput
-                    label={t('settings.defaultTimezone', 'Default Timezone')}
-                    value={settings.defaultTimezone}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings({
-                        ...settings,
-                        defaultTimezone: e.target.value,
-                      })
-                    }
-                  />
-                </Box>
-                <Box style={{ flex: '1 1 200px' }}>
-                  <NumberInput
-                    label={t(
-                      'settings.defaultSlotDurationMinutes',
-                      'Slot Duration (Minutes)'
-                    )}
-                    value={settings.defaultSlotDurationMinutes}
-                    onValueChange={(v: number | undefined) =>
-                      setSettings({
-                        ...settings,
-                        defaultSlotDurationMinutes: Math.max(5, Number(v ?? 60)),
-                      })
-                    }
-                  />
-                </Box>
-                <Box style={{ flex: '1 1 200px' }}>
-                  <NumberInput
-                    label={t(
-                      'settings.defaultCapacityPerSlot',
-                      'Default Capacity Per Slot'
-                    )}
-                    value={settings.defaultCapacityPerSlot}
-                    onValueChange={(v: number | undefined) =>
-                      setSettings({
-                        ...settings,
-                        defaultCapacityPerSlot: Math.max(1, Number(v ?? 1)),
-                      })
-                    }
-                  />
-                </Box>
-              </Flex>
+          <Tabs.Content value="slots">
+            <Box
+              background="neutral0"
+              hasRadius
+              shadow="tableShadow"
+              padding={6}
+              style={{ border: '1px solid rgba(128, 128, 128, 0.22)' }}
+            >
+              <Flex direction="column" alignItems="stretch" gap={4}>
+                <Typography variant="delta" fontWeight="bold" tag="h2">
+                  {t('settings.defaultsHeading', 'Default Slot & Scheduling Rules')}
+                </Typography>
 
-              <Flex gap={4} wrap="wrap">
-                <Box style={{ flex: '1 1 200px' }}>
-                  <NumberInput
-                    label={t(
-                      'settings.defaultBufferBeforeMinutes',
-                      'Buffer Before (Minutes)'
-                    )}
-                    value={settings.defaultBufferBeforeMinutes}
-                    onValueChange={(v: number | undefined) =>
-                      setSettings({
-                        ...settings,
-                        defaultBufferBeforeMinutes: Math.max(0, Number(v ?? 0)),
-                      })
-                    }
-                  />
-                </Box>
-                <Box style={{ flex: '1 1 200px' }}>
-                  <NumberInput
-                    label={t(
-                      'settings.defaultBufferAfterMinutes',
-                      'Buffer After (Minutes)'
-                    )}
-                    value={settings.defaultBufferAfterMinutes}
-                    onValueChange={(v: number | undefined) =>
-                      setSettings({
-                        ...settings,
-                        defaultBufferAfterMinutes: Math.max(0, Number(v ?? 0)),
-                      })
-                    }
-                  />
-                </Box>
-                <Box style={{ flex: '1 1 200px' }}>
-                  <NumberInput
-                    label={t(
-                      'settings.defaultMinLeadTimeHours',
-                      'Minimum Lead Time (Hours)'
-                    )}
-                    value={settings.defaultMinLeadTimeHours}
-                    onValueChange={(v: number | undefined) =>
-                      setSettings({
-                        ...settings,
-                        defaultMinLeadTimeHours: Math.max(0, Number(v ?? 2)),
-                      })
-                    }
-                  />
-                </Box>
-                <Box style={{ flex: '1 1 200px' }}>
-                  <NumberInput
-                    label={t(
-                      'settings.defaultMaxAdvanceDays',
-                      'Max Advance Horizon (Days)'
-                    )}
-                    value={settings.defaultMaxAdvanceDays}
-                    onValueChange={(v: number | undefined) =>
-                      setSettings({
-                        ...settings,
-                        defaultMaxAdvanceDays: Math.max(1, Number(v ?? 90)),
-                      })
-                    }
-                  />
-                </Box>
-              </Flex>
-
-              <Divider />
-
-              <Flex gap={6} wrap="wrap">
-                <Checkbox
-                  checked={settings.defaultRequiresApproval}
-                  onCheckedChange={(checked: boolean) =>
-                    setSettings({
-                      ...settings,
-                      defaultRequiresApproval: Boolean(checked),
-                    })
-                  }
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                    gap: 16,
+                  }}
                 >
-                  {t(
-                    'settings.requiresApproval',
-                    'Require manual admin approval before confirming bookings'
-                  )}
-                </Checkbox>
-
-                <Checkbox
-                  checked={settings.sendEmailNotifications}
-                  onCheckedChange={(checked: boolean) =>
-                    setSettings({
-                      ...settings,
-                      sendEmailNotifications: Boolean(checked),
-                    })
-                  }
-                >
-                  {t(
-                    'settings.sendEmailNotifications',
-                    'Send confirmation and status update emails'
-                  )}
-                </Checkbox>
-              </Flex>
-            </Flex>
-          </Box>
-
-          <Box background="neutral0" hasRadius shadow="tableShadow" padding={5}>
-            <Flex direction="column" alignItems="stretch" gap={4}>
-              <Typography variant="delta" tag="h2">
-                {t(
-                  'settings.secondaryCalendarsHeading',
-                  'Secondary Calendar Systems (Powered by @vicacha-devs/strapi-plugin-calendar)'
-                )}
-              </Typography>
-              <Flex gap={4} wrap="wrap">
-                {SUPPORTED_INTL_CALENDARS.filter(
-                  (cal) => cal.id !== 'gregory' && cal.id !== 'iso8601'
-                ).map((cal) => {
-                  const active = settings.secondaryCalendars.find(
-                    (c) => c.id === cal.id
-                  )?.enabled;
-                  return (
-                    <Checkbox
-                      key={cal.id}
-                      checked={Boolean(active)}
-                      onCheckedChange={() =>
-                        handleToggleSecondaryCalendar(
-                          cal.id,
-                          cal.intlCalendar,
-                          cal.defaultLabel
-                        )
+                  <Field.Root>
+                    <Field.Label>
+                      {t(
+                        'settings.defaultSlotDurationMinutes',
+                        'Slot Duration (Minutes)'
+                      )}
+                    </Field.Label>
+                    <NumberInput
+                      placeholder={t(
+                        'settings.defaultSlotDurationMinutes.placeholder',
+                        'e.g., 60'
+                      )}
+                      value={settings.defaultSlotDurationMinutes}
+                      onValueChange={(v: number | undefined) =>
+                        setSettings({
+                          ...settings,
+                          defaultSlotDurationMinutes: Math.max(5, Number(v ?? 60)),
+                        })
                       }
-                    >
-                      {cal.defaultLabel}
-                    </Checkbox>
-                  );
-                })}
+                    />
+                    <Field.Hint>
+                      {t(
+                        'settings.defaultSlotDurationMinutesHint',
+                        'Standard length of each bookable appointment slot.'
+                      )}
+                    </Field.Hint>
+                  </Field.Root>
+
+                  <Field.Root>
+                    <Field.Label>
+                      {t(
+                        'settings.defaultCapacityPerSlot',
+                        'Default Capacity Per Slot'
+                      )}
+                    </Field.Label>
+                    <NumberInput
+                      placeholder={t(
+                        'settings.defaultCapacityPerSlot.placeholder',
+                        'e.g., 1'
+                      )}
+                      value={settings.defaultCapacityPerSlot}
+                      onValueChange={(v: number | undefined) =>
+                        setSettings({
+                          ...settings,
+                          defaultCapacityPerSlot: Math.max(1, Number(v ?? 1)),
+                        })
+                      }
+                    />
+                    <Field.Hint>
+                      {t(
+                        'settings.defaultCapacityPerSlotHint',
+                        'Concurrent reservations allowed per time slot.'
+                      )}
+                    </Field.Hint>
+                  </Field.Root>
+
+                  <Field.Root>
+                    <Field.Label>
+                      {t(
+                        'settings.defaultBufferBeforeMinutes',
+                        'Buffer Before (Minutes)'
+                      )}
+                    </Field.Label>
+                    <NumberInput
+                      placeholder={t(
+                        'settings.defaultBufferBeforeMinutes.placeholder',
+                        'e.g., 0'
+                      )}
+                      value={settings.defaultBufferBeforeMinutes}
+                      onValueChange={(v: number | undefined) =>
+                        setSettings({
+                          ...settings,
+                          defaultBufferBeforeMinutes: Math.max(0, Number(v ?? 0)),
+                        })
+                      }
+                    />
+                    <Field.Hint>
+                      {t(
+                        'settings.defaultBufferBeforeMinutesHint',
+                        'Preparation gap blocked before each booking starts.'
+                      )}
+                    </Field.Hint>
+                  </Field.Root>
+
+                  <Field.Root>
+                    <Field.Label>
+                      {t(
+                        'settings.defaultBufferAfterMinutes',
+                        'Buffer After (Minutes)'
+                      )}
+                    </Field.Label>
+                    <NumberInput
+                      placeholder={t(
+                        'settings.defaultBufferAfterMinutes.placeholder',
+                        'e.g., 0'
+                      )}
+                      value={settings.defaultBufferAfterMinutes}
+                      onValueChange={(v: number | undefined) =>
+                        setSettings({
+                          ...settings,
+                          defaultBufferAfterMinutes: Math.max(0, Number(v ?? 0)),
+                        })
+                      }
+                    />
+                    <Field.Hint>
+                      {t(
+                        'settings.defaultBufferAfterMinutesHint',
+                        'Cooldown gap blocked after each booking ends.'
+                      )}
+                    </Field.Hint>
+                  </Field.Root>
+
+                  <Field.Root>
+                    <Field.Label>
+                      {t(
+                        'settings.defaultMinLeadTimeHours',
+                        'Minimum Lead Time (Hours)'
+                      )}
+                    </Field.Label>
+                    <NumberInput
+                      placeholder={t(
+                        'settings.defaultMinLeadTimeHours.placeholder',
+                        'e.g., 2'
+                      )}
+                      value={settings.defaultMinLeadTimeHours}
+                      onValueChange={(v: number | undefined) =>
+                        setSettings({
+                          ...settings,
+                          defaultMinLeadTimeHours: Math.max(0, Number(v ?? 2)),
+                        })
+                      }
+                    />
+                    <Field.Hint>
+                      {t(
+                        'settings.defaultMinLeadTimeHoursHint',
+                        'Minimum notice required before a slot can be booked.'
+                      )}
+                    </Field.Hint>
+                  </Field.Root>
+
+                  <Field.Root>
+                    <Field.Label>
+                      {t(
+                        'settings.defaultMaxAdvanceDays',
+                        'Max Advance Horizon (Days)'
+                      )}
+                    </Field.Label>
+                    <NumberInput
+                      placeholder={t(
+                        'settings.defaultMaxAdvanceDays.placeholder',
+                        'e.g., 90'
+                      )}
+                      value={settings.defaultMaxAdvanceDays}
+                      onValueChange={(v: number | undefined) =>
+                        setSettings({
+                          ...settings,
+                          defaultMaxAdvanceDays: Math.max(1, Number(v ?? 90)),
+                        })
+                      }
+                    />
+                    <Field.Hint>
+                      {t(
+                        'settings.defaultMaxAdvanceDaysHint',
+                        'How far in advance visitors may schedule bookings.'
+                      )}
+                    </Field.Hint>
+                  </Field.Root>
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    gap: 16,
+                  }}
+                >
+                  <Field.Root>
+                    <Field.Label>
+                      {t('settings.defaultTimezone', 'Operating Hours Timezone (IANA)')}
+                    </Field.Label>
+                    <TextInput
+                      placeholder={t(
+                        'settings.defaultTimezone.placeholder',
+                        'e.g., America/Bogota'
+                      )}
+                      value={settings.defaultTimezone || 'America/Bogota'}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setSettings({
+                          ...settings,
+                          defaultTimezone: e.target.value,
+                        })
+                      }
+                    />
+                    <Field.Hint>
+                      {t(
+                        'settings.defaultTimezoneHint',
+                        'IANA timezone used to evaluate daily operating windows.'
+                      )}
+                    </Field.Hint>
+                  </Field.Root>
+                </div>
               </Flex>
-            </Flex>
-          </Box>
-        </Flex>
+            </Box>
+          </Tabs.Content>
+
+          <Tabs.Content value="approvals">
+            <Box
+              background="neutral0"
+              hasRadius
+              shadow="tableShadow"
+              padding={6}
+              style={{ border: '1px solid rgba(128, 128, 128, 0.22)' }}
+            >
+              <Flex direction="column" alignItems="stretch" gap={4}>
+                <Typography variant="delta" fontWeight="bold" tag="h2">
+                  {t('settings.approvalsHeading', 'Approval Workflow & Email Notifications')}
+                </Typography>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    gap: 16,
+                  }}
+                >
+                <Box
+                  padding={4}
+                  background="neutral100"
+                  hasRadius
+                  style={{ border: '1px solid rgba(128, 128, 128, 0.18)' }}
+                >
+                  <Checkbox
+                    checked={settings.defaultRequiresApproval}
+                    onCheckedChange={(checked: boolean) =>
+                      setSettings({
+                        ...settings,
+                        defaultRequiresApproval: Boolean(checked),
+                      })
+                    }
+                  >
+                    {t(
+                      'settings.requiresApproval',
+                      'Require Manual Admin Approval'
+                    )}
+                  </Checkbox>
+                  <Box paddingTop={2}>
+                    <Typography variant="pi" textColor="neutral600">
+                      {t(
+                        'settings.requiresApprovalHintPrefix',
+                        'Places new visitor reservations in'
+                      )}{' '}
+                      <code
+                        style={{
+                          fontFamily:
+                            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                          fontSize: '0.88em',
+                          padding: '2px 6px',
+                          borderRadius: 4,
+                          background: 'rgba(128, 128, 128, 0.16)',
+                          border: '1px solid rgba(128, 128, 128, 0.25)',
+                        }}
+                      >
+                        pending
+                      </code>{' '}
+                      {t(
+                        'settings.requiresApprovalHintSuffix',
+                        'status until confirmed by staff.'
+                      )}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box
+                  padding={4}
+                  background="neutral100"
+                  hasRadius
+                  style={{ border: '1px solid rgba(128, 128, 128, 0.18)' }}
+                >
+                  <Checkbox
+                    checked={settings.sendEmailNotifications}
+                    onCheckedChange={(checked: boolean) =>
+                      setSettings({
+                        ...settings,
+                        sendEmailNotifications: Boolean(checked),
+                      })
+                    }
+                  >
+                    {t(
+                      'settings.sendEmailNotifications',
+                      'Send Confirmation & Status Update Emails'
+                    )}
+                  </Checkbox>
+                  <Box paddingTop={2}>
+                    <Typography variant="pi" textColor="neutral600">
+                      {t(
+                        'settings.sendEmailNotificationsHint',
+                        'Automatically notifies visitors when their booking is created, approved, or rescheduled.'
+                      )}
+                    </Typography>
+                  </Box>
+                </Box>
+                </div>
+              </Flex>
+            </Box>
+          </Tabs.Content>
+        </Tabs.Root>
       </Layouts.Content>
     </Layouts.Root>
   );

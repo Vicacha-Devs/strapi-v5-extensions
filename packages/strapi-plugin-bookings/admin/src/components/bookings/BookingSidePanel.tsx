@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Divider,
+  Field,
   Flex,
   SingleSelect,
   SingleSelectOption,
@@ -156,33 +157,50 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
 
         <Divider />
 
-        <SingleSelect
-          label={t('panel.status', 'Booking Status')}
-          value={status}
-          onChange={(val: string | number) => setStatus(String(val) as BookingStatus)}
-        >
-          {BOOKING_STATUSES.map((st) => (
-            <SingleSelectOption key={st} value={st}>
-              {st.toUpperCase()}
-            </SingleSelectOption>
-          ))}
-        </SingleSelect>
+        <Field.Root>
+          <Field.Label>
+            {t('panel.status', 'Booking Status')}
+          </Field.Label>
+          <SingleSelect
+            placeholder={t('placeholder.select_booking_status', 'Select booking status')}
+            value={status}
+            onChange={(val: string | number) =>
+              setStatus(String(val) as BookingStatus)
+            }
+          >
+            {BOOKING_STATUSES.map((st) => (
+              <SingleSelectOption key={st} value={st}>
+                {st.toUpperCase()}
+              </SingleSelectOption>
+            ))}
+          </SingleSelect>
+        </Field.Root>
 
-        <TextInput
-          label={t('panel.assignedHost', 'Assigned Staff / Host')}
-          value={assignedHost}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setAssignedHost(e.target.value)
-          }
-        />
+        <Field.Root>
+          <Field.Label>
+            {t('panel.assignedHost', 'Assigned Staff / Host')}
+          </Field.Label>
+          <TextInput
+            placeholder={t('placeholder.assign_guide_or_host', 'Assign guide or host...')}
+            value={assignedHost}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setAssignedHost(e.target.value)
+            }
+          />
+        </Field.Root>
 
-        <Textarea
-          label={t('panel.internalNotes', 'Internal Notes')}
-          value={internalNotes}
-          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-            setInternalNotes(e.target.value)
-          }
-        />
+        <Field.Root>
+          <Field.Label>
+            {t('panel.internalNotes', 'Internal Notes')}
+          </Field.Label>
+          <Textarea
+            placeholder={t('placeholder.internal_staff_notes', 'Internal staff notes...')}
+            value={internalNotes}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setInternalNotes(e.target.value)
+            }
+          />
+        </Field.Root>
 
         <Flex gap={2} justifyContent="space-between" wrap="wrap">
           <Button

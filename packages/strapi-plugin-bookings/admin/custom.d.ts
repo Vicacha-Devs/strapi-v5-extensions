@@ -125,6 +125,12 @@ declare module '@strapi/strapi/admin' {
     }): void;
   };
 
+  export const Layouts: {
+    Root: import('react').FC<Record<string, any>>;
+    Header: import('react').FC<Record<string, any>>;
+    Content: import('react').FC<Record<string, any>>;
+  };
+
   export interface StrapiAdminApp {
     customFields: {
       register(config: Record<string, unknown>): void;
@@ -162,6 +168,12 @@ declare module 'react-router-dom' {
 }
 
 declare module '@strapi/design-system' {
+  export const Tabs: {
+    Root: any;
+    List: any;
+    Trigger: any;
+    Content: any;
+  };
   import type { FC, ReactNode } from 'react';
   export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
 
@@ -257,6 +269,7 @@ declare module '@fullcalendar/core' {
   export interface DayCellContentArg {
     date: Date;
     dayNumberText: string;
+    isToday?: boolean;
   }
 
   export interface EventContentArg {
@@ -380,4 +393,8 @@ declare module '@fullcalendar/interaction' {
 declare module '*.json' {
   const value: Record<string, string>;
   export default value;
+}
+
+declare module 'styled-components' {
+  export function useTheme(): Record<string, any>;
 }

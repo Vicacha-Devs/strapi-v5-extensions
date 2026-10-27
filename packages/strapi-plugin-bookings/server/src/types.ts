@@ -41,6 +41,9 @@ export interface CustomFieldRegistration {
 
 export interface BookingsPluginConfig {
   defaultTimezone?: string;
+  defaultLocale?: string;
+  theme?: 'breeze' | 'emerald' | 'sand' | 'midnight' | 'classic';
+  secondaryCalendarLanguage?: 'local' | 'ar' | 'off';
   defaultSlotDurationMinutes?: number;
   defaultBufferBeforeMinutes?: number;
   defaultBufferAfterMinutes?: number;

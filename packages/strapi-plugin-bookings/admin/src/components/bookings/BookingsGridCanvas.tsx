@@ -1,8 +1,14 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type FullCalendar from '@fullcalendar/react';
 import { Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
 import { FullCalendarCanvas } from '@vicacha-devs/strapi-plugin-calendar/strapi-admin';
-import type { ExpandedCalendarOccurrence } from '@vicacha-devs/strapi-plugin-calendar/shared';
+import {
+  formatDateInCalendarSystem,
+  type CalendarPluginSettings,
+  type CalendarThemePreset,
+  type ExpandedCalendarOccurrence,
+  type SecondaryCalendarLanguageMode,
+} from '@vicacha-devs/strapi-plugin-calendar/shared';
 import type {
   BookingRecord,
   SecondaryCalendarConfig,
@@ -31,6 +37,9 @@ export function maskEmailForPreview(email: string): string {
 export interface BookingsGridCanvasProps {
   t: (id: string, defaultMessage: string) => string;
   locale: string;
+  theme?: CalendarThemePreset;
+  calendarSettings?: CalendarPluginSettings | null;
+  secondaryCalendarLanguage?: SecondaryCalendarLanguageMode;
   viewMode: BookingsViewMode;
   occurrences: ExpandedCalendarOccurrence[];
   bookings: BookingRecord[];
@@ -47,6 +56,9 @@ export interface BookingsGridCanvasProps {
 export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
   t,
   locale,
+  theme = 'breeze',
+  calendarSettings = null,
+  secondaryCalendarLanguage = 'local',
   viewMode,
   occurrences,
   bookings,
@@ -56,6 +68,7 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
   onQuickCreateOnDate,
 }) => {
   const calendarRef = useRef<FullCalendar | null>(null);
+  const [anchorDate, setAnchorDate] = useState<Date>(() => new Date());
 
   useEffect(() => {
     if (viewMode === 'list') return;
@@ -65,6 +78,59 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
       api.changeView(targetView);
     }
   }, [viewMode]);
+
+  const navigateCalendar = useCallback((action: 'prev' | 'today' | 'next') => {
+    const api = calendarRef.current?.getApi();
+    if (!api) return;
+    if (action === 'prev') api.prev();
+    else if (action === 'today') api.today();
+    else api.next();
+    setAnchorDate(api.getDate());
+  }, []);
+
+  const effectiveLocale = locale || 'es';
+
+  const monthLabel = useMemo(() => {
+    try {
+      const formatted = new Intl.DateTimeFormat(effectiveLocale, {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }).format(anchorDate);
+      return formatted.toUpperCase();
+    } catch {
+      return anchorDate.toISOString().slice(0, 7);
+    }
+  }, [anchorDate, effectiveLocale]);
+
+  const secondaryHeaderLabel = useMemo(() => {
+    if (
+      activeSecondaryCalendars.length === 0 ||
+      secondaryCalendarLanguage === 'off'
+    ) {
+      return '';
+    }
+    const anchorIso = anchorDate.toISOString().slice(0, 10);
+    const targetLoc =
+      secondaryCalendarLanguage === 'ar' ? 'ar-SA' : effectiveLocale;
+    return activeSecondaryCalendars
+      .map((sys) => {
+        const formatted = formatDateInCalendarSystem(
+          anchorIso,
+          { ...sys, locale: targetLoc },
+          targetLoc,
+          { compact: false }
+        );
+        return formatted ? `${sys.label}: ${formatted}` : '';
+      })
+      .filter(Boolean)
+      .join(' • ');
+  }, [
+    activeSecondaryCalendars,
+    anchorDate,
+    effectiveLocale,
+    secondaryCalendarLanguage,
+  ]);
 
   const bookingMap = useMemo(
     () => new Map(bookings.map((b) => [b.documentId, b])),
@@ -79,8 +145,8 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
         start: occ.startDate,
         end: occ.endDate,
         allDay: occ.allDay,
-        backgroundColor: occ.color || '#0d9488',
-        borderColor: occ.color || '#0d9488',
+        backgroundColor: occ.color || '#0284C7',
+        borderColor: occ.color || '#0284C7',
         textColor: '#ffffff',
         extendedProps: {
           occurrence: occ,
@@ -168,30 +234,81 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
   }
 
   return (
-    <FullCalendarCanvas
-      calendarRef={calendarRef}
-      locale={locale || 'en'}
-      settings={null}
-      events={fullCalendarEvents}
-      activeSecondaryCalendars={activeSecondaryCalendars}
-      onDatesSet={() => {}}
-      onSelectSlot={(startStr) => onQuickCreateOnDate(startStr)}
-      onSelectOccurrence={(occ: ExpandedCalendarOccurrence) => {
-        const matched = bookingMap.get(occ.documentId);
-        if (matched) {
-          onSelectBooking(matched);
-        }
-      }}
-      onDropOrResizeOccurrence={(
-        occ: ExpandedCalendarOccurrence,
-        newStartIso: string,
-        newEndIso?: string
-      ) => {
-        const matched = bookingMap.get(occ.documentId);
-        if (matched) {
-          onRescheduleBooking(matched, newStartIso, newEndIso);
-        }
-      }}
-    />
+    <Flex direction="column" alignItems="stretch" gap={3}>
+      {/* Calendar Month/Year Header Bar + Navigation */}
+      <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="center"
+          wrap="wrap"
+          gap={3}
+        >
+          <Flex gap={3} alignItems="center" wrap="wrap">
+            <Typography variant="delta" fontWeight="bold" tag="h3">
+              {monthLabel}
+            </Typography>
+            {secondaryHeaderLabel && (
+              <Badge backgroundColor="secondary100" textColor="secondary700">
+                {secondaryHeaderLabel}
+              </Badge>
+            )}
+          </Flex>
+
+          <Flex gap={2} alignItems="center">
+            <Button
+              variant="tertiary"
+              size="S"
+              onClick={() => navigateCalendar('prev')}
+            >
+              ← {t('nav.prev', 'Prev')}
+            </Button>
+            <Button
+              variant="secondary"
+              size="S"
+              onClick={() => navigateCalendar('today')}
+            >
+              {t('nav.today', 'Today')}
+            </Button>
+            <Button
+              variant="tertiary"
+              size="S"
+              onClick={() => navigateCalendar('next')}
+            >
+              {t('nav.next', 'Next')} →
+            </Button>
+          </Flex>
+        </Flex>
+      </Box>
+
+      <FullCalendarCanvas
+        calendarRef={calendarRef}
+        locale={effectiveLocale}
+        theme={calendarSettings?.theme ?? theme}
+        colorScheme={calendarSettings?.colorScheme}
+        themePalette={calendarSettings?.themePalette}
+        secondaryCalendarLanguage={secondaryCalendarLanguage}
+        settings={calendarSettings}
+        events={fullCalendarEvents}
+        activeSecondaryCalendars={activeSecondaryCalendars}
+        onDatesSet={(currentStart) => setAnchorDate(currentStart)}
+        onSelectSlot={(startStr) => onQuickCreateOnDate(startStr)}
+        onSelectOccurrence={(occ: ExpandedCalendarOccurrence) => {
+          const matched = bookingMap.get(occ.documentId);
+          if (matched) {
+            onSelectBooking(matched);
+          }
+        }}
+        onDropOrResizeOccurrence={(
+          occ: ExpandedCalendarOccurrence,
+          newStartIso: string,
+          newEndIso?: string
+        ) => {
+          const matched = bookingMap.get(occ.documentId);
+          if (matched) {
+            onRescheduleBooking(matched, newStartIso, newEndIso);
+          }
+        }}
+      />
+    </Flex>
   );
 };

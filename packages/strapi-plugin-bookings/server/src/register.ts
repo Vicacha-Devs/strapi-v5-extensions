@@ -20,26 +20,36 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   const contentTypes = (strapi.contentTypes ?? {}) as Record<
     string,
-    { attributes?: Record<string, unknown> }
+    {
+      attributes?: Record<string, Record<string, unknown>>;
+      __schema__?: { attributes?: Record<string, Record<string, unknown>> };
+    }
   >;
 
-  if (
-    pluginConfig.schemaExtensions?.resource &&
-    contentTypes['plugin::bookings.resource']?.attributes
-  ) {
-    Object.assign(
-      contentTypes['plugin::bookings.resource'].attributes,
-      pluginConfig.schemaExtensions.resource
-    );
-  }
+  const applyExtensions = (
+    uid: string,
+    extra?: Record<string, unknown>
+  ) => {
+    if (!extra || typeof extra !== 'object') return;
+    const schema = contentTypes[uid];
+    if (!schema) return;
+    for (const [attrName, attrDef] of Object.entries(extra)) {
+      if (!attrName || !attrDef || typeof attrDef !== 'object') continue;
+      if (schema.attributes) {
+        schema.attributes[attrName] = {
+          ...(schema.attributes[attrName] ?? {}),
+          ...(attrDef as Record<string, unknown>),
+        };
+      }
+      if (schema.__schema__?.attributes) {
+        schema.__schema__.attributes[attrName] = {
+          ...(schema.__schema__.attributes[attrName] ?? {}),
+          ...(attrDef as Record<string, unknown>),
+        };
+      }
+    }
+  };
 
-  if (
-    pluginConfig.schemaExtensions?.booking &&
-    contentTypes['plugin::bookings.booking']?.attributes
-  ) {
-    Object.assign(
-      contentTypes['plugin::bookings.booking'].attributes,
-      pluginConfig.schemaExtensions.booking
-    );
-  }
+  applyExtensions('plugin::bookings.resource', pluginConfig.schemaExtensions?.resource);
+  applyExtensions('plugin::bookings.booking', pluginConfig.schemaExtensions?.booking);
 };
