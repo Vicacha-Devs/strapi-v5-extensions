@@ -33,6 +33,29 @@ const DEFAULT_TIME_SLOTS: Record<string, TimeSlotWindow> = {
   evening: { start: '18:00:00', end: '20:00:00' },
 };
 
+function matchesSourceFilter(
+  s: CalendarSourceMapping,
+  filter?: string
+): boolean {
+  if (!filter || filter === 'all') return true;
+  if (s.id === filter || s.uid === filter) return true;
+  if (filter === 'events') {
+    return (
+      s.id.includes('event') ||
+      s.uid === 'plugin::events.event' ||
+      s.uid.includes('event')
+    );
+  }
+  if (filter === 'bookings') {
+    return (
+      s.id.includes('booking') ||
+      s.uid === 'plugin::bookings.booking' ||
+      s.uid.includes('booking')
+    );
+  }
+  return false;
+}
+
 function resolveStartEndFromDocument(
   doc: Record<string, unknown>,
   source: CalendarSourceMapping
@@ -147,8 +170,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
 
       const activeSources = (settings.sources ?? []).filter(
         (s: CalendarSourceMapping) =>
-          s.enabled &&
-          (!params.sourceId || s.id === params.sourceId || s.uid === params.sourceId)
+          s.enabled && matchesSourceFilter(s, params.sourceId)
       );
 
       const allOccurrences: ExpandedCalendarOccurrence[] = [];

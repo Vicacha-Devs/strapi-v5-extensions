@@ -113,6 +113,32 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     return result;
   };
 
+  const mergeSourceLists = (
+    defaults: CalendarSourceMapping[],
+    stored?: CalendarSourceMapping[]
+  ): CalendarSourceMapping[] => {
+    const result = Array.isArray(stored) ? [...stored] : [];
+    for (const defSource of defaults ?? []) {
+      if (!result.some((s) => s.id === defSource.id || s.uid === defSource.uid)) {
+        result.push(defSource);
+      }
+    }
+    return result;
+  };
+
+  const mergeCalendarLists = (
+    defaults: CalendarPluginSettings['secondaryCalendars'],
+    stored?: CalendarPluginSettings['secondaryCalendars']
+  ): NonNullable<CalendarPluginSettings['secondaryCalendars']> => {
+    const result = Array.isArray(stored) ? [...stored] : [];
+    for (const defCal of defaults ?? []) {
+      if (!result.some((c) => c.id === defCal.id)) {
+        result.push(defCal);
+      }
+    }
+    return result;
+  };
+
   const service: SettingsService = {
     async ensureInitialized(): Promise<CalendarPluginSettings> {
       const store = getStore();
@@ -126,33 +152,18 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
         return defaults;
       }
 
-      const storedSources = Array.isArray(existing.sources) ? [...existing.sources] : [];
-      for (const defSource of defaults.sources) {
-        if (!storedSources.some((s) => s.id === defSource.id || s.uid === defSource.uid)) {
-          storedSources.push(defSource);
-        }
-      }
-
-      const storedCalendars = Array.isArray(existing.secondaryCalendars)
-        ? [...existing.secondaryCalendars]
-        : [];
-      for (const defCal of defaults.secondaryCalendars ?? []) {
-        if (!storedCalendars.some((c) => c.id === defCal.id)) {
-          storedCalendars.push(defCal);
-        }
-      }
-
-      const storedPresets = mergePresetLists(
-        defaults.recurrencePresets,
-        existing.recurrencePresets
-      );
-
       const merged: CalendarPluginSettings = {
         ...defaults,
         ...existing,
-        sources: storedSources,
-        secondaryCalendars: storedCalendars,
-        recurrencePresets: storedPresets,
+        sources: mergeSourceLists(defaults.sources, existing.sources),
+        secondaryCalendars: mergeCalendarLists(
+          defaults.secondaryCalendars,
+          existing.secondaryCalendars
+        ),
+        recurrencePresets: mergePresetLists(
+          defaults.recurrencePresets,
+          existing.recurrencePresets
+        ),
       };
       await store.set({ key: STORE_KEY, value: merged });
       return merged;
@@ -170,14 +181,11 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
       return {
         ...defaults,
         ...stored,
-        sources:
-          Array.isArray(stored.sources) && stored.sources.length > 0
-            ? stored.sources
-            : defaults.sources,
-        secondaryCalendars:
-          Array.isArray(stored.secondaryCalendars) && stored.secondaryCalendars.length > 0
-            ? stored.secondaryCalendars
-            : defaults.secondaryCalendars ?? [],
+        sources: mergeSourceLists(defaults.sources, stored.sources),
+        secondaryCalendars: mergeCalendarLists(
+          defaults.secondaryCalendars,
+          stored.secondaryCalendars
+        ),
         recurrencePresets: mergePresetLists(
           defaults.recurrencePresets,
           stored.recurrencePresets
