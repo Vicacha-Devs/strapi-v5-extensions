@@ -147,8 +147,18 @@ const Settings: React.FC = () => {
 
   const handleDeleteCollectionType = async (index: number) => {
     const updated = removeAt(collectionTypes, index);
+    // Sitemap definitions reference collection types by position, so drop/shift them.
+    const updatedSitemaps = sitemaps.map((def) => ({
+      ...def,
+      collectionTypeConfigIndices: (def.collectionTypeConfigIndices ?? [])
+        .filter((i) => i !== index)
+        .map((i) => (i > index ? i - 1 : i)),
+    }));
     setCollectionTypes(updated);
-    await persist({ collectionTypes: updated }, 'delete collection type');
+    setSitemaps(updatedSitemaps);
+    if (await persist({ collectionTypes: updated, sitemaps: updatedSitemaps }, 'delete collection type')) {
+      setInitialSitemaps(updatedSitemaps);
+    }
   };
 
   const handleSaveCustomURL = async (data: CustomURLConfig) => {

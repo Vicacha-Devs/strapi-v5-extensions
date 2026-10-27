@@ -47,6 +47,14 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
   adminGetOptions: async (ctx: any) => {
     ctx.body = await strapi.plugin(PLUGIN_ID).service('service').getOptions();
   },
+  adminGetSettings: async (ctx: any) => {
+    ctx.body = await strapi.plugin(PLUGIN_ID).service('settings').getSettings();
+  },
+  adminPutSettings: async (ctx: any) => {
+    const body = ctx.request.body;
+    const requestData = body?.data !== undefined ? body.data : body;
+    ctx.body = await strapi.plugin(PLUGIN_ID).service('settings').updateSettings(requestData);
+  },
   adminGetCustomURLs: async (ctx: any) => {
     ctx.body = await strapi.plugin(PLUGIN_ID).service('service').getCustomURLs();
   },
