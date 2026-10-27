@@ -31,10 +31,10 @@ export default {
         id: `${PLUGIN_ID}.plugin.name`,
         defaultMessage: 'Community Broadcasts',
       },
-      Component: async () => {
-        const mod = await import('./pages/BroadcastsHomePage');
-        return mod.BroadcastsHomePage;
-      },
+      Component: () =>
+        import('./pages/BroadcastsHomePage').then((mod) => ({
+          default: mod.BroadcastsHomePage,
+        })),
       permissions: [],
     });
 
@@ -54,10 +54,10 @@ export default {
           },
           id: `${PLUGIN_ID}-settings`,
           to: `${PLUGIN_ID}`,
-          Component: async () => {
-            const mod = await import('./pages/SettingsPage');
-            return mod.SettingsPage;
-          },
+          Component: () =>
+            import('./pages/SettingsPage').then((mod) => ({
+              default: mod.SettingsPage,
+            })),
           permissions: [],
         },
       ]
@@ -71,21 +71,17 @@ export default {
     });
   },
 
-  async registerTrads({ locales }: { locales: string[] }) {
-    const importedTrads = await Promise.all(
-      locales.map(async (locale) => {
-        if (
-          !SUPPORTED_ADMIN_LOCALES.includes(
-            locale as (typeof SUPPORTED_ADMIN_LOCALES)[number]
-          )
-        ) {
-          return { data: {}, locale };
-        }
+  async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
+    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    return Promise.all(
+      allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
           const prefixed: Record<string, string> = {};
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
-            prefixed[`${PLUGIN_ID}.${k}`] = v;
+            prefixed[k] = v;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            prefixed[fullKey] = v;
           }
           return { data: prefixed, locale };
         } catch {
@@ -93,7 +89,5 @@ export default {
         }
       })
     );
-
-    return importedTrads;
   },
 };

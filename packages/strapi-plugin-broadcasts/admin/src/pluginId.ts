@@ -1,3 +1,3 @@
-import { PLUGIN_ID } from '../../shared';
+import { PLUGIN_ID } from '../../shared/constants';
 
 export { PLUGIN_ID };
