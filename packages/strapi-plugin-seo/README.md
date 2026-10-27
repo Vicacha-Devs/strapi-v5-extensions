@@ -15,13 +15,13 @@ To install this plugin, you need to add an NPM dependency to your Strapi applica
 
 ```sh
 # Using Yarn
-yarn add @notum-cz/strapi-plugin-seo
+yarn add @vicacha-devs/strapi-plugin-seo
 
 # Or using PNPM
-pnpm add @notum-cz/strapi-plugin-seo
+pnpm add @vicacha-devs/strapi-plugin-seo
 
 # Or using NPM
-npm install @notum-cz/strapi-plugin-seo
+npm install @vicacha-devs/strapi-plugin-seo
 ```
 
 ## How it works
