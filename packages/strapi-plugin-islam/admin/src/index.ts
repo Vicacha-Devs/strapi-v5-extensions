@@ -1,4 +1,5 @@
 import { PLUGIN_ID } from '../../shared';
+import { PluginIcon } from './components/PluginIcon';
 
 const ALL_TRANSLATION_LOCALES = ['en', 'es', 'ar', 'tr', 'fr', 'de', 'pt', 'id', 'ms', 'ur'];
 
@@ -6,15 +7,15 @@ export default {
   register(app: any) {
     app.addMenuLink({
       to: `plugins/${PLUGIN_ID}`,
-      icon: () => null,
+      icon: PluginIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.plugin.name`,
         defaultMessage: 'Islam Suite (Salah, Hilal & Scripture)',
       },
-      Component: async () => {
-        const mod = await import('./pages/IslamPage');
-        return mod.IslamPage;
-      },
+      Component: () =>
+        import('./pages/IslamPage').then((mod) => ({
+          default: mod.IslamPage,
+        })),
       permissions: [],
     });
 
@@ -33,11 +34,11 @@ export default {
             defaultMessage: 'Calculation Engine, Hilal, Nisab & Bridges',
           },
           id: `${PLUGIN_ID}-settings`,
-          to: `/settings/${PLUGIN_ID}`,
-          Component: async () => {
-            const mod = await import('./pages/SettingsPage');
-            return mod.SettingsPage;
-          },
+          to: `${PLUGIN_ID}`,
+          Component: () =>
+            import('./pages/SettingsPage').then((mod) => ({
+              default: mod.SettingsPage,
+            })),
           permissions: [],
         },
       ]
@@ -51,13 +52,19 @@ export default {
 
   bootstrap() {},
 
-  async registerTrads({ locales }: { locales: string[] }) {
-    const targetLocales = Array.from(new Set([...(locales || []), ...ALL_TRANSLATION_LOCALES]));
+  async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
+    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
     return Promise.all(
-      targetLocales.map(async (locale) => {
+      allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          return { data, locale };
+          const prefixed: Record<string, string> = {};
+          for (const [k, v] of Object.entries(data as Record<string, string>)) {
+            prefixed[k] = v;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            prefixed[fullKey] = v;
+          }
+          return { data: prefixed, locale };
         } catch {
           return { data: {}, locale };
         }
