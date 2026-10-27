@@ -49,7 +49,7 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     settings = await settingsService.ensureInitialized();
   }
 
-  // Bridge with @vicacha-devs/strapi-plugin-calendar if installed in the same Strapi v5 instance
+  // Register all event sources with @vicacha-devs/strapi-plugin-calendar (required dependency providing the unified calendar view)
   const calendarPlugin = strapi.plugin('calendar');
   const calendarRegistry = calendarPlugin?.service('registry') as
     | CalendarRegistryService

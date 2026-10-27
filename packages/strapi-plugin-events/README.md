@@ -1,16 +1,14 @@
 # `@vicacha-devs/strapi-plugin-events`
 
-Enterprise-grade **Events, RFC 5545 Recurrence (`RRULE`), Multi-Calendar System Engine, Unified Admin Calendar View, RSVP/Capacity/Waitlist & iCal (`.ics`)** plugin for **Strapi v5**.
+Enterprise-grade **Events, RFC 5545 Recurrence (`RRULE`), Multi-Calendar System Engine, RSVP/Capacity/Waitlist & iCal (`.ics`)** plugin for **Strapi v5**, powered by [`@vicacha-devs/strapi-plugin-calendar`](../strapi-plugin-calendar) as a required dependency.
 
 ---
 
 ## Features
 
-1. **Full Strapi v5 Admin Calendar View (`/admin/plugins/events`)**
-   - **5 View Modes**: **Month**, **Week**, **Day**, **Agenda**, and **Attendees & Check-In**.
-   - **Dual-Calendar Grid & Overlay Switcher**: Switch between Gregorian-only or overlay any secondary calendar system (`Hijri`, `Hebrew`, `Persian`, `Buddhist`, `Chinese Lunar`, `Japanese`, etc.) directly inside the Month/Week day cells and occurrence drawer.
-   - **Drag-and-Drop Rescheduling**: Drag an occurrence to a new date to either reschedule the entire series or create a single-occurrence override (`overrides[YYYY-MM-DD]`).
-   - **Quick-Create Modal**: Click any day cell to create and publish an event with configurable `recurrencePresets` and RSVP capacity.
+1. **Dedicated Events RSVP, Waitlist & Check-In Workspace (`/admin/plugins/events`) + Unified Calendar Integration**
+   - **Required Dependency on `@vicacha-devs/strapi-plugin-calendar`**: Automatically registers all event sources into the central `/admin/plugins/calendar` workspace on server bootstrap so all Month/Week/Day/Agenda/Year schedule views are unified in one place (with a 1-click **Open in Calendar** shortcut to `/admin/plugins/calendar?source=events`).
+   - **RSVP, Waitlist & Attendee Check-In Workspace**: KPI summary cards (Total Registrations, Confirmed Seats, Checked-In Seats, Waitlisted Seats, Events with RSVPs), attendee search & status filters, 1-click attendee check-in, status updates with automatic waitlist promotion, Quick-Create Event panel, and formula-injection-safe CSV export.
 2. **Extensible Secondary Calendar Systems (`secondaryCalendars` + Custom Formatters)**
    - Built-in ECMA-402 / Unicode CLDR support (`islamic-umalqura`, `islamic-civil`, `hebrew`, `persian`, `buddhist`, `japanese`, `chinese`, `indian`, `coptic`, `ethiopic`).
    - Configurable `dayOffset` (`-2` to `+2` days) for lunar sighting or regional adjustments.
@@ -20,7 +18,7 @@ Enterprise-grade **Events, RFC 5545 Recurrence (`RRULE`), Multi-Calendar System 
    - Extend built-in `plugin::events.event` and `plugin::events.registration` schemas directly from `config/plugins.ts` without modifying plugin source files.
    - Pass arbitrary collection attributes (`customFields: ['hijriDate', 'speaker', ...]`) through to `ExpandedOccurrence.customFields`.
 4. **Hybrid Content Model**
-   - Ships ready-to-use `plugin::events.event` and `plugin::events.registration` Content-Types (including generic `alternateDates` and `metadata` JSON fields) **and** maps any existing Strapi v5 collection types onto one unified Calendar View and API.
+   - Ships ready-to-use `plugin::events.event` and `plugin::events.registration` Content-Types (including generic `alternateDates` and `metadata` JSON fields) **and** maps any existing Strapi v5 collection types onto the unified Calendar View and API.
 5. **RFC 5545 Recurrence (`plugin::events.rrule`) & iCal (`.ics`) Syndication**
    - Visual `RRuleInput` custom field (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`, `INTERVAL`, `BYDAY`, `BYMONTHDAY`, `COUNT`, `UNTIL`, `exdates`, and per-occurrence `overrides`).
    - Public `.ics` subscription feed (`/api/events/feed.ics`) and single-event `.ics` invites.
