@@ -18,9 +18,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async getOverview(ctx: any) {
     const campaignService = strapi.plugin(PLUGIN_ID).service('campaign') as any;
     const pledgeService = strapi.plugin(PLUGIN_ID).service('pledge') as any;
+    const settingsService = strapi.plugin(PLUGIN_ID).service('settings') as any;
     const { locale, status } = ctx.query || {};
 
-    const [campaigns, pledges] = await Promise.all([
+    const [campaigns, pledges, settings] = await Promise.all([
       campaignService.findCampaigns({
         locale: locale ? String(locale) : undefined,
         onlyActive: false,
@@ -28,19 +29,73 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       pledgeService.findPledges({
         status: status ? (String(status) as PledgeStatus) : undefined,
       }),
+      settingsService.getSettings(),
     ]);
 
     const majorCampaigns = campaigns.filter((c: any) => c.campaignKind === 'major_campaign');
     const utilityInvoices = campaigns.filter((c: any) => c.campaignKind === 'utility_invoice');
+    const microNeeds = campaigns.filter((c: any) => c.campaignKind === 'micro_need');
 
     ctx.body = {
       data: {
         campaigns,
         majorCampaigns,
         utilityInvoices,
+        microNeeds,
         pledges,
+        settings,
       },
     };
+  },
+
+  async createCampaign(ctx: any) {
+    const campaignService = strapi.plugin(PLUGIN_ID).service('campaign') as any;
+    const body = ctx.request?.body?.data || ctx.request?.body || {};
+    try {
+      const created = await campaignService.createCampaign(body);
+      ctx.status = 201;
+      ctx.body = { data: created };
+    } catch (err: any) {
+      return ctx.badRequest(err?.message || 'Unable to create campaign');
+    }
+  },
+
+  async updateCampaign(ctx: any) {
+    const campaignService = strapi.plugin(PLUGIN_ID).service('campaign') as any;
+    const { identifier } = ctx.params || {};
+    const body = ctx.request?.body?.data || ctx.request?.body || {};
+    const updated = await campaignService.updateCampaign(String(identifier || ''), body);
+    if (!updated) {
+      return ctx.notFound('Campaign not found');
+    }
+    ctx.body = { data: updated };
+  },
+
+  async addEvidence(ctx: any) {
+    const campaignService = strapi.plugin(PLUGIN_ID).service('campaign') as any;
+    const { identifier } = ctx.params || {};
+    const body = ctx.request?.body?.data || ctx.request?.body || {};
+    const updated = await campaignService.addCampaignEvidence(String(identifier || ''), {
+      ...body,
+      verifiedBy: body.verifiedBy || ctx.state?.user?.email || 'admin',
+    });
+    if (!updated) {
+      return ctx.notFound('Campaign not found');
+    }
+    ctx.body = { data: updated };
+  },
+
+  async removeEvidence(ctx: any) {
+    const campaignService = strapi.plugin(PLUGIN_ID).service('campaign') as any;
+    const { identifier, evidenceId } = ctx.params || {};
+    const updated = await campaignService.removeCampaignEvidence(
+      String(identifier || ''),
+      String(evidenceId || '')
+    );
+    if (!updated) {
+      return ctx.notFound('Campaign not found');
+    }
+    ctx.body = { data: updated };
   },
 
   async verifyPledge(ctx: any) {
@@ -63,3 +118,4 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     ctx.body = { data: updated };
   },
 });
+

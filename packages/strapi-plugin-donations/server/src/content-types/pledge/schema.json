@@ -10,6 +10,14 @@
   "options": {
     "draftAndPublish": false
   },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
   "attributes": {
     "referenceCode": {
       "type": "string",

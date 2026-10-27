@@ -14,6 +14,29 @@ export type PaymentChannel =
   | 'cash'
   | 'other';
 
+export type CampaignEvidenceType =
+  | 'paid_receipt'
+  | 'photo_gallery'
+  | 'delivery_report'
+  | 'audit_document'
+  | 'beneficiary_update';
+
+export interface CampaignEvidenceItem {
+  id: string;
+  title: string;
+  evidenceType: CampaignEvidenceType;
+  description: string;
+  body: string;
+  date: string;
+  amountSpent: number;
+  currency: string;
+  mediaUrls: string[];
+  documentUrl: string | null;
+  verifiedBy: string | null;
+  createdAt: string;
+  secondaryDates?: SecondaryCalendarDate[];
+}
+
 export interface DonationCategoryConfig {
   key: string;
   labels: Record<string, string>;
@@ -28,6 +51,7 @@ export interface DonationCampaignItem {
   title: string;
   slug: string;
   description: string;
+  body: string;
   campaignKind: CampaignKind;
   categoryKey: string;
   goalAmount: number;
@@ -52,6 +76,9 @@ export interface DonationCampaignItem {
   invoiceDocumentUrl: string | null;
   paymentGatewayUrl: string | null;
   icon: string | null;
+  evidences: CampaignEvidenceItem[];
+  evidenceCount: number;
+  accountedAmount: number;
   locale: string;
   availableLocales: string[];
   secondaryDates?: SecondaryCalendarDate[];
@@ -168,6 +195,7 @@ export interface DonationsSettings {
   enableCertificatesBridge: boolean;
   taxCertificateTemplateSlug: string;
   autoIssueCertificateOnVerify: boolean;
+  richTextCustomField?: string;
   secondaryCalendars: string[];
   campaignMapping: CollectionMapping;
   pledgeMapping: CollectionMapping;

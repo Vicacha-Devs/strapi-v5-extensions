@@ -6,7 +6,9 @@ import {
   computeCampaignProgress,
   convertToBaseCurrency,
   evaluateAssessmentCalculation,
+  extractRichTextPlainText,
   generateDonationReferenceCode,
+  normalizeRichTextValue,
   parseGatewayWebhookPayload,
   verifyWebhookSignature,
 } from '../shared';
@@ -245,4 +247,138 @@ describe('@vicacha-devs/strapi-plugin-donations', () => {
     assert.equal(updatedInvoice.invoiceStatus, 'paid');
     assert.equal(updatedInvoice.donorCount, 7);
   });
+
+  it('creates campaigns, manages rich text body (Markdown, HTML, Tiptap JSON), and attaches impact evidences (paid bills, computer photos, Kurban/Ramadan gifts)', async () => {
+    const campaignsStore: any[] = [];
+    let storedSettings: any = null;
+
+    const fakeStrapi: any = {
+      config: { get: () => ({}) },
+      store: () => ({
+        get: async () => storedSettings,
+        set: async ({ value }: any) => {
+          storedSettings = value;
+        },
+      }),
+      documents: () => ({
+        findMany: async ({ filters }: any = {}) => {
+          if (!filters) return campaignsStore;
+          return campaignsStore.filter((item) =>
+            Object.entries(filters).every(([k, v]) => item[k] === v)
+          );
+        },
+        create: async ({ data }: any) => {
+          const item = {
+            id: campaignsStore.length + 1,
+            documentId: `camp-doc-${campaignsStore.length + 1}`,
+            ...data,
+          };
+          campaignsStore.push(item);
+          return item;
+        },
+        update: async ({ documentId, data }: any) => {
+          const idx = campaignsStore.findIndex((i) => i.documentId === documentId);
+          if (idx >= 0) {
+            campaignsStore[idx] = { ...campaignsStore[idx], ...data };
+            return campaignsStore[idx];
+          }
+          return null;
+        },
+      }),
+      plugin: () => ({
+        service: (svc: string) => servicesMap[svc],
+      }),
+    };
+
+    const servicesMap: Record<string, any> = {
+      settings: settingsServiceFactory({ strapi: fakeStrapi }),
+      campaign: campaignServiceFactory({ strapi: fakeStrapi }),
+    };
+
+    // 1. Verify Tiptap ProseMirror JSON, HTML, and Markdown rich text compatibility
+    const tiptapDoc = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: '10 classroom computers donated and installed.' }],
+        },
+      ],
+    };
+    assert.equal(
+      normalizeRichTextValue(tiptapDoc),
+      '10 classroom computers donated and installed.'
+    );
+    assert.equal(
+      extractRichTextPlainText('<p><strong>Paid utility bill</strong> receipt attached.</p>'),
+      'Paid utility bill receipt attached.'
+    );
+
+    // 2. Open a new Micro-Need Campaign for Computers & Seasonal Gifts
+    const created = await servicesMap.campaign.createCampaign({
+      title: 'Computers & Ramadan/Kurban Solidarity Drive',
+      campaignKind: 'micro_need',
+      categoryKey: 'general_fund',
+      goalAmount: 15000000,
+      raisedAmount: 9000000,
+      currency: 'COP',
+      description: 'Equipping study labs with computers and delivering seasonal gift packages.',
+      body: '## Campaign Story\n\nSupporting student education and seasonal family gifts.',
+    });
+
+    assert.equal(created.slug, 'computers-ramadan-kurban-solidarity-drive');
+    assert.equal(created.campaignKind, 'micro_need');
+    assert.equal(created.progressPercent, 60);
+    assert.equal(created.evidenceCount, 0);
+
+    // 3. Attach photo evidence of donated computers
+    const withComputers = await servicesMap.campaign.addCampaignEvidence(created.documentId, {
+      id: 'ev-computers-1',
+      title: '10 Donated Computers Installed in Study Lab',
+      evidenceType: 'photo_gallery',
+      date: '2026-03-10',
+      amountSpent: 8500000,
+      mediaUrls: [
+        'https://example.org/uploads/donated-computers-1.jpg',
+        'https://example.org/uploads/donated-computers-2.jpg',
+      ],
+      body: 'Delivered 10 desktop workstations for community students.',
+      appendToCampaignBody: true,
+    });
+
+    assert.ok(withComputers);
+    assert.equal(withComputers.evidenceCount, 1);
+    assert.equal(withComputers.accountedAmount, 8500000);
+    assert.equal(withComputers.evidences[0].mediaUrls.length, 2);
+    assert.match(withComputers.body, /10 Donated Computers Installed in Study Lab/);
+
+    // 4. Attach Kurban & Ramadan gift distribution report + Paid service bill receipt
+    const withGifts = await servicesMap.campaign.addCampaignEvidence(created.documentId, {
+      id: 'ev-kurban-ramadan-2',
+      title: 'Kurban & Ramadan Gift Baskets Distribution + Paid Service Bill',
+      evidenceType: 'delivery_report',
+      date: '2026-03-20',
+      amountSpent: 6500000,
+      documentUrl: 'https://example.org/uploads/paid-bill-and-distribution-voucher.pdf',
+      mediaUrls: ['https://example.org/uploads/kurban-ramadan-gifts.jpg'],
+      body: 'Distributed 120 Kurban and Ramadan food gift packages and settled logistics bill.',
+      markCampaignPaid: true,
+    });
+
+    assert.ok(withGifts);
+    assert.equal(withGifts.evidenceCount, 2);
+    assert.equal(withGifts.accountedAmount, 15000000);
+    assert.equal(withGifts.invoiceStatus, 'paid');
+    assert.equal(withGifts.progressPercent, 100);
+
+    // 5. Remove one evidence
+    const afterRemove = await servicesMap.campaign.removeCampaignEvidence(
+      created.documentId,
+      'ev-computers-1'
+    );
+    assert.ok(afterRemove);
+    assert.equal(afterRemove.evidenceCount, 1);
+    assert.equal(afterRemove.evidences[0].id, 'ev-kurban-ramadan-2');
+  });
 });
+

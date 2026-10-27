@@ -167,6 +167,7 @@ export const DEFAULT_SETTINGS: DonationsSettings = {
   enableCertificatesBridge: true,
   taxCertificateTemplateSlug: 'tax-donation-certificate',
   autoIssueCertificateOnVerify: true,
+  richTextCustomField: '',
   secondaryCalendars: ['islamic-umalqura'],
   campaignMapping: {
     enabled: false,
@@ -175,6 +176,7 @@ export const DEFAULT_SETTINGS: DonationsSettings = {
       title: 'title',
       slug: 'slug',
       description: 'description',
+      body: 'body',
       campaignKind: 'campaignKind',
       categoryKey: 'category',
       goalAmount: 'goalAmount',
@@ -197,6 +199,7 @@ export const DEFAULT_SETTINGS: DonationsSettings = {
       invoiceDocumentUrl: 'invoiceDocumentUrl',
       paymentGatewayUrl: 'paymentGatewayUrl',
       icon: 'icon',
+      evidences: 'evidences',
     },
   },
   pledgeMapping: {
