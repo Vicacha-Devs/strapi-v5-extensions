@@ -191,33 +191,6 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     }
   },
 
-  async saveAdminData(data: any) {
-    try {
-      const result = await strapi.db.query(CONTENT_TYPE_UID).create({
-        data,
-      });
-      return {
-        message: 'Data saved successfully',
-        savedData: result,
-      };
-    } catch (error) {
-      strapi.log.error('Error saving data:', error);
-      throw new Error('Failed to save data');
-    }
-  },
-
-  async getAdminData() {
-    try {
-      const results = await strapi.db.query(CONTENT_TYPE_UID).findMany();
-      return {
-        results,
-      };
-    } catch (error) {
-      strapi.log.error('Error fetching data:', error);
-      throw new Error('Failed to fetch data');
-    }
-  },
-
   async getContentTypes() {
     try {
       const contentTypes = (strapi.contentTypes || {}) as Record<string, any>;
@@ -314,48 +287,6 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     };
   },
 
-  async updateAdminData(data: any) {
-    try {
-      const result = await strapi.db.query(CONTENT_TYPE_UID).update({
-        where: { id: data.id },
-        data: {
-          type: data.type,
-          langcode: data.langcode,
-          pattern: data.pattern,
-          priority: data.priority,
-          frequency: data.frequency,
-          lastModified: data.lastModified,
-          thumbnail: data.thumbnail,
-          populateLinkedModels: data.populateLinkedModels,
-        },
-      });
-      return {
-        message: 'Data saved successfully',
-        savedData: result,
-      };
-    } catch (error) {
-      strapi.log.error('Error saving data:', error);
-      throw new Error('Failed to save data');
-    }
-  },
-
-  async deleteAdminData(id: any) {
-    try {
-      const result = await strapi.db.query(CONTENT_TYPE_UID).delete({
-        where: {
-          id,
-        },
-      });
-      return {
-        message: 'Data deleted successfully',
-        deletedData: result,
-      };
-    } catch (error) {
-      strapi.log.error('Error deleting data:', error);
-      throw new Error('Failed to delete data');
-    }
-  },
-
   async getOptions() {
     try {
       const results: any = await (strapi.documents as any)(OPTION_UID).findFirst();
@@ -413,70 +344,6 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     } catch (error) {
       strapi.log.error('Error saving data:', error);
       throw new Error('Failed to save data');
-    }
-  },
-
-  async getCustomURLs() {
-    try {
-      const results = await (strapi.documents as any)(SINGLE_URL_UID).findMany();
-      return {
-        results,
-      };
-    } catch (error) {
-      strapi.log.error('Error fetching data:', error);
-      throw new Error('Failed to fetch data');
-    }
-  },
-
-  async postCustomURLs(data: any) {
-    try {
-      const result = await (strapi.documents as any)(SINGLE_URL_UID).create({
-        data,
-      });
-      return {
-        message: 'Data saved successfully',
-        savedData: result,
-      };
-    } catch (error) {
-      strapi.log.error('Error saving data:', error);
-      throw new Error('Failed to save data');
-    }
-  },
-
-  async putCustomURLs(data: any) {
-    try {
-      const result = await strapi.db.query(SINGLE_URL_UID).update({
-        where: { id: data.id },
-        data: {
-          slug: data.slug,
-          priority: data.priority,
-          frequency: data.frequency,
-        },
-      });
-      return {
-        message: 'Data saved successfully',
-        savedData: result,
-      };
-    } catch (error) {
-      strapi.log.error('Error saving data:', error);
-      throw new Error('Failed to save data');
-    }
-  },
-
-  async deleteCustomURLs(id: any) {
-    try {
-      const result = await strapi.db.query(SINGLE_URL_UID).delete({
-        where: {
-          id,
-        },
-      });
-      return {
-        message: 'Data deleted successfully',
-        deletedData: result,
-      };
-    } catch (error) {
-      strapi.log.error('Error deleting data:', error);
-      throw new Error('Failed to delete data');
     }
   },
 });
