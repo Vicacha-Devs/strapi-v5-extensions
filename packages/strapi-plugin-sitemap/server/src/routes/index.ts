@@ -122,6 +122,22 @@ const admin = [
       policies: [],
     },
   },
+  {
+    method: 'GET',
+    path: '/settings',
+    handler: 'controller.adminGetSettings',
+    config: {
+      policies: [],
+    },
+  },
+  {
+    method: 'PUT',
+    path: '/settings',
+    handler: 'controller.adminPutSettings',
+    config: {
+      policies: [],
+    },
+  },
 ];
 
 export default {
