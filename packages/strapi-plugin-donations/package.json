@@ -24,31 +24,29 @@
     "directory": "packages/strapi-plugin-donations"
   },
   "files": [
-    "dist",
-    "strapi-admin.js",
-    "strapi-server.js"
+    "dist"
   ],
   "exports": {
     "./package.json": "./package.json",
     "./strapi-admin": {
       "source": "./admin/src/index.ts",
       "types": "./dist/admin/src/index.d.ts",
-      "import": "./dist/admin/index.mjs",
-      "require": "./dist/admin/index.js",
+      "import": "./dist/admin/index.js",
+      "require": "./dist/admin/index.cjs",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
       "source": "./server/src/index.ts",
       "types": "./dist/server/src/index.d.ts",
-      "import": "./dist/server/index.mjs",
-      "require": "./dist/server/index.js",
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs",
       "default": "./dist/server/index.js"
     },
     "./shared": {
       "source": "./shared/index.ts",
       "types": "./dist/shared/index.d.ts",
-      "import": "./dist/shared/index.mjs",
-      "require": "./dist/shared/index.js",
+      "import": "./dist/shared/index.js",
+      "require": "./dist/shared/index.cjs",
       "default": "./dist/shared/index.js"
     }
   },
