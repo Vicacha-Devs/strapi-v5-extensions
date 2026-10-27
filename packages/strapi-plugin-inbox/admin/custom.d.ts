@@ -29,6 +29,10 @@ declare module 'react' {
     effect: () => void | (() => void),
     deps?: readonly unknown[]
   ): void;
+  export function useMemo<T>(
+    factory: () => T,
+    deps?: readonly unknown[]
+  ): T;
   export function createElement(...args: any[]): ReactElement;
   export const Fragment: unknown;
 
@@ -76,6 +80,12 @@ declare const Buffer: {
 };
 
 declare module '@strapi/design-system' {
+  export const Tabs: {
+    Root: any;
+    List: any;
+    Trigger: any;
+    Content: any;
+  };
   import type { FC, ReactNode } from 'react';
   export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
 
@@ -85,6 +95,7 @@ declare module '@strapi/design-system' {
   export const Typography: FC<DesignComponentProps>;
   export const Button: FC<DesignComponentProps>;
   export const TextInput: FC<DesignComponentProps>;
+  export const NumberInput: FC<DesignComponentProps>;
   export const Checkbox: FC<DesignComponentProps>;
   export const Badge: FC<DesignComponentProps>;
   export const Divider: FC<DesignComponentProps>;
@@ -94,6 +105,16 @@ declare module '@strapi/design-system' {
   export const Tr: FC<DesignComponentProps>;
   export const Th: FC<DesignComponentProps>;
   export const Td: FC<DesignComponentProps>;
+  export const SingleSelect: FC<DesignComponentProps>;
+  export const SingleSelectOption: FC<DesignComponentProps>;
+  export const Textarea: FC<DesignComponentProps>;
+
+  export const Field: {
+    Root: FC<DesignComponentProps>;
+    Label: FC<DesignComponentProps>;
+    Error: FC<DesignComponentProps>;
+    Hint: FC<DesignComponentProps>;
+  };
 }
 
 declare module '@strapi/strapi/admin' {
@@ -101,5 +122,24 @@ declare module '@strapi/strapi/admin' {
     get: (url: string) => Promise<{ data: any }>;
     post: (url: string, data?: any) => Promise<{ data: any }>;
     put: (url: string, data?: any) => Promise<{ data: any }>;
+  };
+}
+
+declare module 'styled-components' {
+  export function useTheme(): Record<string, any>;
+}
+
+declare module 'react-intl' {
+  export interface MessageDescriptor {
+    id: string;
+    defaultMessage?: string;
+  }
+
+  export function useIntl(): {
+    formatMessage: (
+      descriptor: MessageDescriptor,
+      values?: Record<string, string | number>
+    ) => string;
+    locale: string;
   };
 }
