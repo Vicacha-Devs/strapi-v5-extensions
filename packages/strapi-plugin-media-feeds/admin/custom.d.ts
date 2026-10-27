@@ -95,6 +95,15 @@ declare module 'react-intl' {
 }
 
 declare module '@strapi/strapi/admin' {
+  import type { FC, ReactNode } from 'react';
+  export type AdminLayoutProps = Record<string, any> & { children?: ReactNode };
+
+  export const Layouts: {
+    Root: FC<AdminLayoutProps>;
+    Header: FC<AdminLayoutProps>;
+    Content: FC<AdminLayoutProps>;
+  };
+
   export interface FetchResponse<T = any> {
     data: T;
   }
@@ -143,6 +152,12 @@ declare module 'react-router-dom' {
 }
 
 declare module '@strapi/design-system' {
+  export const Tabs: {
+    Root: any;
+    List: any;
+    Trigger: any;
+    Content: any;
+  };
   import type { FC, ReactNode } from 'react';
   export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
 
@@ -185,4 +200,8 @@ declare module '@strapi/icons' {
 declare module '*.json' {
   const value: Record<string, string>;
   export default value;
+}
+
+declare module 'styled-components' {
+  export function useTheme(): Record<string, any>;
 }

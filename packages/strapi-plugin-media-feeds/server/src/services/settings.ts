@@ -38,6 +38,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         ...(fileConfig.liveStream ?? {}),
         ...(stored?.liveStream ?? {}),
       },
+      liveStreams:
+        stored?.liveStreams?.length
+          ? stored.liveStreams
+          : fileConfig.liveStreams?.length
+            ? fileConfig.liveStreams
+            : DEFAULT_MEDIA_FEEDS_SETTINGS.liveStreams ?? [],
       supportedLocales:
         stored?.supportedLocales?.length
           ? stored.supportedLocales

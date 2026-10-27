@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Badge,
@@ -6,13 +7,12 @@ import {
   Divider,
   Field,
   Flex,
-  Layouts,
   SingleSelect,
   SingleSelectOption,
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/strapi/admin';
+import { Layouts, useFetchClient, useNotification } from '@strapi/strapi/admin';
 import {
   PLUGIN_ID,
   type LiveBroadcastState,
@@ -30,6 +30,9 @@ interface OverviewPayload {
 }
 
 export const MediaFeedsPage: React.FC = () => {
+  const { formatMessage } = useIntl();
+  const t = (id: string, defaultMessage: string) =>
+    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
   const { get, post } = useFetchClient();
   const { toggleNotification } = useNotification();
 
@@ -62,7 +65,7 @@ export const MediaFeedsPage: React.FC = () => {
       } catch {
         toggleNotification({
           type: 'danger',
-          message: 'Failed to load Media Feeds overview',
+          message: t('page.ui.msg_failed_to_load_media_feeds_overview', 'Failed to load Media Feeds overview'),
         });
       } finally {
         setLoading(false);
@@ -88,7 +91,7 @@ export const MediaFeedsPage: React.FC = () => {
     } catch {
       toggleNotification({
         type: 'warning',
-        message: 'Could not parse or enrich the provided URL',
+        message: t('page.ui.msg_could_not_parse_or_enrich_the_provided_url', 'Could not parse or enrich the provided URL'),
       });
     }
   };
@@ -108,7 +111,7 @@ export const MediaFeedsPage: React.FC = () => {
     } catch {
       toggleNotification({
         type: 'danger',
-        message: 'Failed to sync YouTube feeds',
+        message: t('page.ui.msg_failed_to_sync_youtube_feeds', 'Failed to sync YouTube feeds'),
       });
     } finally {
       setSyncing(false);
@@ -127,16 +130,14 @@ export const MediaFeedsPage: React.FC = () => {
   return (
     <Layouts.Root>
       <Layouts.Header
-        title="Media Feeds, Podcasts & Live Broadcasts"
-        subtitle="Multi-language episodes (YouTube, Spotify, Podcasts, Lectures), RSS 2.0 XML feeds, and Live status"
+        title={t('page.ui.title_media_feeds_podcasts_live_broadcasts', 'Media Feeds, Podcasts & Live Broadcasts')}
+        subtitle={t('page.ui.subtitle_multi_language_episodes_youtube_spotify_podcasts', 'Multi-language episodes (YouTube, Spotify, Podcasts, Lectures), RSS 2.0 XML feeds, and Live status')}
         primaryAction={
           <Button
             onClick={handleSyncYouTube}
             loading={syncing}
             variant="secondary"
-          >
-            Sync YouTube Feeds
-          </Button>
+          >{t('page.ui.sync_youtube_feeds', 'Sync YouTube Feeds')}</Button>
         }
       />
       <Layouts.Content>
@@ -171,8 +172,9 @@ export const MediaFeedsPage: React.FC = () => {
 
               <Box style={{ minWidth: '200px' }}>
                 <Field.Root>
-                  <Field.Label>Preview Locale</Field.Label>
+                  <Field.Label>{t('field.preview_locale', 'Preview Locale')}</Field.Label>
                   <SingleSelect
+                    placeholder={t('placeholder.select_preview_locale', 'Select preview locale')}
                     value={selectedLocale}
                     onChange={(val: string) => {
                       setSelectedLocale(val);
@@ -197,17 +199,13 @@ export const MediaFeedsPage: React.FC = () => {
             shadow="filterShadow"
             hasRadius
           >
-            <Typography variant="delta" fontWeight="bold">
-              YouTube / Podcast URL Inspector & oEmbed Enricher
-            </Typography>
+            <Typography variant="delta" fontWeight="bold">{t('page.ui.youtube_podcast_url_inspector_oembed_enricher', 'YouTube / Podcast URL Inspector & oEmbed Enricher')}</Typography>
             <Flex gap={3} marginTop={3} alignItems="flex-end">
               <Box style={{ flex: 1 }}>
                 <Field.Root>
-                  <Field.Label>
-                    Paste YouTube, Spotify, Vimeo, or Apple Podcasts URL
-                  </Field.Label>
+                  <Field.Label>{t('field.paste_youtube_spotify_vimeo_or_apple_podcasts_ur', 'Paste YouTube, Spotify, Vimeo, or Apple Podcasts URL')}</Field.Label>
                   <TextInput
-                    placeholder="https://www.youtube.com/watch?v=..."
+                    placeholder={t('placeholder.https_www_youtube_com_watch_v', 'https://www.youtube.com/watch?v=...')}
                     value={inspectUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setInspectUrl(e.target.value)
@@ -215,7 +213,7 @@ export const MediaFeedsPage: React.FC = () => {
                   />
                 </Field.Root>
               </Box>
-              <Button onClick={handleInspectUrl}>Inspect URL</Button>
+              <Button onClick={handleInspectUrl}>{t('page.ui.inspect_url', 'Inspect URL')}</Button>
             </Flex>
             {inspectedInfo && (
               <Box
@@ -255,11 +253,9 @@ export const MediaFeedsPage: React.FC = () => {
             <Divider marginTop={3} marginBottom={4} />
 
             {loading ? (
-              <Typography>Loading media feeds...</Typography>
+              <Typography>{t('page.ui.loading_media_feeds', 'Loading media feeds...')}</Typography>
             ) : episodes.length === 0 ? (
-              <Typography textColor="neutral600">
-                No published media items found for this locale.
-              </Typography>
+              <Typography textColor="neutral600">{t('page.ui.no_published_media_items_found_for_this_locale', 'No published media items found for this locale.')}</Typography>
             ) : (
               <Flex direction="column" gap={3} alignItems="stretch">
                 {episodes.map((ep) => (
@@ -289,7 +285,7 @@ export const MediaFeedsPage: React.FC = () => {
                             : ''}
                         </Typography>
                       </Box>
-                      {ep.featured && <Badge>FEATURED</Badge>}
+                      {ep.featured && <Badge>{t('page.ui.featured', 'FEATURED')}</Badge>}
                     </Flex>
                   </Box>
                 ))}
