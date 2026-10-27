@@ -1,3 +1,4 @@
+import { useIntl } from 'react-intl';
 import React, { useState } from 'react';
 import {
   Box,
@@ -11,7 +12,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import type { CertificateIssueInput, CertificateTemplate } from '../../../shared';
+import type { CertificateIssueInput, CertificateTemplate } from '../../../shared/types';
 
 interface IssueCertificateModalProps {
   templates: CertificateTemplate[];
@@ -24,6 +25,9 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
   onClose,
   onSubmit,
 }) => {
+  const { formatMessage } = useIntl();
+  const t = (id: string, defaultMessage: string) =>
+    formatMessage({ id: `${"certificates"}.${id}`, defaultMessage });
   const [templateSlug, setTemplateSlug] = useState<string>(
     templates[0]?.slug || ''
   );
@@ -110,8 +114,9 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
 
       <Flex direction="column" gap={4} alignItems="stretch">
         <Field.Root required>
-          <Field.Label>Certificate Template</Field.Label>
+          <Field.Label>{t('field.certificate_template', 'Certificate Template')}</Field.Label>
           <SingleSelect
+            placeholder={t('placeholder.select_certificate_template', 'Select certificate template')}
             value={templateSlug}
             onChange={(val: string) => setTemplateSlug(String(val))}
           >
@@ -126,25 +131,25 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
         <Flex gap={4} wrap="wrap">
           <Box style={{ flex: 1, minWidth: 240 }}>
             <Field.Root required>
-              <Field.Label>Recipient Full Legal Name</Field.Label>
+              <Field.Label>{t('field.recipient_full_legal_name', 'Recipient Full Legal Name')}</Field.Label>
               <TextInput
                 value={recipientFullName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setRecipientFullName(e.target.value)
                 }
-                placeholder="e.g. Carlos Andres Perez"
+                placeholder={t('placeholder.e_g_carlos_andres_perez', 'e.g. Carlos Andres Perez')}
               />
             </Field.Root>
           </Box>
           <Box style={{ flex: 1, minWidth: 240 }}>
             <Field.Root>
-              <Field.Label>Chosen Name / Honorific / Title (Optional)</Field.Label>
+              <Field.Label>{t('field.chosen_name_honorific_title_optional', 'Chosen Name / Honorific / Title (Optional)')}</Field.Label>
               <TextInput
                 value={recipientChosenName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setRecipientChosenName(e.target.value)
                 }
-                placeholder="e.g. Ibrahim / Chosen Muslim Name"
+                placeholder={t('placeholder.e_g_ibrahim_chosen_muslim_name', 'e.g. Ibrahim / Chosen Muslim Name')}
               />
             </Field.Root>
           </Box>
@@ -153,147 +158,149 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
         <Flex gap={4} wrap="wrap">
           <Box style={{ flex: 1, minWidth: 200 }}>
             <Field.Root>
-              <Field.Label>National ID / Passport (Hashed SHA-256 at rest)</Field.Label>
+              <Field.Label>{t('field.national_id_passport_hashed_sha_256_at_rest', 'National ID / Passport (Hashed SHA-256 at rest)')}</Field.Label>
               <TextInput
                 value={nationalIdRaw}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setNationalIdRaw(e.target.value)
                 }
-                placeholder="e.g. CC 1020304050"
+                placeholder={t('placeholder.e_g_cc_1020304050', 'e.g. CC 1020304050')}
               />
             </Field.Root>
           </Box>
           <Box style={{ flex: 1, minWidth: 200 }}>
             <Field.Root>
-              <Field.Label>Nationality</Field.Label>
+              <Field.Label>{t('field.nationality', 'Nationality')}</Field.Label>
               <TextInput
                 value={recipientNationality}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setRecipientNationality(e.target.value)
                 }
-                placeholder="e.g. Colombian"
+                placeholder={t('placeholder.e_g_colombian', 'e.g. Colombian')}
               />
             </Field.Root>
           </Box>
           <Box style={{ flex: 1, minWidth: 200 }}>
             <Field.Root>
-              <Field.Label>Recipient Email</Field.Label>
+              <Field.Label>{t('field.recipient_email', 'Recipient Email')}</Field.Label>
               <TextInput
                 value={recipientEmail}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setRecipientEmail(e.target.value)
                 }
-                placeholder="recipient@example.org"
+                placeholder={t('placeholder.recipient_example_org', 'recipient@example.org')}
               />
             </Field.Root>
           </Box>
           <Box style={{ flex: 1, minWidth: 180 }}>
             <Field.Root>
-              <Field.Label>Linked Booking Code</Field.Label>
+              <Field.Label>{t('field.linked_booking_code', 'Linked Booking Code')}</Field.Label>
               <TextInput
                 value={linkedBookingCode}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setLinkedBookingCode(e.target.value)
                 }
-                placeholder="e.g. BK-A1B2C3D4"
+                placeholder={t('placeholder.e_g_bk_a1b2c3d4', 'e.g. BK-A1B2C3D4')}
               />
             </Field.Root>
           </Box>
         </Flex>
 
-        <Box
-          padding={4}
-          background="neutral100"
-          hasRadius
-          borderColor="neutral200"
-        >
-          <Typography variant="omega" fontWeight="bold">
-            Official Witnesses Attestation
-            {selectedTemplate?.requiresWitnesses
-              ? ` (Minimum ${selectedTemplate.minWitnesses} required)`
-              : ' (Optional)'}
-          </Typography>
-          <Flex gap={4} wrap="wrap" marginTop={3}>
-            <Box style={{ flex: 1, minWidth: 180 }}>
-              <Field.Root>
-                <Field.Label>Witness 1 Full Name</Field.Label>
-                <TextInput
-                  value={witness1Name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWitness1Name(e.target.value)
-                  }
-                  placeholder="Witness 1 Name"
-                />
-              </Field.Root>
-            </Box>
-            <Box style={{ flex: 1, minWidth: 150 }}>
-              <Field.Root>
-                <Field.Label>Witness 1 ID</Field.Label>
-                <TextInput
-                  value={witness1Id}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWitness1Id(e.target.value)
-                  }
-                  placeholder="Masked automatically"
-                />
-              </Field.Root>
-            </Box>
-            <Box style={{ flex: 1, minWidth: 180 }}>
-              <Field.Root>
-                <Field.Label>Witness 1 Email (DocuSign)</Field.Label>
-                <TextInput
-                  value={witness1Email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWitness1Email(e.target.value)
-                  }
-                  placeholder="witness1@example.org"
-                />
-              </Field.Root>
-            </Box>
-          </Flex>
-          <Flex gap={4} wrap="wrap" marginTop={3}>
-            <Box style={{ flex: 1, minWidth: 180 }}>
-              <Field.Root>
-                <Field.Label>Witness 2 Full Name</Field.Label>
-                <TextInput
-                  value={witness2Name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWitness2Name(e.target.value)
-                  }
-                  placeholder="Witness 2 Name"
-                />
-              </Field.Root>
-            </Box>
-            <Box style={{ flex: 1, minWidth: 150 }}>
-              <Field.Root>
-                <Field.Label>Witness 2 ID</Field.Label>
-                <TextInput
-                  value={witness2Id}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWitness2Id(e.target.value)
-                  }
-                  placeholder="Masked automatically"
-                />
-              </Field.Root>
-            </Box>
-            <Box style={{ flex: 1, minWidth: 180 }}>
-              <Field.Root>
-                <Field.Label>Witness 2 Email (DocuSign)</Field.Label>
-                <TextInput
-                  value={witness2Email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setWitness2Email(e.target.value)
-                  }
-                  placeholder="witness2@example.org"
-                />
-              </Field.Root>
-            </Box>
-          </Flex>
-        </Box>
+      <Box
+        padding={4}
+        background="neutral100"
+        hasRadius
+        borderColor="neutral200"
+        style={{ border: '1px solid rgba(128, 128, 128, 0.18)' }}
+      >
+        <Typography variant="omega" fontWeight="bold">
+          Official Witnesses Attestation
+          {selectedTemplate?.requiresWitnesses
+            ? ` (Minimum ${selectedTemplate.minWitnesses} required)`
+            : ' (Optional)'}
+        </Typography>
+        <Flex gap={4} wrap="wrap" marginTop={3}>
+          <Box style={{ flex: 1, minWidth: 180 }}>
+            <Field.Root>
+              <Field.Label>{t('field.witness_1_full_name', 'Witness 1 Full Name')}</Field.Label>
+              <TextInput
+                value={witness1Name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setWitness1Name(e.target.value)
+                }
+                placeholder={t('placeholder.e_g_ahmad_al_mansour', 'e.g., Ahmad Al-Mansour')}
+              />
+            </Field.Root>
+          </Box>
+          <Box style={{ flex: 1, minWidth: 150 }}>
+            <Field.Root>
+              <Field.Label>{t('field.witness_1_id_document', 'Witness 1 ID Document')}</Field.Label>
+              <TextInput
+                value={witness1Id}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setWitness1Id(e.target.value)
+                }
+                placeholder={t('placeholder.e_g_cc_79123456_masked', 'e.g., CC 79123456 (masked)')}
+              />
+            </Field.Root>
+          </Box>
+          <Box style={{ flex: 1, minWidth: 180 }}>
+            <Field.Root>
+              <Field.Label>{t('field.witness_1_email_docusign', 'Witness 1 Email (DocuSign)')}</Field.Label>
+              <TextInput
+                value={witness1Email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setWitness1Email(e.target.value)
+                }
+                placeholder={t('placeholder.e_g_witness1_example_org', 'e.g., witness1@example.org')}
+              />
+            </Field.Root>
+          </Box>
+        </Flex>
+        <Flex gap={4} wrap="wrap" marginTop={3}>
+          <Box style={{ flex: 1, minWidth: 180 }}>
+            <Field.Root>
+              <Field.Label>{t('field.witness_2_full_name', 'Witness 2 Full Name')}</Field.Label>
+              <TextInput
+                value={witness2Name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setWitness2Name(e.target.value)
+                }
+                placeholder={t('placeholder.e_g_yusuf_benavides', 'e.g., Yusuf Benavides')}
+              />
+            </Field.Root>
+          </Box>
+          <Box style={{ flex: 1, minWidth: 150 }}>
+            <Field.Root>
+              <Field.Label>{t('field.witness_2_id_document', 'Witness 2 ID Document')}</Field.Label>
+              <TextInput
+                value={witness2Id}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setWitness2Id(e.target.value)
+                }
+                placeholder={t('placeholder.e_g_cc_80234567_masked', 'e.g., CC 80234567 (masked)')}
+              />
+            </Field.Root>
+          </Box>
+          <Box style={{ flex: 1, minWidth: 180 }}>
+            <Field.Root>
+              <Field.Label>{t('field.witness_2_email_docusign', 'Witness 2 Email (DocuSign)')}</Field.Label>
+              <TextInput
+                value={witness2Email}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setWitness2Email(e.target.value)
+                }
+                placeholder={t('placeholder.e_g_witness2_example_org', 'e.g., witness2@example.org')}
+              />
+            </Field.Root>
+          </Box>
+        </Flex>
+      </Box>
 
         <Field.Root>
-          <Field.Label>Internal Registry Notes</Field.Label>
+          <Field.Label>{t('field.internal_registry_notes', 'Internal Registry Notes')}</Field.Label>
           <Textarea
+            placeholder={t('placeholder.attestation_context_officiating_imam_or_ceremony', 'Attestation context, officiating Imam, or ceremony notes...')}
             value={notes}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setNotes(e.target.value)
@@ -306,14 +313,20 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
           disabled={sendViaESign}
           onCheckedChange={(val: boolean) => setAutoApprove(Boolean(val))}
         >
-          Immediately sign with Ed25519 private key and mark as Issued
+          {t(
+            'checkbox.immediately_sign_with_ed25519',
+            'Immediately sign with Ed25519 private key and mark as Issued'
+          )}
         </Checkbox>
 
         <Checkbox
           checked={sendViaESign}
           onCheckedChange={(val: boolean) => setSendViaESign(Boolean(val))}
         >
-          Dispatch DocuSign eSignature Envelope to Witnesses & Signatories first (auto-approves on completion webhook)
+          {t(
+            'checkbox.dispatch_docusign_esignature_envelope',
+            'Dispatch DocuSign eSignature Envelope to Witnesses & Signatories first (auto-approves on completion webhook)'
+          )}
         </Checkbox>
 
         <Flex justifyContent="flex-end" gap={3}>
