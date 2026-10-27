@@ -1,9 +1,16 @@
 import type {
   AlternateDateValue as SecondaryCalendarDateBadge,
   CalendarSystemConfig as SecondaryCalendarConfig,
+  CalendarThemePreset,
+  SecondaryCalendarLanguageMode,
 } from '@vicacha-devs/strapi-plugin-calendar/shared';
 
-export type { SecondaryCalendarConfig, SecondaryCalendarDateBadge };
+export type {
+  SecondaryCalendarConfig,
+  SecondaryCalendarDateBadge,
+  CalendarThemePreset,
+  SecondaryCalendarLanguageMode,
+};
 
 export type BookingResourceType =
   | 'service'
@@ -234,6 +241,9 @@ export interface BookingSourceMapping {
 }
 
 export interface BookingsPluginSettings {
+  theme?: CalendarThemePreset;
+  defaultLocale?: string;
+  secondaryCalendarLanguage?: SecondaryCalendarLanguageMode;
   defaultTimezone: string;
   defaultSlotDurationMinutes: number;
   defaultBufferBeforeMinutes: number;

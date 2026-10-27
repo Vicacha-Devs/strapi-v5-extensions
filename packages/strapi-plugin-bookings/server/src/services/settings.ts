@@ -20,6 +20,9 @@ function buildDefaultSettings(strapi: Core.Strapi): BookingsPluginSettings {
     {}) as BookingsPluginConfig;
 
   return {
+    theme: pluginConfig.theme ?? 'breeze',
+    defaultLocale: pluginConfig.defaultLocale ?? 'es',
+    secondaryCalendarLanguage: pluginConfig.secondaryCalendarLanguage ?? 'local',
     defaultTimezone: pluginConfig.defaultTimezone ?? 'UTC',
     defaultSlotDurationMinutes: pluginConfig.defaultSlotDurationMinutes ?? 60,
     defaultBufferBeforeMinutes: pluginConfig.defaultBufferBeforeMinutes ?? 0,
@@ -70,6 +73,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => ({
     }
 
     return {
+      theme: stored?.theme ?? defaults.theme ?? 'breeze',
+      defaultLocale: stored?.defaultLocale ?? defaults.defaultLocale ?? 'es',
+      secondaryCalendarLanguage:
+        stored?.secondaryCalendarLanguage ?? defaults.secondaryCalendarLanguage ?? 'local',
       defaultTimezone: stored?.defaultTimezone ?? defaults.defaultTimezone,
       defaultSlotDurationMinutes:
         stored?.defaultSlotDurationMinutes ?? defaults.defaultSlotDurationMinutes,
@@ -105,6 +112,24 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => ({
   ): Promise<BookingsPluginSettings> {
     const current = await this.getSettings();
     const updated: BookingsPluginSettings = {
+      theme:
+        partial.theme === 'breeze' ||
+        partial.theme === 'emerald' ||
+        partial.theme === 'sand' ||
+        partial.theme === 'midnight' ||
+        partial.theme === 'classic'
+          ? partial.theme
+          : current.theme ?? 'breeze',
+      defaultLocale:
+        typeof partial.defaultLocale === 'string' && partial.defaultLocale.trim()
+          ? partial.defaultLocale.trim()
+          : current.defaultLocale ?? 'es',
+      secondaryCalendarLanguage:
+        partial.secondaryCalendarLanguage === 'local' ||
+        partial.secondaryCalendarLanguage === 'ar' ||
+        partial.secondaryCalendarLanguage === 'off'
+          ? partial.secondaryCalendarLanguage
+          : current.secondaryCalendarLanguage ?? 'local',
       defaultTimezone: partial.defaultTimezone ?? current.defaultTimezone,
       defaultSlotDurationMinutes: Math.max(
         5,

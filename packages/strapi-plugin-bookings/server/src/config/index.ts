@@ -1,7 +1,10 @@
 import type { BookingsPluginConfig } from '../types';
 
 const defaultConfig: BookingsPluginConfig = {
-  defaultTimezone: 'UTC',
+  defaultTimezone: 'America/Bogota',
+  defaultLocale: 'es',
+  theme: 'breeze',
+  secondaryCalendarLanguage: 'local',
   defaultSlotDurationMinutes: 60,
   defaultBufferBeforeMinutes: 0,
   defaultBufferAfterMinutes: 0,
