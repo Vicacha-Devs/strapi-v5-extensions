@@ -1,6 +1,6 @@
 # `@vicacha-devs/dashboard`
 
-Strapi v5 host application for developing, testing, and demonstrating all 10 `@vicacha-devs/strapi-v5-extensions` workspace plugins:
+Strapi v5 host application for developing, testing, and demonstrating all 11 `@vicacha-devs/strapi-v5-extensions` workspace plugins:
 
 - `@vicacha-devs/strapi-plugin-calendar` — FullCalendar v6 multi-source scheduling engine, 79-locale localization, RTL/LTR auto-direction, CLDR/custom secondary calendar overlays, RFC 5545 RRULE engine, and iCal (`.ics`) syndication.
 - `@vicacha-devs/strapi-plugin-events` — Event management, RSVP & seat capacity enforcement, automatic waitlist promotion, corner spotlights, attendee check-in, and CSV export.
@@ -12,6 +12,7 @@ Strapi v5 host application for developing, testing, and demonstrating all 10 `@v
 - `@vicacha-devs/strapi-plugin-media-feeds` — Audio/video archive, YouTube OEmbed enricher, Apple/Spotify Podcast RSS 2.0, and live broadcast status.
 - `@vicacha-devs/strapi-plugin-broadcasts` — Omnichannel WhatsApp, Telegram, and Email campaigns with event-driven automation rules.
 - `@vicacha-devs/strapi-plugin-resources` — Downloadable PDF publications, photo gallery albums, and searchable phonetic glossary.
+- `@vicacha-devs/strapi-plugin-seo` — SEO component management, Open Graph/social previews, structured data checks, and keyword density analysis.
 
 ## Usage
 
