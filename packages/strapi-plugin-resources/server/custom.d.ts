@@ -58,7 +58,7 @@ declare module '@strapi/strapi' {
       status?: 'draft' | 'published';
       filters?: Record<string, unknown>;
       populate?: string[];
-      sort?: string;
+      sort?: string | Record<string, string>;
     }
 
     export interface DocumentServiceInstance {
@@ -72,6 +72,7 @@ declare module '@strapi/strapi' {
         data: Record<string, unknown>;
         locale?: string;
         status?: 'draft' | 'published';
+        populate?: string[];
       }): Promise<Record<string, unknown>>;
       update(params: {
         documentId: string;
@@ -94,7 +95,7 @@ declare module '@strapi/strapi' {
     }
 
     export interface PluginInstance {
-      service<T = Record<string, unknown>>(name: string): T;
+      service<T = any>(name: string): T;
     }
 
     export interface Strapi {

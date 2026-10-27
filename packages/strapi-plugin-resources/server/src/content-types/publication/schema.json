@@ -11,6 +11,12 @@
     "draftAndPublish": true
   },
   "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    },
     "i18n": {
       "localized": true
     }
@@ -91,6 +97,15 @@
       "pluginOptions": {
         "i18n": {
           "localized": true
+        }
+      }
+    },
+    "authorSlug": {
+      "type": "string",
+      "maxLength": 140,
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
         }
       }
     },
