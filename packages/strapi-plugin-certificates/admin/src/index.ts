@@ -1,6 +1,6 @@
 import { CheckCircle } from '@strapi/icons';
 import type { StrapiApp } from '@strapi/strapi/admin';
-import { PLUGIN_ID } from '../../shared';
+import { PLUGIN_ID } from '../../shared/pluginId';
 
 export default {
   register(app: StrapiApp) {
@@ -11,10 +11,10 @@ export default {
         id: `${PLUGIN_ID}.plugin.name`,
         defaultMessage: 'Certificates',
       },
-      Component: async () => {
-        const { CertificatesPage } = await import('./pages/CertificatesPage');
-        return CertificatesPage;
-      },
+      Component: () =>
+        import('./pages/CertificatesPage').then((mod) => ({
+          default: mod.CertificatesPage,
+        })),
       permissions: [],
     });
 
@@ -34,10 +34,10 @@ export default {
           },
           id: `${PLUGIN_ID}-settings`,
           to: `${PLUGIN_ID}`,
-          Component: async () => {
-            const { SettingsPage } = await import('./pages/SettingsPage');
-            return SettingsPage;
-          },
+          Component: () =>
+            import('./pages/SettingsPage').then((mod) => ({
+              default: mod.SettingsPage,
+            })),
           permissions: [],
         },
       ]
@@ -49,19 +49,23 @@ export default {
     });
   },
 
-  async registerTrads({ locales }: { locales: string[] }) {
-    const importedTrads = await Promise.all(
-      locales.map(async (locale) => {
+  async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
+    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    return Promise.all(
+      allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(
-            `./translations/${locale}.json`
-          );
-          return { data, locale };
+          const { default: data } = await import(`./translations/${locale}.json`);
+          const prefixed: Record<string, string> = {};
+          for (const [k, v] of Object.entries(data as Record<string, string>)) {
+            prefixed[k] = v;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            prefixed[fullKey] = v;
+          }
+          return { data: prefixed, locale };
         } catch {
           return { data: {}, locale };
         }
       })
     );
-    return importedTrads;
   },
 };

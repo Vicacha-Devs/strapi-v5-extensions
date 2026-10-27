@@ -1,26 +1,30 @@
+import { useIntl } from 'react-intl';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Badge,
   Box,
   Button,
+  Field,
   Flex,
-  Layouts,
   SingleSelect,
   SingleSelectOption,
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useNotification } from '@strapi/strapi/admin';
-import {
-  PLUGIN_ID,
-  type CertificateIssueInput,
-  type CertificateRecord,
-  type CertificateStats,
-  type CertificateTemplate,
-} from '../../../shared';
+import { Layouts, useFetchClient, useNotification } from '@strapi/strapi/admin';
+import { PLUGIN_ID } from '../../../shared/pluginId';
+import type {
+  CertificateIssueInput,
+  CertificateRecord,
+  CertificateStats,
+  CertificateTemplate,
+} from '../../../shared/types';
 import { IssueCertificateModal } from '../components/IssueCertificateModal';
 
 export const CertificatesPage: React.FC = () => {
+  const { formatMessage } = useIntl();
+  const t = (id: string, defaultMessage: string) =>
+    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
   const { get, post, put } = useFetchClient();
   const { toggleNotification } = useNotification();
 
@@ -62,7 +66,7 @@ export const CertificatesPage: React.FC = () => {
     } catch {
       toggleNotification({
         type: 'danger',
-        message: 'Failed to load certificates registry',
+        message: t('page.ui.msg_failed_to_load_certificates_registry', 'Failed to load certificates registry'),
       });
     } finally {
       setLoading(false);
@@ -118,7 +122,7 @@ export const CertificatesPage: React.FC = () => {
       await put(`/${PLUGIN_ID}/certificates/${documentId}/approve`, {});
       toggleNotification({
         type: 'success',
-        message: 'Certificate approved and signed with Ed25519',
+        message: t('page.ui.msg_certificate_approved_and_signed_with_ed25519', 'Certificate approved and signed with Ed25519'),
       });
       await loadData();
     } catch (err) {
@@ -136,13 +140,13 @@ export const CertificatesPage: React.FC = () => {
       });
       toggleNotification({
         type: 'warning',
-        message: 'Certificate revoked',
+        message: t('page.ui.msg_certificate_revoked', 'Certificate revoked'),
       });
       await loadData();
     } catch {
       toggleNotification({
         type: 'danger',
-        message: 'Failed to revoke certificate',
+        message: t('page.ui.msg_failed_to_revoke_certificate', 'Failed to revoke certificate'),
       });
     }
   };
@@ -160,7 +164,7 @@ export const CertificatesPage: React.FC = () => {
     } catch {
       toggleNotification({
         type: 'danger',
-        message: 'Unable to render printable certificate document',
+        message: t('page.ui.msg_unable_to_render_printable_certificate_document', 'Unable to render printable certificate document'),
       });
     }
   };
@@ -168,12 +172,10 @@ export const CertificatesPage: React.FC = () => {
   return (
     <Layouts.Root>
       <Layouts.Header
-        title="Official Certificates & Cryptographic Registry"
-        subtitle="Ed25519 digitally signed certificates, optional DocuSign eSignature envelopes, witness attestation, and QR verification"
+        title={t('page.ui.title_official_certificates_cryptographic_registry', 'Official Certificates & Cryptographic Registry')}
+        subtitle={t('page.ui.subtitle_ed25519_digitally_signed_certificates_optional_d', 'Ed25519 digitally signed certificates, optional DocuSign eSignature envelopes, witness attestation, and QR verification')}
         primaryAction={
-          <Button onClick={() => setShowIssueModal(true)}>
-            + Issue Signed Certificate
-          </Button>
+          <Button onClick={() => setShowIssueModal(true)}>{t('page.ui.issue_signed_certificate', '+ Issue Signed Certificate')}</Button>
         }
       />
       <Layouts.Content>
@@ -185,9 +187,7 @@ export const CertificatesPage: React.FC = () => {
             shadow="filterShadow"
             style={{ flex: 1, minWidth: 160 }}
           >
-            <Typography variant="sigma" textColor="neutral600">
-              Total Certificates
-            </Typography>
+            <Typography variant="sigma" textColor="neutral600">{t('page.ui.total_certificates', 'Total Certificates')}</Typography>
             <Box marginTop={1}>
               <Typography variant="alpha" fontWeight="bold">
                 {stats.total}
@@ -201,9 +201,7 @@ export const CertificatesPage: React.FC = () => {
             shadow="filterShadow"
             style={{ flex: 1, minWidth: 160 }}
           >
-            <Typography variant="sigma" textColor="success600">
-              Issued & Signed
-            </Typography>
+            <Typography variant="sigma" textColor="success600">{t('page.ui.issued_signed', 'Issued & Signed')}</Typography>
             <Box marginTop={1}>
               <Typography variant="alpha" fontWeight="bold">
                 {stats.issued}
@@ -217,9 +215,7 @@ export const CertificatesPage: React.FC = () => {
             shadow="filterShadow"
             style={{ flex: 1, minWidth: 160 }}
           >
-            <Typography variant="sigma" textColor="warning600">
-              Pending Approval
-            </Typography>
+            <Typography variant="sigma" textColor="warning600">{t('page.ui.pending_approval', 'Pending Approval')}</Typography>
             <Box marginTop={1}>
               <Typography variant="alpha" fontWeight="bold">
                 {stats.pending_approval}
@@ -233,9 +229,7 @@ export const CertificatesPage: React.FC = () => {
             shadow="filterShadow"
             style={{ flex: 1, minWidth: 160 }}
           >
-            <Typography variant="sigma" textColor="danger600">
-              Revoked / Expired
-            </Typography>
+            <Typography variant="sigma" textColor="danger600">{t('page.ui.revoked_expired', 'Revoked / Expired')}</Typography>
             <Box marginTop={1}>
               <Typography variant="alpha" fontWeight="bold">
                 {stats.revoked + stats.expired}
@@ -259,43 +253,44 @@ export const CertificatesPage: React.FC = () => {
           shadow="filterShadow"
           marginBottom={4}
         >
-          <Flex gap={4} alignItems="center" wrap="wrap">
+          <Flex gap={4} alignItems="flex-end" wrap="wrap">
             <Box style={{ minWidth: 260, flex: 1 }}>
-              <TextInput
-                placeholder="Search by serial number, recipient name, chosen name, or email..."
-                value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSearchQuery(e.target.value)
-                }
-              />
+              <Field.Root>
+                <Field.Label>{t('field.search_certificates', 'Search Certificates')}</Field.Label>
+                <TextInput
+                  placeholder={t('placeholder.search_by_serial_number_recipient_name_chosen_na', 'Search by serial number, recipient name, chosen name, or email...')}
+                  value={searchQuery}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearchQuery(e.target.value)
+                  }
+                />
+              </Field.Root>
             </Box>
             <Box style={{ minWidth: 200 }}>
-              <SingleSelect
-                value={statusFilter}
-                onChange={(val: string) => setStatusFilter(String(val))}
-              >
-                <SingleSelectOption value="all">All Statuses</SingleSelectOption>
-                <SingleSelectOption value="issued">Issued</SingleSelectOption>
-                <SingleSelectOption value="pending_approval">
-                  Pending Approval
-                </SingleSelectOption>
-                <SingleSelectOption value="revoked">Revoked</SingleSelectOption>
-                <SingleSelectOption value="expired">Expired</SingleSelectOption>
-              </SingleSelect>
+              <Field.Root>
+                <Field.Label>{t('field.certificate_status', 'Certificate Status')}</Field.Label>
+                <SingleSelect
+                  placeholder={t('placeholder.all_statuses', 'All Statuses')}
+                  value={statusFilter}
+                  onChange={(val: string) => setStatusFilter(String(val))}
+                >
+                  <SingleSelectOption value="all">{t('page.ui.all_statuses', 'All Statuses')}</SingleSelectOption>
+                  <SingleSelectOption value="issued">{t('page.ui.issued', 'Issued')}</SingleSelectOption>
+                  <SingleSelectOption value="pending_approval">{t('page.ui.pending_approval', 'Pending Approval')}</SingleSelectOption>
+                  <SingleSelectOption value="revoked">{t('page.ui.revoked', 'Revoked')}</SingleSelectOption>
+                  <SingleSelectOption value="expired">{t('page.ui.expired', 'Expired')}</SingleSelectOption>
+                </SingleSelect>
+              </Field.Root>
             </Box>
-            <Button variant="secondary" onClick={() => void loadData()}>
-              Refresh
-            </Button>
+            <Button variant="secondary" onClick={() => void loadData()}>{t('page.ui.refresh', 'Refresh')}</Button>
           </Flex>
         </Box>
 
         <Box padding={4} background="neutral0" hasRadius shadow="filterShadow">
           {loading ? (
-            <Typography>Loading official certificates registry...</Typography>
+            <Typography>{t('page.ui.loading_official_certificates_registry', 'Loading official certificates registry...')}</Typography>
           ) : records.length === 0 ? (
-            <Typography textColor="neutral600">
-              No certificates found matching the current filters.
-            </Typography>
+            <Typography textColor="neutral600">{t('page.ui.no_certificates_found_matching_the_current_filte', 'No certificates found matching the current filters.')}</Typography>
           ) : (
             <Flex direction="column" gap={3} alignItems="stretch">
               {records.map((rec) => {
@@ -355,31 +350,23 @@ export const CertificatesPage: React.FC = () => {
                         <Button
                           variant="secondary"
                           onClick={() => void handleOpenPrintable(rec.documentId)}
-                        >
-                          Print / PDF
-                        </Button>
+                        >{t('page.ui.print_pdf', 'Print / PDF')}</Button>
                         {rec.status === 'pending_approval' && (
                           <>
                             <Button
                               variant="tertiary"
                               onClick={() => void handleSendDocuSign(rec.documentId)}
-                            >
-                              Send DocuSign
-                            </Button>
+                            >{t('page.ui.send_docusign', 'Send DocuSign')}</Button>
                             <Button
                               onClick={() => void handleApprove(rec.documentId)}
-                            >
-                              Approve & Sign
-                            </Button>
+                            >{t('page.ui.approve_sign', 'Approve & Sign')}</Button>
                           </>
                         )}
                         {rec.status === 'issued' && (
                           <Button
                             variant="danger-light"
                             onClick={() => void handleRevoke(rec.documentId)}
-                          >
-                            Revoke
-                          </Button>
+                          >{t('page.ui.revoke', 'Revoke')}</Button>
                         )}
                       </Flex>
                     </Flex>
