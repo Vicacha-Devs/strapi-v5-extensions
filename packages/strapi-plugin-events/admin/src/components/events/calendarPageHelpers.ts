@@ -17,9 +17,34 @@ export const DEFAULT_RECURRENCE_PRESETS: RecurrencePreset[] = [
     rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO',
   },
   {
+    id: 'weekly-tue',
+    label: 'Weekly on Tuesdays',
+    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TU',
+  },
+  {
+    id: 'weekly-wed',
+    label: 'Weekly on Wednesdays',
+    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=WE',
+  },
+  {
+    id: 'weekly-thu',
+    label: 'Weekly on Thursdays',
+    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TH',
+  },
+  {
     id: 'weekly-fri',
     label: 'Weekly on Fridays',
     rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=FR',
+  },
+  {
+    id: 'weekly-sat',
+    label: 'Weekly on Saturdays',
+    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SA',
+  },
+  {
+    id: 'weekly-sun',
+    label: 'Weekly on Sundays',
+    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SU',
   },
   { id: 'monthly', label: 'Monthly', rrule: 'FREQ=MONTHLY;INTERVAL=1' },
   { id: 'yearly', label: 'Yearly', rrule: 'FREQ=YEARLY;INTERVAL=1' },

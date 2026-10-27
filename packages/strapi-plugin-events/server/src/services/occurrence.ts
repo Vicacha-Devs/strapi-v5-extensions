@@ -89,7 +89,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           if (params.documentId) {
             queryOpts.filters = { documentId: { $eq: params.documentId } };
           }
-          if (params.locale) {
+          if (params.locale && params.locale !== 'auto') {
             queryOpts.locale = params.locale;
           }
           if (!params.includeDrafts) {
@@ -233,7 +233,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
               doc,
               source,
               secondaryCalendars: settings.secondaryCalendars ?? [],
-              locale: params.locale || 'en',
+              locale: params.locale && params.locale !== 'auto' ? params.locale : 'en',
             });
 
             allOccurrences.push({

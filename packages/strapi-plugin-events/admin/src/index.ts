@@ -14,7 +14,7 @@ export default {
         id: `${PLUGIN_ID}.plugin.name`,
         defaultMessage: 'Events & Calendar',
       },
-      Component: async () =>
+      Component: () =>
         import('./pages/CalendarPage').then((m) => ({ default: m.default })),
       permissions: [
         {
@@ -45,8 +45,8 @@ export default {
           defaultMessage: 'Events & Calendar',
         },
         id: `${PLUGIN_ID}-settings`,
-        to: `/${PLUGIN_ID}`,
-        Component: async () =>
+        to: `${PLUGIN_ID}`,
+        Component: () =>
           import('./pages/SettingsPage').then((m) => ({ default: m.default })),
         permissions: [
           {
@@ -72,12 +72,19 @@ export default {
     }
   },
 
-  async registerTrads({ locales }: { locales: string[] }) {
+  async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
+    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
     return Promise.all(
-      locales.map(async (locale) => {
+      allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          return { data, locale };
+          const prefixed: Record<string, string> = {};
+          for (const [k, v] of Object.entries(data as Record<string, string>)) {
+            prefixed[k] = v;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            prefixed[fullKey] = v;
+          }
+          return { data: prefixed, locale };
         } catch {
           return { data: {}, locale };
         }

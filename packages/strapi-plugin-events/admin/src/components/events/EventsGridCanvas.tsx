@@ -2,7 +2,10 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import type FullCalendar from '@fullcalendar/react';
 import { Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
 import { FullCalendarCanvas } from '@vicacha-devs/strapi-plugin-calendar/strapi-admin';
-import type { ExpandedCalendarOccurrence } from '@vicacha-devs/strapi-plugin-calendar/shared';
+import type {
+  CalendarPluginSettings,
+  ExpandedCalendarOccurrence,
+} from '@vicacha-devs/strapi-plugin-calendar/shared';
 import type {
   CalendarSystemConfig,
   ExpandedOccurrence,
@@ -19,6 +22,9 @@ const VIEW_MODE_TO_FULLCALENDAR: Record<Exclude<EventsViewMode, 'attendees'>, st
 export interface EventsGridCanvasProps {
   t: (id: string, defaultMessage: string) => string;
   locale: string;
+  theme?: 'breeze' | 'emerald' | 'sand' | 'midnight' | 'classic';
+  calendarSettings?: CalendarPluginSettings | null;
+  secondaryCalendarLanguage?: 'local' | 'ar' | 'off';
   viewMode: EventsViewMode;
   anchorDate: Date;
   todayKey: string;
@@ -37,7 +43,11 @@ export interface EventsGridCanvasProps {
 export const EventsGridCanvas: React.FC<EventsGridCanvasProps> = ({
   t,
   locale,
+  theme = 'breeze',
+  calendarSettings = null,
+  secondaryCalendarLanguage = 'local',
   viewMode,
+  anchorDate,
   occurrences,
   activeSecondaryCalendars,
   onSelectOccurrence,
@@ -56,6 +66,14 @@ export const EventsGridCanvas: React.FC<EventsGridCanvasProps> = ({
     }
   }, [viewMode]);
 
+  useEffect(() => {
+    if (viewMode === 'attendees') return;
+    const api = calendarRef.current?.getApi();
+    if (api && anchorDate && !Number.isNaN(anchorDate.getTime())) {
+      api.gotoDate(anchorDate);
+    }
+  }, [anchorDate, viewMode]);
+
   const fullCalendarEvents = useMemo(
     () =>
       occurrences.map((occ) => ({
@@ -66,8 +84,8 @@ export const EventsGridCanvas: React.FC<EventsGridCanvasProps> = ({
         start: occ.startDate,
         end: occ.endDate,
         allDay: occ.allDay,
-        backgroundColor: occ.color || '#0D9488',
-        borderColor: occ.color || '#0D9488',
+        backgroundColor: occ.color || '#0284C7',
+        borderColor: occ.color || '#0284C7',
         textColor: '#FFFFFF',
         extendedProps: {
           occurrence: occ,
@@ -89,8 +107,12 @@ export const EventsGridCanvas: React.FC<EventsGridCanvasProps> = ({
     <Flex direction="column" alignItems="stretch" gap={4}>
       <FullCalendarCanvas
         calendarRef={calendarRef}
-        locale={locale || 'en'}
-        settings={null}
+        locale={locale || 'es'}
+        settings={calendarSettings}
+        theme={calendarSettings?.theme ?? theme}
+        colorScheme={calendarSettings?.colorScheme}
+        themePalette={calendarSettings?.themePalette}
+        secondaryCalendarLanguage={secondaryCalendarLanguage}
         events={fullCalendarEvents}
         activeSecondaryCalendars={activeSecondaryCalendars}
         onDatesSet={() => {}}

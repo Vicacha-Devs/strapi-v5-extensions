@@ -105,6 +105,15 @@ declare module 'react-intl' {
 }
 
 declare module '@strapi/strapi/admin' {
+  import type { FC, ReactNode } from 'react';
+  export type AdminLayoutProps = Record<string, any> & { children?: ReactNode };
+
+  export const Layouts: {
+    Root: FC<AdminLayoutProps>;
+    Header: FC<AdminLayoutProps>;
+    Content: FC<AdminLayoutProps>;
+  };
+
   export interface FetchResponse<T = any> {
     data: T;
   }
@@ -117,6 +126,13 @@ declare module '@strapi/strapi/admin' {
   }
 
   export function useFetchClient(): FetchClient;
+
+  export function useNotification(): {
+    toggleNotification(config: {
+      type?: 'success' | 'warning' | 'danger' | 'info';
+      message: string;
+    }): void;
+  };
 
   export interface StrapiAdminApp {
     customFields: {
@@ -144,6 +160,12 @@ declare module '@strapi/strapi/admin' {
 }
 
 declare module '@strapi/design-system' {
+  export const Tabs: {
+    Root: any;
+    List: any;
+    Trigger: any;
+    Content: any;
+  };
   import type { FC, ReactNode } from 'react';
   export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
 
@@ -151,10 +173,12 @@ declare module '@strapi/design-system' {
   export const Box: FC<DesignComponentProps>;
   export const Button: FC<DesignComponentProps>;
   export const Checkbox: FC<DesignComponentProps>;
+  export const Divider: FC<DesignComponentProps>;
   export const Flex: FC<DesignComponentProps>;
   export const NumberInput: FC<DesignComponentProps>;
   export const SingleSelect: FC<DesignComponentProps>;
   export const SingleSelectOption: FC<DesignComponentProps>;
+  export const Textarea: FC<DesignComponentProps>;
   export const TextInput: FC<DesignComponentProps>;
   export const Typography: FC<DesignComponentProps>;
 
@@ -231,6 +255,7 @@ declare module '@fullcalendar/core' {
   export interface DayCellContentArg {
     date: Date;
     dayNumberText: string;
+    isToday?: boolean;
   }
 
   export interface EventContentArg {
@@ -354,4 +379,8 @@ declare module '@fullcalendar/interaction' {
 declare module '*.json' {
   const value: Record<string, string>;
   export default value;
+}
+
+declare module 'styled-components' {
+  export function useTheme(): Record<string, any>;
 }
