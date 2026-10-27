@@ -13,20 +13,6 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
     ctx.set('Content-Type', 'application/xml');
     ctx.body = sitemap;
   },
-  adminGET: async (ctx: any) => {
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').getAdminData();
-  },
-  adminPOST: async (ctx: any) => {
-    const requestData = ctx.request.body;
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').saveAdminData(requestData);
-  },
-  adminPUT: async (ctx: any) => {
-    const requestData = ctx.request.body;
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').updateAdminData(requestData);
-  },
-  adminDELETE: async (ctx: any) => {
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').deleteAdminData(ctx.query.id);
-  },
   adminGETContentTypes: async (ctx: any) => {
     ctx.body = await strapi.plugin(PLUGIN_ID).service('service').getContentTypes();
   },
@@ -37,7 +23,7 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
     ctx.body = await strapi
       .plugin(PLUGIN_ID)
       .service('service')
-      .getAllowedFields(ctx.query.type);
+      .getAllowedFields(ctx.query.singularName ?? ctx.query.type);
   },
   adminPutOptions: async (ctx: any) => {
     const body = ctx.request.body;
@@ -54,23 +40,6 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
     const body = ctx.request.body;
     const requestData = body?.data !== undefined ? body.data : body;
     ctx.body = await strapi.plugin(PLUGIN_ID).service('settings').updateSettings(requestData);
-  },
-  adminGetCustomURLs: async (ctx: any) => {
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').getCustomURLs();
-  },
-  adminPostCustomURLs: async (ctx: any) => {
-    const requestData = ctx.request.body;
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').postCustomURLs(requestData);
-  },
-  adminPutCustomURLs: async (ctx: any) => {
-    const requestData = ctx.request.body;
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').putCustomURLs(requestData);
-  },
-  adminDeleteCustomURLs: async (ctx: any) => {
-    ctx.body = await strapi
-      .plugin(PLUGIN_ID)
-      .service('service')
-      .deleteCustomURLs(ctx.query.id);
   },
 });
 
