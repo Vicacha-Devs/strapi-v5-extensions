@@ -1,5 +1,7 @@
 import type { Core } from '@strapi/strapi';
 import { CONTENT_TYPE_UID, OPTION_UID, PLUGIN_ID, SINGLE_URL_UID } from '../pluginId';
+import { buildEntryUrl, parseTableReferences } from '../utils/pattern';
+import { generateSitemapIndexXml, generateUrlsetXml } from '../utils/xml';
 
 const EXCLUDED_PLUGIN_PREFIXES = [
   'plugin::upload.',
@@ -8,49 +10,12 @@ const EXCLUDED_PLUGIN_PREFIXES = [
   'plugin::content-releases.',
   'plugin::review-workflows.',
   `plugin::${PLUGIN_ID}.`,
-  'plugin::strapi-5-sitemap-plugin.',
 ];
 
 const service = ({ strapi }: { strapi: Core.Strapi }) => ({
-  getNestedValue(obj: any, path: string) {
-    return path.split('.').reduce((current, key) => {
-      return current && current[key] !== undefined ? current[key] : null;
-    }, obj);
-  },
-
-  parseTableReferences(pattern: string) {
-    const populate: Record<string, any> = {};
-    const placeholders = pattern.match(/\[([^\]]+)]/g) || [];
-    for (const placeholder of placeholders) {
-      const content = placeholder.replace(/[\[\]]/g, '');
-      if (content.includes('.')) {
-        const parts = content.split('.');
-        parts.pop();
-        if (parts.length === 1) {
-          const table = parts[0];
-          populate[table] = true;
-        } else if (parts.length > 1) {
-          let current = populate;
-          for (let i = 0; i < parts.length; i++) {
-            const tableName = parts[i];
-            if (i === parts.length - 1) {
-              current[tableName] = true;
-            } else {
-              if (!current[tableName] || current[tableName] === true) {
-                current[tableName] = { populate: {} };
-              }
-              current = current[tableName].populate;
-            }
-          }
-        }
-      }
-    }
-    return Object.keys(populate).length > 0 ? { populate } : {};
-  },
-
   async getSitemap(slug?: string) {
     const baseURLObject: any = await (strapi.documents as any)(OPTION_UID).findFirst();
-    if (!baseURLObject) return this.generateUrlsetXml([]);
+    if (!baseURLObject) return generateUrlsetXml([]);
     const baseURL = baseURLObject.baseUrl || '';
     const excludedUrls = Array.isArray(baseURLObject.excludedUrls)
       ? baseURLObject.excludedUrls
@@ -64,12 +29,12 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     if (useSitemapIndex && sitemapDefinitions.length > 0) {
       if (slug === undefined) {
-        return this.generateSitemapIndexXml(baseURL, sitemapDefinitions);
+        return generateSitemapIndexXml(baseURL, `/api/${PLUGIN_ID}`, sitemapDefinitions);
       }
       const def = sitemapDefinitions.find(
         (d: any) => (d.name || '').trim() === String(slug).trim()
       );
-      if (!def) return this.generateUrlsetXml([]);
+      if (!def) return generateUrlsetXml([]);
       const configIds = Array.isArray(def.collectionTypeConfigIds)
         ? def.collectionTypeConfigIds
         : [];
@@ -93,35 +58,6 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     );
   },
 
-  generateSitemapIndexXml(baseURL: string, definitions: any[]) {
-    const base = baseURL.replace(/\/$/, '');
-    const prefix = `/api/${PLUGIN_ID}`;
-    const sitemaps = definitions
-      .filter((d) => (d.name || '').trim() !== '')
-      .map(
-        (d) =>
-          `<sitemap><loc>${base}${prefix}/sitemap-${encodeURIComponent(String(d.name).trim())}.xml</loc></sitemap>`
-      )
-      .join('');
-    return `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemaps}</sitemapindex>`;
-  },
-
-  generateUrlsetXml(sitemap: any[]) {
-    const urlSet = sitemap
-      .map(
-        (entry) => `
-      <url>
-        <loc>${entry.url}</loc>
-        <priority>${entry.priority}</priority>
-        <changefreq>${entry.frequency}</changefreq>
-        ${entry.lastmod ? `<lastmod>${entry.lastmod}</lastmod>` : ''}
-        ${entry.thumbnail ? `<image:image><image:loc>${entry.thumbnail}</image:loc><image:title>${entry.thumbnailTitle || ''}</image:title></image:image>` : ''}
-      </url>`
-      )
-      .join('');
-    return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${urlSet}</urlset>`;
-  },
-
   resolveContentTypeUid(typeName: string): string | undefined {
     const allContentTypes = (strapi.contentTypes || {}) as Record<string, any>;
     return Object.keys(allContentTypes).find(
@@ -137,40 +73,40 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     customURLs: any[]
   ) {
     try {
-      const collections: any[] = [];
       const sitemap: any[] = [];
 
-      for (const sitemapEntry of sitemapEntries) {
-        const targetUid =
-          this.resolveContentTypeUid(sitemapEntry.type) ||
-          `api::${sitemapEntry.type}.${sitemapEntry.type}`;
-        if (!(strapi.contentTypes as Record<string, any>)?.[targetUid]) {
-          continue;
-        }
+      const collections = (
+        await Promise.all(
+          sitemapEntries.map(async (sitemapEntry) => {
+            const targetUid =
+              this.resolveContentTypeUid(sitemapEntry.type) ||
+              `api::${sitemapEntry.type}.${sitemapEntry.type}`;
+            if (!(strapi.contentTypes as Record<string, any>)?.[targetUid]) {
+              return null;
+            }
 
-        const isValidThumbnail =
-          sitemapEntry.thumbnail && sitemapEntry.thumbnail !== '-';
-        let populate: Record<string, any> | undefined = isValidThumbnail
-          ? { [sitemapEntry.thumbnail]: true }
-          : undefined;
-        if (sitemapEntry.populateLinkedModels === 'true') {
-          const linkedModels = this.parseTableReferences(sitemapEntry.pattern);
-          if (linkedModels.populate) {
-            populate = {
-              ...populate,
-              ...linkedModels.populate,
-            };
-          }
-        }
+            const isValidThumbnail =
+              sitemapEntry.thumbnail && sitemapEntry.thumbnail !== '-';
+            let populate: Record<string, any> | undefined = isValidThumbnail
+              ? { [sitemapEntry.thumbnail]: true }
+              : undefined;
+            if (sitemapEntry.populateLinkedModels === 'true') {
+              const linkedModels = parseTableReferences(sitemapEntry.pattern);
+              if (linkedModels.populate) {
+                populate = { ...populate, ...linkedModels.populate };
+              }
+            }
 
-        const entries = await (strapi.documents as any)(targetUid).findMany({
-          locale:
-            sitemapEntry.langcode === '-' ? undefined : sitemapEntry.langcode,
-          status: 'published',
-          populate,
-        });
-        collections.push({ ...sitemapEntry, entries });
-      }
+            const entries = await (strapi.documents as any)(targetUid).findMany({
+              locale:
+                sitemapEntry.langcode === '-' ? undefined : sitemapEntry.langcode,
+              status: 'published',
+              populate,
+            });
+            return { ...sitemapEntry, entries };
+          })
+        )
+      ).filter((collection): collection is NonNullable<typeof collection> => collection !== null);
 
       collections.forEach((collection) => {
         const {
@@ -184,34 +120,10 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
         } = collection;
 
         for (const entry of entries) {
-          let url = pattern;
-          const placeholders = pattern.match(/\[([^\]]+)]/g) || [];
-          let hasInvalidPlaceholder = false;
-
-          for (const placeholder of placeholders) {
-            const key = placeholder.replace(/[\[\]]/g, '');
-            let value: any;
-            if (key.includes('.')) {
-              value = this.getNestedValue(entry, key);
-            } else {
-              value = entry[key];
-            }
-            if (value !== null && value !== undefined) {
-              url = url.replace(placeholder, String(value));
-            } else if (key.includes('.')) {
-              url = url.replace(placeholder, '');
-            } else {
-              hasInvalidPlaceholder = true;
-              break;
-            }
-          }
-
-          if (hasInvalidPlaceholder) {
+          const url = buildEntryUrl(pattern, entry, baseURL);
+          if (url === null) {
             continue;
           }
-
-          url = url.replace(/\/+/g, '/');
-          url = baseURL.replace(/\/$/, '') + (url.startsWith('/') ? url : `/${url}`);
 
           const sitemapEntry: Record<string, any> = {
             url,
@@ -250,10 +162,12 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       }));
       sitemap.push(...customSitemapEntries);
 
-      const normalizedExcluded = excludedUrls
-        .map((path) => String(path).trim())
-        .filter(Boolean)
-        .map((p) => (p.startsWith('/') ? p : `/${p}`).replace(/\/$/, '') || '/');
+      const normalizedExcluded = new Set(
+        excludedUrls
+          .map((path) => String(path).trim())
+          .filter(Boolean)
+          .map((p) => (p.startsWith('/') ? p : `/${p}`).replace(/\/$/, '') || '/')
+      );
 
       const getPathFromUrl = (url: string) => {
         try {
@@ -264,12 +178,11 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
         }
       };
 
-      const filteredSitemap = sitemap.filter((entry) => {
-        const path = getPathFromUrl(entry.url);
-        return !normalizedExcluded.some((ex) => path === ex);
-      });
+      const filteredSitemap = sitemap.filter(
+        (entry) => !normalizedExcluded.has(getPathFromUrl(entry.url))
+      );
 
-      return this.generateUrlsetXml(filteredSitemap);
+      return generateUrlsetXml(filteredSitemap);
     } catch (error) {
       strapi.log.error('Error fetching entries:', error);
       throw new Error('Failed to fetch entries for types');
