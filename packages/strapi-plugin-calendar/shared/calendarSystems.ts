@@ -16,11 +16,27 @@ export const SUPPORTED_INTL_CALENDARS: ReadonlyArray<{
 }> = [
   { id: 'gregory', intlCalendar: 'gregory', defaultLabel: 'Gregorian' },
   { id: 'iso8601', intlCalendar: 'iso8601', defaultLabel: 'ISO 8601' },
-  { id: 'islamic-umalqura', intlCalendar: 'islamic-umalqura', defaultLabel: 'Hijri (Umm al-Qura)' },
-  { id: 'islamic-civil', intlCalendar: 'islamic-civil', defaultLabel: 'Hijri (Civil)' },
-  { id: 'islamic-tbla', intlCalendar: 'islamic-tbla', defaultLabel: 'Hijri (Tabular)' },
+  {
+    id: 'islamic-umalqura',
+    intlCalendar: 'islamic-umalqura',
+    defaultLabel: 'Hijri (Umm al-Qura)',
+  },
+  {
+    id: 'islamic-civil',
+    intlCalendar: 'islamic-civil',
+    defaultLabel: 'Hijri (Civil)',
+  },
+  {
+    id: 'islamic-tbla',
+    intlCalendar: 'islamic-tbla',
+    defaultLabel: 'Hijri (Tabular)',
+  },
   { id: 'hebrew', intlCalendar: 'hebrew', defaultLabel: 'Hebrew' },
-  { id: 'persian', intlCalendar: 'persian', defaultLabel: 'Persian (Solar Hijri)' },
+  {
+    id: 'persian',
+    intlCalendar: 'persian',
+    defaultLabel: 'Persian (Solar Hijri)',
+  },
   { id: 'buddhist', intlCalendar: 'buddhist', defaultLabel: 'Buddhist' },
   { id: 'japanese', intlCalendar: 'japanese', defaultLabel: 'Japanese' },
   { id: 'chinese', intlCalendar: 'chinese', defaultLabel: 'Chinese Lunar' },
@@ -45,7 +61,10 @@ export function unregisterCalendarSystemFormatter(calendarId: string): void {
   customFormatters.delete(calendarId);
 }
 
-export function getRegisteredCalendarFormatters(): ReadonlyMap<string, CalendarSystemFormatterFn> {
+export function getRegisteredCalendarFormatters(): ReadonlyMap<
+  string,
+  CalendarSystemFormatterFn
+> {
   return customFormatters;
 }
 
@@ -54,7 +73,7 @@ export function applyDayOffset(date: Date, dayOffset?: number): Date {
     return date;
   }
   const offsetDays = Math.trunc(dayOffset);
-  return new Date(date.getTime() + offsetDays * 86_400_000);
+  return new Date(date.getTime() + offsetDays * 86400000);
 }
 
 /**
@@ -67,13 +86,16 @@ export function extractCalendarParts(
   date: Date,
   intlCalendar: string,
   dayOffset = 0
-): { year: number; month: number; day: number } | null {
+): {
+  year: number;
+  month: number;
+  day: number;
+} | null {
   if (Number.isNaN(date.getTime())) {
     return null;
   }
   const effectiveDate = applyDayOffset(date, dayOffset);
   const calendarTag = (intlCalendar || 'gregory').trim().toLowerCase();
-
   try {
     const formatter = new Intl.DateTimeFormat(`en-u-ca-${calendarTag}-nu-latn`, {
       year: 'numeric',
@@ -86,7 +108,8 @@ export function extractCalendarParts(
     let month = 0;
     let day = 0;
     for (const part of parts) {
-      if (part.type === 'year' || (part.type as string) === 'relatedYear') {
+      const partType = String(part.type);
+      if (partType === 'year' || partType === 'relatedYear') {
         const parsedY = Number.parseInt(part.value.replace(/[^0-9]/g, ''), 10);
         if (Number.isFinite(parsedY)) year = parsedY;
       } else if (part.type === 'month') {
@@ -101,9 +124,8 @@ export function extractCalendarParts(
       return { year, month, day };
     }
   } catch {
-    // Fall back to UTC Gregorian parts
+    // Fallback below
   }
-
   return {
     year: effectiveDate.getUTCFullYear(),
     month: effectiveDate.getUTCMonth() + 1,
@@ -123,16 +145,20 @@ export function formatDateInCalendarSystem(
   const rawDate = /^\d{4}-\d{2}-\d{2}$/.test(isoOrDateKey)
     ? new Date(`${isoOrDateKey}T12:00:00.000Z`)
     : new Date(isoOrDateKey);
-
   if (Number.isNaN(rawDate.getTime())) {
     return '';
   }
-
   const effectiveDate = applyDayOffset(rawDate, system.dayOffset);
-  const effectiveLocale = (system.locale || locale || 'en').split('-u-')[0];
-
+  const rawLocale =
+    system.locale && system.locale !== 'auto'
+      ? system.locale
+      : locale && locale !== 'auto'
+        ? locale
+        : 'en';
+  const effectiveLocale = rawLocale.split('-u-')[0];
   const customFn =
-    customFormatters.get(system.id) ?? customFormatters.get(system.intlCalendar);
+    customFormatters.get(system.id) ??
+    customFormatters.get(system.intlCalendar);
   if (customFn) {
     try {
       return customFn(effectiveDate, {
@@ -141,10 +167,9 @@ export function formatDateInCalendarSystem(
         compact: Boolean(options?.compact),
       });
     } catch {
-      // Fall back to Intl.DateTimeFormat if custom formatter throws
+      // Fallback to Intl.DateTimeFormat
     }
   }
-
   const calendarTag = (system.intlCalendar || 'gregory').trim();
   try {
     const intlLocale = `${effectiveLocale}-u-ca-${calendarTag}`;
@@ -200,20 +225,19 @@ export function resolveOccurrenceAlternateDates(params: {
     secondaryCalendars = [],
     locale = 'en',
   } = params;
-
   const result: Record<string, AlternateDateValue> = {};
   const sourceAltFields = source.fields.alternateDateFields ?? {};
   const isBaseOccurrence = !isRecurring || occurrenceDate === baseDateKey;
   const docAltDatesMap =
-    doc.alternateDates && typeof doc.alternateDates === 'object' && !Array.isArray(doc.alternateDates)
+    doc.alternateDates &&
+    typeof doc.alternateDates === 'object' &&
+    !Array.isArray(doc.alternateDates)
       ? (doc.alternateDates as Record<string, unknown>)
       : null;
-
   const rawDateObj = new Date(`${occurrenceDate}T12:00:00.000Z`);
 
   for (const sys of secondaryCalendars) {
     if (!sys || !sys.enabled || !sys.id) continue;
-
     const fieldName = sourceAltFields[sys.id] || sys.overrideField;
     const rawFieldVal = fieldName ? doc[fieldName] : undefined;
     const rawFieldOverride =
@@ -223,8 +247,11 @@ export function resolveOccurrenceAlternateDates(params: {
         ? String(docAltDatesMap[sys.id]).trim()
         : '';
     const rawOverride = rawFieldOverride || rawJsonOverride;
-
-    const parts = extractCalendarParts(rawDateObj, sys.intlCalendar, sys.dayOffset ?? 0);
+    const parts = extractCalendarParts(
+      rawDateObj,
+      sys.intlCalendar,
+      sys.dayOffset ?? 0
+    );
 
     if (rawOverride && isBaseOccurrence) {
       result[sys.id] = {
@@ -247,7 +274,6 @@ export function resolveOccurrenceAlternateDates(params: {
     const compact = formatDateInCalendarSystem(occurrenceDate, sys, locale, {
       compact: true,
     });
-
     if (formatted) {
       result[sys.id] = {
         calendarId: sys.id,

@@ -160,7 +160,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
           if (params.documentId) {
             queryOpts.filters = { documentId: { $eq: params.documentId } };
           }
-          if (params.locale) {
+          if (params.locale && params.locale !== 'auto') {
             queryOpts.locale = params.locale;
           }
           if (!params.includeDrafts) {

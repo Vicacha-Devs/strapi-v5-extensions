@@ -163,12 +163,13 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
 
             <Flex gap={3} wrap="wrap">
               <Box style={{ flex: 1, minWidth: 170 }}>
-                <Typography variant="pi" fontWeight="bold">
-                  {t('rrule.frequency', 'Repeat Frequency')}
-                </Typography>
-                <Box paddingTop={1}>
+                <Field.Root>
+                  <Field.Label>
+                    {t('rrule.frequency', 'Repeat Frequency')}
+                  </Field.Label>
                   <SingleSelect
                     disabled={disabled}
+                    placeholder={t('placeholder.select_repeat_frequency', 'Select repeat frequency')}
                     value={parsedRule.freq}
                     onChange={(val: string) =>
                       updateRule({
@@ -193,34 +194,36 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                       {t('rrule.freq.yearly', 'Yearly')}
                     </SingleSelectOption>
                   </SingleSelect>
-                </Box>
+                </Field.Root>
               </Box>
 
               {parsedRule.freq !== 'NONE' && (
                 <Box style={{ width: 130 }}>
-                  <Typography variant="pi" fontWeight="bold">
-                    {t('rrule.interval', 'Every (Interval)')}
-                  </Typography>
-                  <Box paddingTop={1}>
+                  <Field.Root>
+                    <Field.Label>
+                      {t('rrule.interval', 'Every (Interval)')}
+                    </Field.Label>
                     <NumberInput
                       disabled={disabled}
+                      placeholder={t('placeholder.1', '1')}
                       value={parsedRule.interval}
                       onValueChange={(val: number | undefined) =>
                         updateRule({ interval: val && val >= 1 ? val : 1 })
                       }
                     />
-                  </Box>
+                  </Field.Root>
                 </Box>
               )}
 
               {parsedRule.freq !== 'NONE' && (
                 <Box style={{ flex: 1, minWidth: 190 }}>
-                  <Typography variant="pi" fontWeight="bold">
-                    {t('rrule.rscale', 'Calendar Scale (RSCALE)')}
-                  </Typography>
-                  <Box paddingTop={1}>
+                  <Field.Root>
+                    <Field.Label>
+                      {t('rrule.rscale', 'Calendar Scale (RSCALE)')}
+                    </Field.Label>
                     <SingleSelect
                       disabled={disabled}
+                      placeholder={t('placeholder.select_calendar_scale', 'Select calendar scale')}
                       value={parsedRule.rscale || 'gregory'}
                       onChange={(val: string) =>
                         updateRule({ rscale: val === 'gregory' ? undefined : val })
@@ -232,17 +235,18 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                         </SingleSelectOption>
                       ))}
                     </SingleSelect>
-                  </Box>
+                  </Field.Root>
                 </Box>
               )}
 
               <Box style={{ flex: 1, minWidth: 180 }}>
-                <Typography variant="pi" fontWeight="bold">
-                  {t('rrule.timezone', 'Timezone')}
-                </Typography>
-                <Box paddingTop={1}>
+                <Field.Root>
+                  <Field.Label>
+                    {t('rrule.timezone', 'Timezone')}
+                  </Field.Label>
                   <SingleSelect
                     disabled={disabled}
+                    placeholder={t('placeholder.select_timezone', 'Select timezone')}
                     value={fieldValue.timezone || 'UTC'}
                     onChange={(tz: string) =>
                       emitChange({
@@ -257,7 +261,7 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                       </SingleSelectOption>
                     ))}
                   </SingleSelect>
-                </Box>
+                </Field.Root>
               </Box>
             </Flex>
 
@@ -302,12 +306,13 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
               <Flex gap={3} wrap="wrap">
                 {parsedRule.freq === 'YEARLY' && (
                   <Box style={{ width: 160 }}>
-                    <Typography variant="pi" fontWeight="bold">
-                      {t('rrule.byMonth', 'Month (1-12)')}
-                    </Typography>
-                    <Box paddingTop={1}>
+                    <Field.Root>
+                      <Field.Label>
+                        {t('rrule.byMonth', 'Month (1-12)')}
+                      </Field.Label>
                       <NumberInput
                         disabled={disabled}
+                        placeholder={t('placeholder.1', '1')}
                         value={parsedRule.byMonth ?? 1}
                         onValueChange={(val: number | undefined) =>
                           updateRule({
@@ -316,17 +321,18 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                           })
                         }
                       />
-                    </Box>
+                    </Field.Root>
                   </Box>
                 )}
 
                 <Box style={{ width: 160 }}>
-                  <Typography variant="pi" fontWeight="bold">
-                    {t('rrule.byMonthDay', 'Day of Month (1-31)')}
-                  </Typography>
-                  <Box paddingTop={1}>
+                  <Field.Root>
+                    <Field.Label>
+                      {t('rrule.byMonthDay', 'Day of Month (1-31)')}
+                    </Field.Label>
                     <NumberInput
                       disabled={disabled}
+                      placeholder={t('placeholder.1', '1')}
                       value={parsedRule.byMonthDay ?? 1}
                       onValueChange={(val: number | undefined) =>
                         updateRule({
@@ -335,7 +341,7 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                         })
                       }
                     />
-                  </Box>
+                  </Field.Root>
                 </Box>
               </Flex>
             )}
@@ -343,12 +349,13 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
             {parsedRule.freq !== 'NONE' && (
               <Flex gap={3} wrap="wrap" alignItems="flex-end">
                 <Box style={{ width: 180 }}>
-                  <Typography variant="pi" fontWeight="bold">
-                    {t('rrule.ends', 'Series Ends')}
-                  </Typography>
-                  <Box paddingTop={1}>
+                  <Field.Root>
+                    <Field.Label>
+                      {t('rrule.ends', 'Series Ends')}
+                    </Field.Label>
                     <SingleSelect
                       disabled={disabled}
+                      placeholder={t('placeholder.select_series_end_mode', 'Select series end mode')}
                       value={endMode}
                       onChange={(mode: string) => {
                         if (mode === 'never') {
@@ -375,41 +382,43 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                         {t('rrule.ends.count', 'After N Occurrences (COUNT)')}
                       </SingleSelectOption>
                     </SingleSelect>
-                  </Box>
+                  </Field.Root>
                 </Box>
 
                 {endMode === 'until' && (
                   <Box style={{ width: 200 }}>
-                    <Typography variant="pi" fontWeight="bold">
-                      {t('rrule.untilDate', 'Until Date (YYYY-MM-DD)')}
-                    </Typography>
-                    <Box paddingTop={1}>
+                    <Field.Root>
+                      <Field.Label>
+                        {t('rrule.untilDate', 'Until Date (YYYY-MM-DD)')}
+                      </Field.Label>
                       <TextInput
                         type="date"
+                        placeholder={t('placeholder.yyyy_mm_dd', 'YYYY-MM-DD')}
                         disabled={disabled}
                         value={parsedRule.until ?? ''}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           updateRule({ until: e.target.value })
                         }
                       />
-                    </Box>
+                    </Field.Root>
                   </Box>
                 )}
 
                 {endMode === 'count' && (
                   <Box style={{ width: 180 }}>
-                    <Typography variant="pi" fontWeight="bold">
-                      {t('rrule.occurrenceCount', 'Max Occurrences')}
-                    </Typography>
-                    <Box paddingTop={1}>
+                    <Field.Root>
+                      <Field.Label>
+                        {t('rrule.occurrenceCount', 'Max Occurrences')}
+                      </Field.Label>
                       <NumberInput
                         disabled={disabled}
+                        placeholder={t('placeholder.10', '10')}
                         value={parsedRule.count ?? 10}
                         onValueChange={(val: number | undefined) =>
                           updateRule({ count: val && val >= 1 ? Math.floor(val) : 1 })
                         }
                       />
-                    </Box>
+                    </Field.Root>
                   </Box>
                 )}
               </Flex>
@@ -417,19 +426,22 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
 
             {parsedRule.freq !== 'NONE' && (
               <Box>
-                <Typography variant="pi" fontWeight="bold">
-                  {t('rrule.exdates', 'Excluded Dates (Holiday / Exception Dates)')}
-                </Typography>
-                <Flex gap={2} paddingTop={1} wrap="wrap">
-                  <Box style={{ width: 200 }}>
-                    <TextInput
-                      type="date"
-                      disabled={disabled}
-                      value={newExdate}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setNewExdate(e.target.value)
-                      }
-                    />
+                <Flex gap={2} paddingTop={1} wrap="wrap" alignItems="flex-end">
+                  <Box style={{ width: 240 }}>
+                    <Field.Root>
+                      <Field.Label>
+                        {t('rrule.exdates', 'Excluded Dates (Holiday / Exception Dates)')}
+                      </Field.Label>
+                      <TextInput
+                        type="date"
+                        placeholder={t('placeholder.yyyy_mm_dd', 'YYYY-MM-DD')}
+                        disabled={disabled}
+                        value={newExdate}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setNewExdate(e.target.value)
+                        }
+                      />
+                    </Field.Root>
                   </Box>
                   <Button
                     variant="secondary"

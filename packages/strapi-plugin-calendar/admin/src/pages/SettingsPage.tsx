@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useFetchClient } from '@strapi/strapi/admin';
-import { Box, Button, Flex, Typography } from '@strapi/design-system';
+import { Layouts, useFetchClient } from '@strapi/strapi/admin';
+import { Box, Button, Flex, Tabs, Typography } from '@strapi/design-system';
 import { PLUGIN_ID } from '../../../shared/pluginId';
 import type {
   CalendarPluginSettings,
@@ -153,31 +153,27 @@ export const SettingsPage: React.FC = () => {
 
   if (!settings) {
     return (
-      <Box padding={6}>
-        <Typography variant="omega">
-          {t('settings.loading', 'Loading Calendar settings...')}
-        </Typography>
-      </Box>
+      <Layouts.Root>
+        <Layouts.Content>
+          <Box padding={6}>
+            <Typography variant="omega">
+              {t('settings.loading', 'Loading Calendar settings...')}
+            </Typography>
+          </Box>
+        </Layouts.Content>
+      </Layouts.Root>
     );
   }
 
   return (
-    <Box padding={6} background="neutral100">
-      <Flex direction="column" alignItems="stretch" gap={5}>
-        <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
-          <Box>
-            <Typography variant="alpha" fontWeight="bold">
-              {t('settings.title', 'Calendar & Scheduler Settings')}
-            </Typography>
-            <Box paddingTop={1}>
-              <Typography variant="epsilon" textColor="neutral600">
-                {t(
-                  'settings.subtitle',
-                  'Configure mapped collection types, view modes, business hours, secondary calendar systems, and iCal feeds.'
-                )}
-              </Typography>
-            </Box>
-          </Box>
+    <Layouts.Root>
+      <Layouts.Header
+        title={t('settings.title', 'Calendar & Scheduler Settings')}
+        subtitle={t(
+          'settings.subtitle',
+          'Select visual theme (Breeze default), primary local language, optional Arabic/Hijri calendar overlay, and mapped collection sources.'
+        )}
+        primaryAction={
           <Flex gap={2}>
             <Button variant="tertiary" onClick={handleResetSettings}>
               {t('settings.reset', 'Reset Defaults')}
@@ -186,41 +182,79 @@ export const SettingsPage: React.FC = () => {
               {t('common.save', 'Save Settings')}
             </Button>
           </Flex>
+        }
+      />
+
+      <Layouts.Content>
+        <Flex direction="column" alignItems="stretch" gap={4}>
+          {savedBanner && (
+            <Box padding={3} background="success100" hasRadius>
+              <Typography variant="omega" fontWeight="bold" textColor="success700">
+                {savedBanner}
+              </Typography>
+            </Box>
+          )}
+
+          <Tabs.Root defaultValue="theme">
+            <Tabs.List aria-label={t('settings.title', 'Calendar & Scheduler Settings')}>
+              <Tabs.Trigger value="theme">
+                {t('settings.tab.theme', 'Theme & Appearance')}
+              </Tabs.Trigger>
+              <Tabs.Trigger value="general">
+                {t('settings.tab.general', 'General & Views')}
+              </Tabs.Trigger>
+              <Tabs.Trigger value="sources">
+                {t('settings.tab.sources', 'Collection Sources')} ({settings.sources?.length ?? 0})
+              </Tabs.Trigger>
+              <Tabs.Trigger value="secondary">
+                {t('settings.tab.secondaryCalendars', 'Secondary Calendars')} ({settings.secondaryCalendars?.length ?? 0})
+              </Tabs.Trigger>
+            </Tabs.List>
+
+            <Tabs.Content value="theme">
+              <CalendarViewsSection
+                mode="theme"
+                t={t}
+                settings={settings}
+                onPatchSettings={(patch) => setSettings({ ...settings, ...patch })}
+              />
+            </Tabs.Content>
+
+            <Tabs.Content value="general">
+              <CalendarViewsSection
+                mode="general"
+                t={t}
+                settings={settings}
+                onPatchSettings={(patch) => setSettings({ ...settings, ...patch })}
+              />
+            </Tabs.Content>
+
+            <Tabs.Content value="sources">
+              <CollectionSourcesSection
+                t={t}
+                sources={settings.sources}
+                contentTypes={contentTypes}
+                onAddOrUpdateSource={handleAddOrUpdateSource}
+                onToggleSourceEnabled={toggleSourceEnabled}
+                onRemoveSource={removeSource}
+              />
+            </Tabs.Content>
+
+            <Tabs.Content value="secondary">
+              <SecondaryCalendarsSection
+                t={t}
+                secondaryCalendars={settings.secondaryCalendars ?? []}
+                onAddOrUpdateCalendar={handleAddOrUpdateCalendar}
+                onToggleCalendarEnabled={toggleCalendarEnabled}
+                onRemoveCalendar={removeCalendarSystem}
+              />
+            </Tabs.Content>
+          </Tabs.Root>
         </Flex>
-
-        {savedBanner && (
-          <Box padding={3} background="success100" hasRadius>
-            <Typography variant="omega" fontWeight="bold" textColor="success700">
-              {savedBanner}
-            </Typography>
-          </Box>
-        )}
-
-        <CollectionSourcesSection
-          t={t}
-          sources={settings.sources}
-          contentTypes={contentTypes}
-          onAddOrUpdateSource={handleAddOrUpdateSource}
-          onToggleSourceEnabled={toggleSourceEnabled}
-          onRemoveSource={removeSource}
-        />
-
-        <CalendarViewsSection
-          t={t}
-          settings={settings}
-          onPatchSettings={(patch) => setSettings({ ...settings, ...patch })}
-        />
-
-        <SecondaryCalendarsSection
-          t={t}
-          secondaryCalendars={settings.secondaryCalendars ?? []}
-          onAddOrUpdateCalendar={handleAddOrUpdateCalendar}
-          onToggleCalendarEnabled={toggleCalendarEnabled}
-          onRemoveCalendar={removeCalendarSystem}
-        />
-      </Flex>
-    </Box>
+      </Layouts.Content>
+    </Layouts.Root>
   );
 };
 
 export default SettingsPage;
+

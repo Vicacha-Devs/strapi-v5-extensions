@@ -4,7 +4,17 @@ import type {
   FullCalendarLocaleDefinition,
 } from './types';
 
-const RTL_LANGUAGE_PREFIXES = new Set(['ar', 'he', 'iw', 'fa', 'ur', 'ps', 'sd', 'ug', 'yi']);
+const RTL_LANGUAGE_PREFIXES = new Set([
+  'ar',
+  'he',
+  'iw',
+  'fa',
+  'ur',
+  'ps',
+  'sd',
+  'ug',
+  'yi',
+]);
 
 export const SUPPORTED_CALENDAR_LOCALES: FullCalendarLocaleDefinition[] = [
   {

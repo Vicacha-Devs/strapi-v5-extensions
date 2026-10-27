@@ -18,6 +18,7 @@ import type {
   CalendarSystemConfig,
   CalendarViewMode,
   ExpandedCalendarOccurrence,
+  SecondaryCalendarLanguageMode,
 } from '../../../shared/types';
 import { CalendarToolbar } from '../components/calendar/CalendarToolbar';
 import { FullCalendarCanvas } from '../components/calendar/FullCalendarCanvas';
@@ -56,8 +57,9 @@ export const CalendarPage: React.FC = () => {
 
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [calendarOverlayId, setCalendarOverlayId] = useState<string>('configured');
   const [localeOverride, setLocaleOverride] = useState<string>('auto');
+  const [secondaryLangMode, setSecondaryLangMode] =
+    useState<SecondaryCalendarLanguageMode>('local');
 
   const [occurrences, setOccurrences] = useState<ExpandedCalendarOccurrence[]>([]);
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
@@ -79,7 +81,13 @@ export const CalendarPage: React.FC = () => {
 
   const effectiveLocale = useMemo(
     () =>
-      resolveFullCalendarLocale(locale, settings?.defaultLocale, localeOverride),
+      resolveFullCalendarLocale(
+        locale,
+        settings?.defaultLocale && settings.defaultLocale !== 'auto'
+          ? settings.defaultLocale
+          : 'es',
+        localeOverride
+      ),
     [locale, settings?.defaultLocale, localeOverride]
   );
 
@@ -111,7 +119,12 @@ export const CalendarPage: React.FC = () => {
         setOccurrences(Array.isArray(payload.occurrences) ? payload.occurrences : []);
         if (payload.settings) {
           setSettings(payload.settings);
+          if (payload.settings.secondaryCalendarLanguage) {
+            setSecondaryLangMode(payload.settings.secondaryCalendarLanguage);
+          }
         }
+        const loadErrorMsg = t('calendar.error.load', 'Could not load calendar occurrences.');
+        setBannerMessage((prev) => (prev === loadErrorMsg ? null : prev));
       }
     } catch {
       setBannerMessage(t('calendar.error.load', 'Could not load calendar occurrences.'));
@@ -141,33 +154,27 @@ export const CalendarPage: React.FC = () => {
   }, [occurrences]);
 
   const activeSecondaryCalendars = useMemo<CalendarSystemConfig[]>(() => {
-    if (calendarOverlayId === 'none') {
+    if (secondaryLangMode === 'off') {
       return [];
     }
-    if (calendarOverlayId === 'configured') {
-      return (settings?.secondaryCalendars ?? []).filter((c) => c.enabled);
+    const configured = (settings?.secondaryCalendars ?? []).filter((c) => c.enabled);
+    if (configured.length > 0) {
+      return configured;
     }
-    const configuredMatch = (settings?.secondaryCalendars ?? []).find(
-      (c) => c.id === calendarOverlayId || c.intlCalendar === calendarOverlayId
+    const hijriMatch = SUPPORTED_INTL_CALENDARS.find(
+      (c) => c.id === 'islamic-umalqura'
     );
-    if (configuredMatch) {
-      return [{ ...configuredMatch, enabled: true }];
-    }
-    const intlMatch = SUPPORTED_INTL_CALENDARS.find(
-      (c) => c.id === calendarOverlayId || c.intlCalendar === calendarOverlayId
-    );
-    if (intlMatch) {
-      return [
-        {
-          id: intlMatch.id,
-          label: intlMatch.defaultLabel,
-          intlCalendar: intlMatch.intlCalendar,
-          enabled: true,
-        },
-      ];
-    }
-    return [];
-  }, [calendarOverlayId, settings?.secondaryCalendars]);
+    return hijriMatch
+      ? [
+          {
+            id: 'hijri',
+            label: hijriMatch.defaultLabel,
+            intlCalendar: hijriMatch.intlCalendar,
+            enabled: true,
+          },
+        ]
+      : [];
+  }, [secondaryLangMode, settings?.secondaryCalendars]);
 
   const recurrencePresets = useMemo(
     () =>
@@ -181,9 +188,34 @@ export const CalendarPage: React.FC = () => {
               rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO',
             },
             {
+              id: 'weekly-tue',
+              label: 'Weekly on Tuesdays',
+              rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TU',
+            },
+            {
+              id: 'weekly-wed',
+              label: 'Weekly on Wednesdays',
+              rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=WE',
+            },
+            {
+              id: 'weekly-thu',
+              label: 'Weekly on Thursdays',
+              rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TH',
+            },
+            {
               id: 'weekly-fri',
               label: 'Weekly on Fridays',
               rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=FR',
+            },
+            {
+              id: 'weekly-sat',
+              label: 'Weekly on Saturdays',
+              rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SA',
+            },
+            {
+              id: 'weekly-sun',
+              label: 'Weekly on Sundays',
+              rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SU',
             },
             { id: 'monthly', label: 'Monthly', rrule: 'FREQ=MONTHLY;INTERVAL=1' },
             { id: 'yearly', label: 'Yearly', rrule: 'FREQ=YEARLY;INTERVAL=1' },
@@ -199,8 +231,8 @@ export const CalendarPage: React.FC = () => {
         start: occ.startDate,
         end: occ.endDate,
         allDay: occ.allDay,
-        backgroundColor: occ.color || settings?.primaryColor || '#0D9488',
-        borderColor: occ.color || settings?.primaryColor || '#0D9488',
+        backgroundColor: occ.color || settings?.primaryColor || '#0284C7',
+        borderColor: occ.color || settings?.primaryColor || '#0284C7',
         extendedProps: {
           occurrence: occ,
         },
@@ -344,14 +376,17 @@ export const CalendarPage: React.FC = () => {
   );
 
   const secondaryHeaderLabel = useMemo(() => {
-    if (activeSecondaryCalendars.length === 0) return '';
+    if (activeSecondaryCalendars.length === 0 || secondaryLangMode === 'off') {
+      return '';
+    }
     const anchorIso = anchorDate.toISOString().slice(0, 10);
+    const targetLoc = secondaryLangMode === 'ar' ? 'ar-SA' : effectiveLocale;
     return activeSecondaryCalendars
       .map((sys) => {
         const formatted = formatDateInCalendarSystem(
           anchorIso,
-          sys,
-          effectiveLocale,
+          { ...sys, locale: targetLoc },
+          targetLoc,
           {
             compact: false,
           }
@@ -360,7 +395,7 @@ export const CalendarPage: React.FC = () => {
       })
       .filter(Boolean)
       .join(' • ');
-  }, [activeSecondaryCalendars, anchorDate, effectiveLocale]);
+  }, [activeSecondaryCalendars, anchorDate, effectiveLocale, secondaryLangMode]);
 
   const todayKey = new Date().toISOString().slice(0, 10);
 
@@ -394,6 +429,8 @@ export const CalendarPage: React.FC = () => {
           effectiveDirection={effectiveDirection}
           localeOverride={localeOverride}
           onLocaleOverrideChange={setLocaleOverride}
+          secondaryLangMode={secondaryLangMode}
+          onSecondaryLangModeChange={setSecondaryLangMode}
           monthLabel={monthLabel}
           secondaryHeaderLabel={secondaryHeaderLabel}
           loading={loading}
@@ -404,8 +441,6 @@ export const CalendarPage: React.FC = () => {
           categoryFilter={categoryFilter}
           onCategoryFilterChange={setCategoryFilter}
           availableCategories={availableCategories}
-          calendarOverlayId={calendarOverlayId}
-          onCalendarOverlayChange={setCalendarOverlayId}
           viewMode={viewMode}
           enabledViews={enabledViews}
           onViewChange={changeFullCalendarView}
@@ -422,15 +457,14 @@ export const CalendarPage: React.FC = () => {
             padding={3}
             background="primary100"
             hasRadius
-            style={{ border: '1px solid #0D9488' }}
+            style={{ border: '1px solid #0284C7' }}
           >
             <Flex justifyContent="space-between" alignItems="center">
               <Typography variant="omega" fontWeight="bold" textColor="primary700">
                 {bannerMessage}
               </Typography>
               <Button variant="tertiary" size="S" onClick={() => setBannerMessage(null)}>
-                ×
-              </Button>
+                ×</Button>
             </Flex>
           </Box>
         )}
@@ -470,6 +504,10 @@ export const CalendarPage: React.FC = () => {
           calendarRef={calendarRef}
           locale={effectiveLocale}
           direction={effectiveDirection}
+          theme={settings?.theme}
+          colorScheme={settings?.colorScheme}
+          themePalette={settings?.themePalette}
+          secondaryCalendarLanguage={secondaryLangMode}
           settings={settings}
           events={fullCalendarEvents}
           activeSecondaryCalendars={activeSecondaryCalendars}

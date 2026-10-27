@@ -1,6 +1,10 @@
 import type { CalendarPluginSettings } from '../../../shared/types';
 
 export const DEFAULT_CALENDAR_SETTINGS: CalendarPluginSettings = {
+  theme: 'breeze',
+  colorScheme: 'auto',
+  themePalette: 'default',
+  secondaryCalendarLanguage: 'local',
   defaultTimezone: 'UTC',
   defaultLocale: 'auto',
   direction: 'auto',
@@ -12,7 +16,7 @@ export const DEFAULT_CALENDAR_SETTINGS: CalendarPluginSettings = {
   startHour: '07:00:00',
   endHour: '21:00:00',
   slotDuration: '00:30:00',
-  primaryColor: '#0D9488',
+  primaryColor: '#0284C7',
   showWeekends: true,
   showTodayButton: true,
   showCreateButton: true,
@@ -34,7 +38,12 @@ export const DEFAULT_CALENDAR_SETTINGS: CalendarPluginSettings = {
   recurrencePresets: [
     { id: 'daily', label: 'Daily', rrule: 'FREQ=DAILY;INTERVAL=1' },
     { id: 'weekly-mon', label: 'Weekly on Mondays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO' },
+    { id: 'weekly-tue', label: 'Weekly on Tuesdays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TU' },
+    { id: 'weekly-wed', label: 'Weekly on Wednesdays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=WE' },
+    { id: 'weekly-thu', label: 'Weekly on Thursdays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TH' },
     { id: 'weekly-fri', label: 'Weekly on Fridays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=FR' },
+    { id: 'weekly-sat', label: 'Weekly on Saturdays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SA' },
+    { id: 'weekly-sun', label: 'Weekly on Sundays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SU' },
     { id: 'monthly', label: 'Monthly', rrule: 'FREQ=MONTHLY;INTERVAL=1' },
     { id: 'yearly', label: 'Yearly', rrule: 'FREQ=YEARLY;INTERVAL=1' },
   ],

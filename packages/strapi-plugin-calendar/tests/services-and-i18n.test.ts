@@ -10,10 +10,14 @@ import type {
   CalendarPluginServiceMap,
   StrapiRouteContext,
 } from '../server/src/types';
-import type {
-  CalendarPluginSettings,
-  DiscoveredContentType,
-  ExpandedCalendarOccurrence,
+import {
+  CALENDAR_COLOR_PALETTES,
+  CALENDAR_THEME_PRESETS,
+  detectEffectiveColorScheme,
+  resolveCalendarTheme,
+  type CalendarPluginSettings,
+  type DiscoveredContentType,
+  type ExpandedCalendarOccurrence,
 } from '../shared/types';
 
 import {
@@ -284,28 +288,34 @@ describe('Strapi Plugin Calendar Services & Controllers', () => {
     const adminCtrl = adminControllerFactory({ strapi });
     const contentCtrl = contentApiControllerFactory({ strapi });
 
-    // Update settings including FullCalendar localization options
+    // Update settings including FullCalendar localization options & modern themes
     const updateCtx: StrapiRouteContext<Partial<CalendarPluginSettings>> = {
       request: {
         body: {
-          defaultView: 'timeGridWeek',
+          defaultView: 'multiMonthYearStacked',
           defaultLocale: 'ar',
           direction: 'rtl',
           weekNumbers: true,
           weekNumberCalculation: 'local',
           timeFormat24h: false,
+          theme: 'forma',
+          colorScheme: 'dark',
+          themePalette: 'indigo',
         },
       },
       body: null,
     };
     await adminCtrl.updateSettings(updateCtx);
     const updatedBody = updateCtx.body as { data: CalendarPluginSettings };
-    expect(updatedBody.data.defaultView).toBe('timeGridWeek');
+    expect(updatedBody.data.defaultView).toBe('multiMonthYearStacked');
     expect(updatedBody.data.defaultLocale).toBe('ar');
     expect(updatedBody.data.direction).toBe('rtl');
     expect(updatedBody.data.weekNumbers).toBe(true);
     expect(updatedBody.data.weekNumberCalculation).toBe('local');
     expect(updatedBody.data.timeFormat24h).toBe(false);
+    expect(updatedBody.data.theme).toBe('forma');
+    expect(updatedBody.data.colorScheme).toBe('dark');
+    expect(updatedBody.data.themePalette).toBe('indigo');
 
     // Clear settings back to config defaults
     const clearCtx: StrapiRouteContext = { body: null };
@@ -386,5 +396,67 @@ describe('FullCalendar Localization & 10-Locale Translation Parity', () => {
     expect(buildFullCalendarTimeFormat(true).hour12).toBe(false);
     expect(buildFullCalendarTimeFormat(false).hour12).toBe(true);
   });
+
+  it('resolves modern FullCalendar themes (Breezy, Monarch, Forma, Pulse, Classic, Shadcn, MUI) across light/dark schemes and accent palettes', () => {
+    const themeKeys = Object.keys(CALENDAR_THEME_PRESETS);
+    for (const key of [
+      'breeze',
+      'monarch',
+      'forma',
+      'pulse',
+      'classic',
+      'shadcn',
+      'mui',
+      'emerald',
+      'sand',
+      'midnight',
+    ]) {
+      expect(themeKeys).toContain(key);
+    }
+    expect(Object.keys(CALENDAR_COLOR_PALETTES).length).toBeGreaterThanOrEqual(7);
+
+    // Breezy (tinted event style, 10px container radius)
+    const breezyLight = resolveCalendarTheme('breeze', 'light', 'default');
+    expect(breezyLight.eventStyle).toBe('tinted');
+    expect(breezyLight.containerRadius).toBe('10px');
+    expect(breezyLight.primaryColor).toBe('#0284C7');
+
+    // Forma (6px left accent-bar event style, top-bar Today highlight)
+    const formaDarkEmerald = resolveCalendarTheme('forma', 'dark', 'emerald');
+    expect(formaDarkEmerald.eventStyle).toBe('accent-bar');
+    expect(formaDarkEmerald.todayHeaderAccent).toBe('top-bar');
+    expect(formaDarkEmerald.primaryColor).toBe('#34D399');
+    expect(formaDarkEmerald.cellBg).toBe('#030712');
+
+    // Monarch (Material 3 Expressive: solid event style, centered header, 14px radius)
+    const monarchRose = resolveCalendarTheme('monarch', 'light', 'rose');
+    expect(monarchRose.eventStyle).toBe('solid');
+    expect(monarchRose.dayNumberAlign).toBe('center');
+    expect(monarchRose.containerRadius).toBe('14px');
+    expect(monarchRose.primaryColor).toBe('#E11D48');
+
+    // Shadcn & MUI design-system themes
+    const shadcnDark = resolveCalendarTheme('shadcn', 'dark', 'default');
+    expect(shadcnDark.category).toBe('design-system');
+    expect(shadcnDark.eventStyle).toBe('tinted');
+    expect(shadcnDark.cellBg).toBe('#030712');
+
+    const muiLight = resolveCalendarTheme('mui', 'light', 'blue');
+    expect(muiLight.category).toBe('design-system');
+    expect(muiLight.eventStyle).toBe('solid');
+    expect(muiLight.primaryColor).toBe('#0F6CBD');
+
+    // Auto colorScheme detection from Strapi Admin neutral0 token (#212134 dark vs #ffffff light)
+    expect(detectEffectiveColorScheme('auto', '#212134')).toBe('dark');
+    expect(detectEffectiveColorScheme('auto', '#181826')).toBe('dark');
+    expect(detectEffectiveColorScheme('auto', '#ffffff')).toBe('light');
+    expect(detectEffectiveColorScheme('dark', '#ffffff')).toBe('dark');
+    expect(detectEffectiveColorScheme('light', '#212134')).toBe('light');
+
+    const autoDarkBreeze = resolveCalendarTheme('breeze', 'auto', 'default', '#212134');
+    expect(autoDarkBreeze.cellBg).toBe('#030712');
+    expect(autoDarkBreeze.headerBg).toBe('#111827');
+  });
 });
+
 

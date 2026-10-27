@@ -1,6 +1,6 @@
 import type { CalendarLinkSet, ExpandedCalendarOccurrence } from './types';
 
-function escapeIcsText(value?: string | null): string {
+function escapeIcsText(value?: string): string {
   if (!value) return '';
   return String(value)
     .replace(/\\/g, '\\\\')
@@ -115,7 +115,6 @@ export function generateIcsCalendar(params: {
     lines.push('BEGIN:VEVENT');
     lines.push(`UID:${escapeIcsText(occ.occurrenceId)}@strapi-plugin-calendar`);
     lines.push(`DTSTAMP:${nowStamp}`);
-
     if (occ.allDay) {
       lines.push(`DTSTART;VALUE=DATE:${toIcsTimestamp(occ.startDate, true)}`);
       lines.push(`DTEND;VALUE=DATE:${toIcsTimestamp(occ.endDate, true)}`);
@@ -123,21 +122,16 @@ export function generateIcsCalendar(params: {
       lines.push(`DTSTART:${toIcsTimestamp(occ.startDate, false)}`);
       lines.push(`DTEND:${toIcsTimestamp(occ.endDate, false)}`);
     }
-
     lines.push(`SUMMARY:${escapeIcsText(occ.title)}`);
-
     if (occ.summary) {
       lines.push(`DESCRIPTION:${escapeIcsText(occ.summary)}`);
     }
-
     if (occ.location) {
       lines.push(`LOCATION:${escapeIcsText(occ.location)}`);
     }
-
     if (occ.category) {
       lines.push(`CATEGORIES:${escapeIcsText(occ.category)}`);
     }
-
     if (occ.alternateDates) {
       for (const alt of Object.values(occ.alternateDates)) {
         lines.push(
@@ -145,13 +139,12 @@ export function generateIcsCalendar(params: {
         );
       }
     }
-
     const icsStatus =
       occ.status === 'cancelled'
         ? 'CANCELLED'
         : occ.status === 'postponed'
-          ? 'TENTATIVE'
-          : 'CONFIRMED';
+        ? 'TENTATIVE'
+        : 'CONFIRMED';
     lines.push(`STATUS:${icsStatus}`);
     lines.push('END:VEVENT');
   }

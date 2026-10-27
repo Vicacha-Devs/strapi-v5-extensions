@@ -106,6 +106,19 @@ declare module '@strapi/strapi/admin' {
 
   export function useFetchClient(): FetchClient;
 
+  export function useNotification(): {
+    toggleNotification: (config: {
+      type?: 'success' | 'warning' | 'danger' | 'info';
+      message: string;
+    }) => void;
+  };
+
+  export const Layouts: {
+    Root: import('react').FC<Record<string, any>>;
+    Header: import('react').FC<Record<string, any>>;
+    Content: import('react').FC<Record<string, any>>;
+  };
+
   export interface StrapiAdminApp {
     customFields: {
       register(config: Record<string, unknown>): void;
@@ -136,10 +149,12 @@ declare module '@strapi/design-system' {
   export const Box: FC<DesignComponentProps>;
   export const Button: FC<DesignComponentProps>;
   export const Checkbox: FC<DesignComponentProps>;
+  export const Divider: FC<DesignComponentProps>;
   export const Flex: FC<DesignComponentProps>;
   export const NumberInput: FC<DesignComponentProps>;
   export const SingleSelect: FC<DesignComponentProps>;
   export const SingleSelectOption: FC<DesignComponentProps>;
+  export const Textarea: FC<DesignComponentProps>;
   export const TextInput: FC<DesignComponentProps>;
   export const Typography: FC<DesignComponentProps>;
 
@@ -149,6 +164,17 @@ declare module '@strapi/design-system' {
     Error: FC<DesignComponentProps>;
     Hint: FC<DesignComponentProps>;
   };
+
+  export const Tabs: {
+    Root: FC<DesignComponentProps>;
+    List: FC<DesignComponentProps>;
+    Trigger: FC<DesignComponentProps>;
+    Content: FC<DesignComponentProps>;
+  };
+}
+
+declare module 'styled-components' {
+  export function useTheme(): Record<string, any>;
 }
 
 declare module '@strapi/design-system/*';
@@ -216,6 +242,7 @@ declare module '@fullcalendar/core' {
   export interface DayCellContentArg {
     date: Date;
     dayNumberText: string;
+    isToday?: boolean;
   }
 
   export interface EventContentArg {

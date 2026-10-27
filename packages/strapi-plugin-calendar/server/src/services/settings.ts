@@ -1,9 +1,11 @@
 import type { Core } from '@strapi/strapi';
 import { PLUGIN_ID } from '../../../shared/pluginId';
-import type {
-  CalendarPluginSettings,
-  CalendarSourceMapping,
-  DiscoveredContentType,
+import {
+  CALENDAR_COLOR_PALETTES,
+  CALENDAR_THEME_PRESETS,
+  type CalendarPluginSettings,
+  type CalendarSourceMapping,
+  type DiscoveredContentType,
 } from '../../../shared/types';
 import { DEFAULT_CALENDAR_SETTINGS } from '../config';
 import { getCalendarService, type SettingsService } from '../types';
@@ -70,7 +72,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     if (Array.isArray(userConfig.recurrencePresets)) {
       for (const preset of userConfig.recurrencePresets) {
         if (!preset || !preset.id || !preset.rrule) continue;
-        const idx = mergedPresets.findIndex((p) => p.id === preset.id);
+        const idx = mergedPresets.findIndex(
+          (p) => p.id === preset.id || p.rrule === preset.rrule
+        );
         if (idx >= 0) {
           mergedPresets[idx] = { ...mergedPresets[idx], ...preset };
         } else {
@@ -86,6 +90,27 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
       secondaryCalendars: mergedCalendars,
       recurrencePresets: mergedPresets,
     };
+  };
+
+  const mergePresetLists = (
+    defaults: CalendarPluginSettings['recurrencePresets'],
+    stored: CalendarPluginSettings['recurrencePresets']
+  ) => {
+    const result = [...(defaults ?? [])];
+    if (Array.isArray(stored)) {
+      for (const item of stored) {
+        if (!item || !item.id || !item.rrule) continue;
+        const idx = result.findIndex(
+          (p) => p.id === item.id || p.rrule === item.rrule
+        );
+        if (idx >= 0) {
+          result[idx] = { ...result[idx], ...item };
+        } else {
+          result.push(item);
+        }
+      }
+    }
+    return result;
   };
 
   const service: SettingsService = {
@@ -117,14 +142,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
         }
       }
 
-      const storedPresets = Array.isArray(existing.recurrencePresets)
-        ? [...existing.recurrencePresets]
-        : [];
-      for (const defPreset of defaults.recurrencePresets ?? []) {
-        if (!storedPresets.some((p) => p.id === defPreset.id)) {
-          storedPresets.push(defPreset);
-        }
-      }
+      const storedPresets = mergePresetLists(
+        defaults.recurrencePresets,
+        existing.recurrencePresets
+      );
 
       const merged: CalendarPluginSettings = {
         ...defaults,
@@ -157,10 +178,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
           Array.isArray(stored.secondaryCalendars) && stored.secondaryCalendars.length > 0
             ? stored.secondaryCalendars
             : defaults.secondaryCalendars ?? [],
-        recurrencePresets:
-          Array.isArray(stored.recurrencePresets) && stored.recurrencePresets.length > 0
-            ? stored.recurrencePresets
-            : defaults.recurrencePresets ?? [],
+        recurrencePresets: mergePresetLists(
+          defaults.recurrencePresets,
+          stored.recurrencePresets
+        ),
       };
     },
 
@@ -170,6 +191,26 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
       const current = await service.getSettings();
       const next: CalendarPluginSettings = {
         ...current,
+        theme:
+          patch.theme && patch.theme in CALENDAR_THEME_PRESETS
+            ? patch.theme
+            : current.theme ?? 'breeze',
+        colorScheme:
+          patch.colorScheme === 'auto' ||
+          patch.colorScheme === 'light' ||
+          patch.colorScheme === 'dark'
+            ? patch.colorScheme
+            : current.colorScheme ?? 'auto',
+        themePalette:
+          patch.themePalette && patch.themePalette in CALENDAR_COLOR_PALETTES
+            ? patch.themePalette
+            : current.themePalette ?? 'default',
+        secondaryCalendarLanguage:
+          patch.secondaryCalendarLanguage === 'local' ||
+          patch.secondaryCalendarLanguage === 'ar' ||
+          patch.secondaryCalendarLanguage === 'off'
+            ? patch.secondaryCalendarLanguage
+            : current.secondaryCalendarLanguage ?? 'local',
         defaultTimezone:
           typeof patch.defaultTimezone === 'string' && patch.defaultTimezone.trim()
             ? patch.defaultTimezone.trim()
@@ -272,11 +313,26 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     discoverContentTypes(): DiscoveredContentType[] {
       const contentTypes = strapi.contentTypes ?? {};
       const discovered: DiscoveredContentType[] = [];
+      const INTERNAL_PLUGIN_PREFIXES = [
+        'plugin::upload',
+        'plugin::i18n',
+        'plugin::users-permissions',
+        'plugin::content-releases',
+        'plugin::review-workflows',
+        'plugin::navigation',
+        'plugin::email-designer-5',
+        'plugin::strapi-cache',
+        'plugin::typesense',
+        'plugin::preview-button',
+        'plugin::seo',
+      ];
 
       for (const [uid, schema] of Object.entries(contentTypes)) {
         if (!schema || typeof schema !== 'object') continue;
         if (!uid.startsWith('api::') && !uid.startsWith('plugin::')) continue;
-        if (uid.startsWith('plugin::upload') || uid.startsWith('plugin::i18n')) continue;
+        if (INTERNAL_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix))) {
+          continue;
+        }
         if (schema.kind && schema.kind !== 'collectionType') continue;
 
         const attributes = schema.attributes ?? {};
@@ -287,6 +343,15 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
             type: String(def.customField || def.type),
           }));
 
+        if (!fields.some((f) => f.name === 'publishedAt')) {
+          fields.push({ name: 'publishedAt', type: 'datetime' });
+        }
+        if (!fields.some((f) => f.name === 'createdAt')) {
+          fields.push({ name: 'createdAt', type: 'datetime' });
+        }
+
+        if (fields.length === 0) continue;
+
         discovered.push({
           uid,
           displayName: String(schema.info?.displayName || uid),
@@ -294,6 +359,18 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
           fields,
         });
       }
+
+      discovered.sort((a, b) => {
+        const score = (u: string) =>
+          u === 'plugin::events.event'
+            ? 0
+            : u === 'plugin::bookings.booking'
+              ? 1
+              : u.startsWith('api::')
+                ? 2
+                : 3;
+        return score(a.uid) - score(b.uid) || a.displayName.localeCompare(b.displayName);
+      });
 
       return discovered;
     },
