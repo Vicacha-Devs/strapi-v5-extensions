@@ -121,6 +121,16 @@ export interface LiveBroadcastScheduleSlot {
   label?: string;
 }
 
+export interface LiveBroadcastChannelItem {
+  id: string;
+  enabled: boolean;
+  title: string;
+  scheduleLabel?: string;
+  eventSlug?: string;
+  provider: MediaProviderType;
+  watchUrl: string;
+}
+
 export interface LiveBroadcastConfig {
   enabled: boolean;
   title: string;
@@ -146,6 +156,7 @@ export interface LiveBroadcastState {
   spokenLanguages: string[];
   activeEpisodeDocumentId?: string | null;
   secondaryDates?: Record<string, AlternateDateValue>;
+  streams?: LiveBroadcastChannelItem[];
 }
 
 export interface YouTubeSyncSourceConfig {
@@ -221,6 +232,7 @@ export interface MediaFeedsSettings {
   fallbackToDefaultLocale: boolean;
   podcastFeed: PodcastFeedConfig;
   liveStream: LiveBroadcastConfig;
+  liveStreams?: LiveBroadcastChannelItem[];
   youtubeApiKey?: string;
   youtubeSyncSources: YouTubeSyncSourceConfig[];
   secondaryCalendars: CalendarSystemConfig[];

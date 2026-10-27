@@ -22,9 +22,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           ? MEDIA_SERIES_UID
           : targetKey;
 
-    const schema = strapi.contentTypes?.[resolvedUid];
-    if (schema?.attributes) {
-      Object.assign(schema.attributes, extraAttributes);
+    const schema = strapi.contentTypes?.[resolvedUid] as
+      | {
+          attributes?: Record<string, Record<string, unknown>>;
+          __schema__?: { attributes?: Record<string, Record<string, unknown>> };
+        }
+      | undefined;
+
+    for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
+      if (!attrName || !attrDef || typeof attrDef !== 'object') continue;
+      if (schema?.attributes) {
+        schema.attributes[attrName] = {
+          ...(schema.attributes[attrName] ?? {}),
+          ...(attrDef as Record<string, unknown>),
+        };
+      }
+      if (schema?.__schema__?.attributes) {
+        schema.__schema__.attributes[attrName] = {
+          ...(schema.__schema__.attributes[attrName] ?? {}),
+          ...(attrDef as Record<string, unknown>),
+        };
+      }
     }
   }
 };

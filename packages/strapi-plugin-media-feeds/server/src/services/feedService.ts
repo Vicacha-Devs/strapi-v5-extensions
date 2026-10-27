@@ -229,6 +229,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         spokenLanguages: liveEpisode.spokenLanguages,
         activeEpisodeDocumentId: liveEpisode.documentId,
         secondaryDates,
+        streams: settings.liveStreams ?? [],
       };
     }
 
@@ -253,6 +254,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       spokenLanguages: settings.liveStream.spokenLanguages ?? ['es'],
       activeEpisodeDocumentId: null,
       secondaryDates,
+      streams: settings.liveStreams ?? [],
     };
   },
 

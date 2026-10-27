@@ -85,6 +85,14 @@
         }
       }
     },
+    "speakerSlug": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      }
+    },
     "seriesSlug": {
       "type": "string"
     },
