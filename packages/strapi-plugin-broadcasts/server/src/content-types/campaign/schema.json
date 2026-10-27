@@ -8,14 +8,14 @@
     "description": "Omnichannel Email, Telegram & WhatsApp broadcast campaign"
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {
     "content-manager": {
       "visible": true
     },
     "content-type-builder": {
-      "visible": false
+      "visible": true
     }
   },
   "attributes": {

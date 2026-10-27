@@ -364,7 +364,7 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
           phone,
           fullName: 'Comunidad',
           locale: settings.defaultLocale || 'es',
-          topics: [campaign.topic],
+          topics: [campaign!.topic],
         })),
       ];
 
