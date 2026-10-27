@@ -178,9 +178,9 @@ function createMockStrapi() {
       if (name === 'calendar') {
         return {
           service(svcName: string) {
-            if (svcName === 'settings') {
+            if (svcName === 'registry') {
               return {
-                registerCompanionSource(src: unknown) {
+                async registerSource(src: unknown) {
                   companionSources.push(src);
                 },
               };
