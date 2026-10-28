@@ -44,7 +44,8 @@
     "watch:link": "strapi-plugin watch:link",
     "test:ts": "npm run test:ts:front && npm run test:ts:back",
     "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
-    "test:ts:back": "tsc --noEmit -p server/tsconfig.json"
+    "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "@strapi/design-system": "^2.0.0",
@@ -62,7 +63,8 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
     "styled-components": "^6.1.13",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vitest": "^3.0.9"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",
