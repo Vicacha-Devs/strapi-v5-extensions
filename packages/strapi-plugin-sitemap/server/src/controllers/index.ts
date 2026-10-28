@@ -25,14 +25,6 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       .service('service')
       .getAllowedFields(ctx.query.singularName ?? ctx.query.type);
   },
-  adminPutOptions: async (ctx: any) => {
-    const body = ctx.request.body;
-    const requestData = body?.data !== undefined ? body.data : body;
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').updateOptions(requestData);
-  },
-  adminGetOptions: async (ctx: any) => {
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').getOptions();
-  },
   adminGetSettings: async (ctx: any) => {
     ctx.body = await strapi.plugin(PLUGIN_ID).service('settings').getSettings();
   },
