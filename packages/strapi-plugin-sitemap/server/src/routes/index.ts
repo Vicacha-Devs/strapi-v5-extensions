@@ -44,22 +44,6 @@ const admin = [
   },
   {
     method: 'GET',
-    path: '/admin-get-options',
-    handler: 'controller.adminGetOptions',
-    config: {
-      policies: [],
-    },
-  },
-  {
-    method: 'PUT',
-    path: '/admin-put-options',
-    handler: 'controller.adminPutOptions',
-    config: {
-      policies: [],
-    },
-  },
-  {
-    method: 'GET',
     path: '/settings',
     handler: 'controller.adminGetSettings',
     config: {
