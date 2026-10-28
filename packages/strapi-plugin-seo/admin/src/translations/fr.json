@@ -110,5 +110,6 @@
   "SEOPage.tab.plugin-title": "Plugins",
   "SEOPage.info.no-plugin-content-type": "Vous n'avez pas encore de content-type de plugin...",
   "SEOChecks.metaRobotsCheck.not-found": "Aucune balise meta robot n'a été trouvée.",
-  "notification.success.settings": "Paramètres enregistrés pour le content-type {collectionName}."
+  "notification.success.settings": "Paramètres enregistrés pour le content-type {collectionName}.",
+  "Modal.seo-component-empty-open-graph": "Les métadonnées Open Graph sont vides..."
 }
