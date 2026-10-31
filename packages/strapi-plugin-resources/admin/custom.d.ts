@@ -1,12 +1,5 @@
-declare module 'react' {
-  export type ReactNode =
-    | string
-    | number
-    | boolean
-    | null
-    | undefined
-    | ReactElement
-    | ReactNode[];
+declare module "react" {
+  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
 
   export interface ReactElement<P = unknown> {
     type: unknown;
@@ -36,14 +29,8 @@ declare module 'react' {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(
-    effect: () => void | (() => void),
-    deps?: readonly unknown[]
-  ): void;
-  export function useMemo<T>(
-    factory: () => T,
-    deps?: readonly unknown[]
-  ): T;
+  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
+  export function useMemo<T>(factory: () => T, deps?: readonly unknown[]): T;
   export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
     deps?: readonly unknown[]
@@ -62,8 +49,8 @@ declare module 'react' {
   export as namespace React;
 }
 
-declare module 'react/jsx-runtime' {
-  import type { ReactElement } from 'react';
+declare module "react/jsx-runtime" {
+  import type { ReactElement } from "react";
   export const Fragment: unknown;
   export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
   export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
@@ -76,20 +63,20 @@ declare module 'react/jsx-runtime' {
   }
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }
 
-declare module '@strapi/icons' {
-  import type { FC } from 'react';
+declare module "@strapi/icons" {
+  import type { FC } from "react";
   export const Book: FC<Record<string, unknown>>;
   export const Folder: FC<Record<string, unknown>>;
   export const File: FC<Record<string, unknown>>;
 }
 
-declare module '@strapi/design-system' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/design-system" {
+  import type { FC, ReactNode } from "react";
   export type DesignComponentProps = {
     children?: ReactNode;
     onClick?: (...args: never[]) => unknown;
@@ -111,9 +98,12 @@ declare module '@strapi/design-system' {
   export const Typography: FC<DesignComponentProps>;
   export const Button: FC<DesignComponentProps>;
   export const TextInput: FC<DesignComponentProps>;
+  export const NumberInput: FC<DesignComponentProps>;
   export const Checkbox: FC<DesignComponentProps>;
   export const SingleSelect: FC<DesignComponentProps>;
   export const SingleSelectOption: FC<DesignComponentProps>;
+  export const MultiSelect: FC<DesignComponentProps>;
+  export const MultiSelectOption: FC<DesignComponentProps>;
   export const Badge: FC<DesignComponentProps>;
   export const Divider: FC<DesignComponentProps>;
   export const Table: FC<DesignComponentProps>;
@@ -131,14 +121,14 @@ declare module '@strapi/design-system' {
   };
 }
 
-declare module '@strapi/strapi/admin' {
+declare module "@strapi/strapi/admin" {
   import type {
     GalleryAlbumRecord,
     GlossaryTermRecord,
     MediaLibraryAsset,
     PublicationRecord,
     ResourcesPluginSettings,
-  } from '../shared';
+  } from "../shared";
 
   export type FetchInnerData = ResourcesPluginSettings & {
     publications?: PublicationRecord[];
@@ -161,11 +151,11 @@ declare module '@strapi/strapi/admin' {
   };
 }
 
-declare module 'styled-components' {
+declare module "styled-components" {
   export function useTheme(): Record<string, unknown>;
 }
 
-declare module 'react-intl' {
+declare module "react-intl" {
   export interface MessageDescriptor {
     id: string;
     defaultMessage?: string;

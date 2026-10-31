@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Badge,
   Box,
@@ -11,13 +10,15 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
+} from "@strapi/design-system";
+import * as React from "react";
+
 import {
   CONTENT_TYPE_UIDS,
   type PublicationCategory,
   type PublicationRecord,
-} from '../../../../shared';
-import { getContentManagerUrl, useResourcesTranslation } from './uploadHelper';
+} from "../../../../shared";
+import { getContentManagerUrl, useResourcesTranslation } from "./uploadHelper";
 
 function truncateSummary(summary: string): string {
   return summary.length > 85 ? `${summary.slice(0, 85)}…` : summary;
@@ -26,8 +27,8 @@ function truncateSummary(summary: string): string {
 const LINK_STYLE: React.CSSProperties = {
   fontSize: 12,
   fontWeight: 600,
-  color: '#7b79ff',
-  textDecoration: 'underline',
+  color: "#7b79ff",
+  textDecoration: "underline",
 };
 
 interface PublicationFileCellProps {
@@ -35,10 +36,7 @@ interface PublicationFileCellProps {
   onUploadClick: (docId: string | null) => void;
 }
 
-const PublicationFileCell: React.FC<PublicationFileCellProps> = ({
-  pub,
-  onUploadClick,
-}) => {
+const PublicationFileCell: React.FC<PublicationFileCellProps> = ({ pub, onUploadClick }) => {
   const { t } = useResourcesTranslation();
   const downloadHref = pub.file?.url || pub.externalDownloadUrl;
 
@@ -50,36 +48,20 @@ const PublicationFileCell: React.FC<PublicationFileCellProps> = ({
             {pub.file.name} ({pub.file.formattedSize})
           </Badge>
           {downloadHref && (
-            <a
-              href={downloadHref}
-              target="_blank"
-              rel="noreferrer"
-              style={LINK_STYLE}
-            >
-              {t('common.open', 'Open')}
+            <a href={downloadHref} target="_blank" rel="noreferrer" style={LINK_STYLE}>
+              {t("common.open", "Open")}
             </a>
           )}
         </>
       ) : pub.externalDownloadUrl ? (
-        <a
-          href={pub.externalDownloadUrl}
-          target="_blank"
-          rel="noreferrer"
-          style={LINK_STYLE}
-        >
-          {t('pub.external_link', 'External Link')}
+        <a href={pub.externalDownloadUrl} target="_blank" rel="noreferrer" style={LINK_STYLE}>
+          {t("pub.external_link", "External Link")}
         </a>
       ) : (
-        <Badge>{t('pub.no_file_attached', 'No file attached')}</Badge>
+        <Badge>{t("pub.no_file_attached", "No file attached")}</Badge>
       )}
-      <Button
-        size="S"
-        variant="secondary"
-        onClick={() => onUploadClick(pub.documentId || null)}
-      >
-        {pub.file
-          ? t('pub.btn.replace_pdf', 'Replace PDF')
-          : t('pub.btn.upload_pdf', 'Upload PDF')}
+      <Button size="S" variant="secondary" onClick={() => onUploadClick(pub.documentId || null)}>
+        {pub.file ? t("pub.btn.replace_pdf", "Replace PDF") : t("pub.btn.upload_pdf", "Upload PDF")}
       </Button>
     </Flex>
   );
@@ -105,29 +87,23 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
       <Thead>
         <Tr>
           <Th>
+            <Typography variant="sigma">{t("pub.table.publication", "Publication")}</Typography>
+          </Th>
+          <Th>
+            <Typography variant="sigma">{t("page.ui.category", "Category")}</Typography>
+          </Th>
+          <Th>
             <Typography variant="sigma">
-              {t('pub.table.publication', 'Publication')}
+              {t("pub.table.pdf_download_file", "PDF / Download File")}
             </Typography>
           </Th>
           <Th>
             <Typography variant="sigma">
-              {t('page.ui.category', 'Category')}
+              {t("pub.table.downloads_date", "Downloads & Date")}
             </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('pub.table.pdf_download_file', 'PDF / Download File')}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {t('pub.table.downloads_date', 'Downloads & Date')}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {t('common.actions', 'Actions')}
-            </Typography>
+            <Typography variant="sigma">{t("common.actions", "Actions")}</Typography>
           </Th>
         </Tr>
       </Thead>
@@ -145,7 +121,7 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
                   )}
                   {pub.authorName && (
                     <Typography variant="pi" textColor="neutral500">
-                      {t('pub.by_author', 'By')} {pub.authorName}
+                      {t("pub.by_author", "By")} {pub.authorName}
                     </Typography>
                   )}
                 </Flex>
@@ -155,15 +131,12 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
               <Badge>{getCategoryLabel(pub.category)}</Badge>
             </Td>
             <Td>
-              <PublicationFileCell
-                pub={pub}
-                onUploadClick={onUploadRowClick}
-              />
+              <PublicationFileCell pub={pub} onUploadClick={onUploadRowClick} />
             </Td>
             <Td>
               <Flex direction="column" alignItems="flex-start" gap={1}>
                 <Badge>
-                  {pub.downloadCount} {t('page.ui.downloads', 'downloads')}
+                  {pub.downloadCount} {t("page.ui.downloads", "downloads")}
                 </Badge>
                 {pub.secondaryDateFormatted && (
                   <Typography variant="pi" textColor="neutral600">
@@ -185,14 +158,10 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
                     );
                   }}
                 >
-                  {t('common.edit', 'Edit')}
+                  {t("common.edit", "Edit")}
                 </Button>
-                <Button
-                  size="S"
-                  variant="danger-light"
-                  onClick={() => onDelete(pub)}
-                >
-                  {t('common.delete', 'Delete')}
+                <Button size="S" variant="danger-light" onClick={() => onDelete(pub)}>
+                  {t("common.delete", "Delete")}
                 </Button>
               </Flex>
             </Td>

@@ -1,6 +1,6 @@
-import settings from './settings';
-import mediaLibraryService from './mediaLibraryService';
-import catalogService from './catalogService';
+import catalogService from "./catalogService";
+import mediaLibraryService from "./mediaLibraryService";
+import settings from "./settings";
 
 const services: Record<string, unknown> = {
   settings,

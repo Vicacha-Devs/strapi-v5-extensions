@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Badge,
   Box,
@@ -11,18 +10,16 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
+} from "@strapi/design-system";
+import * as React from "react";
+
 import {
   CONTENT_TYPE_UIDS,
   type GalleryAlbumCategory,
   type GalleryAlbumRecord,
   type MediaLibraryAsset,
-} from '../../../../shared';
-import {
-  CARD_BORDER_STYLE,
-  getContentManagerUrl,
-  useResourcesTranslation,
-} from './uploadHelper';
+} from "../../../../shared";
+import { CARD_BORDER_STYLE, getContentManagerUrl, useResourcesTranslation } from "./uploadHelper";
 
 function truncateText(value: string, max: number): string {
   return value.length > max ? `${value.slice(0, max)}…` : value;
@@ -50,8 +47,7 @@ export const GalleryMediaPicker: React.FC<GalleryMediaPickerProps> = ({
       {selectedAssets.length > 0 && (
         <Box paddingTop={4}>
           <Typography variant="pi" textColor="neutral600">
-            {t('gallery.selected_photos', 'Selected Album Photos')} (
-            {selectedAssets.length}):
+            {t("gallery.selected_photos", "Selected Album Photos")} ({selectedAssets.length}):
           </Typography>
           <Flex gap={2} paddingTop={2} wrap="wrap">
             {selectedAssets.map((img) => (
@@ -61,9 +57,9 @@ export const GalleryMediaPicker: React.FC<GalleryMediaPickerProps> = ({
                 padding={2}
                 hasRadius
                 style={{
-                  cursor: 'pointer',
-                  border: '2px solid #7b79ff',
-                  background: 'rgba(123, 121, 255, 0.14)',
+                  cursor: "pointer",
+                  border: "2px solid #7b79ff",
+                  background: "rgba(123, 121, 255, 0.14)",
                 }}
               >
                 <Flex gap={2} alignItems="center">
@@ -74,14 +70,12 @@ export const GalleryMediaPicker: React.FC<GalleryMediaPickerProps> = ({
                       style={{
                         width: 28,
                         height: 28,
-                        objectFit: 'cover',
+                        objectFit: "cover",
                         borderRadius: 4,
                       }}
                     />
                   )}
-                  <Typography variant="pi">
-                    {truncateText(img.name, 22)} ×
-                  </Typography>
+                  <Typography variant="pi">{truncateText(img.name, 22)} ×</Typography>
                 </Flex>
               </Box>
             ))}
@@ -90,24 +84,16 @@ export const GalleryMediaPicker: React.FC<GalleryMediaPickerProps> = ({
       )}
 
       {showLibraryPicker && imageAssets.length > 0 && (
-        <Box
-          padding={4}
-          marginTop={4}
-          background="neutral100"
-          hasRadius
-          style={CARD_BORDER_STYLE}
-        >
+        <Box padding={4} marginTop={4} background="neutral100" hasRadius style={CARD_BORDER_STYLE}>
           <Typography variant="pi" textColor="neutral600">
             {t(
-              'gallery.picker_hint',
-              'Click any Media Library image below to include or exclude it from this album:'
+              "gallery.picker_hint",
+              "Click any Media Library image below to include or exclude it from this album:"
             )}
           </Typography>
           <Flex gap={2} paddingTop={2} wrap="wrap">
             {imageAssets.slice(0, 24).map((img) => {
-              const isSelected = selectedPhotoIds.some(
-                (id) => String(id) === String(img.id)
-              );
+              const isSelected = selectedPhotoIds.some((id) => String(id) === String(img.id));
               return (
                 <Box
                   key={String(img.id)}
@@ -116,10 +102,8 @@ export const GalleryMediaPicker: React.FC<GalleryMediaPickerProps> = ({
                   background="neutral0"
                   hasRadius
                   style={{
-                    cursor: 'pointer',
-                    border: isSelected
-                      ? '2px solid #7b79ff'
-                      : '1px solid rgba(128,128,128,0.28)',
+                    cursor: "pointer",
+                    border: isSelected ? "2px solid #7b79ff" : "1px solid rgba(128,128,128,0.28)",
                   }}
                 >
                   <Flex gap={2} alignItems="center">
@@ -130,14 +114,12 @@ export const GalleryMediaPicker: React.FC<GalleryMediaPickerProps> = ({
                         style={{
                           width: 32,
                           height: 32,
-                          objectFit: 'cover',
+                          objectFit: "cover",
                           borderRadius: 4,
                         }}
                       />
                     )}
-                    <Typography variant="pi">
-                      {truncateText(img.name, 22)}
-                    </Typography>
+                    <Typography variant="pi">{truncateText(img.name, 22)}</Typography>
                   </Flex>
                 </Box>
               );
@@ -169,24 +151,16 @@ export const PhotoGalleriesTable: React.FC<PhotoGalleriesTableProps> = ({
       <Thead>
         <Tr>
           <Th>
-            <Typography variant="sigma">
-              {t('page.ui.album', 'Album')}
-            </Typography>
+            <Typography variant="sigma">{t("page.ui.album", "Album")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('page.ui.category', 'Category')}
-            </Typography>
+            <Typography variant="sigma">{t("page.ui.category", "Category")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('page.ui.photos', 'Photos')}
-            </Typography>
+            <Typography variant="sigma">{t("page.ui.photos", "Photos")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('common.actions', 'Actions')}
-            </Typography>
+            <Typography variant="sigma">{t("common.actions", "Actions")}</Typography>
           </Th>
         </Tr>
       </Thead>
@@ -203,7 +177,7 @@ export const PhotoGalleriesTable: React.FC<PhotoGalleriesTableProps> = ({
                       style={{
                         width: 44,
                         height: 44,
-                        objectFit: 'cover',
+                        objectFit: "cover",
                         borderRadius: 6,
                       }}
                     />
@@ -225,8 +199,7 @@ export const PhotoGalleriesTable: React.FC<PhotoGalleriesTableProps> = ({
             <Td>
               <Flex gap={2} alignItems="center" wrap="wrap">
                 <Badge active={album.photoCount > 0}>
-                  {album.photoCount}{' '}
-                  {t('page.ui.photos', 'Photos').toLowerCase()}
+                  {album.photoCount} {t("page.ui.photos", "Photos").toLowerCase()}
                 </Badge>
                 {(album.photos || []).slice(0, 4).map((p) => (
                   <img
@@ -237,17 +210,13 @@ export const PhotoGalleriesTable: React.FC<PhotoGalleriesTableProps> = ({
                     style={{
                       width: 28,
                       height: 28,
-                      objectFit: 'cover',
+                      objectFit: "cover",
                       borderRadius: 4,
                     }}
                   />
                 ))}
-                <Button
-                  size="S"
-                  variant="secondary"
-                  onClick={() => onAddPhotosToAlbum(album)}
-                >
-                  {t('gallery.btn.add_photos', '+ Add Photos')}
+                <Button size="S" variant="secondary" onClick={() => onAddPhotosToAlbum(album)}>
+                  {t("gallery.btn.add_photos", "+ Add Photos")}
                 </Button>
               </Flex>
             </Td>
@@ -264,14 +233,10 @@ export const PhotoGalleriesTable: React.FC<PhotoGalleriesTableProps> = ({
                     );
                   }}
                 >
-                  {t('common.edit', 'Edit')}
+                  {t("common.edit", "Edit")}
                 </Button>
-                <Button
-                  size="S"
-                  variant="danger-light"
-                  onClick={() => onDeleteAlbum(album)}
-                >
-                  {t('common.delete', 'Delete')}
+                <Button size="S" variant="danger-light" onClick={() => onDeleteAlbum(album)}>
+                  {t("common.delete", "Delete")}
                 </Button>
               </Flex>
             </Td>

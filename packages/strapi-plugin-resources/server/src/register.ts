@@ -1,5 +1,6 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../shared';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../shared";
 
 interface MutableContentTypeSchema {
   attributes?: Record<string, Record<string, unknown>>;
@@ -13,7 +14,7 @@ function mergeTargetAttributes(
 ): void {
   if (!target) return;
   target[attrName] = {
-    ...(target[attrName] ?? {}),
+    ...target[attrName],
     ...attrDef,
   };
 }
@@ -24,7 +25,7 @@ function applyExtensionToSchema(
 ): void {
   if (!schema) return;
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
-    if (!attrName || !attrDef || typeof attrDef !== 'object') continue;
+    if (!attrName || !attrDef || typeof attrDef !== "object") continue;
     mergeTargetAttributes(schema.attributes, attrName, attrDef);
     mergeTargetAttributes(schema.__schema__?.attributes, attrName, attrDef);
   }
@@ -36,19 +37,17 @@ const register = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const extensions = config.schemaExtensions ?? {};
-  const contentTypes = strapi.contentTypes as
-    | Record<string, MutableContentTypeSchema>
-    | undefined;
+  const contentTypes = strapi.contentTypes as Record<string, MutableContentTypeSchema> | undefined;
 
   for (const [targetKey, extraAttributes] of Object.entries(extensions)) {
-    if (!extraAttributes || typeof extraAttributes !== 'object') continue;
-    const resolvedUid = targetKey.startsWith('plugin::')
+    if (!extraAttributes || typeof extraAttributes !== "object") continue;
+    const resolvedUid = targetKey.startsWith("plugin::")
       ? targetKey
       : `plugin::${PLUGIN_ID}.${targetKey}`;
     applyExtensionToSchema(contentTypes?.[resolvedUid], extraAttributes);
   }
 
-  strapi.log.info('[strapi-plugin-resources] Registering Media Library & Digital Catalog plugin');
+  strapi.log.info("[strapi-plugin-resources] Registering Media Library & Digital Catalog plugin");
 };
 
 export default register;

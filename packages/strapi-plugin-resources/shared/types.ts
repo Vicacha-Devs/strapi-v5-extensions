@@ -1,26 +1,26 @@
 export type PublicationCategory =
-  | 'guide'
-  | 'book'
-  | 'pamphlet'
-  | 'press_kit'
-  | 'academic'
-  | 'general';
+  | "guide"
+  | "book"
+  | "pamphlet"
+  | "press_kit"
+  | "academic"
+  | "general";
 
 export type GalleryAlbumCategory =
-  | 'architecture'
-  | 'community'
-  | 'events'
-  | 'ramadan_eid'
-  | 'heritage'
-  | 'press';
+  | "architecture"
+  | "community"
+  | "events"
+  | "ramadan_eid"
+  | "heritage"
+  | "press";
 
 export type GlossaryCategory =
-  | 'beliefs'
-  | 'worship'
-  | 'ethics'
-  | 'history'
-  | 'community'
-  | 'general';
+  | "beliefs"
+  | "worship"
+  | "ethics"
+  | "history"
+  | "community"
+  | "general";
 
 export interface MediaLibraryFormatVariant {
   url: string;

@@ -14,36 +14,34 @@ import {
   type PublicationRecord,
   type ResourcesPluginSettings,
   type SecondaryCalendarId,
-} from '../../../shared';
+} from "../../../shared";
 
-function asString(val: unknown, fallback = ''): string {
-  return typeof val === 'string' ? val : fallback;
+function asString(val: unknown, fallback = ""): string {
+  return typeof val === "string" ? val : fallback;
 }
 
 function asNonEmptyString(val: unknown, fallback: string): string {
-  return typeof val === 'string' && val ? val : fallback;
+  return typeof val === "string" && val ? val : fallback;
 }
 
 function asOptString(val: unknown): string | undefined {
-  return typeof val === 'string' ? val : undefined;
+  return typeof val === "string" ? val : undefined;
 }
 
 function asTrimmedOptString(val: unknown): string | undefined {
-  return typeof val === 'string' && val.trim() ? val.trim() : undefined;
+  return typeof val === "string" && val.trim() ? val.trim() : undefined;
 }
 
 function asNumber(val: unknown, fallback = 0): number {
-  return typeof val === 'number' ? val : fallback;
+  return typeof val === "number" ? val : fallback;
 }
 
 function asOptNumber(val: unknown): number | undefined {
-  return typeof val === 'number' ? val : undefined;
+  return typeof val === "number" ? val : undefined;
 }
 
 function resolveDocId(row: Record<string, unknown>): string {
-  return typeof row.documentId === 'string'
-    ? row.documentId
-    : String(row.id ?? '');
+  return typeof row.documentId === "string" ? row.documentId : String(row.id ?? "");
 }
 
 function resolveSecondaryDateFormatted(
@@ -83,7 +81,7 @@ export function normalizePublicationRow(
     title: asString(row.title),
     slug: asString(row.slug),
     summary: asString(row.summary),
-    category: (row.category as PublicationCategory) || 'guide',
+    category: (row.category as PublicationCategory) || "guide",
     authorName: asOptString(row.authorName),
     isbnOrReference: asOptString(row.isbnOrReference),
     pageCount: asOptNumber(row.pageCount),
@@ -102,10 +100,7 @@ export function normalizePublicationRow(
     allowPublicDownload: row.allowPublicDownload !== false,
     externalDownloadUrl: asOptString(row.externalDownloadUrl),
     file: normalizeUploadFile(row.file, settings.enableCloudinaryOptimization),
-    coverImage: normalizeUploadFile(
-      row.coverImage,
-      settings.enableCloudinaryOptimization
-    ),
+    coverImage: normalizeUploadFile(row.coverImage, settings.enableCloudinaryOptimization),
     locale,
   };
 }
@@ -117,17 +112,9 @@ export function normalizeGalleryAlbumRow(
   const locale = asNonEmptyString(row.locale, settings.defaultLocale);
   const eventDate = asOptString(row.eventDate);
   const secondaryDateOverride = asTrimmedOptString(row.secondaryDateOverride);
-  const photos = normalizePhotoArray(
-    row.photos,
-    settings.enableCloudinaryOptimization
-  );
+  const photos = normalizePhotoArray(row.photos, settings.enableCloudinaryOptimization);
   const coverPhoto =
-    normalizeUploadFile(
-      row.coverPhoto,
-      settings.enableCloudinaryOptimization
-    ) ??
-    photos[0] ??
-    null;
+    normalizeUploadFile(row.coverPhoto, settings.enableCloudinaryOptimization) ?? photos[0] ?? null;
   const storedPhotoCount = Math.max(0, asNumber(row.photoCount, 0));
 
   return {
@@ -135,7 +122,7 @@ export function normalizeGalleryAlbumRow(
     title: asString(row.title),
     slug: asString(row.slug),
     description: asString(row.description),
-    category: (row.category as GalleryAlbumCategory) || 'community',
+    category: (row.category as GalleryAlbumCategory) || "community",
     eventDate,
     secondaryDateOverride,
     secondaryDateFormatted: resolveSecondaryDateFormatted(
@@ -144,8 +131,7 @@ export function normalizeGalleryAlbumRow(
       settings,
       locale
     ),
-    mediaFolderId:
-      typeof row.mediaFolderId === 'number' ? row.mediaFolderId : null,
+    mediaFolderId: typeof row.mediaFolderId === "number" ? row.mediaFolderId : null,
     mediaFolderPath: asOptString(row.mediaFolderPath),
     photographerCredit: asOptString(row.photographerCredit),
     framingNotes: asOptString(row.framingNotes),
@@ -160,7 +146,7 @@ export function normalizeGalleryAlbumRow(
 
 function normalizeStringArray(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter((t): t is string => typeof t === 'string');
+  return raw.filter((t): t is string => typeof t === "string");
 }
 
 export function normalizeGlossaryTermRow(
@@ -175,8 +161,8 @@ export function normalizeGlossaryTermRow(
     nativeScript: asOptString(row.nativeScript),
     transliteration: asOptString(row.transliteration),
     definition: asString(row.definition),
-    category: (row.category as GlossaryCategory) || 'general',
-    letterGroup: asNonEmptyString(row.letterGroup, 'A'),
+    category: (row.category as GlossaryCategory) || "general",
+    letterGroup: asNonEmptyString(row.letterGroup, "A"),
     relatedTerms: normalizeStringArray(row.relatedTerms),
     featured: Boolean(row.featured),
     pronunciationAudio: normalizeUploadFile(
@@ -209,11 +195,8 @@ export function assertPublicationDownloadable(
   }
 }
 
-export function resolvePublicationDownloadUrl(
-  record: PublicationRecord,
-  slug: string
-): string {
-  const downloadUrl = record.file?.url || record.externalDownloadUrl || '';
+export function resolvePublicationDownloadUrl(record: PublicationRecord, slug: string): string {
+  const downloadUrl = record.file?.url || record.externalDownloadUrl || "";
   if (!downloadUrl) {
     throw new Error(`Publication "${slug}" has no downloadable file attached`);
   }
@@ -227,16 +210,16 @@ export function buildDownloadTicket(
 ): DownloadTicketResult {
   const fileName = sanitizeFilename(
     record.file?.name || `${record.slug}.pdf`,
-    record.file?.ext || '.pdf'
+    record.file?.ext || ".pdf"
   );
-  const mime = record.file?.mime || 'application/pdf';
+  const mime = record.file?.mime || "application/pdf";
   return {
     slug: record.slug,
     title: record.title,
     fileName,
     downloadUrl,
     mime,
-    formattedSize: record.file?.formattedSize || 'PDF',
+    formattedSize: record.file?.formattedSize || "PDF",
     downloadCount: nextCount,
     headers: buildAttachmentHeaders(fileName, mime),
   };
@@ -272,7 +255,7 @@ export function mergeRecordPayload(
 ): Record<string, unknown> {
   return {
     ...existing,
-    ...(payload && typeof payload === 'object' ? payload : {}),
+    ...(payload && typeof payload === "object" ? payload : {}),
   };
 }
 
@@ -286,10 +269,7 @@ export function buildGalleryAlbumUpdateData(
   const photoIds = validatedData.photos;
   const hasPhotos = Array.isArray(photoIds);
   const shouldDefaultCover =
-    hasPhotos &&
-    photoIds.length > 0 &&
-    !validatedData.coverPhoto &&
-    !existing.coverPhoto;
+    hasPhotos && photoIds.length > 0 && !validatedData.coverPhoto && !existing.coverPhoto;
 
   return {
     ...validatedData,

@@ -71,14 +71,7 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": [
-        "beliefs",
-        "worship",
-        "ethics",
-        "history",
-        "community",
-        "general"
-      ],
+      "enum": ["beliefs", "worship", "ethics", "history", "community", "general"],
       "default": "general",
       "required": true,
       "pluginOptions": {

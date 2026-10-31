@@ -1,16 +1,16 @@
-import { CM_DESCRIPTION_TRANSLATIONS } from './translations/cmDescriptions';
-import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
-import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
-import { PLUGIN_ID } from './pluginId';
-import { Initializer } from './components/Initializer';
-import { PluginIcon } from './components/PluginIcon';
+import { Initializer } from "./components/Initializer";
+import { PluginIcon } from "./components/PluginIcon";
+import { PLUGIN_ID } from "./pluginId";
+import { CM_DESCRIPTION_TRANSLATIONS } from "./translations/cmDescriptions";
+import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
+import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
 
 const LOADED_TRADS: Record<string, Record<string, string>> = {};
 
 const PLUGIN_CONTENT_TYPES = [
-  'plugin::resources.publication',
-  'plugin::resources.gallery-album',
-  'plugin::resources.glossary-term',
+  "plugin::resources.publication",
+  "plugin::resources.gallery-album",
+  "plugin::resources.glossary-term",
 ];
 
 interface QueryPlugins {
@@ -51,29 +51,25 @@ function getGlobalI18nMap(): Record<string, Record<string, string>> {
 
 function resolveActiveLocale(query?: EditViewQuery): string {
   const fromQuery = query?.plugins?.i18n?.locale;
-  if (typeof fromQuery === 'string' && fromQuery) {
+  if (typeof fromQuery === "string" && fromQuery) {
     return fromQuery;
   }
-  if (typeof window !== 'undefined') {
-    const urlLoc = new URLSearchParams(window.location.search).get(
-      'plugins[i18n][locale]'
-    );
+  if (typeof window !== "undefined") {
+    const urlLoc = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
     if (urlLoc) return urlLoc;
     try {
-      const stored = window.localStorage
-        ?.getItem('strapi-admin-language')
-        ?.replace(/^"|"$/g, '');
+      const stored = window.localStorage?.getItem("strapi-admin-language")?.replace(/^"|"$/g, "");
       if (stored) return stored;
     } catch {
       // Ignore storage access errors
     }
   }
-  return 'en';
+  return "en";
 }
 
 function detectPluginUidFromLocation(): string | null {
-  if (typeof window === 'undefined') return null;
-  const pathname = window.location.pathname || '';
+  if (typeof window === "undefined") return null;
+  const pathname = window.location.pathname || "";
   for (const uid of PLUGIN_CONTENT_TYPES) {
     if (pathname.includes(uid)) {
       return uid;
@@ -111,10 +107,10 @@ export default {
       icon: PluginIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.plugin.name`,
-        defaultMessage: 'Resources & Media',
+        defaultMessage: "Resources & Media",
       },
       Component: () =>
-        import('./pages/ResourcesHomePage').then((mod) => ({
+        import("./pages/ResourcesHomePage").then((mod) => ({
           default: mod.ResourcesHomePage,
         })),
       permissions: [],
@@ -125,19 +121,19 @@ export default {
         id: PLUGIN_ID,
         intlLabel: {
           id: `${PLUGIN_ID}.settings.section`,
-          defaultMessage: 'Resources & Media Library',
+          defaultMessage: "Resources & Media Library",
         },
       },
       [
         {
           intlLabel: {
             id: `${PLUGIN_ID}.settings.page.title`,
-            defaultMessage: 'Media Library & Catalog Settings',
+            defaultMessage: "Media Library & Catalog Settings",
           },
           id: `${PLUGIN_ID}-settings`,
           to: `${PLUGIN_ID}`,
           Component: () =>
-            import('./pages/SettingsPage').then((mod) => ({
+            import("./pages/SettingsPage").then((mod) => ({
               default: mod.SettingsPage,
             })),
           permissions: [],
@@ -162,47 +158,38 @@ export default {
       }
     ) => void;
   }) {
-    if (typeof app.registerHook === 'function') {
-      app.registerHook(
-        'Admin/CM/pages/EditView/mutate-edit-view-layout',
-        ({ layout, query }) => {
-          const uid = detectPluginUidFromLocation();
-          if (!uid || !Array.isArray(layout?.layout)) {
-            return { layout, query };
-          }
-          const locale = resolveActiveLocale(query);
-          const globalMap = getGlobalI18nMap();
-          const dict =
-            LOADED_TRADS[locale] ||
-            globalMap[locale] ||
-            LOADED_TRADS.en ||
-            {};
-
-          const nextPanels = layout.layout.map((panel) =>
-            Array.isArray(panel)
-              ? panel.map((row) =>
-                  Array.isArray(row)
-                    ? row.map((field) => localizeField(field, uid, dict))
-                    : row
-                )
-              : panel
-          );
-
-          return {
-            query,
-            layout: {
-              ...layout,
-              layout: nextPanels,
-            },
-          };
+    if (typeof app.registerHook === "function") {
+      app.registerHook("Admin/CM/pages/EditView/mutate-edit-view-layout", ({ layout, query }) => {
+        const uid = detectPluginUidFromLocation();
+        if (!uid || !Array.isArray(layout?.layout)) {
+          return { layout, query };
         }
-      );
+        const locale = resolveActiveLocale(query);
+        const globalMap = getGlobalI18nMap();
+        const dict = LOADED_TRADS[locale] || globalMap[locale] || LOADED_TRADS.en || {};
+
+        const nextPanels = layout.layout.map((panel) =>
+          Array.isArray(panel)
+            ? panel.map((row) =>
+                Array.isArray(row) ? row.map((field) => localizeField(field, uid, dict)) : row
+              )
+            : panel
+        );
+
+        return {
+          query,
+          layout: {
+            ...layout,
+            layout: nextPanels,
+          },
+        };
+      });
     }
   },
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
     const allLocales = Array.from(
-      new Set([...locales, 'en', 'es', 'ar', 'tr', 'fr', 'de', 'it', 'pt', 'ru', 'zh'])
+      new Set([...locales, "en", "es", "ar", "tr", "fr", "de", "it", "pt", "ru", "zh"])
     );
     return Promise.all(
       allLocales.map(async (locale) => {

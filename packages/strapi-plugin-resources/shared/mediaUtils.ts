@@ -1,28 +1,25 @@
 import {
   DEFAULT_ALLOWED_DOWNLOAD_EXTENSIONS,
   DEFAULT_ALLOWED_DOWNLOAD_MIME_TYPES,
-} from './constants';
-import type { MediaLibraryAsset, MediaLibraryFormatVariant } from './types';
+} from "./constants";
+import type { MediaLibraryAsset, MediaLibraryFormatVariant } from "./types";
 
 /**
  * Strips path traversal sequences (`../`, `..\\`), directory separators,
  * quotes, and control characters from a filename before use in HTTP headers.
  */
-export function sanitizeFilename(rawName: unknown, fallbackExt = '.pdf'): string {
-  const input = typeof rawName === 'string' ? rawName.trim() : '';
-  const base = input
-    .replace(/\\/g, '/')
-    .split('/')
-    .pop() || '';
+export function sanitizeFilename(rawName: unknown, fallbackExt = ".pdf"): string {
+  const input = typeof rawName === "string" ? rawName.trim() : "";
+  const base = input.replace(/\\/g, "/").split("/").pop() || "";
   const cleaned = base
-    .replace(/\.\.+/g, '.')
-    .replace(/[^a-zA-Z0-9._-]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^[-.]+|[-.]+$/g, '')
+    .replace(/\.\.+/g, ".")
+    .replace(/[^a-zA-Z0-9._-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^[-.]+|[-.]+$/g, "")
     .slice(0, 120);
 
   if (!cleaned) {
-    return `resource${fallbackExt.startsWith('.') ? fallbackExt : `.${fallbackExt}`}`;
+    return `resource${fallbackExt.startsWith(".") ? fallbackExt : `.${fallbackExt}`}`;
   }
   return cleaned;
 }
@@ -37,11 +34,10 @@ export function isAllowedDownloadAsset(
   allowedMimeTypes: string[] = DEFAULT_ALLOWED_DOWNLOAD_MIME_TYPES
 ): boolean {
   const normalizedExt =
-    typeof ext === 'string' && ext.trim()
-      ? (ext.trim().startsWith('.') ? ext.trim() : `.${ext.trim()}`).toLowerCase()
-      : '';
-  const normalizedMime =
-    typeof mime === 'string' ? mime.trim().toLowerCase() : '';
+    typeof ext === "string" && ext.trim()
+      ? (ext.trim().startsWith(".") ? ext.trim() : `.${ext.trim()}`).toLowerCase()
+      : "";
+  const normalizedMime = typeof mime === "string" ? mime.trim().toLowerCase() : "";
 
   const extAllowed =
     normalizedExt.length > 0 &&
@@ -58,19 +54,19 @@ export function isAllowedDownloadAsset(
  */
 export function buildAttachmentHeaders(
   fileName: string,
-  mime = 'application/pdf'
+  mime = "application/pdf"
 ): Record<string, string> {
   const safeName = sanitizeFilename(fileName);
   const safeMime =
-    typeof mime === 'string' && /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(mime.trim())
+    typeof mime === "string" && /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(mime.trim())
       ? mime.trim()
-      : 'application/octet-stream';
+      : "application/octet-stream";
 
   return {
-    'Content-Disposition': `attachment; filename="${safeName}"`,
-    'X-Content-Type-Options': 'nosniff',
-    'Content-Type': safeMime,
-    'Cache-Control': 'private, no-store',
+    "Content-Disposition": `attachment; filename="${safeName}"`,
+    "X-Content-Type-Options": "nosniff",
+    "Content-Type": safeMime,
+    "Cache-Control": "private, no-store",
   };
 }
 
@@ -83,25 +79,21 @@ export function optimizeCloudinaryMediaUrl(
   enableOptimization = true,
   width?: number
 ): string {
-  if (typeof rawUrl !== 'string' || !rawUrl.trim()) return '';
+  if (typeof rawUrl !== "string" || !rawUrl.trim()) return "";
   const url = rawUrl.trim();
-  if (
-    !enableOptimization ||
-    !url.includes('res.cloudinary.com') ||
-    !url.includes('/upload/')
-  ) {
+  if (!enableOptimization || !url.includes("res.cloudinary.com") || !url.includes("/upload/")) {
     return url;
   }
 
   const transform =
-    typeof width === 'number' && width > 0
+    typeof width === "number" && width > 0
       ? `f_auto,q_auto,w_${Math.round(width)}`
-      : 'f_auto,q_auto';
+      : "f_auto,q_auto";
 
   if (url.includes(`/upload/${transform}/`)) {
     return url;
   }
-  return url.replace('/upload/', `/upload/${transform}/`);
+  return url.replace("/upload/", `/upload/${transform}/`);
 }
 
 /**
@@ -109,7 +101,7 @@ export function optimizeCloudinaryMediaUrl(
  */
 export function formatMediaSizeFromKB(sizeInKB: unknown): string {
   const kb = Number(sizeInKB);
-  if (!Number.isFinite(kb) || kb <= 0) return '0 KB';
+  if (!Number.isFinite(kb) || kb <= 0) return "0 KB";
   if (kb < 1024) {
     return `${Math.max(1, Math.round(kb))} KB`;
   }
@@ -118,28 +110,25 @@ export function formatMediaSizeFromKB(sizeInKB: unknown): string {
 }
 
 function optNumber(val: unknown): number | undefined {
-  return typeof val === 'number' ? val : undefined;
+  return typeof val === "number" ? val : undefined;
 }
 
 function optString(val: unknown): string | undefined {
-  return typeof val === 'string' ? val : undefined;
+  return typeof val === "string" ? val : undefined;
 }
 
 function normalizeFormatVariants(
   rawFormats: unknown,
   enableCloudinaryOptimization: boolean
 ): Record<string, MediaLibraryFormatVariant> {
-  if (!rawFormats || typeof rawFormats !== 'object') return {};
+  if (!rawFormats || typeof rawFormats !== "object") return {};
   const formats: Record<string, MediaLibraryFormatVariant> = {};
   for (const [key, variant] of Object.entries(
     rawFormats as Record<string, Record<string, unknown>>
   )) {
-    if (variant && typeof variant.url === 'string' && variant.url.trim()) {
+    if (variant && typeof variant.url === "string" && variant.url.trim()) {
       formats[key] = {
-        url: optimizeCloudinaryMediaUrl(
-          variant.url,
-          enableCloudinaryOptimization
-        ),
+        url: optimizeCloudinaryMediaUrl(variant.url, enableCloudinaryOptimization),
         width: optNumber(variant.width),
         height: optNumber(variant.height),
         mime: optString(variant.mime),
@@ -155,24 +144,20 @@ function resolveThumbnailUrl(
   rawUrl: string,
   enableCloudinaryOptimization: boolean
 ): string {
-  const candidate =
-    formats.medium?.url ?? formats.small?.url ?? formats.thumbnail?.url;
-  return (
-    candidate ??
-    optimizeCloudinaryMediaUrl(rawUrl, enableCloudinaryOptimization, 640)
-  );
+  const candidate = formats.medium?.url ?? formats.small?.url ?? formats.thumbnail?.url;
+  return candidate ?? optimizeCloudinaryMediaUrl(rawUrl, enableCloudinaryOptimization, 640);
 }
 
 function resolveAssetId(val: unknown): number | string | undefined {
-  return typeof val === 'number' || typeof val === 'string' ? val : undefined;
+  return typeof val === "number" || typeof val === "string" ? val : undefined;
 }
 
 function resolveAltText(val: unknown, fallback: string): string {
-  return typeof val === 'string' && val.trim() ? val.trim() : fallback;
+  return typeof val === "string" && val.trim() ? val.trim() : fallback;
 }
 
 function resolveFiniteSizeKB(val: unknown): number {
-  return typeof val === 'number' && Number.isFinite(val) ? val : 0;
+  return typeof val === "number" && Number.isFinite(val) ? val : 0;
 }
 
 /**
@@ -182,36 +167,26 @@ export function normalizeUploadFile(
   rawFile: unknown,
   enableCloudinaryOptimization = true
 ): MediaLibraryAsset | null {
-  if (!rawFile || typeof rawFile !== 'object') return null;
+  if (!rawFile || typeof rawFile !== "object") return null;
   const f = rawFile as Record<string, unknown>;
-  const rawUrl = typeof f.url === 'string' ? f.url.trim() : '';
+  const rawUrl = typeof f.url === "string" ? f.url.trim() : "";
   if (!rawUrl) return null;
 
-  const formats = normalizeFormatVariants(
-    f.formats,
-    enableCloudinaryOptimization
-  );
+  const formats = normalizeFormatVariants(f.formats, enableCloudinaryOptimization);
   const sizeInKB = resolveFiniteSizeKB(f.size);
-  const ext = optString(f.ext) ?? '';
-  const name = sanitizeFilename(f.name || rawUrl, ext || '.bin');
+  const ext = optString(f.ext) ?? "";
+  const name = sanitizeFilename(f.name || rawUrl, ext || ".bin");
 
   return {
     id: resolveAssetId(f.id),
     documentId: optString(f.documentId),
     name,
     alternativeText: resolveAltText(f.alternativeText, name),
-    caption: typeof f.caption === 'string' ? f.caption.trim() : '',
+    caption: typeof f.caption === "string" ? f.caption.trim() : "",
     url: rawUrl,
-    optimizedUrl: optimizeCloudinaryMediaUrl(
-      rawUrl,
-      enableCloudinaryOptimization
-    ),
-    thumbnailUrl: resolveThumbnailUrl(
-      formats,
-      rawUrl,
-      enableCloudinaryOptimization
-    ),
-    mime: optString(f.mime) ?? 'application/octet-stream',
+    optimizedUrl: optimizeCloudinaryMediaUrl(rawUrl, enableCloudinaryOptimization),
+    thumbnailUrl: resolveThumbnailUrl(formats, rawUrl, enableCloudinaryOptimization),
+    mime: optString(f.mime) ?? "application/octet-stream",
     ext,
     sizeInKB,
     formattedSize: formatMediaSizeFromKB(sizeInKB),
@@ -226,11 +201,11 @@ export function normalizeUploadFile(
  * Computes the normalized alphabetical letter group (`A`..`Z` or `#`) for glossary indexing.
  */
 export function computeLetterGroup(term: unknown): string {
-  if (typeof term !== 'string' || !term.trim()) return '#';
+  if (typeof term !== "string" || !term.trim()) return "#";
   const normalized = term
     .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
   const firstChar = normalized.charAt(0).toUpperCase();
-  return /^[A-Z]$/.test(firstChar) ? firstChar : '#';
+  return /^[A-Z]$/.test(firstChar) ? firstChar : "#";
 }

@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Badge,
   Box,
@@ -10,31 +9,33 @@ import {
   SingleSelectOption,
   TextInput,
   Typography,
-} from '@strapi/design-system';
+} from "@strapi/design-system";
+import * as React from "react";
+
 import {
   PLUGIN_ID,
   type MediaLibraryAsset,
   type PublicationCategory,
   type PublicationRecord,
-} from '../../../../shared';
-import { PublicationsTable } from './PublicationsTable';
+} from "../../../../shared";
+import { PublicationsTable } from "./PublicationsTable";
 import {
   CARD_BORDER_STYLE,
   uploadFilesToStrapiMediaLibrary,
   useResourcesTranslation,
-} from './uploadHelper';
+} from "./uploadHelper";
 
 const PUBLICATION_CATEGORY_LABELS: Record<PublicationCategory, string> = {
-  guide: 'Visitor & Prayer Guide',
-  book: 'Book / eBook',
-  pamphlet: 'Pamphlet / Brochure',
-  press_kit: 'Press & Media Kit',
-  academic: 'Academic / Research',
-  general: 'General Publication',
+  guide: "Visitor & Prayer Guide",
+  book: "Book / eBook",
+  pamphlet: "Pamphlet / Brochure",
+  press_kit: "Press & Media Kit",
+  academic: "Academic / Research",
+  general: "General Publication",
 };
 
 function parseFileIdValue(selectedFileId: string): number | string | null {
-  if (!selectedFileId || selectedFileId === 'none') return null;
+  if (!selectedFileId || selectedFileId === "none") return null;
   return Number(selectedFileId) || selectedFileId;
 }
 
@@ -58,39 +59,35 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
 }) => {
   const { t } = useResourcesTranslation();
   const [editingDocId, setEditingDocId] = React.useState<string | null>(null);
-  const [title, setTitle] = React.useState('');
-  const [category, setCategory] = React.useState<PublicationCategory>('guide');
-  const [authorName, setAuthorName] = React.useState('');
-  const [summary, setSummary] = React.useState('');
-  const [selectedFileId, setSelectedFileId] = React.useState<string>('none');
-  const [externalUrl, setExternalUrl] = React.useState('');
+  const [title, setTitle] = React.useState("");
+  const [category, setCategory] = React.useState<PublicationCategory>("guide");
+  const [authorName, setAuthorName] = React.useState("");
+  const [summary, setSummary] = React.useState("");
+  const [selectedFileId, setSelectedFileId] = React.useState<string>("none");
+  const [externalUrl, setExternalUrl] = React.useState("");
   const [uploading, setUploading] = React.useState(false);
 
   const formFileInputRef = React.useRef<HTMLInputElement | null>(null);
   const rowFileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [uploadingRowDocId, setUploadingRowDocId] = React.useState<
-    string | null
-  >(null);
+  const [uploadingRowDocId, setUploadingRowDocId] = React.useState<string | null>(null);
 
-  const [selectedFileName, setSelectedFileName] = React.useState<string>('');
+  const [selectedFileName, setSelectedFileName] = React.useState<string>("");
 
   const getCategoryLabel = (cat: PublicationCategory) =>
     t(`pub.category.${cat}`, PUBLICATION_CATEGORY_LABELS[cat] || cat);
 
   const resetForm = () => {
     setEditingDocId(null);
-    setTitle('');
-    setCategory('guide');
-    setAuthorName('');
-    setSummary('');
-    setSelectedFileId('none');
-    setSelectedFileName('');
-    setExternalUrl('');
+    setTitle("");
+    setCategory("guide");
+    setAuthorName("");
+    setSummary("");
+    setSelectedFileId("none");
+    setSelectedFileName("");
+    setExternalUrl("");
   };
 
-  const handleUploadForForm = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleUploadForForm = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setUploading(true);
@@ -100,11 +97,9 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         setSelectedFileId(String(uploaded[0].id));
         setSelectedFileName(uploaded[0].name || files[0].name);
         onStatusMessage(
-          t(
-            'pub.msg.uploaded_attached',
-            'Uploaded "{name}" and attached it to this publication.',
-            { name: uploaded[0].name }
-          )
+          t("pub.msg.uploaded_attached", 'Uploaded "{name}" and attached it to this publication.', {
+            name: uploaded[0].name,
+          })
         );
         await onReload();
       }
@@ -112,7 +107,7 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
       onStatusMessage(`Upload failed: ${(err as Error).message}`);
     } finally {
       setUploading(false);
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
@@ -128,11 +123,10 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           fileId: Number(uploaded[0].id) || uploaded[0].id,
         });
         onStatusMessage(
-          t(
-            'pub.msg.attached_row',
-            'Attached "{name}" ({size}) to publication.',
-            { name: uploaded[0].name, size: uploaded[0].formattedSize }
-          )
+          t("pub.msg.attached_row", 'Attached "{name}" ({size}) to publication.', {
+            name: uploaded[0].name,
+            size: uploaded[0].formattedSize,
+          })
         );
         await onReload();
       }
@@ -141,15 +135,13 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
     } finally {
       setUploading(false);
       setUploadingRowDocId(null);
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
   const handleSave = async () => {
     if (!title.trim()) {
-      onStatusMessage(
-        t('pub.msg.title_required', 'Please enter a Publication Title.')
-      );
+      onStatusMessage(t("pub.msg.title_required", "Please enter a Publication Title."));
       return;
     }
     try {
@@ -164,10 +156,7 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         allowPublicDownload: true,
       };
       if (editingDocId) {
-        await put(
-          `/${PLUGIN_ID}/publications/${encodeURIComponent(editingDocId)}`,
-          payload
-        );
+        await put(`/${PLUGIN_ID}/publications/${encodeURIComponent(editingDocId)}`, payload);
         onStatusMessage(`Updated publication "${title.trim()}".`);
       } else {
         await post(`/${PLUGIN_ID}/publications`, payload);
@@ -183,9 +172,7 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
   const handleDelete = async (pub: PublicationRecord) => {
     if (!pub.documentId) return;
     try {
-      await del(
-        `/${PLUGIN_ID}/publications/${encodeURIComponent(pub.documentId)}`
-      );
+      await del(`/${PLUGIN_ID}/publications/${encodeURIComponent(pub.documentId)}`);
       onStatusMessage(`Removed publication "${pub.title}".`);
       if (editingDocId === pub.documentId) resetForm();
       await onReload();
@@ -195,10 +182,10 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
   };
 
   const uploadBtnText = uploading
-    ? t('common.uploading', 'Uploading…')
-    : selectedFileId !== 'none'
-      ? t('pub.btn.replace_pdf_ebook', 'Replace PDF / eBook')
-      : t('pub.btn.upload_pdf_ebook', '+ Upload PDF / eBook');
+    ? t("common.uploading", "Uploading…")
+    : selectedFileId !== "none"
+      ? t("pub.btn.replace_pdf_ebook", "Replace PDF / eBook")
+      : t("pub.btn.upload_pdf_ebook", "+ Upload PDF / eBook");
 
   return (
     <Box paddingTop={6}>
@@ -206,14 +193,14 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         ref={formFileInputRef}
         type="file"
         accept=".pdf,.epub,.doc,.docx,application/pdf"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         onChange={handleUploadForForm}
       />
       <input
         ref={rowFileInputRef}
         type="file"
         accept=".pdf,.epub,.doc,.docx,application/pdf"
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
         onChange={handleUploadForRow}
       />
 
@@ -235,20 +222,20 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           <Flex direction="column" alignItems="flex-start" gap={1}>
             <Typography variant="delta" tag="h2" fontWeight="bold">
               {t(
-                'page.ui.add_digital_library_publication_media_library_pd',
-                'Add Digital Library Publication (PDF / eBook)'
+                "page.ui.add_digital_library_publication_media_library_pd",
+                "Add Digital Library Publication (PDF / eBook)"
               )}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
               {t(
-                'pub.form.subtitle',
-                'Upload a PDF or eBook from your computer using the button below, or provide an external download link.'
+                "pub.form.subtitle",
+                "Upload a PDF or eBook from your computer using the button below, or provide an external download link."
               )}
             </Typography>
           </Flex>
           {editingDocId && (
             <Button variant="tertiary" size="S" onClick={resetForm}>
-              {t('common.cancel_edit', 'Cancel Edit')}
+              {t("common.cancel_edit", "Cancel Edit")}
             </Button>
           )}
         </Flex>
@@ -256,32 +243,28 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         {/* Row 1: Title, Category, Author */}
         <Box
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
             gap: 20,
-            alignItems: 'start',
+            alignItems: "start",
           }}
         >
           <Box style={{ minWidth: 0 }}>
             <Field.Root
               required
               hint={t(
-                'page.ui.display_title_shown_in_the_public_digital_librar',
-                'Title shown in the public Digital Library'
+                "page.ui.display_title_shown_in_the_public_digital_librar",
+                "Title shown in the public Digital Library"
               )}
             >
-              <Field.Label>
-                {t('field.publication_title', 'Publication Title')}
-              </Field.Label>
+              <Field.Label>{t("field.publication_title", "Publication Title")}</Field.Label>
               <TextInput
                 placeholder={t(
-                  'placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf',
-                  'e.g., Mosque Visitor & Prayer Guide'
+                  "placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf",
+                  "e.g., Mosque Visitor & Prayer Guide"
                 )}
                 value={title}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setTitle(e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
               />
               <Field.Hint />
             </Field.Root>
@@ -290,22 +273,16 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           <Box style={{ minWidth: 0 }}>
             <Field.Root
               hint={t(
-                'page.ui.used_for_filtering_publications_on_the_public_po',
-                'Used to filter publications on the website'
+                "page.ui.used_for_filtering_publications_on_the_public_po",
+                "Used to filter publications on the website"
               )}
             >
-              <Field.Label>{t('page.ui.category', 'Category')}</Field.Label>
+              <Field.Label>{t("page.ui.category", "Category")}</Field.Label>
               <SingleSelect
                 value={category}
-                onChange={(val: string | number) =>
-                  setCategory(String(val) as PublicationCategory)
-                }
+                onChange={(val: string | number) => setCategory(String(val) as PublicationCategory)}
               >
-                {(
-                  Object.keys(
-                    PUBLICATION_CATEGORY_LABELS
-                  ) as PublicationCategory[]
-                ).map((val) => (
+                {(Object.keys(PUBLICATION_CATEGORY_LABELS) as PublicationCategory[]).map((val) => (
                   <SingleSelectOption key={val} value={val}>
                     {getCategoryLabel(val)}
                   </SingleSelectOption>
@@ -316,24 +293,12 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           </Box>
 
           <Box style={{ minWidth: 0 }}>
-            <Field.Root
-              hint={t(
-                'pub.field.author_hint',
-                'Author or committee name (optional)'
-              )}
-            >
-              <Field.Label>
-                {t('pub.field.author_label', 'Author (Optional)')}
-              </Field.Label>
+            <Field.Root hint={t("pub.field.author_hint", "Author or committee name (optional)")}>
+              <Field.Label>{t("pub.field.author_label", "Author (Optional)")}</Field.Label>
               <TextInput
-                placeholder={t(
-                  'pub.field.author_placeholder',
-                  'e.g., Department of Education'
-                )}
+                placeholder={t("pub.field.author_placeholder", "e.g., Department of Education")}
                 value={authorName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setAuthorName(e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthorName(e.target.value)}
               />
               <Field.Hint />
             </Field.Root>
@@ -344,31 +309,29 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         <Box
           paddingTop={4}
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: 20,
-            alignItems: 'start',
+            alignItems: "start",
           }}
         >
           <Box style={{ minWidth: 0 }}>
             <Field.Root
               hint={t(
-                'page.ui.short_description_displayed_on_the_download_card',
-                'Short description shown on the download card'
+                "page.ui.short_description_displayed_on_the_download_card",
+                "Short description shown on the download card"
               )}
             >
               <Field.Label>
-                {t('field.summary_abstract', 'Summary / Abstract (Optional)')}
+                {t("field.summary_abstract", "Summary / Abstract (Optional)")}
               </Field.Label>
               <TextInput
                 placeholder={t(
-                  'placeholder.e_g_introducci_n_a_la_historia_horarios_y_etique',
-                  'Brief summary of this guide, book, or brochure...'
+                  "placeholder.e_g_introducci_n_a_la_historia_horarios_y_etique",
+                  "Brief summary of this guide, book, or brochure..."
                 )}
                 value={summary}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSummary(e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSummary(e.target.value)}
               />
               <Field.Hint />
             </Field.Root>
@@ -377,15 +340,12 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           <Box style={{ minWidth: 0 }}>
             <Field.Root
               hint={t(
-                'pub.field.external_url_hint',
-                'Only needed if hosted on an external link instead of uploading a PDF below'
+                "pub.field.external_url_hint",
+                "Only needed if hosted on an external link instead of uploading a PDF below"
               )}
             >
               <Field.Label>
-                {t(
-                  'pub.field.external_url_label',
-                  'External Download URL (Optional)'
-                )}
+                {t("pub.field.external_url_label", "External Download URL (Optional)")}
               </Field.Label>
               <TextInput
                 placeholder="https://..."
@@ -404,13 +364,7 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         </Box>
 
         {/* Footer Action Bar */}
-        <Flex
-          paddingTop={4}
-          justifyContent="space-between"
-          alignItems="center"
-          wrap="wrap"
-          gap={3}
-        >
+        <Flex paddingTop={4} justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
           <Flex gap={3} alignItems="center" wrap="wrap">
             <Button
               variant="secondary"
@@ -419,27 +373,26 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
             >
               {uploadBtnText}
             </Button>
-            {selectedFileId !== 'none' && (
+            {selectedFileId !== "none" && (
               <Flex gap={2} alignItems="center">
                 <Badge active>
-                  {t('common.attached', 'Attached')}:{' '}
-                  {selectedFileName || `#${selectedFileId}`}
+                  {t("common.attached", "Attached")}: {selectedFileName || `#${selectedFileId}`}
                 </Badge>
                 <Button
                   variant="tertiary"
                   size="S"
                   onClick={() => {
-                    setSelectedFileId('none');
-                    setSelectedFileName('');
+                    setSelectedFileId("none");
+                    setSelectedFileName("");
                   }}
                 >
-                  {t('common.remove', 'Remove')}
+                  {t("common.remove", "Remove")}
                 </Button>
               </Flex>
             )}
           </Flex>
           <Button onClick={handleSave}>
-            {t('page.ui.create_publication', 'Create Publication')}
+            {t("page.ui.create_publication", "Create Publication")}
           </Button>
         </Flex>
       </Box>
