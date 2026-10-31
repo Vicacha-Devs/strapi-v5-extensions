@@ -1,25 +1,22 @@
-import type {
-  AlternateDateValue,
-  CalendarSystemConfig,
-} from './calendarSystems';
+import type { AlternateDateValue, CalendarSystemConfig } from "./calendarSystems";
 
 export type MediaFeedType =
-  | 'video'
-  | 'podcast'
-  | 'audio'
-  | 'lecture'
-  | 'short'
-  | 'live'
+  | "video"
+  | "podcast"
+  | "audio"
+  | "lecture"
+  | "short"
+  | "live"
   | (string & {});
 
 export type MediaProviderType =
-  | 'youtube'
-  | 'spotify'
-  | 'apple_podcasts'
-  | 'vimeo'
-  | 'soundcloud'
-  | 'direct'
-  | 'upload';
+  | "youtube"
+  | "spotify"
+  | "apple_podcasts"
+  | "vimeo"
+  | "soundcloud"
+  | "direct"
+  | "upload";
 
 export interface MediaLanguageTrack {
   /** ISO-639-1 or BCP-47 locale code, e.g. 'es', 'en', 'ar', 'tr', 'fr', 'ur' */
@@ -83,6 +80,7 @@ export interface MediaFeedItem {
   title: string;
   slug: string;
   description: string;
+  transcript?: string | null;
   type: MediaFeedType;
   typeLabel?: string | null;
   provider: MediaProviderType;
@@ -145,7 +143,7 @@ export interface LiveBroadcastConfig {
 }
 
 export interface LiveBroadcastState {
-  status: 'live' | 'upcoming' | 'offline';
+  status: "live" | "upcoming" | "offline";
   title: string;
   description: string;
   scheduleLabel?: string;
@@ -175,6 +173,7 @@ export interface MediaFeedsSourceFieldMap {
   title: string;
   slug?: string;
   description?: string;
+  transcript?: string;
   type?: string;
   provider?: string;
   externalId?: string;

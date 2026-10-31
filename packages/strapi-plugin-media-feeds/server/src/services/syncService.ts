@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   buildYouTubeAtomFeedUrl,
   MEDIA_ITEM_UID,
@@ -7,7 +8,7 @@ import {
   PLUGIN_ID,
   type MediaFeedsSettings,
   type ParsedMediaProviderInfo,
-} from '../../../shared';
+} from "../../../shared";
 
 export interface EnrichedMediaMetadata extends ParsedMediaProviderInfo {
   title?: string | null;
@@ -15,12 +16,9 @@ export interface EnrichedMediaMetadata extends ParsedMediaProviderInfo {
 }
 
 const OEMBED_BUILDERS: Record<string, (url: string) => string> = {
-  youtube: (url) =>
-    `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
-  vimeo: (url) =>
-    `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`,
-  spotify: (url) =>
-    `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`,
+  youtube: (url) => `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
+  vimeo: (url) => `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`,
+  spotify: (url) => `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`,
 };
 
 function mergeOembedPayload(
@@ -29,42 +27,34 @@ function mergeOembedPayload(
 ): EnrichedMediaMetadata {
   return {
     ...parsed,
-    title: typeof payload.title === 'string' ? payload.title : null,
-    authorName:
-      typeof payload.author_name === 'string' ? payload.author_name : null,
+    title: typeof payload.title === "string" ? payload.title : null,
+    authorName: typeof payload.author_name === "string" ? payload.author_name : null,
     thumbnailUrl:
-      typeof payload.thumbnail_url === 'string'
-        ? payload.thumbnail_url
-        : parsed.thumbnailUrl,
+      typeof payload.thumbnail_url === "string" ? payload.thumbnail_url : parsed.thumbnailUrl,
   };
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   getSettingsService() {
-    return strapi.plugin(PLUGIN_ID).service('settings') as {
+    return strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings(): Promise<MediaFeedsSettings>;
     };
   },
 
-  async enrichUrl(
-    rawUrl: string,
-    fetchOembed = false
-  ): Promise<EnrichedMediaMetadata> {
+  async enrichUrl(rawUrl: string, fetchOembed = false): Promise<EnrichedMediaMetadata> {
     const parsed = parseMediaUrl(rawUrl);
     const buildEndpoint = OEMBED_BUILDERS[parsed.provider];
     if (
       !fetchOembed ||
       !parsed.canonicalUrl ||
       !buildEndpoint ||
-      typeof globalThis.fetch !== 'function'
+      typeof globalThis.fetch !== "function"
     ) {
       return parsed;
     }
 
     try {
-      const response = await globalThis.fetch(
-        buildEndpoint(parsed.canonicalUrl)
-      );
+      const response = await globalThis.fetch(buildEndpoint(parsed.canonicalUrl));
       if (!response.ok) return parsed;
       const payload = (await response.json()) as Record<string, unknown>;
       return mergeOembedPayload(parsed, payload);
@@ -78,9 +68,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     sourceId?: string
   ): Promise<{ syncedCount: number; skippedCount: number }> {
     const settings = await this.getSettingsService().getSettings();
-    const sourceConfig = settings.youtubeSyncSources.find(
-      (s) => s.id === sourceId
-    );
+    const sourceConfig = settings.youtubeSyncSources.find((s) => s.id === sourceId);
     const videos = parseYouTubeAtomFeedXml(xmlContent, sourceConfig);
 
     let syncedCount = 0;
@@ -91,9 +79,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       limit: 200,
     });
     const existingIds = new Set(
-      existing
-        .map((r) => (typeof r.externalId === 'string' ? r.externalId : null))
-        .filter(Boolean)
+      existing.map((r) => (typeof r.externalId === "string" ? r.externalId : null)).filter(Boolean)
     );
 
     for (const video of videos) {
@@ -104,13 +90,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
       await strapi.documents(MEDIA_ITEM_UID).create({
         locale: settings.defaultLocale,
-        status: 'published',
+        status: "published",
         data: {
           title: video.title,
           slug: video.slug,
           description: video.description,
           type: video.type,
-          provider: 'youtube',
+          provider: "youtube",
           externalId: video.videoId,
           sourceUrl: video.watchUrl,
           embedUrl: video.embedUrl,
@@ -144,7 +130,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     let totalSkipped = 0;
     let sourcesProcessed = 0;
 
-    if (typeof globalThis.fetch !== 'function') {
+    if (typeof globalThis.fetch !== "function") {
       return { syncedCount: 0, skippedCount: 0, sourcesProcessed: 0 };
     }
 
@@ -155,10 +141,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         const res = await globalThis.fetch(feedUrl);
         if (!res.ok) continue;
         const xml = await res.text();
-        const { syncedCount, skippedCount } = await this.syncYouTubeFeedXml(
-          xml,
-          src.id
-        );
+        const { syncedCount, skippedCount } = await this.syncYouTubeFeedXml(xml, src.id);
         totalSynced += syncedCount;
         totalSkipped += skippedCount;
         sourcesProcessed += 1;

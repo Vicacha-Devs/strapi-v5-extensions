@@ -1,6 +1,6 @@
-import settings from './settings';
-import feedService from './feedService';
-import syncService from './syncService';
+import feedService from "./feedService";
+import settings from "./settings";
+import syncService from "./syncService";
 
 export default {
   settings,

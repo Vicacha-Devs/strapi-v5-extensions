@@ -122,5 +122,9 @@
   "settings.ui.save_settings": "Save Settings",
   "settings.ui.subtitle_configure_multi_language_locales_apple_spotify_r": "Configure multi-language locales, Apple/Spotify RSS 2.0 metadata, and Live Broadcast defaults",
   "settings.ui.summary_shown_in_apple_podcasts_spotify_and_rss_": "Summary shown in Apple Podcasts, Spotify, and RSS reader directories.",
-  "settings.ui.title_media_feeds_podcast_settings": "Media Feeds & Podcast Settings"
+  "settings.ui.title_media_feeds_podcast_settings": "Media Feeds & Podcast Settings",
+  "field.supported_locales": "Supported Locales",
+  "placeholder.select_supported_locales": "Select supported locales...",
+  "settings.tab.localization": "Multi-Language & Localization",
+  "settings.tab.podcast": "Podcast RSS 2.0 Feed"
 }

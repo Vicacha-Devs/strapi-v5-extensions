@@ -4,18 +4,18 @@ import type {
   MediaLanguageTrack,
   MediaProviderType,
   ParsedMediaProviderInfo,
-} from './types';
+} from "./types";
 
 const YOUTUBE_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/;
 
 const VALID_PROVIDERS: MediaProviderType[] = [
-  'youtube',
-  'spotify',
-  'apple_podcasts',
-  'vimeo',
-  'soundcloud',
-  'direct',
-  'upload',
+  "youtube",
+  "spotify",
+  "apple_podcasts",
+  "vimeo",
+  "soundcloud",
+  "direct",
+  "upload",
 ];
 
 export function extractYouTubeVideoId(rawUrl: string): string | null {
@@ -42,7 +42,7 @@ function tryParseKnownPlatformUrl(url: string): ParsedMediaProviderInfo | null {
   const ytId = extractYouTubeVideoId(url);
   if (ytId) {
     return {
-      provider: 'youtube',
+      provider: "youtube",
       externalId: ytId,
       canonicalUrl: `https://www.youtube.com/watch?v=${ytId}`,
       embedUrl: `https://www.youtube-nocookie.com/embed/${ytId}`,
@@ -50,13 +50,11 @@ function tryParseKnownPlatformUrl(url: string): ParsedMediaProviderInfo | null {
     };
   }
 
-  const spotifyMatch = url.match(
-    /open\.spotify\.com\/(episode|show|track)\/([a-zA-Z0-9]+)/
-  );
+  const spotifyMatch = url.match(/open\.spotify\.com\/(episode|show|track)\/([a-zA-Z0-9]+)/);
   if (spotifyMatch?.[1] && spotifyMatch?.[2]) {
     const [, kind, id] = spotifyMatch;
     return {
-      provider: 'spotify',
+      provider: "spotify",
       externalId: id,
       canonicalUrl: `https://open.spotify.com/${kind}/${id}`,
       embedUrl: `https://open.spotify.com/embed/${kind}/${id}`,
@@ -64,13 +62,11 @@ function tryParseKnownPlatformUrl(url: string): ParsedMediaProviderInfo | null {
     };
   }
 
-  const vimeoMatch = url.match(
-    /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/
-  );
+  const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
   if (vimeoMatch?.[1]) {
     const id = vimeoMatch[1];
     return {
-      provider: 'vimeo',
+      provider: "vimeo",
       externalId: id,
       canonicalUrl: `https://vimeo.com/${id}`,
       embedUrl: `https://player.vimeo.com/video/${id}`,
@@ -85,17 +81,17 @@ function tryParsePodcastPlatformUrl(url: string): ParsedMediaProviderInfo | null
   if (/podcasts\.apple\.com\//i.test(url)) {
     const idMatch = url.match(/id(\d+)/);
     return {
-      provider: 'apple_podcasts',
+      provider: "apple_podcasts",
       externalId: idMatch?.[1] ?? null,
       canonicalUrl: url,
-      embedUrl: url.replace('podcasts.apple.com', 'embed.podcasts.apple.com'),
+      embedUrl: url.replace("podcasts.apple.com", "embed.podcasts.apple.com"),
       thumbnailUrl: null,
     };
   }
 
   if (/soundcloud\.com\//i.test(url)) {
     return {
-      provider: 'soundcloud',
+      provider: "soundcloud",
       externalId: null,
       canonicalUrl: url,
       embedUrl: `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}`,
@@ -110,22 +106,20 @@ export function parseMediaUrl(
   rawUrl?: string | null,
   explicitProvider?: MediaProviderType | string | null
 ): ParsedMediaProviderInfo {
-  const url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
+  const url = typeof rawUrl === "string" ? rawUrl.trim() : "";
 
-  const matchedPlatform =
-    tryParseKnownPlatformUrl(url) ?? tryParsePodcastPlatformUrl(url);
+  const matchedPlatform = tryParseKnownPlatformUrl(url) ?? tryParsePodcastPlatformUrl(url);
   if (matchedPlatform) {
     return matchedPlatform;
   }
 
   const isExplicitValid =
-    Boolean(explicitProvider) &&
-    VALID_PROVIDERS.includes(explicitProvider as MediaProviderType);
+    Boolean(explicitProvider) && VALID_PROVIDERS.includes(explicitProvider as MediaProviderType);
   const fallbackProvider: MediaProviderType = isExplicitValid
     ? (explicitProvider as MediaProviderType)
-    : url.startsWith('/')
-      ? 'upload'
-      : 'direct';
+    : url.startsWith("/")
+      ? "upload"
+      : "direct";
 
   return {
     provider: fallbackProvider,
@@ -137,7 +131,7 @@ export function parseMediaUrl(
 }
 
 function tryParseColonDuration(text: string): number | null {
-  const colonParts = text.split(':').map((p) => Number(p.trim()));
+  const colonParts = text.split(":").map((p) => Number(p.trim()));
   const validParts =
     (colonParts.length === 2 || colonParts.length === 3) &&
     colonParts.every((n) => Number.isFinite(n) && n >= 0);
@@ -160,13 +154,11 @@ function tryParseIso8601Duration(text: string): number | null {
   return h * 3600 + m * 60 + s;
 }
 
-export function parseDurationToSeconds(
-  raw?: string | number | null
-): number | null {
-  if (typeof raw === 'number' && Number.isFinite(raw) && raw >= 0) {
+export function parseDurationToSeconds(raw?: string | number | null): number | null {
+  if (typeof raw === "number" && Number.isFinite(raw) && raw >= 0) {
     return Math.round(raw);
   }
-  if (typeof raw !== 'string') return null;
+  if (typeof raw !== "string") return null;
   const text = raw.trim();
   if (!text) return null;
 
@@ -181,32 +173,27 @@ export function parseDurationToSeconds(
 }
 
 export function formatSecondsToDuration(seconds?: number | null): string | null {
-  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds <= 0) {
+  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds <= 0) {
     return null;
   }
   const total = Math.round(seconds);
   const hrs = Math.floor(total / 3600);
   const mins = Math.floor((total % 3600) / 60);
   const secs = total % 60;
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return hrs > 0
-    ? `${hrs}:${pad(mins)}:${pad(secs)}`
-    : `${pad(mins)}:${pad(secs)}`;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return hrs > 0 ? `${hrs}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
 }
 
-export function normalizeSpokenLanguages(
-  raw: unknown,
-  fallback: string[] = ['es']
-): string[] {
+export function normalizeSpokenLanguages(raw: unknown, fallback: string[] = ["es"]): string[] {
   if (Array.isArray(raw)) {
     const cleaned = raw
-      .map((item) => (typeof item === 'string' ? item.trim().toLowerCase() : ''))
+      .map((item) => (typeof item === "string" ? item.trim().toLowerCase() : ""))
       .filter(Boolean);
     if (cleaned.length > 0) return Array.from(new Set(cleaned));
   }
-  if (typeof raw === 'string' && raw.trim()) {
+  if (typeof raw === "string" && raw.trim()) {
     const split = raw
-      .split(',')
+      .split(",")
       .map((s) => s.trim().toLowerCase())
       .filter(Boolean);
     if (split.length > 0) return Array.from(new Set(split));
@@ -215,13 +202,13 @@ export function normalizeSpokenLanguages(
 }
 
 function trimmedStringOrNull(val: unknown): string | null {
-  return typeof val === 'string' ? val.trim() : null;
+  return typeof val === "string" ? val.trim() : null;
 }
 
 function parseSingleLanguageTrack(entry: unknown): MediaLanguageTrack | null {
-  if (!entry || typeof entry !== 'object') return null;
+  if (!entry || typeof entry !== "object") return null;
   const obj = entry as Record<string, unknown>;
-  const locale = (trimmedStringOrNull(obj.locale) ?? '').toLowerCase();
+  const locale = (trimmedStringOrNull(obj.locale) ?? "").toLowerCase();
   if (!locale) return null;
 
   return {
@@ -231,7 +218,7 @@ function parseSingleLanguageTrack(entry: unknown): MediaLanguageTrack | null {
     videoUrl: trimmedStringOrNull(obj.videoUrl),
     captionsUrl: trimmedStringOrNull(obj.captionsUrl),
     transcriptUrl: trimmedStringOrNull(obj.transcriptUrl),
-    transcriptText: typeof obj.transcriptText === 'string' ? obj.transcriptText : null,
+    transcriptText: typeof obj.transcriptText === "string" ? obj.transcriptText : null,
     translatedTitle: trimmedStringOrNull(obj.translatedTitle),
     translatedDescription: trimmedStringOrNull(obj.translatedDescription),
   };
@@ -239,25 +226,21 @@ function parseSingleLanguageTrack(entry: unknown): MediaLanguageTrack | null {
 
 export function normalizeLanguageTracks(raw: unknown): MediaLanguageTrack[] {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .map(parseSingleLanguageTrack)
-    .filter((t): t is MediaLanguageTrack => t !== null);
+  return raw.map(parseSingleLanguageTrack).filter((t): t is MediaLanguageTrack => t !== null);
 }
 
 function parseSingleChapterMarker(item: unknown): MediaChapterMarker | null {
-  if (!item || typeof item !== 'object') return null;
+  if (!item || typeof item !== "object") return null;
   const obj = item as Record<string, unknown>;
-  const label = trimmedStringOrNull(obj.label) ?? '';
+  const label = trimmedStringOrNull(obj.label) ?? "";
   if (!label) return null;
 
   const seconds =
-    typeof obj.startSeconds === 'number'
+    typeof obj.startSeconds === "number"
       ? obj.startSeconds
-      : parseDurationToSeconds(obj.timecode as string) ?? 0;
+      : (parseDurationToSeconds(obj.timecode as string) ?? 0);
   const timecode =
-    typeof obj.timecode === 'string'
-      ? obj.timecode
-      : formatSecondsToDuration(seconds) ?? '00:00';
+    typeof obj.timecode === "string" ? obj.timecode : (formatSecondsToDuration(seconds) ?? "00:00");
 
   return {
     startSeconds: Math.max(0, seconds),
@@ -279,12 +262,12 @@ function findMatchingTrack(
   targetLocale: string,
   defaultLocale: string
 ): MediaLanguageTrack | null {
-  const baseLang = targetLocale.split('-')[0];
+  const baseLang = targetLocale.split("-")[0];
   const defaultLower = defaultLocale.toLowerCase();
 
   return (
     tracks.find((t) => t.locale.toLowerCase() === targetLocale) ??
-    tracks.find((t) => t.locale.toLowerCase().split('-')[0] === baseLang) ??
+    tracks.find((t) => t.locale.toLowerCase().split("-")[0] === baseLang) ??
     tracks.find((t) => t.locale.toLowerCase() === defaultLower) ??
     null
   );
@@ -293,16 +276,10 @@ function findMatchingTrack(
 export function resolveEpisodeForLocale(
   episode: MediaFeedItem,
   requestedLocale?: string,
-  defaultLocale = 'es'
+  defaultLocale = "es"
 ): MediaFeedItem {
-  const targetLocale = (requestedLocale || episode.locale || defaultLocale)
-    .trim()
-    .toLowerCase();
-  const exactTrack = findMatchingTrack(
-    episode.languageTracks,
-    targetLocale,
-    defaultLocale
-  );
+  const targetLocale = (requestedLocale || episode.locale || defaultLocale).trim().toLowerCase();
+  const exactTrack = findMatchingTrack(episode.languageTracks, targetLocale, defaultLocale);
 
   if (!exactTrack) {
     return {
@@ -315,6 +292,7 @@ export function resolveEpisodeForLocale(
     ...episode,
     title: exactTrack.translatedTitle || episode.title,
     description: exactTrack.translatedDescription || episode.description,
+    transcript: episode.transcript || exactTrack.transcriptText || null,
     audioUrl: exactTrack.audioUrl || episode.audioUrl,
     transcriptUrl: exactTrack.transcriptUrl || episode.transcriptUrl,
     activeLanguageTrack: exactTrack,

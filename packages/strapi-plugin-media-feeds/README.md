@@ -14,5 +14,5 @@ Generic **Multi-Language Audio/Video Media Hub, YouTube & OEmbed Enricher, Apple
   - Generates standard RSS 2.0 XML (`GET /api/media-feeds/rss.xml`) and iTunes/Spotify-compliant Podcast XML (`GET /api/media-feeds/podcast.xml`).
 - **Live Broadcast Status (`GET /api/media-feeds/live`)**:
   - Exposes real-time livestream status, embed URL, and upcoming broadcast schedule synced with `@vicacha-devs/strapi-plugin-calendar`.
-- **10-Locale Admin UI**:
-  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `id`, `ur`, and `zh`.
+- **13-Locale Admin UI**:
+  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur`, and `zh`.

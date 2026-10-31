@@ -122,5 +122,9 @@
   "settings.ui.save_settings": "Ayarları Kaydet",
   "settings.ui.subtitle_configure_multi_language_locales_apple_spotify_r": "Çok dilli yerel ayarları, Apple/Spotify RSS 2.0 meta verilerini ve Canlı Yayın varsayılanlarını yapılandırın",
   "settings.ui.summary_shown_in_apple_podcasts_spotify_and_rss_": "Özet shown in Apple Podcasts, Spotify, and RSS reader directories.",
-  "settings.ui.title_media_feeds_podcast_settings": "Medya Akışları ve Podcast Ayarları"
+  "settings.ui.title_media_feeds_podcast_settings": "Medya Akışları ve Podcast Ayarları",
+  "field.supported_locales": "Supported Locales",
+  "placeholder.select_supported_locales": "Select supported locales...",
+  "settings.tab.localization": "Çoklu Dil ve Yerelleştirme",
+  "settings.tab.podcast": "Podcast RSS 2.0 Akışı"
 }

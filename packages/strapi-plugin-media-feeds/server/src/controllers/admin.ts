@@ -1,12 +1,13 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   type LiveBroadcastState,
   type MediaFeedItem,
   type MediaFeedsSettings,
   type MediaSeriesItem,
-} from '../../../shared';
-import type { EnrichedMediaMetadata } from '../services/syncService';
+} from "../../../shared";
+import type { EnrichedMediaMetadata } from "../services/syncService";
 
 interface StrapiContext {
   query?: Record<string, string | undefined>;
@@ -17,16 +18,14 @@ interface StrapiContext {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   getSettingsService() {
-    return strapi.plugin(PLUGIN_ID).service('settings') as {
+    return strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings(): Promise<MediaFeedsSettings>;
-      updateSettings(
-        partial: Partial<MediaFeedsSettings>
-      ): Promise<MediaFeedsSettings>;
+      updateSettings(partial: Partial<MediaFeedsSettings>): Promise<MediaFeedsSettings>;
     };
   },
 
   getFeedService() {
-    return strapi.plugin(PLUGIN_ID).service('feedService') as {
+    return strapi.plugin(PLUGIN_ID).service("feedService") as {
       getEpisodes(options?: Record<string, unknown>): Promise<MediaFeedItem[]>;
       getSeriesList(locale?: string): Promise<MediaSeriesItem[]>;
       getLiveStatus(locale?: string): Promise<LiveBroadcastState>;
@@ -34,7 +33,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   getSyncService() {
-    return strapi.plugin(PLUGIN_ID).service('syncService') as {
+    return strapi.plugin(PLUGIN_ID).service("syncService") as {
       enrichUrl(url: string, fetchOembed?: boolean): Promise<EnrichedMediaMetadata>;
       syncConfiguredYouTubeSources(sourceId?: string): Promise<{
         syncedCount: number;
@@ -75,9 +74,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async enrichUrl(ctx: StrapiContext) {
-    const rawUrl = String(ctx.request?.body?.url ?? '').trim();
+    const rawUrl = String(ctx.request?.body?.url ?? "").trim();
     if (!rawUrl) {
-      return ctx.badRequest('A media URL is required');
+      return ctx.badRequest("A media URL is required");
     }
     const fetchOembed = ctx.request?.body?.fetchOembed !== false;
     const data = await this.getSyncService().enrichUrl(rawUrl, fetchOembed);
@@ -86,12 +85,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async syncYouTube(ctx: StrapiContext) {
     const sourceId =
-      typeof ctx.request?.body?.sourceId === 'string'
-        ? ctx.request.body.sourceId
-        : undefined;
-    const data = await this.getSyncService().syncConfiguredYouTubeSources(
-      sourceId
-    );
+      typeof ctx.request?.body?.sourceId === "string" ? ctx.request.body.sourceId : undefined;
+    const data = await this.getSyncService().syncConfiguredYouTubeSources(sourceId);
     ctx.body = { data };
   },
 });

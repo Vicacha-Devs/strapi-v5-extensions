@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   computeSecondaryDates,
   generatePodcastRssXml,
@@ -11,8 +12,8 @@ import {
   type MediaFeedItem,
   type MediaFeedsSettings,
   type MediaSeriesItem,
-} from '../../../shared';
-import { normalizeRawMediaRecord } from './feedNormalizer';
+} from "../../../shared";
+import { normalizeRawMediaRecord } from "./feedNormalizer";
 
 export interface QueryMediaFeedOptions {
   locale?: string;
@@ -36,31 +37,24 @@ function matchesSearchQuery(item: MediaFeedItem, q: string): boolean {
   return (
     item.title.toLowerCase().includes(q) ||
     item.description.toLowerCase().includes(q) ||
-    (item.speaker ?? '').toLowerCase().includes(q)
+    (item.speaker ?? "").toLowerCase().includes(q)
   );
 }
 
-function matchesCategoryAndProvider(
-  item: MediaFeedItem,
-  options: QueryMediaFeedOptions
-): boolean {
+function matchesCategoryAndProvider(item: MediaFeedItem, options: QueryMediaFeedOptions): boolean {
   const typeMatch =
     !options.type ||
-    options.type === 'all' ||
+    options.type === "all" ||
     item.type.toLowerCase() === options.type.toLowerCase();
   const providerMatch =
-    !options.provider ||
-    item.provider.toLowerCase() === options.provider.toLowerCase();
+    !options.provider || item.provider.toLowerCase() === options.provider.toLowerCase();
   const seriesMatch =
     !options.seriesSlug ||
-    (item.seriesSlug ?? '').toLowerCase() === options.seriesSlug.toLowerCase();
+    (item.seriesSlug ?? "").toLowerCase() === options.seriesSlug.toLowerCase();
   return typeMatch && providerMatch && seriesMatch;
 }
 
-function matchesSingleEpisodeFilter(
-  item: MediaFeedItem,
-  options: QueryMediaFeedOptions
-): boolean {
+function matchesSingleEpisodeFilter(item: MediaFeedItem, options: QueryMediaFeedOptions): boolean {
   if (!matchesCategoryAndProvider(item, options)) return false;
   if (
     options.spokenLanguage &&
@@ -68,7 +62,7 @@ function matchesSingleEpisodeFilter(
   ) {
     return false;
   }
-  if (typeof options.featured === 'boolean') {
+  if (typeof options.featured === "boolean") {
     return item.featured === options.featured;
   }
   return true;
@@ -78,16 +72,13 @@ function filterAndSortEpisodes(
   items: MediaFeedItem[],
   options: QueryMediaFeedOptions
 ): MediaFeedItem[] {
-  const searchQuery = options.search?.trim().toLowerCase() ?? '';
+  const searchQuery = options.search?.trim().toLowerCase() ?? "";
   const filtered = items.filter((item) => {
     if (!matchesSingleEpisodeFilter(item, options)) return false;
     return !searchQuery || matchesSearchQuery(item, searchQuery);
   });
 
-  filtered.sort(
-    (a, b) =>
-      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
+  filtered.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
   if (options.limit && options.limit > 0) {
     return filtered.slice(0, options.limit);
@@ -96,14 +87,11 @@ function filterAndSortEpisodes(
 }
 
 function stringOrNull(value: unknown): string | null {
-  return typeof value === 'string' ? value : null;
+  return typeof value === "string" ? value : null;
 }
 
-function mapRawSeriesItem(
-  r: Record<string, unknown>,
-  supportedLocales: string[]
-): MediaSeriesItem {
-  const slug = String(r.slug ?? '');
+function mapRawSeriesItem(r: Record<string, unknown>, supportedLocales: string[]): MediaSeriesItem {
+  const slug = String(r.slug ?? "");
   const id = (r.id as string | number) ?? slug;
   const documentId = String(r.documentId ?? id);
   const spokenLanguages = Array.isArray(r.spokenLanguages)
@@ -113,13 +101,13 @@ function mapRawSeriesItem(
   return {
     id,
     documentId,
-    title: String(r.title ?? 'Series'),
+    title: String(r.title ?? "Series"),
     slug,
-    description: String(r.description ?? ''),
+    description: String(r.description ?? ""),
     author: stringOrNull(r.author),
     coverImageUrl: stringOrNull(r.coverImageUrl),
-    category: stringOrNull(r.category) ?? 'Education',
-    defaultType: String(r.defaultType ?? 'podcast'),
+    category: stringOrNull(r.category) ?? "Education",
+    defaultType: String(r.defaultType ?? "podcast"),
     spokenLanguages,
     rssEnabled: r.rssEnabled !== false,
     youtubePlaylistId: stringOrNull(r.youtubePlaylistId),
@@ -135,16 +123,14 @@ function buildActiveLiveBroadcastState(
   secondaryDates?: Record<string, AlternateDateValue>
 ): LiveBroadcastState {
   return {
-    status: 'live',
+    status: "live",
     title: liveEpisode.title,
     description: liveEpisode.description,
-    scheduleLabel:
-      liveEpisode.publishedAtLabel || settings.liveStream.scheduleLabel,
+    scheduleLabel: liveEpisode.publishedAtLabel || settings.liveStream.scheduleLabel,
     provider: liveEpisode.provider,
     watchUrl: liveEpisode.sourceUrl || settings.liveStream.watchUrl,
     embedUrl: liveEpisode.embedUrl ?? null,
-    thumbnailUrl:
-      liveEpisode.thumbnailUrl ?? settings.liveStream.thumbnailUrl ?? null,
+    thumbnailUrl: liveEpisode.thumbnailUrl ?? settings.liveStream.thumbnailUrl ?? null,
     spokenLanguages: liveEpisode.spokenLanguages,
     activeEpisodeDocumentId: liveEpisode.documentId,
     secondaryDates,
@@ -157,10 +143,7 @@ function buildStandbyLiveBroadcastState(
   episodes: MediaFeedItem[],
   secondaryDates?: Record<string, AlternateDateValue>
 ): LiveBroadcastState {
-  const parsedWatch = parseMediaUrl(
-    settings.liveStream.watchUrl,
-    settings.liveStream.provider
-  );
+  const parsedWatch = parseMediaUrl(settings.liveStream.watchUrl, settings.liveStream.provider);
   const thumbnailUrl =
     settings.liveStream.thumbnailUrl ??
     parsedWatch.thumbnailUrl ??
@@ -168,7 +151,7 @@ function buildStandbyLiveBroadcastState(
     null;
 
   return {
-    status: settings.liveStream.enabled ? 'upcoming' : 'offline',
+    status: settings.liveStream.enabled ? "upcoming" : "offline",
     title: settings.liveStream.title,
     description: settings.liveStream.description,
     scheduleLabel: settings.liveStream.scheduleLabel,
@@ -176,7 +159,7 @@ function buildStandbyLiveBroadcastState(
     watchUrl: settings.liveStream.watchUrl,
     embedUrl: settings.liveStream.embedUrl ?? parsedWatch.embedUrl,
     thumbnailUrl,
-    spokenLanguages: settings.liveStream.spokenLanguages ?? ['es'],
+    spokenLanguages: settings.liveStream.spokenLanguages ?? ["es"],
     activeEpisodeDocumentId: null,
     secondaryDates,
     streams: settings.liveStreams ?? [],
@@ -185,7 +168,7 @@ function buildStandbyLiveBroadcastState(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   getSettingsService() {
-    return strapi.plugin(PLUGIN_ID).service('settings') as {
+    return strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings(): Promise<MediaFeedsSettings>;
     };
   },
@@ -201,7 +184,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     try {
       const primary = await strapi.documents(uid).findMany({
         locale: requestedLocale,
-        status: 'published',
+        status: "published",
         populate,
         limit: 200,
       });
@@ -216,7 +199,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
       return await strapi.documents(uid).findMany({
         locale: settings.defaultLocale,
-        status: 'published',
+        status: "published",
         populate,
         limit: 200,
       });
@@ -234,12 +217,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       MEDIA_ITEM_UID,
       activeLocale,
       settings,
-      ['thumbnail', 'audioFile', 'transcriptFile']
+      ["thumbnail", "audioFile", "transcriptFile"]
     );
     for (const rec of builtInRecords) {
-      allItems.push(
-        normalizeRawMediaRecord(rec, { settings, requestedLocale: activeLocale })
-      );
+      allItems.push(normalizeRawMediaRecord(rec, { settings, requestedLocale: activeLocale }));
     }
 
     for (const source of settings.sources ?? []) {
@@ -271,9 +252,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async getEpisodes(options: QueryMediaFeedOptions = {}): Promise<MediaFeedItem[]> {
     const settings = await this.getSettingsService().getSettings();
-    const activeLocale = (options.locale || settings.defaultLocale)
-      .trim()
-      .toLowerCase();
+    const activeLocale = (options.locale || settings.defaultLocale).trim().toLowerCase();
     const allItems = await this.collectSourceEpisodes(activeLocale, settings);
     return filterAndSortEpisodes(allItems, options);
   },
@@ -299,26 +278,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const secondaryDates =
       settings.secondaryCalendars?.length > 0
-        ? computeSecondaryDates(
-            new Date().toISOString(),
-            settings.secondaryCalendars
-          )
+        ? computeSecondaryDates(new Date().toISOString(), settings.secondaryCalendars)
         : undefined;
 
     if (liveEpisode) {
-      return buildActiveLiveBroadcastState(
-        liveEpisode,
-        settings,
-        secondaryDates
-      );
+      return buildActiveLiveBroadcastState(liveEpisode, settings, secondaryDates);
     }
     return buildStandbyLiveBroadcastState(settings, episodes, secondaryDates);
   },
 
-  async generateRssFeed(options: {
-    locale?: string;
-    seriesSlug?: string;
-  } = {}): Promise<string> {
+  async generateRssFeed(
+    options: {
+      locale?: string;
+      seriesSlug?: string;
+    } = {}
+  ): Promise<string> {
     const settings = await this.getSettingsService().getSettings();
     const episodes = await this.getEpisodes({
       locale: options.locale,

@@ -1,21 +1,11 @@
-import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
-import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
-import { Play } from '@strapi/icons';
-import type { StrapiApp } from '@strapi/strapi/admin';
-import { PLUGIN_ID } from '../../shared';
+import { Play } from "@strapi/icons";
+import type { StrapiApp } from "@strapi/strapi/admin";
 
-const SUPPORTED_ADMIN_LOCALES = [
-  'en',
-  'es',
-  'ar',
-  'tr',
-  'fr',
-  'de',
-  'pt',
-  'id',
-  'ur',
-  'zh',
-];
+import { PLUGIN_ID } from "../../shared";
+import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
+import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
+
+export const SUPPORTED_ADMIN_LOCALES = ["en", "es", "ar", "tr", "fr", "de", "pt", "id", "ur", "zh"];
 
 export default {
   register(app: StrapiApp) {
@@ -24,37 +14,37 @@ export default {
       icon: Play,
       intlLabel: {
         id: `${PLUGIN_ID}.plugin.name`,
-        defaultMessage: 'Media Feeds',
+        defaultMessage: "Media Feeds",
       },
       Component: () =>
-        import('./pages/MediaFeedsPage').then((mod) => ({
+        import("./pages/MediaFeedsPage").then((mod) => ({
           default: mod.default,
         })),
       permissions: [],
     });
 
     const broadcastsSuiteSection = {
-      id: 'broadcasts',
+      id: "broadcasts",
       intlLabel: {
-        id: 'broadcasts.settings.section',
-        defaultMessage: 'Broadcasts, Media Feeds & Podcasts',
+        id: "broadcasts.settings.section",
+        defaultMessage: "Broadcasts, Media Feeds & Podcasts",
       },
     };
     const mediaFeedsSettingsLink = {
       intlLabel: {
         id: `${PLUGIN_ID}.settings.general`,
-        defaultMessage: 'Media Feeds & Podcasts',
+        defaultMessage: "Media Feeds & Podcasts",
       },
       id: `${PLUGIN_ID}-settings`,
       to: `${PLUGIN_ID}`,
       Component: () =>
-        import('./pages/SettingsPage').then((mod) => ({
+        import("./pages/SettingsPage").then((mod) => ({
           default: mod.default,
         })),
       permissions: [],
     };
     try {
-      if (typeof app.addSettingsLink === 'function') {
+      if (typeof app.addSettingsLink === "function") {
         app.addSettingsLink(broadcastsSuiteSection.id, mediaFeedsSettingsLink);
       } else {
         app.createSettingSection(broadcastsSuiteSection, [mediaFeedsSettingsLink]);
