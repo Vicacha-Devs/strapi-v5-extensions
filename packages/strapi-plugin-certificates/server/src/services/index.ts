@@ -1,6 +1,6 @@
-import settings from './settings';
-import issuance from './issuance';
-import docusign from './docusign';
+import docusign from "./docusign";
+import issuance from "./issuance";
+import settings from "./settings";
 
 export default {
   settings,

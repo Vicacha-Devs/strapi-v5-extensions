@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   computePublicKeyFingerprint,
@@ -7,16 +8,16 @@ import {
   type CertificatesPluginSettings,
   type DocuSignProviderConfig,
   type Ed25519KeyPairMaterial,
-} from '../../../shared';
+} from "../../../shared";
 
-const SETTINGS_STORE_KEY = 'settings';
-const KEYPAIR_STORE_KEY = 'ed25519_keypair';
+const SETTINGS_STORE_KEY = "settings";
+const KEYPAIR_STORE_KEY = "ed25519_keypair";
 
 export const DEFAULT_SECONDARY_CALENDARS: CalendarSystemConfig[] = [
   {
-    id: 'islamic-umalqura',
-    label: 'Hijri (Umm al-Qura)',
-    intlCalendar: 'islamic-umalqura',
+    id: "islamic-umalqura",
+    label: "Hijri (Umm al-Qura)",
+    intlCalendar: "islamic-umalqura",
     enabled: true,
     dayOffset: 0,
   },
@@ -24,22 +25,22 @@ export const DEFAULT_SECONDARY_CALENDARS: CalendarSystemConfig[] = [
 
 export const DEFAULT_ESIGN_CONFIG: DocuSignProviderConfig = {
   enabled: false,
-  provider: 'none',
-  baseUrl: 'https://demo.docusign.net/restapi',
-  accountId: '',
-  integrationKey: '',
-  emailSubjectPrefix: 'Official Certificate Signature Request',
+  provider: "none",
+  baseUrl: "https://demo.docusign.net/restapi",
+  accountId: "",
+  integrationKey: "",
+  emailSubjectPrefix: "Official Certificate Signature Request",
 };
 
 export const DEFAULT_SETTINGS: Omit<
   CertificatesPluginSettings,
-  'publicKeyPem' | 'publicKeyFingerprint'
+  "publicKeyPem" | "publicKeyFingerprint"
 > = {
-  organizationName: 'Official Certification Authority',
-  organizationSubheader: 'Office of Official Records & Attestation',
-  verificationBaseUrl: 'http://localhost:1337/api/certificates/verify',
-  defaultTimezone: 'UTC',
-  defaultLocale: 'en',
+  organizationName: "Official Certification Authority",
+  organizationSubheader: "Office of Official Records & Attestation",
+  verificationBaseUrl: "http://localhost:1337/api/certificates/verify",
+  defaultTimezone: "UTC",
+  defaultLocale: "en",
   maskPublicRecipientName: true,
   allowPublicApplications: true,
   secondaryCalendars: DEFAULT_SECONDARY_CALENDARS,
@@ -50,14 +51,14 @@ export const DEFAULT_SETTINGS: Omit<
 function sanitizeCalendarSystems(raw: unknown): CalendarSystemConfig[] {
   if (!Array.isArray(raw)) return DEFAULT_SECONDARY_CALENDARS;
   return raw
-    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
     .map((item) => ({
-      id: String(item.id || 'islamic-umalqura').trim(),
-      label: String(item.label || item.id || 'Hijri').trim(),
-      intlCalendar: String(item.intlCalendar || 'islamic-umalqura').trim(),
+      id: String(item.id || "islamic-umalqura").trim(),
+      label: String(item.label || item.id || "Hijri").trim(),
+      intlCalendar: String(item.intlCalendar || "islamic-umalqura").trim(),
       enabled: item.enabled !== false,
       dayOffset:
-        typeof item.dayOffset === 'number' && Number.isFinite(item.dayOffset)
+        typeof item.dayOffset === "number" && Number.isFinite(item.dayOffset)
           ? Math.max(-5, Math.min(5, Math.trunc(item.dayOffset)))
           : 0,
     }));
@@ -65,25 +66,25 @@ function sanitizeCalendarSystems(raw: unknown): CalendarSystemConfig[] {
 
 function pickFirstString(...candidates: Array<string | undefined>): string {
   for (const candidate of candidates) {
-    if (candidate !== undefined && candidate !== '') {
+    if (candidate !== undefined && candidate !== "") {
       return String(candidate).trim();
     }
   }
-  return '';
+  return "";
 }
 
 function normalizeEsignProvider(
   providerRaw: string,
   enabled: boolean
-): DocuSignProviderConfig['provider'] {
-  if (providerRaw === 'docusign' || providerRaw === 'webhook') {
+): DocuSignProviderConfig["provider"] {
+  if (providerRaw === "docusign" || providerRaw === "webhook") {
     return providerRaw;
   }
-  return enabled ? 'docusign' : 'none';
+  return enabled ? "docusign" : "none";
 }
 
 function toRecordObject(raw: unknown): Partial<DocuSignProviderConfig> {
-  return raw && typeof raw === 'object' ? (raw as Partial<DocuSignProviderConfig>) : {};
+  return raw && typeof raw === "object" ? (raw as Partial<DocuSignProviderConfig>) : {};
 }
 
 function sanitizeESignConfig(
@@ -96,7 +97,7 @@ function sanitizeESignConfig(
   const envIntegrationKey = process.env.DOCUSIGN_INTEGRATION_KEY?.trim();
 
   const enabled = Boolean(obj.enabled ?? fallback.enabled ?? Boolean(envAccountId));
-  const providerRaw = pickFirstString(obj.provider, fallback.provider, 'none');
+  const providerRaw = pickFirstString(obj.provider, fallback.provider, "none");
 
   return {
     enabled,
@@ -106,13 +107,9 @@ function sanitizeESignConfig(
       envBaseUrl,
       fallback.baseUrl,
       DEFAULT_ESIGN_CONFIG.baseUrl
-    ).replace(/\/+$/, ''),
+    ).replace(/\/+$/, ""),
     accountId: pickFirstString(obj.accountId, envAccountId, fallback.accountId),
-    integrationKey: pickFirstString(
-      obj.integrationKey,
-      envIntegrationKey,
-      fallback.integrationKey
-    ),
+    integrationKey: pickFirstString(obj.integrationKey, envIntegrationKey, fallback.integrationKey),
     emailSubjectPrefix: pickFirstString(
       obj.emailSubjectPrefix,
       fallback.emailSubjectPrefix,
@@ -124,7 +121,7 @@ function sanitizeESignConfig(
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getPluginStore = () =>
     strapi.store({
-      type: 'plugin',
+      type: "plugin",
       name: PLUGIN_ID,
     });
 
@@ -135,9 +132,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (envPrivate && envPublic) {
         return {
-          privateKeyPem: envPrivate.replace(/\\n/g, '\n'),
-          publicKeyPem: envPublic.replace(/\\n/g, '\n'),
-          fingerprint: computePublicKeyFingerprint(envPublic.replace(/\\n/g, '\n')),
+          privateKeyPem: envPrivate.replace(/\\n/g, "\n"),
+          publicKeyPem: envPublic.replace(/\\n/g, "\n"),
+          fingerprint: computePublicKeyFingerprint(envPublic.replace(/\\n/g, "\n")),
         };
       }
 
@@ -150,8 +147,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return {
           privateKeyPem: stored.privateKeyPem,
           publicKeyPem: stored.publicKeyPem,
-          fingerprint:
-            stored.fingerprint || computePublicKeyFingerprint(stored.publicKeyPem),
+          fingerprint: stored.fingerprint || computePublicKeyFingerprint(stored.publicKeyPem),
         };
       }
 
@@ -176,9 +172,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         key: KEYPAIR_STORE_KEY,
         value: generated,
       });
-      strapi.log.warn(
-        `[${PLUGIN_ID}] Rotated Ed25519 signing keypair to ${generated.fingerprint}`
-      );
+      strapi.log.warn(`[${PLUGIN_ID}] Rotated Ed25519 signing keypair to ${generated.fingerprint}`);
       return {
         publicKeyPem: generated.publicKeyPem,
         publicKeyFingerprint: generated.fingerprint,
@@ -188,10 +182,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async getSettings(): Promise<CertificatesPluginSettings> {
       const store = getPluginStore();
       const configDefaults =
-        strapi.config.get<Partial<CertificatesPluginSettings>>(
-          `plugin::${PLUGIN_ID}`,
-          {}
-        ) || {};
+        strapi.config.get<Partial<CertificatesPluginSettings>>(`plugin::${PLUGIN_ID}`, {}) || {};
       const stored = ((await store.get({ key: SETTINGS_STORE_KEY })) ||
         {}) as Partial<CertificatesPluginSettings>;
       const keyPair = await this.getSigningKeyPair();
@@ -202,10 +193,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ...stored,
       };
 
-      const defaultEsign = sanitizeESignConfig(
-        configDefaults.esign,
-        DEFAULT_ESIGN_CONFIG
-      );
+      const defaultEsign = sanitizeESignConfig(configDefaults.esign, DEFAULT_ESIGN_CONFIG);
 
       return {
         organizationName: String(
@@ -218,22 +206,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           merged.verificationBaseUrl || DEFAULT_SETTINGS.verificationBaseUrl
         )
           .trim()
-          .replace(/\/+$/, ''),
-        defaultTimezone: String(
-          merged.defaultTimezone || DEFAULT_SETTINGS.defaultTimezone
-        ).trim(),
-        defaultLocale: String(
-          merged.defaultLocale || DEFAULT_SETTINGS.defaultLocale
-        ).trim(),
+          .replace(/\/+$/, ""),
+        defaultTimezone: String(merged.defaultTimezone || DEFAULT_SETTINGS.defaultTimezone).trim(),
+        defaultLocale: String(merged.defaultLocale || DEFAULT_SETTINGS.defaultLocale).trim(),
         maskPublicRecipientName: merged.maskPublicRecipientName !== false,
         allowPublicApplications: merged.allowPublicApplications !== false,
         publicKeyPem: keyPair.publicKeyPem,
         publicKeyFingerprint: keyPair.fingerprint,
         secondaryCalendars: sanitizeCalendarSystems(merged.secondaryCalendars),
         esign: sanitizeESignConfig(stored.esign, defaultEsign),
-        defaultTemplates: Array.isArray(merged.defaultTemplates)
-          ? merged.defaultTemplates
-          : [],
+        defaultTemplates: Array.isArray(merged.defaultTemplates) ? merged.defaultTemplates : [],
       };
     },
 
@@ -243,31 +225,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const current = await this.getSettings();
       const updated = {
         organizationName:
-          typeof partial.organizationName === 'string'
+          typeof partial.organizationName === "string"
             ? partial.organizationName.trim()
             : current.organizationName,
         organizationSubheader:
-          typeof partial.organizationSubheader === 'string'
+          typeof partial.organizationSubheader === "string"
             ? partial.organizationSubheader.trim()
             : current.organizationSubheader,
         verificationBaseUrl:
-          typeof partial.verificationBaseUrl === 'string'
-            ? partial.verificationBaseUrl.trim().replace(/\/+$/, '')
+          typeof partial.verificationBaseUrl === "string"
+            ? partial.verificationBaseUrl.trim().replace(/\/+$/, "")
             : current.verificationBaseUrl,
         defaultTimezone:
-          typeof partial.defaultTimezone === 'string'
+          typeof partial.defaultTimezone === "string"
             ? partial.defaultTimezone.trim()
             : current.defaultTimezone,
         defaultLocale:
-          typeof partial.defaultLocale === 'string'
+          typeof partial.defaultLocale === "string"
             ? partial.defaultLocale.trim()
             : current.defaultLocale,
         maskPublicRecipientName:
-          typeof partial.maskPublicRecipientName === 'boolean'
+          typeof partial.maskPublicRecipientName === "boolean"
             ? partial.maskPublicRecipientName
             : current.maskPublicRecipientName,
         allowPublicApplications:
-          typeof partial.allowPublicApplications === 'boolean'
+          typeof partial.allowPublicApplications === "boolean"
             ? partial.allowPublicApplications
             : current.allowPublicApplications,
         secondaryCalendars:

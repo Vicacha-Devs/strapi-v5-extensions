@@ -1,5 +1,6 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../shared';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../shared";
 
 type AttributeMap = Record<string, Record<string, unknown>>;
 
@@ -15,7 +16,7 @@ function mergeAttributesIntoTarget(
 ): void {
   if (!target) return;
   target[attrName] = {
-    ...(target[attrName] ?? {}),
+    ...target[attrName],
     ...attrDef,
   };
 }
@@ -25,7 +26,7 @@ function applyExtraAttributesToSchema(
   extraAttributes: AttributeMap
 ): void {
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
-    if (!attrName || !attrDef || typeof attrDef !== 'object') continue;
+    if (!attrName || !attrDef || typeof attrDef !== "object") continue;
     mergeAttributesIntoTarget(schema?.attributes, attrName, attrDef);
     mergeAttributesIntoTarget(schema?.__schema__?.attributes, attrName, attrDef);
   }
@@ -37,8 +38,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   for (const [targetKey, extraAttributes] of Object.entries(config.schemaExtensions ?? {})) {
-    if (!extraAttributes || typeof extraAttributes !== 'object') continue;
-    const resolvedUid = targetKey.startsWith('plugin::')
+    if (!extraAttributes || typeof extraAttributes !== "object") continue;
+    const resolvedUid = targetKey.startsWith("plugin::")
       ? targetKey
       : `plugin::${PLUGIN_ID}.${targetKey}`;
 

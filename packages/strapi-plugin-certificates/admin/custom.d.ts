@@ -1,12 +1,5 @@
-declare module 'react' {
-  export type ReactNode =
-    | string
-    | number
-    | boolean
-    | null
-    | undefined
-    | ReactElement
-    | ReactNode[];
+declare module "react" {
+  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
 
   export interface ReactElement<P = unknown> {
     type: unknown;
@@ -42,10 +35,7 @@ declare module 'react' {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(
-    effect: () => void | (() => void),
-    deps?: readonly unknown[]
-  ): void;
+  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
   export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
@@ -65,8 +55,8 @@ declare module 'react' {
   export as namespace React;
 }
 
-declare module 'react/jsx-runtime' {
-  import type { ReactElement } from 'react';
+declare module "react/jsx-runtime" {
+  import type { ReactElement } from "react";
   export const Fragment: unknown;
   export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
   export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
@@ -79,7 +69,7 @@ declare module 'react/jsx-runtime' {
   }
 }
 
-declare module 'react-intl' {
+declare module "react-intl" {
   export interface MessageDescriptor {
     id: string;
     defaultMessage?: string;
@@ -94,8 +84,8 @@ declare module 'react-intl' {
   };
 }
 
-declare module '@strapi/strapi/admin' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/strapi/admin" {
+  import type { FC, ReactNode } from "react";
   export type AdminLayoutProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Layouts: {
@@ -119,7 +109,7 @@ declare module '@strapi/strapi/admin' {
 
   export function useNotification(): {
     toggleNotification(config: {
-      type?: 'success' | 'warning' | 'danger' | 'info';
+      type?: "success" | "warning" | "danger" | "info";
       message: string;
     }): void;
   };
@@ -140,8 +130,8 @@ declare module '@strapi/strapi/admin' {
   export type StrapiApp = StrapiAdminApp;
 }
 
-declare module 'react-router-dom' {
-  import type { FC, ReactNode } from 'react';
+declare module "react-router-dom" {
+  import type { FC, ReactNode } from "react";
   export const Routes: FC<{ children?: ReactNode }>;
   export const Route: FC<{
     index?: boolean;
@@ -151,8 +141,8 @@ declare module 'react-router-dom' {
   export function useNavigate(): (to: string) => void;
 }
 
-declare module '@strapi/design-system' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/design-system" {
+  import type { FC, ReactNode } from "react";
   export type DesignComponentProps = Record<string, unknown> & {
     children?: ReactNode;
     onChange?: (arg: never) => void;
@@ -194,16 +184,16 @@ declare module '@strapi/design-system' {
   };
 }
 
-declare module '@strapi/design-system/*';
+declare module "@strapi/design-system/*";
 
-declare module '@strapi/icons' {
-  import type { FC } from 'react';
+declare module "@strapi/icons" {
+  import type { FC } from "react";
   export const CheckCircle: FC<Record<string, unknown>>;
   export const File: FC<Record<string, unknown>>;
   export const Key: FC<Record<string, unknown>>;
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }
@@ -211,35 +201,41 @@ declare module '*.json' {
 declare const Buffer: {
   from(
     input: string,
-    encoding?: 'utf8' | 'utf-8' | 'hex' | 'base64' | 'base64url'
+    encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
   ): Uint8Array & {
-    toString(encoding?: 'utf8' | 'utf-8' | 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"): string;
   };
 };
 
-declare module 'node:crypto' {
+declare module "node:crypto" {
   export function randomBytes(size: number): {
-    toString(encoding: 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding: "hex" | "base64" | "base64url"): string;
   };
-  export function createHash(algorithm: 'sha256' | 'sha512'): {
-    update(data: string, encoding?: 'utf8' | 'utf-8'): {
-      digest(encoding: 'hex' | 'base64' | 'base64url'): string;
+  export function createHash(algorithm: "sha256" | "sha512"): {
+    update(
+      data: string,
+      encoding?: "utf8" | "utf-8"
+    ): {
+      digest(encoding: "hex" | "base64" | "base64url"): string;
     };
   };
   export function createHmac(
-    algorithm: 'sha256' | 'sha512',
+    algorithm: "sha256" | "sha512",
     key: string
   ): {
-    update(data: string, encoding?: 'utf8' | 'utf-8'): {
-      digest(encoding: 'hex' | 'base64' | 'base64url'): string;
+    update(
+      data: string,
+      encoding?: "utf8" | "utf-8"
+    ): {
+      digest(encoding: "hex" | "base64" | "base64url"): string;
     };
   };
   export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean;
   export function generateKeyPairSync(
-    type: 'ed25519',
+    type: "ed25519",
     options: {
-      publicKeyEncoding: { type: 'spki'; format: 'pem' };
-      privateKeyEncoding: { type: 'pkcs8'; format: 'pem' };
+      publicKeyEncoding: { type: "spki"; format: "pem" };
+      privateKeyEncoding: { type: "pkcs8"; format: "pem" };
     }
   ): {
     publicKey: string;
@@ -250,7 +246,7 @@ declare module 'node:crypto' {
     data: Uint8Array,
     privateKeyPem: string
   ): {
-    toString(encoding: 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding: "hex" | "base64" | "base64url"): string;
   };
   export function verify(
     algorithm: null | undefined,
@@ -260,7 +256,7 @@ declare module 'node:crypto' {
   ): boolean;
 }
 
-declare module 'styled-components' {
+declare module "styled-components" {
   export function useTheme(): {
     colors?: Record<string, string | undefined>;
     [key: string]: unknown;

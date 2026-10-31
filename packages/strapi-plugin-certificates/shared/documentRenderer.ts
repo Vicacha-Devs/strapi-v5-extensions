@@ -1,4 +1,4 @@
-import type { CertificateRecord, CertificateTemplate } from './types';
+import type { CertificateRecord, CertificateTemplate } from "./types";
 
 function computeDeterministicHex(input: string): string {
   const out: string[] = [];
@@ -8,22 +8,22 @@ function computeDeterministicHex(input: string): string {
       h ^= input.charCodeAt(i);
       h = Math.imul(h, 0x01000193) >>> 0;
     }
-    out.push(h.toString(16).padStart(8, '0'));
+    out.push(h.toString(16).padStart(8, "0"));
   }
-  return out.join('');
+  return out.join("");
 }
 
 export function escapeHtml(input: unknown): string {
-  return String(input ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return String(input ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
-export function sanitizeHexColor(input?: string, fallback = '#14532d'): string {
-  const cleaned = String(input || '').trim();
+export function sanitizeHexColor(input?: string, fallback = "#14532d"): string {
+  const cleaned = String(input || "").trim();
   if (/^#[0-9a-fA-F]{6}$/.test(cleaned)) {
     return cleaned;
   }
@@ -36,12 +36,12 @@ export function interpolateBodyTemplate(
 ): string {
   const safeTemplate = escapeHtml(templateText);
   return safeTemplate.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_match, key: string) => {
-    const rawVal = variables[key] ?? '';
+    const rawVal = variables[key] ?? "";
     return `<strong>${escapeHtml(rawVal)}</strong>`;
   });
 }
 
-export function renderVerificationMatrixSvg(seedText: string, accentColor = '#14532d'): string {
+export function renderVerificationMatrixSvg(seedText: string, accentColor = "#14532d"): string {
   const safeColor = sanitizeHexColor(accentColor);
   const hashHex = computeDeterministicHex(seedText);
   const size = 9;
@@ -50,9 +50,7 @@ export function renderVerificationMatrixSvg(seedText: string, accentColor = '#14
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
       const isCornerFinder =
-        (row < 3 && col < 3) ||
-        (row < 3 && col >= size - 3) ||
-        (row >= size - 3 && col < 3);
+        (row < 3 && col < 3) || (row < 3 && col >= size - 3) || (row >= size - 3 && col < 3);
       const hexIdx = (row * size + col) % hashHex.length;
       const nibble = parseInt(hashHex[hexIdx], 16);
       const filled = isCornerFinder || nibble % 2 === 0;
@@ -70,8 +68,8 @@ export function renderVerificationMatrixSvg(seedText: string, accentColor = '#14
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84" width="84" height="84" role="img" aria-label="Cryptographic Verification Matrix">',
     `<rect x="1" y="1" width="82" height="82" rx="6" fill="#ffffff" stroke="${safeColor}" stroke-width="2" />`,
     ...cells,
-    '</svg>',
-  ].join('');
+    "</svg>",
+  ].join("");
 }
 
 function buildTemplateVariables(
@@ -82,22 +80,19 @@ function buildTemplateVariables(
 ): Record<string, string> {
   return {
     recipientFullName: certificate.recipientFullName,
-    recipientChosenName:
-      certificate.recipientChosenName || certificate.recipientFullName,
-    chosenName: certificate.recipientChosenName || '',
-    nationalIdMasked: certificate.nationalIdMasked || 'N/A',
-    recipientNationality: certificate.recipientNationality || '',
+    recipientChosenName: certificate.recipientChosenName || certificate.recipientFullName,
+    chosenName: certificate.recipientChosenName || "",
+    nationalIdMasked: certificate.nationalIdMasked || "N/A",
+    recipientNationality: certificate.recipientNationality || "",
     issuedDateFormatted,
     secondaryDateFormatted: secondaryFormattedList || issuedDateFormatted,
     serialNumber: certificate.serialNumber,
     organizationName: template.organizationName,
-    ...(certificate.customData || {}),
+    ...certificate.customData,
   };
 }
 
-function renderSignatoriesHtml(
-  signatories: CertificateRecord['signatories']
-): string {
+function renderSignatoriesHtml(signatories: CertificateRecord["signatories"]): string {
   return (signatories || [])
     .map(
       (sig, idx) => `
@@ -105,15 +100,15 @@ function renderSignatoriesHtml(
         <div class="sig-line"><span class="esign-anchor">/sig_${idx + 1}/</span></div>
         <div class="sig-name">${escapeHtml(sig.name)}</div>
         <div class="sig-title">${escapeHtml(sig.title)}</div>
-        ${sig.role ? `<div class="sig-role">${escapeHtml(sig.role)}</div>` : ''}
+        ${sig.role ? `<div class="sig-role">${escapeHtml(sig.role)}</div>` : ""}
       </div>`
     )
-    .join('');
+    .join("");
 }
 
-function renderWitnessesHtml(witnesses: CertificateRecord['witnesses']): string {
+function renderWitnessesHtml(witnesses: CertificateRecord["witnesses"]): string {
   const list = witnesses || [];
-  if (list.length === 0) return '';
+  if (list.length === 0) return "";
   const cards = list
     .map(
       (w, idx) => `
@@ -121,12 +116,12 @@ function renderWitnessesHtml(witnesses: CertificateRecord['witnesses']): string 
               <div class="sig-line"><span class="esign-anchor">/wit_${idx + 1}/</span></div>
               <div class="witness-name">${escapeHtml(w.fullName)}</div>
               <div class="witness-meta">
-                ${w.role ? `<span>${escapeHtml(w.role)}</span>` : ''}
-                ${w.documentIdMasked ? `<span>ID: ${escapeHtml(w.documentIdMasked)}</span>` : ''}
+                ${w.role ? `<span>${escapeHtml(w.role)}</span>` : ""}
+                ${w.documentIdMasked ? `<span>ID: ${escapeHtml(w.documentIdMasked)}</span>` : ""}
               </div>
             </div>`
     )
-    .join('');
+    .join("");
   return `
       <div class="witness-section">
         <div class="witness-heading">Official Witnesses</div>
@@ -142,27 +137,27 @@ function renderOptionalHtmlFragments(
 ) {
   return {
     statusBanner:
-      certificate.status !== 'issued'
+      certificate.status !== "issued"
         ? `<div class="watermark-alert">STATUS: ${escapeHtml(certificate.status.toUpperCase())}</div>`
-        : '',
+        : "",
     headerHtml: template.headerText
       ? `<div class="header-Invocation">${escapeHtml(template.headerText)}</div>`
-      : '',
+      : "",
     subheaderHtml: template.organizationSubheader
       ? `<div class="org-subheader">${escapeHtml(template.organizationSubheader)}</div>`
-      : '',
+      : "",
     chosenNameHtml: certificate.recipientChosenName
       ? `<div class="recipient-chosen">Chosen Name / Title: ${escapeHtml(certificate.recipientChosenName)}</div>`
-      : '',
+      : "",
     secondaryDateHtml: secondaryFormattedList
       ? `<span><strong>Secondary Calendar:</strong> ${escapeHtml(secondaryFormattedList)}</span>`
-      : '',
+      : "",
     nationalIdHtml: certificate.nationalIdMasked
       ? `<span><strong>Document ID:</strong> ${escapeHtml(certificate.nationalIdMasked)}</span>`
-      : '',
+      : "",
     esignLineHtml: certificate.esignEnvelopeId
-      ? `<div>E-Sign Envelope (${escapeHtml(certificate.esignProvider || 'docusign')}): ${escapeHtml(certificate.esignEnvelopeId)} [${escapeHtml(certificate.esignEnvelopeStatus || 'sent')}]</div>`
-      : '',
+      ? `<div>E-Sign Envelope (${escapeHtml(certificate.esignProvider || "docusign")}): ${escapeHtml(certificate.esignEnvelopeId)} [${escapeHtml(certificate.esignEnvelopeStatus || "sent")}]</div>`
+      : "",
   };
 }
 
@@ -172,11 +167,11 @@ export function renderPrintableCertificateHtml(params: {
   verificationUrl: string;
 }): string {
   const { certificate, template, verificationUrl } = params;
-  const accent = sanitizeHexColor(template.accentColor, '#14532d');
+  const accent = sanitizeHexColor(template.accentColor, "#14532d");
   const issuedDateFormatted = certificate.issuedAt.slice(0, 10);
   const secondaryFormattedList = Object.values(certificate.secondaryDates || {})
     .map((d) => `${d.label}: ${d.formatted}`)
-    .join(' • ');
+    .join(" • ");
 
   const variables = buildTemplateVariables(
     certificate,
@@ -191,11 +186,7 @@ export function renderPrintableCertificateHtml(params: {
   );
   const signatoriesHtml = renderSignatoriesHtml(certificate.signatories);
   const witnessesHtml = renderWitnessesHtml(certificate.witnesses);
-  const fragments = renderOptionalHtmlFragments(
-    certificate,
-    template,
-    secondaryFormattedList
-  );
+  const fragments = renderOptionalHtmlFragments(certificate, template, secondaryFormattedList);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -419,11 +410,13 @@ export function renderPrintableCertificateHtml(params: {
 }
 
 export function escapeCsvCell(value: unknown): string {
-  let str = String(value ?? '').replace(/\r?\n/g, ' ').trim();
+  let str = String(value ?? "")
+    .replace(/\r?\n/g, " ")
+    .trim();
   if (/^[=+\-@\t\r]/.test(str)) {
     str = `'${str}`;
   }
-  if (str.includes(',') || str.includes('"') || str.includes("'")) {
+  if (str.includes(",") || str.includes('"') || str.includes("'")) {
     return `"${str.replace(/"/g, '""')}"`;
   }
   return str;
@@ -431,30 +424,30 @@ export function escapeCsvCell(value: unknown): string {
 
 export function exportCertificatesToCsv(records: CertificateRecord[]): string {
   const headers = [
-    'Serial Number',
-    'Template',
-    'Status',
-    'Recipient Full Name',
-    'Chosen Name / Title',
-    'Masked ID',
-    'Issued At',
-    'Expires At',
-    'Signatories',
-    'Witnesses Count',
-    'Key Fingerprint',
+    "Serial Number",
+    "Template",
+    "Status",
+    "Recipient Full Name",
+    "Chosen Name / Title",
+    "Masked ID",
+    "Issued At",
+    "Expires At",
+    "Signatories",
+    "Witnesses Count",
+    "Key Fingerprint",
   ];
   const rows = records.map((r) => [
     escapeCsvCell(r.serialNumber),
     escapeCsvCell(r.templateName || r.templateSlug),
     escapeCsvCell(r.status),
     escapeCsvCell(r.recipientFullName),
-    escapeCsvCell(r.recipientChosenName || ''),
-    escapeCsvCell(r.nationalIdMasked || ''),
+    escapeCsvCell(r.recipientChosenName || ""),
+    escapeCsvCell(r.nationalIdMasked || ""),
     escapeCsvCell(r.issuedAt),
-    escapeCsvCell(r.expiresAt || ''),
-    escapeCsvCell((r.signatories || []).map((s) => s.name).join('; ')),
+    escapeCsvCell(r.expiresAt || ""),
+    escapeCsvCell((r.signatories || []).map((s) => s.name).join("; ")),
     escapeCsvCell((r.witnesses || []).length),
     escapeCsvCell(r.publicKeyFingerprint),
   ]);
-  return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+  return [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
 }

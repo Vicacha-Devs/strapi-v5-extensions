@@ -1,40 +1,46 @@
 declare const Buffer: {
   from(
     input: string,
-    encoding?: 'utf8' | 'utf-8' | 'hex' | 'base64' | 'base64url'
+    encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
   ): Uint8Array & {
-    toString(encoding?: 'utf8' | 'utf-8' | 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"): string;
   };
-  byteLength(input: string, encoding?: 'utf8' | 'utf-8'): number;
+  byteLength(input: string, encoding?: "utf8" | "utf-8"): number;
 };
 
 declare const process: {
   env: Record<string, string | undefined>;
 };
 
-declare module 'node:crypto' {
+declare module "node:crypto" {
   export function randomBytes(size: number): {
-    toString(encoding: 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding: "hex" | "base64" | "base64url"): string;
   };
-  export function createHash(algorithm: 'sha256' | 'sha512'): {
-    update(data: string, encoding?: 'utf8' | 'utf-8'): {
-      digest(encoding: 'hex' | 'base64' | 'base64url'): string;
+  export function createHash(algorithm: "sha256" | "sha512"): {
+    update(
+      data: string,
+      encoding?: "utf8" | "utf-8"
+    ): {
+      digest(encoding: "hex" | "base64" | "base64url"): string;
     };
   };
   export function createHmac(
-    algorithm: 'sha256' | 'sha512',
+    algorithm: "sha256" | "sha512",
     key: string
   ): {
-    update(data: string, encoding?: 'utf8' | 'utf-8'): {
-      digest(encoding: 'hex' | 'base64' | 'base64url'): string;
+    update(
+      data: string,
+      encoding?: "utf8" | "utf-8"
+    ): {
+      digest(encoding: "hex" | "base64" | "base64url"): string;
     };
   };
   export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean;
   export function generateKeyPairSync(
-    type: 'ed25519',
+    type: "ed25519",
     options: {
-      publicKeyEncoding: { type: 'spki'; format: 'pem' };
-      privateKeyEncoding: { type: 'pkcs8'; format: 'pem' };
+      publicKeyEncoding: { type: "spki"; format: "pem" };
+      privateKeyEncoding: { type: "pkcs8"; format: "pem" };
     }
   ): {
     publicKey: string;
@@ -45,7 +51,7 @@ declare module 'node:crypto' {
     data: Uint8Array,
     privateKeyPem: string
   ): {
-    toString(encoding: 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding: "hex" | "base64" | "base64url"): string;
   };
   export function verify(
     algorithm: null | undefined,
@@ -65,8 +71,8 @@ declare module 'node:crypto' {
   export default cryptoDefault;
 }
 
-declare module 'node:fs' {
-  export function readFileSync(path: string, encoding: 'utf8' | 'utf-8'): string;
+declare module "node:fs" {
+  export function readFileSync(path: string, encoding: "utf8" | "utf-8"): string;
   export function existsSync(path: string): boolean;
   const fsDefault: {
     readFileSync: typeof readFileSync;
@@ -75,7 +81,7 @@ declare module 'node:fs' {
   export default fsDefault;
 }
 
-declare module 'node:path' {
+declare module "node:path" {
   export function dirname(p: string): string;
   export function resolve(...paths: string[]): string;
   export function join(...paths: string[]): string;
@@ -87,11 +93,11 @@ declare module 'node:path' {
   export default pathDefault;
 }
 
-declare module 'node:url' {
+declare module "node:url" {
   export function fileURLToPath(url: string): string;
 }
 
-declare module 'node:assert/strict' {
+declare module "node:assert/strict" {
   const assert: {
     equal(actual: unknown, expected: unknown, message?: string): void;
     notEqual(actual: unknown, expected: unknown, message?: string): void;
@@ -102,12 +108,12 @@ declare module 'node:assert/strict' {
   export default assert;
 }
 
-declare module 'node:test' {
+declare module "node:test" {
   export function describe(name: string, fn: () => void | Promise<void>): void;
   export function it(name: string, fn: () => void | Promise<void>): void;
 }
 
-declare module '@strapi/strapi' {
+declare module "@strapi/strapi" {
   export namespace Core {
     export interface PluginStore {
       get(params: { key: string }): Promise<unknown>;
@@ -134,7 +140,7 @@ declare module '@strapi/strapi' {
     export interface DocumentQueryOptions {
       limit?: number;
       locale?: string;
-      status?: 'draft' | 'published';
+      status?: "draft" | "published";
       filters?: Record<string, unknown>;
       populate?: string[];
       sort?: string;
@@ -149,7 +155,7 @@ declare module '@strapi/strapi' {
       }): Promise<Record<string, unknown> | null>;
       create(params: {
         data: Record<string, unknown>;
-        status?: 'draft' | 'published';
+        status?: "draft" | "published";
       }): Promise<Record<string, unknown>>;
       update(params: {
         documentId: string;
@@ -206,7 +212,7 @@ declare module '@strapi/strapi' {
   }
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, unknown>;
   export default value;
 }

@@ -248,5 +248,8 @@
   "settings.ui.endpoint_public_key": "GET /api/certificates/public-key",
   "certificates.settings.ui.endpoint_public_key": "GET /api/certificates/public-key",
   "field.for_offline_embassy_verification": "pour vérification consulaire hors ligne)",
-  "certificates.field.for_offline_embassy_verification": "pour vérification consulaire hors ligne)"
+  "certificates.field.for_offline_embassy_verification": "pour vérification consulaire hors ligne)",
+  "settings.tab.organization": "Issuing Organization & Verification",
+  "settings.tab.docusign": "DocuSign E-Signature",
+  "settings.tab.keys": "Ed25519 Signing Keys"
 }

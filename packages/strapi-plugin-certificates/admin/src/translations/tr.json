@@ -248,5 +248,8 @@
   "settings.ui.endpoint_public_key": "GET /api/certificates/public-key",
   "certificates.settings.ui.endpoint_public_key": "GET /api/certificates/public-key",
   "field.for_offline_embassy_verification": "çevrimdışı elçilik/konsolosluk doğrulaması için)",
-  "certificates.field.for_offline_embassy_verification": "çevrimdışı elçilik/konsolosluk doğrulaması için)"
+  "certificates.field.for_offline_embassy_verification": "çevrimdışı elçilik/konsolosluk doğrulaması için)",
+  "settings.tab.organization": "Veren Kurum ve Doğrulama",
+  "settings.tab.docusign": "DocuSign E-İmza",
+  "settings.tab.keys": "Ed25519 İmza Anahtarları"
 }
