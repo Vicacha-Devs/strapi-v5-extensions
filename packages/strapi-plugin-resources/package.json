@@ -3,75 +3,71 @@
   "version": "1.0.0",
   "description": "Generic Strapi v5 Digital Library Publications, Media Library Folder-Synced Photo Galleries & Multilingual A-Z Glossary Plugin powered by @strapi/upload and @vicacha-devs/strapi-plugin-calendar",
   "keywords": [
+    "digital-library",
+    "glossary",
+    "i18n",
+    "media-library",
+    "multi-calendar",
+    "photo-gallery",
+    "press-kit",
+    "publications",
+    "resources",
     "strapi",
     "strapi-plugin",
-    "strapi-v5",
-    "resources",
-    "digital-library",
-    "publications",
-    "photo-gallery",
-    "media-library",
-    "glossary",
-    "press-kit",
-    "i18n",
-    "multi-calendar"
+    "strapi-v5"
   ],
-  "type": "module",
-  "license": "MIT",
-  "author": {
-    "name": "Vicacha Devs",
-    "email": "devs@vicacha.org"
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions/tree/main/packages/strapi-plugin-resources#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
   },
+  "license": "MIT",
+  "author": "Vicacha Devs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vicacha-devs/strapi-v5-extensions.git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
     "directory": "packages/strapi-plugin-resources"
   },
   "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+    "dist"
   ],
+  "type": "module",
   "exports": {
     "./package.json": "./package.json",
     "./strapi-admin": {
-      "source": "./admin/src/index.ts",
       "types": "./dist/admin/src/index.d.ts",
-      "import": "./dist/admin/index.js",
-      "require": "./dist/admin/index.cjs",
-      "default": "./dist/admin/index.js"
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.mjs"
     },
     "./strapi-server": {
-      "source": "./server/src/index.ts",
       "types": "./dist/server/src/index.d.ts",
-      "import": "./dist/server/index.js",
-      "require": "./dist/server/index.cjs",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
     "./shared": {
-      "source": "./shared/index.ts",
       "types": "./dist/shared/index.d.ts",
-      "import": "./dist/shared/index.js",
-      "require": "./dist/shared/index.cjs",
-      "default": "./dist/shared/index.js"
+      "source": "./shared/index.ts",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
+      "default": "./dist/shared/index.mjs"
     }
   },
-  "strapi": {
-    "name": "resources",
-    "displayName": "Resources, Galleries & Glossary",
-    "description": "Digital Library Publications, Media Library Folder-Synced Photo Galleries, Press Kits, and Multilingual A-Z Glossary",
-    "kind": "plugin",
-    "required": false
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "scripts": {
-    "build": "strapi-plugin build",
-    "watch": "strapi-plugin watch",
-    "watch:link": "strapi-plugin watch:link",
-    "verify": "strapi-plugin verify",
-    "test": "node --import ./tests/register-ts-resolver.mjs --test tests/*.test.ts",
+    "build": "strapi-plugin build && node ../../scripts/ensure-esm-dist.ts",
+    "test": "node --import ./tests/register-ts-resolver.ts --test tests/*.test.ts",
     "test:ts": "tsc --noEmit -p admin/tsconfig.json && tsc --noEmit -p server/tsconfig.json",
     "test:ts:admin": "tsc --noEmit -p admin/tsconfig.json",
-    "test:ts:server": "tsc --noEmit -p server/tsconfig.json"
+    "test:ts:server": "tsc --noEmit -p server/tsconfig.json",
+    "verify": "strapi-plugin verify",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link"
   },
   "dependencies": {
     "@strapi/design-system": "^2.0.0-rc.21",
@@ -80,11 +76,10 @@
     "react-intl": "^6.6.8"
   },
   "devDependencies": {
-    "@strapi/sdk-plugin": "^5.2.4",
+    "@strapi/sdk-plugin": "6.1.1",
     "@strapi/strapi": "^5.39.0",
     "@vicacha-devs/eslint-config": "workspace:*",
     "@vicacha-devs/typescript-config": "workspace:*",
-    "prettier": "^3.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
@@ -97,5 +92,16 @@
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
     "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  },
+  "strapi": {
+    "name": "resources",
+    "displayName": "Resources, Galleries & Glossary",
+    "description": "Digital Library Publications, Media Library Folder-Synced Photo Galleries, Press Kits, and Multilingual A-Z Glossary",
+    "kind": "plugin",
+    "required": false
   }
 }
