@@ -64,7 +64,8 @@
       "min": 0
     },
     "currency": {
-      "type": "string",
+      "type": "customField",
+      "customField": "plugin::donations.currency",
       "default": "COP",
       "required": true
     },

@@ -196,6 +196,7 @@ export interface DonationsSettings {
   taxCertificateTemplateSlug: string;
   autoIssueCertificateOnVerify: boolean;
   richTextCustomField?: string;
+  availableRichTextCustomFields?: string[];
   secondaryCalendars: string[];
   campaignMapping: CollectionMapping;
   pledgeMapping: CollectionMapping;
