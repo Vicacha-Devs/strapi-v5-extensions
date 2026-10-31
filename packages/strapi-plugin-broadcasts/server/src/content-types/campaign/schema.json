@@ -82,6 +82,13 @@
     "whatsappTemplateName": {
       "type": "string"
     },
+    "whatsappGroupIds": {
+      "type": "json",
+      "default": []
+    },
+    "telegramChatId": {
+      "type": "string"
+    },
     "telegramThreadId": {
       "type": "integer"
     },

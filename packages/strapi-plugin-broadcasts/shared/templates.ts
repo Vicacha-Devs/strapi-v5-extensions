@@ -55,14 +55,81 @@ export function maskPhone(phone: string): string {
   return `${prefix}***${suffix}`;
 }
 
+export interface NormalizedWhatsAppTarget {
+  /** Canonical identifier used for idempotency keys & masking (e.g. "+573101234567" or "120363025891234567@g.us") */
+  normalized: string;
+  /** True when target is a WhatsApp Group (@g.us) or WhatsApp Channel (@newsletter) */
+  isGroupOrChannel: boolean;
+  /** JID for WAHA / OpenWA gateways (e.g. "573101234567@c.us", "1203630...@g.us", or "1203630...@newsletter") */
+  chatId: string;
+  /** Recipient identifier for Evolution API v2 (e.g. "573101234567", "1203630...@g.us", or "1203630...@newsletter") */
+  evolutionNumber: string;
+}
+
+export function isWhatsAppGroupOrChannelJid(raw: string): boolean {
+  const trimmed = String(raw || '').trim().toLowerCase();
+  return /^[\d-]+@g\.us$/.test(trimmed) || /^[\d-]+@newsletter$/.test(trimmed);
+}
+
+export function normalizeWhatsAppTarget(
+  raw: string,
+  defaultCountryCode = '57'
+): NormalizedWhatsAppTarget {
+  const trimmed = String(raw || '').trim();
+  if (!trimmed) {
+    return {
+      normalized: '',
+      isGroupOrChannel: false,
+      chatId: '',
+      evolutionNumber: '',
+    };
+  }
+
+  const lower = trimmed.toLowerCase();
+  if (isWhatsAppGroupOrChannelJid(lower)) {
+    return {
+      normalized: lower,
+      isGroupOrChannel: true,
+      chatId: lower,
+      evolutionNumber: lower,
+    };
+  }
+
+  if (lower.endsWith('@c.us') || lower.endsWith('@s.whatsapp.net')) {
+    const userPart = lower.split('@')[0];
+    const e164 = normalizeE164Phone(userPart, defaultCountryCode);
+    const digits = e164.replace(/^\+/, '');
+    return {
+      normalized: e164,
+      isGroupOrChannel: false,
+      chatId: digits ? `${digits}@c.us` : '',
+      evolutionNumber: digits,
+    };
+  }
+
+  const e164 = normalizeE164Phone(trimmed, defaultCountryCode);
+  const digits = e164.replace(/^\+/, '');
+  return {
+    normalized: e164,
+    isGroupOrChannel: false,
+    chatId: digits ? `${digits}@c.us` : '',
+    evolutionNumber: digits,
+  };
+}
+
 export function maskRecipientIdentifier(identifier: string): string {
   const trimmed = String(identifier || '').trim();
   if (!trimmed) return '***';
+  const lower = trimmed.toLowerCase();
+  if (isWhatsAppGroupOrChannelJid(lower)) {
+    // WhatsApp Group (@g.us) & Channel (@newsletter) JIDs are non-PII group/channel identifiers
+    return lower;
+  }
   if (trimmed.includes('@') && !trimmed.startsWith('@')) {
     return maskEmail(trimmed);
   }
-  if (trimmed.startsWith('@') || trimmed.startsWith('-100')) {
-    // Public/group Telegram channel IDs are non-PII channel identifiers
+  if (trimmed.startsWith('@') || /^-\d+$/.test(trimmed)) {
+    // Public/group Telegram channel and group/supergroup IDs (@handle or -100... / -...) are non-PII channel identifiers
     return trimmed;
   }
   return maskPhone(trimmed);
@@ -71,6 +138,9 @@ export function maskRecipientIdentifier(identifier: string): string {
 export function normalizeE164Phone(phone: string, defaultCountryCode = '57'): string {
   const raw = String(phone || '').trim();
   if (!raw) return '';
+  if (isWhatsAppGroupOrChannelJid(raw)) {
+    return raw.toLowerCase();
+  }
   const hasPlus = raw.startsWith('+');
   const digitsOnly = raw.replace(/\D+/g, '');
   if (!digitsOnly) return '';

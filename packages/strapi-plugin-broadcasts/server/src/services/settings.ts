@@ -17,6 +17,26 @@ function maskSecret(val?: string): string {
   return MASKED_SECRET;
 }
 
+function resolveSecretValue(
+  incoming: string | undefined,
+  current: string | undefined
+): string {
+  if (incoming === undefined || incoming === MASKED_SECRET) {
+    return current ?? '';
+  }
+  return incoming;
+}
+
+function resolveSecondaryCalendars(
+  incoming: unknown,
+  fallback: CalendarSystemId[]
+): CalendarSystemId[] {
+  if (!Array.isArray(incoming)) return fallback;
+  return incoming.filter((cal): cal is CalendarSystemId =>
+    isSupportedCalendar(cal)
+  );
+}
+
 const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => ({
   getPluginStore() {
     return strapi.store({
@@ -37,13 +57,10 @@ const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => ({
       ? rawConfig.primaryCalendar
       : DEFAULT_BROADCAST_SETTINGS.primaryCalendar;
 
-    const secondaryCalendars: CalendarSystemId[] = Array.isArray(
-      rawConfig.secondaryCalendars
-    )
-      ? rawConfig.secondaryCalendars.filter((cal): cal is CalendarSystemId =>
-          isSupportedCalendar(cal)
-        )
-      : DEFAULT_BROADCAST_SETTINGS.secondaryCalendars;
+    const secondaryCalendars = resolveSecondaryCalendars(
+      rawConfig.secondaryCalendars,
+      DEFAULT_BROADCAST_SETTINGS.secondaryCalendars
+    );
 
     return {
       ...DEFAULT_BROADCAST_SETTINGS,
@@ -105,29 +122,25 @@ const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => ({
       primaryCalendar: isSupportedCalendar(partial.primaryCalendar)
         ? partial.primaryCalendar
         : current.primaryCalendar,
-      secondaryCalendars: Array.isArray(partial.secondaryCalendars)
-        ? partial.secondaryCalendars.filter((cal): cal is CalendarSystemId =>
-            isSupportedCalendar(cal)
-          )
-        : current.secondaryCalendars,
+      secondaryCalendars: resolveSecondaryCalendars(
+        partial.secondaryCalendars,
+        current.secondaryCalendars
+      ),
       whatsappDriver: isSupportedWhatsAppDriver(partial.whatsappDriver)
         ? partial.whatsappDriver
         : current.whatsappDriver,
-      telegramBotToken:
-        partial.telegramBotToken === MASKED_SECRET ||
-        partial.telegramBotToken === undefined
-          ? current.telegramBotToken
-          : partial.telegramBotToken,
-      whatsappAccessToken:
-        partial.whatsappAccessToken === MASKED_SECRET ||
-        partial.whatsappAccessToken === undefined
-          ? current.whatsappAccessToken
-          : partial.whatsappAccessToken,
-      whatsappGatewayApiKey:
-        partial.whatsappGatewayApiKey === MASKED_SECRET ||
-        partial.whatsappGatewayApiKey === undefined
-          ? current.whatsappGatewayApiKey
-          : partial.whatsappGatewayApiKey,
+      telegramBotToken: resolveSecretValue(
+        partial.telegramBotToken,
+        current.telegramBotToken
+      ),
+      whatsappAccessToken: resolveSecretValue(
+        partial.whatsappAccessToken,
+        current.whatsappAccessToken
+      ),
+      whatsappGatewayApiKey: resolveSecretValue(
+        partial.whatsappGatewayApiKey,
+        current.whatsappGatewayApiKey
+      ),
     };
 
     const store = this.getPluginStore();

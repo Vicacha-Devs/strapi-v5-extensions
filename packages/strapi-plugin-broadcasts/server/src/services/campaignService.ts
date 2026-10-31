@@ -4,57 +4,36 @@ import {
   PLUGIN_ID,
   STARTER_CAMPAIGN_TEMPLATES,
   formatSecondaryDate,
-  interpolateBroadcastTemplate,
   normalizeChannels,
-  resolveLocalizedCampaignCopy,
   validateCampaignInput,
-  type BroadcastChannel,
   type BroadcastSettings,
   type CampaignRecord,
   type CampaignStats,
-  type ChannelDispatchCount,
   type ChannelDispatchResult,
   type SubscriberRecipient,
 } from '../../../shared';
-import type {
-  EmailSendPayload,
-  TelegramSendPayload,
-  WhatsAppSendPayload,
-} from './transportService';
+import {
+  buildCampaignDocumentData,
+  buildPresetCampaignPayload,
+  dispatchAllActiveChannels,
+  mapRawSubscriber,
+  type TransportServiceContract,
+} from './campaignChannelDispatch';
+import { createEmptyStats } from './campaignHelpers';
 
-function createEmptyStats(): CampaignStats {
-  return {
-    totalRecipients: 0,
-    sentCount: 0,
-    simulatedCount: 0,
-    skippedCount: 0,
-    failedCount: 0,
-    byChannel: {},
-  };
-}
-
-function recordResultInStats(stats: CampaignStats, result: ChannelDispatchResult): void {
-  stats.totalRecipients += 1;
-  const bucket: ChannelDispatchCount = stats.byChannel[result.channel] || {
-    sent: 0,
-    simulated: 0,
-    skipped: 0,
-    failed: 0,
-  };
-  if (result.status === 'sent') {
-    stats.sentCount += 1;
-    bucket.sent += 1;
-  } else if (result.status === 'simulated') {
-    stats.simulatedCount += 1;
-    bucket.simulated += 1;
-  } else if (result.status === 'skipped_duplicate') {
-    stats.skippedCount += 1;
-    bucket.skipped += 1;
-  } else {
-    stats.failedCount += 1;
-    bucket.failed += 1;
+function computeCampaignSecondaryDate(
+  campaign: CampaignRecord,
+  settings: BroadcastSettings
+): NonNullable<CampaignRecord['secondaryDate']> {
+  if (campaign.secondaryDate?.formatted) {
+    return campaign.secondaryDate;
   }
-  stats.byChannel[result.channel] = bucket;
+  const secondaryCal = settings.secondaryCalendars?.[0] || 'islamic-umalqura';
+  return formatSecondaryDate(
+    new Date().toISOString().slice(0, 10),
+    secondaryCal,
+    settings.defaultLocale || 'es'
+  );
 }
 
 const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -64,19 +43,22 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     };
   },
 
-  getTransportService() {
-    return strapi.plugin(PLUGIN_ID).service('transportService') as {
-      sendEmailBroadcast(payload: EmailSendPayload): Promise<ChannelDispatchResult>;
-      sendTelegramBroadcast(payload: TelegramSendPayload): Promise<ChannelDispatchResult>;
-      sendWhatsAppBroadcast(payload: WhatsAppSendPayload): Promise<ChannelDispatchResult>;
-    };
+  getTransportService(): TransportServiceContract {
+    return strapi
+      .plugin(PLUGIN_ID)
+      .service('transportService') as TransportServiceContract;
   },
 
-  async listCampaigns(params?: { status?: string; topic?: string }): Promise<CampaignRecord[]> {
+  async listCampaigns(params?: {
+    status?: string;
+    topic?: string;
+  }): Promise<CampaignRecord[]> {
     const filters: Record<string, unknown> = {};
     if (params?.status) filters.status = params.status;
     if (params?.topic) filters.topic = params.topic;
-    const docs = await strapi.documents(CAMPAIGN_UID).findMany({ filters, limit: 100 });
+    const docs = await strapi
+      .documents(CAMPAIGN_UID)
+      .findMany({ filters, limit: 100 });
     return docs as unknown as CampaignRecord[];
   },
 
@@ -110,6 +92,15 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     return (docs[0] as unknown as CampaignRecord) || null;
   },
 
+  async findCampaignByDocIdOrSlug(
+    documentIdOrSlug: string
+  ): Promise<CampaignRecord | null> {
+    const byDoc = (await strapi
+      .documents(CAMPAIGN_UID)
+      .findOne({ documentId: documentIdOrSlug })) as unknown as CampaignRecord | null;
+    return byDoc ?? (await this.getCampaignBySlug(documentIdOrSlug));
+  },
+
   async createCampaign(input: Partial<CampaignRecord>): Promise<CampaignRecord> {
     const channels = normalizeChannels(input.channels);
     const candidate: Partial<CampaignRecord> = { ...input, channels };
@@ -120,7 +111,10 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const settings = await this.getSettingsService().getSettings();
     const secondaryCal = settings.secondaryCalendars?.[0] || 'islamic-umalqura';
-    const referenceIso = (input.scheduledAt || new Date().toISOString()).slice(0, 10);
+    const referenceIso = (input.scheduledAt || new Date().toISOString()).slice(
+      0,
+      10
+    );
     const secondaryDate = formatSecondaryDate(
       referenceIso,
       secondaryCal,
@@ -129,23 +123,7 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const created = await strapi.documents(CAMPAIGN_UID).create({
       data: {
-        title: candidate.title,
-        slug: candidate.slug,
-        topic: candidate.topic || 'announcements',
-        channels,
-        priority: candidate.priority || 'normal',
-        status: candidate.status || 'draft',
-        scheduledAt: candidate.scheduledAt,
-        subject: candidate.subject,
-        bodyText: candidate.bodyText,
-        bodyHtml: candidate.bodyHtml || `<p>${candidate.bodyText}</p>`,
-        ctaLabel: candidate.ctaLabel,
-        ctaUrl: candidate.ctaUrl,
-        mediaUrl: candidate.mediaUrl,
-        emailTemplateRef: candidate.emailTemplateRef,
-        whatsappTemplateName: candidate.whatsappTemplateName,
-        telegramThreadId: candidate.telegramThreadId,
-        translations: candidate.translations || {},
+        ...buildCampaignDocumentData(candidate, channels, 'draft'),
         secondaryDate,
         secondaryDateLabel: secondaryDate.formatted,
         stats: candidate.stats || createEmptyStats(),
@@ -155,6 +133,40 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     });
 
     return created as unknown as CampaignRecord;
+  },
+
+  async updateCampaign(
+    documentIdOrSlug: string,
+    input: Partial<CampaignRecord>
+  ): Promise<CampaignRecord> {
+    const existing = await this.findCampaignByDocIdOrSlug(documentIdOrSlug);
+    if (!existing?.documentId) {
+      throw new Error(`Campaign "${documentIdOrSlug}" not found`);
+    }
+
+    const channels = normalizeChannels(input.channels ?? existing.channels);
+    const merged: Partial<CampaignRecord> = {
+      ...existing,
+      ...input,
+      channels,
+    };
+    const validation = validateCampaignInput(merged);
+    if (!validation.valid) {
+      throw new Error(validation.errors.join('; '));
+    }
+
+    const updated = await strapi.documents(CAMPAIGN_UID).update({
+      documentId: existing.documentId,
+      data: buildCampaignDocumentData(
+        merged,
+        channels,
+        existing.status || 'draft'
+      ),
+    });
+
+    return (
+      (updated as unknown as CampaignRecord) || (merged as CampaignRecord)
+    );
   },
 
   async createFromStarterTemplate(templateId: string): Promise<CampaignRecord> {
@@ -167,48 +179,22 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const existing = await this.getCampaignBySlug(tpl.slug);
     if (existing) return existing;
 
-    return this.createCampaign({
-      slug: tpl.slug,
-      title: tpl.title,
-      topic: tpl.topic,
-      channels: tpl.channels,
-      priority: tpl.priority,
-      subject: tpl.subject,
-      bodyText: tpl.bodyText,
-      bodyHtml: tpl.bodyHtml,
-      ctaLabel: tpl.ctaLabel,
-      ctaUrl: tpl.ctaUrl,
-      translations: tpl.translations,
-    });
+    return this.createCampaign(buildPresetCampaignPayload(tpl));
   },
 
   async seedStarterCampaigns(): Promise<number> {
     const settings = await this.getSettingsService().getSettings();
-    const presets =
-      Array.isArray(settings.presetCampaigns) && settings.presetCampaigns.length > 0
-        ? settings.presetCampaigns
-        : STARTER_CAMPAIGN_TEMPLATES;
+    const presets = settings.presetCampaigns?.length
+      ? settings.presetCampaigns
+      : STARTER_CAMPAIGN_TEMPLATES;
 
     let seededCount = 0;
     for (const preset of presets) {
       if (!preset.slug || !preset.title) continue;
       const existing = await this.getCampaignBySlug(preset.slug);
-      if (!existing) {
-        await this.createCampaign({
-          slug: preset.slug,
-          title: preset.title,
-          topic: preset.topic || 'announcements',
-          channels: preset.channels || ['email', 'telegram'],
-          priority: preset.priority || 'normal',
-          subject: preset.subject || preset.title,
-          bodyText: preset.bodyText || preset.title,
-          bodyHtml: preset.bodyHtml,
-          ctaLabel: preset.ctaLabel,
-          ctaUrl: preset.ctaUrl,
-          translations: preset.translations || {},
-        });
-        seededCount += 1;
-      }
+      if (existing) continue;
+      await this.createCampaign(buildPresetCampaignPayload(preset));
+      seededCount += 1;
     }
     return seededCount;
   },
@@ -227,21 +213,96 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
       }>('subscriberService');
 
       if (subscriberService?.listSubscribers) {
-        const list = await subscriberService.listSubscribers({ status: 'confirmed', topic });
-        return list.map((sub) => ({
-          email: typeof sub.email === 'string' ? sub.email : undefined,
-          phone: typeof sub.phone === 'string' ? sub.phone : undefined,
-          fullName: typeof sub.fullName === 'string' ? sub.fullName : undefined,
-          locale: typeof sub.locale === 'string' && sub.locale ? sub.locale : settings.defaultLocale,
-          topics: Array.isArray(sub.topics) ? sub.topics.map((t) => String(t)) : ['announcements'],
-          unsubscribeToken:
-            typeof sub.unsubscribeToken === 'string' ? sub.unsubscribeToken : undefined,
-        }));
+        const list = await subscriberService.listSubscribers({
+          status: 'confirmed',
+          topic,
+        });
+        return list.map((sub) =>
+          mapRawSubscriber(sub, settings.defaultLocale || 'es')
+        );
       }
     } catch {
       // Fallback when inbox plugin is not registered in isolated unit tests
     }
     return [];
+  },
+
+  async selectCampaignRecipients(
+    campaign: CampaignRecord,
+    settings: BroadcastSettings,
+    options: {
+      customRecipients?: SubscriberRecipient[];
+      testRecipientEmail?: string;
+      testRecipientPhone?: string;
+    }
+  ): Promise<{ isTestDispatch: boolean; recipients: SubscriberRecipient[] }> {
+    const isTestDispatch = Boolean(
+      options.testRecipientEmail || options.testRecipientPhone
+    );
+    if (isTestDispatch) {
+      return {
+        isTestDispatch: true,
+        recipients: [
+          {
+            email: options.testRecipientEmail,
+            phone: options.testRecipientPhone,
+            fullName: 'Test Recipient',
+            locale: settings.defaultLocale,
+            topics: [campaign.topic],
+          },
+        ],
+      };
+    }
+    if (options.customRecipients && options.customRecipients.length > 0) {
+      return { isTestDispatch: false, recipients: options.customRecipients };
+    }
+    return {
+      isTestDispatch: false,
+      recipients: await this.resolveRecipientsForTopic(campaign.topic),
+    };
+  },
+
+  async finalizeDispatchedCampaign(
+    campaign: CampaignRecord,
+    secondaryDate: CampaignRecord['secondaryDate'],
+    secondaryDateLabel: string,
+    stats: CampaignStats
+  ): Promise<CampaignRecord> {
+    const finalStatus =
+      stats.totalRecipients > 0 && stats.failedCount === stats.totalRecipients
+        ? 'failed'
+        : 'sent';
+    const sentAt = new Date().toISOString();
+
+    let updatedCampaign: CampaignRecord = {
+      ...campaign,
+      status: finalStatus,
+      sentAt,
+      secondaryDateLabel,
+      stats,
+    };
+
+    if (campaign.documentId) {
+      const updated = await strapi.documents(CAMPAIGN_UID).update({
+        documentId: campaign.documentId,
+        data: {
+          status: finalStatus,
+          sentAt,
+          secondaryDate,
+          secondaryDateLabel,
+          stats,
+        },
+      });
+      if (updated) updatedCampaign = updated as unknown as CampaignRecord;
+    }
+
+    strapi.eventHub?.emit('broadcasts.campaign.sent', {
+      slug: updatedCampaign.slug,
+      topic: updatedCampaign.topic,
+      stats,
+    });
+
+    return updatedCampaign;
   },
 
   async dispatchCampaign(
@@ -252,167 +313,40 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
       testRecipientPhone?: string;
     } = {}
   ): Promise<{ campaign: CampaignRecord; results: ChannelDispatchResult[] }> {
-    let campaign = (await strapi
-      .documents(CAMPAIGN_UID)
-      .findOne({ documentId: documentIdOrSlug })) as unknown as CampaignRecord | null;
-
-    if (!campaign) campaign = await this.getCampaignBySlug(documentIdOrSlug);
+    const campaign = await this.findCampaignByDocIdOrSlug(documentIdOrSlug);
     if (!campaign) throw new Error(`Campaign "${documentIdOrSlug}" not found`);
 
     const settings = await this.getSettingsService().getSettings();
     const transport = this.getTransportService();
-    const secondaryCal = settings.secondaryCalendars?.[0] || 'islamic-umalqura';
-    const secondaryDate = campaign.secondaryDate?.formatted
-      ? campaign.secondaryDate
-      : formatSecondaryDate(
-          new Date().toISOString().slice(0, 10),
-          secondaryCal,
-          settings.defaultLocale || 'es'
-        );
-    const secondaryDateLabel = campaign.secondaryDateLabel || secondaryDate.formatted;
+    const secondaryDate = computeCampaignSecondaryDate(campaign, settings);
+    const secondaryDateLabel =
+      campaign.secondaryDateLabel || secondaryDate.formatted;
 
-    let recipients: SubscriberRecipient[] = [];
-    if (options.testRecipientEmail || options.testRecipientPhone) {
-      recipients = [
-        {
-          email: options.testRecipientEmail,
-          phone: options.testRecipientPhone,
-          fullName: 'Test Recipient',
-          locale: settings.defaultLocale,
-          topics: [campaign.topic],
-        },
-      ];
-    } else if (Array.isArray(options.customRecipients) && options.customRecipients.length > 0) {
-      recipients = options.customRecipients;
-    } else {
-      recipients = await this.resolveRecipientsForTopic(campaign.topic);
-    }
+    const { isTestDispatch, recipients } = await this.selectCampaignRecipients(
+      campaign,
+      settings,
+      options
+    );
 
     const stats = createEmptyStats();
-    const results: ChannelDispatchResult[] = [];
-    const activeChannels: BroadcastChannel[] = normalizeChannels(campaign.channels);
-
-    if (activeChannels.includes('telegram') && settings.telegramEnabled) {
-      const channelLocale = settings.defaultLocale || 'es';
-      const localized = resolveLocalizedCampaignCopy(campaign, channelLocale, settings.defaultLocale);
-      const vars = {
-        recipientName: 'Comunidad',
-        organizationName: settings.organizationName,
-        secondaryDate: secondaryDateLabel,
-        siteBaseUrl: settings.siteBaseUrl,
-      };
-      const tgRes = await transport.sendTelegramBroadcast({
-        campaignSlug: campaign.slug,
-        chatId: settings.telegramDefaultChatId,
-        threadId: campaign.telegramThreadId ?? settings.telegramTopicThreadMap?.[campaign.topic],
-        locale: channelLocale,
-        subject: interpolateBroadcastTemplate(localized.subject, vars, { escapeHtmlValues: true }),
-        htmlBody: interpolateBroadcastTemplate(localized.bodyHtml || localized.bodyText, vars, {
-          escapeHtmlValues: true,
-        }),
-        ctaLabel: localized.ctaLabel,
-        ctaUrl: localized.ctaUrl,
-        secondaryDateLabel,
-      });
-      results.push(tgRes);
-      recordResultInStats(stats, tgRes);
-    }
-
-    if (activeChannels.includes('email')) {
-      for (const recipient of recipients) {
-        if (!recipient.email) continue;
-        const locale = recipient.locale || settings.defaultLocale || 'es';
-        const localized = resolveLocalizedCampaignCopy(campaign, locale, settings.defaultLocale);
-        const baseSite = settings.siteBaseUrl.replace(/\/+$/, '');
-        const unsubscribeUrl = recipient.unsubscribeToken
-          ? `${baseSite}/api/inbox/public/unsubscribe?token=${encodeURIComponent(
-              recipient.unsubscribeToken
-            )}`
-          : `${baseSite}/${locale}/unsubscribe`;
-
-        const vars = {
-          recipientName: recipient.fullName || recipient.email,
-          organizationName: settings.organizationName,
-          secondaryDate: secondaryDateLabel,
-          siteBaseUrl: settings.siteBaseUrl,
-          unsubscribeUrl,
-        };
-        const emailRes = await transport.sendEmailBroadcast({
-          campaignSlug: campaign.slug,
-          recipientEmail: recipient.email,
-          locale,
-          subject: interpolateBroadcastTemplate(localized.subject, vars),
-          text: interpolateBroadcastTemplate(localized.bodyText, vars),
-          html: interpolateBroadcastTemplate(
-            localized.bodyHtml || `<p>${localized.bodyText}</p>`,
-            vars,
-            { escapeHtmlValues: true }
-          ),
-          unsubscribeUrl,
-          emailTemplateRef: campaign.emailTemplateRef,
-          secondaryDateLabel,
-        });
-        results.push(emailRes);
-        recordResultInStats(stats, emailRes);
-      }
-    }
-
-    if (activeChannels.includes('whatsapp') && settings.whatsappEnabled) {
-      const phoneRecipients: SubscriberRecipient[] = [
-        ...recipients.filter((r) => Boolean(r.phone)),
-        ...(settings.whatsappDefaultRecipients || []).map((phone) => ({
-          phone,
-          fullName: 'Comunidad',
-          locale: settings.defaultLocale || 'es',
-          topics: [campaign!.topic],
-        })),
-      ];
-
-      for (const recipient of phoneRecipients) {
-        if (!recipient.phone) continue;
-        const locale = recipient.locale || settings.defaultLocale || 'es';
-        const localized = resolveLocalizedCampaignCopy(campaign, locale, settings.defaultLocale);
-        const vars = {
-          recipientName: recipient.fullName || 'Comunidad',
-          organizationName: settings.organizationName,
-          secondaryDate: secondaryDateLabel,
-          siteBaseUrl: settings.siteBaseUrl,
-        };
-        const waRes = await transport.sendWhatsAppBroadcast({
-          campaignSlug: campaign.slug,
-          recipientPhone: recipient.phone,
-          locale,
-          textBody: interpolateBroadcastTemplate(localized.bodyText, vars),
-          templateName: campaign.whatsappTemplateName,
-          ctaUrl: localized.ctaUrl,
-          secondaryDateLabel,
-        });
-        results.push(waRes);
-        recordResultInStats(stats, waRes);
-      }
-    }
-
-    const finalStatus =
-      stats.totalRecipients > 0 && stats.failedCount === stats.totalRecipients ? 'failed' : 'sent';
-    const sentAt = new Date().toISOString();
-
-    if (campaign.documentId) {
-      const updated = await strapi.documents(CAMPAIGN_UID).update({
-        documentId: campaign.documentId,
-        data: { status: finalStatus, sentAt, secondaryDate, secondaryDateLabel, stats },
-      });
-      if (updated) campaign = updated as unknown as CampaignRecord;
-    } else {
-      campaign = { ...campaign, status: finalStatus, sentAt, secondaryDateLabel, stats };
-    }
-
-    strapi.eventHub?.emit('broadcasts.campaign.sent', {
-      slug: campaign.slug,
-      topic: campaign.topic,
+    const results = await dispatchAllActiveChannels({
+      transport,
+      campaign,
+      settings,
+      recipients,
+      isTestDispatch,
+      secondaryDateLabel,
       stats,
     });
 
-    return { campaign, results };
+    const updatedCampaign = await this.finalizeDispatchedCampaign(
+      campaign,
+      secondaryDate,
+      secondaryDateLabel,
+      stats
+    );
+
+    return { campaign: updatedCampaign, results };
   },
 });
 

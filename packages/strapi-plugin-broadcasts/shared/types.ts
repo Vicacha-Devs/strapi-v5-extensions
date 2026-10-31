@@ -61,6 +61,8 @@ export interface CampaignRecord {
   mediaUrl?: string;
   emailTemplateRef?: string;
   whatsappTemplateName?: string;
+  whatsappGroupIds?: string[];
+  telegramChatId?: string;
   telegramThreadId?: number;
   translations?: Record<string, CampaignTranslation>;
   secondaryDate?: SecondaryDateDisplay;
@@ -143,6 +145,8 @@ export interface BroadcastSettings {
   dryRun: boolean;
   enableInboxSubscriberBridge: boolean;
   enableEventHubAutomations: boolean;
+  enableEmailDesignerBridge?: boolean;
+  defaultEmailTemplateRef?: string;
   siteBaseUrl: string;
   organizationName: string;
   emailFromAddress: string;
@@ -150,6 +154,7 @@ export interface BroadcastSettings {
   telegramEnabled: boolean;
   telegramBotToken?: string;
   telegramDefaultChatId: string;
+  telegramTopicChatMap?: Record<string, string | string[]>;
   telegramTopicThreadMap?: Record<string, number>;
   whatsappEnabled: boolean;
   whatsappDriver: WhatsAppDriver;
@@ -159,12 +164,21 @@ export interface BroadcastSettings {
   whatsappGatewaySession?: string;
   whatsappGatewayApiKey?: string;
   whatsappDefaultRecipients?: string[];
+  whatsappTopicGroupMap?: Record<string, string | string[]>;
   allowLocalhostGateways?: boolean;
   publicChannelLinks: PublicChannelLink[];
   presetCampaigns?: Array<Partial<CampaignRecord> & { slug: string; title: string }>;
   presetAutomationRules?: Array<
     Partial<AutomationRuleRecord> & { slug: string; name: string; eventName: string }
   >;
+}
+
+export interface EmailDesignerTemplateSummary {
+  templateReferenceId: number;
+  name: string;
+  subject?: string;
+  tags?: string[];
+  updatedAt?: string;
 }
 
 export interface ChannelDispatchResult {
@@ -190,5 +204,6 @@ export interface StarterCampaignTemplate {
   bodyHtml: string;
   ctaLabel: string;
   ctaUrl: string;
+  emailTemplateRef?: string;
   translations: Record<string, CampaignTranslation>;
 }

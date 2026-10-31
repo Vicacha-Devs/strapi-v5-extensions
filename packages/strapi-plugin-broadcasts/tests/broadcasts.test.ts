@@ -8,10 +8,12 @@ import {
   computeIdempotencyKey,
   escapeHtml,
   interpolateBroadcastTemplate,
+  isWhatsAppGroupOrChannelJid,
   maskEmail,
   maskPhone,
   maskRecipientIdentifier,
   normalizeE164Phone,
+  normalizeWhatsAppTarget,
   resolveLocalizedCampaignCopy,
   validateAutomationRuleInput,
   validateCampaignInput,
@@ -287,6 +289,14 @@ describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
     assert.ok(jumuah);
     assert.ok(jumuah.secondaryDateLabel);
 
+    const updatedJumuah = await services.campaignService.updateCampaign(
+      jumuah.documentId || 'jumuah-weekly-reminder',
+      {
+        title: 'Recordatorio Semanal de Jumu’ah (Actualizado)',
+      }
+    );
+    assert.equal(updatedJumuah.title, 'Recordatorio Semanal de Jumu’ah (Actualizado)');
+
     const firstDispatch = await services.campaignService.dispatchCampaign(
       'jumuah-weekly-reminder'
     );
@@ -324,6 +334,12 @@ describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
 
     const seededRules = await services.automationService.seedStarterRules();
     assert.equal(seededRules, 2);
+
+    const toggledRule = await services.automationService.updateRule(
+      'auto-event-published-broadcast',
+      { active: false }
+    );
+    assert.equal(toggledRule.active, false);
 
     const outcomes = await services.automationService.handleEventTrigger(
       'inbox.alert.published',
@@ -368,4 +384,113 @@ describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
       }
     }
   });
+
+  it('discovers Email Designer 5 templates, resolves localized variants, and renders HTML email broadcasts', async () => {
+    const { services, collections } = createMockStrapi({
+      ...DEFAULT_BROADCAST_SETTINGS,
+      dryRun: true,
+      enableEmailDesignerBridge: true,
+    });
+
+    collections['plugin::email-designer-5.email-designer-template'] = [
+      {
+        templateReferenceId: 401,
+        name: 'broadcastNewsletter_es',
+        subject: '🕌 {{subject}}',
+        bodyHtml: '<div><h1>{{subject}}</h1>{{bodyHtml}}<footer>{{secondaryDate}}</footer></div>',
+      },
+      {
+        templateReferenceId: 403,
+        name: 'broadcastNewsletter_ar',
+        subject: '🕌 {{subject}}',
+        bodyHtml: '<div dir="rtl"><h1>{{subject}}</h1>{{bodyHtml}}</div>',
+      },
+    ];
+
+    const templates = await services.transportService.listEmailDesignerTemplates();
+    assert.equal(templates.length, 2);
+    assert.equal(templates[0].templateReferenceId, 401);
+
+    // Resolving "401" for an Arabic ("ar") recipient automatically resolves sibling "broadcastNewsletter_ar" (403)
+    const resolvedAr = await services.transportService.resolveEmailDesignerTemplate('401', 'ar');
+    assert.equal(resolvedAr?.templateReferenceId, 403);
+
+    const camp = await services.campaignService.createCampaign({
+      slug: 'ed5-newsletter-test',
+      title: 'Boletín con Email Designer 5',
+      topic: 'announcements',
+      channels: ['email'],
+      emailTemplateRef: '401',
+      subject: 'Boletín Comunitario',
+      bodyText: 'Contenido del boletín para {{recipientName}}.',
+    });
+    assert.equal(camp.emailTemplateRef, '401');
+
+    const dispatched = await services.campaignService.dispatchCampaign('ed5-newsletter-test');
+    assert.equal(dispatched.results.length, 2);
+    assert.ok(
+      dispatched.results.every((r) => r.driver === 'email-designer-5-dryrun')
+    );
+  });
+
+  it('normalizes and dispatches to WhatsApp Groups (@g.us), WhatsApp Channels (@newsletter), and Telegram Groups', async () => {
+    assert.equal(isWhatsAppGroupOrChannelJid('120363025891234567@g.us'), true);
+    assert.equal(isWhatsAppGroupOrChannelJid('120363099999999999@newsletter'), true);
+    assert.equal(isWhatsAppGroupOrChannelJid('+573101234567'), false);
+
+    const groupTarget = normalizeWhatsAppTarget('120363025891234567@g.us', '57');
+    assert.equal(groupTarget.isGroupOrChannel, true);
+    assert.equal(groupTarget.evolutionNumber, '120363025891234567@g.us');
+    assert.equal(groupTarget.chatId, '120363025891234567@g.us');
+
+    const phoneTarget = normalizeWhatsAppTarget('3101234567', '57');
+    assert.equal(phoneTarget.isGroupOrChannel, false);
+    assert.equal(phoneTarget.normalized, '+573101234567');
+    assert.equal(phoneTarget.evolutionNumber, '573101234567');
+    assert.equal(phoneTarget.chatId, '573101234567@c.us');
+
+    assert.equal(maskRecipientIdentifier('120363025891234567@g.us'), '120363025891234567@g.us');
+    assert.equal(maskRecipientIdentifier('-1001234567890'), '-1001234567890');
+
+    const { services } = createMockStrapi({
+      ...DEFAULT_BROADCAST_SETTINGS,
+      dryRun: true,
+      whatsappDriver: 'evolution',
+      whatsappDefaultRecipients: ['120363011111111111@g.us'],
+      whatsappTopicGroupMap: {
+        urgent_janazah: ['120363022222222222@g.us', '120363099999999999@newsletter'],
+      },
+      telegramTopicChatMap: {
+        urgent_janazah: ['@MezquitaCentralBogota', '-1009876543210'],
+      },
+    });
+
+    await services.campaignService.createCampaign({
+      slug: 'janazah-group-broadcast',
+      title: 'Aviso Janazah en Grupos',
+      topic: 'urgent_janazah',
+      channels: ['telegram', 'whatsapp'],
+      whatsappGroupIds: ['120363033333333333@g.us'],
+      subject: 'Salat al-Janazah',
+      bodyText: 'Oración funeraria hoy después de Dhuhr.',
+    });
+
+    const dispatched = await services.campaignService.dispatchCampaign('janazah-group-broadcast');
+    const tgRecipients = dispatched.results
+      .filter((r) => r.channel === 'telegram')
+      .map((r) => r.recipientMasked);
+    const waRecipients = dispatched.results
+      .filter((r) => r.channel === 'whatsapp')
+      .map((r) => r.recipientMasked);
+
+    assert.deepEqual(tgRecipients, ['@MezquitaCentralBogota', '-1009876543210']);
+    // 1 subscriber on urgent_janazah (+57***4567) + 1 default group + 2 topic groups/channels + 1 campaign group = 5
+    assert.equal(waRecipients.length, 5);
+    assert.ok(waRecipients.includes('+57***4567'));
+    assert.ok(waRecipients.includes('120363011111111111@g.us'));
+    assert.ok(waRecipients.includes('120363022222222222@g.us'));
+    assert.ok(waRecipients.includes('120363099999999999@newsletter'));
+    assert.ok(waRecipients.includes('120363033333333333@g.us'));
+  });
 });
+
