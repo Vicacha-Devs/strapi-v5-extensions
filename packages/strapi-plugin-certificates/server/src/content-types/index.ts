@@ -1,5 +1,5 @@
-import templateSchema from './template/schema.json';
-import certificateSchema from './certificate/schema.json';
+import certificateSchema from "./certificate/schema.json";
+import templateSchema from "./template/schema.json";
 
 export default {
   template: { schema: templateSchema },

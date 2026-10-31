@@ -248,5 +248,8 @@
   "settings.ui.endpoint_public_key": "GET /api/certificates/public-key",
   "certificates.settings.ui.endpoint_public_key": "GET /api/certificates/public-key",
   "field.for_offline_embassy_verification": "للتحقق القنصلي أو السفارات دون اتصال)",
-  "certificates.field.for_offline_embassy_verification": "للتحقق القنصلي أو السفارات دون اتصال)"
+  "certificates.field.for_offline_embassy_verification": "للتحقق القنصلي أو السفارات دون اتصال)",
+  "settings.tab.organization": "الجهة المُصدِرة والتحقق",
+  "settings.tab.docusign": "التوقيع الإلكتروني DocuSign",
+  "settings.tab.keys": "مفاتيح التوقيع Ed25519"
 }

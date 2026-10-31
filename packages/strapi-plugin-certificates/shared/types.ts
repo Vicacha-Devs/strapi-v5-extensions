@@ -1,20 +1,16 @@
-import type { AlternateDateValue, CalendarSystemConfig } from './calendarSystems';
+import type { AlternateDateValue, CalendarSystemConfig } from "./calendarSystems";
 
-export type CertificateStatus =
-  | 'pending_approval'
-  | 'issued'
-  | 'revoked'
-  | 'expired';
+export type CertificateStatus = "pending_approval" | "issued" | "revoked" | "expired";
 
-export type ESignProviderType = 'none' | 'docusign' | 'webhook';
+export type ESignProviderType = "none" | "docusign" | "webhook";
 
 export type ESignEnvelopeStatus =
-  | 'not_sent'
-  | 'sent'
-  | 'delivered'
-  | 'completed'
-  | 'declined'
-  | 'voided';
+  | "not_sent"
+  | "sent"
+  | "delivered"
+  | "completed"
+  | "declined"
+  | "voided";
 
 export interface DocuSignProviderConfig {
   enabled: boolean;
@@ -141,7 +137,7 @@ export interface CertificateIssueInput {
 }
 
 export interface CanonicalCertificatePayload {
-  version: '1.0';
+  version: "1.0";
   serialNumber: string;
   templateSlug: string;
   organizationName: string;
@@ -197,7 +193,7 @@ export interface CertificatesPluginSettings {
   publicKeyFingerprint: string;
   secondaryCalendars: CalendarSystemConfig[];
   esign: DocuSignProviderConfig;
-  defaultTemplates?: Array<Omit<CertificateTemplate, 'documentId'>>;
+  defaultTemplates?: Array<Omit<CertificateTemplate, "documentId">>;
 }
 
 export interface CertificateStats {

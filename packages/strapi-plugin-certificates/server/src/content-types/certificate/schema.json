@@ -42,12 +42,7 @@
     },
     "status": {
       "type": "enumeration",
-      "enum": [
-        "pending_approval",
-        "issued",
-        "revoked",
-        "expired"
-      ],
+      "enum": ["pending_approval", "issued", "revoked", "expired"],
       "default": "pending_approval",
       "required": true
     },

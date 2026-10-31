@@ -16,15 +16,11 @@ import {
   type CertificatesPluginSettings,
   type ESignEnvelopeStatus,
   type ESignProviderType,
-} from '../../../shared';
+} from "../../../shared";
 
 const rateLimitStore = new Map<string, number[]>();
 
-export function checkRateLimit(
-  key: string,
-  maxRequests = 20,
-  windowMs = 60_000
-): boolean {
+export function checkRateLimit(key: string, maxRequests = 20, windowMs = 60_000): boolean {
   const now = Date.now();
   const existing = rateLimitStore.get(key) || [];
   const recent = existing.filter((ts) => now - ts < windowMs);
@@ -40,19 +36,17 @@ export function checkRateLimit(
 export function normalizeSignatories(raw: unknown): CertificateSignatory[] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
     .map((item) => ({
-      name: String(item.name || '').trim(),
-      title: String(item.title || '').trim(),
+      name: String(item.name || "").trim(),
+      title: String(item.title || "").trim(),
       role: item.role ? String(item.role).trim() : undefined,
       email: item.email ? String(item.email).trim() : undefined,
       routingOrder:
-        typeof item.routingOrder === 'number' && Number.isFinite(item.routingOrder)
+        typeof item.routingOrder === "number" && Number.isFinite(item.routingOrder)
           ? Math.max(1, Math.trunc(item.routingOrder))
           : undefined,
-      signatureImageUrl: item.signatureImageUrl
-        ? String(item.signatureImageUrl).trim()
-        : undefined,
+      signatureImageUrl: item.signatureImageUrl ? String(item.signatureImageUrl).trim() : undefined,
       signedAt: item.signedAt ? String(item.signedAt).trim() : undefined,
     }))
     .filter((s) => Boolean(s.name && s.title));
@@ -61,7 +55,7 @@ export function normalizeSignatories(raw: unknown): CertificateSignatory[] {
 export function normalizeWitnesses(raw: unknown): CertificateWitness[] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === 'object'))
+    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
     .map((item) => {
       const rawDocId = item.documentIdRaw ? String(item.documentIdRaw) : undefined;
       const maskedDocId = item.documentIdMasked
@@ -70,12 +64,12 @@ export function normalizeWitnesses(raw: unknown): CertificateWitness[] {
           ? maskNationalId(rawDocId)
           : undefined;
       return {
-        fullName: String(item.fullName || '').trim(),
+        fullName: String(item.fullName || "").trim(),
         documentIdMasked: maskedDocId,
         role: item.role ? String(item.role).trim() : undefined,
         email: item.email ? String(item.email).trim() : undefined,
         routingOrder:
-          typeof item.routingOrder === 'number' && Number.isFinite(item.routingOrder)
+          typeof item.routingOrder === "number" && Number.isFinite(item.routingOrder)
             ? Math.max(1, Math.trunc(item.routingOrder))
             : undefined,
         signedAt: item.signedAt ? String(item.signedAt).trim() : undefined,
@@ -84,7 +78,7 @@ export function normalizeWitnesses(raw: unknown): CertificateWitness[] {
     .filter((w) => Boolean(w.fullName));
 }
 
-function asStr(val: unknown, fallback = ''): string {
+function asStr(val: unknown, fallback = ""): string {
   return val ? String(val) : fallback;
 }
 
@@ -101,32 +95,28 @@ function asArr<T>(val: unknown, fallback: T[] = []): T[] {
 }
 
 function asObj<T>(val: unknown): T {
-  return val && typeof val === 'object' ? (val as T) : ({} as T);
+  return val && typeof val === "object" ? (val as T) : ({} as T);
 }
 
 function asEsignProvider(val: unknown): ESignProviderType {
-  const raw = asStr(val, 'none');
-  return raw === 'docusign' || raw === 'webhook' ? raw : 'none';
+  const raw = asStr(val, "none");
+  return raw === "docusign" || raw === "webhook" ? raw : "none";
 }
 
 function asNonNegativeInt(val: unknown, fallback = 0): number {
-  return typeof val === 'number' && Number.isFinite(val)
-    ? Math.max(0, Math.trunc(val))
-    : fallback;
+  return typeof val === "number" && Number.isFinite(val) ? Math.max(0, Math.trunc(val)) : fallback;
 }
 
-export function normalizeTemplateRecord(
-  doc: Record<string, unknown>
-): CertificateTemplate {
+export function normalizeTemplateRecord(doc: Record<string, unknown>): CertificateTemplate {
   return {
     id: doc.id as number | string | undefined,
     documentId: asStr(doc.documentId, asStr(doc.id)),
     name: asStr(doc.name),
     slug: asStr(doc.slug),
     description: asOptStr(doc.description),
-    serialPrefix: asStr(doc.serialPrefix, 'CERT'),
+    serialPrefix: asStr(doc.serialPrefix, "CERT"),
     defaultValidityDays:
-      typeof doc.defaultValidityDays === 'number' ? doc.defaultValidityDays : null,
+      typeof doc.defaultValidityDays === "number" ? doc.defaultValidityDays : null,
     requiresWitnesses: Boolean(doc.requiresWitnesses),
     minWitnesses: asNonNegativeInt(doc.minWitnesses, 0),
     requiresApproval: doc.requiresApproval !== false,
@@ -141,7 +131,7 @@ export function normalizeTemplateRecord(
     defaultSignatories: normalizeSignatories(doc.defaultSignatories),
     customFieldsSchema: asArr(doc.customFieldsSchema),
     secondaryCalendars: asArr(doc.secondaryCalendars),
-    accentColor: asStr(doc.accentColor, '#14532d'),
+    accentColor: asStr(doc.accentColor, "#14532d"),
     active: doc.active !== false,
   };
 }
@@ -157,7 +147,7 @@ export function normalizeCertificateRecord(
     templateDocumentId: asStr(doc.templateDocumentId),
     templateSlug: asStr(doc.templateSlug),
     templateName: asStr(doc.templateName),
-    status: asStr(doc.status, 'pending_approval') as CertificateStatus,
+    status: asStr(doc.status, "pending_approval") as CertificateStatus,
     recipientFullName: asStr(doc.recipientFullName),
     recipientChosenName: asOptStr(doc.recipientChosenName),
     recipientEmail: asOptStr(doc.recipientEmail),
@@ -171,16 +161,13 @@ export function normalizeCertificateRecord(
     signatories: normalizeSignatories(doc.signatories),
     witnesses: normalizeWitnesses(doc.witnesses),
     customData: asObj<Record<string, string>>(doc.customData),
-    secondaryDates: asObj<CertificateRecord['secondaryDates']>(doc.secondaryDates),
+    secondaryDates: asObj<CertificateRecord["secondaryDates"]>(doc.secondaryDates),
     canonicalPayloadHash: asStr(doc.canonicalPayloadHash),
     cryptographicSignature: asStr(doc.cryptographicSignature),
     publicKeyFingerprint: asStr(doc.publicKeyFingerprint),
     esignProvider: asEsignProvider(doc.esignProvider),
     esignEnvelopeId: asOptStr(doc.esignEnvelopeId),
-    esignEnvelopeStatus: asStr(
-      doc.esignEnvelopeStatus,
-      'not_sent'
-    ) as ESignEnvelopeStatus,
+    esignEnvelopeStatus: asStr(doc.esignEnvelopeStatus, "not_sent") as ESignEnvelopeStatus,
     esignCompletedAt: asNullStr(doc.esignCompletedAt),
     linkedBookingCode: asOptStr(doc.linkedBookingCode),
     notes: asOptStr(doc.notes),
@@ -207,22 +194,22 @@ export function buildCanonicalPayload(params: {
   witnesses: CertificateWitness[];
 }): CanonicalCertificatePayload {
   return {
-    version: '1.0',
+    version: "1.0",
     serialNumber: params.serialNumber,
     templateSlug: params.templateSlug,
     organizationName: params.organizationName,
     recipientFullName: params.recipientFullName,
-    recipientChosenName: params.recipientChosenName || '',
-    nationalIdHash: params.nationalIdHash || '',
+    recipientChosenName: params.recipientChosenName || "",
+    nationalIdHash: params.nationalIdHash || "",
     issuedAt: params.issuedAt,
-    expiresAt: params.expiresAt || '',
+    expiresAt: params.expiresAt || "",
     signatories: (params.signatories || []).map((s) => ({
       name: s.name,
       title: s.title,
     })),
     witnesses: (params.witnesses || []).map((w) => ({
       fullName: w.fullName,
-      role: w.role || 'Witness',
+      role: w.role || "Witness",
     })),
   };
 }
@@ -234,8 +221,7 @@ export function evaluateCertificateVerification(params: {
   options?: { token?: string; nationalId?: string };
 }): CertificateVerificationResult {
   const { cert, template, settings, options } = params;
-  const organizationName =
-    template?.organizationName || settings.organizationName;
+  const organizationName = template?.organizationName || settings.organizationName;
 
   const canonicalPayload = buildCanonicalPayload({
     serialNumber: cert.serialNumber,
@@ -258,29 +244,22 @@ export function evaluateCertificateVerification(params: {
 
   let effectiveStatus: CertificateStatus = cert.status;
   if (
-    effectiveStatus === 'issued' &&
+    effectiveStatus === "issued" &&
     cert.expiresAt &&
     new Date(cert.expiresAt).getTime() < Date.now()
   ) {
-    effectiveStatus = 'expired';
+    effectiveStatus = "expired";
   }
 
-  const isTokenValid = verifyTokenConstantTime(
-    options?.token,
-    cert.verificationToken
-  );
+  const isTokenValid = verifyTokenConstantTime(options?.token, cert.verificationToken);
   const isUnmasked = isTokenValid || !settings.maskPublicRecipientName;
 
   const nationalIdMatches = options?.nationalId
-    ? verifyNationalIdHash(
-        options.nationalId,
-        cert.serialNumber,
-        cert.nationalIdHash
-      )
+    ? verifyNationalIdHash(options.nationalId, cert.serialNumber, cert.nationalIdHash)
     : undefined;
 
   return {
-    valid: effectiveStatus === 'issued' && cryptographicallyVerified,
+    valid: effectiveStatus === "issued" && cryptographicallyVerified,
     cryptographicallyVerified,
     status: effectiveStatus,
     serialNumber: cert.serialNumber,
@@ -324,20 +303,17 @@ export function renderPrintableFromRecord(params: {
 }): { html: string; serialNumber: string } {
   const { cert, template, settings, options } = params;
   if (!options?.isAdmin) {
-    const tokenOk = verifyTokenConstantTime(
-      options?.token,
-      cert.verificationToken
-    );
+    const tokenOk = verifyTokenConstantTime(options?.token, cert.verificationToken);
     if (!tokenOk) {
-      throw new Error('Valid verificationToken required to print certificate');
+      throw new Error("Valid verificationToken required to print certificate");
     }
   }
 
   const effectiveTemplate: CertificateTemplate = template || {
-    documentId: 'fallback',
+    documentId: "fallback",
     name: cert.templateName,
     slug: cert.templateSlug,
-    serialPrefix: 'CERT',
+    serialPrefix: "CERT",
     requiresWitnesses: false,
     minWitnesses: 0,
     requiresApproval: false,
@@ -345,7 +321,7 @@ export function renderPrintableFromRecord(params: {
     organizationSubheader: settings.organizationSubheader,
     titleText: cert.templateName,
     bodyTemplate:
-      'This is to certify that {{recipientFullName}} has been officially attested by {{organizationName}} on {{issuedDateFormatted}}.',
+      "This is to certify that {{recipientFullName}} has been officially attested by {{organizationName}} on {{issuedDateFormatted}}.",
     defaultSignatories: cert.signatories,
     active: true,
   };
@@ -368,11 +344,10 @@ export function filterAndComputeCertificateStats(
 ): { records: CertificateRecord[]; stats: CertificateStats } {
   const stats: CertificateStats = {
     total: allRecords.length,
-    issued: allRecords.filter((r) => r.status === 'issued').length,
-    pending_approval: allRecords.filter((r) => r.status === 'pending_approval')
-      .length,
-    revoked: allRecords.filter((r) => r.status === 'revoked').length,
-    expired: allRecords.filter((r) => r.status === 'expired').length,
+    issued: allRecords.filter((r) => r.status === "issued").length,
+    pending_approval: allRecords.filter((r) => r.status === "pending_approval").length,
+    revoked: allRecords.filter((r) => r.status === "revoked").length,
+    expired: allRecords.filter((r) => r.status === "expired").length,
   };
 
   const records = allRecords.filter((r) => {
@@ -385,10 +360,10 @@ export function filterAndComputeCertificateStats(
       const hay = [
         r.serialNumber,
         r.recipientFullName,
-        r.recipientChosenName || '',
-        r.recipientEmail || '',
+        r.recipientChosenName || "",
+        r.recipientEmail || "",
       ]
-        .join(' ')
+        .join(" ")
         .toLowerCase();
       if (!hay.includes(q)) return false;
     }

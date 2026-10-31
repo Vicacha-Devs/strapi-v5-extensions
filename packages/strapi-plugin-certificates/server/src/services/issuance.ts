@@ -1,33 +1,51 @@
-import type { Core } from '@strapi/strapi';
-import {
-  PLUGIN_ID, exportCertificatesToCsv, formatSecondaryCalendars, generateSerialNumber,
-  generateVerificationToken, hashNationalId, maskNationalId, signCanonicalPayload,
-  type CertificateIssueInput, type CertificateRecord, type CertificateSignatory,
-  type CertificateStats, type CertificateStatus, type CertificateTemplate,
-  type CertificateVerificationResult, type CertificateWitness,
-  type CertificatesPluginSettings, type Ed25519KeyPairMaterial,
-} from '../../../shared';
-import {
-  buildCanonicalPayload, evaluateCertificateVerification, filterAndComputeCertificateStats,
-  normalizeCertificateRecord, normalizeSignatories, normalizeTemplateRecord,
-  normalizeWitnesses, renderPrintableFromRecord,
-} from './issuanceHelpers';
+import type { Core } from "@strapi/strapi";
 
-const TEMPLATE_UID = 'plugin::certificates.template';
-const CERTIFICATE_UID = 'plugin::certificates.certificate';
+import {
+  PLUGIN_ID,
+  exportCertificatesToCsv,
+  formatSecondaryCalendars,
+  generateSerialNumber,
+  generateVerificationToken,
+  hashNationalId,
+  maskNationalId,
+  signCanonicalPayload,
+  type CertificateIssueInput,
+  type CertificateRecord,
+  type CertificateSignatory,
+  type CertificateStats,
+  type CertificateStatus,
+  type CertificateTemplate,
+  type CertificateVerificationResult,
+  type CertificateWitness,
+  type CertificatesPluginSettings,
+  type Ed25519KeyPairMaterial,
+} from "../../../shared";
+import {
+  buildCanonicalPayload,
+  evaluateCertificateVerification,
+  filterAndComputeCertificateStats,
+  normalizeCertificateRecord,
+  normalizeSignatories,
+  normalizeTemplateRecord,
+  normalizeWitnesses,
+  renderPrintableFromRecord,
+} from "./issuanceHelpers";
+
+const TEMPLATE_UID = "plugin::certificates.template";
+const CERTIFICATE_UID = "plugin::certificates.certificate";
 
 interface SettingsServiceContract {
   getSettings(): Promise<CertificatesPluginSettings>;
   getSigningKeyPair(): Promise<Ed25519KeyPairMaterial>;
 }
 
-function trimStr(val: unknown, fallback = ''): string {
-  const s = val ? String(val).trim() : '';
+function trimStr(val: unknown, fallback = ""): string {
+  const s = val ? String(val).trim() : "";
   return s || fallback;
 }
 
 function trimOptStr(val: unknown): string | undefined {
-  const s = val ? String(val).trim() : '';
+  const s = val ? String(val).trim() : "";
   return s || undefined;
 }
 
@@ -37,11 +55,14 @@ function pickNonEmptyArray<T>(primary: T[] | undefined, fallback: T[]): T[] {
 
 function slugifyName(name: string, explicitSlug?: string): string {
   if (explicitSlug && explicitSlug.trim()) return explicitSlug.trim();
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 const DEFAULT_BODY_TEMPLATE =
-  'This is to certify that {{recipientFullName}} has been officially attested by {{organizationName}} on {{issuedDateFormatted}}.';
+  "This is to certify that {{recipientFullName}} has been officially attested by {{organizationName}} on {{issuedDateFormatted}}.";
 
 function buildTemplateCreateData(
   name: string,
@@ -52,10 +73,11 @@ function buildTemplateCreateData(
     name,
     slug: slugifyName(name, data.slug),
     description: trimStr(data.description),
-    serialPrefix: trimStr(data.serialPrefix, 'CERT').toUpperCase().slice(0, 8),
-    defaultValidityDays: typeof data.defaultValidityDays === 'number' ? data.defaultValidityDays : null,
+    serialPrefix: trimStr(data.serialPrefix, "CERT").toUpperCase().slice(0, 8),
+    defaultValidityDays:
+      typeof data.defaultValidityDays === "number" ? data.defaultValidityDays : null,
     requiresWitnesses: Boolean(data.requiresWitnesses),
-    minWitnesses: typeof data.minWitnesses === 'number' ? data.minWitnesses : 0,
+    minWitnesses: typeof data.minWitnesses === "number" ? data.minWitnesses : 0,
     requiresApproval: data.requiresApproval !== false,
     organizationName: trimStr(data.organizationName, settings.organizationName),
     organizationSubheader: data.organizationSubheader ?? settings.organizationSubheader,
@@ -65,8 +87,10 @@ function buildTemplateCreateData(
     footerText: trimStr(data.footerText),
     defaultSignatories: normalizeSignatories(data.defaultSignatories),
     customFieldsSchema: Array.isArray(data.customFieldsSchema) ? data.customFieldsSchema : [],
-    secondaryCalendars: Array.isArray(data.secondaryCalendars) ? data.secondaryCalendars : settings.secondaryCalendars,
-    accentColor: trimStr(data.accentColor, '#14532d'),
+    secondaryCalendars: Array.isArray(data.secondaryCalendars)
+      ? data.secondaryCalendars
+      : settings.secondaryCalendars,
+    accentColor: trimStr(data.accentColor, "#14532d"),
     active: data.active !== false,
   };
 }
@@ -86,12 +110,12 @@ function assertWitnessCount(
 function resolveIssueDatesAndIdentity(input: CertificateIssueInput, template: CertificateTemplate) {
   const issuedDateObj = input.issuedAt ? new Date(input.issuedAt) : new Date();
   if (Number.isNaN(issuedDateObj.getTime())) {
-    throw new Error('Invalid issuedAt date');
+    throw new Error("Invalid issuedAt date");
   }
   const issuedAt = issuedDateObj.toISOString();
   const validityDays = template.defaultValidityDays;
   const computedExpiry =
-    typeof validityDays === 'number' && validityDays > 0
+    typeof validityDays === "number" && validityDays > 0
       ? new Date(issuedDateObj.getTime() + validityDays * 86_400_000).toISOString()
       : null;
   const expiresAt: string | null = input.expiresAt ?? computedExpiry;
@@ -103,12 +127,12 @@ function resolveIssueDatesAndIdentity(input: CertificateIssueInput, template: Ce
     expiresAt,
     serialNumber,
     verificationToken: generateVerificationToken(),
-    nationalIdMasked: rawNationalId ? maskNationalId(rawNationalId) : '',
-    nationalIdHash: rawNationalId ? hashNationalId(rawNationalId, serialNumber) : '',
+    nationalIdMasked: rawNationalId ? maskNationalId(rawNationalId) : "",
+    nationalIdHash: rawNationalId ? hashNationalId(rawNationalId, serialNumber) : "",
   };
 }
 
-function buildIssueRecordPayload(params: {
+function buildIssueRecordPayload(p: {
   input: CertificateIssueInput;
   template: CertificateTemplate;
   recipientFullName: string;
@@ -116,57 +140,68 @@ function buildIssueRecordPayload(params: {
   signatories: CertificateSignatory[];
   witnesses: CertificateWitness[];
   datesAndId: ReturnType<typeof resolveIssueDatesAndIdentity>;
-  secondaryDates: CertificateRecord['secondaryDates'];
+  secondaryDates: CertificateRecord["secondaryDates"];
   signed: { payloadHash: string; signature: string };
   fingerprint: string;
 }) {
-  const { input, template, recipientFullName, status, signatories, witnesses, datesAndId, secondaryDates, signed, fingerprint } = params;
   return {
-    serialNumber: datesAndId.serialNumber,
-    templateDocumentId: template.documentId,
-    templateSlug: template.slug,
-    templateName: template.name,
-    status,
-    recipientFullName,
-    recipientChosenName: trimStr(input.recipientChosenName),
-    recipientEmail: trimOptStr(input.recipientEmail),
-    recipientPhone: trimStr(input.recipientPhone),
-    recipientNationality: trimStr(input.recipientNationality),
-    nationalIdMasked: datesAndId.nationalIdMasked,
-    nationalIdHash: datesAndId.nationalIdHash,
-    issuedAt: datesAndId.issuedAt,
-    expiresAt: datesAndId.expiresAt,
-    signatories,
-    witnesses,
-    customData: input.customData ?? {},
-    secondaryDates,
-    canonicalPayloadHash: signed.payloadHash,
-    cryptographicSignature: signed.signature,
-    publicKeyFingerprint: fingerprint,
-    verificationToken: datesAndId.verificationToken,
-    linkedBookingCode: trimStr(input.linkedBookingCode),
-    notes: trimStr(input.notes),
+    serialNumber: p.datesAndId.serialNumber,
+    templateDocumentId: p.template.documentId,
+    templateSlug: p.template.slug,
+    templateName: p.template.name,
+    status: p.status,
+    recipientFullName: p.recipientFullName,
+    recipientChosenName: trimStr(p.input.recipientChosenName),
+    recipientEmail: trimOptStr(p.input.recipientEmail),
+    recipientPhone: trimStr(p.input.recipientPhone),
+    recipientNationality: trimStr(p.input.recipientNationality),
+    nationalIdMasked: p.datesAndId.nationalIdMasked,
+    nationalIdHash: p.datesAndId.nationalIdHash,
+    issuedAt: p.datesAndId.issuedAt,
+    expiresAt: p.datesAndId.expiresAt,
+    signatories: p.signatories,
+    witnesses: p.witnesses,
+    customData: p.input.customData ?? {},
+    secondaryDates: p.secondaryDates,
+    canonicalPayloadHash: p.signed.payloadHash,
+    cryptographicSignature: p.signed.signature,
+    publicKeyFingerprint: p.fingerprint,
+    verificationToken: p.datesAndId.verificationToken,
+    linkedBookingCode: trimStr(p.input.linkedBookingCode),
+    notes: trimStr(p.input.notes),
   };
 }
 
 interface ApproveCertificateOptions {
   signatories?: CertificateSignatory[];
-  witnesses?: Array<{ fullName: string; documentIdRaw?: string; documentIdMasked?: string; role?: string }>;
+  witnesses?: Array<{
+    fullName: string;
+    documentIdRaw?: string;
+    documentIdMasked?: string;
+    role?: string;
+  }>;
   recipientChosenName?: string;
   notes?: string;
 }
 
 function resolveApprovalFields(existing: CertificateRecord, options?: ApproveCertificateOptions) {
-  const witnesses = options?.witnesses !== undefined ? normalizeWitnesses(options.witnesses) : existing.witnesses;
-  const signatories = options?.signatories !== undefined ? normalizeSignatories(options.signatories) : existing.signatories;
-  const recipientChosenName = options?.recipientChosenName !== undefined ? trimStr(options.recipientChosenName) : existing.recipientChosenName;
+  const witnesses =
+    options?.witnesses !== undefined ? normalizeWitnesses(options.witnesses) : existing.witnesses;
+  const signatories =
+    options?.signatories !== undefined
+      ? normalizeSignatories(options.signatories)
+      : existing.signatories;
+  const recipientChosenName =
+    options?.recipientChosenName !== undefined
+      ? trimStr(options.recipientChosenName)
+      : existing.recipientChosenName;
   const notes = options?.notes !== undefined ? options.notes : existing.notes;
   return { witnesses, signatories, recipientChosenName, notes };
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsService = () =>
-    strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>('settings');
+    strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>("settings");
 
   return {
     async listTemplates(activeOnly = false): Promise<CertificateTemplate[]> {
@@ -197,14 +232,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return null;
     },
 
-    async createTemplate(
-      data: Partial<CertificateTemplate>
-    ): Promise<CertificateTemplate> {
+    async createTemplate(data: Partial<CertificateTemplate>): Promise<CertificateTemplate> {
       const settings = await getSettingsService().getSettings();
       const name = trimStr(data.name);
-      if (!name) {
-        throw new Error('Template name is required');
-      }
+      if (!name) throw new Error("Template name is required");
       const created = await strapi.documents(TEMPLATE_UID).create({
         data: buildTemplateCreateData(name, data, settings),
       });
@@ -214,8 +245,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async seedDefaultTemplates(): Promise<number> {
       const settings = await getSettingsService().getSettings();
       const defaults = settings.defaultTemplates || [];
-      if (defaults.length === 0) return 0;
-
       let seededCount = 0;
       for (const tpl of defaults) {
         const existing = await this.findTemplate({ templateSlug: tpl.slug });
@@ -227,26 +256,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return seededCount;
     },
 
-    async issueCertificate(
-      input: CertificateIssueInput
-    ): Promise<CertificateRecord> {
+    async issueCertificate(input: CertificateIssueInput): Promise<CertificateRecord> {
       const recipientFullName = trimStr(input.recipientFullName);
-      if (!recipientFullName) {
-        throw new Error('recipientFullName is required');
-      }
+      if (!recipientFullName) throw new Error("recipientFullName is required");
 
       const template = await this.findTemplate({
         templateDocumentId: input.templateDocumentId,
         templateSlug: input.templateSlug,
       });
-      if (!template?.active) {
-        throw new Error('Active certificate template not found');
-      }
+      if (!template?.active) throw new Error("Active certificate template not found");
 
       const settings = await getSettingsService().getSettings();
       const keyPair = await getSettingsService().getSigningKeyPair();
       const isIssued = input.autoApprove === true || !template.requiresApproval;
-      const status: CertificateStatus = isIssued ? 'issued' : 'pending_approval';
+      const status: CertificateStatus = isIssued ? "issued" : "pending_approval";
 
       const witnesses = normalizeWitnesses(input.witnesses);
       assertWitnessCount(template, witnesses, isIssued);
@@ -263,7 +286,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const secondaryDates = formatSecondaryCalendars(
         datesAndId.issuedDateObj,
         activeCalendars,
-        trimStr(input.locale, trimStr(settings.defaultLocale, 'en'))
+        trimStr(input.locale, trimStr(settings.defaultLocale, "en"))
       );
 
       const canonicalPayload = buildCanonicalPayload({
@@ -296,14 +319,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       const record = normalizeCertificateRecord(created, true);
-      strapi.eventHub?.emit(
-        isIssued ? 'certificates.issued' : 'certificates.requested',
-        {
-          serialNumber: record.serialNumber,
-          templateSlug: record.templateSlug,
-          status: record.status,
-        }
-      );
+      strapi.eventHub?.emit(isIssued ? "certificates.issued" : "certificates.requested", {
+        serialNumber: record.serialNumber,
+        templateSlug: record.templateSlug,
+        status: record.status,
+      });
       return record;
     },
 
@@ -311,11 +331,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       documentId: string,
       options?: ApproveCertificateOptions
     ): Promise<CertificateRecord> {
-      const existingDoc = await strapi
-        .documents(CERTIFICATE_UID)
-        .findOne({ documentId });
+      const existingDoc = await strapi.documents(CERTIFICATE_UID).findOne({ documentId });
       if (!existingDoc) {
-        throw new Error('Certificate record not found');
+        throw new Error("Certificate record not found");
       }
       const existing = normalizeCertificateRecord(existingDoc, true);
       const template = await this.findTemplate({
@@ -323,8 +341,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         templateSlug: existing.templateSlug,
       });
 
-      const { witnesses, signatories, recipientChosenName, notes } =
-        resolveApprovalFields(existing, options);
+      const { witnesses, signatories, recipientChosenName, notes } = resolveApprovalFields(
+        existing,
+        options
+      );
       assertWitnessCount(template, witnesses, true);
 
       const keyPair = await getSettingsService().getSigningKeyPair();
@@ -334,10 +354,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const canonicalPayload = buildCanonicalPayload({
         serialNumber: existing.serialNumber,
         templateSlug: existing.templateSlug,
-        organizationName: trimStr(
-          template?.organizationName,
-          settings.organizationName
-        ),
+        organizationName: trimStr(template?.organizationName, settings.organizationName),
         recipientFullName: existing.recipientFullName,
         recipientChosenName,
         nationalIdHash: existing.nationalIdHash,
@@ -351,7 +368,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const updated = await strapi.documents(CERTIFICATE_UID).update({
         documentId,
         data: {
-          status: 'issued',
+          status: "issued",
           issuedAt,
           recipientChosenName: trimStr(recipientChosenName),
           signatories,
@@ -364,11 +381,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       if (!updated) {
-        throw new Error('Failed to update certificate record');
+        throw new Error("Failed to update certificate record");
       }
 
       const record = normalizeCertificateRecord(updated, true);
-      strapi.eventHub?.emit('certificates.issued', {
+      strapi.eventHub?.emit("certificates.issued", {
         serialNumber: record.serialNumber,
         templateSlug: record.templateSlug,
         status: record.status,
@@ -376,24 +393,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return record;
     },
 
-    async revokeCertificate(
-      documentId: string,
-      reason: string
-    ): Promise<CertificateRecord> {
-      const cleanReason = String(reason || 'Revoked by administrator').trim();
+    async revokeCertificate(documentId: string, reason: string): Promise<CertificateRecord> {
+      const cleanReason = String(reason || "Revoked by administrator").trim();
       const updated = await strapi.documents(CERTIFICATE_UID).update({
         documentId,
         data: {
-          status: 'revoked',
+          status: "revoked",
           revokedAt: new Date().toISOString(),
           revocationReason: cleanReason,
         },
       });
       if (!updated) {
-        throw new Error('Certificate record not found');
+        throw new Error("Certificate record not found");
       }
       const record = normalizeCertificateRecord(updated, false);
-      strapi.eventHub?.emit('certificates.revoked', {
+      strapi.eventHub?.emit("certificates.revoked", {
         serialNumber: record.serialNumber,
         revocationReason: cleanReason,
       });
@@ -404,7 +418,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       serialNumber: string,
       options?: { token?: string; nationalId?: string }
     ): Promise<CertificateVerificationResult | null> {
-      const cleanSerial = String(serialNumber || '')
+      const cleanSerial = String(serialNumber || "")
         .trim()
         .toUpperCase();
       if (!cleanSerial) return null;
@@ -475,10 +489,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return filterAndComputeCertificateStats(allRecords, filters);
     },
 
-    async exportCsv(filters?: {
-      status?: string;
-      templateSlug?: string;
-    }): Promise<string> {
+    async exportCsv(filters?: { status?: string; templateSlug?: string }): Promise<string> {
       const { records } = await this.listCertificates(filters);
       return exportCertificatesToCsv(records);
     },

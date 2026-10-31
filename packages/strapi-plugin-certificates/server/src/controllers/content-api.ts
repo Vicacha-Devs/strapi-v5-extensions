@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   type CertificateIssueInput,
@@ -7,8 +8,8 @@ import {
   type CertificateVerificationResult,
   type CertificatesPluginSettings,
   type ESignEnvelopeStatus,
-} from '../../../shared';
-import { checkRateLimit } from '../services/issuanceHelpers';
+} from "../../../shared";
+import { checkRateLimit } from "../services/issuanceHelpers";
 
 interface SettingsServiceContract {
   getSettings(): Promise<CertificatesPluginSettings>;
@@ -57,12 +58,9 @@ interface KoaContext {
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getSettings = () =>
-    strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>('settings');
-  const getIssuance = () =>
-    strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>('issuance');
-  const getDocuSign = () =>
-    strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>('docusign');
+  const getSettings = () => strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>("settings");
+  const getIssuance = () => strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>("issuance");
+  const getDocuSign = () => strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>("docusign");
 
   return {
     async listPublicTemplates(ctx: KoaContext) {
@@ -86,7 +84,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = {
         data: {
           organizationName: settings.organizationName,
-          algorithm: 'Ed25519',
+          algorithm: "Ed25519",
           publicKeyFingerprint: settings.publicKeyFingerprint,
           publicKeyPem: settings.publicKeyPem,
         },
@@ -94,16 +92,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async applyCertificate(ctx: KoaContext) {
-      const ipKey = `apply:${ctx.ip || 'unknown'}`;
+      const ipKey = `apply:${ctx.ip || "unknown"}`;
       if (!checkRateLimit(ipKey, 10, 60_000)) {
         ctx.status = 429;
-        ctx.body = { error: { message: 'Too many certificate requests. Please wait.' } };
+        ctx.body = { error: { message: "Too many certificate requests. Please wait." } };
         return;
       }
 
       const settings = await getSettings().getSettings();
       if (!settings.allowPublicApplications) {
-        return ctx.forbidden('Public certificate applications are disabled');
+        return ctx.forbidden("Public certificate applications are disabled");
       }
 
       try {
@@ -125,21 +123,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           },
         };
       } catch (err) {
-        return ctx.badRequest((err as Error).message || 'Invalid certificate application');
+        return ctx.badRequest((err as Error).message || "Invalid certificate application");
       }
     },
 
     async verifyBySerial(ctx: KoaContext) {
-      const ipKey = `verify:${ctx.ip || 'unknown'}`;
+      const ipKey = `verify:${ctx.ip || "unknown"}`;
       if (!checkRateLimit(ipKey, 30, 60_000)) {
         ctx.status = 429;
-        ctx.body = { error: { message: 'Rate limit exceeded for verification.' } };
+        ctx.body = { error: { message: "Rate limit exceeded for verification." } };
         return;
       }
 
       const serial = ctx.params.serial;
       if (!serial) {
-        return ctx.badRequest('Certificate serial number is required');
+        return ctx.badRequest("Certificate serial number is required");
       }
 
       const result = await getIssuance().verifyCertificateBySerial(serial, {
@@ -148,10 +146,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       if (!result) {
-        return ctx.notFound('Certificate serial number not found in official registry');
+        return ctx.notFound("Certificate serial number not found in official registry");
       }
 
-      ctx.set('Cache-Control', 'no-store');
+      ctx.set("Cache-Control", "no-store");
       ctx.body = { data: result };
     },
 
@@ -159,7 +157,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const serial = ctx.params.serial;
       const token = ctx.query.token;
       if (!serial || !token) {
-        return ctx.badRequest('Both serial and verification token are required');
+        return ctx.badRequest("Both serial and verification token are required");
       }
 
       try {
@@ -168,38 +166,37 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           { token, isAdmin: false }
         );
         if (!rendered) {
-          return ctx.notFound('Certificate not found');
+          return ctx.notFound("Certificate not found");
         }
-        ctx.set('Content-Type', 'text/html; charset=utf-8');
+        ctx.set("Content-Type", "text/html; charset=utf-8");
         ctx.set(
-          'Content-Security-Policy',
+          "Content-Security-Policy",
           "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:;"
         );
-        ctx.set('X-Content-Type-Options', 'nosniff');
-        ctx.set('X-Frame-Options', 'SAMEORIGIN');
-        ctx.set('Cache-Control', 'no-store');
+        ctx.set("X-Content-Type-Options", "nosniff");
+        ctx.set("X-Frame-Options", "SAMEORIGIN");
+        ctx.set("Cache-Control", "no-store");
         ctx.body = rendered.html;
       } catch (err) {
-        return ctx.forbidden((err as Error).message || 'Invalid verification token');
+        return ctx.forbidden((err as Error).message || "Invalid verification token");
       }
     },
 
     async docusignWebhook(ctx: KoaContext) {
-      const ipKey = `webhook:${ctx.ip || 'unknown'}`;
+      const ipKey = `webhook:${ctx.ip || "unknown"}`;
       if (!checkRateLimit(ipKey, 60, 60_000)) {
         ctx.status = 429;
-        ctx.body = { error: { message: 'Webhook rate limit exceeded.' } };
+        ctx.body = { error: { message: "Webhook rate limit exceeded." } };
         return;
       }
 
       const payload = (ctx.request.body || {}) as Record<string, unknown>;
       const rawBody =
-        typeof ctx.request.rawBody === 'string' && ctx.request.rawBody
+        typeof ctx.request.rawBody === "string" && ctx.request.rawBody
           ? ctx.request.rawBody
           : JSON.stringify(payload);
       const signatureHeader =
-        ctx.headers?.['x-docusign-signature-1'] ||
-        ctx.headers?.['X-DocuSign-Signature-1'];
+        ctx.headers?.["x-docusign-signature-1"] || ctx.headers?.["X-DocuSign-Signature-1"];
 
       try {
         const result = await getDocuSign().handleWebhookEvent({
@@ -216,9 +213,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           },
         };
       } catch (err) {
-        return ctx.forbidden(
-          (err as Error).message || 'DocuSign webhook verification failed'
-        );
+        return ctx.forbidden((err as Error).message || "DocuSign webhook verification failed");
       }
     },
   };

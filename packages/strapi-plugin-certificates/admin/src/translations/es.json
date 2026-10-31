@@ -248,5 +248,8 @@
   "settings.ui.endpoint_public_key": "GET /api/certificates/public-key",
   "certificates.settings.ui.endpoint_public_key": "GET /api/certificates/public-key",
   "field.for_offline_embassy_verification": "para verificación consular o de embajada sin conexión)",
-  "certificates.field.for_offline_embassy_verification": "para verificación consular o de embajada sin conexión)"
+  "certificates.field.for_offline_embassy_verification": "para verificación consular o de embajada sin conexión)",
+  "settings.tab.organization": "Organización y Verificación",
+  "settings.tab.docusign": "Firma Electrónica DocuSign",
+  "settings.tab.keys": "Claves Ed25519"
 }

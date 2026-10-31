@@ -11,8 +11,8 @@ Generic **Official Certificates, Cryptographic Ed25519 Signing, Printable Creden
 - **Cryptographic Ed25519 Signing & Verification (`plugin::certificates.certificate`)**:
   - Signs issued certificate payloads (`serialNumber`, `recipientName`, `templateSlug`, `issuedAt`, `canonicalPayloadHash`) using **Ed25519** (`node:crypto`) and exposes the public verification key at `GET /api/certificates/public-key` and verification endpoint at `GET /api/certificates/verify/:serial`.
 - **Self-Service Applications & Printable Credentials**:
-  - Public application intake (`POST /api/certificates/apply`), printable HTML/PDF rendering (`GET /api/certificates/:serial/printable`), and DocuSign webhook status sync (`POST /api/certificates/webhooks/docusign`).
+  - Public application intake (`POST /api/certificates/apply`), printable HTML/PDF rendering (`GET /api/certificates/verify/:serial/print`), and DocuSign webhook status sync (`POST /api/certificates/webhooks/docusign`).
 - **Calendar Bridge**:
   - Automatically syncs ceremony/appointment dates into `@vicacha-devs/strapi-plugin-calendar`.
-- **10-Locale Admin UI**:
-  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `id`, `ur`, and `zh`.
+- **13-Locale Admin UI**:
+  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur`, and `zh`.

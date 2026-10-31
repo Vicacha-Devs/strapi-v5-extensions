@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   type CertificateIssueInput,
@@ -7,13 +8,11 @@ import {
   type CertificateTemplate,
   type CertificatesPluginSettings,
   type ESignEnvelopeStatus,
-} from '../../../shared';
+} from "../../../shared";
 
 interface SettingsServiceContract {
   getSettings(): Promise<CertificatesPluginSettings>;
-  updateSettings(
-    partial: Partial<CertificatesPluginSettings>
-  ): Promise<CertificatesPluginSettings>;
+  updateSettings(partial: Partial<CertificatesPluginSettings>): Promise<CertificatesPluginSettings>;
   rotateKeyPair(): Promise<{
     publicKeyPem: string;
     publicKeyFingerprint: string;
@@ -34,18 +33,12 @@ interface IssuanceServiceContract {
     documentId: string,
     options?: Record<string, unknown>
   ): Promise<CertificateRecord>;
-  revokeCertificate(
-    documentId: string,
-    reason: string
-  ): Promise<CertificateRecord>;
+  revokeCertificate(documentId: string, reason: string): Promise<CertificateRecord>;
   renderCertificateDocument(
     identifier: { documentId?: string; serialNumber?: string },
     options?: { token?: string; isAdmin?: boolean }
   ): Promise<{ html: string; serialNumber: string } | null>;
-  exportCsv(filters?: {
-    status?: string;
-    templateSlug?: string;
-  }): Promise<string>;
+  exportCsv(filters?: { status?: string; templateSlug?: string }): Promise<string>;
 }
 
 interface DocuSignServiceContract {
@@ -70,12 +63,9 @@ interface KoaContext {
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getSettings = () =>
-    strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>('settings');
-  const getIssuance = () =>
-    strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>('issuance');
-  const getDocuSign = () =>
-    strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>('docusign');
+  const getSettings = () => strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>("settings");
+  const getIssuance = () => strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>("issuance");
+  const getDocuSign = () => strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>("docusign");
 
   return {
     async getSettings(ctx: KoaContext) {
@@ -105,7 +95,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const data = await getIssuance().createTemplate(payload);
         ctx.body = { data };
       } catch (err) {
-        return ctx.badRequest((err as Error).message || 'Failed to create template');
+        return ctx.badRequest((err as Error).message || "Failed to create template");
       }
     },
 
@@ -128,102 +118,92 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async issueCertificate(ctx: KoaContext) {
       try {
         const body = (ctx.request.body || {}) as unknown as CertificateIssueInput;
-        const autoApprove =
-          body.sendViaESign === true ? false : body.autoApprove !== false;
+        const autoApprove = body.sendViaESign === true ? false : body.autoApprove !== false;
         let data = await getIssuance().issueCertificate({
           ...body,
           autoApprove,
         });
         if (body.sendViaESign === true) {
-          const sent = await getDocuSign().sendEnvelopeForCertificate(
-            data.documentId
-          );
+          const sent = await getDocuSign().sendEnvelopeForCertificate(data.documentId);
           data = sent.certificate;
         }
         ctx.body = { data };
       } catch (err) {
-        return ctx.badRequest((err as Error).message || 'Failed to issue certificate');
+        return ctx.badRequest((err as Error).message || "Failed to issue certificate");
       }
     },
 
     async sendDocuSignEnvelope(ctx: KoaContext) {
       const documentId = ctx.params.documentId;
       if (!documentId) {
-        return ctx.badRequest('documentId is required');
+        return ctx.badRequest("documentId is required");
       }
       try {
         const result = await getDocuSign().sendEnvelopeForCertificate(documentId);
         ctx.body = { data: result };
       } catch (err) {
-        return ctx.badRequest(
-          (err as Error).message || 'Failed to dispatch DocuSign envelope'
-        );
+        return ctx.badRequest((err as Error).message || "Failed to dispatch DocuSign envelope");
       }
     },
 
     async approveCertificate(ctx: KoaContext) {
       const documentId = ctx.params.documentId;
       if (!documentId) {
-        return ctx.badRequest('documentId is required');
+        return ctx.badRequest("documentId is required");
       }
       try {
         const body = (ctx.request.body || {}) as Record<string, unknown>;
         const data = await getIssuance().approveCertificate(documentId, body);
         ctx.body = { data };
       } catch (err) {
-        return ctx.badRequest((err as Error).message || 'Failed to approve certificate');
+        return ctx.badRequest((err as Error).message || "Failed to approve certificate");
       }
     },
 
     async revokeCertificate(ctx: KoaContext) {
       const documentId = ctx.params.documentId;
       if (!documentId) {
-        return ctx.badRequest('documentId is required');
+        return ctx.badRequest("documentId is required");
       }
       try {
-        const reason = String(
-          (ctx.request.body || {}).reason || 'Revoked by administrator'
-        );
+        const reason = String((ctx.request.body || {}).reason || "Revoked by administrator");
         const data = await getIssuance().revokeCertificate(documentId, reason);
         ctx.body = { data };
       } catch (err) {
-        return ctx.badRequest((err as Error).message || 'Failed to revoke certificate');
+        return ctx.badRequest((err as Error).message || "Failed to revoke certificate");
       }
     },
 
     async printCertificate(ctx: KoaContext) {
       const documentId = ctx.params.documentId;
       if (!documentId) {
-        return ctx.badRequest('documentId is required');
+        return ctx.badRequest("documentId is required");
       }
       const rendered = await getIssuance().renderCertificateDocument(
         { documentId },
         { isAdmin: true }
       );
       if (!rendered) {
-        return ctx.notFound('Certificate not found');
+        return ctx.notFound("Certificate not found");
       }
-      ctx.set('Content-Type', 'text/html; charset=utf-8');
+      ctx.set("Content-Type", "text/html; charset=utf-8");
       ctx.set(
-        'Content-Security-Policy',
+        "Content-Security-Policy",
         "default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src data:;"
       );
-      ctx.set('X-Content-Type-Options', 'nosniff');
-      ctx.set('X-Frame-Options', 'SAMEORIGIN');
-      ctx.set('Cache-Control', 'no-store');
+      ctx.set("X-Content-Type-Options", "nosniff");
+      ctx.set("X-Frame-Options", "SAMEORIGIN");
+      ctx.set("Cache-Control", "no-store");
       ctx.body = rendered.html;
     },
 
     async exportCsv(ctx: KoaContext) {
       const { status, templateSlug } = ctx.query;
       const csv = await getIssuance().exportCsv({ status, templateSlug });
-      ctx.set('Content-Type', 'text/csv; charset=utf-8');
-      ctx.set(
-        'Content-Disposition',
-        'attachment; filename="certificates-registry.csv"'
-      );
-      ctx.set('X-Content-Type-Options', 'nosniff');
-      ctx.set('Cache-Control', 'no-store');
+      ctx.set("Content-Type", "text/csv; charset=utf-8");
+      ctx.set("Content-Disposition", 'attachment; filename="certificates-registry.csv"');
+      ctx.set("X-Content-Type-Options", "nosniff");
+      ctx.set("Cache-Control", "no-store");
       ctx.body = csv;
     },
   };
