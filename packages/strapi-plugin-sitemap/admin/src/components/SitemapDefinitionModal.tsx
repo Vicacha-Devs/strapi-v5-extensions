@@ -108,7 +108,10 @@ const SitemapDefinitionModal: React.FC<SitemapDefinitionModalProps> = ({
               })}
             </Field.Label>
             <TextInput
-              placeholder="e.g. articles or pages"
+              placeholder={formatMessage({
+                id: getTrad('modal.sitemapDef.namePlaceholder'),
+                defaultMessage: 'e.g. articles or pages',
+              })}
               value={name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
             />

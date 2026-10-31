@@ -1,6 +1,14 @@
 import { PLUGIN_ID } from './pluginId';
 import getTrad from './utils/getTrad';
 
+interface StrapiAdminApp {
+  createSettingSection: (
+    section: Record<string, unknown>,
+    links: Array<Record<string, unknown>>
+  ) => void;
+  registerPlugin: (plugin: Record<string, unknown>) => void;
+}
+
 const SUPPORTED_LOCALES = ['en', 'es', 'ar', 'tr', 'fr', 'pt-BR'] as const;
 
 const prefixPluginTranslations = (
@@ -14,7 +22,7 @@ const prefixPluginTranslations = (
 };
 
 export default {
-  register(app: any) {
+  register(app: StrapiAdminApp) {
     app.createSettingSection(
       {
         id: PLUGIN_ID,

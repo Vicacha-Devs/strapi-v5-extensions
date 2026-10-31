@@ -22,12 +22,143 @@ export interface CollectionTypeConfig {
   populateLinkedModels?: boolean;
 }
 
+interface AdminContentTypeItem {
+  uid: string;
+  info: {
+    singularName: string;
+  };
+}
+
 interface CollectionTypeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: CollectionTypeConfig) => void;
   existingData?: CollectionTypeConfig | null;
 }
+
+const DEFAULT_CONFIG: CollectionTypeConfig = {
+  type: '',
+  langcode: '-',
+  pattern: '',
+  priority: 0.5,
+  frequency: 'monthly',
+  lastModified: false,
+  thumbnail: '',
+  populateLinkedModels: false,
+};
+
+const getInitialConfig = (existingData?: CollectionTypeConfig | null): CollectionTypeConfig => {
+  if (!existingData) {
+    return DEFAULT_CONFIG;
+  }
+  return {
+    ...DEFAULT_CONFIG,
+    ...existingData,
+    populateLinkedModels: Boolean(existingData.populateLinkedModels),
+  };
+};
+
+interface BooleanAndMediaFieldsSectionProps {
+  type: string;
+  lastModified: boolean;
+  setLastModified: (val: boolean) => void;
+  populateLinkedModels: boolean;
+  setPopulateLinkedModels: (val: boolean) => void;
+  thumbnail: string;
+  setThumbnail: (val: string) => void;
+  mediaFields: string[];
+}
+
+const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> = ({
+  type,
+  lastModified,
+  setLastModified,
+  populateLinkedModels,
+  setPopulateLinkedModels,
+  thumbnail,
+  setThumbnail,
+  mediaFields,
+}) => {
+  const { formatMessage } = useIntl();
+  const isTypeEmpty = !type;
+  const isThumbnailDisabled = isTypeEmpty || mediaFields.length === 0;
+
+  return (
+    <>
+      <Field.Root id="lastModified" style={{ marginBottom: 16 }}>
+        <Field.Label>
+          {formatMessage({
+            id: getTrad('modal.collectionType.lastModified'),
+            defaultMessage: 'Add last modified?',
+          })}
+        </Field.Label>
+        <SingleSelect
+          value={lastModified.toString()}
+          onChange={(value: string | number) => setLastModified(String(value) === 'true')}
+          disabled={isTypeEmpty}
+        >
+          <SingleSelectOption value="false">
+            {formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
+          </SingleSelectOption>
+          <SingleSelectOption value="true">
+            {formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })}
+          </SingleSelectOption>
+        </SingleSelect>
+      </Field.Root>
+
+      <Field.Root id="populateLinkedModels" style={{ marginBottom: 16 }}>
+        <Field.Label>
+          {formatMessage({
+            id: getTrad('modal.collectionType.populateLinkedModels'),
+            defaultMessage: 'Populate linked models? (Only checks one level deep)',
+          })}
+        </Field.Label>
+        <SingleSelect
+          value={populateLinkedModels.toString()}
+          onChange={(value: string | number) => setPopulateLinkedModels(String(value) === 'true')}
+          disabled={isTypeEmpty}
+        >
+          <SingleSelectOption value="false">
+            {formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
+          </SingleSelectOption>
+          <SingleSelectOption value="true">
+            {formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })}
+          </SingleSelectOption>
+        </SingleSelect>
+      </Field.Root>
+
+      <Field.Root id="thumbnail" style={{ marginBottom: 16 }}>
+        <Field.Label>
+          {formatMessage({
+            id: getTrad('modal.collectionType.thumbnail'),
+            defaultMessage: 'Optional: Select a thumbnail field',
+          })}
+        </Field.Label>
+        <SingleSelect
+          value={thumbnail}
+          onChange={(value: string | number) => setThumbnail(String(value))}
+          disabled={isThumbnailDisabled}
+        >
+          <SingleSelectOption value="">
+            {formatMessage({ id: getTrad('common.none'), defaultMessage: 'None' })}
+          </SingleSelectOption>
+          {mediaFields.map((field) => (
+            <SingleSelectOption key={field} value={field}>
+              {field}
+            </SingleSelectOption>
+          ))}
+        </SingleSelect>
+      </Field.Root>
+    </>
+  );
+};
+
+const isConfigReadyToSave = (
+  type: string,
+  pattern: string,
+  priority: number,
+  frequency: string
+): boolean => Boolean(type && pattern && priority && frequency);
 
 const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
   isOpen,
@@ -37,49 +168,52 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
 }) => {
   const { get } = useFetchClient();
   const { formatMessage } = useIntl();
+  const initial = getInitialConfig(existingData);
 
   const [collectionTypes, setCollectionTypes] = useState<string[]>([]);
   const [locales, setLocales] = useState<string[]>([]);
   const [fields, setFields] = useState<string[]>([]);
   const [mediaFields, setMediaFields] = useState<string[]>([]);
 
-  const [type, setType] = useState<string>(existingData?.type || '');
-  const [langcode, setLangcode] = useState<string>(existingData?.langcode || '-');
-  const [pattern, setPattern] = useState<string>(existingData?.pattern || '');
-  const [priority, setPriority] = useState<number>(existingData?.priority || 0.5);
-  const [frequency, setFrequency] = useState<string>(existingData?.frequency || 'monthly');
-  const [lastModified, setLastModified] = useState<boolean>(existingData?.lastModified || false);
-  const [thumbnail, setThumbnail] = useState<string>(existingData?.thumbnail || '');
+  const [type, setType] = useState<string>(initial.type);
+  const [langcode, setLangcode] = useState<string>(initial.langcode);
+  const [pattern, setPattern] = useState<string>(initial.pattern);
+  const [priority, setPriority] = useState<number>(initial.priority);
+  const [frequency, setFrequency] = useState<string>(initial.frequency);
+  const [lastModified, setLastModified] = useState<boolean>(initial.lastModified);
+  const [thumbnail, setThumbnail] = useState<string>(initial.thumbnail);
   const [populateLinkedModels, setPopulateLinkedModels] = useState<boolean>(
-    existingData?.populateLinkedModels || false
+    Boolean(initial.populateLinkedModels)
   );
 
   useEffect(() => {
     const fetchCollectionTypes = async () => {
       try {
-        const response = await get('/sitemap/admin-get-content-types');
-        const types =
-          response?.data?.collectionTypes
-            ?.filter((ct: any) => ct.uid.startsWith('api::'))
-            .map((ct: any) => ct.info.singularName) || [];
+        const response = await get<{ collectionTypes?: AdminContentTypeItem[] }>(
+          '/sitemap/admin-get-content-types'
+        );
+        const list = response?.data?.collectionTypes ?? [];
+        const types = list
+          .filter((ct) => ct.uid.startsWith('api::'))
+          .map((ct) => ct.info.singularName);
         setCollectionTypes(types);
       } catch (err) {
         console.error('Failed to fetch collection types:', err);
       }
     };
-    fetchCollectionTypes();
+    void fetchCollectionTypes();
   }, [get]);
 
   useEffect(() => {
     const fetchLocales = async () => {
       try {
-        const response = await get('/sitemap/admin-get-locales');
-        setLocales(response?.data?.locales || []);
+        const response = await get<{ locales?: string[] }>('/sitemap/admin-get-locales');
+        setLocales(response?.data?.locales ?? []);
       } catch (err) {
         console.error('Failed to fetch locales:', err);
       }
     };
-    fetchLocales();
+    void fetchLocales();
   }, [get]);
 
   useEffect(() => {
@@ -87,34 +221,37 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
 
     const fetchFields = async () => {
       try {
-        const response = await get(
+        const response = await get<{ allowedFields?: string[]; mediaFields?: string[] }>(
           `/sitemap/admin-allowed-fields?singularName=${type}&populateLinkedModels=${populateLinkedModels}`
         );
-        setFields(response?.data?.allowedFields || []);
-        setMediaFields(response?.data?.mediaFields || []);
+        setFields(response?.data?.allowedFields ?? []);
+        setMediaFields(response?.data?.mediaFields ?? []);
       } catch (err) {
         console.error('Failed to fetch fields:', err);
       }
     };
 
-    fetchFields();
+    void fetchFields();
   }, [type, populateLinkedModels, get]);
 
   useEffect(() => {
     if (existingData) {
-      setType(existingData.type);
-      setLangcode(existingData.langcode);
-      setPattern(existingData.pattern);
-      setPriority(existingData.priority);
-      setFrequency(existingData.frequency);
-      setLastModified(existingData.lastModified);
-      setThumbnail(existingData.thumbnail);
-      setPopulateLinkedModels(existingData.populateLinkedModels || false);
+      const next = getInitialConfig(existingData);
+      setType(next.type);
+      setLangcode(next.langcode);
+      setPattern(next.pattern);
+      setPriority(next.priority);
+      setFrequency(next.frequency);
+      setLastModified(next.lastModified);
+      setThumbnail(next.thumbnail);
+      setPopulateLinkedModels(Boolean(next.populateLinkedModels));
     }
   }, [existingData]);
 
+  const canSave = isConfigReadyToSave(type, pattern, priority, frequency);
+
   const handleSave = () => {
-    if (!type || !pattern || !priority || !frequency) return;
+    if (!canSave) return;
 
     onSave({
       type,
@@ -247,82 +384,22 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
             </SingleSelect>
           </Field.Root>
 
-          <Field.Root id="lastModified" style={{ marginBottom: 16 }}>
-            <Field.Label>
-              {formatMessage({
-                id: getTrad('modal.collectionType.lastModified'),
-                defaultMessage: 'Add last modified?',
-              })}
-            </Field.Label>
-            <SingleSelect
-              value={lastModified.toString()}
-              onChange={(value: string | number) => setLastModified(String(value) === 'true')}
-              disabled={!type}
-            >
-              <SingleSelectOption value="false">
-                {formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
-              </SingleSelectOption>
-              <SingleSelectOption value="true">
-                {formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })}
-              </SingleSelectOption>
-            </SingleSelect>
-          </Field.Root>
-
-          <Field.Root id="populateLinkedModels" style={{ marginBottom: 16 }}>
-            <Field.Label>
-              {formatMessage({
-                id: getTrad('modal.collectionType.populateLinkedModels'),
-                defaultMessage: 'Populate linked models? (Only checks one level deep)',
-              })}
-            </Field.Label>
-            <SingleSelect
-              value={populateLinkedModels.toString()}
-              onChange={(value: string | number) =>
-                setPopulateLinkedModels(String(value) === 'true')
-              }
-              disabled={!type}
-            >
-              <SingleSelectOption value="false">
-                {formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
-              </SingleSelectOption>
-              <SingleSelectOption value="true">
-                {formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })}
-              </SingleSelectOption>
-            </SingleSelect>
-          </Field.Root>
-
-          <Field.Root id="thumbnail" style={{ marginBottom: 16 }}>
-            <Field.Label>
-              {formatMessage({
-                id: getTrad('modal.collectionType.thumbnail'),
-                defaultMessage: 'Optional: Select a thumbnail field',
-              })}
-            </Field.Label>
-            <SingleSelect
-              value={thumbnail}
-              onChange={(value: string | number) => setThumbnail(String(value))}
-              disabled={!type || mediaFields.length === 0}
-            >
-              <SingleSelectOption value="">
-                {formatMessage({ id: getTrad('common.none'), defaultMessage: 'None' })}
-              </SingleSelectOption>
-              {mediaFields.map((field) => (
-                <SingleSelectOption key={field} value={field}>
-                  {field}
-                </SingleSelectOption>
-              ))}
-            </SingleSelect>
-          </Field.Root>
+          <BooleanAndMediaFieldsSection
+            type={type}
+            lastModified={lastModified}
+            setLastModified={setLastModified}
+            populateLinkedModels={populateLinkedModels}
+            setPopulateLinkedModels={setPopulateLinkedModels}
+            thumbnail={thumbnail}
+            setThumbnail={setThumbnail}
+            mediaFields={mediaFields}
+          />
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={onClose} variant="tertiary">
             {formatMessage({ id: getTrad('action.cancel'), defaultMessage: 'Cancel' })}
           </Button>
-          <Button
-            onClick={handleSave}
-            variant="default"
-            disabled={!type || !pattern || !priority || !frequency}
-          >
+          <Button onClick={handleSave} variant="default" disabled={!canSave}>
             {formatMessage({ id: getTrad('action.save'), defaultMessage: 'Save' })}
           </Button>
         </Modal.Footer>

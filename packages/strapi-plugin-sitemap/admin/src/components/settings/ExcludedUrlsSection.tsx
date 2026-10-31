@@ -1,73 +1,113 @@
 import React from 'react';
-import { Box, Button, Flex, Table, Tbody, Td, TextInput, Thead, Tr, Typography } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
+import {
+  Box,
+  Button,
+  Flex,
+  Table,
+  Tbody,
+  Td,
+  TextInput,
+  Th,
+  Thead,
+  Tr,
+  Typography,
+} from '@strapi/design-system';
+import { Check, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import getTrad from '../../utils/getTrad';
-import SectionCard from './SectionCard';
-import { HeadCell, RowActions, SaveButton } from './TableParts';
 
 interface ExcludedUrlsSectionProps {
-  paths: string[];
-  newPath: string;
-  isModified: boolean;
-  onNewPathChange: (value: string) => void;
-  onAdd: () => void;
-  onDelete: (index: number) => void;
-  onSave: () => void;
+  excludedUrls: string[];
+  newExcludedPath: string;
+  setNewExcludedPath: (val: string) => void;
+  isExcludedUrlsModified: boolean;
+  onAddExcludedUrl: () => void;
+  onDeleteExcludedUrl: (index: number) => void;
+  onSaveExcludedUrls: () => void;
 }
 
-const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
-  paths,
-  newPath,
-  isModified,
-  onNewPathChange,
-  onAdd,
-  onDelete,
-  onSave,
+export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
+  excludedUrls,
+  newExcludedPath,
+  setNewExcludedPath,
+  isExcludedUrlsModified,
+  onAddExcludedUrl,
+  onDeleteExcludedUrl,
+  onSaveExcludedUrls,
 }) => {
   const { formatMessage } = useIntl();
-  const t = (id: string, defaultMessage: string) =>
-    formatMessage({ id: getTrad(id), defaultMessage });
 
   return (
-    <SectionCard
-      title={t('settings.excludedUrls.title', 'Excluded URLs')}
-      description={t(
-        'settings.excludedUrls.description',
-        'Paths listed here will not be included in the sitemap (e.g. /admin or /private-page). Save using the Save button below.'
-      )}
-    >
+    <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+      <Typography variant="delta" as="h2">
+        {formatMessage({
+          id: getTrad('settings.excludedUrls.title'),
+          defaultMessage: 'Excluded URLs',
+        })}
+      </Typography>
+      <Box paddingBottom={4}>
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: getTrad('settings.excludedUrls.description'),
+            defaultMessage:
+              'Paths listed here will not be included in the sitemap (e.g. /admin or /private-page). Save using the Save button below.',
+          })}
+        </Typography>
+      </Box>
       <Flex gap={2} paddingBottom={4}>
         <Box style={{ flex: 1, maxWidth: 400 }}>
           <TextInput
-            placeholder={t('settings.excludedUrls.placeholder', '/path-to-exclude')}
-            value={newPath}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onNewPathChange(e.target.value)}
-            onKeyDown={(e: React.KeyboardEvent) =>
-              e.key === 'Enter' && (e.preventDefault(), onAdd())
+            placeholder={formatMessage({
+              id: getTrad('settings.excludedUrls.placeholder'),
+              defaultMessage: '/path-to-exclude',
+            })}
+            value={newExcludedPath}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setNewExcludedPath(e.target.value)
             }
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                onAddExcludedUrl();
+              }
+            }}
           />
         </Box>
         <Button
           startIcon={<Plus />}
           variant="secondary"
-          onClick={onAdd}
-          disabled={!newPath.trim()}
+          onClick={onAddExcludedUrl}
+          disabled={!newExcludedPath.trim()}
         >
-          {t('settings.excludedUrls.add', 'Add')}
+          {formatMessage({ id: getTrad('settings.excludedUrls.add'), defaultMessage: 'Add' })}
         </Button>
       </Flex>
-      {paths.length > 0 && (
-        <Table colCount={3} rowCount={paths.length + 1}>
+      {excludedUrls.length > 0 && (
+        <Table colCount={3} rowCount={excludedUrls.length + 1}>
           <Thead>
             <Tr>
-              <HeadCell label={t('table.id', 'ID')} />
-              <HeadCell label={t('settings.excludedUrls.table.path', 'Path')} />
-              <HeadCell label={t('table.actions', 'Actions')} />
+              <Th>
+                <Typography variant="sigma">
+                  {formatMessage({ id: getTrad('table.id'), defaultMessage: 'ID' })}
+                </Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">
+                  {formatMessage({
+                    id: getTrad('settings.excludedUrls.table.path'),
+                    defaultMessage: 'Path',
+                  })}
+                </Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">
+                  {formatMessage({ id: getTrad('table.actions'), defaultMessage: 'Actions' })}
+                </Typography>
+              </Th>
             </Tr>
           </Thead>
           <Tbody>
-            {paths.map((path, index) => (
+            {excludedUrls.map((path, index) => (
               <Tr key={index}>
                 <Td>
                   <Typography textColor="neutral800">{index + 1}</Typography>
@@ -76,7 +116,13 @@ const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
                   <Typography textColor="neutral800">{path}</Typography>
                 </Td>
                 <Td>
-                  <RowActions onDelete={() => onDelete(index)} />
+                  <Button
+                    variant="danger-light"
+                    startIcon={<Trash />}
+                    onClick={() => onDeleteExcludedUrl(index)}
+                  >
+                    {formatMessage({ id: getTrad('action.delete'), defaultMessage: 'Delete' })}
+                  </Button>
                 </Td>
               </Tr>
             ))}
@@ -84,10 +130,15 @@ const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
         </Table>
       )}
       <Box paddingTop={4}>
-        <SaveButton modified={isModified} onClick={onSave} />
+        <Button
+          startIcon={<Check />}
+          onClick={onSaveExcludedUrls}
+          disabled={!isExcludedUrlsModified}
+          variant={isExcludedUrlsModified ? 'default' : 'tertiary'}
+        >
+          {formatMessage({ id: getTrad('settings.save'), defaultMessage: 'Save' })}
+        </Button>
       </Box>
-    </SectionCard>
+    </Box>
   );
 };
-
-export default ExcludedUrlsSection;
