@@ -1,28 +1,29 @@
-import type { Core } from '@strapi/strapi';
-import type { EventsPluginSettings, RsvpStatus } from '../../../shared/types';
+import type { Core } from "@strapi/strapi";
+
+import type { EventsPluginSettings, RsvpStatus } from "../../../shared/types";
 import {
   type StrapiKoaContext,
   getErrorMessage,
   getOccurrenceService,
   getRsvpService,
   getSettingsService,
-} from '../types';
+} from "../types";
 
 function optStr(val: unknown): string | undefined {
-  return typeof val === 'string' && val ? val : undefined;
+  return typeof val === "string" && val ? val : undefined;
 }
 
 function optNum(val: unknown): number | undefined {
-  return typeof val === 'number' ? val : undefined;
+  return typeof val === "number" ? val : undefined;
 }
 
 function buildRescheduleInput(body: Record<string, unknown>) {
   return {
     sourceId: optStr(body.sourceId),
     uid: optStr(body.uid),
-    documentId: String(body.documentId ?? ''),
-    occurrenceDate: String(body.occurrenceDate ?? ''),
-    newStartDate: String(body.newStartDate ?? ''),
+    documentId: String(body.documentId ?? ""),
+    occurrenceDate: String(body.occurrenceDate ?? ""),
+    newStartDate: String(body.newStartDate ?? ""),
     newEndDate: optStr(body.newEndDate),
     applyToSeries: Boolean(body.applyToSeries),
     cancelOccurrence: Boolean(body.cancelOccurrence),
@@ -32,8 +33,8 @@ function buildRescheduleInput(body: Record<string, unknown>) {
 function buildQuickCreateInput(body: Record<string, unknown>) {
   return {
     sourceId: optStr(body.sourceId),
-    title: String(body.title ?? ''),
-    startDate: String(body.startDate ?? ''),
+    title: String(body.title ?? ""),
+    startDate: String(body.startDate ?? ""),
     endDate: optStr(body.endDate),
     location: optStr(body.location),
     category: optStr(body.category),
@@ -85,7 +86,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: updated };
       } catch (err: unknown) {
-        ctx.badRequest(getErrorMessage(err, 'Unable to reschedule event occurrence.'));
+        ctx.badRequest(getErrorMessage(err, "Unable to reschedule event occurrence."));
       }
     },
 
@@ -98,7 +99,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
-        ctx.badRequest(getErrorMessage(err, 'Unable to create event.'));
+        ctx.badRequest(getErrorMessage(err, "Unable to create event."));
       }
     },
 
@@ -107,7 +108,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const q = ctx.query ?? {};
       const data = await getRsvpService(strapi).getEventStats({
         eventUid: optStr(q.eventUid),
-        eventDocumentId: String(documentId ?? ''),
+        eventDocumentId: String(documentId ?? ""),
         occurrenceDate: optStr(q.occurrenceDate) ?? null,
       });
       ctx.body = { data };
@@ -129,12 +130,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const { documentId } = ctx.params ?? {};
         const { status } = ctx.request?.body ?? {};
         const result = await getRsvpService(strapi).updateRegistrationStatus(
-          String(documentId ?? ''),
+          String(documentId ?? ""),
           status as RsvpStatus
         );
         ctx.body = { data: result };
       } catch (err: unknown) {
-        ctx.badRequest(getErrorMessage(err, 'Failed to update registration status.'));
+        ctx.badRequest(getErrorMessage(err, "Failed to update registration status."));
       }
     },
 
@@ -148,7 +149,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
         ctx.body = { data };
       } catch (err: unknown) {
-        ctx.badRequest(getErrorMessage(err, 'Check-in failed.'));
+        ctx.badRequest(getErrorMessage(err, "Check-in failed."));
       }
     },
 
@@ -160,9 +161,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         status: optStr(q.status) as RsvpStatus | undefined,
       });
 
-      ctx.set('Content-Type', 'text/csv; charset=utf-8');
-      ctx.set('Content-Disposition', 'attachment; filename="event-registrations.csv"');
-      ctx.set('X-Content-Type-Options', 'nosniff');
+      ctx.set("Content-Type", "text/csv; charset=utf-8");
+      ctx.set("Content-Disposition", 'attachment; filename="event-registrations.csv"');
+      ctx.set("X-Content-Type-Options", "nosniff");
       ctx.body = csv;
     },
   };

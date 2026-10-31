@@ -1,25 +1,22 @@
-import type { Core } from '@strapi/strapi';
-import { resolveOccurrenceAlternateDates } from '../../../shared/calendarSystems';
-import { buildCalendarLinks } from '../../../shared/icalGenerator';
-import { EVENT_CONTENT_TYPE_UID } from '../../../shared/pluginId';
-import { expandRuleSlots, parseRRuleFieldValue } from '../../../shared/rruleEngine';
+import type { Core } from "@strapi/strapi";
+
+import { resolveOccurrenceAlternateDates } from "../../../shared/calendarSystems";
+import { buildCalendarLinks } from "../../../shared/icalGenerator";
+import { EVENT_CONTENT_TYPE_UID } from "../../../shared/pluginId";
+import { expandRuleSlots, parseRRuleFieldValue } from "../../../shared/rruleEngine";
 import {
   mapEventStatus,
   normalizeEventActionLinks,
   normalizeEventPoster,
   normalizeEventSpotlightConfig,
   resolveStartEndFromDocument,
-} from '../../../shared/spotlightHelpers';
+} from "../../../shared/spotlightHelpers";
 import type {
   EventSourceMapping,
   EventsPluginSettings,
   ExpandedOccurrence,
-} from '../../../shared/types';
-import {
-  type StrapiDocumentQueryOptions,
-  getDocumentsClient,
-  getRsvpService,
-} from '../types';
+} from "../../../shared/types";
+import { type StrapiDocumentQueryOptions, getDocumentsClient, getRsvpService } from "../types";
 
 export interface GetOccurrencesParams {
   from?: string;
@@ -49,8 +46,8 @@ function resolveEffectiveQueryLocale(
   paramLocale: string | undefined,
   defaultLocale: string | undefined
 ): string | undefined {
-  if (paramLocale && paramLocale !== 'auto') return paramLocale;
-  if (defaultLocale && defaultLocale !== 'auto') return defaultLocale;
+  if (paramLocale && paramLocale !== "auto") return paramLocale;
+  if (defaultLocale && defaultLocale !== "auto") return defaultLocale;
   return undefined;
 }
 
@@ -72,7 +69,7 @@ function buildSourceQueryOptions(
     queryOpts.locale = effectiveLocale;
   }
   if (!params.includeDrafts) {
-    queryOpts.status = 'published';
+    queryOpts.status = "published";
   }
   return queryOpts;
 }
@@ -135,19 +132,22 @@ function resolveDocColor(
 ): string {
   const categoryColor = categoryVal ? source.categoryColors?.[categoryVal] : undefined;
   if (categoryColor) return categoryColor;
-  if (typeof doc.color === 'string' && doc.color.startsWith('#')) return doc.color;
+  if (typeof doc.color === "string" && doc.color.startsWith("#")) return doc.color;
   return source.color;
 }
 
 function readOptionalFieldString(doc: Record<string, unknown>, fieldName?: string): string {
-  if (!fieldName) return '';
-  return String(doc[fieldName] ?? '');
+  if (!fieldName) return "";
+  return String(doc[fieldName] ?? "");
 }
 
-function resolveDocCapacity(doc: Record<string, unknown>, source: EventSourceMapping): number | null {
-  const capField = source.fields.capacity ?? 'capacity';
+function resolveDocCapacity(
+  doc: Record<string, unknown>,
+  source: EventSourceMapping
+): number | null {
+  const capField = source.fields.capacity ?? "capacity";
   const rawCap = doc[capField];
-  return typeof rawCap === 'number' && rawCap > 0 ? Math.floor(rawCap) : null;
+  return typeof rawCap === "number" && rawCap > 0 ? Math.floor(rawCap) : null;
 }
 
 interface ExtractedDocMeta {
@@ -157,14 +157,14 @@ interface ExtractedDocMeta {
   summary: string;
   slug: string | undefined;
   categoryVal: string;
-  statusVal: ExpandedOccurrence['status'];
+  statusVal: ExpandedOccurrence["status"];
   color: string;
   rsvpEnabled: boolean;
   capacity: number | null;
   baseDateKey: string;
-  poster: ExpandedOccurrence['poster'];
-  actionLinks: ExpandedOccurrence['actionLinks'];
-  spotlightConfig: ExpandedOccurrence['spotlightConfig'];
+  poster: ExpandedOccurrence["poster"];
+  actionLinks: ExpandedOccurrence["actionLinks"];
+  spotlightConfig: ExpandedOccurrence["spotlightConfig"];
   extractedCustomFields: Record<string, unknown> | undefined;
 }
 
@@ -175,7 +175,7 @@ function extractDocMetadata(
   baseDateKey: string
 ): ExtractedDocMeta {
   const categoryVal = readOptionalFieldString(doc, source.fields.category);
-  const baseTitle = String(doc[source.fields.title] ?? doc.title ?? 'Untitled');
+  const baseTitle = String(doc[source.fields.title] ?? doc.title ?? "Untitled");
   const baseLocation = readOptionalFieldString(doc, source.fields.location);
   const summary = readOptionalFieldString(doc, source.fields.summary);
   const slugVal = readOptionalFieldString(doc, source.fields.slug);
@@ -183,14 +183,14 @@ function extractDocMetadata(
     source.fields.status ? doc[source.fields.status] : doc.eventStatus
   );
   const color = resolveDocColor(doc, source, categoryVal);
-  const rsvpField = source.fields.rsvpEnabled ?? 'rsvpEnabled';
+  const rsvpField = source.fields.rsvpEnabled ?? "rsvpEnabled";
   const rsvpEnabled = doc[rsvpField] !== undefined ? Boolean(doc[rsvpField]) : false;
   const capacity = resolveDocCapacity(doc, source);
   const posterField = source.fields.poster;
   const poster = normalizeEventPoster(posterField ? doc[posterField] : doc.poster, baseTitle);
-  const actionLinks = normalizeEventActionLinks(doc[source.fields.actionLinks ?? 'actionLinks']);
+  const actionLinks = normalizeEventActionLinks(doc[source.fields.actionLinks ?? "actionLinks"]);
   const spotlightConfig = normalizeEventSpotlightConfig(
-    doc[source.fields.spotlightConfig ?? 'spotlightConfig']
+    doc[source.fields.spotlightConfig ?? "spotlightConfig"]
   );
 
   return {
@@ -213,7 +213,7 @@ function extractDocMetadata(
 }
 
 function matchesCategoryFilter(categoryVal: string, filterCategory?: string): boolean {
-  if (!filterCategory || filterCategory === 'all') return true;
+  if (!filterCategory || filterCategory === "all") return true;
   return categoryVal.toLowerCase() === filterCategory.toLowerCase();
 }
 
@@ -224,8 +224,7 @@ function resolveDocumentRecurrence(
   allDay: boolean
 ) {
   const rawRecurrence = source.fields.rrule ? doc[source.fields.rrule] : null;
-  const docTz =
-    typeof doc.timezone === 'string' && doc.timezone ? doc.timezone : defaultTimezone;
+  const docTz = typeof doc.timezone === "string" && doc.timezone ? doc.timezone : defaultTimezone;
   const recurrence = parseRRuleFieldValue(rawRecurrence, docTz);
   if (allDay) {
     recurrence.allDay = true;
@@ -242,7 +241,7 @@ export async function expandDocumentOccurrences(
   windowStart: string,
   windowEnd: string
 ): Promise<ExpandedOccurrence[]> {
-  const docId = String(doc.documentId ?? doc.id ?? '');
+  const docId = String(doc.documentId ?? doc.id ?? "");
   if (!docId) return [];
   const startEnd = resolveStartEndFromDocument(doc, source);
   if (!startEnd) return [];
@@ -293,7 +292,7 @@ async function fetchSlotRsvpStats(
 ) {
   if (!meta.rsvpEnabled) return undefined;
   const waitlistOverride =
-    typeof doc.waitlistEnabled === 'boolean'
+    typeof doc.waitlistEnabled === "boolean"
       ? doc.waitlistEnabled
       : settings.waitlistEnabledByDefault;
 
@@ -313,7 +312,7 @@ function toUndefinedIfEmpty(val: string): string | undefined {
 
 function readOptionalDocString(doc: Record<string, unknown>, key: string): string | undefined {
   const val = doc[key];
-  return typeof val === 'string' && val ? val : undefined;
+  return typeof val === "string" && val ? val : undefined;
 }
 
 async function buildSingleExpandedOccurrence(args: {
@@ -356,7 +355,7 @@ async function buildSingleExpandedOccurrence(args: {
     doc,
     source,
     secondaryCalendars: settings.secondaryCalendars ?? [],
-    locale: paramLocale && paramLocale !== 'auto' ? paramLocale : 'en',
+    locale: paramLocale && paramLocale !== "auto" ? paramLocale : "en",
   });
 
   return {
@@ -365,7 +364,7 @@ async function buildSingleExpandedOccurrence(args: {
     sourceLabel: source.label,
     uid: source.uid,
     documentId: meta.docId,
-    locale: readOptionalDocString(doc, 'locale'),
+    locale: readOptionalDocString(doc, "locale"),
     occurrenceDate: slot.occurrenceDate,
     startDate: slot.startDate,
     endDate: slot.endDate,
@@ -375,7 +374,7 @@ async function buildSingleExpandedOccurrence(args: {
     slug: meta.slug,
     summary: toUndefinedIfEmpty(meta.summary),
     location: toUndefinedIfEmpty(effectiveLocation),
-    virtualUrl: readOptionalDocString(doc, 'virtualUrl'),
+    virtualUrl: readOptionalDocString(doc, "virtualUrl"),
     category: toUndefinedIfEmpty(meta.categoryVal),
     status: meta.statusVal,
     color: meta.color,
@@ -419,11 +418,11 @@ export function buildQuickCreatePayload(
     capacity?: number;
   }
 ): Record<string, unknown> {
-  const title = (params.title ?? '').trim();
+  const title = (params.title ?? "").trim();
   const slug = title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
     .slice(0, 80);
 
   const data: Record<string, unknown> = {
@@ -468,10 +467,10 @@ function applyQuickCreateRRuleAndRsvp(
       overrides: {},
     };
   }
-  if (source.fields.rsvpEnabled && typeof params.rsvpEnabled === 'boolean') {
+  if (source.fields.rsvpEnabled && typeof params.rsvpEnabled === "boolean") {
     data[source.fields.rsvpEnabled] = params.rsvpEnabled;
   }
-  if (source.fields.capacity && typeof params.capacity === 'number' && params.capacity > 0) {
+  if (source.fields.capacity && typeof params.capacity === "number" && params.capacity > 0) {
     data[source.fields.capacity] = Math.floor(params.capacity);
   }
 }

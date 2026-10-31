@@ -1,4 +1,3 @@
-import React, { useMemo, useState } from 'react';
 import {
   Badge,
   Box,
@@ -15,36 +14,38 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import type { ExpandedOccurrence } from '../../../../shared/types';
+} from "@strapi/design-system";
+import React, { useMemo, useState } from "react";
+
+import type { ExpandedOccurrence } from "../../../../shared/types";
 
 function formatCategoryLabel(category: string): string {
   const trimmed = category.trim();
-  if (!trimmed) return '';
+  if (!trimmed) return "";
   return trimmed
     .split(/[\s_-]+/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+    .join(" ");
 }
 
 const EVENT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  scheduled: { bg: 'success100', text: 'success700' },
-  cancelled: { bg: 'danger100', text: 'danger700' },
+  scheduled: { bg: "success100", text: "success700" },
+  cancelled: { bg: "danger100", text: "danger700" },
 };
 
 function getEventStatusColors(status: string): { bg: string; text: string } {
-  return EVENT_STATUS_COLORS[status] ?? { bg: 'warning100', text: 'warning700' };
+  return EVENT_STATUS_COLORS[status] ?? { bg: "warning100", text: "warning700" };
 }
 
 function matchesCategoryFilter(ev: ExpandedOccurrence, categoryFilter: string): boolean {
-  if (categoryFilter === 'all') return true;
-  return (ev.category ?? '').toLowerCase() === categoryFilter.toLowerCase();
+  if (categoryFilter === "all") return true;
+  return (ev.category ?? "").toLowerCase() === categoryFilter.toLowerCase();
 }
 
 function matchesRsvpModeFilter(ev: ExpandedOccurrence, rsvpModeFilter: string): boolean {
   const enabled = Boolean(ev.rsvp?.rsvpEnabled);
-  if (rsvpModeFilter === 'rsvp') return enabled;
-  if (rsvpModeFilter === 'info') return !enabled;
+  if (rsvpModeFilter === "rsvp") return enabled;
+  if (rsvpModeFilter === "info") return !enabled;
   return true;
 }
 
@@ -52,13 +53,13 @@ function matchesSearchQuery(ev: ExpandedOccurrence, query: string): boolean {
   if (!query) return true;
   const haystack = [ev.title, ev.location, ev.category, ev.summary]
     .filter(Boolean)
-    .join(' ')
+    .join(" ")
     .toLowerCase();
   return haystack.includes(query);
 }
 
 function formatEventDateLabel(ev: ExpandedOccurrence): string {
-  const endKey = ev.endDate ? ev.endDate.slice(0, 10) : '';
+  const endKey = ev.endDate ? ev.endDate.slice(0, 10) : "";
   return endKey && endKey !== ev.occurrenceDate
     ? `${ev.occurrenceDate} → ${endKey}`
     : ev.occurrenceDate;
@@ -74,28 +75,28 @@ interface EventDirectoryRowProps {
 }
 
 const EventRsvpCell: React.FC<{
-  rsvp: ExpandedOccurrence['rsvp'];
+  rsvp: ExpandedOccurrence["rsvp"];
   t: (id: string, defaultMessage: string) => string;
 }> = ({ rsvp, t }) => {
   if (!rsvp?.rsvpEnabled) {
     return (
       <Badge backgroundColor="neutral150" textColor="neutral600">
-        {t('events.directory.noRsvp', 'Info / External Link')}
+        {t("events.directory.noRsvp", "Info / External Link")}
       </Badge>
     );
   }
-  const badgeBg = rsvp.isFull ? 'warning100' : 'primary100';
-  const badgeText = rsvp.isFull ? 'warning700' : 'primary700';
+  const badgeBg = rsvp.isFull ? "warning100" : "primary100";
+  const badgeText = rsvp.isFull ? "warning700" : "primary700";
   const seatsLabel =
     rsvp.remainingSeats !== null
-      ? `${rsvp.remainingSeats} ${t('events.directory.seatsLeft', 'seats available')}`
-      : t('sidePanel.open', 'Open');
+      ? `${rsvp.remainingSeats} ${t("events.directory.seatsLeft", "seats available")}`
+      : t("sidePanel.open", "Open");
 
   return (
     <Flex direction="column" alignItems="flex-start" gap={1}>
       <Badge backgroundColor={badgeBg} textColor={badgeText}>
-        {rsvp.confirmedSeats} / {rsvp.capacity ?? '∞'}{' '}
-        {t('sidePanel.confirmedSeats', 'Confirmed Seats')}
+        {rsvp.confirmedSeats} / {rsvp.capacity ?? "∞"}{" "}
+        {t("sidePanel.confirmedSeats", "Confirmed Seats")}
       </Badge>
       <Typography variant="pi" textColor="neutral600">
         {seatsLabel}
@@ -115,10 +116,10 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
   const dateLabel = formatEventDateLabel(ev);
   const statusColors = getEventStatusColors(ev.status);
   const rsvpEnabled = Boolean(ev.rsvp?.rsvpEnabled);
-  const rsvpBtnVariant = isSelectedForRsvp ? 'default' : 'secondary';
+  const rsvpBtnVariant = isSelectedForRsvp ? "default" : "secondary";
   const rsvpBtnLabel = isSelectedForRsvp
-    ? t('attendees.clearEventFilter', 'Clear Filter')
-    : t('events.directory.filterRsvps', 'View RSVPs');
+    ? t("attendees.clearEventFilter", "Clear Filter")
+    : t("events.directory.filterRsvps", "View RSVPs");
 
   return (
     <Tr>
@@ -129,15 +130,15 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
               style={{
                 width: 10,
                 height: 10,
-                borderRadius: '50%',
-                background: ev.color || '#0D9488',
+                borderRadius: "50%",
+                background: ev.color || "#0D9488",
                 flexShrink: 0,
               }}
             />
             <Typography fontWeight="bold">{ev.title}</Typography>
             {ev.isRecurring && (
               <Badge backgroundColor="secondary100" textColor="secondary700">
-                {t('events.directory.recurring', 'Recurring')}
+                {t("events.directory.recurring", "Recurring")}
               </Badge>
             )}
           </Flex>
@@ -147,9 +148,9 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
               textColor="neutral600"
               style={{
                 maxWidth: 360,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
               {ev.summary}
@@ -178,7 +179,7 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
       </Td>
       <Td>
         <Typography variant="pi" textColor="neutral700">
-          {ev.location || '—'}
+          {ev.location || "—"}
         </Typography>
       </Td>
       <Td>
@@ -190,7 +191,7 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
             <Button
               size="S"
               variant={rsvpBtnVariant}
-              onClick={() => onSelectEventDocId(isSelectedForRsvp ? '' : ev.documentId)}
+              onClick={() => onSelectEventDocId(isSelectedForRsvp ? "" : ev.documentId)}
             >
               {rsvpBtnLabel}
             </Button>
@@ -200,10 +201,10 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
             variant="tertiary"
             onClick={() => onEditInContentManager(ev.uid, ev.documentId, ev.locale)}
           >
-            {t('events.directory.editEvent', 'Edit Event')}
+            {t("events.directory.editEvent", "Edit Event")}
           </Button>
           <Button size="S" variant="tertiary" onClick={() => onOpenInCalendar(ev.documentId)}>
-            {t('calendar.openUnifiedCalendar', 'Calendar')}
+            {t("calendar.openUnifiedCalendar", "Calendar")}
           </Button>
         </Flex>
       </Td>
@@ -228,9 +229,9 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
   onEditInContentManager,
   onOpenInCalendar,
 }) => {
-  const [eventSearch, setEventSearch] = useState<string>('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [rsvpModeFilter, setRsvpModeFilter] = useState<string>('all');
+  const [eventSearch, setEventSearch] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [rsvpModeFilter, setRsvpModeFilter] = useState<string>("all");
 
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -257,7 +258,7 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
           <Box>
             <Flex gap={2} alignItems="center">
               <Typography variant="delta" tag="h2" fontWeight="bold">
-                {t('events.directory.title', 'Registered Events')}
+                {t("events.directory.title", "Registered Events")}
               </Typography>
               <Badge backgroundColor="primary100" textColor="primary700">
                 {filteredEvents.length}
@@ -266,8 +267,8 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
             <Box paddingTop={1}>
               <Typography variant="pi" textColor="neutral600">
                 {t(
-                  'events.directory.subtitle',
-                  'All scheduled and recurring events across your configured sources, including RSVP seat capacity and Content Manager links.'
+                  "events.directory.subtitle",
+                  "All scheduled and recurring events across your configured sources, including RSVP seat capacity and Content Manager links."
                 )}
               </Typography>
             </Box>
@@ -276,15 +277,15 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
           <Flex gap={3} wrap="wrap" alignItems="flex-end">
             <Box style={{ minWidth: 220 }}>
               <Field.Root>
-                <Field.Label>{t('events.directory.search', 'Search Events')}</Field.Label>
+                <Field.Label>{t("events.directory.search", "Search Events")}</Field.Label>
                 <TextInput
                   value={eventSearch}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setEventSearch(e.target.value)
                   }
                   placeholder={t(
-                    'events.directory.searchPlaceholder',
-                    'Title, location, category...'
+                    "events.directory.searchPlaceholder",
+                    "Title, location, category..."
                   )}
                 />
               </Field.Root>
@@ -292,13 +293,13 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
 
             <Box style={{ minWidth: 160 }}>
               <Field.Root>
-                <Field.Label>{t('calendar.categoryFilter', 'Category')}</Field.Label>
+                <Field.Label>{t("calendar.categoryFilter", "Category")}</Field.Label>
                 <SingleSelect
                   value={categoryFilter}
                   onChange={(val: string | number) => setCategoryFilter(String(val))}
                 >
                   <SingleSelectOption value="all">
-                    {t('calendar.allCategories', 'All Categories')}
+                    {t("calendar.allCategories", "All Categories")}
                   </SingleSelectOption>
                   {categories.map((cat) => (
                     <SingleSelectOption key={cat} value={cat}>
@@ -311,19 +312,19 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
 
             <Box style={{ minWidth: 160 }}>
               <Field.Root>
-                <Field.Label>{t('events.directory.rsvpFilter', 'RSVP Mode')}</Field.Label>
+                <Field.Label>{t("events.directory.rsvpFilter", "RSVP Mode")}</Field.Label>
                 <SingleSelect
                   value={rsvpModeFilter}
                   onChange={(val: string | number) => setRsvpModeFilter(String(val))}
                 >
                   <SingleSelectOption value="all">
-                    {t('events.directory.allEvents', 'All Events')}
+                    {t("events.directory.allEvents", "All Events")}
                   </SingleSelectOption>
                   <SingleSelectOption value="rsvp">
-                    {t('events.directory.rsvpOnly', 'With RSVPs Enabled')}
+                    {t("events.directory.rsvpOnly", "With RSVPs Enabled")}
                   </SingleSelectOption>
                   <SingleSelectOption value="info">
-                    {t('events.directory.infoOnly', 'Informational Only')}
+                    {t("events.directory.infoOnly", "Informational Only")}
                   </SingleSelectOption>
                 </SingleSelect>
               </Field.Root>
@@ -334,7 +335,7 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
         {filteredEvents.length === 0 ? (
           <Box padding={4} background="neutral100" hasRadius>
             <Typography variant="omega" textColor="neutral600">
-              {t('events.directory.empty', 'No events found matching the current filters.')}
+              {t("events.directory.empty", "No events found matching the current filters.")}
             </Typography>
           </Box>
         ) : (
@@ -343,32 +344,32 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
               <Tr>
                 <Th>
                   <Typography variant="sigma">
-                    {t('calendar.field.title', 'Event Title')}
+                    {t("calendar.field.title", "Event Title")}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
-                    {t('calendar.categoryFilter', 'Category')}
+                    {t("calendar.categoryFilter", "Category")}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
-                    {t('calendar.field.startDate', 'Start Date')}
+                    {t("calendar.field.startDate", "Start Date")}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
-                    {t('calendar.field.location', 'Location')}
+                    {t("calendar.field.location", "Location")}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
-                    {t('sidePanel.rsvpStatus', 'RSVP & Capacity')}
+                    {t("sidePanel.rsvpStatus", "RSVP & Capacity")}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
-                    {t('events.directory.actions', 'Actions')}
+                    {t("events.directory.actions", "Actions")}
                   </Typography>
                 </Th>
               </Tr>

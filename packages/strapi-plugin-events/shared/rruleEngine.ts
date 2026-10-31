@@ -8,31 +8,35 @@ import {
   expandRuleSlots as calendarExpandRuleSlots,
   parseRRule,
   parseRRuleFieldValue,
-} from '@vicacha-devs/strapi-plugin-calendar/shared';
-import type { ParsedRRule, RRuleFieldValue } from './types';
+} from "@vicacha-devs/strapi-plugin-calendar/shared";
+
+import type { ParsedRRule, RRuleFieldValue } from "./types";
 
 export type RawOccurrenceSlot = ExpandedSlot;
 
 export { parseRRule, parseRRuleFieldValue };
 
 export function toDateKey(dateInput: Date | string): string {
-  const d = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
   if (Number.isNaN(d.getTime())) {
-    return '';
+    return "";
   }
   return d.toISOString().slice(0, 10);
 }
 
 export function normalizeRRuleString(raw: string | undefined | null): string {
-  if (!raw || typeof raw !== 'string') {
-    return '';
+  if (!raw || typeof raw !== "string") {
+    return "";
   }
-  return raw.trim().replace(/^RRULE:/i, '').trim();
+  return raw
+    .trim()
+    .replace(/^RRULE:/i, "")
+    .trim();
 }
 
 export function buildRRule(parsed: Partial<ParsedRRule>): string {
   return calendarBuildRRule({
-    freq: parsed.freq ?? 'NONE',
+    freq: parsed.freq ?? "NONE",
     interval: parsed.interval ?? 1,
     byDay: parsed.byDay ?? [],
     byMonthDay: parsed.byMonthDay,
@@ -42,10 +46,10 @@ export function buildRRule(parsed: Partial<ParsedRRule>): string {
 }
 
 const FREQ_UNITS: Record<string, { singular: string; plural: string }> = {
-  DAILY: { singular: 'day', plural: 'days' },
-  WEEKLY: { singular: 'week', plural: 'weeks' },
-  MONTHLY: { singular: 'month', plural: 'months' },
-  YEARLY: { singular: 'year', plural: 'years' },
+  DAILY: { singular: "day", plural: "days" },
+  WEEKLY: { singular: "week", plural: "weeks" },
+  MONTHLY: { singular: "month", plural: "months" },
+  YEARLY: { singular: "year", plural: "years" },
 };
 
 function formatIntervalUnit(freq: string, interval: number): string {
@@ -55,14 +59,14 @@ function formatIntervalUnit(freq: string, interval: number): string {
 
 export function describeRRule(rruleString: string | undefined | null): string {
   const parsed = parseRRule(rruleString);
-  if (parsed.freq === 'NONE') {
-    return 'Does not repeat';
+  if (parsed.freq === "NONE") {
+    return "Does not repeat";
   }
 
   let summary = `Every ${formatIntervalUnit(parsed.freq, parsed.interval)}`;
-  if (parsed.freq === 'WEEKLY' && parsed.byDay.length > 0) {
-    summary += ` on ${parsed.byDay.join(', ')}`;
-  } else if (parsed.freq === 'MONTHLY' && parsed.byMonthDay) {
+  if (parsed.freq === "WEEKLY" && parsed.byDay.length > 0) {
+    summary += ` on ${parsed.byDay.join(", ")}`;
+  } else if (parsed.freq === "MONTHLY" && parsed.byMonthDay) {
     summary += ` on day ${parsed.byMonthDay}`;
   }
 
@@ -84,13 +88,11 @@ export function expandRuleSlots(options: {
   maxInstances?: number;
 }): RawOccurrenceSlot[] {
   const windowStartIso =
-    typeof options.windowStart === 'string'
+    typeof options.windowStart === "string"
       ? options.windowStart
       : options.windowStart.toISOString();
   const windowEndIso =
-    typeof options.windowEnd === 'string'
-      ? options.windowEnd
-      : options.windowEnd.toISOString();
+    typeof options.windowEnd === "string" ? options.windowEnd : options.windowEnd.toISOString();
 
   return calendarExpandRuleSlots({
     baseStartDate: options.baseStartDate,

@@ -1,6 +1,6 @@
-declare module 'node:crypto' {
+declare module "node:crypto" {
   export function randomBytes(size: number): {
-    toString(encoding: 'hex' | 'base64'): string;
+    toString(encoding: "hex" | "base64"): string;
   };
   const cryptoDefault: {
     randomBytes: typeof randomBytes;
@@ -8,8 +8,8 @@ declare module 'node:crypto' {
   export default cryptoDefault;
 }
 
-declare module 'node:fs' {
-  export function readFileSync(path: string, encoding: 'utf8' | 'utf-8'): string;
+declare module "node:fs" {
+  export function readFileSync(path: string, encoding: "utf8" | "utf-8"): string;
   export function existsSync(path: string): boolean;
   const fsDefault: {
     readFileSync: typeof readFileSync;
@@ -18,7 +18,7 @@ declare module 'node:fs' {
   export default fsDefault;
 }
 
-declare module 'node:path' {
+declare module "node:path" {
   export function dirname(p: string): string;
   export function resolve(...paths: string[]): string;
   export function join(...paths: string[]): string;
@@ -30,11 +30,11 @@ declare module 'node:path' {
   export default pathDefault;
 }
 
-declare module 'node:url' {
+declare module "node:url" {
   export function fileURLToPath(url: string): string;
 }
 
-declare module '@strapi/strapi' {
+declare module "@strapi/strapi" {
   export namespace Core {
     export interface PluginStore {
       get(params: { key: string }): Promise<unknown>;
@@ -61,7 +61,7 @@ declare module '@strapi/strapi' {
     export interface DocumentQueryOptions {
       limit?: number;
       locale?: string;
-      status?: 'draft' | 'published';
+      status?: "draft" | "published";
       filters?: Record<string, unknown>;
     }
 
@@ -73,7 +73,7 @@ declare module '@strapi/strapi' {
       }): Promise<Record<string, unknown> | null>;
       create(params: {
         data: Record<string, unknown>;
-        status?: 'draft' | 'published';
+        status?: "draft" | "published";
       }): Promise<Record<string, unknown>>;
       update(params: {
         documentId: string;
@@ -127,7 +127,7 @@ declare module '@strapi/strapi' {
   }
 }
 
-declare module 'vitest' {
+declare module "vitest" {
   export function describe(name: string, fn: () => void | Promise<void>): void;
   export function it(name: string, fn: () => void | Promise<void>): void;
   export interface Assertion<T = unknown> {
@@ -141,7 +141,7 @@ declare module 'vitest' {
   export function expect<T = unknown>(actual: T, message?: string): Assertion<T>;
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }

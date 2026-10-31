@@ -1,21 +1,22 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   formatDateInCalendarSystem,
   registerCalendarSystemFormatter,
   unregisterCalendarSystemFormatter,
-} from '../../../shared/calendarSystems';
-import { parseRRuleFieldValue } from '../../../shared/rruleEngine';
+} from "../../../shared/calendarSystems";
+import { parseRRuleFieldValue } from "../../../shared/rruleEngine";
 import {
   deduplicateAndSortSpotlights,
   isEventSpotlightActiveOnDate,
-} from '../../../shared/spotlightHelpers';
+} from "../../../shared/spotlightHelpers";
 import type {
   CalendarSystemConfig,
   CalendarSystemFormatterFn,
   EventSourceMapping,
   ExpandedOccurrence,
-} from '../../../shared/types';
-import { getDocumentsClient, getSettingsService } from '../types';
+} from "../../../shared/types";
+import { getDocumentsClient, getSettingsService } from "../types";
 import {
   type GetOccurrencesParams,
   buildQuickCreatePayload,
@@ -23,7 +24,7 @@ import {
   fetchDocumentsForSource,
   resolveOccurrenceWindow,
   resolveQuickCreateSource,
-} from './occurrenceHelpers';
+} from "./occurrenceHelpers";
 
 function buildReschedulePayload(
   source: EventSourceMapping,
@@ -34,7 +35,7 @@ function buildReschedulePayload(
   }
 ): Record<string, unknown> {
   if (params.cancelOccurrence && source.fields.status) {
-    return { [source.fields.status]: 'cancelled' };
+    return { [source.fields.status]: "cancelled" };
   }
   const updatePayload: Record<string, unknown> = {
     [source.fields.startDate]: params.newStartDate,
@@ -64,9 +65,9 @@ function buildSingleOccurrenceOverridePatch(
     cancelOccurrence?: boolean;
   }
 ): Record<string, unknown> {
-  const nextOverrides = { ...(recurrence.overrides ?? {}) };
+  const nextOverrides = { ...recurrence.overrides };
   nextOverrides[params.occurrenceDate] = {
-    ...(nextOverrides[params.occurrenceDate] ?? {}),
+    ...nextOverrides[params.occurrenceDate],
     originalDate: params.occurrenceDate,
     cancelled: Boolean(params.cancelOccurrence),
     startDate: params.newStartDate || undefined,
@@ -88,7 +89,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     formatDateInCalendarSystem(
       isoOrDateKey: string,
       system: CalendarSystemConfig,
-      locale = 'en',
+      locale = "en",
       options?: { compact?: boolean }
     ): string {
       return formatDateInCalendarSystem(isoOrDateKey, system, locale, options);
@@ -178,7 +179,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const source = resolveRescheduleSource(settings.sources, params.sourceId, params.uid);
 
       if (!source) {
-        throw new Error('Target event source is not configured.');
+        throw new Error("Target event source is not configured.");
       }
 
       const client = getDocumentsClient(strapi, source.uid);
@@ -217,9 +218,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       rsvpEnabled?: boolean;
       capacity?: number;
     }): Promise<Record<string, unknown>> {
-      const title = (params.title ?? '').trim();
+      const title = (params.title ?? "").trim();
       if (!title) {
-        throw new Error('Event title is required.');
+        throw new Error("Event title is required.");
       }
       const settings = await getSettingsService(strapi).getSettings();
       const source = resolveQuickCreateSource(settings, params.sourceId);
@@ -227,7 +228,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       return getDocumentsClient(strapi, source.uid).create({
         data,
-        status: 'published',
+        status: "published",
       });
     },
   };

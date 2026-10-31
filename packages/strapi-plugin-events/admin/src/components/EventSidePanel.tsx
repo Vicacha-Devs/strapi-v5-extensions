@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useIntl } from 'react-intl';
-import { useFetchClient } from '@strapi/strapi/admin';
-import { Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
-import { formatDateInCalendarSystem } from '../../../shared/calendarSystems';
-import { EVENT_CONTENT_TYPE_UID, PLUGIN_ID } from '../../../shared/pluginId';
-import type { CalendarSystemConfig, EventsPluginSettings, RsvpStats } from '../../../shared/types';
+import { Badge, Box, Button, Flex, Typography } from "@strapi/design-system";
+import { useFetchClient } from "@strapi/strapi/admin";
+import React, { useEffect, useMemo, useState } from "react";
+import { useIntl } from "react-intl";
+
+import { formatDateInCalendarSystem } from "../../../shared/calendarSystems";
+import { EVENT_CONTENT_TYPE_UID, PLUGIN_ID } from "../../../shared/pluginId";
+import type { CalendarSystemConfig, EventsPluginSettings, RsvpStats } from "../../../shared/types";
 
 interface SidePanelProps {
   activeTab?: string;
@@ -24,14 +25,18 @@ interface ComputedAltDate {
 
 function getStringProp(doc: Record<string, unknown> | undefined, key: string): string {
   const val = doc?.[key];
-  return typeof val === 'string' ? val : '';
+  return typeof val === "string" ? val : "";
 }
 
 function resolveDocumentStartDate(doc: Record<string, unknown> | undefined): string {
-  return getStringProp(doc, 'startDate') || getStringProp(doc, 'preferredDate');
+  return getStringProp(doc, "startDate") || getStringProp(doc, "preferredDate");
 }
 
-function isDocumentEventLike(model: string, doc: Record<string, unknown> | undefined, rawStartDate: string): boolean {
+function isDocumentEventLike(
+  model: string,
+  doc: Record<string, unknown> | undefined,
+  rawStartDate: string
+): boolean {
   if (model === EVENT_CONTENT_TYPE_UID) return true;
   return Boolean(rawStartDate || doc?.recurrence || doc?.rsvpEnabled !== undefined);
 }
@@ -42,10 +47,9 @@ function formatSingleCalendarSystem(
   doc: Record<string, unknown> | undefined,
   locale: string
 ): ComputedAltDate {
-  const overrideVal = sys.overrideField ? getStringProp(doc, sys.overrideField).trim() : '';
+  const overrideVal = sys.overrideField ? getStringProp(doc, sys.overrideField).trim() : "";
   const formatted =
-    overrideVal ||
-    formatDateInCalendarSystem(rawStartDate, sys, locale, { compact: false });
+    overrideVal || formatDateInCalendarSystem(rawStartDate, sys, locale, { compact: false });
   return {
     id: sys.id,
     label: sys.label,
@@ -61,7 +65,7 @@ function computeCapacityPercent(stats: RsvpStats | null): number {
 }
 
 function resolveRsvpEnabled(doc: Record<string, unknown> | undefined, stats: RsvpStats): boolean {
-  return typeof doc?.rsvpEnabled === 'boolean' ? doc.rsvpEnabled : stats.rsvpEnabled;
+  return typeof doc?.rsvpEnabled === "boolean" ? doc.rsvpEnabled : stats.rsvpEnabled;
 }
 
 interface SidePanelRsvpCardProps {
@@ -77,17 +81,17 @@ const SidePanelRsvpCard: React.FC<SidePanelRsvpCardProps> = ({
   capacityPercent,
   t,
 }) => {
-  const badgeBg = stats.isFull ? 'danger100' : 'success100';
-  const badgeText = stats.isFull ? 'danger700' : 'success700';
+  const badgeBg = stats.isFull ? "danger100" : "success100";
+  const badgeText = stats.isFull ? "danger700" : "success700";
   const badgeLabel = stats.isFull
-    ? t('sidePanel.full', 'Full / Waitlist')
-    : t('sidePanel.open', 'Open');
+    ? t("sidePanel.full", "Full / Waitlist")
+    : t("sidePanel.open", "Open");
 
   return (
     <Box padding={3} background="neutral100" hasRadius>
       <Flex justifyContent="space-between" alignItems="center">
         <Typography variant="sigma" textColor="neutral600">
-          {t('sidePanel.rsvpStatus', 'RSVP & Capacity')}
+          {t("sidePanel.rsvpStatus", "RSVP & Capacity")}
         </Typography>
         {rsvpEnabled ? (
           <Badge backgroundColor={badgeBg} textColor={badgeText}>
@@ -95,18 +99,16 @@ const SidePanelRsvpCard: React.FC<SidePanelRsvpCardProps> = ({
           </Badge>
         ) : (
           <Badge backgroundColor="neutral150" textColor="neutral600">
-            {t('events.directory.noRsvp', 'Info / External Link')}
+            {t("events.directory.noRsvp", "Info / External Link")}
           </Badge>
         )}
       </Flex>
 
       <Flex justifyContent="space-between" paddingTop={2}>
-        <Typography variant="pi">
-          {t('sidePanel.confirmedSeats', 'Confirmed Seats')}:
-        </Typography>
+        <Typography variant="pi">{t("sidePanel.confirmedSeats", "Confirmed Seats")}:</Typography>
         <Typography variant="pi" fontWeight="bold">
           {stats.confirmedSeats}
-          {stats.capacity ? ` / ${stats.capacity}` : ''}
+          {stats.capacity ? ` / ${stats.capacity}` : ""}
         </Typography>
       </Flex>
 
@@ -117,29 +119,29 @@ const SidePanelRsvpCard: React.FC<SidePanelRsvpCardProps> = ({
           style={{
             height: 8,
             borderRadius: 4,
-            background: '#eaeaef',
-            overflow: 'hidden',
+            background: "#eaeaef",
+            overflow: "hidden",
           }}
         >
           <div
             style={{
               width: `${capacityPercent}%`,
-              height: '100%',
-              background: stats.isFull ? '#d02b20' : '#0D9488',
+              height: "100%",
+              background: stats.isFull ? "#d02b20" : "#0D9488",
             }}
           />
         </Box>
       )}
 
       <Flex justifyContent="space-between" paddingTop={1}>
-        <Typography variant="pi">{t('sidePanel.checkedIn', 'Checked In')}:</Typography>
+        <Typography variant="pi">{t("sidePanel.checkedIn", "Checked In")}:</Typography>
         <Typography variant="pi" fontWeight="bold">
           {stats.checkedInSeats}
         </Typography>
       </Flex>
 
       <Flex justifyContent="space-between" paddingTop={1}>
-        <Typography variant="pi">{t('sidePanel.waitlisted', 'Waitlisted Seats')}:</Typography>
+        <Typography variant="pi">{t("sidePanel.waitlisted", "Waitlisted Seats")}:</Typography>
         <Typography variant="pi" fontWeight="bold">
           {stats.waitlistedSeats}
         </Typography>
@@ -153,11 +155,11 @@ interface GlobalCmI18nWindow {
 }
 
 function resolveActiveContentLocale(fallbackLocale?: string): string {
-  if (typeof window !== 'undefined') {
-    const urlLoc = new URLSearchParams(window.location.search).get('plugins[i18n][locale]');
+  if (typeof window !== "undefined") {
+    const urlLoc = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
     if (urlLoc) return urlLoc;
   }
-  return fallbackLocale || 'en';
+  return fallbackLocale || "en";
 }
 
 function formatPluginMessageWithUrlLocale(
@@ -167,8 +169,8 @@ function formatPluginMessageWithUrlLocale(
   formatMessage: (descriptor: { id: string; defaultMessage: string }) => string
 ): string {
   const fullKey = `${pluginId}.${id}`;
-  if (typeof window !== 'undefined') {
-    const urlLoc = new URLSearchParams(window.location.search).get('plugins[i18n][locale]');
+  if (typeof window !== "undefined") {
+    const urlLoc = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
     const globalMessages = (globalThis as unknown as GlobalCmI18nWindow).__CM_I18N_MESSAGES__;
     const override = urlLoc ? globalMessages?.[urlLoc]?.[fullKey] : undefined;
     if (override) return override;
@@ -182,8 +184,8 @@ export const EventSidePanel = (props: SidePanelProps) => {
   const [stats, setStats] = useState<RsvpStats | null>(null);
   const [settings, setSettings] = useState<EventsPluginSettings | null>(null);
 
-  const model = props.model ?? '';
-  const documentId = props.documentId || getStringProp(props.document, 'documentId');
+  const model = props.model ?? "";
+  const documentId = props.documentId || getStringProp(props.document, "documentId");
   const rawStartDate = resolveDocumentStartDate(props.document);
   const isEventLike = isDocumentEventLike(model, props.document, rawStartDate);
   const activeLocale = resolveActiveContentLocale(locale);
@@ -234,14 +236,14 @@ export const EventSidePanel = (props: SidePanelProps) => {
   const capacityPercent = computeCapacityPercent(stats);
 
   return {
-    title: t('sidePanel.title', 'Events & RSVP Summary'),
+    title: t("sidePanel.title", "Events & RSVP Summary"),
     content: (
       <Box paddingTop={2} paddingBottom={2}>
         <Flex direction="column" alignItems="stretch" gap={3}>
           {computedAlternateDates.length > 0 && (
             <Box padding={3} background="neutral100" hasRadius>
               <Typography variant="sigma" textColor="neutral600">
-                {t('sidePanel.secondaryCalendars', 'Alternative Calendar Dates')}
+                {t("sidePanel.secondaryCalendars", "Alternative Calendar Dates")}
               </Typography>
               <Flex direction="column" alignItems="stretch" gap={1} paddingTop={2}>
                 {computedAlternateDates.map((alt) => (
@@ -276,7 +278,7 @@ export const EventSidePanel = (props: SidePanelProps) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {t('sidePanel.downloadIcs', 'Download .ics Invite')}
+              {t("sidePanel.downloadIcs", "Download .ics Invite")}
             </Button>
             <Button
               variant="tertiary"
@@ -284,7 +286,7 @@ export const EventSidePanel = (props: SidePanelProps) => {
               tag="a"
               href={`/admin/plugins/${PLUGIN_ID}?eventDocumentId=${encodeURIComponent(documentId)}`}
             >
-              {t('sidePanel.openCalendar', 'Open in Events & Attendees Manager')}
+              {t("sidePanel.openCalendar", "Open in Events & Attendees Manager")}
             </Button>
           </Flex>
         </Flex>

@@ -1,6 +1,3 @@
-import React, { useEffect, useState } from 'react';
-import { useIntl } from 'react-intl';
-import { useFetchClient } from '@strapi/strapi/admin';
 import {
   Badge,
   Box,
@@ -12,12 +9,16 @@ import {
   Tabs,
   TextInput,
   Typography,
-} from '@strapi/design-system';
-import { PLUGIN_ID } from '../../../shared/pluginId';
-import type { EventsPluginSettings } from '../../../shared/types';
+} from "@strapi/design-system";
+import { useFetchClient } from "@strapi/strapi/admin";
+import React, { useEffect, useState } from "react";
+import { useIntl } from "react-intl";
+
+import { PLUGIN_ID } from "../../../shared/pluginId";
+import type { EventsPluginSettings } from "../../../shared/types";
 
 const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
-  border: '1px solid rgba(128, 128, 128, 0.18)',
+  border: "1px solid rgba(128, 128, 128, 0.18)",
 };
 
 export const SettingsPage: React.FC = () => {
@@ -52,9 +53,9 @@ export const SettingsPage: React.FC = () => {
       if (res?.data?.data) {
         setSettings(res.data.data as EventsPluginSettings);
       }
-      setSavedBanner(t('settings.saved', 'Events plugin settings saved successfully.'));
+      setSavedBanner(t("settings.saved", "Events plugin settings saved successfully."));
     } catch {
-      setSavedBanner(t('settings.error', 'Could not save settings.'));
+      setSavedBanner(t("settings.error", "Could not save settings."));
     } finally {
       setSaving(false);
     }
@@ -64,7 +65,7 @@ export const SettingsPage: React.FC = () => {
     return (
       <Box padding={6}>
         <Typography variant="omega">
-          {t('settings.loading', 'Loading Events & RSVP settings...')}
+          {t("settings.loading", "Loading Events & RSVP settings...")}
         </Typography>
       </Box>
     );
@@ -76,19 +77,19 @@ export const SettingsPage: React.FC = () => {
         <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
           <Box>
             <Typography variant="alpha" fontWeight="bold">
-              {t('settings.title', 'Events & RSVP Settings')}
+              {t("settings.title", "Events & RSVP Settings")}
             </Typography>
             <Box paddingTop={1}>
               <Typography variant="epsilon" textColor="neutral600">
                 {t(
-                  'settings.subtitle',
-                  'Configure RSVP capacity, waitlist promotion automation, and public iCal (.ics) syndication.'
+                  "settings.subtitle",
+                  "Configure RSVP capacity, waitlist promotion automation, and public iCal (.ics) syndication."
                 )}
               </Typography>
             </Box>
           </Box>
           <Button variant="default" loading={saving} onClick={handleSave}>
-            {t('common.save', 'Save Settings')}
+            {t("common.save", "Save Settings")}
           </Button>
         </Flex>
 
@@ -101,12 +102,12 @@ export const SettingsPage: React.FC = () => {
         )}
 
         <Tabs.Root defaultValue="rsvp">
-          <Tabs.List aria-label={t('settings.title', 'Events & RSVP Settings')}>
+          <Tabs.List aria-label={t("settings.title", "Events & RSVP Settings")}>
             <Tabs.Trigger value="rsvp">
-              {t('settings.section.rsvp', 'RSVP, Capacity & Waitlist Automation')}
+              {t("settings.section.rsvp", "RSVP, Capacity & Waitlist Automation")}
             </Tabs.Trigger>
             <Tabs.Trigger value="feed">
-              {t('settings.section.general', 'iCal (.ics) Feed & Timezone')}
+              {t("settings.section.general", "iCal (.ics) Feed & Timezone")}
             </Tabs.Trigger>
           </Tabs.List>
 
@@ -121,25 +122,27 @@ export const SettingsPage: React.FC = () => {
             >
               <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" fontWeight="bold">
-                  {t('settings.section.rsvp', 'RSVP, Capacity & Waitlist Automation')}
+                  {t("settings.section.rsvp", "RSVP, Capacity & Waitlist Automation")}
                 </Typography>
 
                 <Box
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                     gap: 16,
                   }}
                 >
-                  <Field.Root>
+                  <Field.Root
+                    hint={t(
+                      "settings.defaultCapacityHint",
+                      "Default seat capacity for newly created RSVP events."
+                    )}
+                  >
                     <Field.Label>
-                      {t('settings.defaultCapacity', 'Default Event Capacity')}
+                      {t("settings.defaultCapacity", "Default Event Capacity")}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t(
-                        'settings.defaultCapacity.placeholder',
-                        'e.g., 100'
-                      )}
+                      placeholder={t("settings.defaultCapacity.placeholder", "e.g., 100")}
                       value={settings.defaultCapacity || 100}
                       onValueChange={(val: number | undefined) =>
                         setSettings({
@@ -148,20 +151,20 @@ export const SettingsPage: React.FC = () => {
                         })
                       }
                     />
-                    <Field.Hint>
-                      {t(
-                        'settings.defaultCapacityHint',
-                        'Default seat capacity for newly created RSVP events.'
-                      )}
-                    </Field.Hint>
+                    <Field.Hint />
                   </Field.Root>
 
-                  <Field.Root>
+                  <Field.Root
+                    hint={t(
+                      "settings.maxGuestsHint",
+                      "Maximum number of seats a single RSVP submission may reserve."
+                    )}
+                  >
                     <Field.Label>
-                      {t('settings.maxGuests', 'Max Guests per Registration')}
+                      {t("settings.maxGuests", "Max Guests per Registration")}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t('settings.maxGuests.placeholder', 'e.g., 5')}
+                      placeholder={t("settings.maxGuests.placeholder", "e.g., 5")}
                       value={settings.defaultMaxGuestsPerRegistration || 5}
                       onValueChange={(val: number | undefined) =>
                         setSettings({
@@ -170,19 +173,14 @@ export const SettingsPage: React.FC = () => {
                         })
                       }
                     />
-                    <Field.Hint>
-                      {t(
-                        'settings.maxGuestsHint',
-                        'Maximum number of seats a single RSVP submission may reserve.'
-                      )}
-                    </Field.Hint>
+                    <Field.Hint />
                   </Field.Root>
                 </Box>
 
                 <div
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                     gap: 16,
                   }}
                 >
@@ -194,15 +192,15 @@ export const SettingsPage: React.FC = () => {
                       }
                     >
                       {t(
-                        'settings.waitlistEnabledByDefault',
-                        'Enable Waitlist & Automatic Promotion'
+                        "settings.waitlistEnabledByDefault",
+                        "Enable Waitlist & Automatic Promotion"
                       )}
                     </Checkbox>
                     <Box paddingTop={2}>
                       <Typography variant="pi" textColor="neutral600">
                         {t(
-                          'settings.waitlistEnabledByDefaultHint',
-                          'Automatically promotes waitlisted attendees in FIFO order when a confirmed attendee cancels.'
+                          "settings.waitlistEnabledByDefaultHint",
+                          "Automatically promotes waitlisted attendees in FIFO order when a confirmed attendee cancels."
                         )}
                       </Typography>
                     </Box>
@@ -216,15 +214,15 @@ export const SettingsPage: React.FC = () => {
                       }
                     >
                       {t(
-                        'settings.sendRsvpEmails',
-                        'Send Confirmation & Waitlist Promotion Emails'
+                        "settings.sendRsvpEmails",
+                        "Send Confirmation & Waitlist Promotion Emails"
                       )}
                     </Checkbox>
                     <Box paddingTop={2}>
                       <Typography variant="pi" textColor="neutral600">
                         {t(
-                          'settings.sendRsvpEmailsHint',
-                          'Dispatches confirmation and waitlist promotion emails via the Strapi Email plugin.'
+                          "settings.sendRsvpEmailsHint",
+                          "Dispatches confirmation and waitlist promotion emails via the Strapi Email plugin."
                         )}
                       </Typography>
                     </Box>
@@ -247,70 +245,76 @@ export const SettingsPage: React.FC = () => {
                 <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
                   <Box>
                     <Typography variant="delta" fontWeight="bold">
-                      {t('settings.section.general', 'iCal (.ics) Feed & Timezone')}
+                      {t("settings.section.general", "iCal (.ics) Feed & Timezone")}
                     </Typography>
                     <Typography variant="pi" textColor="neutral600">
                       {t(
-                        'settings.section.generalHint',
-                        'Default timezone and public iCal (.ics) feed title exported for community calendar subscriptions.'
+                        "settings.section.generalHint",
+                        "Default timezone and public iCal (.ics) feed title exported for community calendar subscriptions."
                       )}
                     </Typography>
                   </Box>
                   <Badge active>
-                    {t('settings.badge.timezone', 'Timezone')}:{' '}
-                    {settings.defaultTimezone || 'America/Bogota'}
+                    {t("settings.badge.timezone", "Timezone")}:{" "}
+                    {settings.defaultTimezone || "America/Bogota"}
                   </Badge>
                 </Flex>
 
                 <Box
                   style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                     gap: 16,
                   }}
                 >
-                  <Field.Root>
+                  <Field.Root
+                    hint={t(
+                      "settings.defaultTimezoneHint",
+                      "IANA timezone identifier used for event recurrence and iCal exports."
+                    )}
+                  >
                     <Field.Label>
-                      {t('settings.defaultTimezone', 'Default Timezone (IANA)')}
+                      {t("settings.defaultTimezone", "Default Timezone (IANA)")}
                     </Field.Label>
                     <TextInput
                       placeholder={t(
-                        'settings.defaultTimezone.placeholder',
-                        'e.g., America/Bogota'
+                        "settings.defaultTimezone.placeholder",
+                        "e.g., America/Bogota"
                       )}
-                      value={settings.defaultTimezone || 'America/Bogota'}
+                      value={settings.defaultTimezone || "America/Bogota"}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setSettings({ ...settings, defaultTimezone: e.target.value })
                       }
                     />
-                    <Field.Hint>
-                      {t('settings.defaultTimezoneHint', 'IANA timezone identifier used for event recurrence and iCal exports.')}
-                    </Field.Hint>
+                    <Field.Hint />
                   </Field.Root>
 
-                  <Field.Root>
+                  <Field.Root
+                    hint={t(
+                      "settings.feedTitleHint",
+                      "Calendar name shown when users subscribe in Google, Apple, or Outlook Calendar."
+                    )}
+                  >
                     <Field.Label>
-                      {t('settings.feedTitle', 'Public iCal (.ics) Feed Title')}
+                      {t("settings.feedTitle", "Public iCal (.ics) Feed Title")}
                     </Field.Label>
                     <TextInput
                       placeholder={t(
-                        'settings.feedTitle.placeholder',
-                        'e.g., Abu Bakr As-Siddiq Central Mosque — Events Calendar'
+                        "settings.feedTitle.placeholder",
+                        "e.g., Abu Bakr As-Siddiq Central Mosque — Events Calendar"
                       )}
                       value={
                         settings.feedTitle ||
                         t(
-                          'settings.defaultFeedTitle',
-                          'Abu Bakr As-Siddiq Central Mosque — Events Calendar'
+                          "settings.defaultFeedTitle",
+                          "Abu Bakr As-Siddiq Central Mosque — Events Calendar"
                         )
                       }
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setSettings({ ...settings, feedTitle: e.target.value })
                       }
                     />
-                    <Field.Hint>
-                      {t('settings.feedTitleHint', 'Calendar name shown when users subscribe in Google, Apple, or Outlook Calendar.')}
-                    </Field.Hint>
+                    <Field.Hint />
                   </Field.Root>
                 </Box>
               </Flex>
