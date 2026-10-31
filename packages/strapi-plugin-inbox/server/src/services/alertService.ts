@@ -6,6 +6,30 @@ import {
   type AlertBannerRecord,
   type InboxSettings,
 } from '../../../shared';
+import { getDocuments } from './docHelper';
+
+function buildAlertBannerPayload(
+  input: Partial<AlertBannerRecord> & {
+    code: string;
+    title: string;
+    message: string;
+  }
+): Record<string, unknown> {
+  return {
+    code: input.code,
+    title: input.title,
+    message: input.message,
+    severity: input.severity ?? 'info',
+    ctaLabel: input.ctaLabel ?? '',
+    ctaUrl: input.ctaUrl ?? '',
+    dismissible: input.dismissible ?? true,
+    active: input.active ?? true,
+    priority: input.priority ?? 10,
+    startsAt: input.startsAt ?? null,
+    endsAt: input.endsAt ?? null,
+    translations: input.translations ?? {},
+  };
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async getActiveAlerts(params?: {
@@ -19,7 +43,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const locale = params?.locale || settings.defaultLocale || 'es';
     const nowMs = new Date(params?.nowIso || Date.now()).getTime();
 
-    const docs = (await strapi.documents(ALERT_BANNER_UID).findMany({
+    const docs = (await getDocuments(strapi, ALERT_BANNER_UID).findMany({
       filters: { active: true },
       limit: 50,
     })) as unknown as AlertBannerRecord[];
@@ -63,36 +87,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       message: string;
     }
   ): Promise<AlertBannerRecord> {
-    const existingDocs = (await strapi.documents(ALERT_BANNER_UID).findMany({
+    const existingDocs = (await getDocuments(strapi, ALERT_BANNER_UID).findMany({
       filters: { code: input.code },
       limit: 1,
     })) as unknown as AlertBannerRecord[];
 
     const existing = existingDocs[0] || null;
-    const payload: Record<string, unknown> = {
-      code: input.code,
-      title: input.title,
-      message: input.message,
-      severity: input.severity || 'info',
-      ctaLabel: input.ctaLabel || '',
-      ctaUrl: input.ctaUrl || '',
-      dismissible: input.dismissible ?? true,
-      active: input.active ?? true,
-      priority: input.priority ?? 10,
-      startsAt: input.startsAt ?? null,
-      endsAt: input.endsAt ?? null,
-      translations: input.translations || {},
-    };
+    const payload = buildAlertBannerPayload(input);
 
     if (existing?.documentId) {
-      const updated = await strapi.documents(ALERT_BANNER_UID).update({
+      const updated = await getDocuments(strapi, ALERT_BANNER_UID).update({
         documentId: existing.documentId,
         data: payload,
       });
       return updated as unknown as AlertBannerRecord;
     }
 
-    const created = await strapi.documents(ALERT_BANNER_UID).create({
+    const created = await getDocuments(strapi, ALERT_BANNER_UID).create({
       data: payload,
     });
     return created as unknown as AlertBannerRecord;

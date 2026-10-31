@@ -131,7 +131,22 @@ export interface FormRecord {
   translations?: Record<string, FormTranslation>;
   active: boolean;
   submissionCount?: number;
+  formBuilderId?: number | null;
+  formBuilderSlug?: string | null;
   publishedAt?: string | null;
+}
+
+export interface FormBuilderCmsFormSummary {
+  id: number;
+  documentId?: string;
+  slug: string;
+  title: string;
+  description?: string;
+  fieldCount: number;
+  submissionCount: number;
+  publishedAt?: string | null;
+  linkedInboxSlug?: string;
+  linkedCategory?: FormCategory;
 }
 
 export interface ValidationResult {
@@ -159,6 +174,7 @@ export interface SubmissionRecord {
   assignedTo?: string;
   linkedBookingId?: string;
   linkedCertificateNumber?: string;
+  formBuilderSubmissionId?: number | null;
   ipAddress?: string;
   userAgent?: string;
   submittedAt: string;
@@ -228,6 +244,8 @@ export interface InboxSettings {
   enableDoubleOptIn: boolean;
   availableTopics: string[];
   availableDepartments: string[];
+  enableFormBuilderBridge: boolean;
+  autoSyncFormBuilderForms: boolean;
   enableBookingBridge: boolean;
   enableCertificateBridge: boolean;
   defaultNotifyEmails: string[];

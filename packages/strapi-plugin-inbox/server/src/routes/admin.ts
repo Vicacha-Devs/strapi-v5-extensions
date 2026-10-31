@@ -21,6 +21,18 @@ export default {
     },
     {
       method: 'GET',
+      path: '/form-builder-forms',
+      handler: 'inboxController.listFormBuilderForms',
+      config: { policies: [] },
+    },
+    {
+      method: 'POST',
+      path: '/forms/sync-builder',
+      handler: 'inboxController.syncFormBuilder',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
       path: '/forms',
       handler: 'inboxController.listForms',
       config: { policies: [] },

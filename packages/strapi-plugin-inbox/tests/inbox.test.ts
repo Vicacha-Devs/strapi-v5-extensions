@@ -1,11 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
-  DEFAULT_INBOX_SETTINGS,
-  FORM_UID,
-  SUBMISSION_UID,
-  SUBSCRIBER_UID,
-  ALERT_BANNER_UID,
+  FORM_BUILDER_CMS_FORM_UID,
+  FORM_BUILDER_CMS_SUBMISSION_UID,
   SlidingWindowRateLimiter,
   escapeCsvCell,
   isHoneypotTriggered,
@@ -16,130 +13,7 @@ import {
   verifyCaptchaToken,
   type FormRecord,
 } from '../shared';
-import formServiceFactory from '../server/src/services/formService';
-import submissionServiceFactory from '../server/src/services/submissionService';
-import subscriberServiceFactory from '../server/src/services/subscriberService';
-import alertServiceFactory from '../server/src/services/alertService';
-
-function createMockStrapi() {
-  const storeMap = new Map<string, unknown>();
-  const collections: Record<string, Array<Record<string, unknown>>> = {
-    [FORM_UID]: [],
-    [SUBMISSION_UID]: [],
-    [SUBSCRIBER_UID]: [],
-    [ALERT_BANNER_UID]: [],
-  };
-  let idCounter = 1;
-  const emittedEvents: Array<{ event: string; payload: unknown }> = [];
-
-  const strapi: Record<string, unknown> = {
-    config: {
-      get: (_key: string, def?: unknown) => def ?? {},
-    },
-    log: {
-      debug: () => {},
-      info: () => {},
-      warn: () => {},
-      error: () => {},
-    },
-    eventHub: {
-      emit: (event: string, payload?: unknown) => {
-        emittedEvents.push({ event, payload });
-      },
-    },
-    store: () => ({
-      get: async ({ key }: { key: string }) => storeMap.get(key) ?? null,
-      set: async ({ key, value }: { key: string; value: unknown }) => {
-        storeMap.set(key, value);
-      },
-    }),
-    documents: (uid: string) => ({
-      findMany: async (params?: { filters?: Record<string, unknown>; limit?: number }) => {
-        const list = collections[uid] || [];
-        const filters = params?.filters || {};
-        return list.filter((item) =>
-          Object.entries(filters).every(([k, v]) => item[k] === v)
-        );
-      },
-      findOne: async ({ documentId }: { documentId: string }) => {
-        const list = collections[uid] || [];
-        return list.find((item) => item.documentId === documentId) ?? null;
-      },
-      create: async ({ data }: { data: Record<string, unknown> }) => {
-        const doc = {
-          ...data,
-          documentId: `doc_${idCounter++}`,
-        };
-        if (!collections[uid]) collections[uid] = [];
-        collections[uid].push(doc);
-        return doc;
-      },
-      update: async ({
-        documentId,
-        data,
-      }: {
-        documentId: string;
-        data: Record<string, unknown>;
-      }) => {
-        const list = collections[uid] || [];
-        const idx = list.findIndex((item) => item.documentId === documentId);
-        if (idx === -1) return null;
-        list[idx] = { ...list[idx], ...data };
-        return list[idx];
-      },
-    }),
-  };
-
-  const services: Record<string, unknown> = {
-    settings: {
-      getSettings: async () => ({
-        ...DEFAULT_INBOX_SETTINGS,
-        supportedLocales: ['es', 'en', 'ar', 'tr'],
-      }),
-    },
-  };
-
-  strapi.plugin = (name: string) => {
-    if (name === 'bookings') {
-      return {
-        service: () => ({
-          createBooking: async (input: { serviceSlug: string; date: string }) => ({
-            documentId: 'bkg_doc_1',
-            referenceCode: `BKG-${input.serviceSlug.toUpperCase()}-${input.date}`,
-          }),
-        }),
-      };
-    }
-    if (name === 'certificates') {
-      return {
-        service: () => ({
-          issueCertificate: async (input: { templateSlug: string }) => ({
-            certificateNumber: `CERT-2026-${input.templateSlug.toUpperCase()}`,
-          }),
-        }),
-      };
-    }
-    return {
-      service: (svcName: string) => services[svcName],
-    };
-  };
-
-  services.formService = formServiceFactory({ strapi: strapi as never });
-  services.submissionService = submissionServiceFactory({ strapi: strapi as never });
-  services.subscriberService = subscriberServiceFactory({ strapi: strapi as never });
-  services.alertService = alertServiceFactory({ strapi: strapi as never });
-
-  return {
-    strapi,
-    services: services as {
-      formService: ReturnType<typeof formServiceFactory>;
-      submissionService: ReturnType<typeof submissionServiceFactory>;
-      subscriberService: ReturnType<typeof subscriberServiceFactory>;
-      alertService: ReturnType<typeof alertServiceFactory>;
-    },
-    emittedEvents,
-  };
-}
+import { createMockStrapi } from './mockStrapi';
 
 describe('@vicacha-devs/strapi-plugin-inbox', () => {
   it('1. localizes forms across >2 languages (es, en, ar, tr) and validates field rules', () => {
@@ -427,5 +301,106 @@ describe('@vicacha-devs/strapi-plugin-inbox', () => {
       nowIso: '2026-03-20T12:00:00.000Z',
     });
     assert.equal(activeAr[0].title, 'إعلان صلاة عيد الفطر');
+  });
+
+  it('6. bridges forms and submissions two-way with strapi-plugin-form-builder-cms', async () => {
+    const { strapi, services } = createMockStrapi();
+
+    // 1. Creating a form in Inbox automatically syncs it to Form Builder CMS
+    const inboxForm = await services.formService.createFromTemplate('general-contact');
+    assert.ok(inboxForm.formBuilderId);
+    assert.equal(inboxForm.formBuilderSlug, 'general-contact');
+
+    const builderList = await services.formService.listFormBuilderForms();
+    assert.equal(builderList.available, true);
+    assert.equal(builderList.forms.length, 1);
+    assert.equal(builderList.forms[0].slug, 'general-contact');
+    assert.equal(builderList.forms[0].linkedInboxSlug, 'general-contact');
+
+    // 2. Creating a visual drag-and-drop form directly in Form Builder CMS syncs back into Inbox
+    const cmsQuery = (strapi.db as { query: (uid: string) => { create: (arg: { data: Record<string, unknown> }) => Promise<Record<string, unknown>> } }).query(
+      FORM_BUILDER_CMS_FORM_UID
+    );
+    const createdVisualForm = await cmsQuery.create({
+      data: {
+        title: 'Ramadan Volunteer Signup',
+        slug: 'ramadan-volunteer-signup',
+        description: 'Sign up to help with Iftar preparation',
+        fields: [
+          {
+            id: 'vf_1',
+            type: 'text',
+            name: 'fullName',
+            label: 'Volunteer Name',
+            required: true,
+            width: 'half',
+          },
+          {
+            id: 'vf_2',
+            type: 'email',
+            name: 'email',
+            label: 'Email',
+            required: true,
+            width: 'half',
+          },
+        ],
+        settings: {
+          submitButtonText: 'Join Volunteer Team',
+          successMessage: 'JazakAllahu Khayran for volunteering!',
+        },
+        publishedAt: '2026-03-01T00:00:00.000Z',
+      },
+    });
+
+    const syncResult = await services.formService.syncWithFormBuilderCms();
+    assert.equal(syncResult.available, true);
+    assert.equal(syncResult.forms.length, 2);
+
+    const syncedVolunteerForm = await services.formService.findBySlug(
+      'ramadan-volunteer-signup'
+    );
+    assert.ok(syncedVolunteerForm);
+    assert.equal(syncedVolunteerForm?.title, 'Ramadan Volunteer Signup');
+    assert.equal(syncedVolunteerForm?.fields.length, 2);
+    assert.equal(
+      syncedVolunteerForm?.settings.submitButtonLabel,
+      'Join Volunteer Team'
+    );
+
+    // 3. Submitting through Form Builder CMS ingests into Casework Inbox with Hijri date & Reference Code
+    const cmsSubQuery = (strapi.db as { query: (uid: string) => { create: (arg: { data: Record<string, unknown> }) => Promise<Record<string, unknown>> } }).query(
+      FORM_BUILDER_CMS_SUBMISSION_UID
+    );
+    const rawCmsSubmission = await cmsSubQuery.create({
+      data: {
+        form: createdVisualForm.id,
+        data: {
+          fullName: 'Bilal Al-Habashi',
+          email: 'bilal@example.org',
+        },
+        ipAddress: '10.10.0.5',
+        userAgent: 'Mozilla/5.0',
+        status: 'new',
+      },
+    });
+
+    const ingested = await services.submissionService.ingestFormBuilderSubmission(
+      rawCmsSubmission,
+      { formId: Number(createdVisualForm.id) }
+    );
+    assert.ok(ingested);
+    assert.ok(ingested?.referenceCode.startsWith('INB-'));
+    assert.equal(ingested?.formSlug, 'ramadan-volunteer-signup');
+    assert.equal(ingested?.applicantName, 'Bilal Al-Habashi');
+    assert.equal(ingested?.applicantEmail, 'bilal@example.org');
+    assert.ok(ingested?.secondaryDate?.formatted);
+
+    // Idempotency check: ingesting the same CMS submission ID twice does not duplicate
+    const duplicateCheck =
+      await services.submissionService.ingestFormBuilderSubmission(
+        rawCmsSubmission,
+        { formId: Number(createdVisualForm.id) }
+      );
+    assert.equal(duplicateCheck?.documentId, ingested?.documentId);
   });
 });

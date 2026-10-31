@@ -8,8 +8,8 @@ declare module 'react' {
     | ReactElement
     | ReactNode[];
 
-  export interface ReactElement<P = any> {
-    type: any;
+  export interface ReactElement<P = Record<string, unknown>> {
+    type: unknown;
     props: P;
     key: string | number | null;
   }
@@ -33,13 +33,13 @@ declare module 'react' {
     factory: () => T,
     deps?: readonly unknown[]
   ): T;
-  export function createElement(...args: any[]): ReactElement;
+  export function createElement(...args: unknown[]): ReactElement;
   export const Fragment: unknown;
 
   export namespace JSX {
     interface Element extends ReactElement {}
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 
@@ -49,13 +49,21 @@ declare module 'react' {
 declare module 'react/jsx-runtime' {
   import type { ReactElement } from 'react';
   export const Fragment: unknown;
-  export function jsx(type: any, props: any, key?: any): ReactElement;
-  export function jsxs(type: any, props: any, key?: any): ReactElement;
+  export function jsx(
+    type: unknown,
+    props: Record<string, unknown>,
+    key?: string | number
+  ): ReactElement;
+  export function jsxs(
+    type: unknown,
+    props: Record<string, unknown>,
+    key?: string | number
+  ): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 }
@@ -72,7 +80,7 @@ declare module 'node:crypto' {
   export function createHmac(algorithm: string, key: string): {
     update(data: string, encoding?: string): { digest(encoding: string): string };
   };
-  export function timingSafeEqual(a: any, b: any): boolean;
+  export function timingSafeEqual(a: unknown, b: unknown): boolean;
 }
 
 declare const Buffer: {
@@ -80,14 +88,15 @@ declare const Buffer: {
 };
 
 declare module '@strapi/design-system' {
-  export const Tabs: {
-    Root: any;
-    List: any;
-    Trigger: any;
-    Content: any;
-  };
   import type { FC, ReactNode } from 'react';
-  export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
+  export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
+
+  export const Tabs: {
+    Root: FC<DesignComponentProps>;
+    List: FC<DesignComponentProps>;
+    Trigger: FC<DesignComponentProps>;
+    Content: FC<DesignComponentProps>;
+  };
 
   export const Main: FC<DesignComponentProps>;
   export const Box: FC<DesignComponentProps>;
@@ -118,15 +127,28 @@ declare module '@strapi/design-system' {
 }
 
 declare module '@strapi/strapi/admin' {
+  export type DefaultApiData = Record<string, unknown> &
+    never[] & {
+      ok?: boolean;
+      reason?: string;
+      forms?: never[];
+    };
+
   export const useFetchClient: () => {
-    get: (url: string) => Promise<{ data: any }>;
-    post: (url: string, data?: any) => Promise<{ data: any }>;
-    put: (url: string, data?: any) => Promise<{ data: any }>;
+    get: <T = DefaultApiData>(url: string) => Promise<{ data?: { data?: T } }>;
+    post: <T = DefaultApiData>(
+      url: string,
+      data?: unknown
+    ) => Promise<{ data?: { data?: T } }>;
+    put: <T = DefaultApiData>(
+      url: string,
+      data?: unknown
+    ) => Promise<{ data?: { data?: T } }>;
   };
 }
 
 declare module 'styled-components' {
-  export function useTheme(): Record<string, any>;
+  export function useTheme(): Record<string, unknown>;
 }
 
 declare module 'react-intl' {

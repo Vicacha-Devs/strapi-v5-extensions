@@ -3,24 +3,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve as resolvePath } from 'node:path';
 
-const currentDir = dirname(fileURLToPath(import.meta.url));
-const calendarPkgRoot = resolvePath(currentDir, '../../strapi-plugin-calendar');
-const intlDateShimUrl = pathToFileURL(
-  resolvePath(calendarPkgRoot, 'tests/intl-date-shim.mjs')
-).href;
-
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (specifier === '@internationalized/date') {
-      return { url: intlDateShimUrl, shortCircuit: true };
-    }
-    if (specifier === '@vicacha-devs/strapi-plugin-calendar/shared') {
-      return {
-        url: pathToFileURL(resolvePath(calendarPkgRoot, 'shared/index.ts')).href,
-        shortCircuit: true,
-      };
-    }
-
     if (
       (specifier.startsWith('./') || specifier.startsWith('../')) &&
       context.parentURL
