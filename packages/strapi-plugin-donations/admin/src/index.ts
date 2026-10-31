@@ -1,10 +1,38 @@
+import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
+import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
 import { PLUGIN_ID } from '../../shared';
+import {
+  CountryCustomFieldInput,
+  CurrencyCustomFieldInput,
+  CurrencySelectField,
+} from './components/CurrencyCountryInput';
 import { PluginIcon } from './components/PluginIcon';
+import {
+  countryCustomField,
+  currencyCustomField,
+} from './fields/currencyCountryFields';
+
+export { CurrencySelectField, CurrencyCustomFieldInput, CountryCustomFieldInput };
 
 const ALL_TRANSLATION_LOCALES = ['en', 'es', 'ar', 'tr', 'fr', 'de', 'pt', 'id', 'ms', 'ur'];
 
+interface StrapiAdminApp {
+  customFields?: {
+    register?: (field: unknown) => void;
+  };
+  addMenuLink: (link: Record<string, unknown>) => void;
+  createSettingSection: (
+    section: Record<string, unknown>,
+    links: Array<Record<string, unknown>>
+  ) => void;
+  registerPlugin: (plugin: { id: string; name: string }) => void;
+}
+
 export default {
-  register(app: any) {
+  register(app: StrapiAdminApp) {
+    app.customFields?.register?.(currencyCustomField);
+    app.customFields?.register?.(countryCustomField);
+
     app.addMenuLink({
       to: `plugins/${PLUGIN_ID}`,
       icon: PluginIcon,
@@ -58,7 +86,7 @@ export default {
       allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          const prefixed: Record<string, string> = {};
+          const prefixed: Record<string, string> = { ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en ?? {}), ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en ?? {}) };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
             const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;

@@ -8,8 +8,8 @@ declare module 'react' {
     | ReactElement
     | ReactNode[];
 
-  export interface ReactElement<P = any> {
-    type: any;
+  export interface ReactElement<P = unknown> {
+    type: unknown;
     props: P;
     key: string | number | null;
   }
@@ -18,7 +18,7 @@ declare module 'react' {
     [key: string]: string | number | undefined;
   }
 
-  export interface FC<P = {}> {
+  export interface FC<P = Record<string, never>> {
     (props: P): ReactElement | null;
   }
 
@@ -29,13 +29,17 @@ declare module 'react' {
     effect: () => void | (() => void),
     deps?: readonly unknown[]
   ): void;
-  export function createElement(...args: any[]): ReactElement;
+  export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
+  export function createElement(...args: unknown[]): ReactElement;
   export const Fragment: unknown;
 
   export namespace JSX {
     interface Element extends ReactElement {}
+    interface IntrinsicAttributes {
+      key?: string | number | null;
+    }
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 
@@ -45,13 +49,16 @@ declare module 'react' {
 declare module 'react/jsx-runtime' {
   import type { ReactElement } from 'react';
   export const Fragment: unknown;
-  export function jsx(type: any, props: any, key?: any): ReactElement;
-  export function jsxs(type: any, props: any, key?: any): ReactElement;
+  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
+    interface IntrinsicAttributes {
+      key?: string | number | null;
+    }
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 }
@@ -65,22 +72,23 @@ declare module 'node:crypto' {
   export function createHmac(algorithm: string, key: string): {
     update(data: string, encoding?: string): { digest(encoding: string): string };
   };
-  export function timingSafeEqual(a: any, b: any): boolean;
+  export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean;
 }
 
 declare const Buffer: {
-  from(data: string, encoding?: string): { length: number };
+  from(data: string, encoding?: string): Uint8Array & { length: number };
 };
 
 declare module '@strapi/design-system' {
-  export const Tabs: {
-    Root: any;
-    List: any;
-    Trigger: any;
-    Content: any;
-  };
   import type { FC, ReactNode } from 'react';
-  export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
+  export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
+
+  export const Tabs: {
+    Root: FC<DesignComponentProps>;
+    List: FC<DesignComponentProps>;
+    Trigger: FC<DesignComponentProps>;
+    Content: FC<DesignComponentProps>;
+  };
 
   export const Main: FC<DesignComponentProps>;
   export const Box: FC<DesignComponentProps>;
@@ -111,15 +119,29 @@ declare module '@strapi/design-system' {
 }
 
 declare module '@strapi/strapi/admin' {
+  export interface FetchClientResponse<T = Record<string, unknown>> {
+    data: {
+      data?: T;
+      [key: string]: unknown;
+    };
+  }
+
   export const useFetchClient: () => {
-    get: (url: string) => Promise<{ data: any }>;
-    post: (url: string, data?: any) => Promise<{ data: any }>;
-    put: (url: string, data?: any) => Promise<{ data: any }>;
+    get: <T = Record<string, unknown>>(url: string) => Promise<FetchClientResponse<T>>;
+    post: <T = Record<string, unknown>>(
+      url: string,
+      data?: unknown
+    ) => Promise<FetchClientResponse<T>>;
+    put: <T = Record<string, unknown>>(
+      url: string,
+      data?: unknown
+    ) => Promise<FetchClientResponse<T>>;
+    del: <T = Record<string, unknown>>(url: string) => Promise<FetchClientResponse<T>>;
   };
 }
 
 declare module 'styled-components' {
-  export function useTheme(): Record<string, any>;
+  export function useTheme(): Record<string, unknown>;
 }
 
 declare module 'react-intl' {

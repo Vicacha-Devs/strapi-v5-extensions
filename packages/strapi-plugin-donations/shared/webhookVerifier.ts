@@ -172,81 +172,107 @@ export function verifyWebhookSignature(
   return constantTimeHexEqual(cleanSig, expectedHex);
 }
 
+const DIRECT_VERIFIED_STATUSES = new Set([
+  'approved',
+  'succeeded',
+  'verified',
+  'paid',
+  'complete',
+]);
+const DIRECT_REJECTED_STATUSES = new Set([
+  'declined',
+  'failed',
+  'rejected',
+  'canceled',
+  'error',
+  'voided',
+]);
+
+function mapWebhookStatus(
+  rawStatus: unknown
+): 'verified' | 'rejected' | 'pending' {
+  const lower = String(rawStatus ?? '').toLowerCase();
+  if (DIRECT_VERIFIED_STATUSES.has(lower)) return 'verified';
+  if (DIRECT_REJECTED_STATUSES.has(lower)) return 'rejected';
+  return 'pending';
+}
+
+function normalizeUpperString(val: unknown): string | undefined {
+  return val ? String(val).toUpperCase() : undefined;
+}
+
+function centsToMajorAmount(cents: unknown): number | undefined {
+  return typeof cents === 'number'
+    ? Number((cents / 100).toFixed(2))
+    : undefined;
+}
+
+function parseDirectWebhookPayload(
+  payload: Record<string, unknown>
+): NormalizedWebhookEvent | null {
+  if (!payload.referenceCode || !payload.status) return null;
+  const txRef =
+    payload.transactionReference ??
+    payload.transactionId ??
+    payload.referenceCode;
+  return {
+    provider: String(payload.provider || 'gateway'),
+    referenceCode: String(payload.referenceCode),
+    transactionReference: String(txRef),
+    status: mapWebhookStatus(payload.status),
+    amount: payload.amount !== undefined ? Number(payload.amount) : undefined,
+    currency: normalizeUpperString(payload.currency),
+  };
+}
+
+function parseWompiWebhookPayload(
+  dataObj: Record<string, unknown> | undefined
+): NormalizedWebhookEvent | null {
+  const wompiTx = dataObj?.transaction as Record<string, unknown> | undefined;
+  if (!wompiTx?.reference) return null;
+  return {
+    provider: 'wompi',
+    referenceCode: String(wompiTx.reference),
+    transactionReference: String(wompiTx.id || wompiTx.reference),
+    status: mapWebhookStatus(wompiTx.status),
+    amount: centsToMajorAmount(wompiTx.amount_in_cents),
+    currency: normalizeUpperString(wompiTx.currency),
+  };
+}
+
+function parseStripeWebhookPayload(
+  dataObj: Record<string, unknown> | undefined
+): NormalizedWebhookEvent | null {
+  const stripeObj = dataObj?.object as Record<string, unknown> | undefined;
+  if (!stripeObj) return null;
+  const metadata = stripeObj.metadata as Record<string, unknown> | undefined;
+  const rawRef = stripeObj.client_reference_id ?? metadata?.referenceCode;
+  if (!rawRef) return null;
+  const refCode = String(rawRef);
+  return {
+    provider: 'stripe',
+    referenceCode: refCode,
+    transactionReference: String(stripeObj.id || refCode),
+    status: mapWebhookStatus(stripeObj.status ?? stripeObj.payment_status),
+    amount: centsToMajorAmount(stripeObj.amount_total),
+    currency: normalizeUpperString(stripeObj.currency),
+  };
+}
+
 /**
  * Normalizes payment gateway webhook payloads (Wompi, Stripe, PayU, or generic JSON)
  * into a unified NormalizedWebhookEvent.
  */
-export function parseGatewayWebhookPayload(payload: Record<string, any>): NormalizedWebhookEvent | null {
+export function parseGatewayWebhookPayload(
+  payload: Record<string, unknown>
+): NormalizedWebhookEvent | null {
   if (!payload || typeof payload !== 'object') {
     return null;
   }
-
-  // Generic direct format
-  if (payload.referenceCode && payload.status) {
-    const rawStatus = String(payload.status).toLowerCase();
-    const status =
-      rawStatus === 'approved' || rawStatus === 'succeeded' || rawStatus === 'verified' || rawStatus === 'paid'
-        ? 'verified'
-        : rawStatus === 'declined' || rawStatus === 'failed' || rawStatus === 'rejected'
-          ? 'rejected'
-          : 'pending';
-
-    return {
-      provider: String(payload.provider || 'gateway'),
-      referenceCode: String(payload.referenceCode),
-      transactionReference: String(payload.transactionReference || payload.transactionId || payload.referenceCode),
-      status,
-      amount: payload.amount !== undefined ? Number(payload.amount) : undefined,
-      currency: payload.currency ? String(payload.currency).toUpperCase() : undefined,
-    };
-  }
-
-  // Wompi-style event.data.transaction
-  const wompiTx = payload?.data?.transaction;
-  if (wompiTx && wompiTx.reference) {
-    const rawStatus = String(wompiTx.status || '').toUpperCase();
-    const status =
-      rawStatus === 'APPROVED'
-        ? 'verified'
-        : rawStatus === 'DECLINED' || rawStatus === 'ERROR' || rawStatus === 'VOIDED'
-          ? 'rejected'
-          : 'pending';
-    return {
-      provider: 'wompi',
-      referenceCode: String(wompiTx.reference),
-      transactionReference: String(wompiTx.id || wompiTx.reference),
-      status,
-      amount:
-        typeof wompiTx.amount_in_cents === 'number'
-          ? Number((wompiTx.amount_in_cents / 100).toFixed(2))
-          : undefined,
-      currency: wompiTx.currency ? String(wompiTx.currency).toUpperCase() : undefined,
-    };
-  }
-
-  // Stripe-style data.object
-  const stripeObj = payload?.data?.object;
-  if (stripeObj && (stripeObj.client_reference_id || stripeObj.metadata?.referenceCode)) {
-    const refCode = String(stripeObj.client_reference_id || stripeObj.metadata?.referenceCode);
-    const rawStatus = String(stripeObj.status || stripeObj.payment_status || '').toLowerCase();
-    const status =
-      rawStatus === 'succeeded' || rawStatus === 'paid' || rawStatus === 'complete'
-        ? 'verified'
-        : rawStatus === 'canceled' || rawStatus === 'failed'
-          ? 'rejected'
-          : 'pending';
-    return {
-      provider: 'stripe',
-      referenceCode: refCode,
-      transactionReference: String(stripeObj.id || refCode),
-      status,
-      amount:
-        typeof stripeObj.amount_total === 'number'
-          ? Number((stripeObj.amount_total / 100).toFixed(2))
-          : undefined,
-      currency: stripeObj.currency ? String(stripeObj.currency).toUpperCase() : undefined,
-    };
-  }
-
-  return null;
+  const dataObj = payload.data as Record<string, unknown> | undefined;
+  return (
+    parseDirectWebhookPayload(payload) ??
+    parseWompiWebhookPayload(dataObj) ??
+    parseStripeWebhookPayload(dataObj)
+  );
 }

@@ -1,4 +1,6 @@
 import type {
+  AssessmentAssetFieldConfig as AssessmentFieldConfig,
+  AssessmentBenchmarkConfig as AssessmentBenchmark,
   AssessmentCalculationInput,
   AssessmentCalculationResult,
   AssessmentProfileConfig,
@@ -12,6 +14,38 @@ export interface CampaignProgressSummary {
   remainingAmount: number;
   progressPercent: number;
   invoiceStatus: InvoiceStatus;
+}
+
+function computeProgressPercent(goalAmount: number, raisedAmount: number): number {
+  if (goalAmount > 0) {
+    return Math.min(100, Math.round((raisedAmount / goalAmount) * 1000) / 10);
+  }
+  return raisedAmount > 0 ? 100 : 0;
+}
+
+function isPastDueDate(
+  dueDate: string | null | undefined,
+  referenceDate?: Date
+): boolean {
+  if (!dueDate) return false;
+  const dueTime = new Date(dueDate).getTime();
+  const nowTime = (referenceDate || new Date()).getTime();
+  return !Number.isNaN(dueTime) && dueTime < nowTime;
+}
+
+function resolveInvoiceStatus(
+  goalAmount: number,
+  raisedAmount: number,
+  dueDate: string | null | undefined,
+  referenceDate?: Date
+): InvoiceStatus {
+  if (goalAmount > 0 && raisedAmount >= goalAmount) {
+    return 'paid';
+  }
+  if (isPastDueDate(dueDate, referenceDate)) {
+    return 'overdue';
+  }
+  return raisedAmount > 0 ? 'partially_funded' : 'open';
 }
 
 /**
@@ -28,34 +62,17 @@ export function computeCampaignProgress(params: {
 }): CampaignProgressSummary {
   const goalAmount = Math.max(0, Number(params.goalAmount) || 0);
   const raisedAmount = Math.max(0, Number(params.raisedAmount) || 0);
-  const remainingAmount = Math.max(0, Number((goalAmount - raisedAmount).toFixed(2)));
-
-  const progressPercent =
-    goalAmount > 0
-      ? Math.min(100, Math.round((raisedAmount / goalAmount) * 1000) / 10)
-      : raisedAmount > 0
-        ? 100
-        : 0;
-
-  let invoiceStatus: InvoiceStatus = params.currentStatus || 'open';
-
-  if (goalAmount > 0 && raisedAmount >= goalAmount) {
-    invoiceStatus = 'paid';
-  } else if (params.dueDate) {
-    const dueTime = new Date(params.dueDate).getTime();
-    const nowTime = (params.referenceDate || new Date()).getTime();
-    if (!Number.isNaN(dueTime) && dueTime < nowTime) {
-      invoiceStatus = 'overdue';
-    } else if (raisedAmount > 0) {
-      invoiceStatus = 'partially_funded';
-    } else {
-      invoiceStatus = 'open';
-    }
-  } else if (raisedAmount > 0) {
-    invoiceStatus = 'partially_funded';
-  } else {
-    invoiceStatus = 'open';
-  }
+  const remainingAmount = Math.max(
+    0,
+    Number((goalAmount - raisedAmount).toFixed(2))
+  );
+  const progressPercent = computeProgressPercent(goalAmount, raisedAmount);
+  const invoiceStatus = resolveInvoiceStatus(
+    goalAmount,
+    raisedAmount,
+    params.dueDate,
+    params.referenceDate
+  );
 
   return {
     goalAmount,
@@ -64,6 +81,52 @@ export function computeCampaignProgress(params: {
     progressPercent,
     invoiceStatus,
   };
+}
+
+function resolveBenchmark(
+  profile: AssessmentProfileConfig,
+  benchmarkKey?: string
+): AssessmentBenchmark {
+  const benchmark =
+    profile.benchmarks.find((b) => b.key === benchmarkKey) ??
+    profile.benchmarks.find((b) => b.key === profile.defaultBenchmarkKey) ??
+    profile.benchmarks[0];
+
+  if (!benchmark) {
+    throw new Error(
+      `No benchmark configured for assessment profile "${profile.key}"`
+    );
+  }
+  return benchmark;
+}
+
+function sumAssessmentFields(
+  fields: AssessmentFieldConfig[],
+  values?: Record<string, number>
+): { totalAssets: number; totalLiabilities: number } {
+  let totalAssets = 0;
+  let totalLiabilities = 0;
+
+  for (const field of fields) {
+    const rawVal = Number(values?.[field.key] ?? 0);
+    const val = Number.isFinite(rawVal) && rawVal > 0 ? rawVal : 0;
+    if (field.kind === 'deductible_liability') {
+      totalLiabilities += val;
+    } else {
+      totalAssets += val;
+    }
+  }
+  return { totalAssets, totalLiabilities };
+}
+
+function computeBenchmarkThreshold(
+  benchmark: AssessmentBenchmark,
+  currency: string
+): number {
+  const unitPrice = Number(benchmark.unitPricesByCurrency[currency] ?? 0);
+  const effectivePrice =
+    benchmark.unitType === 'gram_weight' ? unitPrice : unitPrice || 1;
+  return Number((benchmark.thresholdUnits * effectivePrice).toFixed(2));
 }
 
 /**
@@ -75,36 +138,21 @@ export function evaluateAssessmentCalculation(
   input: AssessmentCalculationInput
 ): AssessmentCalculationResult {
   const currency = (input.currency || 'COP').toUpperCase();
-  const benchmark =
-    profile.benchmarks.find((b) => b.key === input.benchmarkKey) ||
-    profile.benchmarks.find((b) => b.key === profile.defaultBenchmarkKey) ||
-    profile.benchmarks[0];
+  const benchmark = resolveBenchmark(profile, input.benchmarkKey);
+  const { totalAssets, totalLiabilities } = sumAssessmentFields(
+    profile.fields,
+    input.values
+  );
 
-  if (!benchmark) {
-    throw new Error(`No benchmark configured for assessment profile "${profile.key}"`);
-  }
-
-  let totalAssets = 0;
-  let totalLiabilities = 0;
-
-  for (const field of profile.fields) {
-    const rawVal = Number(input.values?.[field.key] ?? 0);
-    const val = Number.isFinite(rawVal) && rawVal > 0 ? rawVal : 0;
-    if (field.kind === 'deductible_liability') {
-      totalLiabilities += val;
-    } else {
-      totalAssets += val;
-    }
-  }
-
-  const netAssessableWealth = Math.max(0, Number((totalAssets - totalLiabilities).toFixed(2)));
-  const unitPrice = Number(benchmark.unitPricesByCurrency[currency] ?? 0);
-  const thresholdAmount =
-    benchmark.unitType === 'gram_weight'
-      ? Number((benchmark.thresholdUnits * unitPrice).toFixed(2))
-      : Number((benchmark.thresholdUnits * (unitPrice || 1)).toFixed(2));
-
-  const meetsThreshold = thresholdAmount > 0 ? netAssessableWealth >= thresholdAmount : netAssessableWealth > 0;
+  const netAssessableWealth = Math.max(
+    0,
+    Number((totalAssets - totalLiabilities).toFixed(2))
+  );
+  const thresholdAmount = computeBenchmarkThreshold(benchmark, currency);
+  const meetsThreshold =
+    thresholdAmount > 0
+      ? netAssessableWealth >= thresholdAmount
+      : netAssessableWealth > 0;
   const rateFraction = (Number(profile.ratePercent) || 0) / 100;
   const payableAmount = meetsThreshold
     ? Number((netAssessableWealth * rateFraction).toFixed(2))
@@ -152,23 +200,38 @@ export function generateDonationReferenceCode(prefix = 'DON'): string {
   return `${prefix.toUpperCase()}-${datePart}-${randomPart}`;
 }
 
-function extractNodeText(node: any): string {
-  if (!node) return '';
-  if (typeof node === 'string') return node;
-  if (typeof node.text === 'string') return node.text;
-  const children = Array.isArray(node.content)
-    ? node.content
-    : Array.isArray(node.children)
-      ? node.children
-      : [];
-  const joined = children.map(extractNodeText).filter(Boolean).join(node.type === 'doc' ? '\n\n' : '');
-  if (node.type === 'heading' || node.type === 'paragraph' || node.type === 'blockquote') {
+interface RichTextNode {
+  type?: string;
+  text?: string;
+  content?: unknown[];
+  children?: unknown[];
+}
+
+function getNodeChildren(node: RichTextNode): unknown[] {
+  if (Array.isArray(node.content)) return node.content;
+  if (Array.isArray(node.children)) return node.children;
+  return [];
+}
+
+function formatBlockNodeText(type: string | undefined, joined: string): string {
+  if (type === 'heading' || type === 'paragraph' || type === 'blockquote') {
     return `${joined}\n`;
   }
-  if (node.type === 'listItem' || node.type === 'list-item') {
+  if (type === 'listItem' || type === 'list-item') {
     return `• ${joined.trim()}\n`;
   }
   return joined;
+}
+
+function extractNodeText(node: unknown): string {
+  if (!node) return '';
+  if (typeof node === 'string') return node;
+  const obj = node as RichTextNode;
+  if (typeof obj.text === 'string') return obj.text;
+  const children = getNodeChildren(obj);
+  const separator = obj.type === 'doc' ? '\n\n' : '';
+  const joined = children.map(extractNodeText).filter(Boolean).join(separator);
+  return formatBlockNodeText(obj.type, joined);
 }
 
 /**
@@ -179,7 +242,7 @@ export function normalizeRichTextValue(value: unknown): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'string') return value;
   if (typeof value === 'object') {
-    const obj = value as Record<string, any>;
+    const obj = value as Record<string, unknown>;
     if (obj.type === 'doc' && Array.isArray(obj.content)) {
       return extractNodeText(obj).trim();
     }
@@ -203,8 +266,12 @@ export function extractRichTextPlainText(value: unknown): string {
   if (!raw) return '';
   if (raw.startsWith('{') || raw.startsWith('[')) {
     try {
-      const parsed = JSON.parse(raw);
-      if (parsed && (parsed.type === 'doc' || Array.isArray(parsed))) {
+      const parsed = JSON.parse(raw) as Record<string, unknown> | unknown[];
+      if (
+        parsed &&
+        (Array.isArray(parsed) ||
+          (typeof parsed === 'object' && parsed.type === 'doc'))
+      ) {
         return extractNodeText(parsed).trim();
       }
     } catch {
@@ -216,4 +283,3 @@ export function extractRichTextPlainText(value: unknown): string {
     .replace(/\s+/g, ' ')
     .trim();
 }
-

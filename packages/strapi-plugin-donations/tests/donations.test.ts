@@ -3,15 +3,22 @@ import assert from 'node:assert/strict';
 import { createHmac } from 'node:crypto';
 import {
   DEFAULT_SETTINGS,
+  ISO_3166_COUNTRIES,
+  ISO_4217_CURRENCIES,
   computeCampaignProgress,
   convertToBaseCurrency,
   evaluateAssessmentCalculation,
   extractRichTextPlainText,
+  formatCountryOptionLabel,
+  formatCurrencyOptionLabel,
   generateDonationReferenceCode,
+  getOrderedCurrencyOptions,
   normalizeRichTextValue,
   parseGatewayWebhookPayload,
   verifyWebhookSignature,
 } from '../shared';
+import registerPlugin from '../server/src/register';
+import bootstrapPlugin from '../server/src/bootstrap';
 import settingsServiceFactory from '../server/src/services/settings';
 import campaignServiceFactory from '../server/src/services/campaignService';
 import pledgeServiceFactory from '../server/src/services/pledgeService';
@@ -380,5 +387,100 @@ describe('@vicacha-devs/strapi-plugin-donations', () => {
     assert.equal(afterRemove.evidenceCount, 1);
     assert.equal(afterRemove.evidences[0].id, 'ev-kurban-ramadan-2');
   });
+
+  it('registers ISO 4217 currency and ISO 3166-1 country custom fields and orders configured currencies first', () => {
+    const registeredFields: Array<{ name: string; plugin: string; type: string }> = [];
+    registerPlugin({
+      strapi: {
+        customFields: {
+          register: (field: { name: string; plugin: string; type: string }) => {
+            registeredFields.push(field);
+          },
+        },
+        config: { get: () => ({}) },
+        log: { debug: () => {} },
+      } as any,
+    });
+
+    assert.equal(registeredFields.length, 2);
+    assert.deepEqual(
+      registeredFields.map((f) => `${f.plugin}.${f.name}:${f.type}`),
+      ['donations.currency:string', 'donations.country:string']
+    );
+
+    assert.ok(ISO_4217_CURRENCIES.some((c) => c.code === 'COP' && c.flag === '🇨🇴'));
+    assert.ok(ISO_3166_COUNTRIES.some((c) => c.code === 'CO' && c.defaultCurrency === 'COP'));
+    assert.match(formatCurrencyOptionLabel('COP', 'es'), /COP/);
+    assert.match(formatCountryOptionLabel('CO', 'es'), /CO/);
+
+    const ordered = getOrderedCurrencyOptions(['TRY', 'COP'], 'en', 'SAR');
+    assert.equal(ordered[0].code, 'TRY');
+    assert.equal(ordered[0].isConfigured, true);
+    assert.equal(ordered[1].code, 'COP');
+    assert.equal(ordered[1].isConfigured, true);
+    assert.equal(ordered[2].code, 'SAR');
+  });
+
+  it('detects only installed Rich Text plugins and prevents bootstrap from applying uninstalled custom fields', async () => {
+    let storedSettings: Record<string, unknown> = {
+      richTextCustomField: 'plugin::ckeditor5.CKEditor',
+    };
+    const campaignSchema = {
+      attributes: { body: { type: 'richtext' as string, customField: undefined as string | undefined } },
+      __schema__: {
+        attributes: { body: { type: 'richtext' as string, customField: undefined as string | undefined } },
+      },
+    };
+    const mockStrapi: any = {
+      plugins: {
+        'tiptap-editor': {},
+      },
+      store: () => ({
+        get: async () => storedSettings,
+        set: async ({ value }: { value: Record<string, unknown> }) => {
+          storedSettings = value;
+        },
+      }),
+      config: {
+        get: () => ({
+          richTextCustomField: 'plugin::tiptap-editor.RichText',
+        }),
+      },
+      contentTypes: {
+        'plugin::donations.campaign': campaignSchema,
+      },
+      plugin: (name: string) => {
+        if (name === 'donations') {
+          return {
+            service: (svc: string) => {
+              if (svc === 'settings') {
+                return settingsServiceFactory({ strapi: mockStrapi });
+              }
+              return null;
+            },
+          };
+        }
+        return mockStrapi.plugins[name];
+      },
+    };
+
+    const settingsSvc = settingsServiceFactory({ strapi: mockStrapi });
+    const loaded = await settingsSvc.getSettings();
+    assert.deepEqual(loaded.availableRichTextCustomFields, ['plugin::tiptap-editor.RichText']);
+
+    // Uninstalled plugin (ckeditor5) in storedSettings must NOT be applied to campaign schema
+    await bootstrapPlugin({ strapi: mockStrapi });
+    assert.equal(campaignSchema.attributes.body.customField, undefined);
+
+    // Installed plugin (tiptap-editor) IS applied to campaign schema
+    storedSettings = { richTextCustomField: 'plugin::tiptap-editor.RichText' };
+    await bootstrapPlugin({ strapi: mockStrapi });
+    assert.equal(campaignSchema.attributes.body.customField, 'plugin::tiptap-editor.RichText');
+    assert.equal(
+      campaignSchema.__schema__.attributes.body.customField,
+      'plugin::tiptap-editor.RichText'
+    );
+  });
 });
+
 

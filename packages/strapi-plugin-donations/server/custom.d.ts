@@ -73,7 +73,7 @@ declare module '@strapi/strapi' {
       status?: 'draft' | 'published';
       filters?: Record<string, unknown>;
       populate?: string[];
-      sort?: string;
+      sort?: string | Record<string, string>;
     }
 
     export interface DocumentServiceInstance {
@@ -95,6 +95,22 @@ declare module '@strapi/strapi' {
       }): Promise<Record<string, unknown> | null>;
     }
 
+    export interface EntityServiceInstance {
+      findMany(
+        uid: string,
+        params?: Record<string, unknown>
+      ): Promise<Array<Record<string, unknown>> | Record<string, unknown> | null>;
+      create(
+        uid: string,
+        params: { data: Record<string, unknown> }
+      ): Promise<Record<string, unknown>>;
+      update(
+        uid: string,
+        id: string | number,
+        params: { data: Record<string, unknown> }
+      ): Promise<Record<string, unknown> | null>;
+    }
+
     export interface PluginInstance {
       service<T = Record<string, unknown>>(name: string): T;
     }
@@ -113,8 +129,17 @@ declare module '@strapi/strapi' {
         emit(event: string, payload?: unknown): void;
       };
       contentTypes: Record<string, ContentTypeSchema>;
+      customFields?: {
+        register(config: {
+          name: string;
+          plugin: string;
+          type: string;
+          inputSize?: { default: number; isResizable: boolean };
+        }): void;
+      };
       store(params: { type: string; name: string }): PluginStore;
       documents(uid: string): DocumentServiceInstance;
+      entityService?: EntityServiceInstance;
       plugin(name: string): PluginInstance;
       admin?: {
         services?: {
