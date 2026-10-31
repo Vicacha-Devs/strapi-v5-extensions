@@ -1,28 +1,29 @@
-import { useEffect, useState } from 'react';
-import { DesignSystemProvider } from '@strapi/design-system';
-import useHotkey from '../hooks/useHotkey';
-import { useAdminTheme } from '../utils/theme';
-import { SearchOverlay } from './SearchOverlay';
+import { DesignSystemProvider } from "@strapi/design-system";
+import { useEffect, useState } from "react";
+
+import useHotkey from "../hooks/useHotkey";
+import { useAdminTheme } from "../utils/theme";
+import { SearchOverlay } from "./SearchOverlay";
 
 const hasToken = (storage: Storage | undefined): boolean => {
   if (!storage) return false;
   try {
-    const raw = storage.getItem('jwtToken');
+    const raw = storage.getItem("jwtToken");
     if (!raw) return false;
     return Boolean(JSON.parse(raw));
   } catch {
-    return Boolean(storage.getItem('jwtToken'));
+    return Boolean(storage.getItem("jwtToken"));
   }
 };
 
 const isAuthenticated = (): boolean => {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === "undefined") return false;
   if (hasToken(window.localStorage) || hasToken(window.sessionStorage)) return true;
-  if (typeof document !== 'undefined' && /(?:^|;\s*)jwtToken=/.test(document.cookie || '')) {
+  if (typeof document !== "undefined" && /(?:^|;\s*)jwtToken=/.test(document.cookie || "")) {
     return true;
   }
 
-  return !/\/auth(\/|$)/.test(window.location?.pathname || '');
+  return !/\/auth(\/|$)/.test(window.location?.pathname || "");
 };
 
 /**
@@ -40,8 +41,8 @@ const GlobalSearchPortal = () => {
     const onOpen = () => {
       if (isAuthenticated()) setIsOpen(true);
     };
-    window.addEventListener('global-search:open', onOpen);
-    return () => window.removeEventListener('global-search:open', onOpen);
+    window.addEventListener("global-search:open", onOpen);
+    return () => window.removeEventListener("global-search:open", onOpen);
   }, []);
 
   return (

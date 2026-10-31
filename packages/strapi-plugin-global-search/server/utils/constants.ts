@@ -1,17 +1,17 @@
-export const PLUGIN_ID = 'global-search';
+export const PLUGIN_ID = "global-search";
 
 /**
  * Attribute types whose stored value is a plain string, i.e. the ones the query
  * engine can match with `$containsi`.
  */
 export const SEARCHABLE_SCALAR_TYPES = [
-  'string',
-  'text',
-  'richtext',
-  'customField',
-  'uid',
-  'email',
-  'enumeration',
+  "string",
+  "text",
+  "richtext",
+  "customField",
+  "uid",
+  "email",
+  "enumeration",
 ];
 
 /**
@@ -19,18 +19,18 @@ export const SEARCHABLE_SCALAR_TYPES = [
  * indexed as user-facing Content-Manager content types by default.
  */
 export const SYSTEM_PLUGIN_PREFIXES = [
-  'plugin::upload.',
-  'plugin::i18n.',
-  'plugin::users-permissions.',
-  'plugin::content-releases.',
-  'plugin::review-workflows.',
-  'plugin::navigation.',
-  'plugin::config-sync.',
-  'plugin::email-designer-5.',
-  'plugin::publisher.',
-  'plugin::seo.',
-  'plugin::tiptap-editor.',
-  'plugin::global-search.',
+  "plugin::upload.",
+  "plugin::i18n.",
+  "plugin::users-permissions.",
+  "plugin::content-releases.",
+  "plugin::review-workflows.",
+  "plugin::navigation.",
+  "plugin::config-sync.",
+  "plugin::email-designer-5.",
+  "plugin::publisher.",
+  "plugin::seo.",
+  "plugin::tiptap-editor.",
+  "plugin::global-search.",
 ];
 
 /**
@@ -38,14 +38,21 @@ export const SYSTEM_PLUGIN_PREFIXES = [
  * - dynamiczone / blocks: the query engine cannot filter polymorphic JSON.
  * - relation / media: would explode the join graph; relations are shown, not searched.
  */
-export const SKIPPED_ATTRIBUTE_TYPES = ['dynamiczone', 'blocks', 'json', 'relation', 'media', 'password'];
+export const SKIPPED_ATTRIBUTE_TYPES = [
+  "dynamiczone",
+  "blocks",
+  "json",
+  "relation",
+  "media",
+  "password",
+];
 
 /** Attribute names that must never leave the server, whatever their type. */
 export const BLOCKLISTED_ATTRIBUTE_NAMES = [
-  'password',
-  'resetPasswordToken',
-  'registrationToken',
-  'confirmationToken',
+  "password",
+  "resetPasswordToken",
+  "registrationToken",
+  "confirmationToken",
 ];
 
 /**
@@ -54,35 +61,35 @@ export const BLOCKLISTED_ATTRIBUTE_NAMES = [
  * declared on the schema.
  */
 export const IDENTIFIER_FIELDS = [
-  'uid',
-  'slug',
-  'code',
-  'key',
-  'referenceCode',
-  'bookingCode',
-  'certificateNumber',
-  'transactionReference',
+  "uid",
+  "slug",
+  "code",
+  "key",
+  "referenceCode",
+  "bookingCode",
+  "certificateNumber",
+  "transactionReference",
 ];
 
 /** Used when the Content-Manager configuration has no mainField for a type. */
 export const MAIN_FIELD_FALLBACKS = [
-  'name',
-  'title',
-  'label',
-  'displayName',
-  'heading',
-  'heroTitle',
-  'question',
-  'term',
-  'subject',
-  'fullName',
-  'applicantName',
-  'customerName',
-  'donorName',
-  'referenceCode',
-  'bookingCode',
-  'certificateNumber',
-  'slug',
+  "name",
+  "title",
+  "label",
+  "displayName",
+  "heading",
+  "heroTitle",
+  "question",
+  "term",
+  "subject",
+  "fullName",
+  "applicantName",
+  "customerName",
+  "donorName",
+  "referenceCode",
+  "bookingCode",
+  "certificateNumber",
+  "slug",
 ];
 
 /** Ranking tiers — lower wins. Mirrors the documented ordering rule. */
@@ -98,14 +105,14 @@ export const TIER = {
 };
 
 export const TIER_LABELS: Record<number, string> = {
-  0: 'id:exact',
-  1: 'id:partial',
-  2: 'name:exact',
-  3: 'name:starts-with',
-  4: 'name:partial',
-  5: 'field',
-  6: 'nested-field',
-  7: 'other',
+  0: "id:exact",
+  1: "id:partial",
+  2: "name:exact",
+  3: "name:starts-with",
+  4: "name:partial",
+  5: "field",
+  6: "nested-field",
+  7: "other",
 };
 
 export const MAX_QUERY_LENGTH = 200;

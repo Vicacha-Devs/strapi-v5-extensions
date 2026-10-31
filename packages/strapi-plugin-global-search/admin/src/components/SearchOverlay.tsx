@@ -1,5 +1,3 @@
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from 'react';
-import styled from 'styled-components';
 import {
   Box,
   Divider,
@@ -9,14 +7,17 @@ import {
   TextInput,
   Typography,
   VisuallyHidden,
-} from '@strapi/design-system';
-import { Search } from '@strapi/icons';
-import useGlobalSearch from '../hooks/useGlobalSearch';
-import useSearchableTypes from '../hooks/useSearchableTypes';
-import { toAdminUrl } from '../utils/adminBase';
-import { t } from '../utils/getTrad';
-import { ResultItem } from './ResultItem';
-import type { SearchHit } from '../types';
+} from "@strapi/design-system";
+import { Search } from "@strapi/icons";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
+import styled from "styled-components";
+
+import useGlobalSearch from "../hooks/useGlobalSearch";
+import useSearchableTypes from "../hooks/useSearchableTypes";
+import type { SearchHit } from "../types";
+import { toAdminUrl } from "../utils/adminBase";
+import { t } from "../utils/getTrad";
+import { ResultItem } from "./ResultItem";
 
 const ResultsScroller = styled(Box)`
   max-height: 45vh;
@@ -33,15 +34,15 @@ const navigateToHit = (hit: SearchHit, newTab: boolean, onClose: () => void) => 
   const url = toAdminUrl(hit.adminUrl);
 
   if (newTab) {
-    window.open(url, '_blank', 'noopener');
+    window.open(url, "_blank", "noopener");
     return;
   }
 
   onClose();
 
   try {
-    window.history.pushState({}, '', url);
-    window.dispatchEvent(new PopStateEvent('popstate'));
+    window.history.pushState({}, "", url);
+    window.dispatchEvent(new PopStateEvent("popstate"));
   } catch {
     window.location.assign(url);
   }
@@ -72,7 +73,7 @@ const OverlayBody = ({
     return (
       <Box padding={6}>
         <Typography textColor="neutral500">
-          {t('palette.min_chars', 'Type at least {count} characters to search.', {
+          {t("palette.min_chars", "Type at least {count} characters to search.", {
             count: minChars,
           })}
         </Typography>
@@ -80,36 +81,36 @@ const OverlayBody = ({
     );
   }
 
-  if (status === 'idle') {
+  if (status === "idle") {
     return (
       <Box padding={6}>
         <Typography textColor="neutral500">
           {t(
-            'palette.idle_hint',
-            'Search every collection type and single type by id, name, or any text field.'
+            "palette.idle_hint",
+            "Search every collection type and single type by id, name, or any text field."
           )}
         </Typography>
       </Box>
     );
   }
 
-  if (status === 'error') {
+  if (status === "error") {
     return (
       <Box padding={6}>
         <Typography textColor="danger600">
           {t(
-            'palette.error',
-            'Search failed. Check that you have permission to read content, and see the server logs.'
+            "palette.error",
+            "Search failed. Check that you have permission to read content, and see the server logs."
           )}
         </Typography>
       </Box>
     );
   }
 
-  if (status === 'loading' && !results.length) {
+  if (status === "loading" && !results.length) {
     return (
       <Flex justifyContent="center" padding={6}>
-        <Loader>{t('common.searching', 'Searching…')}</Loader>
+        <Loader>{t("common.searching", "Searching…")}</Loader>
       </Flex>
     );
   }
@@ -118,17 +119,17 @@ const OverlayBody = ({
     return (
       <Box padding={6}>
         <Typography textColor="neutral500">
-          {t('common.no_results', 'No results for “{query}”.', { query })}
+          {t("common.no_results", "No results for “{query}”.", { query })}
         </Typography>
       </Box>
     );
   }
 
   return (
-    <ResultsScroller role="listbox" aria-label={t('palette.results_aria', 'Search results')}>
+    <ResultsScroller role="listbox" aria-label={t("palette.results_aria", "Search results")}>
       {results.map((hit, index) => (
         <ResultItem
-          key={`${hit.contentTypeUid}-${hit.documentId || hit.id}-${hit.locale || ''}`}
+          key={`${hit.contentTypeUid}-${hit.documentId || hit.id}-${hit.locale || ""}`}
           hit={hit}
           query={query.trim()}
           isActive={index === activeIndex}
@@ -171,25 +172,25 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
   };
 
   const onKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'ArrowDown') {
+    if (event.key === "ArrowDown") {
       event.preventDefault();
       setActiveIndex((index) => (results.length ? (index + 1) % results.length : 0));
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveIndex((index) =>
         results.length ? (index - 1 + results.length) % results.length : 0
       );
-    } else if (event.key === 'Enter') {
+    } else if (event.key === "Enter") {
       event.preventDefault();
       const hit = results[activeIndex];
       if (hit) open(hit, event.metaKey || event.ctrlKey);
-    } else if (event.key === 'Escape') {
+    } else if (event.key === "Escape") {
       event.preventDefault();
       onClose();
     }
   };
 
-  const countSuffix = search.data.meta.capped ? '+' : '';
+  const countSuffix = search.data.meta.capped ? "+" : "";
   const totalCount = `${search.data.pagination.total}${countSuffix}`;
 
   return (
@@ -198,7 +199,7 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
         <Box onKeyDown={onKeyDown}>
           <VisuallyHidden>
             <Typography id="global-search-palette-title">
-              {t('palette.title', 'Global search')}
+              {t("palette.title", "Global search")}
             </Typography>
           </VisuallyHidden>
 
@@ -206,8 +207,8 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
             <TextInput
               ref={inputRef}
               name="global-search-palette"
-              aria-label={t('palette.title', 'Global search')}
-              placeholder={t('palette.placeholder', 'Search all content…')}
+              aria-label={t("palette.title", "Global search")}
+              placeholder={t("palette.placeholder", "Search all content…")}
               startIcon={<Search />}
               value={search.query}
               onChange={(event: ChangeEvent<HTMLInputElement>) =>
@@ -236,11 +237,14 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
 
           <Flex justifyContent="space-between" padding={3} paddingLeft={4} paddingRight={4}>
             <Typography variant="pi" textColor="neutral500">
-              {t('palette.shortcuts_hint', '↑ ↓ navigate · ↵ open · ⌘/Ctrl + ↵ new tab · esc close')}
+              {t(
+                "palette.shortcuts_hint",
+                "↑ ↓ navigate · ↵ open · ⌘/Ctrl + ↵ new tab · esc close"
+              )}
             </Typography>
-            {search.status === 'success' && search.data.pagination.total > 0 ? (
+            {search.status === "success" && search.data.pagination.total > 0 ? (
               <Typography variant="pi" textColor="neutral500">
-                {t('palette.result_count', '{count} results', { count: totalCount })}
+                {t("palette.result_count", "{count} results", { count: totalCount })}
               </Typography>
             ) : null}
           </Flex>

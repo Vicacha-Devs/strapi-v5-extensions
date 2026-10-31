@@ -1,4 +1,4 @@
-import type { PluginSettings } from '../types';
+import type { PluginSettings } from "../types";
 
 /**
  * Every value here has a working default: the plugin must run on a fresh app
@@ -34,7 +34,7 @@ export const defaults: PluginSettings = {
 };
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 export const validator = (config: Partial<PluginSettings> = {}) => {
   const numbers: Record<string, [number, number]> = {
@@ -50,25 +50,27 @@ export const validator = (config: Partial<PluginSettings> = {}) => {
   Object.entries(numbers).forEach(([key, [min, max]]) => {
     if ((config as Record<string, unknown>)[key] === undefined) return;
     const value = (config as Record<string, unknown>)[key];
-    if (typeof value !== 'number' || Number.isNaN(value) || value < min || value > max) {
+    if (typeof value !== "number" || Number.isNaN(value) || value < min || value > max) {
       throw new Error(`[global-search] config.${key} must be a number between ${min} and ${max}`);
     }
   });
 
-  (['deep', 'includeDrafts', 'includePluginContentTypes'] as const).forEach((key) => {
-    if (config[key] !== undefined && typeof config[key] !== 'boolean') {
+  (["deep", "includeDrafts", "includePluginContentTypes"] as const).forEach((key) => {
+    if (config[key] !== undefined && typeof config[key] !== "boolean") {
       throw new Error(`[global-search] config.${key} must be a boolean`);
     }
   });
 
-  (['excludedContentTypes', 'excludedFields'] as const).forEach((key) => {
+  (["excludedContentTypes", "excludedFields"] as const).forEach((key) => {
     if (config[key] !== undefined && !Array.isArray(config[key])) {
       throw new Error(`[global-search] config.${key} must be an array of strings`);
     }
   });
 
   if (config.displayFields !== undefined && !isPlainObject(config.displayFields)) {
-    throw new Error('[global-search] config.displayFields must be an object keyed by content type UID');
+    throw new Error(
+      "[global-search] config.displayFields must be an object keyed by content type UID"
+    );
   }
 };
 

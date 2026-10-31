@@ -1,5 +1,5 @@
-import { PLUGIN_ID } from './utils/constants';
-import type { ContentTypeDescriptor, StrapiLike } from './types';
+import type { ContentTypeDescriptor, StrapiLike } from "./types";
+import { PLUGIN_ID } from "./utils/constants";
 
 export default async ({ strapi }: { strapi: StrapiLike }) => {
   // Warm the schema cache so the first keystroke does not pay for introspection,
@@ -7,15 +7,17 @@ export default async ({ strapi }: { strapi: StrapiLike }) => {
   try {
     const types = (await strapi
       .plugin(PLUGIN_ID)
-      .service('schema')
+      .service("schema")
       .getSearchableContentTypes()) as ContentTypeDescriptor[];
 
     strapi.log.debug(
       `[${PLUGIN_ID}] indexed ${types.length} content type(s) for search: ${types
         .map((type) => type.uid)
-        .join(', ')}`
+        .join(", ")}`
     );
   } catch (error) {
-    strapi.log.error(`[${PLUGIN_ID}] failed to introspect content types: ${(error as Error).message}`);
+    strapi.log.error(
+      `[${PLUGIN_ID}] failed to introspect content types: ${(error as Error).message}`
+    );
   }
 };

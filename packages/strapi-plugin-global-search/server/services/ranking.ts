@@ -1,16 +1,16 @@
-import { TIER, TIER_LABELS } from '../utils/constants';
-import { getValuesAtPath, buildSnippet, humanizeFieldPath } from '../utils/text';
-import type { ContentTypeDescriptor, RankedHit } from '../types';
+import type { ContentTypeDescriptor, RankedHit } from "../types";
+import { TIER, TIER_LABELS } from "../utils/constants";
+import { getValuesAtPath, buildSnippet, humanizeFieldPath } from "../utils/text";
 
 type ScoreResult = Pick<
   RankedHit,
-  | 'tier'
-  | 'tierLabel'
-  | 'matchedField'
-  | 'matchedFieldLabel'
-  | 'matchedSnippet'
-  | 'exactCase'
-  | 'valueLength'
+  | "tier"
+  | "tierLabel"
+  | "matchedField"
+  | "matchedFieldLabel"
+  | "matchedSnippet"
+  | "exactCase"
+  | "valueLength"
 >;
 
 /**
@@ -46,8 +46,9 @@ export default () => ({
 
   score(entry: unknown, descriptor: ContentTypeDescriptor, query: string): ScoreResult {
     const lowered = query.toLowerCase();
-    const idPaths = ['id', 'documentId', ...descriptor.idFields];
-    const mainPaths = descriptor.mainField && descriptor.mainField !== 'id' ? [descriptor.mainField] : [];
+    const idPaths = ["id", "documentId", ...descriptor.idFields];
+    const mainPaths =
+      descriptor.mainField && descriptor.mainField !== "id" ? [descriptor.mainField] : [];
 
     const attempts: Array<[number, string[], (value: string) => boolean]> = [
       [TIER.ID_EXACT, idPaths, (value) => value.toLowerCase() === lowered],

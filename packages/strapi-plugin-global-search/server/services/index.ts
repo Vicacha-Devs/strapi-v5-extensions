@@ -1,9 +1,9 @@
-import schema from './schema';
-import query from './query';
-import ranking from './ranking';
-import permissions from './permissions';
-import settings from './settings';
-import search from './search';
+import permissions from "./permissions";
+import query from "./query";
+import ranking from "./ranking";
+import schema from "./schema";
+import search from "./search";
+import settings from "./settings";
 
 export default {
   schema,

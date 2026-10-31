@@ -1,7 +1,8 @@
-import styled from 'styled-components';
-import { Badge, Box, Flex, Typography } from '@strapi/design-system';
-import { Highlight } from './Highlight';
-import type { SearchHit } from '../types';
+import { Badge, Box, Flex, Typography } from "@strapi/design-system";
+import styled from "styled-components";
+
+import type { SearchHit } from "../types";
+import { Highlight } from "./Highlight";
 
 interface RowThemeProps {
   theme: { colors: Record<string, string> };
@@ -11,10 +12,9 @@ interface RowThemeProps {
 const Row = styled(Box)<{ $active?: boolean }>`
   cursor: pointer;
   border-left: 3px solid
-    ${({ theme, $active }: RowThemeProps) =>
-      $active ? theme.colors.primary600 : 'transparent'};
+    ${({ theme, $active }: RowThemeProps) => ($active ? theme.colors.primary600 : "transparent")};
   background: ${({ theme, $active }: RowThemeProps) =>
-    $active ? theme.colors.primary100 : 'transparent'};
+    $active ? theme.colors.primary100 : "transparent"};
 
   &:hover {
     background: ${({ theme, $active }: RowThemeProps) =>
@@ -58,7 +58,7 @@ const ResultItem = ({ hit, query, isActive, onSelect, onHover = () => {} }: Resu
         {hit.matchedSnippet && hit.matchedField !== hit.mainField ? (
           <Box paddingTop={1}>
             <Typography variant="pi" textColor="neutral500">
-              {hit.matchedFieldLabel}:{' '}
+              {hit.matchedFieldLabel}:{" "}
             </Typography>
             <Typography variant="pi" tag="span">
               <Highlight text={hit.matchedSnippet} query={query} />

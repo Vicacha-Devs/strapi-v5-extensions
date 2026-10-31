@@ -1,4 +1,4 @@
-import { Search } from '@strapi/icons';
+import { Search } from "@strapi/icons";
 
 const PluginIcon = () => <Search />;
 

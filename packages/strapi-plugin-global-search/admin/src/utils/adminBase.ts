@@ -4,21 +4,21 @@
  * configurable (`config/admin.js` -> `url`).
  */
 export const getAdminBase = (): string => {
-  if (typeof window === 'undefined') return '/admin/';
+  if (typeof window === "undefined") return "/admin/";
 
   try {
-    const pathname = window.location.pathname || '';
+    const pathname = window.location.pathname || "";
     const match = pathname.match(/^(.*\/admin)(?:\/|$)/);
 
     if (match) {
-      return match[1].endsWith('/') ? match[1] : `${match[1]}/`;
+      return match[1].endsWith("/") ? match[1] : `${match[1]}/`;
     }
-  } catch (error) {
+  } catch {
     // Fall through to the default admin path.
   }
 
-  return '/admin/';
+  return "/admin/";
 };
 
 export const toAdminUrl = (path: string): string =>
-  `${getAdminBase()}${String(path).replace(/^\//, '')}`;
+  `${getAdminBase()}${String(path).replace(/^\//, "")}`;

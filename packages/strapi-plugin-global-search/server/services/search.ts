@@ -1,6 +1,3 @@
-import { PLUGIN_ID } from '../utils/constants';
-import { sanitizeQuery } from '../utils/text';
-import { withTimeout, mapWithConcurrency } from '../utils/async';
 import type {
   ContentTypeDescriptor,
   PluginSettings,
@@ -8,7 +5,10 @@ import type {
   SearchParams,
   SearchResult,
   StrapiLike,
-} from '../types';
+} from "../types";
+import { withTimeout, mapWithConcurrency } from "../utils/async";
+import { PLUGIN_ID } from "../utils/constants";
+import { sanitizeQuery } from "../utils/text";
 
 const service = (strapi: StrapiLike, name: string) => strapi.plugin(PLUGIN_ID).service(name);
 
@@ -26,9 +26,9 @@ export interface EntryLike {
 export default ({ strapi }: { strapi: StrapiLike }) => ({
   /** Content Manager deep-link for a hit. */
   buildAdminUrl(descriptor: ContentTypeDescriptor, entry: EntryLike): string {
-    const localeQuery = entry.locale ? `?locale=${entry.locale}` : '';
+    const localeQuery = entry.locale ? `?locale=${entry.locale}` : "";
 
-    if (descriptor.kind === 'singleType') {
+    if (descriptor.kind === "singleType") {
       return `/content-manager/single-types/${descriptor.uid}${localeQuery}`;
     }
 
@@ -39,13 +39,9 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
 
   async queryContentType(
     descriptor: ContentTypeDescriptor,
-    {
-      query,
-      locale,
-      settings,
-    }: { query: string; locale?: string; settings: PluginSettings }
+    { query, locale, settings }: { query: string; locale?: string; settings: PluginSettings }
   ): Promise<EntryLike[]> {
-    const params = service(strapi, 'query').buildParams(descriptor, {
+    const params = service(strapi, "query").buildParams(descriptor, {
       query,
       locale,
       limit: settings.perTypeLimit,
@@ -60,7 +56,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
   },
 
   resolveEntryTitle(descriptor: ContentTypeDescriptor, entry: EntryLike): string {
-    const mainVal = descriptor.mainField ? (entry[descriptor.mainField] as string) : '';
+    const mainVal = descriptor.mainField ? (entry[descriptor.mainField] as string) : "";
     if (mainVal) return mainVal;
     return entry.name || entry.title || `#${entry.documentId || entry.id}`;
   },
@@ -68,9 +64,9 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
   resolveEntryStatus(
     descriptor: ContentTypeDescriptor,
     entry: EntryLike
-  ): 'published' | 'draft' | null {
+  ): "published" | "draft" | null {
     if (!descriptor.draftAndPublish) return null;
-    return entry.publishedAt ? 'published' : 'draft';
+    return entry.publishedAt ? "published" : "draft";
   },
 
   toHit(
@@ -79,7 +75,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     query: string,
     settings: PluginSettings
   ): RankedHit {
-    const scored = service(strapi, 'ranking').score(entry, descriptor, query);
+    const scored = service(strapi, "ranking").score(entry, descriptor, query);
     const extraFields = (settings.displayFields[descriptor.uid] || []).slice(0, 2);
 
     return {
@@ -115,7 +111,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     pageSize = 20,
     userAbility,
   }: SearchParams = {}): Promise<SearchResult> {
-    const settings = (await service(strapi, 'settings').get()) as PluginSettings;
+    const settings = (await service(strapi, "settings").get()) as PluginSettings;
     const query = sanitizeQuery(rawQuery);
 
     const empty: SearchResult = {
@@ -128,10 +124,13 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
 
     if (query.length < settings.minChars) return empty;
 
-    const searchable = (await service(strapi, 'schema').getSearchableContentTypes()) as ContentTypeDescriptor[];
+    const searchable = (await service(
+      strapi,
+      "schema"
+    ).getSearchableContentTypes()) as ContentTypeDescriptor[];
     const requested = Array.isArray(types) && types.length ? new Set(types) : null;
 
-    const candidates = service(strapi, 'permissions')
+    const candidates = service(strapi, "permissions")
       .filterReadableTypes(searchable, userAbility)
       .filter((descriptor: ContentTypeDescriptor) => !requested || requested.has(descriptor.uid));
 
@@ -157,14 +156,16 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
         } catch (error) {
           // One broken or slow content type must never fail the whole search.
           failedTypes.push({ uid: descriptor.uid, message: (error as Error).message });
-          strapi.log.warn(`[${PLUGIN_ID}] search failed for ${descriptor.uid}: ${(error as Error).message}`);
+          strapi.log.warn(
+            `[${PLUGIN_ID}] search failed for ${descriptor.uid}: ${(error as Error).message}`
+          );
 
           return [];
         }
       }
     );
 
-    const ranked = service(strapi, 'ranking')
+    const ranked = service(strapi, "ranking")
       .sort(perType.flat())
       .slice(0, settings.maxResults) as RankedHit[];
 

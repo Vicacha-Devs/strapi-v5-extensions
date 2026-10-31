@@ -1,12 +1,13 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
 import {
   Box,
   Button,
+  Field,
   Flex,
   Grid,
   Main,
   NumberInput,
   Table,
+  Tabs,
   Tbody,
   Td,
   Th,
@@ -14,14 +15,16 @@ import {
   Toggle,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { Check } from '@strapi/icons';
-import { Layouts, Page, useNotification, useRBAC } from '@strapi/strapi/admin';
-import { fetchAllTypes, fetchSettings, resetSettings, updateSettings } from '../api/searchApi';
-import { invalidateSearchableTypes } from '../hooks/useSearchableTypes';
-import pluginPermissions from '../permissions';
-import { t } from '../utils/getTrad';
-import type { ContentTypeSummary, PluginSettings } from '../types';
+} from "@strapi/design-system";
+import { Check } from "@strapi/icons";
+import { Layouts, Page, useNotification, useRBAC } from "@strapi/strapi/admin";
+import { useEffect, useState, type ChangeEvent } from "react";
+
+import { fetchAllTypes, fetchSettings, resetSettings, updateSettings } from "../api/searchApi";
+import { invalidateSearchableTypes } from "../hooks/useSearchableTypes";
+import pluginPermissions from "../permissions";
+import type { ContentTypeSummary, PluginSettings } from "../types";
+import { t } from "../utils/getTrad";
 
 const getNumberFields = (): Array<{
   name: keyof PluginSettings;
@@ -29,34 +32,34 @@ const getNumberFields = (): Array<{
   hint: string;
 }> => [
   {
-    name: 'minChars',
-    label: t('settings.min_chars_label', 'Minimum characters'),
-    hint: t('settings.min_chars_hint', 'Shorter queries are not sent to the server.'),
+    name: "minChars",
+    label: t("settings.min_chars_label", "Minimum characters"),
+    hint: t("settings.min_chars_hint", "Shorter queries are not sent to the server."),
   },
   {
-    name: 'debounce',
-    label: t('settings.debounce_label', 'Debounce (ms)'),
-    hint: t('settings.debounce_hint', 'How long to wait after the last keystroke.'),
+    name: "debounce",
+    label: t("settings.debounce_label", "Debounce (ms)"),
+    hint: t("settings.debounce_hint", "How long to wait after the last keystroke."),
   },
   {
-    name: 'perTypeLimit',
-    label: t('settings.per_type_limit_label', 'Results per content type'),
-    hint: t('settings.per_type_limit_hint', 'Rows fetched from each type.'),
+    name: "perTypeLimit",
+    label: t("settings.per_type_limit_label", "Results per content type"),
+    hint: t("settings.per_type_limit_hint", "Rows fetched from each type."),
   },
   {
-    name: 'maxResults',
-    label: t('settings.max_results_label', 'Maximum results'),
-    hint: t('settings.max_results_hint', 'Hard cap on the merged, ranked list.'),
+    name: "maxResults",
+    label: t("settings.max_results_label", "Maximum results"),
+    hint: t("settings.max_results_hint", "Hard cap on the merged, ranked list."),
   },
   {
-    name: 'maxDepth',
-    label: t('settings.max_depth_label', 'Component depth'),
-    hint: t('settings.max_depth_hint', 'How many component levels to search into.'),
+    name: "maxDepth",
+    label: t("settings.max_depth_label", "Component depth"),
+    hint: t("settings.max_depth_hint", "How many component levels to search into."),
   },
   {
-    name: 'queryTimeout',
-    label: t('settings.query_timeout_label', 'Query timeout (ms)'),
-    hint: t('settings.query_timeout_hint', 'A slower content type is skipped.'),
+    name: "queryTimeout",
+    label: t("settings.query_timeout_label", "Query timeout (ms)"),
+    hint: t("settings.query_timeout_hint", "A slower content type is skipped."),
   },
 ];
 
@@ -66,7 +69,7 @@ const extractSaveErrorMessage = (error: unknown): string => {
   };
   return (
     err?.response?.data?.error?.message ||
-    t('settings.error_save', 'Could not save global search settings.')
+    t("settings.error_save", "Could not save global search settings.")
   );
 };
 
@@ -77,78 +80,100 @@ interface SearchBehaviourPanelProps {
 }
 
 const SearchBehaviourPanel = ({ settings, canEdit, onSetField }: SearchBehaviourPanelProps) => {
-  const onText = t('common.on', 'On');
-  const offText = t('common.off', 'Off');
+  const onText = t("common.on", "On");
+  const offText = t("common.off", "Off");
+  const deepLabel = t("settings.deep_label", "Search inside components");
+  const draftsLabel = t("settings.drafts_label", "Include drafts");
+  const pluginsLabel = t("settings.plugins_label", "Include plugin content types");
 
   return (
     <Box background="neutral0" padding={6} hasRadius shadow="tableShadow">
-      <Typography variant="delta">
-        {t('settings.behaviour_title', 'Search behaviour')}
-      </Typography>
+      <Typography variant="delta">{t("settings.behaviour_title", "Search behaviour")}</Typography>
 
       <Box paddingTop={4}>
         <Grid.Root gap={4}>
           {getNumberFields().map((field) => (
             <Grid.Item key={field.name} col={4} s={12}>
-              <NumberInput
-                name={field.name}
-                label={field.label}
-                hint={field.hint}
-                value={settings[field.name] as number}
-                onValueChange={(value: number | undefined) =>
-                  onSetField(field.name, value as PluginSettings[typeof field.name])
-                }
-                disabled={!canEdit}
-              />
+              <Field.Root name={field.name} hint={field.hint}>
+                <Field.Label>{field.label}</Field.Label>
+                <NumberInput
+                  name={field.name}
+                  aria-label={field.label}
+                  value={settings[field.name] as number}
+                  onValueChange={(value: number | undefined) =>
+                    onSetField(field.name, value as PluginSettings[typeof field.name])
+                  }
+                  disabled={!canEdit}
+                />
+                <Field.Hint />
+              </Field.Root>
             </Grid.Item>
           ))}
 
           <Grid.Item col={4} s={12}>
-            <Toggle
+            <Field.Root
               name="deep"
-              label={t('settings.deep_label', 'Search inside components')}
-              hint={t('settings.deep_hint', 'Also match fields nested in components.')}
-              onLabel={onText}
-              offLabel={offText}
-              checked={Boolean(settings.deep)}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                onSetField('deep', event.target.checked)
-              }
-              disabled={!canEdit}
-            />
+              hint={t("settings.deep_hint", "Also match fields nested in components.")}
+            >
+              <Field.Label>{deepLabel}</Field.Label>
+              <Toggle
+                name="deep"
+                aria-label={deepLabel}
+                onLabel={onText}
+                offLabel={offText}
+                checked={Boolean(settings.deep)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  onSetField("deep", event.target.checked)
+                }
+                disabled={!canEdit}
+              />
+              <Field.Hint />
+            </Field.Root>
           </Grid.Item>
 
           <Grid.Item col={4} s={12}>
-            <Toggle
+            <Field.Root
               name="includeDrafts"
-              label={t('settings.drafts_label', 'Include drafts')}
-              hint={t('settings.drafts_hint', 'Search unpublished entries too.')}
-              onLabel={onText}
-              offLabel={offText}
-              checked={Boolean(settings.includeDrafts)}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                onSetField('includeDrafts', event.target.checked)
-              }
-              disabled={!canEdit}
-            />
+              hint={t("settings.drafts_hint", "Search unpublished entries too.")}
+            >
+              <Field.Label>{draftsLabel}</Field.Label>
+              <Toggle
+                name="includeDrafts"
+                aria-label={draftsLabel}
+                onLabel={onText}
+                offLabel={offText}
+                checked={Boolean(settings.includeDrafts)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  onSetField("includeDrafts", event.target.checked)
+                }
+                disabled={!canEdit}
+              />
+              <Field.Hint />
+            </Field.Root>
           </Grid.Item>
 
           <Grid.Item col={4} s={12}>
-            <Toggle
+            <Field.Root
               name="includePluginContentTypes"
-              label={t('settings.plugins_label', 'Include plugin content types')}
               hint={t(
-                'settings.plugins_hint',
-                'Also search visible content types registered by plugins.'
+                "settings.plugins_hint",
+                "Also search visible content types registered by plugins."
               )}
-              onLabel={onText}
-              offLabel={offText}
-              checked={settings.includePluginContentTypes !== false}
-              onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                onSetField('includePluginContentTypes', event.target.checked)
-              }
-              disabled={!canEdit}
-            />
+            >
+              <Field.Label>{pluginsLabel}</Field.Label>
+              <Toggle
+                name="includePluginContentTypes"
+                aria-label={pluginsLabel}
+                onLabel={onText}
+                offLabel={offText}
+                checked={settings.includePluginContentTypes !== false}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  onSetField("includePluginContentTypes", event.target.checked)
+                }
+                disabled={!canEdit}
+              />
+              <Field.Hint />
+            </Field.Root>
           </Grid.Item>
         </Grid.Root>
       </Box>
@@ -170,14 +195,12 @@ const ContentTypesTablePanel = ({
   onToggleContentType,
 }: ContentTypesTablePanelProps) => (
   <Box background="neutral0" padding={6} hasRadius shadow="tableShadow">
-    <Typography variant="delta">
-      {t('settings.content_types_title', 'Content types')}
-    </Typography>
+    <Typography variant="delta">{t("settings.content_types_title", "Content types")}</Typography>
     <Box paddingTop={1} paddingBottom={4}>
       <Typography textColor="neutral600" variant="pi">
         {t(
-          'settings.content_types_hint',
-          'Every API and visible plugin content type is discovered automatically. Turn one off to exclude it from search results.'
+          "settings.content_types_hint",
+          "Every API and visible plugin content type is discovered automatically. Turn one off to exclude it from search results."
         )}
       </Typography>
     </Box>
@@ -187,26 +210,22 @@ const ContentTypesTablePanel = ({
         <Tr>
           <Th>
             <Typography variant="sigma">
-              {t('settings.col_content_type', 'Content type')}
+              {t("settings.col_content_type", "Content type")}
             </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t('settings.col_kind', 'Kind')}</Typography>
+            <Typography variant="sigma">{t("settings.col_kind", "Kind")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('settings.col_main_field', 'Main field')}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {t('settings.col_searchable_fields', 'Searchable fields')}
-            </Typography>
+            <Typography variant="sigma">{t("settings.col_main_field", "Main field")}</Typography>
           </Th>
           <Th>
             <Typography variant="sigma">
-              {t('settings.col_enabled', 'Enabled')}
+              {t("settings.col_searchable_fields", "Searchable fields")}
             </Typography>
+          </Th>
+          <Th>
+            <Typography variant="sigma">{t("settings.col_enabled", "Enabled")}</Typography>
           </Th>
         </Tr>
       </Thead>
@@ -227,27 +246,27 @@ const ContentTypesTablePanel = ({
             </Td>
             <Td>
               <Typography textColor="neutral600">
-                {type.kind === 'singleType'
-                  ? t('settings.kind_single', 'Single')
-                  : t('settings.kind_collection', 'Collection')}
+                {type.kind === "singleType"
+                  ? t("settings.kind_single", "Single")
+                  : t("settings.kind_collection", "Collection")}
               </Typography>
             </Td>
             <Td>
               <Typography textColor="neutral600">{type.mainField}</Typography>
             </Td>
             <Td>
-              <Typography textColor={type.searchable ? 'neutral600' : 'danger600'}>
-                {type.searchable ? type.fieldCount : t('common.none', 'none')}
+              <Typography textColor={type.searchable ? "neutral600" : "danger600"}>
+                {type.searchable ? type.fieldCount : t("common.none", "none")}
               </Typography>
             </Td>
             <Td>
               <Toggle
                 name={`enabled-${type.uid}`}
-                aria-label={t('settings.enable_for_type', 'Enable search for {name}', {
+                aria-label={t("settings.enable_for_type", "Enable search for {name}", {
                   name: type.displayName,
                 })}
-                onLabel={t('common.on', 'On')}
-                offLabel={t('common.off', 'Off')}
+                onLabel={t("common.on", "On")}
+                offLabel={t("common.off", "Off")}
                 checked={!excluded.includes(type.uid)}
                 onChange={() => onToggleContentType(type.uid)}
                 disabled={!canEdit || !type.searchable}
@@ -279,8 +298,8 @@ const SettingsPage = () => {
       setContentTypes(schema.contentTypes || []);
     } catch {
       toggleNotification({
-        type: 'danger',
-        message: t('settings.error_load', 'Could not load global search settings.'),
+        type: "danger",
+        message: t("settings.error_load", "Could not load global search settings."),
       });
     } finally {
       setIsLoading(false);
@@ -289,7 +308,6 @@ const SettingsPage = () => {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setField = <K extends keyof PluginSettings>(name: K, value: PluginSettings[K]) =>
@@ -317,11 +335,11 @@ const SettingsPage = () => {
       setSettings(saved);
       invalidateSearchableTypes();
       toggleNotification({
-        type: 'success',
-        message: t('settings.saved', 'Global search settings saved.'),
+        type: "success",
+        message: t("settings.saved", "Global search settings saved."),
       });
     } catch (error: unknown) {
-      toggleNotification({ type: 'danger', message: extractSaveErrorMessage(error) });
+      toggleNotification({ type: "danger", message: extractSaveErrorMessage(error) });
     } finally {
       setIsSaving(false);
     }
@@ -334,13 +352,13 @@ const SettingsPage = () => {
       setSettings(await resetSettings());
       invalidateSearchableTypes();
       toggleNotification({
-        type: 'success',
-        message: t('settings.restored', 'Defaults restored.'),
+        type: "success",
+        message: t("settings.restored", "Defaults restored."),
       });
     } catch {
       toggleNotification({
-        type: 'danger',
-        message: t('settings.error_restore', 'Could not restore defaults.'),
+        type: "danger",
+        message: t("settings.error_restore", "Could not restore defaults."),
       });
     } finally {
       setIsSaving(false);
@@ -352,33 +370,51 @@ const SettingsPage = () => {
   return (
     <Main>
       <Layouts.Header
-        title={t('plugin.name', 'Global Search')}
+        title={t("plugin.name", "Global Search")}
         subtitle={t(
-          'settings.subtitle',
-          'Tune how the search page and the Ctrl/Cmd + K palette query your content.'
+          "settings.subtitle",
+          "Tune how the search page and the Ctrl/Cmd + K palette query your content."
         )}
         primaryAction={
           <Flex gap={2}>
             <Button variant="tertiary" onClick={restoreDefaults} disabled={!canEdit || isSaving}>
-              {t('settings.restore_defaults', 'Restore defaults')}
+              {t("settings.restore_defaults", "Restore defaults")}
             </Button>
             <Button startIcon={<Check />} onClick={save} loading={isSaving} disabled={!canEdit}>
-              {t('settings.save', 'Save')}
+              {t("settings.save", "Save")}
             </Button>
           </Flex>
         }
       />
 
       <Layouts.Content>
-        <Flex direction="column" alignItems="stretch" gap={6}>
-          <SearchBehaviourPanel settings={settings} canEdit={canEdit} onSetField={setField} />
-          <ContentTypesTablePanel
-            contentTypes={contentTypes}
-            excluded={settings.excludedContentTypes || []}
-            canEdit={canEdit}
-            onToggleContentType={toggleContentType}
-          />
-        </Flex>
+        <Tabs.Root defaultValue="behaviour" variant="simple">
+          <Tabs.List aria-label={t("plugin.name", "Global Search")}>
+            <Tabs.Trigger value="behaviour">
+              {t("settings.behaviour_title", "Search behaviour")}
+            </Tabs.Trigger>
+            <Tabs.Trigger value="content-types">
+              {`${t("settings.content_types_title", "Content types")} (${contentTypes.length})`}
+            </Tabs.Trigger>
+          </Tabs.List>
+
+          <Tabs.Content value="behaviour">
+            <Box paddingTop={4}>
+              <SearchBehaviourPanel settings={settings} canEdit={canEdit} onSetField={setField} />
+            </Box>
+          </Tabs.Content>
+
+          <Tabs.Content value="content-types">
+            <Box paddingTop={4}>
+              <ContentTypesTablePanel
+                contentTypes={contentTypes}
+                excluded={settings.excludedContentTypes || []}
+                canEdit={canEdit}
+                onToggleContentType={toggleContentType}
+              />
+            </Box>
+          </Tabs.Content>
+        </Tabs.Root>
       </Layouts.Content>
     </Main>
   );

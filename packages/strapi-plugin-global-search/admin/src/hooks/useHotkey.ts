@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 /**
  * Cmd+K on macOS, Ctrl+K elsewhere. Registered in the capture phase so it wins
@@ -10,7 +10,7 @@ const useHotkey = (handler: () => void): void => {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'k' && event.key !== 'K') return;
+      if (event.key !== "k" && event.key !== "K") return;
       if (!event.metaKey && !event.ctrlKey) return;
       if (event.altKey) return;
 
@@ -19,9 +19,9 @@ const useHotkey = (handler: () => void): void => {
       handlerRef.current();
     };
 
-    document.addEventListener('keydown', onKeyDown, true);
+    document.addEventListener("keydown", onKeyDown, true);
 
-    return () => document.removeEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
   }, []);
 };
 

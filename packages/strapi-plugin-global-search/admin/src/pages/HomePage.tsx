@@ -1,6 +1,3 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import {
   Badge,
   Box,
@@ -21,14 +18,18 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { Layouts } from '@strapi/strapi/admin';
-import useGlobalSearch from '../hooks/useGlobalSearch';
-import useSearchableTypes from '../hooks/useSearchableTypes';
-import { fetchLocales } from '../api/searchApi';
-import { Highlight } from '../components/Highlight';
-import { t } from '../utils/getTrad';
-import type { ContentTypeSummary, LocaleOption, SearchHit, SearchResponse } from '../types';
+} from "@strapi/design-system";
+import { Layouts } from "@strapi/strapi/admin";
+import { useEffect, useState, type ChangeEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+
+import { fetchLocales } from "../api/searchApi";
+import { Highlight } from "../components/Highlight";
+import useGlobalSearch from "../hooks/useGlobalSearch";
+import useSearchableTypes from "../hooks/useSearchableTypes";
+import type { ContentTypeSummary, LocaleOption, SearchHit, SearchResponse } from "../types";
+import { t } from "../utils/getTrad";
 
 const ClickableRow = styled(Tr)`
   cursor: pointer;
@@ -52,32 +53,32 @@ const ResultsTable = ({ results, trimmedQuery, onSelectHit }: ResultsTableProps)
     <Thead>
       <Tr>
         <Th>
-          <Typography variant="sigma">{t('table.type', 'Type')}</Typography>
+          <Typography variant="sigma">{t("table.type", "Type")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t('table.id', 'Id')}</Typography>
+          <Typography variant="sigma">{t("table.id", "Id")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t('table.name', 'Name')}</Typography>
+          <Typography variant="sigma">{t("table.name", "Name")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t('table.matched', 'Matched')}</Typography>
+          <Typography variant="sigma">{t("table.matched", "Matched")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t('table.locale', 'Locale')}</Typography>
+          <Typography variant="sigma">{t("table.locale", "Locale")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t('table.status', 'Status')}</Typography>
+          <Typography variant="sigma">{t("table.status", "Status")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t('table.updated', 'Updated')}</Typography>
+          <Typography variant="sigma">{t("table.updated", "Updated")}</Typography>
         </Th>
       </Tr>
     </Thead>
     <Tbody>
       {results.map((hit) => (
         <ClickableRow
-          key={`${hit.contentTypeUid}-${hit.documentId || hit.id}-${hit.locale || ''}`}
+          key={`${hit.contentTypeUid}-${hit.documentId || hit.id}-${hit.locale || ""}`}
           onClick={() => onSelectHit(hit.adminUrl)}
         >
           <Td>
@@ -99,7 +100,7 @@ const ResultsTable = ({ results, trimmedQuery, onSelectHit }: ResultsTableProps)
                 </Typography>
                 <Box>
                   <Typography variant="pi">
-                    <Highlight text={hit.matchedSnippet || ''} query={trimmedQuery} />
+                    <Highlight text={hit.matchedSnippet || ""} query={trimmedQuery} />
                   </Typography>
                 </Box>
               </Box>
@@ -108,7 +109,7 @@ const ResultsTable = ({ results, trimmedQuery, onSelectHit }: ResultsTableProps)
             )}
           </Td>
           <Td>
-            <Typography textColor="neutral600">{hit.locale || '—'}</Typography>
+            <Typography textColor="neutral600">{hit.locale || "—"}</Typography>
           </Td>
           <Td>
             {hit.status ? (
@@ -119,7 +120,7 @@ const ResultsTable = ({ results, trimmedQuery, onSelectHit }: ResultsTableProps)
           </Td>
           <Td>
             <Typography textColor="neutral600">
-              {hit.updatedAt ? new Date(hit.updatedAt).toLocaleDateString() : '—'}
+              {hit.updatedAt ? new Date(hit.updatedAt).toLocaleDateString() : "—"}
             </Typography>
           </Td>
         </ClickableRow>
@@ -147,23 +148,23 @@ const SearchResultsSection = ({
   results,
   onSelectHit,
 }: SearchResultsSectionProps) => {
-  if (status === 'error') {
+  if (status === "error") {
     return (
       <Box padding={8} background="neutral0" hasRadius>
         <Typography textColor="danger600">
           {t(
-            'page.error',
-            'Search failed. Check that you have permission to read content, and see the server logs for details.'
+            "page.error",
+            "Search failed. Check that you have permission to read content, and see the server logs for details."
           )}
         </Typography>
       </Box>
     );
   }
 
-  if (isBelowMinChars || (status === 'idle' && !trimmedQuery)) {
+  if (isBelowMinChars || (status === "idle" && !trimmedQuery)) {
     const headingText = isBelowMinChars
-      ? t('palette.min_chars', 'Type at least {count} characters to search.', { count: minChars })
-      : t('page.idle_title', 'Search every collection type and single type in this project.');
+      ? t("palette.min_chars", "Type at least {count} characters to search.", { count: minChars })
+      : t("page.idle_title", "Search every collection type and single type in this project.");
 
     return (
       <Box padding={8} background="neutral0" hasRadius>
@@ -173,8 +174,8 @@ const SearchResultsSection = ({
         <Box paddingTop={2}>
           <Typography textColor="neutral500">
             {t(
-              'page.idle_subtitle',
-              'Results are ordered by id, then name, then any other field — including fields nested inside components. Press Ctrl/Cmd + K anywhere in the admin to open the quick palette.'
+              "page.idle_subtitle",
+              "Results are ordered by id, then name, then any other field — including fields nested inside components. Press Ctrl/Cmd + K anywhere in the admin to open the quick palette."
             )}
           </Typography>
         </Box>
@@ -182,23 +183,23 @@ const SearchResultsSection = ({
     );
   }
 
-  if (status === 'loading' && !results.length) {
+  if (status === "loading" && !results.length) {
     return (
       <Flex justifyContent="center" padding={8}>
-        <Loader>{t('common.searching', 'Searching…')}</Loader>
+        <Loader>{t("common.searching", "Searching…")}</Loader>
       </Flex>
     );
   }
 
   if (!results.length) {
     const emptyHint = hasTypeFilters
-      ? t('page.no_results_clear_filters', 'Try clearing the content type filters.')
-      : t('page.no_results_try_different', 'Try a shorter or different term.');
+      ? t("page.no_results_clear_filters", "Try clearing the content type filters.")
+      : t("page.no_results_try_different", "Try a shorter or different term.");
 
     return (
       <Box padding={8} background="neutral0" hasRadius>
         <Typography variant="delta" textColor="neutral600">
-          {t('common.no_results', 'No results for “{query}”.', { query: trimmedQuery })}
+          {t("common.no_results", "No results for “{query}”.", { query: trimmedQuery })}
         </Typography>
         <Box paddingTop={2}>
           <Typography textColor="neutral500">{emptyHint}</Typography>
@@ -214,7 +215,7 @@ interface SearchFiltersBarProps {
   query: string;
   onQueryChange: (value: string) => void;
   contentTypes: ContentTypeSummary[];
-  groups: SearchResponse['groups'];
+  groups: SearchResponse["groups"];
   selectedTypes: string[];
   onSelectedTypesChange: (value: string[]) => void;
   onClearTypes: () => void;
@@ -242,11 +243,11 @@ const SearchFiltersBar = ({
           name="global-search"
           value={query}
           onChange={(event: ChangeEvent<HTMLInputElement>) => onQueryChange(event.target.value)}
-          onClear={() => onQueryChange('')}
-          clearLabel={t('page.clear_search', 'Clear search')}
-          placeholder={t('page.search_placeholder', 'Search by id, name, or any text field…')}
+          onClear={() => onQueryChange("")}
+          clearLabel={t("page.clear_search", "Clear search")}
+          placeholder={t("page.search_placeholder", "Search by id, name, or any text field…")}
         >
-          {t('page.search_label', 'Search all content')}
+          {t("page.search_label", "Search all content")}
         </Searchbar>
       </SearchForm>
     </Box>
@@ -254,18 +255,18 @@ const SearchFiltersBar = ({
     {contentTypes.length ? (
       <Box minWidth="18rem" maxWidth="28rem">
         <MultiSelect
-          aria-label={t('page.content_types_aria', 'Content types')}
-          placeholder={t('page.all_content_types', 'All content types')}
+          aria-label={t("page.content_types_aria", "Content types")}
+          placeholder={t("page.all_content_types", "All content types")}
           value={selectedTypes}
           onChange={(value: string[]) => onSelectedTypesChange(value)}
           onClear={onClearTypes}
-          clearLabel={t('page.clear_type_filters', 'Clear content type filters')}
+          clearLabel={t("page.clear_type_filters", "Clear content type filters")}
           withTags
           size="S"
         >
           {contentTypes.map((type) => {
             const group = groups.find((item) => item.uid === type.uid);
-            const countLabel = group ? ` (${group.count}${group.truncated ? '+' : ''})` : '';
+            const countLabel = group ? ` (${group.count}${group.truncated ? "+" : ""})` : "";
 
             return (
               <MultiSelectOption key={type.uid} value={type.uid}>
@@ -281,13 +282,13 @@ const SearchFiltersBar = ({
     {locales.length > 1 ? (
       <Box minWidth="16rem">
         <SingleSelect
-          aria-label={t('table.locale', 'Locale')}
+          aria-label={t("table.locale", "Locale")}
           value={locale}
           onChange={(val: string | number) => onLocaleChange(String(val))}
           size="S"
         >
           <SingleSelectOption value="all">
-            {t('page.all_locales', 'All locales')}
+            {t("page.all_locales", "All locales")}
           </SingleSelectOption>
           {locales.map((loc) => (
             <SingleSelectOption key={loc.code} value={loc.code}>
@@ -301,9 +302,9 @@ const SearchFiltersBar = ({
 );
 
 interface SearchPaginationBarProps {
-  pagination: SearchResponse['pagination'];
+  pagination: SearchResponse["pagination"];
   groupsCount: number;
-  meta: SearchResponse['meta'];
+  meta: SearchResponse["meta"];
   pageSize: number;
   onPageSizeChange: (size: number) => void;
   onPageChange: (page: number) => void;
@@ -317,17 +318,17 @@ const SearchPaginationBar = ({
   onPageSizeChange,
   onPageChange,
 }: SearchPaginationBarProps) => {
-  const totalLabel = `${pagination.total}${meta.capped ? '+' : ''}`;
+  const totalLabel = `${pagination.total}${meta.capped ? "+" : ""}`;
   const truncatedNotice =
     meta.truncatedTypes && meta.truncatedTypes.length
-      ? t('page.truncated_notice', ' · some types returned more than the per-type limit')
-      : '';
+      ? t("page.truncated_notice", " · some types returned more than the per-type limit")
+      : "";
 
   return (
     <Flex justifyContent="space-between" alignItems="center">
       <Flex gap={2} alignItems="center">
         <Typography textColor="neutral600" variant="pi">
-          {t('page.results_summary', '{total} results across {groups} content types', {
+          {t("page.results_summary", "{total} results across {groups} content types", {
             total: totalLabel,
             groups: groupsCount,
           })}
@@ -335,14 +336,14 @@ const SearchPaginationBar = ({
         </Typography>
         <Box minWidth="7rem">
           <SingleSelect
-            aria-label={t('page.results_per_page', 'Results per page')}
+            aria-label={t("page.results_per_page", "Results per page")}
             value={String(pageSize)}
             onChange={(value: string | number) => onPageSizeChange(Number(value))}
             size="S"
           >
             {PAGE_SIZES.map((size) => (
               <SingleSelectOption key={size} value={String(size)}>
-                {t('page.per_page_option', '{size} / page', { size })}
+                {t("page.per_page_option", "{size} / page", { size })}
               </SingleSelectOption>
             ))}
           </SingleSelect>
@@ -355,10 +356,10 @@ const SearchPaginationBar = ({
           disabled={pagination.page <= 1}
           onClick={() => onPageChange(pagination.page - 1)}
         >
-          {t('page.previous', 'Previous')}
+          {t("page.previous", "Previous")}
         </Button>
         <Typography variant="pi" textColor="neutral600">
-          {t('page.page_of', 'Page {page} of {pageCount}', {
+          {t("page.page_of", "Page {page} of {pageCount}", {
             page: pagination.page,
             pageCount: pagination.pageCount || 1,
           })}
@@ -368,7 +369,7 @@ const SearchPaginationBar = ({
           disabled={pagination.page >= pagination.pageCount}
           onClick={() => onPageChange(pagination.page + 1)}
         >
-          {t('page.next', 'Next')}
+          {t("page.next", "Next")}
         </Button>
       </Flex>
     </Flex>
@@ -400,23 +401,23 @@ const HomePage = () => {
 
   const { results, groups, pagination, meta } = search.data;
   const headerSubtitle =
-    schemaStatus === 'success'
-      ? t('page.subtitle_ready', 'Searching {count} content types · press Ctrl/Cmd + K anywhere', {
+    schemaStatus === "success"
+      ? t("page.subtitle_ready", "Searching {count} content types · press Ctrl/Cmd + K anywhere", {
           count: contentTypes.length,
         })
-      : t('page.subtitle_loading', 'Discovering content types…');
+      : t("page.subtitle_loading", "Discovering content types…");
 
   return (
-    <Main aria-busy={search.status === 'loading'}>
+    <Main aria-busy={search.status === "loading"}>
       <Layouts.Header
-        title={t('plugin.name', 'Global Search')}
+        title={t("plugin.name", "Global Search")}
         subtitle={headerSubtitle}
         primaryAction={
           <Button
             variant="secondary"
-            onClick={() => window.dispatchEvent(new CustomEvent('global-search:open'))}
+            onClick={() => window.dispatchEvent(new CustomEvent("global-search:open"))}
           >
-            {t('page.open_palette', 'Open Palette (⌘K)')}
+            {t("page.open_palette", "Open Palette (⌘K)")}
           </Button>
         }
       />

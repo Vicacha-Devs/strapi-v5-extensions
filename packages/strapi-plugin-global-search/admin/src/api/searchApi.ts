@@ -1,11 +1,7 @@
-import { getFetchClient } from '@strapi/strapi/admin';
-import pluginId from '../pluginId';
-import type {
-  LocaleOption,
-  PluginSettings,
-  SchemaResponse,
-  SearchResponse,
-} from '../types';
+import { getFetchClient } from "@strapi/strapi/admin";
+
+import pluginId from "../pluginId";
+import type { LocaleOption, PluginSettings, SchemaResponse, SearchResponse } from "../types";
 
 export interface SearchParams {
   q: string;
@@ -68,10 +64,10 @@ export const resetSettings = async (): Promise<PluginSettings> => {
 export const fetchLocales = async (): Promise<LocaleOption[]> => {
   try {
     const { get } = getFetchClient();
-    const { data } = await get('/i18n/locales');
+    const { data } = await get("/i18n/locales");
 
     return Array.isArray(data) ? (data as LocaleOption[]) : [];
-  } catch (error) {
+  } catch {
     return [];
   }
 };
@@ -79,5 +75,5 @@ export const fetchLocales = async (): Promise<LocaleOption[]> => {
 export const isCanceled = (error: unknown): boolean => {
   const err = error as { name?: string; code?: string } | null | undefined;
 
-  return Boolean(err) && (err!.name === 'CanceledError' || err!.code === 'ERR_CANCELED');
+  return Boolean(err) && (err!.name === "CanceledError" || err!.code === "ERR_CANCELED");
 };

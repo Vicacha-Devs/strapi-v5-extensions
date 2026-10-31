@@ -1,4 +1,4 @@
-import { MAX_QUERY_LENGTH, SNIPPET_RADIUS } from './constants';
+import { MAX_QUERY_LENGTH, SNIPPET_RADIUS } from "./constants";
 
 /**
  * `$containsi` is compiled to `LIKE %value%` with the value bound as a parameter,
@@ -6,17 +6,17 @@ import { MAX_QUERY_LENGTH, SNIPPET_RADIUS } from './constants';
  * value and a lone `%` would match every row. Strip it and cap the length.
  */
 export const sanitizeQuery = (raw: unknown): string => {
-  if (typeof raw !== 'string') return '';
-  return raw.replace(/%/g, '').trim().slice(0, MAX_QUERY_LENGTH);
+  if (typeof raw !== "string") return "";
+  return raw.replace(/%/g, "").trim().slice(0, MAX_QUERY_LENGTH);
 };
 
 const isProseMirrorRoot = (value: unknown): value is Record<string, unknown> => {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const obj = value as Record<string, unknown>;
-  if (obj.type === 'doc' && Array.isArray(obj.content)) return true;
-  if (obj.doc && typeof obj.doc === 'object' && !Array.isArray(obj.doc)) {
+  if (obj.type === "doc" && Array.isArray(obj.content)) return true;
+  if (obj.doc && typeof obj.doc === "object" && !Array.isArray(obj.doc)) {
     const inner = obj.doc as Record<string, unknown>;
-    return inner.type === 'doc' && Array.isArray(inner.content);
+    return inner.type === "doc" && Array.isArray(inner.content);
   }
   return false;
 };
@@ -27,13 +27,13 @@ const walkDocNodes = (node: unknown, chunks: string[]): void => {
     node.forEach((child) => walkDocNodes(child, chunks));
     return;
   }
-  if (typeof node !== 'object') return;
+  if (typeof node !== "object") return;
 
   const obj = node as Record<string, unknown>;
-  if (typeof obj.text === 'string' && obj.text.trim()) {
+  if (typeof obj.text === "string" && obj.text.trim()) {
     chunks.push(obj.text);
   }
-  if (obj.doc && typeof obj.doc === 'object') {
+  if (obj.doc && typeof obj.doc === "object") {
     walkDocNodes(obj.doc, chunks);
   }
   if (Array.isArray(obj.content)) {
@@ -53,9 +53,9 @@ const walkDocNodes = (node: unknown, chunks: string[]): void => {
 export const extractStructuredText = (value: unknown): string | null => {
   let candidate: unknown = value;
 
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const trimmed = value.trim();
-    if (!trimmed.startsWith('{')) return null;
+    if (!trimmed.startsWith("{")) return null;
     try {
       candidate = JSON.parse(trimmed);
     } catch {
@@ -67,20 +67,20 @@ export const extractStructuredText = (value: unknown): string | null => {
 
   const chunks: string[] = [];
   walkDocNodes(candidate, chunks);
-  return chunks.join(' ').replace(/\s+/g, ' ').trim();
+  return chunks.join(" ").replace(/\s+/g, " ").trim();
 };
 
 /** Plain-text projection of richtext/HTML/Markdown/ProseMirror JSON, used for snippets. */
 export const toPlainText = (value: unknown): string => {
-  if (value === null || value === undefined) return '';
+  if (value === null || value === undefined) return "";
 
   const structured = extractStructuredText(value);
   if (structured !== null) return structured;
 
   return String(value)
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/[#*_>`~]+/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/<[^>]*>/g, " ")
+    .replace(/[#*_>`~]+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 };
 
@@ -94,16 +94,16 @@ export const collectValues = (node: unknown, parts: string[]): string[] => {
   if (parts.length === 0) {
     const structured = extractStructuredText(node);
     if (structured !== null) return structured ? [structured] : [];
-    if (typeof node === 'string') return [node];
-    if (typeof node === 'number') return [String(node)];
+    if (typeof node === "string") return [node];
+    if (typeof node === "number") return [String(node)];
     return [];
   }
-  if (typeof node !== 'object') return [];
+  if (typeof node !== "object") return [];
   return collectValues((node as Record<string, unknown>)[parts[0]], parts.slice(1));
 };
 
 export const getValuesAtPath = (entry: unknown, path: string): string[] =>
-  collectValues(entry, path.split('.'));
+  collectValues(entry, path.split("."));
 
 /** Extracts a short excerpt centred on the match, for highlighting in the UI. */
 export const buildSnippet = (value: unknown, query: string): string => {
@@ -117,16 +117,16 @@ export const buildSnippet = (value: unknown, query: string): string => {
   const start = Math.max(0, index - SNIPPET_RADIUS);
   const end = Math.min(text.length, index + query.length + SNIPPET_RADIUS);
 
-  return `${start > 0 ? '…' : ''}${text.slice(start, end)}${end < text.length ? '…' : ''}`;
+  return `${start > 0 ? "…" : ""}${text.slice(start, end)}${end < text.length ? "…" : ""}`;
 };
 
 export const humanizeFieldPath = (path: string): string =>
   path
-    .split('.')
+    .split(".")
     .map((segment) =>
       segment
-        .replace(/[_-]+/g, ' ')
-        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+        .replace(/[_-]+/g, " ")
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
         .replace(/^./, (c) => c.toUpperCase())
     )
-    .join(' › ');
+    .join(" › ");
