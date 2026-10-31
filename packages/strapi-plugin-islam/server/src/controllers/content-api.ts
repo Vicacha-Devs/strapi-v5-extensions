@@ -1,12 +1,50 @@
 import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../../shared';
+import {
+  PLUGIN_ID,
+  type FitranaFidyahKaffarahInput,
+  type ZakatAlMalCalculationInput,
+} from '../../../shared';
+import type createIslamService from '../services/islamService';
+
+type IslamServiceInstance = ReturnType<typeof createIslamService>;
+
+export interface KoaContentContext {
+  query?: Record<string, string | undefined>;
+  params?: Record<string, string | undefined>;
+  request?: {
+    body?: Record<string, unknown>;
+  };
+  body?: unknown;
+  status?: number;
+  set: (header: string, value: string) => void;
+}
+
+function getQuery(ctx: KoaContentContext): Record<string, string | undefined> {
+  return ctx.query || {};
+}
+
+function getParams(ctx: KoaContentContext): Record<string, string | undefined> {
+  return ctx.params || {};
+}
+
+function getRequestBody<T>(ctx: KoaContentContext): T {
+  const rawBody = ctx.request?.body;
+  return (rawBody && typeof rawBody === 'object' ? rawBody : {}) as T;
+}
+
+function setNoTranslateHeader(ctx: KoaContentContext): void {
+  if (typeof ctx.set === 'function') {
+    ctx.set('X-Translation-Integrity', 'notranslate');
+  }
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getIslamService = () => strapi.plugin(PLUGIN_ID).service('islamService') as any;
+  const getIslamService = () =>
+    strapi.plugin(PLUGIN_ID).service<IslamServiceInstance>('islamService');
 
   return {
-    async getPrayerTimes(ctx: any) {
-      const q = ctx.query || {};
+    async getPrayerTimes(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const dateParam = typeof q.date === 'string' ? q.date.trim() : undefined;
 
       if (dateParam && /^\d{4}-\d{2}$/.test(dateParam)) {
@@ -33,8 +71,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = { data: daily };
     },
 
-    async getMonthlyPrayerTimes(ctx: any) {
-      const q = ctx.query || {};
+    async getMonthlyPrayerTimes(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const data = await getIslamService().getMonthlyPrayerTimes({
         yearMonth: q.yearMonth || q.date,
         lat: q.lat,
@@ -46,8 +84,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = { data };
     },
 
-    async getPrayerCalendarIcs(ctx: any) {
-      const q = ctx.query || {};
+    async getPrayerCalendarIcs(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const icsContent = await getIslamService().getPrayerCalendarIcs({
         yearMonth: q.yearMonth || q.date,
         lat: q.lat,
@@ -60,8 +98,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = icsContent;
     },
 
-    async getQibla(ctx: any) {
-      const q = ctx.query || {};
+    async getQibla(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const data = await getIslamService().getQiblaCompass({
         lat: q.lat,
         lon: q.lon,
@@ -71,8 +109,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = { data };
     },
 
-    async getHijriAndObservances(ctx: any) {
-      const q = ctx.query || {};
+    async getHijriAndObservances(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const data = await getIslamService().getHijriAndObservances({
         date: q.date,
         locale: q.locale,
@@ -80,10 +118,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = { data };
     },
 
-    async convertDate(ctx: any) {
-      const q = ctx.query || {};
+    async convertDate(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
+      const direction =
+        q.direction === 'hijri_to_gregorian' ? 'hijri_to_gregorian' : 'gregorian_to_hijri';
       const data = await getIslamService().convertDate({
-        direction: q.direction,
+        direction,
         date: q.date,
         hijriYear: q.hijriYear,
         hijriMonth: q.hijriMonth,
@@ -93,8 +133,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = { data };
     },
 
-    async getScriptureHub(ctx: any) {
-      const q = ctx.query || {};
+    async getScriptureHub(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const data = await getIslamService().getScriptureHub({
         date: q.date,
         locale: q.locale,
@@ -105,8 +145,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = { data };
     },
 
-    async getDailyInspiration(ctx: any) {
-      const q = ctx.query || {};
+    async getDailyInspiration(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const hub = await getIslamService().getScriptureHub({
         date: q.date,
         locale: q.locale,
@@ -114,35 +154,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = { data: hub.dailyInspiration };
     },
 
-    async getQuranChapters(ctx: any) {
-      const q = ctx.query || {};
+    async getQuranChapters(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const data = await getIslamService().getQuranChapters({
         locale: q.locale,
       });
-      if (typeof ctx.set === 'function') {
-        ctx.set('X-Translation-Integrity', 'notranslate');
-      }
+      setNoTranslateHeader(ctx);
       ctx.body = { data };
     },
 
-    async getQuranChapterInfo(ctx: any) {
-      const q = ctx.query || {};
-      const params = ctx.params || {};
+    async getQuranChapterInfo(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
+      const params = getParams(ctx);
       const data = await getIslamService().getQuranChapterInfo({
-        chapterNumber: params.chapterNumber ?? q.chapterNumber,
+        chapterNumber: params.chapterNumber ?? q.chapterNumber ?? 1,
         locale: q.locale,
       });
-      if (typeof ctx.set === 'function') {
-        ctx.set('X-Translation-Integrity', 'notranslate');
-      }
+      setNoTranslateHeader(ctx);
       ctx.body = { data };
     },
 
-    async getQuranChapterVerses(ctx: any) {
-      const q = ctx.query || {};
-      const params = ctx.params || {};
+    async getQuranChapterVerses(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
+      const params = getParams(ctx);
       const data = await getIslamService().getQuranChapterVerses({
-        chapterNumber: params.chapterNumber ?? q.chapterNumber,
+        chapterNumber: params.chapterNumber ?? q.chapterNumber ?? 1,
         locale: q.locale,
         page: q.page,
         perPage: q.perPage ?? q.per_page,
@@ -152,65 +188,59 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         translations: q.translations,
         tafsirs: q.tafsirs,
       });
-      if (typeof ctx.set === 'function') {
-        ctx.set('X-Translation-Integrity', 'notranslate');
-      }
+      setNoTranslateHeader(ctx);
       ctx.body = { data };
     },
 
-    async getQuranVerseByKey(ctx: any) {
-      const q = ctx.query || {};
-      const params = ctx.params || {};
+    async getQuranVerseByKey(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
+      const params = getParams(ctx);
       const data = await getIslamService().getQuranVerseByKey({
-        verseKey: params.verseKey ?? q.verseKey,
+        verseKey: params.verseKey ?? q.verseKey ?? '1:1',
         locale: q.locale,
         words: q.words,
         reciterId: q.reciterId ?? q.audio,
         translations: q.translations,
         tafsirs: q.tafsirs,
       });
-      if (typeof ctx.set === 'function') {
-        ctx.set('X-Translation-Integrity', 'notranslate');
-      }
+      setNoTranslateHeader(ctx);
       ctx.body = { data };
     },
 
-    async getQuranAyahHadiths(ctx: any) {
-      const q = ctx.query || {};
-      const params = ctx.params || {};
+    async getQuranAyahHadiths(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
+      const params = getParams(ctx);
       const data = await getIslamService().getQuranAyahHadiths({
-        verseKey: params.verseKey ?? q.verseKey,
+        verseKey: params.verseKey ?? q.verseKey ?? '1:1',
         locale: q.locale,
         page: q.page,
         limit: q.limit,
       });
-      if (typeof ctx.set === 'function') {
-        ctx.set('X-Translation-Integrity', 'notranslate');
-      }
+      setNoTranslateHeader(ctx);
       ctx.body = { data };
     },
 
-    async getQuranChapterAudio(ctx: any) {
-      const q = ctx.query || {};
-      const params = ctx.params || {};
+    async getQuranChapterAudio(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
+      const params = getParams(ctx);
       const data = await getIslamService().getQuranChapterAudio({
-        chapterNumber: params.chapterNumber ?? q.chapterNumber,
+        chapterNumber: params.chapterNumber ?? q.chapterNumber ?? 1,
         reciterId: params.reciterId ?? q.reciterId,
         segments: q.segments,
       });
       ctx.body = { data };
     },
 
-    async getQuranResources(ctx: any) {
-      const q = ctx.query || {};
+    async getQuranResources(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       const data = await getIslamService().getQuranResources({
         locale: q.locale,
       });
       ctx.body = { data };
     },
 
-    async getNisab(ctx: any) {
-      const q = ctx.query || {};
+    async getNisab(ctx: KoaContentContext) {
+      const q = getQuery(ctx);
       if (q.allCurrencies === 'true' || q.allCurrencies === '1') {
         const entries = await getIslamService().getAllCurrencyNisabEntries({
           standard: q.standard,
@@ -228,23 +258,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ctx.body = { data };
     },
 
-    async calculateZakat(ctx: any) {
-      const body =
-        ctx.request?.body && typeof ctx.request.body === 'object'
-          ? ctx.request.body
-          : {};
+    async calculateZakat(ctx: KoaContentContext) {
+      const body = getRequestBody<ZakatAlMalCalculationInput>(ctx);
       const data = await getIslamService().calculateZakat(body);
       ctx.body = { data };
     },
 
-    async calculateFitranaFidyah(ctx: any) {
-      const body =
-        ctx.request?.body && typeof ctx.request.body === 'object'
-          ? ctx.request.body
-          : {};
+    async calculateFitranaFidyah(ctx: KoaContentContext) {
+      const body = getRequestBody<FitranaFidyahKaffarahInput>(ctx);
       const data = await getIslamService().calculateFitranaFidyah(body);
       ctx.body = { data };
     },
   };
 };
-

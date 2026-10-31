@@ -1,10 +1,31 @@
+import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
+import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
 import { PLUGIN_ID } from '../../shared';
 import { PluginIcon } from './components/PluginIcon';
 
-const ALL_TRANSLATION_LOCALES = ['en', 'es', 'ar', 'tr', 'fr', 'de', 'pt', 'id', 'ms', 'ur'];
+interface StrapiAdminApp {
+  addMenuLink(config: {
+    to: string;
+    icon: unknown;
+    intlLabel: { id: string; defaultMessage: string };
+    Component: () => Promise<{ default: unknown }>;
+    permissions: unknown[];
+  }): void;
+  createSettingSection(
+    section: { id: string; intlLabel: { id: string; defaultMessage: string } },
+    links: Array<{
+      intlLabel: { id: string; defaultMessage: string };
+      id: string;
+      to: string;
+      Component: () => Promise<{ default: unknown }>;
+      permissions: unknown[];
+    }>
+  ): void;
+  registerPlugin(plugin: { id: string; name: string }): void;
+}
 
 export default {
-  register(app: any) {
+  register(app: StrapiAdminApp) {
     app.addMenuLink({
       to: `plugins/${PLUGIN_ID}`,
       icon: PluginIcon,
@@ -53,12 +74,12 @@ export default {
   bootstrap() {},
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
-    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    const allLocales = Array.from(new Set([...locales, 'en', 'es', 'ar', 'tr']));
     return Promise.all(
       allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          const prefixed: Record<string, string> = {};
+          const prefixed: Record<string, string> = { ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en ?? {}), ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en ?? {}) };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
             const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;

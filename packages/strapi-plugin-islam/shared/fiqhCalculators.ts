@@ -26,6 +26,40 @@ function roundMoney(value: number, currency: SupportedCurrency): number {
   return Math.round(value * 100) / 100;
 }
 
+function resolveSpotPricePerGram(
+  overridePrice: number | undefined,
+  ratesByCurrency: Record<SupportedCurrency, number>,
+  currency: SupportedCurrency
+): number {
+  if (overridePrice && overridePrice > 0) {
+    return overridePrice;
+  }
+  return ratesByCurrency[currency] || ratesByCurrency.COP;
+}
+
+function convertGramToUnitPrice(pricePerGram: number, isTroyOz: boolean): number {
+  return isTroyOz
+    ? Math.round(pricePerGram * TROY_OUNCE_IN_GRAMS * 100) / 100
+    : pricePerGram;
+}
+
+function convertWeightToUnit(weightGrams: number, isTroyOz: boolean): number {
+  return isTroyOz
+    ? Math.round((weightGrams / TROY_OUNCE_IN_GRAMS) * 1000) / 1000
+    : weightGrams;
+}
+
+function computeCaratPrices(
+  goldPerGram: number,
+  currency: SupportedCurrency
+): Record<string, number> {
+  const caratPricesPerGram: Record<string, number> = {};
+  for (const [carat, factor] of Object.entries(GOLD_CARAT_PURITY_FACTORS)) {
+    caratPricesPerGram[carat] = roundMoney(goldPerGram * factor, currency);
+  }
+  return caratPricesPerGram;
+}
+
 export function calculateNisabThresholds(
   ratesConfig: FiqhRatesConfig,
   options?: {
@@ -42,32 +76,16 @@ export function calculateNisabThresholds(
   const isTroyOz = options?.unit === 'oz';
   const spec = NISAB_STANDARDS[standard];
 
-  const goldPerGram =
-    options?.goldSpotOverridePerGram && options.goldSpotOverridePerGram > 0
-      ? options.goldSpotOverridePerGram
-      : ratesConfig.goldPricePerGramByCurrency[currency] ||
-        ratesConfig.goldPricePerGramByCurrency.COP;
-
-  const silverPerGram =
-    options?.silverSpotOverridePerGram && options.silverSpotOverridePerGram > 0
-      ? options.silverSpotOverridePerGram
-      : ratesConfig.silverPricePerGramByCurrency[currency] ||
-        ratesConfig.silverPricePerGramByCurrency.COP;
-
-  const goldUnitPrice = isTroyOz
-    ? Math.round(goldPerGram * TROY_OUNCE_IN_GRAMS * 100) / 100
-    : goldPerGram;
-  const silverUnitPrice = isTroyOz
-    ? Math.round(silverPerGram * TROY_OUNCE_IN_GRAMS * 100) / 100
-    : silverPerGram;
-
-  const goldNisabAmount = roundMoney(spec.goldGrams * goldPerGram, currency);
-  const silverNisabAmount = roundMoney(spec.silverGrams * silverPerGram, currency);
-
-  const caratPricesPerGram: Record<string, number> = {};
-  for (const [carat, factor] of Object.entries(GOLD_CARAT_PURITY_FACTORS)) {
-    caratPricesPerGram[carat] = roundMoney(goldPerGram * factor, currency);
-  }
+  const goldPerGram = resolveSpotPricePerGram(
+    options?.goldSpotOverridePerGram,
+    ratesConfig.goldPricePerGramByCurrency,
+    currency
+  );
+  const silverPerGram = resolveSpotPricePerGram(
+    options?.silverSpotOverridePerGram,
+    ratesConfig.silverPricePerGramByCurrency,
+    currency
+  );
 
   return {
     fetchedAt: new Date().toISOString(),
@@ -78,23 +96,42 @@ export function calculateNisabThresholds(
     zakatRatePercent: 2.5,
     gold: {
       weightGrams: spec.goldGrams,
-      weightInUnit: isTroyOz
-        ? Math.round((spec.goldGrams / TROY_OUNCE_IN_GRAMS) * 1000) / 1000
-        : spec.goldGrams,
-      unitPrice: goldUnitPrice,
-      nisabAmount: goldNisabAmount,
-      caratPricesPerGram,
+      weightInUnit: convertWeightToUnit(spec.goldGrams, isTroyOz),
+      unitPrice: convertGramToUnitPrice(goldPerGram, isTroyOz),
+      nisabAmount: roundMoney(spec.goldGrams * goldPerGram, currency),
+      caratPricesPerGram: computeCaratPrices(goldPerGram, currency),
     },
     silver: {
       weightGrams: spec.silverGrams,
-      weightInUnit: isTroyOz
-        ? Math.round((spec.silverGrams / TROY_OUNCE_IN_GRAMS) * 1000) / 1000
-        : spec.silverGrams,
-      unitPrice: silverUnitPrice,
-      nisabAmount: silverNisabAmount,
+      weightInUnit: convertWeightToUnit(spec.silverGrams, isTroyOz),
+      unitPrice: convertGramToUnitPrice(silverPerGram, isTroyOz),
+      nisabAmount: roundMoney(spec.silverGrams * silverPerGram, currency),
     },
-    source: options?.source || 'configured_or_live',
+    source: options?.source ?? 'configured_or_live',
   };
+}
+
+const USHR_RATE_BY_IRRIGATION: Record<string, number> = {
+  rain_fed_10: 10,
+  irrigated_5: 5,
+  mixed_7_5: 7.5,
+};
+
+function resolveUshrRatePercent(
+  irrigation?: ZakatAlMalCalculationInput['agriculturalIrrigation']
+): number {
+  return irrigation ? (USHR_RATE_BY_IRRIGATION[irrigation] ?? 0) : 0;
+}
+
+function computeAgriculturalUshrDue(
+  agriValue: number,
+  ratePercent: number,
+  currency: SupportedCurrency
+): number {
+  if (agriValue <= 0 || ratePercent <= 0) {
+    return 0;
+  }
+  return roundMoney(agriValue * (ratePercent / 100), currency);
 }
 
 export function calculateZakatAlMal(
@@ -111,12 +148,16 @@ export function calculateZakatAlMal(
       ? nisabDetails.silver.nisabAmount
       : nisabDetails.gold.nisabAmount;
 
-  const goldPerGram24K =
-    ratesConfig.goldPricePerGramByCurrency[currency] ||
-    ratesConfig.goldPricePerGramByCurrency.COP;
-  const silverPerGram =
-    ratesConfig.silverPricePerGramByCurrency[currency] ||
-    ratesConfig.silverPricePerGramByCurrency.COP;
+  const goldPerGram24K = resolveSpotPricePerGram(
+    undefined,
+    ratesConfig.goldPricePerGramByCurrency,
+    currency
+  );
+  const silverPerGram = resolveSpotPricePerGram(
+    undefined,
+    ratesConfig.silverPricePerGramByCurrency,
+    currency
+  );
 
   const gold24g = sanitizeNonNegativeNumber(input.goldGrams24K, 1_000_000);
   const gold22g = sanitizeNonNegativeNumber(input.goldGrams22K, 1_000_000);
@@ -163,18 +204,14 @@ export function calculateZakatAlMal(
     : 0;
 
   const agriValue = sanitizeNonNegativeNumber(input.agriculturalProduceValue);
-  let agriculturalUshrRatePercent = 0;
-  if (input.agriculturalIrrigation === 'rain_fed_10') {
-    agriculturalUshrRatePercent = 10;
-  } else if (input.agriculturalIrrigation === 'irrigated_5') {
-    agriculturalUshrRatePercent = 5;
-  } else if (input.agriculturalIrrigation === 'mixed_7_5') {
-    agriculturalUshrRatePercent = 7.5;
-  }
-  const agriculturalUshrDue =
-    agriValue > 0 && agriculturalUshrRatePercent > 0
-      ? roundMoney(agriValue * (agriculturalUshrRatePercent / 100), currency)
-      : 0;
+  const agriculturalUshrRatePercent = resolveUshrRatePercent(
+    input.agriculturalIrrigation
+  );
+  const agriculturalUshrDue = computeAgriculturalUshrDue(
+    agriValue,
+    agriculturalUshrRatePercent,
+    currency
+  );
 
   return {
     currency,
