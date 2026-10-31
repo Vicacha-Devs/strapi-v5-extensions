@@ -1,16 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Main, Box, Button, Grid, Flex, Typography, TextInput } from '@strapi/design-system';
-import { Check } from '@strapi/icons';
-import { useFetchClient } from '@strapi/strapi/admin';
-import { useIntl } from 'react-intl';
-import CollectionTypeModal, { CollectionTypeConfig } from '../components/CollectionTypeModal';
-import CustomURLModal, { CustomURLConfig } from '../components/CustomURLModal';
-import SitemapDefinitionModal, { SitemapDefinition } from '../components/SitemapDefinitionModal';
-import { CollectionTypesSection } from '../components/settings/CollectionTypesSection';
-import { CustomUrlsSection } from '../components/settings/CustomUrlsSection';
-import { ExcludedUrlsSection } from '../components/settings/ExcludedUrlsSection';
-import { SitemapIndexSection } from '../components/settings/SitemapIndexSection';
-import getTrad from '../utils/getTrad';
+import {
+  Main,
+  Box,
+  Button,
+  Grid,
+  Flex,
+  Typography,
+  TextInput,
+  Tabs
+} from "@strapi/design-system";
+import { Check } from "@strapi/icons";
+import { useFetchClient } from "@strapi/strapi/admin";
+import React, { useState, useEffect } from "react";
+import { useIntl } from "react-intl";
+
+import CollectionTypeModal, { type CollectionTypeConfig } from "../components/CollectionTypeModal";
+import CustomURLModal, { type CustomURLConfig } from "../components/CustomURLModal";
+import { CollectionTypesSection } from "../components/settings/CollectionTypesSection";
+import { CustomUrlsSection } from "../components/settings/CustomUrlsSection";
+import { ExcludedUrlsSection } from "../components/settings/ExcludedUrlsSection";
+import { SitemapIndexSection } from "../components/settings/SitemapIndexSection";
+import SitemapDefinitionModal, {
+  type SitemapDefinition,
+} from "../components/SitemapDefinitionModal";
+import getTrad from "../utils/getTrad";
 
 interface SitemapSettingsPayload {
   baseUrl?: string;
@@ -31,7 +43,7 @@ interface NormalizedSitemapSettings {
 }
 
 const normalizeFetchedSettings = (data?: SitemapSettingsPayload): NormalizedSitemapSettings => ({
-  baseUrl: data?.baseUrl || '',
+  baseUrl: data?.baseUrl || "",
   collectionTypes: data?.collectionTypes || [],
   customURLs: data?.customURLs || [],
   excludedUrls: data?.excludedUrls || [],
@@ -50,13 +62,13 @@ const Settings: React.FC = () => {
   const { get, put } = useFetchClient();
   const { formatMessage } = useIntl();
 
-  const [baseUrl, setBaseUrl] = useState<string>('');
-  const [initialBaseUrl, setInitialBaseUrl] = useState<string>('');
+  const [baseUrl, setBaseUrl] = useState<string>("");
+  const [initialBaseUrl, setInitialBaseUrl] = useState<string>("");
   const [collectionTypes, setCollectionTypes] = useState<CollectionTypeConfig[]>([]);
   const [customURLs, setCustomURLs] = useState<CustomURLConfig[]>([]);
   const [excludedUrls, setExcludedUrls] = useState<string[]>([]);
   const [initialExcludedUrls, setInitialExcludedUrls] = useState<string[]>([]);
-  const [newExcludedPath, setNewExcludedPath] = useState<string>('');
+  const [newExcludedPath, setNewExcludedPath] = useState<string>("");
 
   const [useSitemapIndex, setUseSitemapIndex] = useState<boolean>(false);
   const [sitemaps, setSitemaps] = useState<SitemapDefinition[]>([]);
@@ -74,7 +86,7 @@ const Settings: React.FC = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const { data } = await get<SitemapSettingsPayload>('/sitemap/settings');
+        const { data } = await get<SitemapSettingsPayload>("/sitemap/settings");
         const normalized = normalizeFetchedSettings(data);
         setBaseUrl(normalized.baseUrl);
         setInitialBaseUrl(normalized.baseUrl);
@@ -87,7 +99,7 @@ const Settings: React.FC = () => {
         setInitialUseSitemapIndex(normalized.useSitemapIndex);
         setInitialSitemaps(normalized.sitemaps);
       } catch (err) {
-        console.error('Failed to fetch settings:', err);
+        console.error("Failed to fetch settings:", err);
       }
     };
     void fetchSettings();
@@ -101,7 +113,7 @@ const Settings: React.FC = () => {
     JSON.stringify(excludedUrls) !== JSON.stringify(initialExcludedUrls);
 
   const persistSettings = async (overrides: Partial<NormalizedSitemapSettings> = {}) => {
-    await put('/sitemap/settings', {
+    await put("/sitemap/settings", {
       baseUrl,
       collectionTypes,
       customURLs,
@@ -117,7 +129,7 @@ const Settings: React.FC = () => {
       await persistSettings();
       setInitialBaseUrl(baseUrl);
     } catch (err) {
-      console.error('Failed to update baseUrl:', err);
+      console.error("Failed to update baseUrl:", err);
     }
   };
 
@@ -127,17 +139,17 @@ const Settings: React.FC = () => {
       setInitialUseSitemapIndex(useSitemapIndex);
       setInitialSitemaps(sitemaps);
     } catch (err) {
-      console.error('Failed to update sitemap settings:', err);
+      console.error("Failed to update sitemap settings:", err);
     }
   };
 
   const handleAddExcludedUrl = () => {
     const trimmed = newExcludedPath.trim();
     if (!trimmed) return;
-    const normalized = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
     if (!excludedUrls.includes(normalized)) {
       setExcludedUrls([...excludedUrls, normalized]);
-      setNewExcludedPath('');
+      setNewExcludedPath("");
     }
   };
 
@@ -150,7 +162,7 @@ const Settings: React.FC = () => {
       await persistSettings();
       setInitialExcludedUrls(excludedUrls);
     } catch (err) {
-      console.error('Failed to update excluded URLs:', err);
+      console.error("Failed to update excluded URLs:", err);
     }
   };
 
@@ -163,7 +175,7 @@ const Settings: React.FC = () => {
       await persistSettings({ sitemaps: updated });
       setInitialSitemaps(updated);
     } catch (err) {
-      console.error('Failed to save sitemap definition:', err);
+      console.error("Failed to save sitemap definition:", err);
     }
   };
 
@@ -174,7 +186,7 @@ const Settings: React.FC = () => {
       await persistSettings({ sitemaps: updated });
       setInitialSitemaps(updated);
     } catch (err) {
-      console.error('Failed to delete sitemap definition:', err);
+      console.error("Failed to delete sitemap definition:", err);
     }
   };
 
@@ -187,7 +199,7 @@ const Settings: React.FC = () => {
     try {
       await persistSettings({ collectionTypes: updatedCollectionTypes });
     } catch (err) {
-      console.error('Failed to save collection types:', err);
+      console.error("Failed to save collection types:", err);
     }
   };
 
@@ -198,7 +210,7 @@ const Settings: React.FC = () => {
     try {
       await persistSettings({ collectionTypes: updatedCollectionTypes });
     } catch (err) {
-      console.error('Failed to delete collection type:', err);
+      console.error("Failed to delete collection type:", err);
     }
   };
 
@@ -211,7 +223,7 @@ const Settings: React.FC = () => {
     try {
       await persistSettings({ customURLs: updatedCustomURLs });
     } catch (err) {
-      console.error('Failed to save custom URLs:', err);
+      console.error("Failed to save custom URLs:", err);
     }
   };
 
@@ -222,7 +234,7 @@ const Settings: React.FC = () => {
     try {
       await persistSettings({ customURLs: updatedCustomURLs });
     } catch (err) {
-      console.error('Failed to delete custom URL:', err);
+      console.error("Failed to delete custom URL:", err);
     }
   };
 
@@ -232,118 +244,176 @@ const Settings: React.FC = () => {
         <Box paddingBottom={4}>
           <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={4}>
             <Box>
-              <Typography variant="alpha" as="h1">
-                {formatMessage({ id: getTrad('settings.title'), defaultMessage: 'Sitemap' })}
+              <Typography variant="alpha" tag="h1">
+                {formatMessage({ id: getTrad("settings.title"), defaultMessage: "Sitemap" })}
               </Typography>
-              <Typography variant="epsilon" textColor="neutral600" as="p">
+              <Typography variant="epsilon" textColor="neutral600" tag="p">
                 {formatMessage({
-                  id: getTrad('settings.subtitle'),
-                  defaultMessage: 'Settings for the XML sitemap and sitemap index',
+                  id: getTrad("settings.subtitle"),
+                  defaultMessage: "Settings for the XML sitemap and sitemap index",
                 })}
               </Typography>
             </Box>
             <Button
               variant="secondary"
-              onClick={() => window.open('/api/sitemap/sitemap.xml', '_blank')}
+              onClick={() => window.open("/api/sitemap/sitemap.xml", "_blank")}
             >
               {formatMessage({
-                id: getTrad('settings.showSitemap'),
-                defaultMessage: 'Show Sitemap',
+                id: getTrad("settings.showSitemap"),
+                defaultMessage: "Show Sitemap",
               })}
             </Button>
           </Flex>
         </Box>
 
-        <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
-          <Typography variant="delta" as="h2">
-            {formatMessage({ id: getTrad('settings.baseUrl.title'), defaultMessage: 'Base URL' })}
-          </Typography>
-          <Box paddingBottom={4}>
-            <Typography variant="pi" textColor="neutral600">
+        <Tabs.Root defaultValue="general">
+          <Tabs.List
+            aria-label={formatMessage({ id: getTrad("settings.title"), defaultMessage: "Sitemap" })}
+          >
+            <Tabs.Trigger value="general">
               {formatMessage({
-                id: getTrad('settings.baseUrl.description'),
-                defaultMessage: 'Enter the base URL used for all sitemap entries',
+                id: getTrad("settings.tabs.general"),
+                defaultMessage: "General & Sitemap Index",
               })}
-            </Typography>
-          </Box>
-          <Grid.Root gap={4}>
-            <Grid.Item col={6} s={12}>
-              <Box style={{ width: '100%' }}>
-                <TextInput
-                  placeholder={formatMessage({
-                    id: getTrad('settings.baseUrl.placeholder'),
-                    defaultMessage: 'https://example.com',
+            </Tabs.Trigger>
+            <Tabs.Trigger value="collection-types">
+              {`${formatMessage({
+                id: getTrad("settings.collectionTypes.title"),
+                defaultMessage: "Collection Types",
+              })} (${collectionTypes.length})`}
+            </Tabs.Trigger>
+            <Tabs.Trigger value="custom-urls">
+              {`${formatMessage({
+                id: getTrad("settings.customUrls.title"),
+                defaultMessage: "Custom URLs",
+              })} (${customURLs.length})`}
+            </Tabs.Trigger>
+            <Tabs.Trigger value="excluded-urls">
+              {`${formatMessage({
+                id: getTrad("settings.excludedUrls.title"),
+                defaultMessage: "Excluded URLs",
+              })} (${excludedUrls.length})`}
+            </Tabs.Trigger>
+          </Tabs.List>
+
+          <Tabs.Content value="general">
+            <Box paddingTop={4}>
+              <Box
+                padding={6}
+                background="neutral0"
+                shadow="filterShadow"
+                hasRadius
+                marginBottom={6}
+              >
+                <Typography variant="delta" tag="h2">
+                  {formatMessage({
+                    id: getTrad("settings.baseUrl.title"),
+                    defaultMessage: "Base URL",
                   })}
-                  value={baseUrl}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBaseUrl(e.target.value)}
-                />
+                </Typography>
+                <Box paddingBottom={4}>
+                  <Typography variant="pi" textColor="neutral600">
+                    {formatMessage({
+                      id: getTrad("settings.baseUrl.description"),
+                      defaultMessage: "Enter the base URL used for all sitemap entries",
+                    })}
+                  </Typography>
+                </Box>
+                <Grid.Root gap={4}>
+                  <Grid.Item col={6} s={12}>
+                    <Box style={{ width: "100%" }}>
+                      <TextInput
+                        placeholder={formatMessage({
+                          id: getTrad("settings.baseUrl.placeholder"),
+                          defaultMessage: "https://example.com",
+                        })}
+                        value={baseUrl}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setBaseUrl(e.target.value)
+                        }
+                      />
+                    </Box>
+                  </Grid.Item>
+                </Grid.Root>
+                <Box paddingTop={4}>
+                  <Button
+                    startIcon={<Check />}
+                    onClick={handleSaveBaseUrl}
+                    disabled={!isUrlModified}
+                    variant={isUrlModified ? "default" : "tertiary"}
+                  >
+                    {formatMessage({ id: getTrad("settings.save"), defaultMessage: "Save" })}
+                  </Button>
+                </Box>
               </Box>
-            </Grid.Item>
-          </Grid.Root>
-          <Box paddingTop={4}>
-            <Button
-              startIcon={<Check />}
-              onClick={handleSaveBaseUrl}
-              disabled={!isUrlModified}
-              variant={isUrlModified ? 'default' : 'tertiary'}
-            >
-              {formatMessage({ id: getTrad('settings.save'), defaultMessage: 'Save' })}
-            </Button>
-          </Box>
-        </Box>
 
-        <SitemapIndexSection
-          useSitemapIndex={useSitemapIndex}
-          setUseSitemapIndex={setUseSitemapIndex}
-          sitemaps={sitemaps}
-          isSitemapSettingsModified={isSitemapSettingsModified}
-          onSaveSitemapSettings={handleSaveSitemapSettings}
-          onAddSitemap={() => {
-            setEditingSitemapIndex(null);
-            setIsSitemapModalOpen(true);
-          }}
-          onEditSitemap={(idx) => {
-            setEditingSitemapIndex(idx);
-            setIsSitemapModalOpen(true);
-          }}
-          onDeleteSitemap={handleDeleteSitemapDef}
-        />
+              <SitemapIndexSection
+                useSitemapIndex={useSitemapIndex}
+                setUseSitemapIndex={setUseSitemapIndex}
+                sitemaps={sitemaps}
+                isSitemapSettingsModified={isSitemapSettingsModified}
+                onSaveSitemapSettings={handleSaveSitemapSettings}
+                onAddSitemap={() => {
+                  setEditingSitemapIndex(null);
+                  setIsSitemapModalOpen(true);
+                }}
+                onEditSitemap={(idx) => {
+                  setEditingSitemapIndex(idx);
+                  setIsSitemapModalOpen(true);
+                }}
+                onDeleteSitemap={handleDeleteSitemapDef}
+              />
+            </Box>
+          </Tabs.Content>
 
-        <CollectionTypesSection
-          collectionTypes={collectionTypes}
-          onAddCollectionType={() => {
-            setEditingCollectionIndex(null);
-            setIsCollectionModalOpen(true);
-          }}
-          onEditCollectionType={(idx) => {
-            setEditingCollectionIndex(idx);
-            setIsCollectionModalOpen(true);
-          }}
-          onDeleteCollectionType={handleDeleteCollectionType}
-        />
+          <Tabs.Content value="collection-types">
+            <Box paddingTop={4}>
+              <CollectionTypesSection
+                collectionTypes={collectionTypes}
+                onAddCollectionType={() => {
+                  setEditingCollectionIndex(null);
+                  setIsCollectionModalOpen(true);
+                }}
+                onEditCollectionType={(idx) => {
+                  setEditingCollectionIndex(idx);
+                  setIsCollectionModalOpen(true);
+                }}
+                onDeleteCollectionType={handleDeleteCollectionType}
+              />
+            </Box>
+          </Tabs.Content>
 
-        <CustomUrlsSection
-          customURLs={customURLs}
-          onAddCustomUrl={() => {
-            setEditingCustomIndex(null);
-            setIsCustomURLModalOpen(true);
-          }}
-          onEditCustomUrl={(idx) => {
-            setEditingCustomIndex(idx);
-            setIsCustomURLModalOpen(true);
-          }}
-          onDeleteCustomUrl={handleDeleteCustomURL}
-        />
+          <Tabs.Content value="custom-urls">
+            <Box paddingTop={4}>
+              <CustomUrlsSection
+                customURLs={customURLs}
+                onAddCustomUrl={() => {
+                  setEditingCustomIndex(null);
+                  setIsCustomURLModalOpen(true);
+                }}
+                onEditCustomUrl={(idx) => {
+                  setEditingCustomIndex(idx);
+                  setIsCustomURLModalOpen(true);
+                }}
+                onDeleteCustomUrl={handleDeleteCustomURL}
+              />
+            </Box>
+          </Tabs.Content>
 
-        <ExcludedUrlsSection
-          excludedUrls={excludedUrls}
-          newExcludedPath={newExcludedPath}
-          setNewExcludedPath={setNewExcludedPath}
-          isExcludedUrlsModified={isExcludedUrlsModified}
-          onAddExcludedUrl={handleAddExcludedUrl}
-          onDeleteExcludedUrl={handleDeleteExcludedUrl}
-          onSaveExcludedUrls={handleSaveExcludedUrls}
-        />
+          <Tabs.Content value="excluded-urls">
+            <Box paddingTop={4}>
+              <ExcludedUrlsSection
+                excludedUrls={excludedUrls}
+                newExcludedPath={newExcludedPath}
+                setNewExcludedPath={setNewExcludedPath}
+                isExcludedUrlsModified={isExcludedUrlsModified}
+                onAddExcludedUrl={handleAddExcludedUrl}
+                onDeleteExcludedUrl={handleDeleteExcludedUrl}
+                onSaveExcludedUrls={handleSaveExcludedUrls}
+              />
+            </Box>
+          </Tabs.Content>
+        </Tabs.Root>
       </Box>
 
       <CollectionTypeModal

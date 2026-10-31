@@ -1,5 +1,5 @@
-import { PLUGIN_ID } from './pluginId';
-import getTrad from './utils/getTrad';
+import { PLUGIN_ID } from "./pluginId";
+import getTrad from "./utils/getTrad";
 
 interface StrapiAdminApp {
   createSettingSection: (
@@ -9,7 +9,7 @@ interface StrapiAdminApp {
   registerPlugin: (plugin: Record<string, unknown>) => void;
 }
 
-const SUPPORTED_LOCALES = ['en', 'es', 'ar', 'tr', 'fr', 'pt-BR'] as const;
+const SUPPORTED_LOCALES = ["en", "es", "ar", "tr", "fr", "pt-BR"] as const;
 
 const prefixPluginTranslations = (
   trad: Record<string, string>,
@@ -27,20 +27,20 @@ export default {
       {
         id: PLUGIN_ID,
         intlLabel: {
-          id: getTrad('plugin.name'),
-          defaultMessage: 'Sitemap',
+          id: getTrad("plugin.name"),
+          defaultMessage: "Sitemap",
         },
       },
       [
         {
           intlLabel: {
-            id: getTrad('plugin.section.item'),
-            defaultMessage: 'Configuration',
+            id: getTrad("plugin.section.item"),
+            defaultMessage: "Configuration",
           },
           id: `${PLUGIN_ID}.configuration`,
           to: `/settings/${PLUGIN_ID}`,
           Component: async () => {
-            const { default: Settings } = await import('./pages/Settings');
+            const { default: Settings } = await import("./pages/Settings");
             return Settings;
           },
           permissions: [],

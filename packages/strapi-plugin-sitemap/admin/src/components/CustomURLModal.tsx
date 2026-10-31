@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Button,
@@ -6,9 +5,11 @@ import {
   SingleSelectOption,
   TextInput,
   Field,
-} from '@strapi/design-system';
-import { useIntl } from 'react-intl';
-import getTrad from '../utils/getTrad';
+} from "@strapi/design-system";
+import React, { useState, useEffect } from "react";
+import { useIntl } from "react-intl";
+
+import getTrad from "../utils/getTrad";
 
 export interface CustomURLConfig {
   url: string;
@@ -30,9 +31,9 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
   existingData,
 }) => {
   const { formatMessage } = useIntl();
-  const [url, setUrl] = useState<string>(existingData?.url || '');
+  const [url, setUrl] = useState<string>(existingData?.url || "");
   const [priority, setPriority] = useState<number>(existingData?.priority || 0.5);
-  const [frequency, setFrequency] = useState<string>(existingData?.frequency || 'monthly');
+  const [frequency, setFrequency] = useState<string>(existingData?.frequency || "monthly");
 
   useEffect(() => {
     if (existingData) {
@@ -46,7 +47,7 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
     if (!priority || !frequency) return;
 
     onSave({
-      url: url.replace(/^\/+/, ''),
+      url: url.replace(/^\/+/, ""),
       priority,
       frequency,
     });
@@ -60,8 +61,8 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
         <Modal.Header>
           <Modal.Title>
             {formatMessage({
-              id: getTrad('modal.customUrl.title'),
-              defaultMessage: 'Custom Sitemap URL',
+              id: getTrad("modal.customUrl.title"),
+              defaultMessage: "Custom Sitemap URL",
             })}
           </Modal.Title>
         </Modal.Header>
@@ -69,8 +70,8 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
           <Field.Root id="custom_url" style={{ marginBottom: 16 }}>
             <Field.Label>
               {formatMessage({
-                id: getTrad('modal.customUrl.slug'),
-                defaultMessage: 'Enter the slug (without trailing or starting slash)',
+                id: getTrad("modal.customUrl.slug"),
+                defaultMessage: "Enter the slug (without trailing or starting slash)",
               })}
             </Field.Label>
             <TextInput
@@ -83,8 +84,8 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
           <Field.Root id="custom_priority" style={{ marginBottom: 16 }}>
             <Field.Label>
               {formatMessage({
-                id: getTrad('modal.collectionType.priority'),
-                defaultMessage: 'Select a priority',
+                id: getTrad("modal.collectionType.priority"),
+                defaultMessage: "Select a priority",
               })}
             </Field.Label>
             <SingleSelect
@@ -102,15 +103,15 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
           <Field.Root id="custom_frequency" style={{ marginBottom: 16 }}>
             <Field.Label>
               {formatMessage({
-                id: getTrad('modal.collectionType.frequency'),
-                defaultMessage: 'Select a change frequency',
+                id: getTrad("modal.collectionType.frequency"),
+                defaultMessage: "Select a change frequency",
               })}
             </Field.Label>
             <SingleSelect
               value={frequency}
               onChange={(value: string | number) => setFrequency(String(value))}
             >
-              {['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never'].map((freq) => (
+              {["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"].map((freq) => (
                 <SingleSelectOption key={freq} value={freq}>
                   {freq}
                 </SingleSelectOption>
@@ -120,10 +121,10 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: getTrad('action.cancel'), defaultMessage: 'Cancel' })}
+            {formatMessage({ id: getTrad("action.cancel"), defaultMessage: "Cancel" })}
           </Button>
           <Button onClick={handleSave} variant="default" disabled={!priority || !frequency}>
-            {formatMessage({ id: getTrad('action.save'), defaultMessage: 'Save' })}
+            {formatMessage({ id: getTrad("action.save"), defaultMessage: "Save" })}
           </Button>
         </Modal.Footer>
       </Modal.Content>

@@ -65,6 +65,6 @@
   "modal.sitemapDef.noCollectionTypes": "لا توجد أنواع مجموعات مضافة بعد.",
   "modal.sitemapDef.includeCustomUrls": "تضمين الروابط المخصصة في خريطة الموقع هذه",
   "modal.sitemapDef.namePlaceholder": "مثال: articles أو pages",
-  "settings.index.table.configsCount": "{count} إعداد(ات)"
+  "settings.index.table.configsCount": "{count} إعداد(ات)",
+  "settings.tabs.general": "عام وفهرس خريطة الموقع"
 }
-

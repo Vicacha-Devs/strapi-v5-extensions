@@ -1,4 +1,4 @@
-declare module 'react' {
+declare module "react" {
   export type ReactNode =
     | string
     | number
@@ -6,7 +6,7 @@ declare module 'react' {
     | null
     | undefined
     | ReactElement
-    | ReactNode[];
+    | Array<ReactNode>;
 
   export interface ReactElement<P = unknown> {
     type: unknown;
@@ -69,8 +69,8 @@ declare module 'react' {
   export as namespace React;
 }
 
-declare module 'react/jsx-runtime' {
-  import type { ReactElement } from 'react';
+declare module "react/jsx-runtime" {
+  import type { ReactElement } from "react";
   export const Fragment: unknown;
   export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
   export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
@@ -86,7 +86,7 @@ declare module 'react/jsx-runtime' {
   }
 }
 
-declare module 'react-intl' {
+declare module "react-intl" {
   export interface MessageDescriptor {
     id: string;
     defaultMessage?: string;
@@ -101,7 +101,7 @@ declare module 'react-intl' {
   };
 }
 
-declare module '@strapi/strapi/admin' {
+declare module "@strapi/strapi/admin" {
   export interface FetchResponse<T = unknown> {
     data: T;
   }
@@ -135,8 +135,8 @@ declare module '@strapi/strapi/admin' {
   }
 }
 
-declare module '@strapi/design-system' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/design-system" {
+  import type { FC, ReactNode } from "react";
   export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Box: FC<DesignComponentProps>;
@@ -183,15 +183,15 @@ declare module '@strapi/design-system' {
   };
 }
 
-declare module '@strapi/icons' {
-  import type { FC } from 'react';
+declare module "@strapi/icons" {
+  import type { FC } from "react";
   export const Check: FC<Record<string, unknown>>;
   export const Pencil: FC<Record<string, unknown>>;
   export const Plus: FC<Record<string, unknown>>;
   export const Trash: FC<Record<string, unknown>>;
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }
