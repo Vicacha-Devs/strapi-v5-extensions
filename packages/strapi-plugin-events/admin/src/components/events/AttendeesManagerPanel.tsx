@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Badge,
   Box,
@@ -9,9 +8,11 @@ import {
   SingleSelectOption,
   TextInput,
   Typography,
-} from '@strapi/design-system';
-import { PLUGIN_ID } from '../../../../shared/pluginId';
-import type { RsvpRegistrationRecord, RsvpStatus } from '../../../../shared/types';
+} from "@strapi/design-system";
+import React from "react";
+
+import { PLUGIN_ID } from "../../../../shared/pluginId";
+import type { RsvpRegistrationRecord, RsvpStatus } from "../../../../shared/types";
 
 export interface AttendeesManagerPanelProps {
   t: (id: string, defaultMessage: string) => string;
@@ -27,10 +28,10 @@ export interface AttendeesManagerPanelProps {
 }
 
 const STATUS_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
-  checked_in: { bg: 'success100', text: 'success700' },
-  confirmed: { bg: 'primary100', text: 'primary700' },
-  waitlisted: { bg: 'warning100', text: 'warning700' },
-  cancelled: { bg: 'danger100', text: 'danger700' },
+  checked_in: { bg: "success100", text: "success700" },
+  confirmed: { bg: "primary100", text: "primary700" },
+  waitlisted: { bg: "warning100", text: "warning700" },
+  cancelled: { bg: "danger100", text: "danger700" },
 };
 
 function getStatusBadgeColors(status: string): { bg: string; text: string } {
@@ -53,11 +54,11 @@ const AttendeeRegistrationRow: React.FC<AttendeeRowProps> = ({
   const colors = getStatusBadgeColors(reg.status);
   const seatWord =
     reg.guestsCount === 1
-      ? t('attendees.seatSingular', 'seat')
-      : t('attendees.seatPlural', 'seats');
+      ? t("attendees.seatSingular", "seat")
+      : t("attendees.seatPlural", "seats");
   const eventDisplay = reg.eventTitle || reg.eventDocumentId;
-  const phoneSuffix = reg.attendeePhone ? ` • ${reg.attendeePhone}` : '';
-  const canCheckIn = reg.status !== 'checked_in' && reg.status !== 'cancelled';
+  const phoneSuffix = reg.attendeePhone ? ` • ${reg.attendeePhone}` : "";
+  const canCheckIn = reg.status !== "checked_in" && reg.status !== "cancelled";
 
   return (
     <Box padding={3} background="neutral100" hasRadius>
@@ -89,31 +90,29 @@ const AttendeeRegistrationRow: React.FC<AttendeeRowProps> = ({
         <Flex gap={2} alignItems="flex-end">
           {canCheckIn && (
             <Button size="S" variant="default" onClick={() => onCheckIn(reg.documentId)}>
-              ✓ {t('attendees.checkIn', 'Check In')}
+              ✓ {t("attendees.checkIn", "Check In")}
             </Button>
           )}
 
           <Box style={{ minWidth: 155 }}>
             <Field.Root>
-              <Field.Label>{t('attendees.rowStatus', 'Registration Status')}</Field.Label>
+              <Field.Label>{t("attendees.rowStatus", "Registration Status")}</Field.Label>
               <SingleSelect
-                placeholder={t('placeholder.select_status', 'Select status')}
+                placeholder={t("placeholder.select_status", "Select status")}
                 value={reg.status}
-                onChange={(nextSt: string) =>
-                  onStatusChange(reg.documentId, nextSt as RsvpStatus)
-                }
+                onChange={(nextSt: string) => onStatusChange(reg.documentId, nextSt as RsvpStatus)}
               >
                 <SingleSelectOption value="confirmed">
-                  {t('status.confirmed', 'Confirmed')}
+                  {t("status.confirmed", "Confirmed")}
                 </SingleSelectOption>
                 <SingleSelectOption value="checked_in">
-                  {t('status.checked_in', 'Checked In')}
+                  {t("status.checked_in", "Checked In")}
                 </SingleSelectOption>
                 <SingleSelectOption value="waitlisted">
-                  {t('status.waitlisted', 'Waitlisted')}
+                  {t("status.waitlisted", "Waitlisted")}
                 </SingleSelectOption>
                 <SingleSelectOption value="cancelled">
-                  {t('status.cancelled', 'Cancelled')}
+                  {t("status.cancelled", "Cancelled")}
                 </SingleSelectOption>
               </SingleSelect>
             </Field.Root>
@@ -138,7 +137,7 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
 }) => {
   const exportQuery = rsvpEventFilter
     ? `?eventDocumentId=${encodeURIComponent(rsvpEventFilter)}`
-    : '';
+    : "";
 
   return (
     <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
@@ -147,17 +146,15 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
           <Flex gap={3} wrap="wrap" alignItems="flex-end">
             <Box style={{ minWidth: 240 }}>
               <Field.Root>
-                <Field.Label>
-                  {t('attendees.search', 'Search Attendee or Event')}
-                </Field.Label>
+                <Field.Label>{t("attendees.search", "Search Attendee or Event")}</Field.Label>
                 <TextInput
                   value={rsvpSearch}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     onRsvpSearchChange(e.target.value)
                   }
                   placeholder={t(
-                    'placeholder.name_email_or_event_title',
-                    'Name, email, or event title...'
+                    "placeholder.name_email_or_event_title",
+                    "Name, email, or event title..."
                   )}
                 />
               </Field.Root>
@@ -165,26 +162,26 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
 
             <Box style={{ minWidth: 160 }}>
               <Field.Root>
-                <Field.Label>{t('attendees.statusFilter', 'Status')}</Field.Label>
+                <Field.Label>{t("attendees.statusFilter", "Status")}</Field.Label>
                 <SingleSelect
-                  placeholder={t('placeholder.all_statuses', 'All Statuses')}
+                  placeholder={t("placeholder.all_statuses", "All Statuses")}
                   value={rsvpStatusFilter}
                   onChange={(val: string) => onRsvpStatusFilterChange(val)}
                 >
                   <SingleSelectOption value="all">
-                    {t('placeholder.all_statuses', 'All Statuses')}
+                    {t("placeholder.all_statuses", "All Statuses")}
                   </SingleSelectOption>
                   <SingleSelectOption value="confirmed">
-                    {t('status.confirmed', 'Confirmed')}
+                    {t("status.confirmed", "Confirmed")}
                   </SingleSelectOption>
                   <SingleSelectOption value="checked_in">
-                    {t('status.checked_in', 'Checked In')}
+                    {t("status.checked_in", "Checked In")}
                   </SingleSelectOption>
                   <SingleSelectOption value="waitlisted">
-                    {t('status.waitlisted', 'Waitlisted')}
+                    {t("status.waitlisted", "Waitlisted")}
                   </SingleSelectOption>
                   <SingleSelectOption value="cancelled">
-                    {t('status.cancelled', 'Cancelled')}
+                    {t("status.cancelled", "Cancelled")}
                   </SingleSelectOption>
                 </SingleSelect>
               </Field.Root>
@@ -192,7 +189,7 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
 
             {rsvpEventFilter && (
               <Button size="S" variant="tertiary" onClick={onClearRsvpEventFilter}>
-                {t('attendees.clearEventFilter', 'Clear Event Filter')} ({rsvpEventFilter})
+                {t("attendees.clearEventFilter", "Clear Event Filter")} ({rsvpEventFilter})
               </Button>
             )}
           </Flex>
@@ -205,13 +202,13 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {t('attendees.exportCsv', 'Export CSV')}
+            {t("attendees.exportCsv", "Export CSV")}
           </Button>
         </Flex>
 
         {registrations.length === 0 ? (
           <Typography variant="omega" textColor="neutral600">
-            {t('attendees.empty', 'No registrations found matching current filters.')}
+            {t("attendees.empty", "No registrations found matching current filters.")}
           </Typography>
         ) : (
           <Flex direction="column" alignItems="stretch" gap={2}>

@@ -1,14 +1,15 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../../shared/pluginId';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../../shared/pluginId";
 import type {
   CalendarSystemConfig,
   EventSourceMapping,
   EventsPluginSettings,
   RecurrencePreset,
-} from '../../../shared/types';
-import { DEFAULT_PLUGIN_SETTINGS } from '../config';
+} from "../../../shared/types";
+import { DEFAULT_PLUGIN_SETTINGS } from "../config";
 
-const STORE_KEY = 'settings';
+const STORE_KEY = "settings";
 
 function mergeSourcesList(
   defaults: EventSourceMapping[],
@@ -24,7 +25,7 @@ function mergeSourcesList(
       merged[existingIdx] = {
         ...merged[existingIdx],
         ...src,
-        fields: { ...merged[existingIdx].fields, ...(src.fields ?? {}) },
+        fields: { ...merged[existingIdx].fields, ...src.fields },
       };
     } else {
       merged.push(src);
@@ -72,19 +73,15 @@ function mergePresetLists(
 }
 
 function resolveNonEmptyString(patchVal: unknown, fallback: string, maxLen?: number): string {
-  if (typeof patchVal === 'string' && patchVal.trim()) {
+  if (typeof patchVal === "string" && patchVal.trim()) {
     const trimmed = patchVal.trim();
     return maxLen ? trimmed.slice(0, maxLen) : trimmed;
   }
   return fallback;
 }
 
-function resolvePositiveInt(
-  patchVal: unknown,
-  fallback: number,
-  maxLimit?: number
-): number {
-  if (typeof patchVal === 'number' && patchVal >= 1) {
+function resolvePositiveInt(patchVal: unknown, fallback: number, maxLimit?: number): number {
+  if (typeof patchVal === "number" && patchVal >= 1) {
     const floored = Math.floor(patchVal);
     return maxLimit ? Math.min(maxLimit, floored) : floored;
   }
@@ -92,7 +89,7 @@ function resolvePositiveInt(
 }
 
 function resolveBoolean(patchVal: unknown, fallback: boolean): boolean {
-  return typeof patchVal === 'boolean' ? patchVal : fallback;
+  return typeof patchVal === "boolean" ? patchVal : fallback;
 }
 
 function resolveArray<T>(patchVal: unknown, fallback: T[]): T[] {
@@ -102,7 +99,7 @@ function resolveArray<T>(patchVal: unknown, fallback: T[]): T[] {
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getStore = () =>
     strapi.store({
-      type: 'plugin',
+      type: "plugin",
       name: PLUGIN_ID,
     });
 
@@ -128,7 +125,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async ensureInitialized(): Promise<EventsPluginSettings> {
       const store = getStore();
-      const existing = (await store.get({ key: STORE_KEY })) as Partial<EventsPluginSettings> | null;
+      const existing = (await store.get({
+        key: STORE_KEY,
+      })) as Partial<EventsPluginSettings> | null;
       const defaults = getConfigDefaults();
 
       if (!existing) {
@@ -157,10 +156,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ...existing,
         sources: storedSources,
         secondaryCalendars: storedCalendars,
-        recurrencePresets: mergePresetLists(
-          defaults.recurrencePresets,
-          existing.recurrencePresets
-        ),
+        recurrencePresets: mergePresetLists(defaults.recurrencePresets, existing.recurrencePresets),
       };
       await store.set({ key: STORE_KEY, value: merged });
       return merged;
@@ -183,11 +179,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         secondaryCalendars:
           Array.isArray(stored.secondaryCalendars) && stored.secondaryCalendars.length > 0
             ? stored.secondaryCalendars
-            : defaults.secondaryCalendars ?? [],
-        recurrencePresets: mergePresetLists(
-          defaults.recurrencePresets,
-          stored.recurrencePresets
-        ),
+            : (defaults.secondaryCalendars ?? []),
+        recurrencePresets: mergePresetLists(defaults.recurrencePresets, stored.recurrencePresets),
       };
     },
 
@@ -213,10 +206,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           patch.secondaryCalendars,
           current.secondaryCalendars ?? []
         ),
-        recurrencePresets: resolveArray(
-          patch.recurrencePresets,
-          current.recurrencePresets ?? []
-        ),
+        recurrencePresets: resolveArray(patch.recurrencePresets, current.recurrencePresets ?? []),
       };
 
       const store = getStore();

@@ -1,5 +1,5 @@
-import eventSchema from './event/schema.json';
-import registrationSchema from './registration/schema.json';
+import eventSchema from "./event/schema.json";
+import registrationSchema from "./registration/schema.json";
 
 export default {
   event: { schema: eventSchema },

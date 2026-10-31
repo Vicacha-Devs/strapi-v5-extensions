@@ -1,11 +1,11 @@
-declare module '*.png';
-declare module '*.svg';
-declare module '*.json' {
+declare module "*.png";
+declare module "*.svg";
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }
 
-declare module 'react' {
+declare module "react" {
   export type ReactNode = unknown;
 
   export interface ReactElement<P = unknown> {
@@ -72,13 +72,14 @@ declare module 'react' {
   export as namespace React;
 }
 
-declare module 'react/jsx-runtime' {
+declare module "react/jsx-runtime" {
+  import type { ReactElement } from "react";
   export const Fragment: unknown;
-  export function jsx(type: unknown, props: unknown, key?: unknown): import('react').ReactElement;
-  export function jsxs(type: unknown, props: unknown, key?: unknown): import('react').ReactElement;
+  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
 
   export namespace JSX {
-    interface Element extends import('react').ReactElement {}
+    interface Element extends ReactElement {}
     interface IntrinsicAttributes {
       key?: string | number | null;
       ref?: unknown;
@@ -90,7 +91,7 @@ declare module 'react/jsx-runtime' {
   }
 }
 
-declare module 'react-intl' {
+declare module "react-intl" {
   export interface MessageDescriptor {
     id: string;
     defaultMessage?: string;
@@ -105,15 +106,15 @@ declare module 'react-intl' {
   export function useIntl(): IntlShape;
 }
 
-declare module 'react-router-dom' {
+declare module "react-router-dom" {
   export function useNavigate(): (to: string) => void;
   export function useLocation(): { pathname: string; search: string; hash: string };
   export function useParams<
-    T extends Record<string, string | undefined> = Record<string, string | undefined>
+    T extends Record<string, string | undefined> = Record<string, string | undefined>,
   >(): T;
 }
 
-declare module '@strapi/strapi/admin' {
+declare module "@strapi/strapi/admin" {
   export type DefaultFetchPayload = { data?: unknown; [key: string]: unknown };
   export interface FetchResponse<T = DefaultFetchPayload> {
     data: T;
@@ -129,16 +130,16 @@ declare module '@strapi/strapi/admin' {
     toggleNotification: (opts: { type?: string; message: string }) => void;
   };
   export const Layouts: {
-    Root: import('react').FC<Record<string, unknown>>;
-    Header: import('react').FC<Record<string, unknown>>;
-    Content: import('react').FC<Record<string, unknown>>;
-    Action: import('react').FC<Record<string, unknown>>;
+    Root: import("react").FC<Record<string, unknown>>;
+    Header: import("react").FC<Record<string, unknown>>;
+    Content: import("react").FC<Record<string, unknown>>;
+    Action: import("react").FC<Record<string, unknown>>;
   };
   export const Page: {
-    Main: import('react').FC<Record<string, unknown>>;
-    Title: import('react').FC<Record<string, unknown>>;
-    Loading: import('react').FC<Record<string, unknown>>;
-    Error: import('react').FC<Record<string, unknown>>;
+    Main: import("react").FC<Record<string, unknown>>;
+    Title: import("react").FC<Record<string, unknown>>;
+    Loading: import("react").FC<Record<string, unknown>>;
+    Error: import("react").FC<Record<string, unknown>>;
   };
   export interface StrapiAdminApp {
     customFields: {
@@ -151,9 +152,7 @@ declare module '@strapi/strapi/admin' {
       links: Array<Record<string, unknown>>
     ): void;
     registerPlugin(config: Record<string, unknown>): void;
-    getPlugin(
-      name: string
-    ):
+    getPlugin(name: string):
       | {
           apis?: {
             addEditViewSidePanel?: (panels: Array<unknown>) => void;
@@ -164,17 +163,19 @@ declare module '@strapi/strapi/admin' {
   export type StrapiApp = StrapiAdminApp;
 }
 
-declare module '@strapi/design-system' {
+declare module "@strapi/design-system" {
   export type DesignComponentProps = {
     [key: string]: unknown;
-    children?: import('react').ReactNode;
-    onChange?: ((val: never) => void) | ((e: import('react').ChangeEvent<HTMLInputElement>) => void);
+    children?: import("react").ReactNode;
+    onChange?:
+      | ((val: never) => void)
+      | ((e: import("react").ChangeEvent<HTMLInputElement>) => void);
     onCheckedChange?: (checked: boolean) => void;
     onValueChange?: ((val: never) => void) | ((val: string) => void);
     onClear?: () => void;
-    onClick?: (e?: import('react').MouseEvent<HTMLElement>) => void;
+    onClick?: (e?: import("react").MouseEvent<HTMLElement>) => void;
   };
-  type DesignComponent = import('react').FC<DesignComponentProps>;
+  type DesignComponent = import("react").FC<DesignComponentProps>;
   export const DesignSystemProvider: DesignComponent;
   export const Main: DesignComponent;
   export const Box: DesignComponent;
@@ -241,8 +242,8 @@ declare module '@strapi/design-system' {
   };
 }
 
-declare module '@strapi/icons' {
-  type IconComponent = import('react').FC<Record<string, unknown>>;
+declare module "@strapi/icons" {
+  type IconComponent = import("react").FC<Record<string, unknown>>;
   export const Calendar: IconComponent;
   export const Check: IconComponent;
   export const CheckCircle: IconComponent;

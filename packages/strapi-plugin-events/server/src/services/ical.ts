@@ -1,6 +1,7 @@
-import type { Core } from '@strapi/strapi';
-import { generateIcsCalendar } from '../../../shared/icalGenerator';
-import { getOccurrenceService, getSettingsService } from '../types';
+import type { Core } from "@strapi/strapi";
+
+import { generateIcsCalendar } from "../../../shared/icalGenerator";
+import { getOccurrenceService, getSettingsService } from "../types";
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {

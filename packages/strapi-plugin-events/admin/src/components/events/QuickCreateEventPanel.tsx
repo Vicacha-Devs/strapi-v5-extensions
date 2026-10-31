@@ -1,4 +1,3 @@
-import React, { useMemo } from 'react';
 import {
   Box,
   Button,
@@ -10,27 +9,34 @@ import {
   SingleSelectOption,
   TextInput,
   Typography,
-} from '@strapi/design-system';
-import type { RecurrencePreset, RRuleWeekday } from '../../../../shared/types';
-import { DEFAULT_RECURRENCE_PRESETS } from './calendarPageHelpers';
+} from "@strapi/design-system";
+import React, { useMemo } from "react";
 
-const WEEKDAYS: Array<{ code: RRuleWeekday; labelKey: string; defaultLabel: string; jsDay: number }> = [
-  { code: 'MO', labelKey: 'rrule.weekday.mo', defaultLabel: 'Mon', jsDay: 1 },
-  { code: 'TU', labelKey: 'rrule.weekday.tu', defaultLabel: 'Tue', jsDay: 2 },
-  { code: 'WE', labelKey: 'rrule.weekday.we', defaultLabel: 'Wed', jsDay: 3 },
-  { code: 'TH', labelKey: 'rrule.weekday.th', defaultLabel: 'Thu', jsDay: 4 },
-  { code: 'FR', labelKey: 'rrule.weekday.fr', defaultLabel: 'Fri', jsDay: 5 },
-  { code: 'SA', labelKey: 'rrule.weekday.sa', defaultLabel: 'Sat', jsDay: 6 },
-  { code: 'SU', labelKey: 'rrule.weekday.su', defaultLabel: 'Sun', jsDay: 0 },
+import type { RecurrencePreset, RRuleWeekday } from "../../../../shared/types";
+import { DEFAULT_RECURRENCE_PRESETS } from "./calendarPageHelpers";
+
+const WEEKDAYS: Array<{
+  code: RRuleWeekday;
+  labelKey: string;
+  defaultLabel: string;
+  jsDay: number;
+}> = [
+  { code: "MO", labelKey: "rrule.weekday.mo", defaultLabel: "Mon", jsDay: 1 },
+  { code: "TU", labelKey: "rrule.weekday.tu", defaultLabel: "Tue", jsDay: 2 },
+  { code: "WE", labelKey: "rrule.weekday.we", defaultLabel: "Wed", jsDay: 3 },
+  { code: "TH", labelKey: "rrule.weekday.th", defaultLabel: "Thu", jsDay: 4 },
+  { code: "FR", labelKey: "rrule.weekday.fr", defaultLabel: "Fri", jsDay: 5 },
+  { code: "SA", labelKey: "rrule.weekday.sa", defaultLabel: "Sat", jsDay: 6 },
+  { code: "SU", labelKey: "rrule.weekday.su", defaultLabel: "Sun", jsDay: 0 },
 ];
 
 function extractByDays(rrule: string): RRuleWeekday[] {
   const match = rrule.match(/BYDAY=([A-Z,]+)/i);
   if (!match?.[1]) return [];
-  const validCodes = new Set<RRuleWeekday>(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']);
+  const validCodes = new Set<RRuleWeekday>(["MO", "TU", "WE", "TH", "FR", "SA", "SU"]);
   return match[1]
     .toUpperCase()
-    .split(',')
+    .split(",")
     .map((d) => d.trim() as RRuleWeekday)
     .filter((d) => validCodes.has(d));
 }
@@ -98,17 +104,15 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
     return Array.from(byRRule.values());
   }, [recurrencePresets]);
 
-  const isWeekly = quickRRule.toUpperCase().includes('FREQ=WEEKLY');
+  const isWeekly = quickRRule.toUpperCase().includes("FREQ=WEEKLY");
   const selectedWeekdays = useMemo(() => extractByDays(quickRRule), [quickRRule]);
   const hasCustomWeeklyOption =
-    isWeekly &&
-    Boolean(quickRRule) &&
-    !normalizedPresets.some((p) => p.rrule === quickRRule);
+    isWeekly && Boolean(quickRRule) && !normalizedPresets.some((p) => p.rrule === quickRRule);
 
   const handleRecurrenceSelect = (val: string) => {
-    const nextRRule = val === 'NONE' ? '' : val;
+    const nextRRule = val === "NONE" ? "" : val;
     onQuickRRuleChange(nextRRule);
-    if (nextRRule.toUpperCase().includes('FREQ=WEEKLY')) {
+    if (nextRRule.toUpperCase().includes("FREQ=WEEKLY")) {
       const days = extractByDays(nextRRule);
       if (days.length === 1 && quickStart) {
         const aligned = alignStartDateToWeekday(quickStart, days[0]);
@@ -129,7 +133,7 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
         (c) => c === code || selectedWeekdays.includes(c)
       );
     }
-    const nextRRule = `FREQ=WEEKLY;INTERVAL=1;BYDAY=${nextDays.join(',')}`;
+    const nextRRule = `FREQ=WEEKLY;INTERVAL=1;BYDAY=${nextDays.join(",")}`;
     onQuickRRuleChange(nextRRule);
     if (nextDays.length === 1 && quickStart) {
       const aligned = alignStartDateToWeekday(quickStart, nextDays[0]);
@@ -141,11 +145,7 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
 
   const handleStartDateChange = (nextDateStr: string) => {
     onQuickStartChange(nextDateStr);
-    if (
-      isWeekly &&
-      selectedWeekdays.length === 1 &&
-      /^\d{4}-\d{2}-\d{2}$/.test(nextDateStr)
-    ) {
+    if (isWeekly && selectedWeekdays.length === 1 && /^\d{4}-\d{2}-\d{2}$/.test(nextDateStr)) {
       const dt = new Date(`${nextDateStr}T00:00:00.000Z`);
       if (!Number.isNaN(dt.getTime())) {
         const match = WEEKDAYS.find((w) => w.jsDay === dt.getUTCDay());
@@ -160,34 +160,30 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
     <Box padding={4} background="neutral0" hasRadius shadow="tableShadow">
       <Flex direction="column" alignItems="stretch" gap={3}>
         <Typography variant="delta" fontWeight="bold">
-          {t('calendar.quickCreateTitle', 'Quick-Create Event')}
+          {t("calendar.quickCreateTitle", "Quick-Create Event")}
         </Typography>
         <Flex gap={3} wrap="wrap">
           <Box style={{ flex: 2, minWidth: 220 }}>
             <Field.Root required>
-              <Field.Label>
-                {t('calendar.field.title', 'Event Title')}
-              </Field.Label>
+              <Field.Label>{t("calendar.field.title", "Event Title")}</Field.Label>
               <TextInput
                 value={quickTitle}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   onQuickTitleChange(e.target.value)
                 }
                 placeholder={t(
-                  'placeholder.e_g_product_launch_webinar_weekly_workshop',
-                  'e.g., Product Launch Webinar / Weekly Workshop'
+                  "placeholder.e_g_product_launch_webinar_weekly_workshop",
+                  "e.g., Product Launch Webinar / Weekly Workshop"
                 )}
               />
             </Field.Root>
           </Box>
           <Box style={{ flex: 1, minWidth: 180 }}>
             <Field.Root required>
-              <Field.Label>
-                {t('calendar.field.startDate', 'Start Date')}
-              </Field.Label>
+              <Field.Label>{t("calendar.field.startDate", "Start Date")}</Field.Label>
               <TextInput
                 type="date"
-                placeholder={t('placeholder.yyyy_mm_dd', 'YYYY-MM-DD')}
+                placeholder={t("placeholder.yyyy_mm_dd", "YYYY-MM-DD")}
                 value={quickStart}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   handleStartDateChange(e.target.value)
@@ -197,30 +193,26 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
           </Box>
           <Box style={{ flex: 1, minWidth: 180 }}>
             <Field.Root>
-              <Field.Label>
-                {t('calendar.field.location', 'Location')}
-              </Field.Label>
+              <Field.Label>{t("calendar.field.location", "Location")}</Field.Label>
               <TextInput
                 value={quickLocation}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   onQuickLocationChange(e.target.value)
                 }
-                placeholder={t('placeholder.main_auditorium_online', 'Main Auditorium / Online')}
+                placeholder={t("placeholder.main_auditorium_online", "Main Auditorium / Online")}
               />
             </Field.Root>
           </Box>
           <Box style={{ flex: 1, minWidth: 210 }}>
             <Field.Root>
-              <Field.Label>
-                {t('calendar.field.recurrence', 'Recurrence Preset')}
-              </Field.Label>
+              <Field.Label>{t("calendar.field.recurrence", "Recurrence Preset")}</Field.Label>
               <SingleSelect
-                placeholder={t('placeholder.select_recurrence_preset', 'Select recurrence preset')}
-                value={quickRRule || 'NONE'}
+                placeholder={t("placeholder.select_recurrence_preset", "Select recurrence preset")}
+                value={quickRRule || "NONE"}
                 onChange={handleRecurrenceSelect}
               >
                 <SingleSelectOption value="NONE">
-                  {t('rrule.freq.none', 'Does not repeat (Single Event)')}
+                  {t("rrule.freq.none", "Does not repeat (Single Event)")}
                 </SingleSelectOption>
                 {normalizedPresets.map((preset) => (
                   <SingleSelectOption key={preset.id} value={preset.rrule}>
@@ -229,7 +221,7 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
                 ))}
                 {hasCustomWeeklyOption && (
                   <SingleSelectOption value={quickRRule}>
-                    {`${t('rrule.freq.weekly', 'Weekly')} (${selectedWeekdays.join(', ')})`}
+                    {`${t("rrule.freq.weekly", "Weekly")} (${selectedWeekdays.join(", ")})`}
                   </SingleSelectOption>
                 )}
               </SingleSelect>
@@ -241,7 +233,7 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
           <Box padding={3} background="neutral100" hasRadius>
             <Flex alignItems="center" gap={2} wrap="wrap">
               <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-                {t('calendar.field.repeatWeekdays', 'Repeat on Day(s) of Week:')}
+                {t("calendar.field.repeatWeekdays", "Repeat on Day(s) of Week:")}
               </Typography>
               {WEEKDAYS.map((day) => {
                 const active = selectedWeekdays.includes(day.code);
@@ -249,7 +241,7 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
                   <Button
                     key={day.code}
                     size="S"
-                    variant={active ? 'default' : 'tertiary'}
+                    variant={active ? "default" : "tertiary"}
                     onClick={() => handleToggleWeekday(day.code)}
                   >
                     {t(day.labelKey, day.defaultLabel)}
@@ -261,22 +253,20 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
         )}
 
         <Flex gap={4} alignItems="flex-end" wrap="wrap">
-          <Box style={{ minHeight: 40, display: 'flex', alignItems: 'center' }}>
+          <Box style={{ minHeight: 40, display: "flex", alignItems: "center" }}>
             <Checkbox
               checked={quickRsvpEnabled}
               onCheckedChange={(checked: boolean) => onQuickRsvpEnabledChange(Boolean(checked))}
             >
-              {t('calendar.field.enableRsvp', 'Enable RSVP & Seat Capacity')}
+              {t("calendar.field.enableRsvp", "Enable RSVP & Seat Capacity")}
             </Checkbox>
           </Box>
           {quickRsvpEnabled && (
             <Box style={{ width: 180 }}>
               <Field.Root>
-                <Field.Label>
-                  {t('calendar.field.capacity', 'Max Capacity (Seats)')}
-                </Field.Label>
+                <Field.Label>{t("calendar.field.capacity", "Max Capacity (Seats)")}</Field.Label>
                 <NumberInput
-                  placeholder={t('placeholder.50', '50')}
+                  placeholder={t("placeholder.50", "50")}
                   value={quickCapacity}
                   onValueChange={(val: number | undefined) =>
                     onQuickCapacityChange(val && val >= 1 ? val : 50)
@@ -285,12 +275,12 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
               </Field.Root>
             </Box>
           )}
-          <Flex gap={2} alignItems="center" style={{ marginLeft: 'auto', minHeight: 40 }}>
+          <Flex gap={2} alignItems="center" style={{ marginLeft: "auto", minHeight: 40 }}>
             <Button variant="tertiary" onClick={onCancel}>
-              {t('common.cancel', 'Cancel')}
+              {t("common.cancel", "Cancel")}
             </Button>
             <Button variant="default" onClick={onSubmit}>
-              {t('common.create', 'Create Event')}
+              {t("common.create", "Create Event")}
             </Button>
           </Flex>
         </Flex>

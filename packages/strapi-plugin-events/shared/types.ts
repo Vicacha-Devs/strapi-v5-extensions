@@ -1,12 +1,12 @@
-export type RRuleFrequency = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+export type RRuleFrequency = "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 
-export type RRuleWeekday = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
+export type RRuleWeekday = "MO" | "TU" | "WE" | "TH" | "FR" | "SA" | "SU";
 
-export type EventLifecycleStatus = 'scheduled' | 'cancelled' | 'postponed' | 'rescheduled';
+export type EventLifecycleStatus = "scheduled" | "cancelled" | "postponed" | "rescheduled";
 
-export type EventLocationType = 'in_person' | 'online' | 'hybrid';
+export type EventLocationType = "in_person" | "online" | "hybrid";
 
-export type RsvpStatus = 'confirmed' | 'waitlisted' | 'cancelled' | 'checked_in';
+export type RsvpStatus = "confirmed" | "waitlisted" | "cancelled" | "checked_in";
 
 export interface OccurrenceOverride {
   /** Original occurrence ISO date (YYYY-MM-DD) */
@@ -102,7 +102,7 @@ export interface EventPosterAsset {
   height?: number;
 }
 
-export type EventActionLinkVariant = 'primary' | 'secondary' | 'outline';
+export type EventActionLinkVariant = "primary" | "secondary" | "outline";
 
 export interface EventActionLink {
   /** Human-readable CTA button or resource link label */
@@ -117,7 +117,7 @@ export interface EventActionLink {
   icon?: string;
 }
 
-export type EventSpotlightPosition = 'bottom-end' | 'bottom-start';
+export type EventSpotlightPosition = "bottom-end" | "bottom-start";
 
 export interface EventSpotlightConfig {
   /** Whether this event is promoted in the floating Spotlight corner dock */

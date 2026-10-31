@@ -1,11 +1,12 @@
-import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
-import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
-import type { StrapiApp } from '@strapi/strapi/admin';
-import { PLUGIN_ID } from '../../shared/pluginId';
-import { EventSidePanel } from './components/EventSidePanel';
-import { Initializer } from './components/Initializer';
-import { PluginIcon } from './components/PluginIcon';
-import { rruleField } from './fields/rruleField';
+import type { StrapiApp } from "@strapi/strapi/admin";
+
+import { PLUGIN_ID } from "../../shared/pluginId";
+import { EventSidePanel } from "./components/EventSidePanel";
+import { Initializer } from "./components/Initializer";
+import { PluginIcon } from "./components/PluginIcon";
+import { rruleField } from "./fields/rruleField";
+import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
+import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
 
 export default {
   register(app: StrapiApp) {
@@ -14,10 +15,9 @@ export default {
       icon: PluginIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.plugin.name`,
-        defaultMessage: 'Events & RSVPs',
+        defaultMessage: "Events & RSVPs",
       },
-      Component: () =>
-        import('./pages/CalendarPage').then((m) => ({ default: m.default })),
+      Component: () => import("./pages/CalendarPage").then((m) => ({ default: m.default })),
       permissions: [
         {
           action: `plugin::${PLUGIN_ID}.read`,
@@ -38,21 +38,20 @@ export default {
     );
 
     const calendarSuiteSection = {
-      id: 'calendar',
+      id: "calendar",
       intlLabel: {
-        id: 'calendar.settings.section',
-        defaultMessage: 'Calendar, Events & Bookings',
+        id: "calendar.settings.section",
+        defaultMessage: "Calendar, Events & Bookings",
       },
     };
     const eventsSettingsLink = {
       intlLabel: {
         id: `${PLUGIN_ID}.settings.menuLabel`,
-        defaultMessage: 'Events & RSVPs',
+        defaultMessage: "Events & RSVPs",
       },
       id: `${PLUGIN_ID}-settings`,
       to: `${PLUGIN_ID}`,
-      Component: () =>
-        import('./pages/SettingsPage').then((m) => ({ default: m.default })),
+      Component: () => import("./pages/SettingsPage").then((m) => ({ default: m.default })),
       permissions: [
         {
           action: `plugin::${PLUGIN_ID}.settings.update`,
@@ -61,13 +60,13 @@ export default {
       ],
     };
     const maybeApp = app as unknown as {
-      addSettingsLink?: StrapiApp['addSettingsLink'];
-      createSettingSection?: StrapiApp['createSettingSection'];
+      addSettingsLink?: StrapiApp["addSettingsLink"];
+      createSettingSection?: StrapiApp["createSettingSection"];
     };
     try {
-      if (typeof maybeApp.addSettingsLink === 'function') {
+      if (typeof maybeApp.addSettingsLink === "function") {
         maybeApp.addSettingsLink(calendarSuiteSection.id, eventsSettingsLink);
-      } else if (typeof maybeApp.createSettingSection === 'function') {
+      } else if (typeof maybeApp.createSettingSection === "function") {
         maybeApp.createSettingSection(calendarSuiteSection, [eventsSettingsLink]);
       }
     } catch {
@@ -76,7 +75,7 @@ export default {
   },
 
   bootstrap(app: StrapiApp) {
-    const cmPlugin = app.getPlugin('content-manager') as
+    const cmPlugin = app.getPlugin("content-manager") as
       | {
           apis?: {
             addEditViewSidePanel?: (panels: Array<typeof EventSidePanel>) => void;
@@ -84,7 +83,7 @@ export default {
         }
       | undefined;
     const apis = cmPlugin?.apis;
-    if (apis && typeof apis.addEditViewSidePanel === 'function') {
+    if (apis && typeof apis.addEditViewSidePanel === "function") {
       apis.addEditViewSidePanel([EventSidePanel]);
     }
   },
@@ -95,7 +94,10 @@ export default {
       allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          const prefixed: Record<string, string> = { ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en ?? {}), ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en ?? {}) };
+          const prefixed: Record<string, string> = {
+            ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en),
+            ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en),
+          };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
             const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;

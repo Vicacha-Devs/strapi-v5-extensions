@@ -1,5 +1,6 @@
-import type { Core } from '@strapi/strapi';
-import { EVENT_CONTENT_TYPE_UID } from '../../../shared/pluginId';
+import type { Core } from "@strapi/strapi";
+
+import { EVENT_CONTENT_TYPE_UID } from "../../../shared/pluginId";
 import type {
   EventSourceMapping,
   EventsPluginSettings,
@@ -7,8 +8,8 @@ import type {
   RsvpRegistrationRecord,
   RsvpStats,
   RsvpStatus,
-} from '../../../shared/types';
-import { getDocumentsClient, getSettingsService } from '../types';
+} from "../../../shared/types";
+import { getDocumentsClient, getSettingsService } from "../types";
 
 export interface ResolvedTargetEvent {
   uid: string;
@@ -23,22 +24,22 @@ export interface ResolvedTargetEvent {
 }
 
 export function maskEmail(email: string): string {
-  const [local, domain] = (email || '').split('@');
-  if (!local || !domain) return '***';
+  const [local, domain] = (email || "").split("@");
+  if (!local || !domain) return "***";
   const visible = local.slice(0, Math.min(2, local.length));
   return `${visible}***@${domain}`;
 }
 
 function readNullablePositiveInt(val: unknown): number | null {
-  return typeof val === 'number' && val > 0 ? Math.floor(val) : null;
+  return typeof val === "number" && val > 0 ? Math.floor(val) : null;
 }
 
 function readBooleanWithDefault(val: unknown, fallback: boolean): boolean {
-  return typeof val === 'boolean' ? val : fallback;
+  return typeof val === "boolean" ? val : fallback;
 }
 
 function readMaxGuestsWithDefault(val: unknown, fallback: number): number {
-  return typeof val === 'number' && val >= 1 ? val : fallback;
+  return typeof val === "number" && val >= 1 ? val : fallback;
 }
 
 function buildResolvedTargetEvent(
@@ -47,10 +48,10 @@ function buildResolvedTargetEvent(
   eventDocumentId: string,
   settings: EventsPluginSettings
 ): ResolvedTargetEvent {
-  const title = String(doc[src.fields.title] ?? doc.title ?? 'Event');
-  const startDate = String(doc[src.fields.startDate] ?? doc.startDate ?? '');
-  const rsvpField = src.fields.rsvpEnabled ?? 'rsvpEnabled';
-  const capField = src.fields.capacity ?? 'capacity';
+  const title = String(doc[src.fields.title] ?? doc.title ?? "Event");
+  const startDate = String(doc[src.fields.startDate] ?? doc.startDate ?? "");
+  const rsvpField = src.fields.rsvpEnabled ?? "rsvpEnabled";
+  const capField = src.fields.capacity ?? "capacity";
   const rsvpEnabled = doc[rsvpField] !== undefined ? Boolean(doc[rsvpField]) : true;
 
   return {
@@ -66,7 +67,7 @@ function buildResolvedTargetEvent(
       settings.defaultMaxGuestsPerRegistration
     ),
     registrationDeadline:
-      typeof doc.registrationDeadline === 'string' ? doc.registrationDeadline : null,
+      typeof doc.registrationDeadline === "string" ? doc.registrationDeadline : null,
   };
 }
 
@@ -106,36 +107,38 @@ function readOptionalText(val: unknown): string | undefined {
 }
 
 function readPositiveGuestsCount(val: unknown): number {
-  return typeof val === 'number' && val > 0 ? Math.floor(val) : 1;
+  return typeof val === "number" && val > 0 ? Math.floor(val) : 1;
 }
 
 export function formatRegistrationRecord(raw: Record<string, unknown>): RsvpRegistrationRecord {
   return {
-    documentId: String(raw.documentId ?? ''),
+    documentId: String(raw.documentId ?? ""),
     eventUid: String(raw.eventUid ?? EVENT_CONTENT_TYPE_UID),
-    eventDocumentId: String(raw.eventDocumentId ?? ''),
+    eventDocumentId: String(raw.eventDocumentId ?? ""),
     eventTitle: readOptionalText(raw.eventTitle),
-    occurrenceDate: String(raw.occurrenceDate ?? ''),
-    attendeeName: String(raw.attendeeName ?? ''),
-    attendeeEmail: String(raw.attendeeEmail ?? ''),
+    occurrenceDate: String(raw.occurrenceDate ?? ""),
+    attendeeName: String(raw.attendeeName ?? ""),
+    attendeeEmail: String(raw.attendeeEmail ?? ""),
     attendeePhone: readOptionalText(raw.attendeePhone),
     guestsCount: readPositiveGuestsCount(raw.guestsCount),
-    status: (raw.status as RsvpStatus) ?? 'confirmed',
+    status: (raw.status as RsvpStatus) ?? "confirmed",
     checkedInAt: raw.checkedInAt ? String(raw.checkedInAt) : null,
-    locale: String(raw.locale ?? 'es'),
+    locale: String(raw.locale ?? "es"),
     notes: readOptionalText(raw.notes),
     createdAt: readOptionalText(raw.createdAt),
   };
 }
 
-export function aggregateRsvpCounts(records: Array<Record<string, unknown>>): Pick<
+export function aggregateRsvpCounts(
+  records: Array<Record<string, unknown>>
+): Pick<
   RsvpStats,
-  | 'confirmedCount'
-  | 'confirmedSeats'
-  | 'checkedInSeats'
-  | 'waitlistedCount'
-  | 'waitlistedSeats'
-  | 'cancelledCount'
+  | "confirmedCount"
+  | "confirmedSeats"
+  | "checkedInSeats"
+  | "waitlistedCount"
+  | "waitlistedSeats"
+  | "cancelledCount"
 > {
   let confirmedCount = 0;
   let confirmedSeats = 0;
@@ -147,16 +150,16 @@ export function aggregateRsvpCounts(records: Array<Record<string, unknown>>): Pi
   for (const rec of records) {
     const guests = readPositiveGuestsCount(rec.guestsCount);
     const st = rec.status as RsvpStatus;
-    if (st === 'confirmed' || st === 'checked_in') {
+    if (st === "confirmed" || st === "checked_in") {
       confirmedCount++;
       confirmedSeats += guests;
-      if (st === 'checked_in') {
+      if (st === "checked_in") {
         checkedInSeats += guests;
       }
-    } else if (st === 'waitlisted') {
+    } else if (st === "waitlisted") {
       waitlistedCount++;
       waitlistedSeats += guests;
-    } else if (st === 'cancelled') {
+    } else if (st === "cancelled") {
       cancelledCount++;
     }
   }
@@ -175,10 +178,10 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function assertValidAttendeeIdentity(attendeeName: string, attendeeEmail: string): void {
   if (!attendeeName || attendeeName.length > 160) {
-    throw new Error('Invalid attendeeName: must be between 1 and 160 characters.');
+    throw new Error("Invalid attendeeName: must be between 1 and 160 characters.");
   }
   if (!attendeeEmail || !EMAIL_REGEX.test(attendeeEmail)) {
-    throw new Error('Invalid attendeeEmail: must be a valid email address.');
+    throw new Error("Invalid attendeeEmail: must be a valid email address.");
   }
 }
 
@@ -186,20 +189,18 @@ export function validateRegistrationInputAndEvent(
   input: RsvpRegistrationInput,
   targetEvent: ResolvedTargetEvent
 ): { attendeeName: string; attendeeEmail: string; guestsCount: number } {
-  const attendeeName = (input.attendeeName ?? '').trim();
-  const attendeeEmail = (input.attendeeEmail ?? '').trim().toLowerCase();
+  const attendeeName = (input.attendeeName ?? "").trim();
+  const attendeeEmail = (input.attendeeEmail ?? "").trim().toLowerCase();
 
   assertValidAttendeeIdentity(attendeeName, attendeeEmail);
   if (!targetEvent.rsvpEnabled) {
-    throw new Error('Registrations are closed for this event.');
+    throw new Error("Registrations are closed for this event.");
   }
   assertRegistrationBeforeDeadline(targetEvent.registrationDeadline);
 
   const guestsCount = readPositiveGuestsCount(input.guestsCount);
   if (guestsCount > targetEvent.maxGuestsPerRegistration) {
-    throw new Error(
-      `Maximum guests per registration is ${targetEvent.maxGuestsPerRegistration}.`
-    );
+    throw new Error(`Maximum guests per registration is ${targetEvent.maxGuestsPerRegistration}.`);
   }
 
   return { attendeeName, attendeeEmail, guestsCount };
@@ -209,7 +210,7 @@ function assertRegistrationBeforeDeadline(deadline: string | null): void {
   if (!deadline) return;
   const deadlineMs = new Date(deadline).getTime();
   if (!Number.isNaN(deadlineMs) && Date.now() > deadlineMs) {
-    throw new Error('The registration deadline for this event has passed.');
+    throw new Error("The registration deadline for this event has passed.");
   }
 }
 
@@ -220,11 +221,11 @@ export function resolveAssignedRsvpStatus(
 ): RsvpStatus {
   if (targetEvent.capacity !== null && confirmedSeats + guestsCount > targetEvent.capacity) {
     if (targetEvent.waitlistEnabled) {
-      return 'waitlisted';
+      return "waitlisted";
     }
-    throw new Error('Event has reached maximum capacity.');
+    throw new Error("Event has reached maximum capacity.");
   }
-  return 'confirmed';
+  return "confirmed";
 }
 
 export async function trySendNotificationEmail(
@@ -243,34 +244,32 @@ export async function trySendNotificationEmail(
     const settings = await getSettingsService(strapi).getSettings();
     if (!settings.sendRsvpEmails) return;
 
-    const emailPlugin = strapi.plugin('email');
-    const emailService = emailPlugin?.service('email') as
+    const emailPlugin = strapi.plugin("email");
+    const emailService = emailPlugin?.service("email") as
       | { send?: (msg: { to: string; subject: string; text: string }) => Promise<void> }
       | undefined;
-    if (!emailService || typeof emailService.send !== 'function') return;
+    if (!emailService || typeof emailService.send !== "function") return;
 
     const statusHeadline = payload.promotedFromWaitlist
-      ? 'Your waitlist spot has been confirmed!'
-      : payload.status === 'waitlisted'
-        ? 'You have been added to the event waitlist'
-        : 'Your event registration is confirmed';
+      ? "Your waitlist spot has been confirmed!"
+      : payload.status === "waitlisted"
+        ? "You have been added to the event waitlist"
+        : "Your event registration is confirmed";
 
     await emailService.send({
       to: payload.to,
       subject: `${statusHeadline} — ${payload.eventTitle}`,
       text: [
         `Hello ${payload.attendeeName},`,
-        '',
+        "",
         statusHeadline,
         `Event: ${payload.eventTitle}`,
         `Date: ${payload.occurrenceDate}`,
         `Seats: ${payload.guestsCount}`,
         `Status: ${payload.status.toUpperCase()}`,
-      ].join('\n'),
+      ].join("\n"),
     });
   } catch {
-    strapi.log.debug(
-      `[events] Could not send RSVP notification email to ${maskEmail(payload.to)}`
-    );
+    strapi.log.debug(`[events] Could not send RSVP notification email to ${maskEmail(payload.to)}`);
   }
 }

@@ -1,13 +1,13 @@
-import bootstrap from './bootstrap';
-import config from './config';
-import contentTypes from './content-types';
-import controllers from './controllers';
-import destroy from './destroy';
-import middlewares from './middlewares';
-import policies from './policies';
-import register from './register';
-import routes from './routes';
-import services from './services';
+import bootstrap from "./bootstrap";
+import config from "./config";
+import contentTypes from "./content-types";
+import controllers from "./controllers";
+import destroy from "./destroy";
+import middlewares from "./middlewares";
+import policies from "./policies";
+import register from "./register";
+import routes from "./routes";
+import services from "./services";
 
 export default {
   register,
@@ -39,7 +39,7 @@ export type {
   RsvpStats,
   RsvpStatus,
   TimeSlotWindow,
-} from '../../shared/types';
+} from "../../shared/types";
 
 export {
   buildRRule,
@@ -47,11 +47,11 @@ export {
   expandRuleSlots,
   parseRRule,
   parseRRuleFieldValue,
-} from '../../shared/rruleEngine';
+} from "../../shared/rruleEngine";
 
 export {
   buildCalendarLinks,
   generateIcsCalendar,
   generateRegistrationsCsv,
   sanitizeCsvCell,
-} from '../../shared/icalGenerator';
+} from "../../shared/icalGenerator";

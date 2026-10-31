@@ -12,4 +12,4 @@ export {
   registerCalendarSystemFormatter,
   resolveOccurrenceAlternateDates,
   unregisterCalendarSystemFormatter,
-} from '@vicacha-devs/strapi-plugin-calendar/shared';
+} from "@vicacha-devs/strapi-plugin-calendar/shared";

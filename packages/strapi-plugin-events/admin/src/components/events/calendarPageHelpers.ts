@@ -1,53 +1,53 @@
 import {
   formatDateInCalendarSystem,
   SUPPORTED_INTL_CALENDARS,
-} from '../../../../shared/calendarSystems';
+} from "../../../../shared/calendarSystems";
 import type {
   CalendarSystemConfig,
   EventsPluginSettings,
   ExpandedOccurrence,
   RecurrencePreset,
-} from '../../../../shared/types';
+} from "../../../../shared/types";
 
 export const DEFAULT_RECURRENCE_PRESETS: RecurrencePreset[] = [
-  { id: 'daily', label: 'Daily', rrule: 'FREQ=DAILY;INTERVAL=1' },
+  { id: "daily", label: "Daily", rrule: "FREQ=DAILY;INTERVAL=1" },
   {
-    id: 'weekly-mon',
-    label: 'Weekly on Mondays',
-    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO',
+    id: "weekly-mon",
+    label: "Weekly on Mondays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO",
   },
   {
-    id: 'weekly-tue',
-    label: 'Weekly on Tuesdays',
-    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TU',
+    id: "weekly-tue",
+    label: "Weekly on Tuesdays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=TU",
   },
   {
-    id: 'weekly-wed',
-    label: 'Weekly on Wednesdays',
-    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=WE',
+    id: "weekly-wed",
+    label: "Weekly on Wednesdays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=WE",
   },
   {
-    id: 'weekly-thu',
-    label: 'Weekly on Thursdays',
-    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TH',
+    id: "weekly-thu",
+    label: "Weekly on Thursdays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=TH",
   },
   {
-    id: 'weekly-fri',
-    label: 'Weekly on Fridays',
-    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=FR',
+    id: "weekly-fri",
+    label: "Weekly on Fridays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR",
   },
   {
-    id: 'weekly-sat',
-    label: 'Weekly on Saturdays',
-    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SA',
+    id: "weekly-sat",
+    label: "Weekly on Saturdays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=SA",
   },
   {
-    id: 'weekly-sun',
-    label: 'Weekly on Sundays',
-    rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SU',
+    id: "weekly-sun",
+    label: "Weekly on Sundays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=SU",
   },
-  { id: 'monthly', label: 'Monthly', rrule: 'FREQ=MONTHLY;INTERVAL=1' },
-  { id: 'yearly', label: 'Yearly', rrule: 'FREQ=YEARLY;INTERVAL=1' },
+  { id: "monthly", label: "Monthly", rrule: "FREQ=MONTHLY;INTERVAL=1" },
+  { id: "yearly", label: "Yearly", rrule: "FREQ=YEARLY;INTERVAL=1" },
 ];
 
 export function buildMonthGridDays(year: number, month: number): Date[] {
@@ -98,10 +98,10 @@ export function resolveActiveSecondaryCalendars(
   calendarOverlayId: string,
   settings: EventsPluginSettings | null
 ): CalendarSystemConfig[] {
-  if (calendarOverlayId === 'none') {
+  if (calendarOverlayId === "none") {
     return [];
   }
-  if (calendarOverlayId === 'configured') {
+  if (calendarOverlayId === "configured") {
     return (settings?.secondaryCalendars ?? []).filter((c) => c.enabled);
   }
   const configuredMatch = (settings?.secondaryCalendars ?? []).find(
@@ -131,15 +131,15 @@ export function formatSecondaryHeaderLabel(
   anchorDate: Date,
   locale: string
 ): string {
-  if (activeSecondaryCalendars.length === 0) return '';
+  if (activeSecondaryCalendars.length === 0) return "";
   const anchorIso = anchorDate.toISOString().slice(0, 10);
   return activeSecondaryCalendars
     .map((sys) => {
-      const formatted = formatDateInCalendarSystem(anchorIso, sys, locale || 'en', {
+      const formatted = formatDateInCalendarSystem(anchorIso, sys, locale || "en", {
         compact: false,
       });
-      return formatted ? `${sys.label}: ${formatted}` : '';
+      return formatted ? `${sys.label}: ${formatted}` : "";
     })
     .filter(Boolean)
-    .join(' • ');
+    .join(" • ");
 }

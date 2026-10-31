@@ -1,25 +1,25 @@
-import { normalizeRRuleString } from './rruleEngine';
-import type { CalendarLinkSet, ExpandedOccurrence, RsvpRegistrationRecord } from './types';
+import { normalizeRRuleString } from "./rruleEngine";
+import type { CalendarLinkSet, ExpandedOccurrence, RsvpRegistrationRecord } from "./types";
 
 export function toIcsTimestamp(isoString: string, allDay = false): string {
   const d = new Date(isoString);
   if (Number.isNaN(d.getTime())) {
-    return '';
+    return "";
   }
   const iso = d.toISOString();
   if (allDay) {
-    return iso.slice(0, 10).replace(/-/g, '');
+    return iso.slice(0, 10).replace(/-/g, "");
   }
-  return iso.replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  return iso.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }
 
 export function escapeIcsText(value: string | undefined | null): string {
-  if (!value) return '';
+  if (!value) return "";
   return String(value)
-    .replace(/\\/g, '\\\\')
-    .replace(/\r?\n/g, '\\n')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,');
+    .replace(/\\/g, "\\\\")
+    .replace(/\r?\n/g, "\\n")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,");
 }
 
 export function foldIcsLine(line: string): string {
@@ -34,7 +34,7 @@ export function foldIcsLine(line: string): string {
     chunks.push(` ${remaining.slice(0, 74)}`);
     remaining = remaining.slice(74);
   }
-  return chunks.join('\r\n');
+  return chunks.join("\r\n");
 }
 
 export function buildCalendarLinks(params: {
@@ -53,8 +53,8 @@ export function buildCalendarLinks(params: {
     startDate,
     endDate,
     allDay = false,
-    summary = '',
-    location = '',
+    summary = "",
+    location = "",
     occurrenceDate,
   } = params;
 
@@ -62,7 +62,7 @@ export function buildCalendarLinks(params: {
   const icsEnd = toIcsTimestamp(endDate, allDay);
 
   const googleParams = new URLSearchParams({
-    action: 'TEMPLATE',
+    action: "TEMPLATE",
     text: title,
     dates: `${icsStart}/${icsEnd}`,
     details: summary,
@@ -70,18 +70,18 @@ export function buildCalendarLinks(params: {
   });
 
   const outlookParams = new URLSearchParams({
-    path: '/calendar/action/compose',
-    rru: 'addevent',
+    path: "/calendar/action/compose",
+    rru: "addevent",
     subject: title,
     startdt: startDate,
     enddt: endDate,
     body: summary,
     location,
-    allday: allDay ? 'true' : 'false',
+    allday: allDay ? "true" : "false",
   });
 
   const yahooParams = new URLSearchParams({
-    v: '60',
+    v: "60",
     title,
     st: icsStart,
     et: icsEnd,
@@ -89,7 +89,7 @@ export function buildCalendarLinks(params: {
     in_loc: location,
   });
 
-  const querySuffix = occurrenceDate ? `?occurrenceDate=${encodeURIComponent(occurrenceDate)}` : '';
+  const querySuffix = occurrenceDate ? `?occurrenceDate=${encodeURIComponent(occurrenceDate)}` : "";
 
   return {
     google: `https://calendar.google.com/calendar/render?${googleParams.toString()}`,
@@ -100,17 +100,17 @@ export function buildCalendarLinks(params: {
 }
 
 const ICS_STATUS_MAP: Record<string, string> = {
-  cancelled: 'CANCELLED',
-  postponed: 'TENTATIVE',
+  cancelled: "CANCELLED",
+  postponed: "TENTATIVE",
 };
 
 function resolveIcsStatus(status: string): string {
-  return ICS_STATUS_MAP[status] ?? 'CONFIRMED';
+  return ICS_STATUS_MAP[status] ?? "CONFIRMED";
 }
 
 function appendVEventDateLines(lines: string[], occ: ExpandedOccurrence): void {
   const isAllDay = Boolean(occ.allDay);
-  const prefix = isAllDay ? ';VALUE=DATE' : '';
+  const prefix = isAllDay ? ";VALUE=DATE" : "";
   lines.push(`DTSTART${prefix}:${toIcsTimestamp(occ.startDate, isAllDay)}`);
   lines.push(`DTEND${prefix}:${toIcsTimestamp(occ.endDate, isAllDay)}`);
 }
@@ -127,32 +127,32 @@ function appendVEventOptionalLines(lines: string[], occ: ExpandedOccurrence): vo
 
 export function generateIcsCalendar(
   occurrences: ExpandedOccurrence[],
-  feedTitle = 'Events Calendar'
+  feedTitle = "Events Calendar"
 ): string {
   const nowStamp = toIcsTimestamp(new Date().toISOString(), false);
   const lines: string[] = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Strapi v5//strapi-plugin-events//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Strapi v5//strapi-plugin-events//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
     foldIcsLine(`X-WR-CALNAME:${escapeIcsText(feedTitle)}`),
   ];
 
   for (const occ of occurrences) {
     const uid = `${occ.documentId}-${occ.occurrenceDate}@strapi-plugin-events`;
-    lines.push('BEGIN:VEVENT');
+    lines.push("BEGIN:VEVENT");
     lines.push(foldIcsLine(`UID:${escapeIcsText(uid)}`));
     lines.push(`DTSTAMP:${nowStamp}`);
     appendVEventDateLines(lines, occ);
     lines.push(foldIcsLine(`SUMMARY:${escapeIcsText(occ.title)}`));
     appendVEventOptionalLines(lines, occ);
     lines.push(`STATUS:${resolveIcsStatus(occ.status)}`);
-    lines.push('END:VEVENT');
+    lines.push("END:VEVENT");
   }
 
-  lines.push('END:VCALENDAR');
-  return `${lines.join('\r\n')}\r\n`;
+  lines.push("END:VCALENDAR");
+  return `${lines.join("\r\n")}\r\n`;
 }
 
 /**
@@ -172,23 +172,23 @@ export function sanitizeCsvCell(raw: unknown): string {
 
 export function generateRegistrationsCsv(records: RsvpRegistrationRecord[]): string {
   const headers = [
-    'Document ID',
-    'Event UID',
-    'Event Document ID',
-    'Event Title',
-    'Occurrence Date',
-    'Attendee Name',
-    'Attendee Email',
-    'Attendee Phone',
-    'Guests Count',
-    'Status',
-    'Checked In At',
-    'Locale',
-    'Notes',
-    'Created At',
+    "Document ID",
+    "Event UID",
+    "Event Document ID",
+    "Event Title",
+    "Occurrence Date",
+    "Attendee Name",
+    "Attendee Email",
+    "Attendee Phone",
+    "Guests Count",
+    "Status",
+    "Checked In At",
+    "Locale",
+    "Notes",
+    "Created At",
   ];
 
-  const rows: string[] = [headers.map(sanitizeCsvCell).join(',')];
+  const rows: string[] = [headers.map(sanitizeCsvCell).join(",")];
 
   for (const r of records) {
     rows.push(
@@ -196,22 +196,22 @@ export function generateRegistrationsCsv(records: RsvpRegistrationRecord[]): str
         r.documentId,
         r.eventUid,
         r.eventDocumentId,
-        r.eventTitle ?? '',
+        r.eventTitle ?? "",
         r.occurrenceDate,
         r.attendeeName,
         r.attendeeEmail,
-        r.attendeePhone ?? '',
+        r.attendeePhone ?? "",
         r.guestsCount,
         r.status,
-        r.checkedInAt ?? '',
+        r.checkedInAt ?? "",
         r.locale,
-        r.notes ?? '',
-        r.createdAt ?? '',
+        r.notes ?? "",
+        r.createdAt ?? "",
       ]
         .map(sanitizeCsvCell)
-        .join(',')
+        .join(",")
     );
   }
 
-  return `${rows.join('\r\n')}\r\n`;
+  return `${rows.join("\r\n")}\r\n`;
 }

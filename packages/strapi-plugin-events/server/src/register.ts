@@ -1,10 +1,11 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   EVENT_CONTENT_TYPE_UID,
   PLUGIN_ID,
   REGISTRATION_CONTENT_TYPE_UID,
-} from '../../shared/pluginId';
-import type { EventsPluginSettings } from '../../shared/types';
+} from "../../shared/pluginId";
+import type { EventsPluginSettings } from "../../shared/types";
 
 interface MutableContentTypeSchema {
   attributes?: Record<string, Record<string, unknown>>;
@@ -18,9 +19,9 @@ function mergeAttributeIntoTarget(
   attrName: string,
   attrDef: Record<string, unknown>
 ): void {
-  if (!target || typeof target !== 'object') return;
+  if (!target || typeof target !== "object") return;
   target[attrName] = {
-    ...(target[attrName] ?? {}),
+    ...target[attrName],
     ...attrDef,
   };
 }
@@ -29,12 +30,12 @@ function applyAttributeExtensions(
   contentType: MutableContentTypeSchema | undefined,
   extraAttributes?: Record<string, Record<string, unknown>>
 ): void {
-  if (!contentType || !extraAttributes || typeof extraAttributes !== 'object') {
+  if (!contentType || !extraAttributes || typeof extraAttributes !== "object") {
     return;
   }
 
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
-    if (!attrName || !attrDef || typeof attrDef !== 'object') continue;
+    if (!attrName || !attrDef || typeof attrDef !== "object") continue;
     mergeAttributeIntoTarget(contentType.attributes, attrName, attrDef);
     mergeAttributeIntoTarget(contentType.__schema__?.attributes, attrName, attrDef);
   }
@@ -44,11 +45,11 @@ function buildCategoryEnumAttribute(
   categoryColors: Record<string, string>
 ): Record<string, unknown> {
   const colorKeys = Object.keys(categoryColors);
-  const enumValues = Array.from(new Set(['general', ...colorKeys]));
+  const enumValues = Array.from(new Set(["general", ...colorKeys]));
   return {
-    type: 'enumeration',
+    type: "enumeration",
     enum: enumValues,
-    default: enumValues.includes('general') ? 'general' : enumValues[0],
+    default: enumValues.includes("general") ? "general" : enumValues[0],
     pluginOptions: {
       i18n: {
         localized: false,
@@ -59,9 +60,9 @@ function buildCategoryEnumAttribute(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.customFields.register({
-    name: 'rrule',
+    name: "rrule",
     plugin: PLUGIN_ID,
-    type: 'json',
+    type: "json",
     inputSize: {
       default: 12,
       isResizable: true,
@@ -85,13 +86,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   );
 
   const eventExtensions: Record<string, Record<string, unknown>> = {
-    ...(userConfig.schemaExtensions?.event ?? {}),
+    ...userConfig.schemaExtensions?.event,
   };
 
   if (eventSourceWithCategories?.categoryColors && !eventExtensions.category) {
-    eventExtensions.category = buildCategoryEnumAttribute(
-      eventSourceWithCategories.categoryColors
-    );
+    eventExtensions.category = buildCategoryEnumAttribute(eventSourceWithCategories.categoryColors);
   }
 
   if (Object.keys(eventExtensions).length > 0) {

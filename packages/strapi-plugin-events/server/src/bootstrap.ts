@@ -1,6 +1,7 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../shared/pluginId';
-import { getSettingsService } from './types';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../shared/pluginId";
+import { getSettingsService } from "./types";
 
 interface CalendarRegistryService {
   registerSource?: (source: {
@@ -19,21 +20,21 @@ interface CalendarRegistryService {
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const actions = [
     {
-      section: 'plugins',
-      displayName: 'Read Calendar & Events',
-      uid: 'read',
+      section: "plugins",
+      displayName: "Read Calendar & Events",
+      uid: "read",
       pluginName: PLUGIN_ID,
     },
     {
-      section: 'plugins',
-      displayName: 'Create & Reschedule Events / Manage RSVPs',
-      uid: 'update',
+      section: "plugins",
+      displayName: "Create & Reschedule Events / Manage RSVPs",
+      uid: "update",
       pluginName: PLUGIN_ID,
     },
     {
-      section: 'plugins',
-      displayName: 'Manage Events Plugin Settings',
-      uid: 'settings.update',
+      section: "plugins",
+      displayName: "Manage Events Plugin Settings",
+      uid: "settings.update",
       pluginName: PLUGIN_ID,
     },
   ];
@@ -45,16 +46,16 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Ensure settings store is initialized with config defaults
   const settingsService = getSettingsService(strapi);
   let settings = null;
-  if (settingsService && typeof settingsService.ensureInitialized === 'function') {
+  if (settingsService && typeof settingsService.ensureInitialized === "function") {
     settings = await settingsService.ensureInitialized();
   }
 
   // Register all event sources with @vicacha-devs/strapi-plugin-calendar (required dependency providing the unified calendar view)
-  const calendarPlugin = strapi.plugin('calendar');
-  const calendarRegistry = calendarPlugin?.service('registry') as
+  const calendarPlugin = strapi.plugin("calendar");
+  const calendarRegistry = calendarPlugin?.service("registry") as
     | CalendarRegistryService
     | undefined;
-  if (calendarRegistry && typeof calendarRegistry.registerSource === 'function' && settings) {
+  if (calendarRegistry && typeof calendarRegistry.registerSource === "function" && settings) {
     for (const source of settings.sources ?? []) {
       try {
         await calendarRegistry.registerSource({

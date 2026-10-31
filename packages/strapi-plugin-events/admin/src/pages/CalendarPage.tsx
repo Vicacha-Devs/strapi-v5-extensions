@@ -1,19 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
-import { useFetchClient } from '@strapi/strapi/admin';
-import { Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
-import { PLUGIN_ID } from '../../../shared/pluginId';
+import { Badge, Box, Button, Flex, Typography } from "@strapi/design-system";
+import { useFetchClient } from "@strapi/strapi/admin";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useIntl } from "react-intl";
+import { useNavigate } from "react-router-dom";
+
+import { PLUGIN_ID } from "../../../shared/pluginId";
 import type {
   EventsPluginSettings,
   ExpandedOccurrence,
   RsvpRegistrationRecord,
   RsvpStatus,
-} from '../../../shared/types';
-import { AttendeesManagerPanel } from '../components/events/AttendeesManagerPanel';
-import { DEFAULT_RECURRENCE_PRESETS } from '../components/events/calendarPageHelpers';
-import { EventsDirectoryPanel } from '../components/events/EventsDirectoryPanel';
-import { QuickCreateEventPanel } from '../components/events/QuickCreateEventPanel';
+} from "../../../shared/types";
+import { AttendeesManagerPanel } from "../components/events/AttendeesManagerPanel";
+import { DEFAULT_RECURRENCE_PRESETS } from "../components/events/calendarPageHelpers";
+import { EventsDirectoryPanel } from "../components/events/EventsDirectoryPanel";
+import { QuickCreateEventPanel } from "../components/events/QuickCreateEventPanel";
 
 function shouldReplaceRepresentativeOccurrence(
   existing: ExpandedOccurrence,
@@ -49,21 +50,21 @@ export const CalendarPage: React.FC = () => {
 
   // Quick-Create modal state
   const [showQuickCreate, setShowQuickCreate] = useState<boolean>(false);
-  const [quickTitle, setQuickTitle] = useState<string>('');
-  const [quickStart, setQuickStart] = useState<string>('');
-  const [quickLocation, setQuickLocation] = useState<string>('');
-  const [quickCategory] = useState<string>('general');
-  const [quickRRule, setQuickRRule] = useState<string>('');
+  const [quickTitle, setQuickTitle] = useState<string>("");
+  const [quickStart, setQuickStart] = useState<string>("");
+  const [quickLocation, setQuickLocation] = useState<string>("");
+  const [quickCategory] = useState<string>("general");
+  const [quickRRule, setQuickRRule] = useState<string>("");
   const [quickRsvpEnabled, setQuickRsvpEnabled] = useState<boolean>(true);
   const [quickCapacity, setQuickCapacity] = useState<number>(50);
 
   // Attendees & RSVP Ledger state
   const [registrations, setRegistrations] = useState<RsvpRegistrationRecord[]>([]);
-  const [rsvpSearch, setRsvpSearch] = useState<string>('');
-  const [rsvpStatusFilter, setRsvpStatusFilter] = useState<string>('all');
+  const [rsvpSearch, setRsvpSearch] = useState<string>("");
+  const [rsvpStatusFilter, setRsvpStatusFilter] = useState<string>("all");
   const [rsvpEventFilter, setRsvpEventFilter] = useState<string>(() => {
-    if (typeof window === 'undefined') return '';
-    return new URLSearchParams(window.location.search).get('eventDocumentId') || '';
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("eventDocumentId") || "";
   });
 
   const todayKey = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -101,9 +102,9 @@ export const CalendarPage: React.FC = () => {
   const fetchRegistrations = useCallback(async () => {
     try {
       const params = new URLSearchParams();
-      if (rsvpSearch.trim()) params.set('search', rsvpSearch.trim());
-      if (rsvpStatusFilter !== 'all') params.set('status', rsvpStatusFilter);
-      if (rsvpEventFilter.trim()) params.set('eventDocumentId', rsvpEventFilter.trim());
+      if (rsvpSearch.trim()) params.set("search", rsvpSearch.trim());
+      if (rsvpStatusFilter !== "all") params.set("status", rsvpStatusFilter);
+      if (rsvpEventFilter.trim()) params.set("eventDocumentId", rsvpEventFilter.trim());
 
       const res = await get(`/${PLUGIN_ID}/registrations?${params.toString()}`);
       const data = res?.data?.data;
@@ -111,7 +112,7 @@ export const CalendarPage: React.FC = () => {
         setRegistrations(data as RsvpRegistrationRecord[]);
       }
     } catch {
-      setBannerMessage(t('attendees.error.load', 'Could not load registrations.'));
+      setBannerMessage(t("attendees.error.load", "Could not load registrations."));
     }
   }, [get, rsvpSearch, rsvpStatusFilter, rsvpEventFilter, t]);
 
@@ -160,9 +161,9 @@ export const CalendarPage: React.FC = () => {
     for (const reg of registrations) {
       const seats = Number(reg.guestsCount) || 1;
       if (reg.eventDocumentId) eventsSet.add(reg.eventDocumentId);
-      if (reg.status === 'confirmed') confirmedSeats += seats;
-      else if (reg.status === 'checked_in') checkedInSeats += seats;
-      else if (reg.status === 'waitlisted') waitlistedSeats += seats;
+      if (reg.status === "confirmed") confirmedSeats += seats;
+      else if (reg.status === "checked_in") checkedInSeats += seats;
+      else if (reg.status === "waitlisted") waitlistedSeats += seats;
     }
 
     return {
@@ -178,7 +179,7 @@ export const CalendarPage: React.FC = () => {
   const handleQuickCreateSubmit = useCallback(async () => {
     if (!quickTitle.trim() || !quickStart) return;
     try {
-      const startIso = quickStart.includes('T')
+      const startIso = quickStart.includes("T")
         ? new Date(quickStart).toISOString()
         : `${quickStart}T10:00:00.000Z`;
       const endIso = new Date(new Date(startIso).getTime() + 3600000).toISOString();
@@ -195,13 +196,13 @@ export const CalendarPage: React.FC = () => {
       });
 
       setShowQuickCreate(false);
-      setQuickTitle('');
-      setQuickLocation('');
-      setQuickRRule('');
-      setBannerMessage(t('calendar.created', 'Event created and published.'));
+      setQuickTitle("");
+      setQuickLocation("");
+      setQuickRRule("");
+      setBannerMessage(t("calendar.created", "Event created and published."));
       await Promise.all([fetchCalendarData(), fetchRegistrations()]);
     } catch {
-      setBannerMessage(t('calendar.error.create', 'Could not create event.'));
+      setBannerMessage(t("calendar.error.create", "Could not create event."));
     }
   }, [
     quickTitle,
@@ -221,10 +222,10 @@ export const CalendarPage: React.FC = () => {
     async (regDocId: string) => {
       try {
         await post(`/${PLUGIN_ID}/registrations/${encodeURIComponent(regDocId)}/check-in`, {});
-        setBannerMessage(t('attendees.checkedInSuccess', 'Attendee checked in.'));
+        setBannerMessage(t("attendees.checkedInSuccess", "Attendee checked in."));
         await Promise.all([fetchCalendarData(), fetchRegistrations()]);
       } catch {
-        setBannerMessage(t('attendees.error.checkIn', 'Check-in failed.'));
+        setBannerMessage(t("attendees.error.checkIn", "Check-in failed."));
       }
     },
     [post, t, fetchCalendarData, fetchRegistrations]
@@ -241,15 +242,15 @@ export const CalendarPage: React.FC = () => {
           (res?.data?.data as { promotedCount?: number } | undefined)?.promotedCount ?? 0;
         setBannerMessage(
           promotedCount > 0
-            ? `${t('attendees.statusUpdated', 'Status updated.')} ${promotedCount} ${t(
-                'attendees.waitlistPromoted',
-                'attendee(s) automatically promoted from waitlist!'
+            ? `${t("attendees.statusUpdated", "Status updated.")} ${promotedCount} ${t(
+                "attendees.waitlistPromoted",
+                "attendee(s) automatically promoted from waitlist!"
               )}`
-            : t('attendees.statusUpdated', 'Status updated.')
+            : t("attendees.statusUpdated", "Status updated.")
         );
         await Promise.all([fetchCalendarData(), fetchRegistrations()]);
       } catch {
-        setBannerMessage(t('attendees.error.status', 'Could not update status.'));
+        setBannerMessage(t("attendees.error.status", "Could not update status."));
       }
     },
     [post, t, fetchCalendarData, fetchRegistrations]
@@ -261,13 +262,13 @@ export const CalendarPage: React.FC = () => {
         <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
           <Box>
             <Typography variant="alpha" fontWeight="bold">
-              {t('calendar.title', 'Events, RSVPs & Check-In')}
+              {t("calendar.title", "Events, RSVPs & Check-In")}
             </Typography>
             <Box paddingTop={1}>
               <Typography variant="epsilon" textColor="neutral600">
                 {t(
-                  'calendar.subtitle',
-                  'Manage event registrations, waitlist auto-promotion, and attendee check-ins. Schedule views are unified in Calendar.'
+                  "calendar.subtitle",
+                  "Manage event registrations, waitlist auto-promotion, and attendee check-ins. Schedule views are unified in Calendar."
                 )}
               </Typography>
             </Box>
@@ -277,9 +278,9 @@ export const CalendarPage: React.FC = () => {
             <Button
               variant="secondary"
               size="S"
-              onClick={() => navigate('/plugins/calendar?source=events')}
+              onClick={() => navigate("/plugins/calendar?source=events")}
             >
-              {t('calendar.openUnifiedCalendar', 'Open in Calendar')}
+              {t("calendar.openUnifiedCalendar", "Open in Calendar")}
             </Button>
             <Button
               variant="default"
@@ -289,7 +290,7 @@ export const CalendarPage: React.FC = () => {
                 setShowQuickCreate(true);
               }}
             >
-              + {t('calendar.quickCreate', 'New Event')}
+              + {t("calendar.quickCreate", "New Event")}
             </Button>
             <Button
               variant="secondary"
@@ -299,14 +300,10 @@ export const CalendarPage: React.FC = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {t('calendar.downloadIcsFeed', 'iCal Feed (.ics)')}
+              {t("calendar.downloadIcsFeed", "iCal Feed (.ics)")}
             </Button>
-            <Button
-              variant="tertiary"
-              size="S"
-              onClick={() => navigate(`/settings/${PLUGIN_ID}`)}
-            >
-              {t('calendar.settings', 'Settings')}
+            <Button variant="tertiary" size="S" onClick={() => navigate(`/settings/${PLUGIN_ID}`)}>
+              {t("calendar.settings", "Settings")}
             </Button>
           </Flex>
         </Flex>
@@ -315,34 +312,34 @@ export const CalendarPage: React.FC = () => {
         <Flex gap={4} wrap="wrap">
           {[
             {
-              label: t('stats.totalEvents', 'Registered Events'),
+              label: t("stats.totalEvents", "Registered Events"),
               value: rsvpStats.totalEvents,
-              badge: 'primary100',
+              badge: "primary100",
             },
             {
-              label: t('stats.eventsWithRsvps', 'Events with RSVPs'),
+              label: t("stats.eventsWithRsvps", "Events with RSVPs"),
               value: rsvpStats.distinctEvents,
-              badge: 'secondary100',
+              badge: "secondary100",
             },
             {
-              label: t('stats.registrations', 'Total Registrations'),
+              label: t("stats.registrations", "Total Registrations"),
               value: rsvpStats.totalRegistrations,
-              badge: 'neutral100',
+              badge: "neutral100",
             },
             {
-              label: t('stats.confirmedSeats', 'Confirmed Seats'),
+              label: t("stats.confirmedSeats", "Confirmed Seats"),
               value: rsvpStats.confirmedSeats,
-              badge: 'primary100',
+              badge: "primary100",
             },
             {
-              label: t('stats.checkedInSeats', 'Checked-In Seats'),
+              label: t("stats.checkedInSeats", "Checked-In Seats"),
               value: rsvpStats.checkedInSeats,
-              badge: 'success100',
+              badge: "success100",
             },
             {
-              label: t('stats.waitlistedSeats', 'Waitlisted Seats'),
+              label: t("stats.waitlistedSeats", "Waitlisted Seats"),
               value: rsvpStats.waitlistedSeats,
-              badge: 'warning100',
+              badge: "warning100",
             },
           ].map((card) => (
             <Box
@@ -351,7 +348,7 @@ export const CalendarPage: React.FC = () => {
               hasRadius
               shadow="tableShadow"
               padding={4}
-              style={{ flex: '1 1 160px' }}
+              style={{ flex: "1 1 160px" }}
             >
               <Flex direction="column" alignItems="flex-start" gap={1}>
                 <Typography variant="sigma" textColor="neutral600">
@@ -364,7 +361,12 @@ export const CalendarPage: React.FC = () => {
         </Flex>
 
         {bannerMessage && (
-          <Box padding={3} background="primary100" hasRadius style={{ border: '1px solid #0284C7' }}>
+          <Box
+            padding={3}
+            background="primary100"
+            hasRadius
+            style={{ border: "1px solid #0284C7" }}
+          >
             <Flex justifyContent="space-between" alignItems="center">
               <Typography variant="omega" fontWeight="bold" textColor="primary700">
                 {bannerMessage}
@@ -403,15 +405,13 @@ export const CalendarPage: React.FC = () => {
           selectedEventDocId={rsvpEventFilter}
           onSelectEventDocId={setRsvpEventFilter}
           onEditInContentManager={(uid, docId, locale) => {
-            const query = locale
-              ? `?plugins[i18n][locale]=${encodeURIComponent(locale)}`
-              : '';
+            const query = locale ? `?plugins[i18n][locale]=${encodeURIComponent(locale)}` : "";
             navigate(`/content-manager/collection-types/${uid}/${docId}${query}`);
           }}
           onOpenInCalendar={(docId) =>
             navigate(
               `/plugins/calendar?source=events${
-                docId ? `&documentId=${encodeURIComponent(docId)}` : ''
+                docId ? `&documentId=${encodeURIComponent(docId)}` : ""
               }`
             )
           }
@@ -425,7 +425,7 @@ export const CalendarPage: React.FC = () => {
           rsvpStatusFilter={rsvpStatusFilter}
           onRsvpStatusFilterChange={setRsvpStatusFilter}
           rsvpEventFilter={rsvpEventFilter}
-          onClearRsvpEventFilter={() => setRsvpEventFilter('')}
+          onClearRsvpEventFilter={() => setRsvpEventFilter("")}
           onCheckIn={handleCheckIn}
           onStatusChange={handleStatusChange}
         />
