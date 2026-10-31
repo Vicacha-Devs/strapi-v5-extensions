@@ -309,8 +309,18 @@
   "bookings.modal.startDate": "开始日期与时间 (ISO)",
   "settings.section": "预约与可用性",
   "bookings.settings.section": "预约与可用性",
-  "settings.link": "时段与排期配置",
-  "bookings.settings.link": "时段与排期配置",
+  "settings.link": "Bookings & Availability",
+  "bookings.settings.link": "Bookings & Availability",
   "settings.approvalsHeading": "审批流程与邮件通知",
-  "bookings.settings.approvalsHeading": "审批流程与邮件通知"
+  "bookings.settings.approvalsHeading": "审批流程与邮件通知",
+  "actions.openUnifiedCalendar": "在日历中打开",
+  "bookings.actions.openUnifiedCalendar": "在日历中打开",
+  "modal.langEs": "Español (ES)",
+  "bookings.modal.langEs": "Español (ES)",
+  "modal.langEn": "English (EN)",
+  "bookings.modal.langEn": "English (EN)",
+  "modal.langAr": "العربية — Arabic (AR)",
+  "bookings.modal.langAr": "العربية — Arabic (AR)",
+  "modal.langTr": "Türkçe — Turkish (TR)",
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
 }

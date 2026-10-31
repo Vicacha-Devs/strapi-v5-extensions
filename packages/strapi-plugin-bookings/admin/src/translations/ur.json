@@ -309,8 +309,18 @@
   "bookings.modal.startDate": "آغاز کی تاریخ اور وقت (ISO)",
   "settings.section": "بکنگز اور دستیابی",
   "bookings.settings.section": "بکنگز اور دستیابی",
-  "settings.link": "اوقات اور شیڈول کی ترتیبات",
-  "bookings.settings.link": "اوقات اور شیڈول کی ترتیبات",
+  "settings.link": "Bookings & Availability",
+  "bookings.settings.link": "Bookings & Availability",
   "settings.approvalsHeading": "منظوری کا طریقہ کار اور ای میل اطلاعات",
-  "bookings.settings.approvalsHeading": "منظوری کا طریقہ کار اور ای میل اطلاعات"
+  "bookings.settings.approvalsHeading": "منظوری کا طریقہ کار اور ای میل اطلاعات",
+  "actions.openUnifiedCalendar": "کیلنڈر میں کھولیں",
+  "bookings.actions.openUnifiedCalendar": "کیلنڈر میں کھولیں",
+  "modal.langEs": "Español (ES)",
+  "bookings.modal.langEs": "Español (ES)",
+  "modal.langEn": "English (EN)",
+  "bookings.modal.langEn": "English (EN)",
+  "modal.langAr": "العربية — Arabic (AR)",
+  "bookings.modal.langAr": "العربية — Arabic (AR)",
+  "modal.langTr": "Türkçe — Turkish (TR)",
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
 }

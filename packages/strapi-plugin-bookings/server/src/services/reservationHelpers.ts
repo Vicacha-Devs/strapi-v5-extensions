@@ -50,66 +50,146 @@ export function generateBookingCode(now = new Date()): string {
   return `BKG-${datePart}-${randomSuffix}`;
 }
 
+function asOptStr(val: unknown): string | undefined {
+  return val ? String(val) : undefined;
+}
+
+function asObjRecord(val: unknown): Record<string, unknown> | undefined {
+  return val && typeof val === 'object' ? (val as Record<string, unknown>) : undefined;
+}
+
+function resolveBookingResourceRef(
+  raw: Record<string, unknown>,
+  resourceMap: Map<string, BookingResource>
+) {
+  const relResource = asObjRecord(raw.resource);
+  const rawResourceStr = typeof raw.resource === 'string' ? raw.resource : '';
+  const resourceDocumentId = String(
+    relResource?.documentId ?? relResource?.id ?? raw.resourceDocumentId ?? rawResourceStr
+  );
+  const mappedResource = resourceDocumentId
+    ? resourceMap.get(resourceDocumentId)
+    : undefined;
+  const resourceName = mappedResource?.name ?? asOptStr(relResource?.name);
+  return {
+    resourceDocumentId: resourceDocumentId || undefined,
+    mappedResource,
+    resourceName,
+  };
+}
+
+function asStr(val: unknown, fallback = ''): string {
+  return val !== undefined && val !== null ? String(val) : fallback;
+}
+
+function formatBookingDefaultTitle(
+  customerName: string,
+  resourceName: string | undefined,
+  partySize: number
+): string {
+  const resourceSuffix = resourceName ? ` — ${resourceName}` : '';
+  const sizeSuffix = partySize > 1 ? ` (${partySize})` : '';
+  return `${customerName}${resourceSuffix}${sizeSuffix}`;
+}
+
+function normalizeBookingOptionals(raw: Record<string, unknown>) {
+  return {
+    customerPhone: asOptStr(raw.customerPhone),
+    organization: asOptStr(raw.organization),
+    slotLabel: asOptStr(raw.slotLabel),
+    preferredLanguage: asOptStr(raw.preferredLanguage),
+    assignedHost: asOptStr(raw.assignedHost),
+    notes: asOptStr(raw.notes),
+    internalNotes: asOptStr(raw.internalNotes),
+    metadata: asObjRecord(raw.metadata),
+    createdAt: asOptStr(raw.createdAt),
+    updatedAt: asOptStr(raw.updatedAt),
+  };
+}
+
 export function normalizeBookingRecord(
   raw: Record<string, unknown>,
   resourceMap: Map<string, BookingResource>
 ): BookingRecord {
-  const relResource =
-    raw.resource && typeof raw.resource === 'object'
-      ? (raw.resource as Record<string, unknown>)
-      : undefined;
-
-  const resourceDocumentId = String(
-    relResource?.documentId ??
-      relResource?.id ??
-      raw.resourceDocumentId ??
-      (typeof raw.resource === 'string' ? raw.resource : '')
+  const { resourceDocumentId, mappedResource, resourceName } =
+    resolveBookingResourceRef(raw, resourceMap);
+  const customerName = asStr(raw.customerName, 'Guest');
+  const partySize = Math.max(1, Number(raw.partySize ?? 1));
+  const documentId = asStr(raw.documentId ?? raw.id);
+  const startDate = asStr(raw.startDate);
+  const defaultTitle = formatBookingDefaultTitle(
+    customerName,
+    resourceName,
+    partySize
   );
 
-  const mappedResource = resourceDocumentId
-    ? resourceMap.get(resourceDocumentId)
-    : undefined;
-
-  const customerName = String(raw.customerName ?? 'Guest');
-  const partySize = Math.max(1, Number(raw.partySize ?? 1));
-  const resourceName =
-    mappedResource?.name ??
-    (relResource?.name ? String(relResource.name) : undefined);
-
   return {
-    documentId: String(raw.documentId ?? raw.id ?? ''),
-    bookingCode: String(raw.bookingCode ?? `BKG-${raw.documentId ?? raw.id}`),
-    title: String(
-      raw.title ||
-        `${customerName}${resourceName ? ` — ${resourceName}` : ''}${partySize > 1 ? ` (${partySize})` : ''}`
-    ),
-    resourceDocumentId: resourceDocumentId || undefined,
+    documentId,
+    bookingCode: asStr(raw.bookingCode, `BKG-${documentId}`),
+    title: asOptStr(raw.title) ?? defaultTitle,
+    resourceDocumentId,
     resourceName,
     resourceColor: mappedResource?.color,
     customerName,
-    customerEmail: String(raw.customerEmail ?? ''),
-    customerPhone: raw.customerPhone ? String(raw.customerPhone) : undefined,
-    organization: raw.organization ? String(raw.organization) : undefined,
-    startDate: String(raw.startDate ?? ''),
-    endDate: String(raw.endDate ?? raw.startDate ?? ''),
-    slotLabel: raw.slotLabel ? String(raw.slotLabel) : undefined,
-    timezone: String(raw.timezone ?? mappedResource?.timezone ?? 'UTC'),
+    customerEmail: asStr(raw.customerEmail),
+    startDate,
+    endDate: asStr(raw.endDate, startDate),
+    timezone: asStr(raw.timezone ?? mappedResource?.timezone, 'UTC'),
     partySize,
     status: normalizeStatus(raw.status),
-    preferredLanguage: raw.preferredLanguage
-      ? String(raw.preferredLanguage)
-      : undefined,
-    assignedHost: raw.assignedHost ? String(raw.assignedHost) : undefined,
-    notes: raw.notes ? String(raw.notes) : undefined,
-    internalNotes: raw.internalNotes ? String(raw.internalNotes) : undefined,
-    sourceCollection: String(raw.sourceCollection ?? 'plugin::bookings.booking'),
-    metadata:
-      raw.metadata && typeof raw.metadata === 'object'
-        ? (raw.metadata as Record<string, unknown>)
-        : undefined,
-    createdAt: raw.createdAt ? String(raw.createdAt) : undefined,
-    updatedAt: raw.updatedAt ? String(raw.updatedAt) : undefined,
+    sourceCollection: asStr(raw.sourceCollection, 'plugin::bookings.booking'),
+    ...normalizeBookingOptionals(raw),
   };
+}
+
+function resolveExternalSlotWindow(
+  dateStr: string,
+  slotLabel: string,
+  initialEndIso: string,
+  source: BookingSourceMapping
+): { startIso: string; endIso: string } {
+  if (dateStr.length === 10) {
+    const defaultWindows: Record<string, { start: string; end: string }> = {
+      morning: { start: '09:00', end: '12:00' },
+      afternoon: { start: '14:00', end: '17:00' },
+      evening: { start: '18:00', end: '20:00' },
+      ...(source.slotWindows ?? {}),
+    };
+    const key = slotLabel.toLowerCase();
+    const windowSpec =
+      (slotLabel && defaultWindows[key]) || { start: '09:00', end: '10:00' };
+    return {
+      startIso: `${dateStr}T${windowSpec.start}:00.000Z`,
+      endIso: initialEndIso || `${dateStr}T${windowSpec.end}:00.000Z`,
+    };
+  }
+  if (!initialEndIso) {
+    const parsedStart = Date.parse(dateStr);
+    const endIso = Number.isNaN(parsedStart)
+      ? dateStr
+      : new Date(parsedStart + 3_600_000).toISOString();
+    return { startIso: dateStr, endIso };
+  }
+  return { startIso: dateStr, endIso: initialEndIso };
+}
+
+function readMappedField(
+  row: Record<string, unknown>,
+  fieldName?: string
+): string | undefined {
+  return fieldName && row[fieldName] ? String(row[fieldName]) : undefined;
+}
+
+function resolveExternalPartyAndStatus(
+  row: Record<string, unknown>,
+  source: BookingSourceMapping
+): { partySize: number; status: BookingStatus } {
+  const rawParty = readMappedField(row, source.partySizeField);
+  const partySize = rawParty ? Math.max(1, Number(rawParty)) : 1;
+  const status = source.statusField
+    ? normalizeStatus(row[source.statusField])
+    : 'confirmed';
+  return { partySize, status };
 }
 
 export function mapExternalSourceRowToBooking(
@@ -120,79 +200,107 @@ export function mapExternalSourceRowToBooking(
   if (!rawDate) return null;
 
   const dateStr = String(rawDate).trim();
-  const slotLabel = source.slotLabelField
-    ? String(row[source.slotLabelField] ?? '')
-    : '';
+  const slotLabel = readMappedField(row, source.slotLabelField) ?? '';
+  const initialEndIso = readMappedField(row, source.endDateField) ?? '';
+  const { startIso, endIso } = resolveExternalSlotWindow(
+    dateStr,
+    slotLabel,
+    initialEndIso,
+    source
+  );
 
-  let startIso = dateStr;
-  let endIso = source.endDateField && row[source.endDateField]
-    ? String(row[source.endDateField])
-    : '';
-
-  if (dateStr.length === 10) {
-    const defaultWindows: Record<string, { start: string; end: string }> = {
-      morning: { start: '09:00', end: '12:00' },
-      afternoon: { start: '14:00', end: '17:00' },
-      evening: { start: '18:00', end: '20:00' },
-      ...(source.slotWindows ?? {}),
-    };
-    const windowSpec = slotLabel && defaultWindows[slotLabel.toLowerCase()]
-      ? defaultWindows[slotLabel.toLowerCase()]
-      : { start: '09:00', end: '10:00' };
-    startIso = `${dateStr}T${windowSpec.start}:00.000Z`;
-    if (!endIso) {
-      endIso = `${dateStr}T${windowSpec.end}:00.000Z`;
-    }
-  } else if (!endIso) {
-    const parsedStart = Date.parse(startIso);
-    endIso = Number.isNaN(parsedStart)
-      ? startIso
-      : new Date(parsedStart + 3_600_000).toISOString();
-  }
-
-  const documentId = String(row.documentId ?? row.id ?? '');
-  const customerName = String(row[source.customerNameField] ?? 'Guest');
-  const partySize = source.partySizeField
-    ? Math.max(1, Number(row[source.partySizeField] ?? 1))
-    : 1;
+  const documentId = asStr(row.documentId ?? row.id);
+  const customerName = asStr(row[source.customerNameField], 'Guest');
+  const { partySize, status } = resolveExternalPartyAndStatus(row, source);
 
   return {
     documentId,
     bookingCode: `EXT-${documentId.slice(0, 8).toUpperCase()}`,
-    title: `${customerName} — ${source.label}${partySize > 1 ? ` (${partySize})` : ''}`,
+    title: formatBookingDefaultTitle(customerName, source.label, partySize),
     resourceDocumentId: source.id,
     resourceName: source.label,
-    resourceColor: source.color || '#0d9488',
+    resourceColor: asStr(source.color, '#0d9488'),
     customerName,
-    customerEmail: source.customerEmailField
-      ? String(row[source.customerEmailField] ?? '')
-      : '',
-    customerPhone:
-      source.customerPhoneField && row[source.customerPhoneField]
-        ? String(row[source.customerPhoneField])
-        : undefined,
-    organization:
-      source.organizationField && row[source.organizationField]
-        ? String(row[source.organizationField])
-        : undefined,
+    customerEmail: readMappedField(row, source.customerEmailField) ?? '',
+    customerPhone: readMappedField(row, source.customerPhoneField),
+    organization: readMappedField(row, source.organizationField),
     startDate: startIso,
     endDate: endIso,
-    slotLabel: slotLabel || undefined,
+    slotLabel: asOptStr(slotLabel),
     timezone: 'UTC',
     partySize,
-    status: source.statusField
-      ? normalizeStatus(row[source.statusField])
-      : 'confirmed',
-    preferredLanguage:
-      source.languageField && row[source.languageField]
-        ? String(row[source.languageField])
-        : undefined,
-    notes:
-      source.notesField && row[source.notesField]
-        ? String(row[source.notesField])
-        : undefined,
+    status,
+    preferredLanguage: readMappedField(row, source.languageField),
+    notes: readMappedField(row, source.notesField),
     sourceCollection: source.uid,
   };
+}
+
+function parseBoundaryMs(isoOrDate: string | undefined, endOfDay: boolean): number | null {
+  if (!isoOrDate) return null;
+  const normalized =
+    isoOrDate.length === 10
+      ? `${isoOrDate}T${endOfDay ? '23:59:59.999Z' : '00:00:00.000Z'}`
+      : isoOrDate;
+  const ms = Date.parse(normalized);
+  return Number.isNaN(ms) ? null : ms;
+}
+
+function isWithinDateBoundaries(
+  booking: BookingRecord,
+  fromMs: number | null,
+  toMs: number | null
+): boolean {
+  if (fromMs !== null) {
+    const endMs = Date.parse(booking.endDate);
+    if (!Number.isNaN(endMs) && endMs < fromMs) return false;
+  }
+  if (toMs !== null) {
+    const startMs = Date.parse(booking.startDate);
+    if (!Number.isNaN(startMs) && startMs > toMs) return false;
+  }
+  return true;
+}
+
+function matchesBookingAttributes(
+  booking: BookingRecord,
+  targetResourceId: string | undefined,
+  query: BookingFilterQuery
+): boolean {
+  if (targetResourceId && booking.resourceDocumentId !== targetResourceId) {
+    return false;
+  }
+  if (query.status && booking.status !== query.status) {
+    return false;
+  }
+  if (
+    query.preferredLanguage &&
+    booking.preferredLanguage?.toLowerCase() !==
+      query.preferredLanguage.toLowerCase()
+  ) {
+    return false;
+  }
+  return !query.source || booking.sourceCollection === query.source;
+}
+
+function matchesBookingSearch(
+  booking: BookingRecord,
+  searchLower: string | undefined
+): boolean {
+  if (!searchLower) return true;
+  const haystack = [
+    booking.bookingCode,
+    booking.customerName,
+    booking.customerEmail,
+    booking.organization,
+    booking.assignedHost,
+    booking.resourceName,
+    booking.notes,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  return haystack.includes(searchLower);
 }
 
 export function filterAndSortBookings(
@@ -200,67 +308,152 @@ export function filterAndSortBookings(
   resources: BookingResource[],
   query: BookingFilterQuery
 ): BookingRecord[] {
-  const fromMs = query.from
-    ? query.from.length === 10
-      ? Date.parse(`${query.from}T00:00:00.000Z`)
-      : Date.parse(query.from)
-    : null;
-  const toMs = query.to
-    ? query.to.length === 10
-      ? Date.parse(`${query.to}T23:59:59.999Z`)
-      : Date.parse(query.to)
-    : null;
+  const fromMs = parseBoundaryMs(query.from, false);
+  const toMs = parseBoundaryMs(query.to, true);
 
-  let targetResourceId = query.resourceDocumentId;
-  if (!targetResourceId && query.resourceSlug) {
-    const matched = resources.find((r) => r.slug === query.resourceSlug);
-    if (matched) targetResourceId = matched.documentId;
-  }
-
+  const matchedResource =
+    !query.resourceDocumentId && query.resourceSlug
+      ? resources.find((r) => r.slug === query.resourceSlug)
+      : undefined;
+  const targetResourceId = query.resourceDocumentId ?? matchedResource?.documentId;
   const searchLower = query.search?.trim().toLowerCase();
 
   return allBookings
-    .filter((b) => {
-      if (fromMs !== null && !Number.isNaN(fromMs)) {
-        const endMs = Date.parse(b.endDate);
-        if (!Number.isNaN(endMs) && endMs < fromMs) return false;
-      }
-      if (toMs !== null && !Number.isNaN(toMs)) {
-        const startMs = Date.parse(b.startDate);
-        if (!Number.isNaN(startMs) && startMs > toMs) return false;
-      }
-      if (targetResourceId && b.resourceDocumentId !== targetResourceId) {
-        return false;
-      }
-      if (query.status && b.status !== query.status) {
-        return false;
-      }
-      if (
-        query.preferredLanguage &&
-        b.preferredLanguage?.toLowerCase() !==
-          query.preferredLanguage.toLowerCase()
-      ) {
-        return false;
-      }
-      if (query.source && b.sourceCollection !== query.source) {
-        return false;
-      }
-      if (searchLower) {
-        const haystack = [
-          b.bookingCode,
-          b.customerName,
-          b.customerEmail,
-          b.organization,
-          b.assignedHost,
-          b.resourceName,
-          b.notes,
-        ]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        if (!haystack.includes(searchLower)) return false;
-      }
-      return true;
-    })
+    .filter(
+      (b) =>
+        isWithinDateBoundaries(b, fromMs, toMs) &&
+        matchesBookingAttributes(b, targetResourceId, query) &&
+        matchesBookingSearch(b, searchLower)
+    )
     .sort((a, b) => Date.parse(a.startDate) - Date.parse(b.startDate));
+}
+
+import type {
+  BookingsPluginSettings,
+  CreateReservationInput,
+  RescheduleBookingInput,
+} from '../../../shared/types';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function trimOrUndefined(val: string | undefined): string | undefined {
+  const trimmed = val?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+export function validateReservationCustomerAndStart(input: CreateReservationInput) {
+  const customerName = input.customerName?.trim();
+  const customerEmail = input.customerEmail?.trim().toLowerCase();
+  if (!customerName) {
+    throw new Error('customerName is required');
+  }
+  if (!customerEmail || !EMAIL_REGEX.test(customerEmail)) {
+    throw new Error('A valid customerEmail is required');
+  }
+  const startMs = Date.parse(input.startDate);
+  if (Number.isNaN(startMs)) {
+    throw new Error('A valid ISO startDate is required');
+  }
+  return { customerName, customerEmail, startMs };
+}
+
+export function computeReservationTimingAndParty(
+  input: CreateReservationInput,
+  startMs: number,
+  resource: BookingResource | null,
+  settings: BookingsPluginSettings
+) {
+  const durationMins =
+    resource?.slotDurationMinutes ?? settings.defaultSlotDurationMinutes ?? 60;
+  const endMs = input.endDate
+    ? Date.parse(input.endDate)
+    : startMs + durationMins * 60_000;
+
+  if (Number.isNaN(endMs) || endMs <= startMs) {
+    throw new Error('endDate must be after startDate');
+  }
+
+  const partySize = Math.max(1, Number(input.partySize ?? 1));
+  const maxParty = resource?.maxPartySize ?? 50;
+  if (partySize > maxParty) {
+    throw new Error(
+      `Requested partySize (${partySize}) exceeds maximum allowed (${maxParty})`
+    );
+  }
+  return { endMs, partySize };
+}
+
+export function buildBookingCreatePayload(params: {
+  bookingCode: string;
+  customerName: string;
+  customerEmail: string;
+  startMs: number;
+  endMs: number;
+  partySize: number;
+  status: BookingStatus;
+  assignedHost: string | undefined;
+  cancelTokenHash: string;
+  resource: BookingResource | null;
+  settings: BookingsPluginSettings;
+  input: CreateReservationInput;
+}): Record<string, unknown> {
+  const {
+    bookingCode,
+    customerName,
+    customerEmail,
+    startMs,
+    endMs,
+    partySize,
+    status,
+    assignedHost,
+    cancelTokenHash,
+    resource,
+    settings,
+    input,
+  } = params;
+  return {
+    bookingCode,
+    title: formatBookingDefaultTitle(customerName, resource?.name, partySize),
+    resource: resource?.documentId ?? undefined,
+    resourceDocumentId: resource?.documentId ?? undefined,
+    customerName,
+    customerEmail,
+    customerPhone: trimOrUndefined(input.customerPhone),
+    organization: trimOrUndefined(input.organization),
+    startDate: new Date(startMs).toISOString(),
+    endDate: new Date(endMs).toISOString(),
+    slotLabel: trimOrUndefined(input.slotLabel),
+    timezone: asStr(input.timezone || resource?.timezone || settings.defaultTimezone, 'UTC'),
+    partySize,
+    status,
+    preferredLanguage: trimOrUndefined(input.preferredLanguage),
+    assignedHost,
+    notes: trimOrUndefined(input.notes),
+    cancelTokenHash,
+    sourceCollection: 'plugin::bookings.booking',
+    metadata: input.metadata ?? undefined,
+  };
+}
+
+export function computeRescheduleWindow(
+  targetRaw: Record<string, unknown>,
+  input: RescheduleBookingInput
+): { newStartMs: number; newEndMs: number } {
+  const newStartMs = Date.parse(input.newStartDate);
+  if (Number.isNaN(newStartMs)) {
+    throw new Error('A valid newStartDate is required');
+  }
+  const oldStartMs = Date.parse(String(targetRaw.startDate));
+  const oldEndMs = Date.parse(String(targetRaw.endDate));
+  const hasValidOldRange =
+    !Number.isNaN(oldStartMs) && !Number.isNaN(oldEndMs) && oldEndMs > oldStartMs;
+  const defaultDurationMs = hasValidOldRange ? oldEndMs - oldStartMs : 3_600_000;
+  const newEndMs = input.newEndDate
+    ? Date.parse(input.newEndDate)
+    : newStartMs + defaultDurationMs;
+
+  if (Number.isNaN(newEndMs) || newEndMs <= newStartMs) {
+    throw new Error('newEndDate must be after newStartDate');
+  }
+  return { newStartMs, newEndMs };
 }

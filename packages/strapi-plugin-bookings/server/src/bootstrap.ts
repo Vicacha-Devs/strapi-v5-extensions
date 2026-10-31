@@ -3,6 +3,48 @@ import { registerCalendarSystemFormatter } from '../../shared/calendarSystems';
 import { PLUGIN_ID } from '../../shared/pluginId';
 import type { BookingsPluginConfig } from './types';
 
+const BOOKING_CALENDAR_SOURCE = {
+  id: 'bookings',
+  label: 'Bookings & Reservations',
+  uid: 'plugin::bookings.booking',
+  color: '#0D9488',
+  enabled: true,
+  fields: {
+    title: 'title',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    status: 'status',
+    location: 'assignedHost',
+    summary: 'notes',
+    category: 'status',
+  },
+};
+
+async function registerCalendarCompanion(strapi: Core.Strapi): Promise<void> {
+  const calendarPlugin = strapi.plugin('calendar') as
+    | {
+        service?: (name: string) => {
+          registerSource?: (source: Record<string, unknown>) => Promise<unknown> | unknown;
+          registerCompanionSource?: (source: Record<string, unknown>) => void;
+        };
+      }
+    | undefined;
+
+  try {
+    const calendarRegistry = calendarPlugin?.service?.('registry');
+    if (typeof calendarRegistry?.registerSource === 'function') {
+      await calendarRegistry.registerSource(BOOKING_CALENDAR_SOURCE);
+    }
+
+    const calendarSettingsSvc = calendarPlugin?.service?.('settings');
+    if (typeof calendarSettingsSvc?.registerCompanionSource === 'function') {
+      calendarSettingsSvc.registerCompanionSource(BOOKING_CALENDAR_SOURCE);
+    }
+  } catch {
+    // Ignore if calendar registry store is unavailable during isolated unit tests
+  }
+}
+
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const pluginConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
     {}) as BookingsPluginConfig;
@@ -48,44 +90,5 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     await actionProvider.registerMany(actions);
   }
 
-  // Register plugin::bookings.booking with @vicacha-devs/strapi-plugin-calendar (required dependency providing the unified calendar view)
-  const calendarPlugin = strapi.plugin('calendar') as
-    | {
-        service?: (name: string) => {
-          registerSource?: (source: Record<string, unknown>) => Promise<unknown> | unknown;
-          registerCompanionSource?: (source: Record<string, unknown>) => void;
-        };
-      }
-    | undefined;
-
-  const bookingCalendarSource = {
-    id: 'bookings',
-    label: 'Bookings & Reservations',
-    uid: 'plugin::bookings.booking',
-    color: '#0D9488',
-    enabled: true,
-    fields: {
-      title: 'title',
-      startDate: 'startDate',
-      endDate: 'endDate',
-      status: 'status',
-      location: 'assignedHost',
-      summary: 'notes',
-      category: 'status',
-    },
-  };
-
-  try {
-    const calendarRegistry = calendarPlugin?.service?.('registry');
-    if (calendarRegistry && typeof calendarRegistry.registerSource === 'function') {
-      await calendarRegistry.registerSource(bookingCalendarSource);
-    }
-
-    const calendarSettingsSvc = calendarPlugin?.service?.('settings');
-    if (calendarSettingsSvc && typeof calendarSettingsSvc.registerCompanionSource === 'function') {
-      calendarSettingsSvc.registerCompanionSource(bookingCalendarSource);
-    }
-  } catch {
-    // Ignore if calendar registry store is unavailable during isolated unit tests
-  }
+  await registerCalendarCompanion(strapi);
 };

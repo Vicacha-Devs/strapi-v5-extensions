@@ -1,16 +1,8 @@
 import { formatSecondaryCalendars } from './calendarSystems';
 import type {
-  AssignableHost,
-  AvailableSlot,
-  BlackoutPeriod,
-  BookingRecord,
-  BookingResource,
-  DailyTimeWindow,
-  DayOfWeekKey,
-  HolidayScheduleRule,
-  SeasonalScheduleOverride,
-  SecondaryCalendarConfig,
-  WeeklyScheduleConfig,
+  AssignableHost, AvailableSlot, BlackoutPeriod, BookingRecord, BookingResource,
+  DailyTimeWindow, DayOfWeekKey, HolidayScheduleRule, SeasonalScheduleOverride,
+  SecondaryCalendarConfig, WeeklyScheduleConfig,
 } from './types';
 
 export const DEFAULT_WEEKLY_SCHEDULE: WeeklyScheduleConfig = {
@@ -26,9 +18,7 @@ export const DEFAULT_WEEKLY_SCHEDULE: WeeklyScheduleConfig = {
 
 export function parseTimeMinutes(hhmm: string): number {
   const match = /^(\d{1,2}):(\d{2})$/.exec(hhmm.trim());
-  if (!match) {
-    return 9 * 60;
-  }
+  if (!match) return 9 * 60;
   const hours = Math.min(23, Math.max(0, Number.parseInt(match[1], 10)));
   const minutes = Math.min(59, Math.max(0, Number.parseInt(match[2], 10)));
   return hours * 60 + minutes;
@@ -44,37 +34,25 @@ export function formatTimeMinutes(totalMinutes: number): string {
 export function extractMonthDay(dateOrMmDd: string): string {
   const trimmed = dateOrMmDd.trim();
   const isoDay = trimmed.length >= 10 ? trimmed.slice(0, 10) : trimmed;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(isoDay)) {
-    return isoDay.slice(5, 10);
-  }
-  if (/^\d{2}-\d{2}$/.test(isoDay)) {
-    return isoDay;
-  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(isoDay)) return isoDay.slice(5, 10);
+  if (/^\d{2}-\d{2}$/.test(isoDay)) return isoDay;
   return '';
 }
 
+function matchesYearlessRange(dateStr: string, startStr: string, endStr: string): boolean {
+  const targetMmDd = extractMonthDay(dateStr);
+  const startMmDd = extractMonthDay(startStr);
+  const endMmDd = extractMonthDay(endStr);
+  if (!targetMmDd || !startMmDd || !endMmDd) return false;
+  if (startMmDd <= endMmDd) return targetMmDd >= startMmDd && targetMmDd <= endMmDd;
+  return targetMmDd >= startMmDd || targetMmDd <= endMmDd;
+}
+
 export function matchesDateOrYearlessRange(
-  dateStr: string,
-  startStr: string,
-  endStr: string,
-  yearless = false
+  dateStr: string, startStr: string, endStr: string, yearless = false
 ): boolean {
-  if (!dateStr || !startStr || !endStr) {
-    return false;
-  }
-  if (yearless) {
-    const targetMmDd = extractMonthDay(dateStr);
-    const startMmDd = extractMonthDay(startStr);
-    const endMmDd = extractMonthDay(endStr);
-    if (!targetMmDd || !startMmDd || !endMmDd) {
-      return false;
-    }
-    if (startMmDd <= endMmDd) {
-      return targetMmDd >= startMmDd && targetMmDd <= endMmDd;
-    }
-    // Cross-year range (e.g. '12-15' to '01-05')
-    return targetMmDd >= startMmDd || targetMmDd <= endMmDd;
-  }
+  if (!dateStr || !startStr || !endStr) return false;
+  if (yearless) return matchesYearlessRange(dateStr, startStr, endStr);
   const targetDay = dateStr.trim().slice(0, 10);
   const startDay = startStr.trim().slice(0, 10);
   const endDay = endStr.trim().slice(0, 10);
@@ -82,43 +60,35 @@ export function matchesDateOrYearlessRange(
 }
 
 export function matchesSingleDateOrYearless(
-  dateStr: string,
-  ruleDateStr: string,
-  yearless = false
+  dateStr: string, ruleDateStr: string, yearless = false
 ): boolean {
   return matchesDateOrYearlessRange(dateStr, ruleDateStr, ruleDateStr, yearless);
 }
 
+function parsePeriodTimestamp(raw: string, endOfDay: boolean): number {
+  const trimmed = raw.trim();
+  if (trimmed.length === 10) {
+    return Date.parse(`${trimmed}T${endOfDay ? '23:59:59.999Z' : '00:00:00.000Z'}`);
+  }
+  return Date.parse(trimmed);
+}
+
+function doesPeriodBlackOutSlot(
+  period: BlackoutPeriod, slotDateStr: string, slotStartMs: number, slotEndMs: number
+): boolean {
+  if (!period.start || !period.end) return false;
+  if (period.yearless) return matchesDateOrYearlessRange(slotDateStr, period.start, period.end, true);
+  const startMs = parsePeriodTimestamp(period.start, false);
+  const endMs = parsePeriodTimestamp(period.end, true);
+  if (Number.isNaN(startMs) || Number.isNaN(endMs)) return false;
+  return slotStartMs < endMs && slotEndMs > startMs;
+}
+
 export function isSlotBlackedOut(
-  slotStartMs: number,
-  slotEndMs: number,
-  blackoutDates: BlackoutPeriod[]
+  slotStartMs: number, slotEndMs: number, blackoutDates: BlackoutPeriod[]
 ): boolean {
   const slotDateStr = new Date(slotStartMs).toISOString().slice(0, 10);
-  for (const period of blackoutDates) {
-    if (!period.start || !period.end) continue;
-    if (period.yearless) {
-      if (matchesDateOrYearlessRange(slotDateStr, period.start, period.end, true)) {
-        return true;
-      }
-      continue;
-    }
-    const rawStart = period.start.trim();
-    const rawEnd = period.end.trim();
-    const startMs =
-      rawStart.length === 10
-        ? Date.parse(`${rawStart}T00:00:00.000Z`)
-        : Date.parse(rawStart);
-    const endMs =
-      rawEnd.length === 10
-        ? Date.parse(`${rawEnd}T23:59:59.999Z`)
-        : Date.parse(rawEnd);
-    if (Number.isNaN(startMs) || Number.isNaN(endMs)) continue;
-    if (slotStartMs < endMs && slotEndMs > startMs) {
-      return true;
-    }
-  }
-  return false;
+  return blackoutDates.some((period) => doesPeriodBlackOutSlot(period, slotDateStr, slotStartMs, slotEndMs));
 }
 
 export interface ResolvedDailySchedule {
@@ -128,6 +98,74 @@ export interface ResolvedDailySchedule {
   scheduleLabel?: string;
 }
 
+function findMatchingHoliday(
+  dateStr: string, globalHolidays: HolidayScheduleRule[], resourceHolidays?: HolidayScheduleRule[]
+): HolidayScheduleRule | undefined {
+  const combined = [
+    ...(Array.isArray(globalHolidays) ? globalHolidays : []),
+    ...(Array.isArray(resourceHolidays) ? resourceHolidays : []),
+  ];
+  let matched: HolidayScheduleRule | undefined;
+  for (const rule of combined) {
+    if (rule?.date && matchesSingleDateOrYearless(dateStr, rule.date, Boolean(rule.yearless))) {
+      matched = rule;
+    }
+  }
+  return matched;
+}
+
+function buildHolidayDailySchedule(
+  holiday: HolidayScheduleRule, baseMode: 'interval' | 'window', baseDurationMins: number
+): ResolvedDailySchedule {
+  const hasCustomWindows = Array.isArray(holiday.windows) && holiday.windows.length > 0;
+  const isClosed = holiday.isClosed ?? !hasCustomWindows;
+  if (isClosed || !hasCustomWindows) {
+    return { mode: baseMode, durationMins: baseDurationMins, windows: [], scheduleLabel: holiday.name };
+  }
+  return {
+    mode: holiday.mode ?? baseMode,
+    durationMins: baseDurationMins,
+    windows: holiday.windows ?? [],
+    scheduleLabel: holiday.name,
+  };
+}
+
+function findWinningSeasonalSchedule(
+  dateStr: string, globalSeasonalSchedules: SeasonalScheduleOverride[], resourceSeasonals?: SeasonalScheduleOverride[]
+): SeasonalScheduleOverride | undefined {
+  const combined = [
+    ...(Array.isArray(globalSeasonalSchedules) ? globalSeasonalSchedules : []),
+    ...(Array.isArray(resourceSeasonals) ? resourceSeasonals : []),
+  ];
+  const matching = combined.filter(
+    (s) => s?.schedule && matchesDateOrYearlessRange(dateStr, s.startDate, s.endDate, Boolean(s.yearless))
+  );
+  if (matching.length === 0) return undefined;
+  matching.sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
+  return matching[matching.length - 1];
+}
+
+function resolveBaseWeeklySchedule(resource: BookingResource) {
+  const baseSchedule: WeeklyScheduleConfig =
+    resource.weeklySchedule?.days ? resource.weeklySchedule : DEFAULT_WEEKLY_SCHEDULE;
+  return {
+    baseSchedule,
+    baseMode: baseSchedule.mode ?? 'interval',
+    baseDurationMins: Math.max(5, resource.slotDurationMinutes || 60),
+  };
+}
+
+function buildSeasonalDailySchedule(
+  seasonal: SeasonalScheduleOverride, dayKey: DayOfWeekKey, baseMode: 'interval' | 'window', baseDurationMins: number
+): ResolvedDailySchedule {
+  return {
+    mode: seasonal.schedule.mode ?? baseMode,
+    durationMins: Math.max(5, seasonal.slotDurationMinutes ?? baseDurationMins),
+    windows: seasonal.schedule.days?.[dayKey] ?? [],
+    scheduleLabel: seasonal.label,
+  };
+}
+
 export function resolveDailyScheduleForDate(
   dateStr: string,
   dayKey: DayOfWeekKey,
@@ -135,71 +173,18 @@ export function resolveDailyScheduleForDate(
   globalSeasonalSchedules: SeasonalScheduleOverride[] = [],
   globalHolidays: HolidayScheduleRule[] = []
 ): ResolvedDailySchedule {
-  const baseSchedule: WeeklyScheduleConfig =
-    resource.weeklySchedule && resource.weeklySchedule.days
-      ? resource.weeklySchedule
-      : DEFAULT_WEEKLY_SCHEDULE;
-  const baseMode = baseSchedule.mode ?? 'interval';
-  const baseDurationMins = Math.max(5, resource.slotDurationMinutes || 60);
-
-  // 1. Check holiday rules (resource-level holiday rules take precedence over global holidays)
-  const combinedHolidays = [
-    ...(Array.isArray(globalHolidays) ? globalHolidays : []),
-    ...(Array.isArray(resource.holidayRules) ? resource.holidayRules : []),
-  ];
-  let matchedHoliday: HolidayScheduleRule | undefined;
-  for (const rule of combinedHolidays) {
-    if (rule?.date && matchesSingleDateOrYearless(dateStr, rule.date, Boolean(rule.yearless))) {
-      matchedHoliday = rule;
-    }
-  }
+  const { baseSchedule, baseMode, baseDurationMins } = resolveBaseWeeklySchedule(resource);
+  const matchedHoliday = findMatchingHoliday(dateStr, globalHolidays, resource.holidayRules);
   if (matchedHoliday) {
-    const hasCustomWindows = Array.isArray(matchedHoliday.windows) && matchedHoliday.windows.length > 0;
-    const isClosed = matchedHoliday.isClosed ?? !hasCustomWindows;
-    if (isClosed || !hasCustomWindows) {
-      return {
-        mode: baseMode,
-        durationMins: baseDurationMins,
-        windows: [],
-        scheduleLabel: matchedHoliday.name,
-      };
-    }
-    return {
-      mode: matchedHoliday.mode ?? baseMode,
-      durationMins: baseDurationMins,
-      windows: matchedHoliday.windows ?? [],
-      scheduleLabel: matchedHoliday.name,
-    };
+    return buildHolidayDailySchedule(matchedHoliday, baseMode, baseDurationMins);
   }
-
-  // 2. Check seasonal schedule overrides (sorted by priority ascending so last/highest wins)
-  const combinedSeasonals = [
-    ...(Array.isArray(globalSeasonalSchedules) ? globalSeasonalSchedules : []),
-    ...(Array.isArray(resource.seasonalSchedules) ? resource.seasonalSchedules : []),
-  ];
-  const matchingSeasonals = combinedSeasonals.filter(
-    (s) =>
-      s &&
-      s.schedule &&
-      matchesDateOrYearlessRange(dateStr, s.startDate, s.endDate, Boolean(s.yearless))
+  const winningSeasonal = findWinningSeasonalSchedule(
+    dateStr, globalSeasonalSchedules, resource.seasonalSchedules
   );
-  if (matchingSeasonals.length > 0) {
-    matchingSeasonals.sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
-    const winner = matchingSeasonals[matchingSeasonals.length - 1];
-    return {
-      mode: winner.schedule.mode ?? baseMode,
-      durationMins: Math.max(5, winner.slotDurationMinutes ?? baseDurationMins),
-      windows: winner.schedule.days?.[dayKey] ?? [],
-      scheduleLabel: winner.label,
-    };
+  if (winningSeasonal) {
+    return buildSeasonalDailySchedule(winningSeasonal, dayKey, baseMode, baseDurationMins);
   }
-
-  // 3. Default weekly schedule
-  return {
-    mode: baseMode,
-    durationMins: baseDurationMins,
-    windows: baseSchedule.days?.[dayKey] ?? [],
-  };
+  return { mode: baseMode, durationMins: baseDurationMins, windows: baseSchedule.days?.[dayKey] ?? [] };
 }
 
 export function isActiveBookingStatus(status: BookingRecord['status']): boolean {
@@ -213,14 +198,10 @@ export function doesBookingOverlapSlot(
   bufferBeforeMinutes = 0,
   bufferAfterMinutes = 0
 ): boolean {
-  if (!isActiveBookingStatus(booking.status)) {
-    return false;
-  }
+  if (!isActiveBookingStatus(booking.status)) return false;
   const bStart = Date.parse(booking.startDate);
   const bEnd = Date.parse(booking.endDate);
-  if (Number.isNaN(bStart) || Number.isNaN(bEnd)) {
-    return false;
-  }
+  if (Number.isNaN(bStart) || Number.isNaN(bEnd)) return false;
   const effectiveBookingStart = bStart - bufferBeforeMinutes * 60_000;
   const effectiveBookingEnd = bEnd + bufferAfterMinutes * 60_000;
   return slotStartMs < effectiveBookingEnd && slotEndMs > effectiveBookingStart;
@@ -232,29 +213,23 @@ export function selectAvailableHostsForSlot(
   preferredLanguage?: string
 ): AssignableHost[] {
   const hosts = Array.isArray(resource.assignedHosts) ? resource.assignedHosts : [];
-  if (hosts.length === 0) {
-    return [];
-  }
+  if (hosts.length === 0) return [];
   const busyHostNamesOrIds = new Set(
     overlappingBookings
       .map((b) => b.assignedHost?.trim().toLowerCase())
       .filter((v): v is string => Boolean(v))
   );
-
   const freeHosts = hosts.filter((host) => {
     const idKey = host.id.trim().toLowerCase();
     const nameKey = host.name.trim().toLowerCase();
     return !busyHostNamesOrIds.has(idKey) && !busyHostNamesOrIds.has(nameKey);
   });
-
-  if (!preferredLanguage) {
-    return freeHosts;
-  }
-
+  if (!preferredLanguage) return freeHosts;
   const normalizedLang = preferredLanguage.trim().toLowerCase();
-  const matchingLang = freeHosts.filter((host) =>
-    Array.isArray(host.languages) &&
-    host.languages.some((l) => l.trim().toLowerCase() === normalizedLang)
+  const matchingLang = freeHosts.filter(
+    (host) =>
+      Array.isArray(host.languages) &&
+      host.languages.some((l) => l.trim().toLowerCase() === normalizedLang)
   );
   return matchingLang.length > 0 ? matchingLang : freeHosts;
 }
@@ -270,6 +245,146 @@ export interface ComputeAvailableSlotsParams {
   globalSeasonalSchedules?: SeasonalScheduleOverride[];
   globalHolidays?: HolidayScheduleRule[];
   referenceNow?: Date;
+}
+
+interface CandidateTimeBlock {
+  startMins: number;
+  endMins: number;
+  label: string;
+  capacity: number;
+}
+
+function buildWindowCandidateBlocks(
+  win: DailyTimeWindow,
+  mode: 'interval' | 'window',
+  durationMins: number,
+  bufferBefore: number,
+  bufferAfter: number,
+  defaultCapacity: number
+): CandidateTimeBlock[] {
+  const winStartMins = parseTimeMinutes(win.start);
+  const winEndMins = parseTimeMinutes(win.end);
+  if (winEndMins <= winStartMins) return [];
+  const cap = win.capacity ?? defaultCapacity;
+  if (mode === 'window') {
+    return [{ startMins: winStartMins, endMins: winEndMins, label: win.label || `${win.start}-${win.end}`, capacity: cap }];
+  }
+  const blocks: CandidateTimeBlock[] = [];
+  const stepMins = Math.max(5, durationMins + bufferBefore + bufferAfter);
+  for (let cursorMins = winStartMins; cursorMins + durationMins <= winEndMins; cursorMins += stepMins) {
+    const blockEndMins = cursorMins + durationMins;
+    const isExactMatch = Boolean(win.label && winStartMins + durationMins === winEndMins);
+    const label = isExactMatch
+      ? String(win.label)
+      : `${formatTimeMinutes(cursorMins)}-${formatTimeMinutes(blockEndMins)}`;
+    blocks.push({ startMins: cursorMins, endMins: blockEndMins, label, capacity: cap });
+  }
+  return blocks;
+}
+
+function isCandidateSlotPermitted(
+  slotStartMs: number,
+  slotEndMs: number,
+  rangeStartMs: number,
+  rangeEndMs: number,
+  minAllowedMs: number | null,
+  maxAllowedMs: number | null,
+  blackoutDates: BlackoutPeriod[]
+): boolean {
+  if (slotEndMs <= rangeStartMs || slotStartMs > rangeEndMs) return false;
+  if (minAllowedMs !== null && slotStartMs < minAllowedMs) return false;
+  if (maxAllowedMs !== null && slotStartMs > maxAllowedMs) return false;
+  return !isSlotBlackedOut(slotStartMs, slotEndMs, blackoutDates);
+}
+
+function evaluateCandidateBlockToSlot(params: {
+  block: CandidateTimeBlock;
+  dayCursorMs: number;
+  dateStr: string;
+  scheduleLabel: string | undefined;
+  resource: BookingResource;
+  resourceBookings: BookingRecord[];
+  bufferBefore: number;
+  bufferAfter: number;
+  partySize: number;
+  preferredLanguage: string | undefined;
+  secondaryCalendars: SecondaryCalendarConfig[];
+}): AvailableSlot {
+  const {
+    block,
+    dayCursorMs,
+    dateStr,
+    scheduleLabel,
+    resource,
+    resourceBookings,
+    bufferBefore,
+    bufferAfter,
+    partySize,
+    preferredLanguage,
+    secondaryCalendars,
+  } = params;
+  const slotStartMs = dayCursorMs + block.startMins * 60_000;
+  const slotEndMs = dayCursorMs + block.endMins * 60_000;
+  const overlapping = resourceBookings.filter((b) =>
+    doesBookingOverlapSlot(b, slotStartMs, slotEndMs, bufferBefore, bufferAfter)
+  );
+  const bookedCount = overlapping.reduce((sum, b) => sum + Math.max(1, Number(b.partySize) || 1), 0);
+  const capacity = Math.max(1, block.capacity || resource.capacityPerSlot || 1);
+  const remainingCapacity = Math.max(0, capacity - bookedCount);
+  const maxParty = Math.max(capacity, resource.maxPartySize || capacity);
+
+  return {
+    slotId: `${resource.documentId}:${dateStr}:${block.label}`,
+    resourceDocumentId: resource.documentId,
+    resourceName: resource.name,
+    resourceSlug: resource.slug,
+    start: new Date(slotStartMs).toISOString(),
+    end: new Date(slotEndMs).toISOString(),
+    date: dateStr,
+    slotLabel: block.label,
+    scheduleLabel,
+    capacity,
+    bookedCount,
+    remainingCapacity,
+    isAvailable: remainingCapacity >= Math.max(1, partySize) && partySize <= maxParty,
+    availableHosts: selectAvailableHostsForSlot(resource, overlapping, preferredLanguage),
+    secondaryDates:
+      secondaryCalendars.length > 0
+        ? formatSecondaryCalendars(new Date(slotStartMs), secondaryCalendars)
+        : undefined,
+  };
+}
+
+function resolveLeadAndAdvanceBounds(
+  resource: BookingResource,
+  referenceNow?: Date
+): { minAllowedMs: number | null; maxAllowedMs: number | null } {
+  if (!referenceNow) return { minAllowedMs: null, maxAllowedMs: null };
+  const nowMs = referenceNow.getTime();
+  const minAllowedMs = nowMs + Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000;
+  const maxAllowedMs =
+    resource.maxAdvanceDays > 0 ? nowMs + resource.maxAdvanceDays * 86_400_000 : null;
+  return { minAllowedMs, maxAllowedMs };
+}
+
+function isValidActiveRange(
+  isActive: boolean,
+  rangeStartMs: number,
+  rangeEndMs: number
+): boolean {
+  if (!isActive || Number.isNaN(rangeStartMs) || Number.isNaN(rangeEndMs)) return false;
+  return rangeEndMs >= rangeStartMs;
+}
+
+function filterActiveBookingsForResource(
+  existingBookings: BookingRecord[],
+  resourceDocumentId: string
+): BookingRecord[] {
+  return existingBookings.filter(
+    (b) =>
+      (!b.resourceDocumentId || b.resourceDocumentId === resourceDocumentId) &&
+      isActiveBookingStatus(b.status)
+  );
 }
 
 export function computeAvailableSlots(
@@ -288,58 +403,31 @@ export function computeAvailableSlots(
     referenceNow,
   } = params;
 
-  if (!resource.isActive) {
-    return [];
-  }
-
-  const rangeStartMs =
-    from.length === 10
-      ? Date.parse(`${from}T00:00:00.000Z`)
-      : Date.parse(from);
-  const rangeEndMs =
-    to.length === 10
-      ? Date.parse(`${to}T23:59:59.999Z`)
-      : Date.parse(to);
-
-  if (Number.isNaN(rangeStartMs) || Number.isNaN(rangeEndMs) || rangeEndMs < rangeStartMs) {
+  const rangeStartMs = parsePeriodTimestamp(from, false);
+  const rangeEndMs = parsePeriodTimestamp(to, true);
+  if (!isValidActiveRange(resource.isActive, rangeStartMs, rangeEndMs)) {
     return [];
   }
 
   const bufferBefore = Math.max(0, resource.bufferBeforeMinutes || 0);
   const bufferAfter = Math.max(0, resource.bufferAfterMinutes || 0);
-  const resourceBookings = existingBookings.filter(
-    (b) =>
-      (!b.resourceDocumentId || b.resourceDocumentId === resource.documentId) &&
-      isActiveBookingStatus(b.status)
-  );
-
-  const minAllowedMs = referenceNow
-    ? referenceNow.getTime() + Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000
-    : null;
-  const maxAllowedMs =
-    referenceNow && resource.maxAdvanceDays > 0
-      ? referenceNow.getTime() + resource.maxAdvanceDays * 86_400_000
-      : null;
+  const resourceBookings = filterActiveBookingsForResource(existingBookings, resource.documentId);
+  const { minAllowedMs, maxAllowedMs } = resolveLeadAndAdvanceBounds(resource, referenceNow);
+  const blackoutDates = resource.blackoutDates ?? [];
 
   const slots: AvailableSlot[] = [];
   const startDayUtc = new Date(rangeStartMs);
   startDayUtc.setUTCHours(0, 0, 0, 0);
 
-  const maxDays = 366;
-  let dayCursorMs = startDayUtc.getTime();
-  let dayCount = 0;
-
-  while (dayCursorMs <= rangeEndMs && dayCount < maxDays) {
-    dayCount += 1;
+  for (
+    let dayCursorMs = startDayUtc.getTime(), dayCount = 0;
+    dayCursorMs <= rangeEndMs && dayCount < 366;
+    dayCursorMs += 86_400_000, dayCount += 1
+  ) {
     const dayDate = new Date(dayCursorMs);
     const dayKey = String(dayDate.getUTCDay()) as DayOfWeekKey;
     const dateStr = dayDate.toISOString().slice(0, 10);
-    const {
-      mode,
-      durationMins,
-      windows,
-      scheduleLabel,
-    } = resolveDailyScheduleForDate(
+    const { mode, durationMins, windows, scheduleLabel } = resolveDailyScheduleForDate(
       dateStr,
       dayKey,
       resource,
@@ -347,107 +435,42 @@ export function computeAvailableSlots(
       globalHolidays
     );
 
-    for (const win of windows) {
-      const winStartMins = parseTimeMinutes(win.start);
-      const winEndMins = parseTimeMinutes(win.end);
-      if (winEndMins <= winStartMins) continue;
+    const dayBlocks = windows.flatMap((win) =>
+      buildWindowCandidateBlocks(win, mode, durationMins, bufferBefore, bufferAfter, resource.capacityPerSlot)
+    );
 
-      const candidateBlocks: Array<{
-        startMins: number;
-        endMins: number;
-        label: string;
-        capacity: number;
-      }> = [];
-
-      if (mode === 'window') {
-        candidateBlocks.push({
-          startMins: winStartMins,
-          endMins: winEndMins,
-          label: win.label || `${win.start}-${win.end}`,
-          capacity: win.capacity ?? resource.capacityPerSlot,
-        });
-      } else {
-        const stepMins = durationMins + bufferBefore + bufferAfter;
-        let cursorMins = winStartMins;
-        while (cursorMins + durationMins <= winEndMins) {
-          const blockEndMins = cursorMins + durationMins;
-          const labelStr =
-            win.label && winStartMins + durationMins === winEndMins
-              ? win.label
-              : `${formatTimeMinutes(cursorMins)}-${formatTimeMinutes(blockEndMins)}`;
-          candidateBlocks.push({
-            startMins: cursorMins,
-            endMins: blockEndMins,
-            label: labelStr,
-            capacity: win.capacity ?? resource.capacityPerSlot,
-          });
-          cursorMins += Math.max(5, stepMins);
-        }
+    for (const block of dayBlocks) {
+      const slotStartMs = dayCursorMs + block.startMins * 60_000;
+      const slotEndMs = dayCursorMs + block.endMins * 60_000;
+      if (
+        !isCandidateSlotPermitted(
+          slotStartMs,
+          slotEndMs,
+          rangeStartMs,
+          rangeEndMs,
+          minAllowedMs,
+          maxAllowedMs,
+          blackoutDates
+        )
+      ) {
+        continue;
       }
-
-      for (const block of candidateBlocks) {
-        const slotStartMs = dayCursorMs + block.startMins * 60_000;
-        const slotEndMs = dayCursorMs + block.endMins * 60_000;
-
-        if (slotEndMs <= rangeStartMs || slotStartMs > rangeEndMs) {
-          continue;
-        }
-        if (minAllowedMs !== null && slotStartMs < minAllowedMs) {
-          continue;
-        }
-        if (maxAllowedMs !== null && slotStartMs > maxAllowedMs) {
-          continue;
-        }
-        if (isSlotBlackedOut(slotStartMs, slotEndMs, resource.blackoutDates || [])) {
-          continue;
-        }
-
-        const overlapping = resourceBookings.filter((b) =>
-          doesBookingOverlapSlot(b, slotStartMs, slotEndMs, bufferBefore, bufferAfter)
-        );
-        const bookedCount = overlapping.reduce(
-          (sum, b) => sum + Math.max(1, Number(b.partySize) || 1),
-          0
-        );
-        const capacity = Math.max(1, block.capacity || resource.capacityPerSlot || 1);
-        const remainingCapacity = Math.max(0, capacity - bookedCount);
-        const availableHosts = selectAvailableHostsForSlot(
-          resource,
-          overlapping,
-          preferredLanguage
-        );
-        const isAvailable =
-          remainingCapacity >= Math.max(1, partySize) &&
-          partySize <= Math.max(capacity, resource.maxPartySize || capacity);
-
-        const slotStartIso = new Date(slotStartMs).toISOString();
-        const slotEndIso = new Date(slotEndMs).toISOString();
-        const secondaryDates =
-          secondaryCalendars.length > 0
-            ? formatSecondaryCalendars(new Date(slotStartMs), secondaryCalendars)
-            : undefined;
-
-        slots.push({
-          slotId: `${resource.documentId}:${dateStr}:${block.label}`,
-          resourceDocumentId: resource.documentId,
-          resourceName: resource.name,
-          resourceSlug: resource.slug,
-          start: slotStartIso,
-          end: slotEndIso,
-          date: dateStr,
-          slotLabel: block.label,
+      slots.push(
+        evaluateCandidateBlockToSlot({
+          block,
+          dayCursorMs,
+          dateStr,
           scheduleLabel,
-          capacity,
-          bookedCount,
-          remainingCapacity,
-          isAvailable,
-          availableHosts,
-          secondaryDates,
-        });
-      }
+          resource,
+          resourceBookings,
+          bufferBefore,
+          bufferAfter,
+          partySize,
+          preferredLanguage,
+          secondaryCalendars,
+        })
+      );
     }
-
-    dayCursorMs += 86_400_000;
   }
 
   return slots;

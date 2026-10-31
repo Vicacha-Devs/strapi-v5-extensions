@@ -309,8 +309,18 @@
   "bookings.modal.startDate": "تاريخ ووقت البدء (ISO)",
   "settings.section": "الحجوزات والتوافر",
   "bookings.settings.section": "الحجوزات والتوافر",
-  "settings.link": "إعدادات الفترات والجداول",
-  "bookings.settings.link": "إعدادات الفترات والجداول",
+  "settings.link": "الحجوزات والتوافر",
+  "bookings.settings.link": "الحجوزات والتوافر",
   "settings.approvalsHeading": "سير عمل الموافقة وإشعارات البريد الإلكتروني",
-  "bookings.settings.approvalsHeading": "سير عمل الموافقة وإشعارات البريد الإلكتروني"
+  "bookings.settings.approvalsHeading": "سير عمل الموافقة وإشعارات البريد الإلكتروني",
+  "actions.openUnifiedCalendar": "فتح في التقويم",
+  "bookings.actions.openUnifiedCalendar": "فتح في التقويم",
+  "modal.langEs": "Español (ES)",
+  "bookings.modal.langEs": "Español (ES)",
+  "modal.langEn": "English (EN)",
+  "bookings.modal.langEn": "English (EN)",
+  "modal.langAr": "العربية — Arabic (AR)",
+  "bookings.modal.langAr": "العربية — Arabic (AR)",
+  "modal.langTr": "Türkçe — Turkish (TR)",
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
 }

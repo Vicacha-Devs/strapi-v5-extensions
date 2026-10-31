@@ -25,6 +25,9 @@ import type {
   SettingsService,
 } from '../types';
 import {
+  buildBookingCreatePayload,
+  computeRescheduleWindow,
+  computeReservationTimingAndParty,
   filterAndSortBookings,
   generateBookingCode,
   generateRawCancelToken,
@@ -32,12 +35,171 @@ import {
   mapExternalSourceRowToBooking,
   normalizeBookingRecord,
   normalizeStatus,
+  trimOrUndefined,
+  validateReservationCustomerAndStart,
   verifyCancelToken,
 } from './reservationHelpers';
 
+import type {
+  BookingsPluginSettings,
+  BookingSourceMapping,
+} from '../../../shared/types';
+
 const BOOKING_UID = 'plugin::bookings.booking';
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+async function loadExternalSourceBookings(
+  strapi: Core.Strapi,
+  sources: BookingSourceMapping[]
+): Promise<BookingRecord[]> {
+  const results: BookingRecord[] = [];
+  for (const source of sources) {
+    if (!source.enabled || !source.uid || source.uid === BOOKING_UID) {
+      continue;
+    }
+    try {
+      const extRows = (await strapi.documents(source.uid as never).findMany({
+        limit: 500,
+      } as never)) as Array<Record<string, unknown>>;
+      for (const extRow of Array.isArray(extRows) ? extRows : []) {
+        const mapped = mapExternalSourceRowToBooking(extRow, source);
+        if (mapped) results.push(mapped);
+      }
+    } catch {
+      // Ignore unresolvable external source
+    }
+  }
+  return results;
+}
+
+async function resolveTargetBookingResource(
+  availabilityService: AvailabilityService,
+  input: CreateReservationInput
+): Promise<BookingResource | null> {
+  const key = input.resourceDocumentId || input.resourceSlug;
+  if (!key) return null;
+  const resource = await availabilityService.getResource(key);
+  if (!resource || !resource.isActive) {
+    throw new Error('Requested booking resource is not found or inactive');
+  }
+  return resource;
+}
+
+function validateResourceBlackoutAndLeadTime(
+  resource: BookingResource | null,
+  startMs: number,
+  endMs: number,
+  options?: { skipLeadTimeCheck?: boolean; referenceNow?: Date }
+): void {
+  if (!resource) return;
+  if (isSlotBlackedOut(startMs, endMs, resource.blackoutDates || [])) {
+    throw new Error('Requested time slot falls on a blackout period');
+  }
+  if (!options?.skipLeadTimeCheck && options?.referenceNow) {
+    const minLeadMs =
+      options.referenceNow.getTime() +
+      Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000;
+    if (startMs < minLeadMs) {
+      throw new Error(
+        `Bookings require at least ${resource.minLeadTimeHours} hours advance notice`
+      );
+    }
+  }
+}
+
+function verifySlotCapacityAndResolveHost(
+  existing: BookingRecord[],
+  startMs: number,
+  endMs: number,
+  partySize: number,
+  resource: BookingResource | null,
+  settings: BookingsPluginSettings,
+  input: CreateReservationInput
+): string | undefined {
+  const bufferBefore =
+    resource?.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes ?? 0;
+  const bufferAfter =
+    resource?.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes ?? 0;
+  const overlapping = existing.filter((b) =>
+    doesBookingOverlapSlot(b, startMs, endMs, bufferBefore, bufferAfter)
+  );
+
+  const capacity =
+    resource?.capacityPerSlot ?? settings.defaultCapacityPerSlot ?? 1;
+  const bookedCount = overlapping.reduce(
+    (sum, b) => sum + Math.max(1, b.partySize),
+    0
+  );
+
+  if (bookedCount + partySize > capacity) {
+    throw new Error(
+      `Insufficient slot capacity: ${Math.max(0, capacity - bookedCount)} remaining, ${partySize} requested`
+    );
+  }
+
+  const explicitHost = trimOrUndefined(input.assignedHost);
+  if (explicitHost || !resource) return explicitHost;
+  const candidates = selectAvailableHostsForSlot(
+    resource,
+    overlapping,
+    input.preferredLanguage
+  );
+  return candidates[0]?.name;
+}
+
+async function findRawBookingOrThrow(
+  strapi: Core.Strapi,
+  key: string | undefined
+): Promise<Record<string, unknown>> {
+  if (!key) {
+    throw new Error('bookingDocumentId or bookingCode is required');
+  }
+  const rawRows = (await strapi.documents(BOOKING_UID as never).findMany({
+    populate: ['resource'],
+  } as never)) as Array<Record<string, unknown>>;
+
+  const targetRaw = (Array.isArray(rawRows) ? rawRows : []).find(
+    (r) => String(r.documentId ?? r.id) === key || String(r.bookingCode) === key
+  );
+  if (!targetRaw) {
+    throw new Error('Booking not found');
+  }
+  return targetRaw;
+}
+
+async function validateRescheduleResourceAvailability(
+  reservationService: ReservationService,
+  resource: BookingResource | undefined,
+  documentId: string,
+  newStartMs: number,
+  newEndMs: number,
+  partySize: number
+): Promise<void> {
+  if (!resource) return;
+  if (isSlotBlackedOut(newStartMs, newEndMs, resource.blackoutDates || [])) {
+    throw new Error('Requested new slot falls on a blackout period');
+  }
+  const existing = await reservationService.listBookings({
+    resourceDocumentId: resource.documentId,
+  });
+  const overlapping = existing.filter(
+    (b) =>
+      b.documentId !== documentId &&
+      doesBookingOverlapSlot(
+        b,
+        newStartMs,
+        newEndMs,
+        resource.bufferBeforeMinutes,
+        resource.bufferAfterMinutes
+      )
+  );
+  const bookedCount = overlapping.reduce(
+    (sum, b) => sum + Math.max(1, b.partySize),
+    0
+  );
+  if (bookedCount + partySize > resource.capacityPerSlot) {
+    throw new Error('Insufficient capacity in the target slot');
+  }
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
   async listBookings(query: BookingFilterQuery = {}): Promise<BookingRecord[]> {
@@ -57,33 +219,11 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
       } as never) as Promise<Array<Record<string, unknown>>>,
     ]);
 
-    const resourceMap = new Map<string, BookingResource>();
-    for (const res of resources) {
-      resourceMap.set(res.documentId, res);
-    }
-
-    const allBookings: BookingRecord[] = (
-      Array.isArray(rawRows) ? rawRows : []
-    ).map((row) => normalizeBookingRecord(row, resourceMap));
-
-    for (const source of settings.sources) {
-      if (!source.enabled || !source.uid || source.uid === BOOKING_UID) {
-        continue;
-      }
-      try {
-        const extRows = (await strapi.documents(source.uid as never).findMany({
-          limit: 500,
-        } as never)) as Array<Record<string, unknown>>;
-        for (const extRow of Array.isArray(extRows) ? extRows : []) {
-          const mapped = mapExternalSourceRowToBooking(extRow, source);
-          if (mapped) {
-            allBookings.push(mapped);
-          }
-        }
-      } catch {
-        // Ignore unresolvable external source
-      }
-    }
+    const resourceMap = new Map(resources.map((res) => [res.documentId, res]));
+    const rows = Array.isArray(rawRows) ? rawRows : [];
+    const allBookings = rows.map((row) => normalizeBookingRecord(row, resourceMap));
+    const extBookings = await loadExternalSourceBookings(strapi, settings.sources);
+    allBookings.push(...extBookings);
 
     return filterAndSortBookings(allBookings, resources, query);
   },
@@ -104,19 +244,8 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
     input: CreateReservationInput,
     options?: { skipLeadTimeCheck?: boolean; referenceNow?: Date }
   ): Promise<CreateReservationResult> {
-    const customerName = input.customerName?.trim();
-    const customerEmail = input.customerEmail?.trim().toLowerCase();
-    if (!customerName) {
-      throw new Error('customerName is required');
-    }
-    if (!customerEmail || !EMAIL_REGEX.test(customerEmail)) {
-      throw new Error('A valid customerEmail is required');
-    }
-
-    const startMs = Date.parse(input.startDate);
-    if (Number.isNaN(startMs)) {
-      throw new Error('A valid ISO startDate is required');
-    }
+    const { customerName, customerEmail, startMs } =
+      validateReservationCustomerAndStart(input);
 
     const availabilityService = strapi
       .plugin(PLUGIN_ID)
@@ -125,87 +254,28 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
       .plugin(PLUGIN_ID)
       .service('settings') as SettingsService;
     const settings = await settingsService.getSettings();
+    const resource = await resolveTargetBookingResource(availabilityService, input);
 
-    let resource: BookingResource | null = null;
-    if (input.resourceDocumentId || input.resourceSlug) {
-      resource = await availabilityService.getResource(
-        (input.resourceDocumentId || input.resourceSlug) as string
-      );
-      if (!resource || !resource.isActive) {
-        throw new Error('Requested booking resource is not found or inactive');
-      }
-    }
-
-    const durationMins =
-      resource?.slotDurationMinutes ?? settings.defaultSlotDurationMinutes ?? 60;
-    const endMs = input.endDate
-      ? Date.parse(input.endDate)
-      : startMs + durationMins * 60_000;
-
-    if (Number.isNaN(endMs) || endMs <= startMs) {
-      throw new Error('endDate must be after startDate');
-    }
-
-    const partySize = Math.max(1, Number(input.partySize ?? 1));
-    const maxParty = resource?.maxPartySize ?? 50;
-    if (partySize > maxParty) {
-      throw new Error(
-        `Requested partySize (${partySize}) exceeds maximum allowed (${maxParty})`
-      );
-    }
-
-    if (resource) {
-      if (isSlotBlackedOut(startMs, endMs, resource.blackoutDates || [])) {
-        throw new Error('Requested time slot falls on a blackout period');
-      }
-
-      if (!options?.skipLeadTimeCheck && options?.referenceNow) {
-        const minLeadMs =
-          options.referenceNow.getTime() +
-          Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000;
-        if (startMs < minLeadMs) {
-          throw new Error(
-            `Bookings require at least ${resource.minLeadTimeHours} hours advance notice`
-          );
-        }
-      }
-    }
+    const { endMs, partySize } = computeReservationTimingAndParty(
+      input,
+      startMs,
+      resource,
+      settings
+    );
+    validateResourceBlackoutAndLeadTime(resource, startMs, endMs, options);
 
     const existing = await this.listBookings({
       resourceDocumentId: resource?.documentId,
     });
-    const bufferBefore =
-      resource?.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes ?? 0;
-    const bufferAfter =
-      resource?.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes ?? 0;
-    const overlapping = existing.filter((b) =>
-      doesBookingOverlapSlot(b, startMs, endMs, bufferBefore, bufferAfter)
+    const assignedHost = verifySlotCapacityAndResolveHost(
+      existing,
+      startMs,
+      endMs,
+      partySize,
+      resource,
+      settings,
+      input
     );
-
-    const capacity =
-      resource?.capacityPerSlot ?? settings.defaultCapacityPerSlot ?? 1;
-    const bookedCount = overlapping.reduce(
-      (sum, b) => sum + Math.max(1, b.partySize),
-      0
-    );
-
-    if (bookedCount + partySize > capacity) {
-      throw new Error(
-        `Insufficient slot capacity: ${Math.max(0, capacity - bookedCount)} remaining, ${partySize} requested`
-      );
-    }
-
-    let assignedHost = input.assignedHost?.trim();
-    if (!assignedHost && resource) {
-      const candidates = selectAvailableHostsForSlot(
-        resource,
-        overlapping,
-        input.preferredLanguage
-      );
-      if (candidates.length > 0) {
-        assignedHost = candidates[0].name;
-      }
-    }
 
     const requiresApproval =
       resource?.requiresApproval ?? settings.defaultRequiresApproval ?? false;
@@ -215,45 +285,27 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
     const cancelToken = generateRawCancelToken();
     const cancelTokenHash = hashCancelToken(cancelToken);
 
-    const startIso = new Date(startMs).toISOString();
-    const endIso = new Date(endMs).toISOString();
-    const title = `${customerName}${resource ? ` — ${resource.name}` : ''}${partySize > 1 ? ` (${partySize})` : ''}`;
-
     const createdRaw = (await strapi
       .documents(BOOKING_UID as never)
       .create({
-        data: {
+        data: buildBookingCreatePayload({
           bookingCode,
-          title,
-          resource: resource?.documentId ?? undefined,
-          resourceDocumentId: resource?.documentId ?? undefined,
           customerName,
           customerEmail,
-          customerPhone: input.customerPhone?.trim() || undefined,
-          organization: input.organization?.trim() || undefined,
-          startDate: startIso,
-          endDate: endIso,
-          slotLabel: input.slotLabel?.trim() || undefined,
-          timezone:
-            input.timezone ||
-            resource?.timezone ||
-            settings.defaultTimezone ||
-            'UTC',
+          startMs,
+          endMs,
           partySize,
           status,
-          preferredLanguage: input.preferredLanguage?.trim() || undefined,
-          assignedHost: assignedHost || undefined,
-          notes: input.notes?.trim() || undefined,
+          assignedHost,
           cancelTokenHash,
-          sourceCollection: BOOKING_UID,
-          metadata: input.metadata ?? undefined,
-        },
+          resource,
+          settings,
+          input,
+        }),
       } as never)) as Record<string, unknown>;
 
     const resourceMap = new Map<string, BookingResource>();
-    if (resource) {
-      resourceMap.set(resource.documentId, resource);
-    }
+    if (resource) resourceMap.set(resource.documentId, resource);
     const booking = normalizeBookingRecord(createdRaw, resourceMap);
 
     strapi.eventHub?.emit('bookings.created', { booking });
@@ -301,50 +353,19 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
     input: RescheduleBookingInput,
     options?: { isAdmin?: boolean; referenceNow?: Date }
   ): Promise<BookingRecord> {
-    const key = input.bookingDocumentId || input.bookingCode;
-    if (!key) {
-      throw new Error('bookingDocumentId or bookingCode is required');
-    }
-
-    const rawRows = (await strapi.documents(BOOKING_UID as never).findMany({
-      populate: ['resource'],
-    } as never)) as Array<Record<string, unknown>>;
-
-    const targetRaw = (Array.isArray(rawRows) ? rawRows : []).find(
-      (r) =>
-        String(r.documentId ?? r.id) === key || String(r.bookingCode) === key
+    const targetRaw = await findRawBookingOrThrow(
+      strapi,
+      input.bookingDocumentId || input.bookingCode
     );
-    if (!targetRaw) {
-      throw new Error('Booking not found');
+
+    if (
+      !options?.isAdmin &&
+      !verifyCancelToken(input.cancelToken, String(targetRaw.cancelTokenHash ?? ''))
+    ) {
+      throw new Error('Invalid or missing cancelToken for rescheduling');
     }
 
-    if (!options?.isAdmin) {
-      const storedHash = String(targetRaw.cancelTokenHash ?? '');
-      if (!verifyCancelToken(input.cancelToken, storedHash)) {
-        throw new Error('Invalid or missing cancelToken for rescheduling');
-      }
-    }
-
-    const newStartMs = Date.parse(input.newStartDate);
-    if (Number.isNaN(newStartMs)) {
-      throw new Error('A valid newStartDate is required');
-    }
-
-    const oldStartMs = Date.parse(String(targetRaw.startDate));
-    const oldEndMs = Date.parse(String(targetRaw.endDate));
-    const defaultDurationMs =
-      !Number.isNaN(oldStartMs) && !Number.isNaN(oldEndMs) && oldEndMs > oldStartMs
-        ? oldEndMs - oldStartMs
-        : 3_600_000;
-
-    const newEndMs = input.newEndDate
-      ? Date.parse(input.newEndDate)
-      : newStartMs + defaultDurationMs;
-
-    if (Number.isNaN(newEndMs) || newEndMs <= newStartMs) {
-      throw new Error('newEndDate must be after newStartDate');
-    }
-
+    const { newStartMs, newEndMs } = computeRescheduleWindow(targetRaw, input);
     const documentId = String(targetRaw.documentId ?? targetRaw.id);
     const availabilityService = strapi
       .plugin(PLUGIN_ID)
@@ -361,32 +382,14 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
       Number(input.partySize ?? currentBooking.partySize ?? 1)
     );
 
-    if (resource) {
-      if (isSlotBlackedOut(newStartMs, newEndMs, resource.blackoutDates || [])) {
-        throw new Error('Requested new slot falls on a blackout period');
-      }
-      const existing = await this.listBookings({
-        resourceDocumentId: resource.documentId,
-      });
-      const overlapping = existing.filter(
-        (b) =>
-          b.documentId !== documentId &&
-          doesBookingOverlapSlot(
-            b,
-            newStartMs,
-            newEndMs,
-            resource.bufferBeforeMinutes,
-            resource.bufferAfterMinutes
-          )
-      );
-      const bookedCount = overlapping.reduce(
-        (sum, b) => sum + Math.max(1, b.partySize),
-        0
-      );
-      if (bookedCount + partySize > resource.capacityPerSlot) {
-        throw new Error('Insufficient capacity in the target slot');
-      }
-    }
+    await validateRescheduleResourceAvailability(
+      this,
+      resource,
+      documentId,
+      newStartMs,
+      newEndMs,
+      partySize
+    );
 
     const updated = (await strapi.documents(BOOKING_UID as never).update({
       documentId,
@@ -407,28 +410,16 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
     input: CancelBookingInput,
     options?: { isAdmin?: boolean }
   ): Promise<BookingRecord> {
-    const key = input.bookingDocumentId || input.bookingCode;
-    if (!key) {
-      throw new Error('bookingDocumentId or bookingCode is required');
-    }
-
-    const rawRows = (await strapi.documents(BOOKING_UID as never).findMany({
-      populate: ['resource'],
-    } as never)) as Array<Record<string, unknown>>;
-
-    const targetRaw = (Array.isArray(rawRows) ? rawRows : []).find(
-      (r) =>
-        String(r.documentId ?? r.id) === key || String(r.bookingCode) === key
+    const targetRaw = await findRawBookingOrThrow(
+      strapi,
+      input.bookingDocumentId || input.bookingCode
     );
-    if (!targetRaw) {
-      throw new Error('Booking not found');
-    }
 
-    if (!options?.isAdmin) {
-      const storedHash = String(targetRaw.cancelTokenHash ?? '');
-      if (!verifyCancelToken(input.cancelToken, storedHash)) {
-        throw new Error('Invalid or missing cancelToken for cancellation');
-      }
+    if (
+      !options?.isAdmin &&
+      !verifyCancelToken(input.cancelToken, String(targetRaw.cancelTokenHash ?? ''))
+    ) {
+      throw new Error('Invalid or missing cancelToken for cancellation');
     }
 
     const documentId = String(targetRaw.documentId ?? targetRaw.id);

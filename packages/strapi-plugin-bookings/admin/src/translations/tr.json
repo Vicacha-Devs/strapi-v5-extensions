@@ -309,8 +309,18 @@
   "bookings.modal.startDate": "Başlangıç Tarihi ve Saati (ISO)",
   "settings.section": "Rezervasyonlar ve Uygunluk",
   "bookings.settings.section": "Rezervasyonlar ve Uygunluk",
-  "settings.link": "Zaman Dilimi ve Program Yapılandırması",
-  "bookings.settings.link": "Zaman Dilimi ve Program Yapılandırması",
+  "settings.link": "Bookings & Availability",
+  "bookings.settings.link": "Bookings & Availability",
   "settings.approvalsHeading": "Onay İş Akışı ve E-posta Bildirimleri",
-  "bookings.settings.approvalsHeading": "Onay İş Akışı ve E-posta Bildirimleri"
+  "bookings.settings.approvalsHeading": "Onay İş Akışı ve E-posta Bildirimleri",
+  "actions.openUnifiedCalendar": "Takvimde Aç",
+  "bookings.actions.openUnifiedCalendar": "Takvimde Aç",
+  "modal.langEs": "Español (ES)",
+  "bookings.modal.langEs": "Español (ES)",
+  "modal.langEn": "English (EN)",
+  "bookings.modal.langEn": "English (EN)",
+  "modal.langAr": "العربية — Arabic (AR)",
+  "bookings.modal.langAr": "العربية — Arabic (AR)",
+  "modal.langTr": "Türkçe — Turkish (TR)",
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
 }

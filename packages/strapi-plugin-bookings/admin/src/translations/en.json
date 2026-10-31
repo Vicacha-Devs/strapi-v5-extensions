@@ -309,8 +309,18 @@
   "bookings.modal.startDate": "Start Date & Time (ISO)",
   "settings.section": "Bookings & Availability",
   "bookings.settings.section": "Bookings & Availability",
-  "settings.link": "Slot & Schedule Configuration",
-  "bookings.settings.link": "Slot & Schedule Configuration",
+  "settings.link": "Bookings & Availability",
+  "bookings.settings.link": "Bookings & Availability",
   "settings.approvalsHeading": "Approval Workflow & Email Notifications",
-  "bookings.settings.approvalsHeading": "Approval Workflow & Email Notifications"
+  "bookings.settings.approvalsHeading": "Approval Workflow & Email Notifications",
+  "actions.openUnifiedCalendar": "Open in Calendar",
+  "bookings.actions.openUnifiedCalendar": "Open in Calendar",
+  "modal.langEs": "Español (ES)",
+  "bookings.modal.langEs": "Español (ES)",
+  "modal.langEn": "English (EN)",
+  "bookings.modal.langEn": "English (EN)",
+  "modal.langAr": "العربية — Arabic (AR)",
+  "bookings.modal.langAr": "العربية — Arabic (AR)",
+  "modal.langTr": "Türkçe — Turkish (TR)",
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
 }

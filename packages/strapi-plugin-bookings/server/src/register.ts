@@ -2,6 +2,18 @@ import type { Core } from '@strapi/strapi';
 import { PLUGIN_ID } from '../../shared/pluginId';
 import type { BookingsPluginConfig } from './types';
 
+function mergeAttributeIntoTarget(
+  attributes: Record<string, Record<string, unknown>> | undefined,
+  attrName: string,
+  attrDef: Record<string, unknown>
+): void {
+  if (!attributes) return;
+  attributes[attrName] = {
+    ...(attributes[attrName] ?? {}),
+    ...attrDef,
+  };
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const pluginConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
     {}) as BookingsPluginConfig;
@@ -30,23 +42,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     uid: string,
     extra?: Record<string, unknown>
   ) => {
-    if (!extra || typeof extra !== 'object') return;
-    const schema = contentTypes[uid];
-    if (!schema) return;
+    const schema = extra && typeof extra === 'object' ? contentTypes[uid] : undefined;
+    if (!schema || !extra) return;
     for (const [attrName, attrDef] of Object.entries(extra)) {
       if (!attrName || !attrDef || typeof attrDef !== 'object') continue;
-      if (schema.attributes) {
-        schema.attributes[attrName] = {
-          ...(schema.attributes[attrName] ?? {}),
-          ...(attrDef as Record<string, unknown>),
-        };
-      }
-      if (schema.__schema__?.attributes) {
-        schema.__schema__.attributes[attrName] = {
-          ...(schema.__schema__.attributes[attrName] ?? {}),
-          ...(attrDef as Record<string, unknown>),
-        };
-      }
+      const typedDef = attrDef as Record<string, unknown>;
+      mergeAttributeIntoTarget(schema.attributes, attrName, typedDef);
+      mergeAttributeIntoTarget(schema.__schema__?.attributes, attrName, typedDef);
     }
   };
 
