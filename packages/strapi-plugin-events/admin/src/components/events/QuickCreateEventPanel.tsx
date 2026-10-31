@@ -14,14 +14,14 @@ import {
 import type { RecurrencePreset, RRuleWeekday } from '../../../../shared/types';
 import { DEFAULT_RECURRENCE_PRESETS } from './calendarPageHelpers';
 
-const WEEKDAYS: Array<{ code: RRuleWeekday; label: string; jsDay: number }> = [
-  { code: 'MO', label: 'Mon', jsDay: 1 },
-  { code: 'TU', label: 'Tue', jsDay: 2 },
-  { code: 'WE', label: 'Wed', jsDay: 3 },
-  { code: 'TH', label: 'Thu', jsDay: 4 },
-  { code: 'FR', label: 'Fri', jsDay: 5 },
-  { code: 'SA', label: 'Sat', jsDay: 6 },
-  { code: 'SU', label: 'Sun', jsDay: 0 },
+const WEEKDAYS: Array<{ code: RRuleWeekday; labelKey: string; defaultLabel: string; jsDay: number }> = [
+  { code: 'MO', labelKey: 'rrule.weekday.mo', defaultLabel: 'Mon', jsDay: 1 },
+  { code: 'TU', labelKey: 'rrule.weekday.tu', defaultLabel: 'Tue', jsDay: 2 },
+  { code: 'WE', labelKey: 'rrule.weekday.we', defaultLabel: 'Wed', jsDay: 3 },
+  { code: 'TH', labelKey: 'rrule.weekday.th', defaultLabel: 'Thu', jsDay: 4 },
+  { code: 'FR', labelKey: 'rrule.weekday.fr', defaultLabel: 'Fri', jsDay: 5 },
+  { code: 'SA', labelKey: 'rrule.weekday.sa', defaultLabel: 'Sat', jsDay: 6 },
+  { code: 'SU', labelKey: 'rrule.weekday.su', defaultLabel: 'Sun', jsDay: 0 },
 ];
 
 function extractByDays(rrule: string): RRuleWeekday[] {
@@ -173,7 +173,10 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   onQuickTitleChange(e.target.value)
                 }
-                placeholder={t('placeholder.e_g_product_launch_webinar_weekly_workshop', 'e.g., Product Launch Webinar / Weekly Workshop')}
+                placeholder={t(
+                  'placeholder.e_g_product_launch_webinar_weekly_workshop',
+                  'e.g., Product Launch Webinar / Weekly Workshop'
+                )}
               />
             </Field.Root>
           </Box>
@@ -216,7 +219,9 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
                 value={quickRRule || 'NONE'}
                 onChange={handleRecurrenceSelect}
               >
-                <SingleSelectOption value="NONE">Single Event</SingleSelectOption>
+                <SingleSelectOption value="NONE">
+                  {t('rrule.freq.none', 'Does not repeat (Single Event)')}
+                </SingleSelectOption>
                 {normalizedPresets.map((preset) => (
                   <SingleSelectOption key={preset.id} value={preset.rrule}>
                     {preset.label}
@@ -224,7 +229,7 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
                 ))}
                 {hasCustomWeeklyOption && (
                   <SingleSelectOption value={quickRRule}>
-                    {`Weekly (${selectedWeekdays.join(', ')})`}
+                    {`${t('rrule.freq.weekly', 'Weekly')} (${selectedWeekdays.join(', ')})`}
                   </SingleSelectOption>
                 )}
               </SingleSelect>
@@ -247,7 +252,7 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
                     variant={active ? 'default' : 'tertiary'}
                     onClick={() => handleToggleWeekday(day.code)}
                   >
-                    {day.label}
+                    {t(day.labelKey, day.defaultLabel)}
                   </Button>
                 );
               })}
@@ -255,13 +260,15 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
           </Box>
         )}
 
-        <Flex gap={3} alignItems="flex-end" wrap="wrap">
-          <Checkbox
-            checked={quickRsvpEnabled}
-            onCheckedChange={(checked: boolean) => onQuickRsvpEnabledChange(Boolean(checked))}
-          >
-            {t('calendar.field.enableRsvp', 'Enable RSVP & Seat Capacity')}
-          </Checkbox>
+        <Flex gap={4} alignItems="flex-end" wrap="wrap">
+          <Box style={{ minHeight: 40, display: 'flex', alignItems: 'center' }}>
+            <Checkbox
+              checked={quickRsvpEnabled}
+              onCheckedChange={(checked: boolean) => onQuickRsvpEnabledChange(Boolean(checked))}
+            >
+              {t('calendar.field.enableRsvp', 'Enable RSVP & Seat Capacity')}
+            </Checkbox>
+          </Box>
           {quickRsvpEnabled && (
             <Box style={{ width: 180 }}>
               <Field.Root>
@@ -278,7 +285,7 @@ export const QuickCreateEventPanel: React.FC<QuickCreateEventPanelProps> = ({
               </Field.Root>
             </Box>
           )}
-          <Flex gap={2} style={{ marginLeft: 'auto' }}>
+          <Flex gap={2} alignItems="center" style={{ marginLeft: 'auto', minHeight: 40 }}>
             <Button variant="tertiary" onClick={onCancel}>
               {t('common.cancel', 'Cancel')}
             </Button>

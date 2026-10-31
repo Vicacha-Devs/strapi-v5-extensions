@@ -99,6 +99,32 @@ export function buildCalendarLinks(params: {
   };
 }
 
+const ICS_STATUS_MAP: Record<string, string> = {
+  cancelled: 'CANCELLED',
+  postponed: 'TENTATIVE',
+};
+
+function resolveIcsStatus(status: string): string {
+  return ICS_STATUS_MAP[status] ?? 'CONFIRMED';
+}
+
+function appendVEventDateLines(lines: string[], occ: ExpandedOccurrence): void {
+  const isAllDay = Boolean(occ.allDay);
+  const prefix = isAllDay ? ';VALUE=DATE' : '';
+  lines.push(`DTSTART${prefix}:${toIcsTimestamp(occ.startDate, isAllDay)}`);
+  lines.push(`DTEND${prefix}:${toIcsTimestamp(occ.endDate, isAllDay)}`);
+}
+
+function appendVEventOptionalLines(lines: string[], occ: ExpandedOccurrence): void {
+  if (occ.summary) lines.push(foldIcsLine(`DESCRIPTION:${escapeIcsText(occ.summary)}`));
+  if (occ.location) lines.push(foldIcsLine(`LOCATION:${escapeIcsText(occ.location)}`));
+  if (occ.virtualUrl) lines.push(foldIcsLine(`URL:${escapeIcsText(occ.virtualUrl)}`));
+  if (occ.isRecurring && occ.rrule) {
+    const normalized = normalizeRRuleString(occ.rrule);
+    if (normalized) lines.push(foldIcsLine(`RRULE:${normalized}`));
+  }
+}
+
 export function generateIcsCalendar(
   occurrences: ExpandedOccurrence[],
   feedTitle = 'Events Calendar'
@@ -118,42 +144,10 @@ export function generateIcsCalendar(
     lines.push('BEGIN:VEVENT');
     lines.push(foldIcsLine(`UID:${escapeIcsText(uid)}`));
     lines.push(`DTSTAMP:${nowStamp}`);
-
-    if (occ.allDay) {
-      lines.push(`DTSTART;VALUE=DATE:${toIcsTimestamp(occ.startDate, true)}`);
-      lines.push(`DTEND;VALUE=DATE:${toIcsTimestamp(occ.endDate, true)}`);
-    } else {
-      lines.push(`DTSTART:${toIcsTimestamp(occ.startDate, false)}`);
-      lines.push(`DTEND:${toIcsTimestamp(occ.endDate, false)}`);
-    }
-
+    appendVEventDateLines(lines, occ);
     lines.push(foldIcsLine(`SUMMARY:${escapeIcsText(occ.title)}`));
-
-    if (occ.summary) {
-      lines.push(foldIcsLine(`DESCRIPTION:${escapeIcsText(occ.summary)}`));
-    }
-    if (occ.location) {
-      lines.push(foldIcsLine(`LOCATION:${escapeIcsText(occ.location)}`));
-    }
-    if (occ.virtualUrl) {
-      lines.push(foldIcsLine(`URL:${escapeIcsText(occ.virtualUrl)}`));
-    }
-
-    const statusUpper =
-      occ.status === 'cancelled'
-        ? 'CANCELLED'
-        : occ.status === 'postponed'
-          ? 'TENTATIVE'
-          : 'CONFIRMED';
-    lines.push(`STATUS:${statusUpper}`);
-
-    if (occ.isRecurring && occ.rrule) {
-      const normalized = normalizeRRuleString(occ.rrule);
-      if (normalized) {
-        lines.push(foldIcsLine(`RRULE:${normalized}`));
-      }
-    }
-
+    appendVEventOptionalLines(lines, occ);
+    lines.push(`STATUS:${resolveIcsStatus(occ.status)}`);
     lines.push('END:VEVENT');
   }
 

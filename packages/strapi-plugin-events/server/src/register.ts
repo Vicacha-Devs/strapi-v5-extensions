@@ -13,6 +13,18 @@ interface MutableContentTypeSchema {
   };
 }
 
+function mergeAttributeIntoTarget(
+  target: Record<string, Record<string, unknown>> | undefined,
+  attrName: string,
+  attrDef: Record<string, unknown>
+): void {
+  if (!target || typeof target !== 'object') return;
+  target[attrName] = {
+    ...(target[attrName] ?? {}),
+    ...attrDef,
+  };
+}
+
 function applyAttributeExtensions(
   contentType: MutableContentTypeSchema | undefined,
   extraAttributes?: Record<string, Record<string, unknown>>
@@ -23,27 +35,29 @@ function applyAttributeExtensions(
 
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
     if (!attrName || !attrDef || typeof attrDef !== 'object') continue;
-    if (contentType.attributes && typeof contentType.attributes === 'object') {
-      contentType.attributes[attrName] = {
-        ...(contentType.attributes[attrName] ?? {}),
-        ...attrDef,
-      };
-    }
-    if (
-      contentType.__schema__ &&
-      contentType.__schema__.attributes &&
-      typeof contentType.__schema__.attributes === 'object'
-    ) {
-      contentType.__schema__.attributes[attrName] = {
-        ...(contentType.__schema__.attributes[attrName] ?? {}),
-        ...attrDef,
-      };
-    }
+    mergeAttributeIntoTarget(contentType.attributes, attrName, attrDef);
+    mergeAttributeIntoTarget(contentType.__schema__?.attributes, attrName, attrDef);
   }
 }
 
+function buildCategoryEnumAttribute(
+  categoryColors: Record<string, string>
+): Record<string, unknown> {
+  const colorKeys = Object.keys(categoryColors);
+  const enumValues = Array.from(new Set(['general', ...colorKeys]));
+  return {
+    type: 'enumeration',
+    enum: enumValues,
+    default: enumValues.includes('general') ? 'general' : enumValues[0],
+    pluginOptions: {
+      i18n: {
+        localized: false,
+      },
+    },
+  };
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  // 1. Register the visual RFC 5545 RRULE custom field
   strapi.customFields.register({
     name: 'rrule',
     plugin: PLUGIN_ID,
@@ -54,34 +68,40 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
   });
 
-  // 2. Apply declarative schema extensions (e.g., hijriDate, speaker, custom registration fields)
-  // configured in `config/plugins.ts` under `events.config.schemaExtensions`
   const userConfig = (strapi.config?.get?.(`plugin::${PLUGIN_ID}`) ??
     {}) as Partial<EventsPluginSettings>;
 
-  if (userConfig.schemaExtensions) {
-    const strapiInternal = strapi as unknown as {
-      contentTypes?: Record<string, MutableContentTypeSchema>;
-      contentType?: (uid: string) => MutableContentTypeSchema | undefined;
-    };
-    const getCt = (uid: string): MutableContentTypeSchema | undefined =>
-      strapiInternal.contentTypes?.[uid] ??
-      (typeof strapiInternal.contentType === 'function'
-        ? strapiInternal.contentType(uid)
-        : undefined);
+  const strapiInternal = strapi as unknown as {
+    contentTypes?: Record<string, MutableContentTypeSchema>;
+    contentType?: (uid: string) => MutableContentTypeSchema | undefined;
+  };
+  const getCt = (uid: string): MutableContentTypeSchema | undefined =>
+    strapiInternal.contentTypes?.[uid] ?? strapiInternal.contentType?.(uid);
 
-    if (userConfig.schemaExtensions.event) {
-      applyAttributeExtensions(
-        getCt(EVENT_CONTENT_TYPE_UID),
-        userConfig.schemaExtensions.event
-      );
-    }
+  const eventSourceWithCategories = userConfig.sources?.find(
+    (s) =>
+      s?.uid === EVENT_CONTENT_TYPE_UID &&
+      Boolean(s.categoryColors && Object.keys(s.categoryColors).length > 0)
+  );
 
-    if (userConfig.schemaExtensions.registration) {
-      applyAttributeExtensions(
-        getCt(REGISTRATION_CONTENT_TYPE_UID),
-        userConfig.schemaExtensions.registration
-      );
-    }
+  const eventExtensions: Record<string, Record<string, unknown>> = {
+    ...(userConfig.schemaExtensions?.event ?? {}),
+  };
+
+  if (eventSourceWithCategories?.categoryColors && !eventExtensions.category) {
+    eventExtensions.category = buildCategoryEnumAttribute(
+      eventSourceWithCategories.categoryColors
+    );
+  }
+
+  if (Object.keys(eventExtensions).length > 0) {
+    applyAttributeExtensions(getCt(EVENT_CONTENT_TYPE_UID), eventExtensions);
+  }
+
+  if (userConfig.schemaExtensions?.registration) {
+    applyAttributeExtensions(
+      getCt(REGISTRATION_CONTENT_TYPE_UID),
+      userConfig.schemaExtensions.registration
+    );
   }
 };

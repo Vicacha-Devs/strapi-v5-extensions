@@ -32,8 +32,8 @@ export const SettingsPage: React.FC = () => {
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
 
   useEffect(() => {
-    get(`/${PLUGIN_ID}/settings`)
-      .then((res: { data?: { data?: EventsPluginSettings } }) => {
+    get<{ data?: EventsPluginSettings }>(`/${PLUGIN_ID}/settings`)
+      .then((res) => {
         if (res?.data?.data) {
           setSettings(res.data.data);
         }

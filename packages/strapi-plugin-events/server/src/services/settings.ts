@@ -1,9 +1,103 @@
 import type { Core } from '@strapi/strapi';
 import { PLUGIN_ID } from '../../../shared/pluginId';
-import type { EventSourceMapping, EventsPluginSettings } from '../../../shared/types';
+import type {
+  CalendarSystemConfig,
+  EventSourceMapping,
+  EventsPluginSettings,
+  RecurrencePreset,
+} from '../../../shared/types';
 import { DEFAULT_PLUGIN_SETTINGS } from '../config';
 
 const STORE_KEY = 'settings';
+
+function mergeSourcesList(
+  defaults: EventSourceMapping[],
+  userSources?: EventSourceMapping[]
+): EventSourceMapping[] {
+  const merged = [...defaults];
+  if (!Array.isArray(userSources)) return merged;
+
+  for (const src of userSources) {
+    if (!src?.id || !src.uid) continue;
+    const existingIdx = merged.findIndex((s) => s.id === src.id || s.uid === src.uid);
+    if (existingIdx >= 0) {
+      merged[existingIdx] = {
+        ...merged[existingIdx],
+        ...src,
+        fields: { ...merged[existingIdx].fields, ...(src.fields ?? {}) },
+      };
+    } else {
+      merged.push(src);
+    }
+  }
+  return merged;
+}
+
+function mergeCalendarsList(
+  defaults: CalendarSystemConfig[] | undefined,
+  userCalendars?: CalendarSystemConfig[]
+): CalendarSystemConfig[] {
+  const merged = [...(defaults ?? [])];
+  if (!Array.isArray(userCalendars)) return merged;
+
+  for (const cal of userCalendars) {
+    if (!cal?.id || !cal.intlCalendar) continue;
+    const idx = merged.findIndex((c) => c.id === cal.id);
+    if (idx >= 0) {
+      merged[idx] = { ...merged[idx], ...cal };
+    } else {
+      merged.push(cal);
+    }
+  }
+  return merged;
+}
+
+function mergePresetLists(
+  defaults: RecurrencePreset[] | undefined,
+  stored?: RecurrencePreset[]
+): RecurrencePreset[] {
+  const result = [...(defaults ?? [])];
+  if (!Array.isArray(stored)) return result;
+
+  for (const item of stored) {
+    if (!item?.id || !item.rrule) continue;
+    const idx = result.findIndex((p) => p.id === item.id || p.rrule === item.rrule);
+    if (idx >= 0) {
+      result[idx] = { ...result[idx], ...item };
+    } else {
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function resolveNonEmptyString(patchVal: unknown, fallback: string, maxLen?: number): string {
+  if (typeof patchVal === 'string' && patchVal.trim()) {
+    const trimmed = patchVal.trim();
+    return maxLen ? trimmed.slice(0, maxLen) : trimmed;
+  }
+  return fallback;
+}
+
+function resolvePositiveInt(
+  patchVal: unknown,
+  fallback: number,
+  maxLimit?: number
+): number {
+  if (typeof patchVal === 'number' && patchVal >= 1) {
+    const floored = Math.floor(patchVal);
+    return maxLimit ? Math.min(maxLimit, floored) : floored;
+  }
+  return fallback;
+}
+
+function resolveBoolean(patchVal: unknown, fallback: boolean): boolean {
+  return typeof patchVal === 'boolean' ? patchVal : fallback;
+}
+
+function resolveArray<T>(patchVal: unknown, fallback: T[]): T[] {
+  return Array.isArray(patchVal) ? (patchVal as T[]) : fallback;
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getStore = () =>
@@ -16,82 +110,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const userConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
       {}) as Partial<EventsPluginSettings>;
 
-    const mergedSources: EventSourceMapping[] = [...DEFAULT_PLUGIN_SETTINGS.sources];
-    if (Array.isArray(userConfig.sources)) {
-      for (const src of userConfig.sources) {
-        if (!src || !src.id || !src.uid) continue;
-        const existingIdx = mergedSources.findIndex((s) => s.id === src.id || s.uid === src.uid);
-        if (existingIdx >= 0) {
-          mergedSources[existingIdx] = {
-            ...mergedSources[existingIdx],
-            ...src,
-            fields: {
-              ...mergedSources[existingIdx].fields,
-              ...(src.fields ?? {}),
-            },
-          };
-        } else {
-          mergedSources.push(src);
-        }
-      }
-    }
-
-    const mergedCalendars = [...(DEFAULT_PLUGIN_SETTINGS.secondaryCalendars ?? [])];
-    if (Array.isArray(userConfig.secondaryCalendars)) {
-      for (const cal of userConfig.secondaryCalendars) {
-        if (!cal || !cal.id || !cal.intlCalendar) continue;
-        const idx = mergedCalendars.findIndex((c) => c.id === cal.id);
-        if (idx >= 0) {
-          mergedCalendars[idx] = { ...mergedCalendars[idx], ...cal };
-        } else {
-          mergedCalendars.push(cal);
-        }
-      }
-    }
-
-    const mergedPresets = [...(DEFAULT_PLUGIN_SETTINGS.recurrencePresets ?? [])];
-    if (Array.isArray(userConfig.recurrencePresets)) {
-      for (const preset of userConfig.recurrencePresets) {
-        if (!preset || !preset.id || !preset.rrule) continue;
-        const idx = mergedPresets.findIndex(
-          (p) => p.id === preset.id || p.rrule === preset.rrule
-        );
-        if (idx >= 0) {
-          mergedPresets[idx] = { ...mergedPresets[idx], ...preset };
-        } else {
-          mergedPresets.push(preset);
-        }
-      }
-    }
-
     return {
       ...DEFAULT_PLUGIN_SETTINGS,
       ...userConfig,
-      sources: mergedSources,
-      secondaryCalendars: mergedCalendars,
-      recurrencePresets: mergedPresets,
+      sources: mergeSourcesList(DEFAULT_PLUGIN_SETTINGS.sources, userConfig.sources),
+      secondaryCalendars: mergeCalendarsList(
+        DEFAULT_PLUGIN_SETTINGS.secondaryCalendars,
+        userConfig.secondaryCalendars
+      ),
+      recurrencePresets: mergePresetLists(
+        DEFAULT_PLUGIN_SETTINGS.recurrencePresets,
+        userConfig.recurrencePresets
+      ),
     };
-  };
-
-  const mergePresetLists = (
-    defaults: EventsPluginSettings['recurrencePresets'],
-    stored: EventsPluginSettings['recurrencePresets']
-  ) => {
-    const result = [...(defaults ?? [])];
-    if (Array.isArray(stored)) {
-      for (const item of stored) {
-        if (!item || !item.id || !item.rrule) continue;
-        const idx = result.findIndex(
-          (p) => p.id === item.id || p.rrule === item.rrule
-        );
-        if (idx >= 0) {
-          result[idx] = { ...result[idx], ...item };
-        } else {
-          result.push(item);
-        }
-      }
-    }
-    return result;
   };
 
   return {
@@ -121,17 +152,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      const storedPresets = mergePresetLists(
-        defaults.recurrencePresets,
-        existing.recurrencePresets
-      );
-
       const merged: EventsPluginSettings = {
         ...defaults,
         ...existing,
         sources: storedSources,
         secondaryCalendars: storedCalendars,
-        recurrencePresets: storedPresets,
+        recurrencePresets: mergePresetLists(
+          defaults.recurrencePresets,
+          existing.recurrencePresets
+        ),
       };
       await store.set({ key: STORE_KEY, value: merged });
       return merged;
@@ -166,38 +195,28 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const current = await this.getSettings();
       const next: EventsPluginSettings = {
         ...current,
-        defaultTimezone:
-          typeof patch.defaultTimezone === 'string' && patch.defaultTimezone.trim()
-            ? patch.defaultTimezone.trim()
-            : current.defaultTimezone,
-        defaultCapacity:
-          typeof patch.defaultCapacity === 'number' && patch.defaultCapacity >= 1
-            ? Math.floor(patch.defaultCapacity)
-            : current.defaultCapacity,
-        waitlistEnabledByDefault:
-          typeof patch.waitlistEnabledByDefault === 'boolean'
-            ? patch.waitlistEnabledByDefault
-            : current.waitlistEnabledByDefault,
-        defaultMaxGuestsPerRegistration:
-          typeof patch.defaultMaxGuestsPerRegistration === 'number' &&
-          patch.defaultMaxGuestsPerRegistration >= 1
-            ? Math.min(50, Math.floor(patch.defaultMaxGuestsPerRegistration))
-            : current.defaultMaxGuestsPerRegistration,
-        sendRsvpEmails:
-          typeof patch.sendRsvpEmails === 'boolean'
-            ? patch.sendRsvpEmails
-            : current.sendRsvpEmails,
-        feedTitle:
-          typeof patch.feedTitle === 'string' && patch.feedTitle.trim()
-            ? patch.feedTitle.trim().slice(0, 140)
-            : current.feedTitle,
-        sources: Array.isArray(patch.sources) ? patch.sources : current.sources,
-        secondaryCalendars: Array.isArray(patch.secondaryCalendars)
-          ? patch.secondaryCalendars
-          : current.secondaryCalendars ?? [],
-        recurrencePresets: Array.isArray(patch.recurrencePresets)
-          ? patch.recurrencePresets
-          : current.recurrencePresets ?? [],
+        defaultTimezone: resolveNonEmptyString(patch.defaultTimezone, current.defaultTimezone),
+        defaultCapacity: resolvePositiveInt(patch.defaultCapacity, current.defaultCapacity),
+        waitlistEnabledByDefault: resolveBoolean(
+          patch.waitlistEnabledByDefault,
+          current.waitlistEnabledByDefault
+        ),
+        defaultMaxGuestsPerRegistration: resolvePositiveInt(
+          patch.defaultMaxGuestsPerRegistration,
+          current.defaultMaxGuestsPerRegistration,
+          50
+        ),
+        sendRsvpEmails: resolveBoolean(patch.sendRsvpEmails, current.sendRsvpEmails),
+        feedTitle: resolveNonEmptyString(patch.feedTitle, current.feedTitle, 140),
+        sources: resolveArray(patch.sources, current.sources),
+        secondaryCalendars: resolveArray(
+          patch.secondaryCalendars,
+          current.secondaryCalendars ?? []
+        ),
+        recurrencePresets: resolveArray(
+          patch.recurrencePresets,
+          current.recurrencePresets ?? []
+        ),
       };
 
       const store = getStore();
