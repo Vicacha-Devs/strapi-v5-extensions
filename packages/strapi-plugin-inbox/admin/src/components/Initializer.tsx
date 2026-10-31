@@ -1,5 +1,6 @@
-import * as React from 'react';
-import { PLUGIN_ID } from '../pluginId';
+import * as React from "react";
+
+import { PLUGIN_ID } from "../pluginId";
 
 interface InitializerProps {
   setPlugin: (id: string) => void;

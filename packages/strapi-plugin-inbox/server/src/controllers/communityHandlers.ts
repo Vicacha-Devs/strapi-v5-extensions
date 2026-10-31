@@ -1,11 +1,12 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   type AlertBannerRecord,
   type SubscriberRecord,
   type SubscriberStatus,
-} from '../../../shared';
-import type { ControllerCtx } from './inboxController';
+} from "../../../shared";
+import type { ControllerCtx } from "./inboxController";
 
 export const createCommunityHandlers = (strapi: Core.Strapi) => ({
   async subscribe(ctx: ControllerCtx) {
@@ -18,7 +19,7 @@ export const createCommunityHandlers = (strapi: Core.Strapi) => ({
         topics?: string[];
         sourceFormSlug?: string;
       }): Promise<SubscriberRecord>;
-    }>('subscriberService');
+    }>("subscriberService");
 
     try {
       const body = (ctx.request.body || {}) as {
@@ -47,12 +48,10 @@ export const createCommunityHandlers = (strapi: Core.Strapi) => ({
 
   async confirmSubscription(ctx: ControllerCtx) {
     const token =
-      ctx.params?.token ||
-      ctx.query?.token ||
-      ((ctx.request.body?.token as string) ?? '');
+      ctx.params?.token || ctx.query?.token || ((ctx.request.body?.token as string) ?? "");
     const svc = strapi.plugin(PLUGIN_ID).service<{
       confirmSubscription(token: string): Promise<SubscriberRecord>;
-    }>('subscriberService');
+    }>("subscriberService");
 
     try {
       const subscriber = await svc.confirmSubscription(token);
@@ -71,12 +70,10 @@ export const createCommunityHandlers = (strapi: Core.Strapi) => ({
 
   async unsubscribe(ctx: ControllerCtx) {
     const token =
-      ctx.params?.token ||
-      ctx.query?.token ||
-      ((ctx.request.body?.token as string) ?? '');
+      ctx.params?.token || ctx.query?.token || ((ctx.request.body?.token as string) ?? "");
     const svc = strapi.plugin(PLUGIN_ID).service<{
       unsubscribe(token: string): Promise<SubscriberRecord>;
-    }>('subscriberService');
+    }>("subscriberService");
 
     try {
       const subscriber = await svc.unsubscribe(token);
@@ -100,7 +97,7 @@ export const createCommunityHandlers = (strapi: Core.Strapi) => ({
         topic?: string;
         locale?: string;
       }): Promise<SubscriberRecord[]>;
-    }>('subscriberService');
+    }>("subscriberService");
 
     const data = await svc.listSubscribers({
       status: ctx.query?.status as SubscriberStatus | undefined,
@@ -112,11 +109,8 @@ export const createCommunityHandlers = (strapi: Core.Strapi) => ({
 
   async getActiveAlerts(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      getActiveAlerts(params?: {
-        locale?: string;
-        nowIso?: string;
-      }): Promise<AlertBannerRecord[]>;
-    }>('alertService');
+      getActiveAlerts(params?: { locale?: string; nowIso?: string }): Promise<AlertBannerRecord[]>;
+    }>("alertService");
 
     const data = await svc.getActiveAlerts({
       locale: ctx.query?.locale,
@@ -134,7 +128,7 @@ export const createCommunityHandlers = (strapi: Core.Strapi) => ({
           message: string;
         }
       ): Promise<AlertBannerRecord>;
-    }>('alertService');
+    }>("alertService");
 
     const body = (ctx.request.body || {}) as Partial<AlertBannerRecord> & {
       code: string;

@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   FORM_BUILDER_CMS_FORM_UID,
   STARTER_FORM_TEMPLATES,
@@ -6,20 +7,21 @@ import {
   type FormBuilderCmsFormSummary,
   type FormCategory,
   type FormRecord,
-} from '../../../shared';
+} from "../../../shared";
 import {
   fromFormBuilderCmsRow,
   mergeFormBuilderCmsIntoInboxForm,
   sanitizePublicForm,
   toFormBuilderCmsPayload,
-} from './formBuilderMapper';
+} from "./formBuilderMapper";
 import {
   countSubmissionsForForm,
   isFormBuilderCmsAvailable,
   listFormBuilderForms,
   syncFormFromBuilderCms,
   syncFormToBuilderCms,
-} from './formBuilderSync';
+} from "./formBuilderSync";
+import { syncSubmissionsFromFormBuilderCms } from "./submissionFormBuilderBridge";
 
 export {
   fromFormBuilderCmsRow,
@@ -30,7 +32,7 @@ export {
 
 function pickVal<T>(...values: Array<T | undefined | null>): T {
   for (const v of values) {
-    if (v !== undefined && v !== null && v !== '') return v;
+    if (v !== undefined && v !== null && v !== "") return v;
   }
   return values[values.length - 1] as T;
 }
@@ -43,7 +45,7 @@ function pickDefVal<T>(...values: Array<T | undefined | null>): T {
 }
 
 async function findExistingCmsFormRow(
-  query: ReturnType<Core.Strapi['db']['query']>,
+  query: ReturnType<Core.Strapi["db"]["query"]>,
   input: Partial<FormRecord> & { slug: string; title: string }
 ): Promise<Record<string, unknown> | null> {
   if (input.formBuilderId) {
@@ -68,33 +70,21 @@ function buildMergedFormRecord(
 
   return {
     documentId: existing?.documentId,
-    title: pickVal(input.title, existing?.title, 'Untitled Form'),
-    slug: pickVal(input.slug, existing?.slug, 'form'),
-    description: pickDefVal(input.description, existing?.description, ''),
-    category: pickVal(input.category, existing?.category, 'contact'),
+    title: pickVal(input.title, existing?.title, "Untitled Form"),
+    slug: pickVal(input.slug, existing?.slug, "form"),
+    description: pickDefVal(input.description, existing?.description, ""),
+    category: pickVal(input.category, existing?.category, "contact"),
     fields: pickVal(input.fields, existing?.fields, []),
-    checklistTemplate: pickDefVal(
-      input.checklistTemplate,
-      existing?.checklistTemplate,
-      []
-    ),
+    checklistTemplate: pickDefVal(input.checklistTemplate, existing?.checklistTemplate, []),
     settings: {
       ...pickDefVal(existing?.settings, {}),
       ...pickDefVal(input.settings, {}),
     },
     translations: pickDefVal(input.translations, existing?.translations, {}),
     active: pickDefVal(input.active, existing?.active, true),
-    submissionCount: pickDefVal(
-      input.submissionCount,
-      existing?.submissionCount,
-      0
-    ),
+    submissionCount: pickDefVal(input.submissionCount, existing?.submissionCount, 0),
     formBuilderId: pickDefVal(input.formBuilderId, existing?.formBuilderId, null),
-    formBuilderSlug: pickDefVal(
-      input.formBuilderSlug,
-      existing?.formBuilderSlug,
-      input.slug
-    ),
+    formBuilderSlug: pickDefVal(input.formBuilderSlug, existing?.formBuilderSlug, input.slug),
     publishedAt,
   };
 }
@@ -117,9 +107,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return syncFormToBuilderCms(strapi, form);
   },
 
-  async syncFormFromBuilderCms(
-    cmsForm: Record<string, unknown>
-  ): Promise<FormRecord | null> {
+  async syncFormFromBuilderCms(cmsForm: Record<string, unknown>): Promise<FormRecord | null> {
     return syncFormFromBuilderCms(strapi, cmsForm);
   },
 
@@ -140,13 +128,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const cmsForms = (await strapi.db
       .query(FORM_BUILDER_CMS_FORM_UID)
-      .findMany({ orderBy: { createdAt: 'desc' } })) as Array<Record<string, unknown>>;
+      .findMany({ orderBy: { createdAt: "desc" } })) as Array<Record<string, unknown>>;
 
     let syncedFromBuilder = 0;
     for (const cmsForm of cmsForms || []) {
       const synced = await this.syncFormFromBuilderCms(cmsForm);
       if (synced) syncedFromBuilder += 1;
     }
+
+    await syncSubmissionsFromFormBuilderCms(strapi);
 
     const forms = await this.listForms({ activeOnly: false });
     return {
@@ -167,16 +157,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const cmsRows = (await strapi.db
       .query(FORM_BUILDER_CMS_FORM_UID)
-      .findMany({ orderBy: { createdAt: 'desc' } })) as Array<Record<string, unknown>>;
+      .findMany({ orderBy: { createdAt: "desc" } })) as Array<Record<string, unknown>>;
 
     const allForms = await Promise.all(
       (cmsRows || []).map(async (row) => {
         const parsed = fromFormBuilderCmsRow(row);
-        const count = await countSubmissionsForForm(
-          strapi,
-          Number(row.id),
-          parsed.slug
-        );
+        const count = await countSubmissionsForForm(strapi, Number(row.id), parsed.slug);
         return {
           ...parsed,
           submissionCount: Math.max(count, parsed.submissionCount || 0),
@@ -212,11 +198,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!cmsRow) return null;
 
     const form = fromFormBuilderCmsRow(cmsRow);
-    const count = await countSubmissionsForForm(
-      strapi,
-      Number(cmsRow.id),
-      form.slug
-    );
+    const count = await countSubmissionsForForm(strapi, Number(cmsRow.id), form.slug);
     form.submissionCount = Math.max(count, form.submissionCount || 0);
 
     if (options?.publicSafe) {
@@ -261,7 +243,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     return this.saveForm({
       ...tpl.form,
-      ...(overrides || {}),
+      ...overrides,
       slug: overrides?.slug || tpl.form.slug,
       title: overrides?.title || tpl.form.title,
     });

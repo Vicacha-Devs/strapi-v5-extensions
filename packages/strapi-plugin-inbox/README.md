@@ -14,5 +14,5 @@ Generic **Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscr
   - Subscription (`POST /api/inbox/subscribe`), token confirmation (`GET /api/inbox/confirm`), and one-click unsubscribe (`POST /api/inbox/unsubscribe`).
 - **Site-Wide Urgent Alert Banners (`plugin::inbox.alert-banner`)**:
   - Scheduled, localized announcement banners (`GET /api/inbox/alerts`) with severity levels (`info`, `important`, `urgent`).
-- **10-Locale Admin UI**:
-  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `id`, `ur`, and `zh`.
+- **13-Locale Admin UI**:
+  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur`, and `zh`.

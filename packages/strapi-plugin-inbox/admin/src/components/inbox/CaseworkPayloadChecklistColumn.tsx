@@ -1,17 +1,12 @@
-import * as React from 'react';
-import {
-  Badge,
-  Box,
-  Checkbox,
-  Flex,
-  Typography,
-} from '@strapi/design-system';
-import type { ChecklistItem, FormRecord } from '../../../../shared';
+import { Badge, Box, Checkbox, Flex, Typography } from "@strapi/design-system";
+import * as React from "react";
+
+import type { ChecklistItem, FormRecord } from "../../../../shared";
 
 export function formatFieldKeyLabel(rawKey: string): string {
   return rawKey
-    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-    .replace(/[_-]+/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
     .trim()
     .replace(/\b\w/g, (ch) => ch.toUpperCase());
 }
@@ -25,9 +20,7 @@ export interface CaseworkPayloadChecklistColumnProps {
   onToggleChecklistItem: (itemId: string, verified: boolean) => Promise<void>;
 }
 
-export const CaseworkPayloadChecklistColumn: React.FC<
-  CaseworkPayloadChecklistColumnProps
-> = ({
+export const CaseworkPayloadChecklistColumn: React.FC<CaseworkPayloadChecklistColumnProps> = ({
   t,
   shortLocale,
   dataEntries,
@@ -48,34 +41,27 @@ export const CaseworkPayloadChecklistColumn: React.FC<
   };
 
   const resolveFieldValue = (key: string, val: unknown): string => {
-    if (val === null || val === undefined || val === '') return '-';
-    if (typeof val === 'object') return JSON.stringify(val);
+    if (val === null || val === undefined || val === "") return "-";
+    if (typeof val === "object") return JSON.stringify(val);
     const strVal = String(val);
     const matchedField = form?.fields?.find((f) => f.name === key);
-    const matchedOption = matchedField?.options?.find(
-      (o) => o.value === strVal
-    );
+    const matchedOption = matchedField?.options?.find((o) => o.value === strVal);
     if (matchedOption) {
-      return (
-        matchedOption.localizedLabels?.[shortLocale] || matchedOption.label
-      );
+      return matchedOption.localizedLabels?.[shortLocale] || matchedOption.label;
     }
     return strVal;
   };
 
   return (
-    <Box style={{ flex: '1 1 360px' }}>
+    <Box style={{ flex: "1 1 360px" }}>
       <Box paddingBottom={4}>
         <Typography variant="sigma" textColor="neutral600">
-          {t('page.ui.submitted_form_payload', 'Submitted Form Payload')}
+          {t("page.ui.submitted_form_payload", "Submitted Form Payload")}
         </Typography>
         <Box background="neutral100" padding={3} hasRadius marginTop={2}>
           {dataEntries.length === 0 ? (
             <Typography variant="pi" textColor="neutral500">
-              {t(
-                'page.ui.no_payload_fields',
-                'No custom payload fields recorded.'
-              )}
+              {t("page.ui.no_payload_fields", "No custom payload fields recorded.")}
             </Typography>
           ) : (
             <Flex direction="column" alignItems="stretch" gap={0}>
@@ -89,16 +75,14 @@ export const CaseworkPayloadChecklistColumn: React.FC<
                   paddingBottom={2}
                   style={{
                     borderBottom:
-                      idx < dataEntries.length - 1
-                        ? '1px solid rgba(128, 128, 128, 0.14)'
-                        : 'none',
+                      idx < dataEntries.length - 1 ? "1px solid rgba(128, 128, 128, 0.14)" : "none",
                   }}
                 >
                   <Typography
                     variant="pi"
                     fontWeight="bold"
                     textColor="neutral600"
-                    style={{ textTransform: 'capitalize' }}
+                    style={{ textTransform: "capitalize" }}
                   >
                     {resolveFieldLabel(key)}
                   </Typography>
@@ -106,7 +90,7 @@ export const CaseworkPayloadChecklistColumn: React.FC<
                     variant="pi"
                     fontWeight="semiBold"
                     textColor="neutral800"
-                    style={{ textAlign: 'right' }}
+                    style={{ textAlign: "right" }}
                   >
                     {resolveFieldValue(key, val)}
                   </Typography>
@@ -119,29 +103,18 @@ export const CaseworkPayloadChecklistColumn: React.FC<
 
       <Box>
         <Typography variant="sigma" textColor="neutral600">
-          {t(
-            'page.ui.document_verification_checklist',
-            'Document Verification Checklist'
-          )}{' '}
-          ({checklist.filter((c) => c.verified).length}/{checklist.length})
+          {t("page.ui.document_verification_checklist", "Document Verification Checklist")} (
+          {checklist.filter((c) => c.verified).length}/{checklist.length})
         </Typography>
         <Box background="neutral100" padding={3} hasRadius marginTop={2}>
           {checklist.length === 0 ? (
             <Typography variant="pi" textColor="neutral500">
-              {t(
-                'page.ui.no_checklist',
-                'No verification checklist attached to this form.'
-              )}
+              {t("page.ui.no_checklist", "No verification checklist attached to this form.")}
             </Typography>
           ) : (
             <Flex direction="column" alignItems="stretch" gap={2}>
               {checklist.map((item) => (
-                <Flex
-                  key={item.id}
-                  justifyContent="space-between"
-                  alignItems="center"
-                  gap={2}
-                >
+                <Flex key={item.id} justifyContent="space-between" alignItems="center" gap={2}>
                   <Checkbox
                     checked={Boolean(item.verified)}
                     onCheckedChange={(checked: boolean) =>
@@ -152,10 +125,10 @@ export const CaseworkPayloadChecklistColumn: React.FC<
                   </Checkbox>
                   <Badge active={Boolean(item.verified)}>
                     {item.verified
-                      ? t('page.ui.verified', 'Verified')
+                      ? t("page.ui.verified", "Verified")
                       : item.required
-                        ? t('page.ui.required', 'Required')
-                        : t('page.ui.optional', 'Optional')}
+                        ? t("page.ui.required", "Required")
+                        : t("page.ui.optional", "Optional")}
                   </Badge>
                 </Flex>
               ))}

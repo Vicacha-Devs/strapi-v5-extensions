@@ -1,19 +1,11 @@
-import * as React from 'react';
-import {
-  Badge,
-  Box,
-  Button,
-  Field,
-  Flex,
-  TextInput,
-  Typography,
-} from '@strapi/design-system';
+import { Badge, Box, Button, Field, Flex, TextInput, Typography } from "@strapi/design-system";
+import * as React from "react";
 
 const subCardStyle: React.CSSProperties = {
-  border: '1px solid rgba(128, 128, 128, 0.2)',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
+  border: "1px solid rgba(128, 128, 128, 0.2)",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
 };
 
 export interface CaptchaProviderCardProps {
@@ -70,8 +62,8 @@ export const CaptchaProviderCard: React.FC<CaptchaProviderCardProps> = ({
           </Typography>
           <Badge>
             {isDefaultActive
-              ? t('settings.ui.default_active', 'Default Active')
-              : t('settings.ui.standby', 'Standby')}
+              ? t("settings.ui.default_active", "Default Active")
+              : t("settings.ui.standby", "Standby")}
           </Badge>
         </Flex>
         <Button variant="secondary" size="S" onClick={onTestSecret}>
@@ -86,9 +78,7 @@ export const CaptchaProviderCard: React.FC<CaptchaProviderCardProps> = ({
             name={siteKeyName}
             placeholder={siteKeyPlaceholder}
             value={siteKeyValue}
-            onChange={(e: { target: { value: string } }) =>
-              onSiteKeyChange(e.target.value)
-            }
+            onChange={(e: { target: { value: string } }) => onSiteKeyChange(e.target.value)}
           />
           <Field.Hint />
         </Field.Root>
@@ -100,9 +90,7 @@ export const CaptchaProviderCard: React.FC<CaptchaProviderCardProps> = ({
             type="password"
             placeholder={secretKeyPlaceholder}
             value={secretKeyValue}
-            onChange={(e: { target: { value: string } }) =>
-              onSecretKeyChange(e.target.value)
-            }
+            onChange={(e: { target: { value: string } }) => onSecretKeyChange(e.target.value)}
           />
           <Field.Hint />
         </Field.Root>

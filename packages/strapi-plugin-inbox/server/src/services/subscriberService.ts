@@ -1,27 +1,28 @@
-import { randomBytes } from 'node:crypto';
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+import { randomBytes } from "node:crypto";
+
 import {
   PLUGIN_ID,
   SUBSCRIBER_UID,
   type InboxSettings,
   type SubscriberRecord,
   type SubscriberStatus,
-} from '../../../shared';
-import { getDocuments } from './docHelper';
+} from "../../../shared";
+import { getDocuments } from "./docHelper";
 
 const EMAIL_Check = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function normalizeSubscriberTopics(topics?: string[]): string[] {
   return Array.isArray(topics) && topics.length > 0
     ? Array.from(new Set(topics))
-    : ['announcements'];
+    : ["announcements"];
 }
 
 function pickSubscriberStr(...values: Array<string | undefined | null>): string {
   for (const val of values) {
     if (val && val.trim().length > 0) return val;
   }
-  return '';
+  return "";
 }
 
 function buildSubscriberPayload(
@@ -35,30 +36,26 @@ function buildSubscriberPayload(
   },
   existing: SubscriberRecord | null,
   settings: InboxSettings
-): Omit<SubscriberRecord, 'documentId'> {
+): Omit<SubscriberRecord, "documentId"> {
   const doubleOptIn = settings.enableDoubleOptIn !== false;
   const nowIso = new Date().toISOString();
-  const status: SubscriberStatus = doubleOptIn ? 'pending' : 'confirmed';
+  const status: SubscriberStatus = doubleOptIn ? "pending" : "confirmed";
 
   return {
     email,
     fullName: pickSubscriberStr(input.fullName, existing?.fullName),
     phone: pickSubscriberStr(input.phone, existing?.phone),
-    locale: pickSubscriberStr(input.locale, settings.defaultLocale, 'es'),
+    locale: pickSubscriberStr(input.locale, settings.defaultLocale, "es"),
     topics: normalizeSubscriberTopics(input.topics),
     status,
-    confirmToken: doubleOptIn ? randomBytes(20).toString('hex') : null,
+    confirmToken: doubleOptIn ? randomBytes(20).toString("hex") : null,
     unsubscribeToken: pickSubscriberStr(
       existing?.unsubscribeToken,
-      randomBytes(20).toString('hex')
+      randomBytes(20).toString("hex")
     ),
     confirmedAt: doubleOptIn ? null : nowIso,
     unsubscribedAt: null,
-    sourceFormSlug: pickSubscriberStr(
-      input.sourceFormSlug,
-      existing?.sourceFormSlug,
-      'newsletter'
-    ),
+    sourceFormSlug: pickSubscriberStr(input.sourceFormSlug, existing?.sourceFormSlug, "newsletter"),
   };
 }
 
@@ -71,16 +68,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     topics?: string[];
     sourceFormSlug?: string;
   }): Promise<SubscriberRecord> {
-    const email = (input.email || '').trim().toLowerCase();
+    const email = (input.email || "").trim().toLowerCase();
     if (!EMAIL_Check.test(email)) {
-      const err = new Error('A valid email address is required to subscribe');
-      err.name = 'ValidationError';
+      const err = new Error("A valid email address is required to subscribe");
+      err.name = "ValidationError";
       throw err;
     }
 
     const settingsService = strapi.plugin(PLUGIN_ID).service<{
       getSettings(): Promise<InboxSettings>;
-    }>('settings');
+    }>("settings");
     const settings = await settingsService.getSettings();
 
     const existingDocs = (await getDocuments(strapi, SUBSCRIBER_UID).findMany({
@@ -103,7 +100,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       data: payload as unknown as Record<string, unknown>,
     })) as unknown as SubscriberRecord;
 
-    strapi.eventHub?.emit('inbox.subscriber.created', {
+    strapi.eventHub?.emit("inbox.subscriber.created", {
       subscriber: created,
     });
 
@@ -111,9 +108,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async confirmSubscription(token: string): Promise<SubscriberRecord> {
-    const trimmed = (token || '').trim();
+    const trimmed = (token || "").trim();
     if (!trimmed) {
-      throw new Error('Confirmation token is required');
+      throw new Error("Confirmation token is required");
     }
 
     const docs = (await getDocuments(strapi, SUBSCRIBER_UID).findMany({
@@ -123,22 +120,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const subscriber = docs[0];
     if (!subscriber || !subscriber.documentId) {
-      const err = new Error('Invalid or expired confirmation token');
-      err.name = 'NotFoundError';
+      const err = new Error("Invalid or expired confirmation token");
+      err.name = "NotFoundError";
       throw err;
     }
 
     const updated = (await getDocuments(strapi, SUBSCRIBER_UID).update({
       documentId: subscriber.documentId,
       data: {
-        status: 'confirmed',
+        status: "confirmed",
         confirmToken: null,
         confirmedAt: new Date().toISOString(),
         unsubscribedAt: null,
       },
     })) as unknown as SubscriberRecord;
 
-    strapi.eventHub?.emit('inbox.subscriber.confirmed', {
+    strapi.eventHub?.emit("inbox.subscriber.confirmed", {
       subscriber: updated,
     });
 
@@ -146,9 +143,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async unsubscribe(token: string): Promise<SubscriberRecord> {
-    const trimmed = (token || '').trim();
+    const trimmed = (token || "").trim();
     if (!trimmed) {
-      throw new Error('Unsubscribe token is required');
+      throw new Error("Unsubscribe token is required");
     }
 
     const docs = (await getDocuments(strapi, SUBSCRIBER_UID).findMany({
@@ -158,20 +155,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const subscriber = docs[0];
     if (!subscriber || !subscriber.documentId) {
-      const err = new Error('Invalid unsubscribe token');
-      err.name = 'NotFoundError';
+      const err = new Error("Invalid unsubscribe token");
+      err.name = "NotFoundError";
       throw err;
     }
 
     const updated = (await getDocuments(strapi, SUBSCRIBER_UID).update({
       documentId: subscriber.documentId,
       data: {
-        status: 'unsubscribed',
+        status: "unsubscribed",
         unsubscribedAt: new Date().toISOString(),
       },
     })) as unknown as SubscriberRecord;
 
-    strapi.eventHub?.emit('inbox.subscriber.unsubscribed', {
+    strapi.eventHub?.emit("inbox.subscriber.unsubscribed", {
       subscriber: updated,
     });
 

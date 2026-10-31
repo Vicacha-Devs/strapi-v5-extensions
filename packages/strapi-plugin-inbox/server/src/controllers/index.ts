@@ -1,4 +1,4 @@
-import inboxController from './inboxController';
+import inboxController from "./inboxController";
 
 const controllers: Record<string, unknown> = {
   inboxController,

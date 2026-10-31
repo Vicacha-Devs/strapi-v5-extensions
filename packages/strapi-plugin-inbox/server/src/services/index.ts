@@ -1,8 +1,8 @@
-import settings from './settings';
-import formService from './formService';
-import submissionService from './submissionService';
-import subscriberService from './subscriberService';
-import alertService from './alertService';
+import alertService from "./alertService";
+import formService from "./formService";
+import settings from "./settings";
+import submissionService from "./submissionService";
+import subscriberService from "./subscriberService";
 
 const services: Record<string, unknown> = {
   settings,

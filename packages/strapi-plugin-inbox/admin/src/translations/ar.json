@@ -254,5 +254,12 @@
   "settings.ui.form_builder_bridge_badge": "Form Builder Bridge",
   "settings.tab.routing": "Localization & Routing",
   "settings.tab.antispam": "Anti-Spam Guard & CAPTCHA",
-  "settings.tab.bridges": "Double Opt-In & Ecosystem Bridges"
+  "settings.tab.bridges": "Double Opt-In & Ecosystem Bridges",
+  "field.supported_locales": "Supported Locales",
+  "field.service_desk_departments": "Service-Desk Departments",
+  "field.subscriber_interest_topics": "Subscriber Interest Topics",
+  "field.topics": "Topics",
+  "placeholder.select_supported_locales": "Select supported locales...",
+  "placeholder.select_service_desk_departments": "Select service-desk departments...",
+  "placeholder.select_subscriber_interest_topics": "Select subscriber interest topics..."
 }

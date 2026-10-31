@@ -1,7 +1,7 @@
-import contentApi from './content-api';
-import admin from './admin';
+import admin from "./admin";
+import contentApi from "./content-api";
 
 export default {
-  'content-api': contentApi,
+  "content-api": contentApi,
   admin,
 };

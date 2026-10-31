@@ -1,10 +1,11 @@
-import * as React from 'react';
 import {
   Badge,
   Box,
   Button,
   Field,
   Flex,
+  MultiSelect,
+  MultiSelectOption,
   SingleSelect,
   SingleSelectOption,
   Table,
@@ -15,11 +16,14 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { PLUGIN_ID, type SubscriberRecord } from '../../../../shared';
+} from "@strapi/design-system";
+import * as React from "react";
+
+import { PLUGIN_ID, type SubscriberRecord } from "../../../../shared";
+import { LOCALE_OPTIONS, TOPIC_OPTIONS } from "../settings/LocalizationRoutingTab";
 
 const cardBorderStyle: React.CSSProperties = {
-  border: '1px solid rgba(128, 128, 128, 0.2)',
+  border: "1px solid rgba(128, 128, 128, 0.2)",
 };
 
 export interface SubscribersTabProps {
@@ -38,12 +42,10 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
   onReload,
 }) => {
   const [showAddForm, setShowAddForm] = React.useState<boolean>(false);
-  const [newSubEmail, setNewSubEmail] = React.useState<string>('');
-  const [newSubName, setNewSubName] = React.useState<string>('');
-  const [newSubLocale, setNewSubLocale] = React.useState<string>('es');
-  const [newSubTopics, setNewSubTopics] = React.useState<string>(
-    'announcements, events'
-  );
+  const [newSubEmail, setNewSubEmail] = React.useState<string>("");
+  const [newSubName, setNewSubName] = React.useState<string>("");
+  const [newSubLocale, setNewSubLocale] = React.useState<string>("es");
+  const [newSubTopics, setNewSubTopics] = React.useState<string[]>(["announcements", "events"]);
 
   const handleAddSubscriber = async () => {
     if (!newSubEmail.trim()) return;
@@ -51,13 +53,10 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
       email: newSubEmail.trim(),
       fullName: newSubName.trim(),
       locale: newSubLocale,
-      topics: newSubTopics
-        .split(',')
-        .map((topic) => topic.trim())
-        .filter(Boolean),
+      topics: newSubTopics.length > 0 ? newSubTopics : ["announcements"],
     });
-    setNewSubEmail('');
-    setNewSubName('');
+    setNewSubEmail("");
+    setNewSubName("");
     setShowAddForm(false);
     onStatusMessage(`Subscriber "${newSubEmail.trim()}" added`);
     await onReload();
@@ -73,16 +72,16 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
         gap={3}
       >
         <Typography variant="beta" tag="h2">
-          {t('page.ui.subscribers_list', 'Community Subscribers')}
+          {t("page.ui.subscribers_list", "Community Subscribers")}
         </Typography>
         <Button
           size="S"
-          variant={showAddForm ? 'tertiary' : 'default'}
+          variant={showAddForm ? "tertiary" : "default"}
           onClick={() => setShowAddForm(!showAddForm)}
         >
           {showAddForm
-            ? t('page.ui.cancel', 'Cancel')
-            : t('page.ui.add_subscriber', '+ Add Subscriber')}
+            ? t("page.ui.cancel", "Cancel")
+            : t("page.ui.add_subscriber", "+ Add Subscriber")}
         </Button>
       </Flex>
 
@@ -97,80 +96,70 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
         >
           <Box
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
               gap: 16,
-              alignItems: 'end',
+              alignItems: "end",
             }}
           >
             <Field.Root name="newSubEmail" required>
-              <Field.Label>
-                {t('field.subscriber_email', 'Email')}
-              </Field.Label>
+              <Field.Label>{t("field.subscriber_email", "Email")}</Field.Label>
               <TextInput
                 name="newSubEmail"
                 type="email"
-                placeholder={t('placeholder.subscriber_email', 'fatima@example.org')}
+                placeholder={t("placeholder.subscriber_email", "fatima@example.org")}
                 value={newSubEmail}
-                onChange={(e: { target: { value: string } }) =>
-                  setNewSubEmail(e.target.value)
-                }
+                onChange={(e: { target: { value: string } }) => setNewSubEmail(e.target.value)}
               />
             </Field.Root>
 
             <Field.Root name="newSubName">
-              <Field.Label>{t('field.full_name', 'Full Name')}</Field.Label>
+              <Field.Label>{t("field.full_name", "Full Name")}</Field.Label>
               <TextInput
                 name="newSubName"
-                placeholder={t('placeholder.subscriber_name', 'Fatima Zahra')}
+                placeholder={t("placeholder.subscriber_name", "Fatima Zahra")}
                 value={newSubName}
-                onChange={(e: { target: { value: string } }) =>
-                  setNewSubName(e.target.value)
-                }
+                onChange={(e: { target: { value: string } }) => setNewSubName(e.target.value)}
               />
             </Field.Root>
 
             <Field.Root name="newSubLocale">
-              <Field.Label>{t('field.preferred_locale', 'Locale')}</Field.Label>
+              <Field.Label>{t("field.preferred_locale", "Locale")}</Field.Label>
               <SingleSelect
                 value={newSubLocale}
                 onChange={(val: string | number) => setNewSubLocale(String(val))}
               >
-                <SingleSelectOption value="es">
-                  {t('locale.es', 'es — Español')}
-                </SingleSelectOption>
-                <SingleSelectOption value="en">
-                  {t('locale.en', 'en — English')}
-                </SingleSelectOption>
-                <SingleSelectOption value="ar">
-                  {t('locale.ar', 'ar — العربية')}
-                </SingleSelectOption>
-                <SingleSelectOption value="tr">
-                  {t('locale.tr', 'tr — Türkçe')}
-                </SingleSelectOption>
+                {LOCALE_OPTIONS.map((opt) => (
+                  <SingleSelectOption key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SingleSelectOption>
+                ))}
               </SingleSelect>
             </Field.Root>
 
             <Field.Root name="newSubTopics">
-              <Field.Label>
-                {t('field.topics_comma_separated', 'Topics')}
-              </Field.Label>
-              <TextInput
+              <Field.Label>{t("field.topics", "Topics")}</Field.Label>
+              <MultiSelect
                 name="newSubTopics"
-                placeholder={t(
-                  'placeholder.subscriber_topics',
-                  'announcements, events'
-                )}
+                withTags
+                placeholder={t("placeholder.subscriber_topics", "Select topics...")}
                 value={newSubTopics}
-                onChange={(e: { target: { value: string } }) =>
-                  setNewSubTopics(e.target.value)
+                onChange={(nextValues: string[]) =>
+                  setNewSubTopics(nextValues.length > 0 ? nextValues : ["announcements"])
                 }
-              />
+                onClear={() => setNewSubTopics(["announcements"])}
+              >
+                {TOPIC_OPTIONS.map((opt) => (
+                  <MultiSelectOption key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </MultiSelectOption>
+                ))}
+              </MultiSelect>
             </Field.Root>
 
             <Box>
               <Button onClick={handleAddSubscriber}>
-                {t('page.ui.save_subscriber', 'Save Subscriber')}
+                {t("page.ui.save_subscriber", "Save Subscriber")}
               </Button>
             </Box>
           </Box>
@@ -180,21 +169,41 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
       <Table colCount={5} rowCount={subscribers.length + 1}>
         <Thead>
           <Tr>
-            <Th><Typography variant="sigma">{t('page.ui.email', 'Email')}</Typography></Th>
-            <Th><Typography variant="sigma">{t('page.ui.name', 'Name')}</Typography></Th>
-            <Th><Typography variant="sigma">{t('page.ui.locale', 'Locale')}</Typography></Th>
-            <Th><Typography variant="sigma">{t('page.ui.topics', 'Topics')}</Typography></Th>
-            <Th><Typography variant="sigma">{t('page.ui.status', 'Status')}</Typography></Th>
+            <Th>
+              <Typography variant="sigma">{t("page.ui.email", "Email")}</Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">{t("page.ui.name", "Name")}</Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">{t("page.ui.locale", "Locale")}</Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">{t("page.ui.topics", "Topics")}</Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">{t("page.ui.status", "Status")}</Typography>
+            </Th>
           </Tr>
         </Thead>
         <Tbody>
           {subscribers.map((sub) => (
             <Tr key={sub.email}>
-              <Td><Typography fontWeight="bold">{sub.email}</Typography></Td>
-              <Td><Typography>{sub.fullName || '-'}</Typography></Td>
-              <Td><Badge>{sub.locale}</Badge></Td>
-              <Td><Typography>{(sub.topics || []).join(', ')}</Typography></Td>
-              <Td><Badge>{sub.status}</Badge></Td>
+              <Td>
+                <Typography fontWeight="bold">{sub.email}</Typography>
+              </Td>
+              <Td>
+                <Typography>{sub.fullName || "-"}</Typography>
+              </Td>
+              <Td>
+                <Badge>{sub.locale}</Badge>
+              </Td>
+              <Td>
+                <Typography>{(sub.topics || []).join(", ")}</Typography>
+              </Td>
+              <Td>
+                <Badge>{sub.status}</Badge>
+              </Td>
             </Tr>
           ))}
         </Tbody>

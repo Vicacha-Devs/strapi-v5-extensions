@@ -1,12 +1,13 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   SUBMISSION_UID,
   submissionsToCsv,
   type FormRecord,
   type SubmissionRecord,
-} from '../../../shared';
-import { getDocuments } from './docHelper';
+} from "../../../shared";
+import { getDocuments } from "./docHelper";
 
 async function tryCreatePluginBooking(
   strapi: Core.Strapi,
@@ -21,23 +22,23 @@ async function tryCreatePluginBooking(
   fallbackId: string
 ): Promise<string> {
   try {
-    const bookingsPlugin = strapi.plugin('bookings');
+    const bookingsPlugin = strapi.plugin("bookings");
     const bookingSvc = bookingsPlugin?.service<{
       createBooking?: (data: Record<string, unknown>) => Promise<{
         documentId?: string;
         referenceCode?: string;
       }>;
-    }>('bookingService');
+    }>("bookingService");
 
     if (!bookingSvc?.createBooking) return fallbackId;
     const createdBooking = await bookingSvc.createBooking({
       serviceSlug: bookingInput.serviceSlug,
       date: bookingInput.date,
       startTime: bookingInput.startTime,
-      endTime: bookingInput.endTime ?? '11:00',
-      requesterName: existing.applicantName ?? 'Applicant',
-      requesterEmail: existing.applicantEmail ?? 'noreply@example.org',
-      requesterPhone: existing.applicantPhone ?? '',
+      endTime: bookingInput.endTime ?? "11:00",
+      requesterName: existing.applicantName ?? "Applicant",
+      requesterEmail: existing.applicantEmail ?? "noreply@example.org",
+      requesterPhone: existing.applicantPhone ?? "",
       notes: bookingInput.notes ?? `Casework Ref: ${existing.referenceCode}`,
     });
     return createdBooking?.referenceCode || createdBooking?.documentId || fallbackId;
@@ -75,7 +76,7 @@ export async function scheduleBookingFromSubmission(
   const updated = (await getDocuments(strapi, SUBMISSION_UID).update({
     documentId,
     data: {
-      status: 'scheduled',
+      status: "scheduled",
       linkedBookingId: bookingId,
     },
   })) as unknown as SubmissionRecord;
@@ -110,18 +111,17 @@ async function tryIssuePluginCertificate(
   fallbackCertNumber: string
 ): Promise<string> {
   try {
-    const certsPlugin = strapi.plugin('certificates');
+    const certsPlugin = strapi.plugin("certificates");
     const certSvc = certsPlugin?.service<{
       issueCertificate?: (data: Record<string, unknown>) => Promise<{
         certificateNumber?: string;
       }>;
-    }>('certificateService');
+    }>("certificateService");
 
     if (!certSvc?.issueCertificate) return fallbackCertNumber;
     const issued = await certSvc.issueCertificate({
-      templateSlug: certInput?.templateSlug || 'official-service-certificate',
-      recipientName:
-        certInput?.recipientName || existing.applicantName || 'Applicant',
+      templateSlug: certInput?.templateSlug || "official-service-certificate",
+      recipientName: certInput?.recipientName || existing.applicantName || "Applicant",
       recipientEmail: existing.applicantEmail,
       metadata: {
         submissionReference: existing.referenceCode,
@@ -163,7 +163,7 @@ export async function issueCertificateFromSubmission(
   const updated = (await getDocuments(strapi, SUBMISSION_UID).update({
     documentId,
     data: {
-      status: 'completed',
+      status: "completed",
       linkedCertificateNumber: certificateNumber,
     },
   })) as unknown as SubmissionRecord;
@@ -176,11 +176,11 @@ export async function exportSubmissionsCsv(
   submissions: SubmissionRecord[],
   formSlug?: string
 ): Promise<string> {
-  let fields: FormRecord['fields'] = [];
+  let fields: FormRecord["fields"] = [];
   if (formSlug) {
     const formService = strapi.plugin(PLUGIN_ID).service<{
       findBySlug(slug: string): Promise<FormRecord | null>;
-    }>('formService');
+    }>("formService");
     const form = await formService.findBySlug(formSlug);
     fields = form?.fields || [];
   }

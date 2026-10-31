@@ -1,5 +1,3 @@
-import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Badge,
   Box,
@@ -12,17 +10,20 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
+} from "@strapi/design-system";
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   FORM_BUILDER_CMS_PLUGIN_ID,
   PLUGIN_ID,
   STARTER_FORM_TEMPLATES,
   type FormRecord,
-} from '../../../../shared';
-import { FormRoutingDrawer } from './FormRoutingDrawer';
+} from "../../../../shared";
+import { FormRoutingDrawer } from "./FormRoutingDrawer";
 
 const drawerCardStyle: React.CSSProperties = {
-  border: '1px solid rgba(128, 128, 128, 0.22)',
+  border: "1px solid rgba(128, 128, 128, 0.22)",
 };
 
 export interface SyncBuilderResponse {
@@ -50,9 +51,7 @@ export const FormBuilderTab: React.FC<FormBuilderTabProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const [editingFormSlug, setEditingFormSlug] = React.useState<string | null>(
-    null
-  );
+  const [editingFormSlug, setEditingFormSlug] = React.useState<string | null>(null);
   const [showTemplates, setShowTemplates] = React.useState<boolean>(false);
 
   const selectedForm = React.useMemo(
@@ -62,9 +61,7 @@ export const FormBuilderTab: React.FC<FormBuilderTabProps> = ({
 
   const handleCreateTemplate = async (templateId: string) => {
     await post(`/${PLUGIN_ID}/forms/from-template`, { templateId });
-    onStatusMessage(
-      `Created form from "${templateId}" in Visual Form Builder`
-    );
+    onStatusMessage(`Created form from "${templateId}" in Visual Form Builder`);
     setShowTemplates(false);
     await onReload();
   };
@@ -72,26 +69,20 @@ export const FormBuilderTab: React.FC<FormBuilderTabProps> = ({
   const handleSyncFormBuilder = async () => {
     const res = await post(`/${PLUGIN_ID}/forms/sync-builder`, {});
     const info = res?.data?.data;
-    onStatusMessage(
-      `Refreshed Visual Form Builder (${info?.forms?.length ?? 0} forms)`
-    );
+    onStatusMessage(`Refreshed Visual Form Builder (${info?.forms?.length ?? 0} forms)`);
     await onReload();
   };
 
   const handleOpenInVisualBuilder = async (form: FormRecord) => {
     if (form.formBuilderId) {
-      navigate(
-        `/plugins/${FORM_BUILDER_CMS_PLUGIN_ID}/builder/${form.formBuilderId}`
-      );
+      navigate(`/plugins/${FORM_BUILDER_CMS_PLUGIN_ID}/builder/${form.formBuilderId}`);
       return;
     }
     const res = await post(`/${PLUGIN_ID}/forms/sync-builder`, {});
     const syncedForms: FormRecord[] = res?.data?.data?.forms || [];
     const matched = syncedForms.find((f) => f.slug === form.slug);
     if (matched?.formBuilderId) {
-      navigate(
-        `/plugins/${FORM_BUILDER_CMS_PLUGIN_ID}/builder/${matched.formBuilderId}`
-      );
+      navigate(`/plugins/${FORM_BUILDER_CMS_PLUGIN_ID}/builder/${matched.formBuilderId}`);
     } else {
       navigate(`/plugins/${FORM_BUILDER_CMS_PLUGIN_ID}`);
     }
@@ -108,54 +99,37 @@ export const FormBuilderTab: React.FC<FormBuilderTabProps> = ({
       >
         <Flex gap={3} alignItems="center" wrap="wrap">
           <Typography variant="beta" tag="h2">
-            {t('page.ui.active_forms', 'Forms & Service-Desk Workflows')}
+            {t("page.ui.active_forms", "Forms & Service-Desk Workflows")}
           </Typography>
-          <Badge>{t('page.ui.formcraft_visual_builder', 'FormCraft Visual Builder')}</Badge>
+          <Badge>{t("page.ui.formcraft_visual_builder", "FormCraft Visual Builder")}</Badge>
         </Flex>
 
         <Flex gap={2} wrap="wrap">
-          <Button
-            variant="tertiary"
-            size="S"
-            onClick={() => setShowTemplates(!showTemplates)}
-          >
+          <Button variant="tertiary" size="S" onClick={() => setShowTemplates(!showTemplates)}>
             {showTemplates
-              ? t('page.ui.hide_templates', 'Hide Templates')
-              : t('page.ui.starter_templates', 'Starter Templates')}
+              ? t("page.ui.hide_templates", "Hide Templates")
+              : t("page.ui.starter_templates", "Starter Templates")}
           </Button>
           <Button variant="secondary" size="S" onClick={handleSyncFormBuilder}>
-            {t('page.ui.sync_form_builder', 'Refresh Forms')}
+            {t("page.ui.sync_form_builder", "Refresh Forms")}
           </Button>
           <Button
             variant="default"
             size="S"
-            onClick={() =>
-              navigate(`/plugins/${FORM_BUILDER_CMS_PLUGIN_ID}/builder/new`)
-            }
+            onClick={() => navigate(`/plugins/${FORM_BUILDER_CMS_PLUGIN_ID}/builder/new`)}
           >
-            {t('page.ui.new_visual_form', '+ New Visual Form')}
+            {t("page.ui.new_visual_form", "+ New Visual Form")}
           </Button>
         </Flex>
       </Flex>
 
       {showTemplates ? (
-        <Box
-          padding={4}
-          marginBottom={4}
-          background="neutral100"
-          hasRadius
-          style={drawerCardStyle}
-        >
-          <Flex
-            justifyContent="space-between"
-            alignItems="center"
-            wrap="wrap"
-            gap={3}
-          >
+        <Box padding={4} marginBottom={4} background="neutral100" hasRadius style={drawerCardStyle}>
+          <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
             <Typography variant="pi" textColor="neutral600">
               {t(
-                'page.ui.seed_starter_form_hint',
-                'Quickly seed a pre-configured multilingual mosque form:'
+                "page.ui.seed_starter_form_hint",
+                "Quickly seed a pre-configured multilingual mosque form:"
               )}
             </Typography>
             <Flex gap={2} wrap="wrap">
@@ -189,34 +163,22 @@ export const FormBuilderTab: React.FC<FormBuilderTabProps> = ({
         <Thead>
           <Tr>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.title', 'Form')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.title", "Form")}</Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.category', 'Category & Dept')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.category", "Category & Dept")}</Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.fields', 'Fields & Locales')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.fields", "Fields & Locales")}</Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.checklist', 'Checklist')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.checklist", "Checklist")}</Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.submissions', 'Submissions')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.submissions", "Submissions")}</Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.actions', 'Actions')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.actions", "Actions")}</Typography>
             </Th>
           </Tr>
         </Thead>
@@ -237,33 +199,28 @@ export const FormBuilderTab: React.FC<FormBuilderTabProps> = ({
                   <Flex gap={2} alignItems="center">
                     <Badge>{form.category}</Badge>
                     <Typography variant="pi" textColor="neutral600">
-                      {form.settings?.department || 'general'}
+                      {form.settings?.department || "general"}
                     </Typography>
                   </Flex>
                 </Td>
                 <Td>
                   <Flex direction="column" alignItems="flex-start" gap={1}>
                     <Typography>
-                      {(form.fields || []).length}{' '}
-                      {t('page.ui.fields_label', 'fields')}
+                      {(form.fields || []).length} {t("page.ui.fields_label", "fields")}
                     </Typography>
                     {localeKeys.length > 0 ? (
                       <Typography variant="pi" textColor="neutral500">
-                        {t('page.ui.locales_label', 'Locales')}:{' '}
-                        {localeKeys.join(', ').toUpperCase()}
+                        {t("page.ui.locales_label", "Locales")}:{" "}
+                        {localeKeys.join(", ").toUpperCase()}
                       </Typography>
                     ) : null}
                   </Flex>
                 </Td>
                 <Td>
-                  <Typography>
-                    {(form.checklistTemplate || []).length}
-                  </Typography>
+                  <Typography>{(form.checklistTemplate || []).length}</Typography>
                 </Td>
                 <Td>
-                  <Typography fontWeight="semiBold">
-                    {form.submissionCount || 0}
-                  </Typography>
+                  <Typography fontWeight="semiBold">{form.submissionCount || 0}</Typography>
                 </Td>
                 <Td>
                   <Flex gap={2} wrap="wrap">
@@ -272,26 +229,16 @@ export const FormBuilderTab: React.FC<FormBuilderTabProps> = ({
                       variant="secondary"
                       onClick={() => handleOpenInVisualBuilder(form)}
                     >
-                      {t(
-                        'page.ui.design_fields',
-                        'Design Fields (Drag & Drop)'
-                      )}
+                      {t("page.ui.design_fields", "Design Fields (Drag & Drop)")}
                     </Button>
                     <Button
                       size="S"
-                      variant={
-                        editingFormSlug === form.slug ? 'default' : 'tertiary'
-                      }
+                      variant={editingFormSlug === form.slug ? "default" : "tertiary"}
                       onClick={() =>
-                        setEditingFormSlug(
-                          editingFormSlug === form.slug ? null : form.slug
-                        )
+                        setEditingFormSlug(editingFormSlug === form.slug ? null : form.slug)
                       }
                     >
-                      {t(
-                        'page.ui.casework_checklist',
-                        'Routing, Checklist & i18n'
-                      )}
+                      {t("page.ui.casework_checklist", "Routing, Checklist & i18n")}
                     </Button>
                   </Flex>
                 </Td>

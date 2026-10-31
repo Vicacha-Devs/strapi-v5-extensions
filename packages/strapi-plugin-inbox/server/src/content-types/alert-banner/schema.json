@@ -34,12 +34,7 @@
     },
     "severity": {
       "type": "enumeration",
-      "enum": [
-        "info",
-        "warning",
-        "urgent",
-        "celebration"
-      ],
+      "enum": ["info", "warning", "urgent", "celebration"],
       "default": "info",
       "required": true
     },

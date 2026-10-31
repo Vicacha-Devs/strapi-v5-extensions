@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   FORM_BUILDER_CMS_FORM_UID,
   FORM_BUILDER_CMS_SUBMISSION_UID,
@@ -8,16 +9,13 @@ import {
   type FormSettings,
   type InboxSettings,
   type SubmissionRecord,
-} from '../../shared';
+} from "../../shared";
+import { resolveCmsSubmissionFormRef } from "./services/submissionFormBuilderBridge";
 
 type FormServiceApi = {
   findBySlug(slug: string): Promise<FormRecord | null>;
-  saveForm(
-    input: Partial<FormRecord> & { slug: string; title: string }
-  ): Promise<FormRecord>;
-  syncFormFromBuilderCms(
-    cmsForm: Record<string, unknown>
-  ): Promise<FormRecord | null>;
+  saveForm(input: Partial<FormRecord> & { slug: string; title: string }): Promise<FormRecord>;
+  syncFormFromBuilderCms(cmsForm: Record<string, unknown>): Promise<FormRecord | null>;
   syncWithFormBuilderCms(): Promise<{
     available: boolean;
     syncedToBuilder: number;
@@ -37,36 +35,36 @@ async function registerPluginPermissions(strapi: Core.Strapi): Promise<void> {
   if (!strapi.admin?.services?.permission?.actionProvider?.registerMany) return;
   await strapi.admin.services.permission.actionProvider.registerMany([
     {
-      section: 'plugins',
-      displayName: 'Manage Forms & Builder',
-      uid: 'forms.manage',
+      section: "plugins",
+      displayName: "Manage Forms & Builder",
+      uid: "forms.manage",
       pluginName: PLUGIN_ID,
     },
     {
-      section: 'plugins',
-      displayName: 'Manage Submissions & Casework',
-      uid: 'submissions.manage',
+      section: "plugins",
+      displayName: "Manage Submissions & Casework",
+      uid: "submissions.manage",
       pluginName: PLUGIN_ID,
     },
     {
-      section: 'plugins',
-      displayName: 'Manage Subscribers & Alert Banners',
-      uid: 'subscribers.manage',
+      section: "plugins",
+      displayName: "Manage Subscribers & Alert Banners",
+      uid: "subscribers.manage",
       pluginName: PLUGIN_ID,
     },
     {
-      section: 'plugins',
-      displayName: 'Manage Inbox Settings',
-      uid: 'settings.manage',
+      section: "plugins",
+      displayName: "Manage Inbox Settings",
+      uid: "settings.manage",
       pluginName: PLUGIN_ID,
     },
   ]);
 }
 
 function mergePresetFieldOptions(
-  existingOptions: FormField['options'],
-  presetOptions: FormField['options']
-): FormField['options'] {
+  existingOptions: FormField["options"],
+  presetOptions: FormField["options"]
+): FormField["options"] {
   if (!existingOptions) return undefined;
   return existingOptions.map((eo) => {
     const po = presetOptions?.find((o) => o.value === eo.value);
@@ -107,15 +105,11 @@ function mergePresetSettings(
   return {
     ...pickFirst(presetSettings, {}),
     ...pickFirst(existingSettings, {}),
-    department: pickNonDefault(
-      existingSettings?.department,
-      presetSettings?.department,
-      'general'
-    ),
+    department: pickNonDefault(existingSettings?.department, presetSettings?.department, "general"),
     defaultPriority: pickNonDefault(
       existingSettings?.defaultPriority,
       presetSettings?.defaultPriority,
-      'normal'
+      "normal"
     ),
     enableBookingBridge: pickFirst(
       existingSettings?.enableBookingBridge,
@@ -136,18 +130,14 @@ function mergePresetSettings(
   };
 }
 
-function needsPresetBackfill(
-  existing: FormRecord,
-  preset: Partial<FormRecord>
-): boolean {
+function needsPresetBackfill(existing: FormRecord, preset: Partial<FormRecord>): boolean {
   const missingChecklist =
     Boolean(preset.checklistTemplate?.length) && !existing.checklistTemplate?.length;
   const missingTranslations =
     Boolean(preset.translations && Object.keys(preset.translations).length > 0) &&
     !Object.keys(existing.translations || {}).length;
   const missingCategory =
-    Boolean(preset.category && preset.category !== 'contact') &&
-    existing.category === 'contact';
+    Boolean(preset.category && preset.category !== "contact") && existing.category === "contact";
   return missingChecklist || missingTranslations || missingCategory;
 }
 
@@ -155,9 +145,7 @@ function buildMergedPresetForm(
   existing: FormRecord,
   preset: Partial<FormRecord> & { slug: string; title: string }
 ): Partial<FormRecord> & { slug: string; title: string } {
-  const baseFields = existing.fields?.length
-    ? existing.fields
-    : pickFirst(preset.fields, []);
+  const baseFields = existing.fields?.length ? existing.fields : pickFirst(preset.fields, []);
   const mergedFields = baseFields.map((ef) => mergePresetField(ef, preset.fields));
   const checklistTemplate = existing.checklistTemplate?.length
     ? existing.checklistTemplate
@@ -171,7 +159,7 @@ function buildMergedPresetForm(
     ...existing,
     slug: existing.slug,
     title: existing.title || preset.title,
-    category: pickNonDefault(existing.category, preset.category, 'contact'),
+    category: pickNonDefault(existing.category, preset.category, "contact"),
     fields: mergedFields,
     checklistTemplate,
     translations,
@@ -194,27 +182,17 @@ async function seedSinglePresetForm(
   }
 }
 
-async function seedPresetForms(
-  strapi: Core.Strapi,
-  formService: FormServiceApi
-): Promise<void> {
+async function seedPresetForms(strapi: Core.Strapi, formService: FormServiceApi): Promise<void> {
   try {
-    const rawConfig = strapi.config.get<Record<string, unknown>>(
-      `plugin::${PLUGIN_ID}`,
-      {}
-    );
+    const rawConfig = strapi.config.get<Record<string, unknown>>(`plugin::${PLUGIN_ID}`, {});
     const presetForms = Array.isArray(rawConfig?.presetForms)
-      ? (rawConfig.presetForms as Array<
-          Partial<FormRecord> & { slug: string; title: string }
-        >)
+      ? (rawConfig.presetForms as Array<Partial<FormRecord> & { slug: string; title: string }>)
       : [];
     for (const preset of presetForms) {
       await seedSinglePresetForm(formService, preset);
     }
   } catch (err) {
-    strapi.log?.warn?.(
-      `[${PLUGIN_ID}] Could not seed presetForms: ${(err as Error).message}`
-    );
+    strapi.log?.warn?.(`[${PLUGIN_ID}] Could not seed presetForms: ${(err as Error).message}`);
   }
 }
 
@@ -233,17 +211,18 @@ async function preserveCmsFormInboxSettings(
   const incomingSettings = data.settings as Record<string, unknown> | undefined;
   if (!incomingSettings || incomingSettings.inbox) return;
 
-  const existing = (await strapi.db
-    .query(FORM_BUILDER_CMS_FORM_UID)
-    .findOne({ where })) as Record<string, unknown> | null;
+  const existing = (await strapi.db.query(FORM_BUILDER_CMS_FORM_UID).findOne({ where })) as Record<
+    string,
+    unknown
+  > | null;
   const prevInbox = (existing?.settings as Record<string, unknown> | undefined)?.inbox;
   if (!prevInbox) return;
 
   incomingSettings.inbox = prevInbox;
-  if (data.publishedData && typeof data.publishedData === 'object') {
+  if (data.publishedData && typeof data.publishedData === "object") {
     const pd = data.publishedData as Record<string, unknown>;
     pd.settings = {
-      ...((pd.settings as Record<string, unknown>) || {}),
+      ...(pd.settings as Record<string, unknown> | undefined),
       inbox: prevInbox,
     };
   }
@@ -253,12 +232,14 @@ function extractLifecycleFormId(event: {
   result?: Record<string, unknown>;
   params?: { data?: Record<string, unknown> };
 }): number | undefined {
-  const rawFormId = event.params?.data?.form ?? event.result?.form ?? undefined;
-  if (typeof rawFormId === 'number') return rawFormId;
-  if (typeof rawFormId === 'object' && rawFormId !== null && 'id' in rawFormId) {
-    return Number((rawFormId as { id: unknown }).id);
-  }
-  return undefined;
+  const dataForm = event.params?.data?.form;
+  const resultForm = event.result?.form;
+  const fromData =
+    dataForm !== undefined ? resolveCmsSubmissionFormRef({ form: dataForm }).formId : null;
+  if (fromData !== null) return fromData;
+  const fromResult =
+    resultForm !== undefined ? resolveCmsSubmissionFormRef({ form: resultForm }).formId : null;
+  return fromResult ?? undefined;
 }
 
 function subscribeFormBuilderLifecycles(
@@ -268,11 +249,7 @@ function subscribeFormBuilderLifecycles(
 ): void {
   if (!strapi.db?.lifecycles?.subscribe) return;
 
-  if (
-    strapi.contentTypes?.[
-      FORM_BUILDER_CMS_FORM_UID as keyof typeof strapi.contentTypes
-    ]
-  ) {
+  if (strapi.contentTypes?.[FORM_BUILDER_CMS_FORM_UID as keyof typeof strapi.contentTypes]) {
     strapi.db.lifecycles.subscribe({
       models: [FORM_BUILDER_CMS_FORM_UID],
       async beforeUpdate(event) {
@@ -286,11 +263,7 @@ function subscribeFormBuilderLifecycles(
     });
   }
 
-  if (
-    strapi.contentTypes?.[
-      FORM_BUILDER_CMS_SUBMISSION_UID as keyof typeof strapi.contentTypes
-    ]
-  ) {
+  if (strapi.contentTypes?.[FORM_BUILDER_CMS_SUBMISSION_UID as keyof typeof strapi.contentTypes]) {
     strapi.db.lifecycles.subscribe({
       models: [FORM_BUILDER_CMS_SUBMISSION_UID],
       async afterCreate(event: {
@@ -310,13 +283,11 @@ function subscribeFormBuilderLifecycles(
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   const settingsService = strapi.plugin(PLUGIN_ID).service<{
     getSettings(): Promise<InboxSettings>;
-  }>('settings');
-  const formService = strapi
-    .plugin(PLUGIN_ID)
-    .service<FormServiceApi>('formService');
+  }>("settings");
+  const formService = strapi.plugin(PLUGIN_ID).service<FormServiceApi>("formService");
   const submissionService = strapi
     .plugin(PLUGIN_ID)
-    .service<SubmissionServiceApi>('submissionService');
+    .service<SubmissionServiceApi>("submissionService");
 
   const settings = await settingsService.getSettings();
   await registerPluginPermissions(strapi);
@@ -324,10 +295,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Sync with strapi-plugin-form-builder-cms and register lifecycle hooks
   try {
-    if (
-      settings.enableFormBuilderBridge !== false &&
-      settings.autoSyncFormBuilderForms !== false
-    ) {
+    if (settings.enableFormBuilderBridge !== false && settings.autoSyncFormBuilderForms !== false) {
       await formService.syncWithFormBuilderCms();
     }
     subscribeFormBuilderLifecycles(strapi, formService, submissionService);

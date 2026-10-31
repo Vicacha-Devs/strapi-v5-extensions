@@ -1,6 +1,6 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
-  FORM_UID,
   PLUGIN_ID,
   SUBMISSION_UID,
   convertIsoDateToCalendar,
@@ -16,24 +16,25 @@ import {
   type SubmissionPriority,
   type SubmissionRecord,
   type SubmissionStatus,
-} from '../../../shared';
+} from "../../../shared";
+import { getDocuments } from "./docHelper";
 import {
   exportSubmissionsCsv,
   issueCertificateFromSubmission,
   scheduleBookingFromSubmission,
-} from './submissionEcosystemBridges';
+} from "./submissionEcosystemBridges";
 import {
   generateReferenceCode,
   ingestFormBuilderSubmission,
   mirrorSubmissionToFormBuilderCms,
-} from './submissionFormBuilderBridge';
-import { getDocuments } from './docHelper';
+  syncSubmissionsFromFormBuilderCms,
+} from "./submissionFormBuilderBridge";
 
 function firstStr(...vals: unknown[]): string {
   for (const val of vals) {
-    if (typeof val === 'string' && val.trim().length > 0) return val.trim();
+    if (typeof val === "string" && val.trim().length > 0) return val.trim();
   }
-  return '';
+  return "";
 }
 
 function enforceHoneypotAndRateLimit(
@@ -44,22 +45,18 @@ function enforceHoneypotAndRateLimit(
   nowMs?: number
 ): void {
   const honeypotField =
-    firstStr(form.settings?.honeypotField, settings.defaultHoneypotField) ||
-    '_website_url';
+    firstStr(form.settings?.honeypotField, settings.defaultHoneypotField) || "_website_url";
   if (isHoneypotTriggered(payload, honeypotField)) {
-    const err = new Error('Bot submission rejected by honeypot');
-    err.name = 'ForbiddenError';
+    const err = new Error("Bot submission rejected by honeypot");
+    err.name = "ForbiddenError";
     throw err;
   }
 
-  const rateLimit =
-    form.settings?.rateLimitPerHour ?? settings.defaultRateLimitPerHour ?? 15;
+  const rateLimit = form.settings?.rateLimitPerHour ?? settings.defaultRateLimitPerHour ?? 15;
   const limitCheck = defaultRateLimiter.check(ip, form.slug, rateLimit, nowMs);
   if (!limitCheck.allowed) {
-    const err = new Error(
-      `Rate limit exceeded. Try again in ${limitCheck.retryAfterSeconds}s`
-    );
-    err.name = 'TooManyRequestsError';
+    const err = new Error(`Rate limit exceeded. Try again in ${limitCheck.retryAfterSeconds}s`);
+    err.name = "TooManyRequestsError";
     throw err;
   }
 }
@@ -72,31 +69,23 @@ async function enforceCaptchaVerification(
   meta?: { captchaToken?: string; fetchImpl?: FetchLike }
 ): Promise<void> {
   const captchaProvider =
-    form.settings?.captchaProvider || settings.defaultCaptchaProvider || 'none';
-  if (captchaProvider === 'none') return;
+    form.settings?.captchaProvider || settings.defaultCaptchaProvider || "none";
+  if (captchaProvider === "none") return;
 
   const providerSecret =
-    captchaProvider === 'turnstile'
-      ? settings.turnstileSecretKey
-      : settings.recaptchaSecretKey;
+    captchaProvider === "turnstile" ? settings.turnstileSecretKey : settings.recaptchaSecretKey;
   const secret = firstStr(form.settings?.captchaSecretKey, providerSecret);
   const token = firstStr(
     meta?.captchaToken,
     payload.captchaToken,
-    payload['cf-turnstile-response'],
-    payload['g-recaptcha-response']
+    payload["cf-turnstile-response"],
+    payload["g-recaptcha-response"]
   );
 
-  const verified = await verifyCaptchaToken(
-    captchaProvider,
-    secret,
-    token,
-    ip,
-    meta?.fetchImpl
-  );
+  const verified = await verifyCaptchaToken(captchaProvider, secret, token, ip, meta?.fetchImpl);
   if (!verified) {
-    const err = new Error('CAPTCHA verification failed');
-    err.name = 'ValidationError';
+    const err = new Error("CAPTCHA verification failed");
+    err.name = "ValidationError";
     throw err;
   }
 }
@@ -109,11 +98,11 @@ function validateOrThrow(
   const validation = validateFormSubmission(form.fields || [], payload, locale);
   if (!validation.valid) {
     const firstField = Object.keys(validation.errors)[0];
-    const firstError = validation.errors[firstField]?.[0] || 'Validation failed';
+    const firstError = validation.errors[firstField]?.[0] || "Validation failed";
     const err = new Error(firstError) as Error & {
       details?: Record<string, string[]>;
     };
-    err.name = 'ValidationError';
+    err.name = "ValidationError";
     err.details = validation.errors;
     throw err;
   }
@@ -130,7 +119,7 @@ function buildSubmissionDataRecord(params: {
   userAgent: string;
   nowMs?: number;
   mirroredCmsSubmissionId: number | null;
-}): Omit<SubmissionRecord, 'documentId'> {
+}): Omit<SubmissionRecord, "documentId"> {
   const {
     form,
     settings,
@@ -148,33 +137,26 @@ function buildSubmissionDataRecord(params: {
     cleaned.name,
     payload.applicantName
   );
-  const applicantEmail = firstStr(
-    cleaned.applicantEmail,
-    cleaned.email,
-    payload.applicantEmail
-  );
-  const applicantPhone = firstStr(
-    cleaned.applicantPhone,
-    cleaned.phone,
-    payload.applicantPhone
-  );
+  const applicantEmail = firstStr(cleaned.applicantEmail, cleaned.email, payload.applicantEmail);
+  const applicantPhone = firstStr(cleaned.applicantPhone, cleaned.phone, payload.applicantPhone);
 
   const timestamp = nowMs ?? Date.now();
   const nowIso = new Date(timestamp).toISOString();
-  const secondaryCal = settings.secondaryCalendars?.[0] ?? 'islamic-umalqura';
+  const secondaryCal = settings.secondaryCalendars?.[0] ?? "islamic-umalqura";
   const converted = convertIsoDateToCalendar(nowIso.slice(0, 10), secondaryCal, locale);
-  const checklistItems: ChecklistItem[] = (form.checklistTemplate ?? []).map(
-    (item) => ({ ...item, verified: false })
-  );
+  const checklistItems: ChecklistItem[] = (form.checklistTemplate ?? []).map((item) => ({
+    ...item,
+    verified: false,
+  }));
 
   return {
     referenceCode: generateReferenceCode(new Date(timestamp)),
     formSlug: form.slug,
     formTitle: form.title,
-    category: form.category ?? 'contact',
-    status: 'new',
-    priority: form.settings?.defaultPriority ?? 'normal',
-    department: form.settings?.department ?? 'general',
+    category: form.category ?? "contact",
+    status: "new",
+    priority: form.settings?.defaultPriority ?? "normal",
+    department: form.settings?.department ?? "general",
     locale,
     applicantName: applicantName || undefined,
     applicantEmail: applicantEmail || undefined,
@@ -196,7 +178,7 @@ function buildSubmissionDataRecord(params: {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async testCaptchaSecret(
-    provider: 'none' | 'turnstile' | 'recaptcha',
+    provider: "none" | "turnstile" | "recaptcha",
     secret: string,
     fetchImpl?: FetchLike
   ) {
@@ -217,39 +199,35 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   ): Promise<SubmissionRecord> {
     const settingsService = strapi.plugin(PLUGIN_ID).service<{
       getSettings(): Promise<InboxSettings>;
-    }>('settings');
+    }>("settings");
     const formService = strapi.plugin(PLUGIN_ID).service<{
       findBySlug(slug: string): Promise<FormRecord | null>;
-    }>('formService');
+    }>("formService");
 
     const settings = await settingsService.getSettings();
     const form = await formService.findBySlug(slug);
 
     if (!form || form.active === false) {
       const err = new Error(`Active form "${slug}" not found`);
-      err.name = 'NotFoundError';
+      err.name = "NotFoundError";
       throw err;
     }
 
-    const locale =
-      firstStr(meta?.locale, payload.locale, settings.defaultLocale) || 'es';
-    const ip = firstStr(meta?.ip) || '127.0.0.1';
+    const locale = firstStr(meta?.locale, payload.locale, settings.defaultLocale) || "es";
+    const ip = firstStr(meta?.ip) || "127.0.0.1";
     const userAgent = firstStr(meta?.userAgent);
 
     enforceHoneypotAndRateLimit(form, settings, payload, ip, meta?.nowMs);
     await enforceCaptchaVerification(form, settings, payload, ip, meta);
     const cleaned = validateOrThrow(form, payload, locale);
 
-    const mirroredCmsSubmissionId = await mirrorSubmissionToFormBuilderCms(
-      strapi,
-      {
-        settings,
-        form,
-        cleanedData: cleaned,
-        ip,
-        userAgent,
-      }
-    );
+    const mirroredCmsSubmissionId = await mirrorSubmissionToFormBuilderCms(strapi, {
+      settings,
+      form,
+      cleanedData: cleaned,
+      ip,
+      userAgent,
+    });
 
     const submissionData = buildSubmissionDataRecord({
       form,
@@ -267,7 +245,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       data: submissionData as unknown as Record<string, unknown>,
     })) as unknown as SubmissionRecord;
 
-    strapi.eventHub?.emit('inbox.submission.created', {
+    strapi.eventHub?.emit("inbox.submission.created", {
       submission: created,
       formSlug: form.slug,
     });
@@ -293,6 +271,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     department?: string;
     limit?: number;
   }): Promise<SubmissionRecord[]> {
+    await syncSubmissionsFromFormBuilderCms(strapi);
+
     const queryFilters: Record<string, unknown> = {};
     if (filters?.formSlug) queryFilters.formSlug = filters.formSlug;
     if (filters?.status) queryFilters.status = filters.status;
@@ -338,7 +318,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       },
     })) as unknown as SubmissionRecord;
 
-    strapi.eventHub?.emit('inbox.submission.updated', {
+    strapi.eventHub?.emit("inbox.submission.updated", {
       submission: updated,
     });
 

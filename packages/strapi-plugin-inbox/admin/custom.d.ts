@@ -1,12 +1,5 @@
-declare module 'react' {
-  export type ReactNode =
-    | string
-    | number
-    | boolean
-    | null
-    | undefined
-    | ReactElement
-    | ReactNode[];
+declare module "react" {
+  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
 
   export interface ReactElement<P = Record<string, unknown>> {
     type: unknown;
@@ -25,14 +18,8 @@ declare module 'react' {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(
-    effect: () => void | (() => void),
-    deps?: readonly unknown[]
-  ): void;
-  export function useMemo<T>(
-    factory: () => T,
-    deps?: readonly unknown[]
-  ): T;
+  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
+  export function useMemo<T>(factory: () => T, deps?: readonly unknown[]): T;
   export function createElement(...args: unknown[]): ReactElement;
   export const Fragment: unknown;
 
@@ -46,8 +33,8 @@ declare module 'react' {
   export as namespace React;
 }
 
-declare module 'react/jsx-runtime' {
-  import type { ReactElement } from 'react';
+declare module "react/jsx-runtime" {
+  import type { ReactElement } from "react";
   export const Fragment: unknown;
   export function jsx(
     type: unknown,
@@ -68,16 +55,19 @@ declare module 'react/jsx-runtime' {
   }
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }
 
-declare module 'node:crypto' {
+declare module "node:crypto" {
   export function randomBytes(size: number): {
-    toString(encoding: 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding: "hex" | "base64" | "base64url"): string;
   };
-  export function createHmac(algorithm: string, key: string): {
+  export function createHmac(
+    algorithm: string,
+    key: string
+  ): {
     update(data: string, encoding?: string): { digest(encoding: string): string };
   };
   export function timingSafeEqual(a: unknown, b: unknown): boolean;
@@ -87,8 +77,8 @@ declare const Buffer: {
   from(data: string, encoding?: string): { length: number };
 };
 
-declare module '@strapi/design-system' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/design-system" {
+  import type { FC, ReactNode } from "react";
   export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Tabs: {
@@ -126,7 +116,7 @@ declare module '@strapi/design-system' {
   };
 }
 
-declare module '@strapi/strapi/admin' {
+declare module "@strapi/strapi/admin" {
   export type DefaultApiData = Record<string, unknown> &
     never[] & {
       ok?: boolean;
@@ -136,22 +126,16 @@ declare module '@strapi/strapi/admin' {
 
   export const useFetchClient: () => {
     get: <T = DefaultApiData>(url: string) => Promise<{ data?: { data?: T } }>;
-    post: <T = DefaultApiData>(
-      url: string,
-      data?: unknown
-    ) => Promise<{ data?: { data?: T } }>;
-    put: <T = DefaultApiData>(
-      url: string,
-      data?: unknown
-    ) => Promise<{ data?: { data?: T } }>;
+    post: <T = DefaultApiData>(url: string, data?: unknown) => Promise<{ data?: { data?: T } }>;
+    put: <T = DefaultApiData>(url: string, data?: unknown) => Promise<{ data?: { data?: T } }>;
   };
 }
 
-declare module 'styled-components' {
+declare module "styled-components" {
   export function useTheme(): Record<string, unknown>;
 }
 
-declare module 'react-intl' {
+declare module "react-intl" {
   export interface MessageDescriptor {
     id: string;
     defaultMessage?: string;
