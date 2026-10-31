@@ -1,4 +1,4 @@
-import { SUPPORTED_INTL_CALENDARS } from '@vicacha-devs/strapi-plugin-calendar/shared';
+import { SUPPORTED_INTL_CALENDARS } from "@vicacha-devs/strapi-plugin-calendar/shared";
 
 export { SUPPORTED_INTL_CALENDARS };
 
@@ -13,6 +13,6 @@ export interface SecondaryDateDisplay {
 }
 
 export function isSupportedCalendar(cal: unknown): cal is CalendarSystemId {
-  if (typeof cal !== 'string' || !cal.trim()) return false;
+  if (typeof cal !== "string" || !cal.trim()) return false;
   return SUPPORTED_INTL_CALENDARS.some((item) => item.id === cal.trim());
 }

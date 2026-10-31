@@ -1,33 +1,36 @@
 declare const Buffer: {
   from(
     input: string,
-    encoding?: 'utf8' | 'utf-8' | 'hex' | 'base64' | 'base64url'
+    encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
   ): Uint8Array & {
-    toString(encoding?: 'utf8' | 'utf-8' | 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"): string;
   };
-  byteLength(input: string, encoding?: 'utf8' | 'utf-8'): number;
+  byteLength(input: string, encoding?: "utf8" | "utf-8"): number;
 };
 
 declare const process: {
   env: Record<string, string | undefined>;
 };
 
-declare module 'node:crypto' {
+declare module "node:crypto" {
   export function randomBytes(size: number): {
-    toString(encoding: 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding: "hex" | "base64" | "base64url"): string;
   };
   export function createHmac(
-    algorithm: 'sha256' | 'sha512',
+    algorithm: "sha256" | "sha512",
     key: string
   ): {
-    update(data: string, encoding?: 'utf8' | 'utf-8'): {
-      digest(encoding: 'hex' | 'base64' | 'base64url'): string;
+    update(
+      data: string,
+      encoding?: "utf8" | "utf-8"
+    ): {
+      digest(encoding: "hex" | "base64" | "base64url"): string;
     };
   };
   export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean;
 }
 
-declare module 'node:assert/strict' {
+declare module "node:assert/strict" {
   const assert: {
     equal(actual: unknown, expected: unknown, message?: string): void;
     notEqual(actual: unknown, expected: unknown, message?: string): void;
@@ -38,12 +41,12 @@ declare module 'node:assert/strict' {
   export default assert;
 }
 
-declare module 'node:test' {
+declare module "node:test" {
   export function describe(name: string, fn: () => void | Promise<void>): void;
   export function it(name: string, fn: () => void | Promise<void>): void;
 }
 
-declare module '@strapi/strapi' {
+declare module "@strapi/strapi" {
   export namespace Core {
     export interface PluginStore {
       get(params: { key: string }): Promise<unknown>;
@@ -70,7 +73,7 @@ declare module '@strapi/strapi' {
     export interface DocumentQueryOptions {
       limit?: number;
       locale?: string;
-      status?: 'draft' | 'published';
+      status?: "draft" | "published";
       filters?: Record<string, unknown>;
       populate?: string[];
       sort?: string;
@@ -86,7 +89,7 @@ declare module '@strapi/strapi' {
       create(params: {
         data: Record<string, unknown>;
         locale?: string;
-        status?: 'draft' | 'published';
+        status?: "draft" | "published";
       }): Promise<Record<string, unknown>>;
       update(params: {
         documentId: string;
@@ -136,12 +139,12 @@ declare module '@strapi/strapi' {
   }
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, unknown>;
   export default value;
 }
 
-declare module '@vicacha-devs/strapi-plugin-calendar/shared' {
+declare module "@vicacha-devs/strapi-plugin-calendar/shared" {
   export const SUPPORTED_INTL_CALENDARS: ReadonlyArray<{
     id: string;
     intlCalendar: string;

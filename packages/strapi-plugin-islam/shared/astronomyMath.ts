@@ -1,67 +1,64 @@
-import { KAABA_COORDINATES } from './constants';
+import { KAABA_COORDINATES } from "./constants";
 import type {
   DailyFivePrayerId,
   IqamahRule,
   ProhibitedTimesWindow,
   QiblaCompassResult,
   SupportedLocale,
-} from './types';
-import { sanitizeCoordinates } from './validation';
+} from "./types";
+import { sanitizeCoordinates } from "./validation";
 
 export const DEG_TO_RAD = Math.PI / 180;
 export const RAD_TO_DEG = 180 / Math.PI;
 const EARTH_RADIUS_KM = 6371.0088;
 
 const COMPASS_16 = [
-  'N',
-  'NNE',
-  'NE',
-  'ENE',
-  'E',
-  'ESE',
-  'SE',
-  'SSE',
-  'S',
-  'SSW',
-  'SW',
-  'WSW',
-  'W',
-  'WNW',
-  'NW',
-  'NNW',
+  "N",
+  "NNE",
+  "NE",
+  "ENE",
+  "E",
+  "ESE",
+  "SE",
+  "SSE",
+  "S",
+  "SSW",
+  "SW",
+  "WSW",
+  "W",
+  "WNW",
+  "NW",
+  "NNW",
 ] as const;
 
-export const PRAYER_LABELS: Record<
-  SupportedLocale,
-  Record<DailyFivePrayerId, string>
-> = {
+export const PRAYER_LABELS: Record<SupportedLocale, Record<DailyFivePrayerId, string>> = {
   es: {
-    fajr: 'Fajr (Alba)',
-    dhuhr: 'Dhuhr (Mediodía)',
-    asr: 'Asr (Tarde)',
-    maghrib: 'Maghrib (Ocaso)',
-    isha: 'Isha (Noche)',
+    fajr: "Fajr (Alba)",
+    dhuhr: "Dhuhr (Mediodía)",
+    asr: "Asr (Tarde)",
+    maghrib: "Maghrib (Ocaso)",
+    isha: "Isha (Noche)",
   },
   en: {
-    fajr: 'Fajr (Dawn)',
-    dhuhr: 'Dhuhr (Noon)',
-    asr: 'Asr (Afternoon)',
-    maghrib: 'Maghrib (Sunset)',
-    isha: 'Isha (Night)',
+    fajr: "Fajr (Dawn)",
+    dhuhr: "Dhuhr (Noon)",
+    asr: "Asr (Afternoon)",
+    maghrib: "Maghrib (Sunset)",
+    isha: "Isha (Night)",
   },
   ar: {
-    fajr: 'الفجر',
-    dhuhr: 'الظهر',
-    asr: 'العصر',
-    maghrib: 'المغرب',
-    isha: 'العشاء',
+    fajr: "الفجر",
+    dhuhr: "الظهر",
+    asr: "العصر",
+    maghrib: "المغرب",
+    isha: "العشاء",
   },
   tr: {
-    fajr: 'İmsak / Sabah (Fecr)',
-    dhuhr: 'Öğle (Zuhur)',
-    asr: 'İkindi (Asr)',
-    maghrib: 'Akşam (Mağrib)',
-    isha: 'Yatsı (İşa)',
+    fajr: "İmsak / Sabah (Fecr)",
+    dhuhr: "Öğle (Zuhur)",
+    asr: "İkindi (Asr)",
+    maghrib: "Akşam (Mağrib)",
+    isha: "Yatsı (İşa)",
   },
 };
 
@@ -98,7 +95,7 @@ export function calculateQiblaCompass(
     kaaba: { lat: KAABA_COORDINATES.lat, lon: KAABA_COORDINATES.lon },
     direction: {
       degrees,
-      from: 'True North',
+      from: "True North",
       clockwise: true,
       cardinal: COMPASS_16[compassIdx],
     },
@@ -111,8 +108,8 @@ export function calculateQiblaCompass(
 
 export function getTimezoneOffsetHours(date: Date, timeZone: string): number {
   try {
-    const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
-    const tzDate = new Date(date.toLocaleString('en-US', { timeZone }));
+    const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
+    const tzDate = new Date(date.toLocaleString("en-US", { timeZone }));
     return (tzDate.getTime() - utcDate.getTime()) / 3_600_000;
   } catch {
     return -5;
@@ -126,14 +123,10 @@ export function solarPosition(julianDay: number): {
   const d = julianDay - 2451545.0;
   const g = ((357.529 + 0.98560028 * d) % 360) * DEG_TO_RAD;
   const q = (280.459 + 0.98564736 * d) % 360;
-  const l =
-    ((q + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) % 360) * DEG_TO_RAD;
+  const l = ((q + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) % 360) * DEG_TO_RAD;
   const e = (23.439 - 0.00000036 * d) * DEG_TO_RAD;
 
-  const ra =
-    ((Math.atan2(Math.cos(e) * Math.sin(l), Math.cos(l)) * RAD_TO_DEG + 360) %
-      360) /
-    15;
+  const ra = ((Math.atan2(Math.cos(e) * Math.sin(l), Math.cos(l)) * RAD_TO_DEG + 360) % 360) / 15;
   const declinationRad = Math.asin(Math.sin(e) * Math.sin(l));
 
   let eqt = q / 15 - ra;
@@ -159,19 +152,17 @@ export function minutesToHhMm(totalMinutes: number): string {
   const wrapped = ((Math.round(totalMinutes) % 1440) + 1440) % 1440;
   const hh = Math.floor(wrapped / 60);
   const mm = wrapped % 60;
-  return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
 function applyMeridiemAdjustment(hours: number, meridiem?: string): number {
-  if (meridiem === 'PM' && hours < 12) return hours + 12;
-  if (meridiem === 'AM' && hours === 12) return 0;
+  if (meridiem === "PM" && hours < 12) return hours + 12;
+  if (meridiem === "AM" && hours === 12) return 0;
   return hours;
 }
 
-export function parseHhMmToMinutes(
-  rawTime: string | undefined | null
-): number | null {
-  if (typeof rawTime !== 'string') return null;
+export function parseHhMmToMinutes(rawTime: string | undefined | null): number | null {
+  if (typeof rawTime !== "string") return null;
   const match = rawTime
     .trim()
     .toUpperCase()
@@ -191,21 +182,19 @@ export function resolveIqamahTime(
 ): { iqamah: string; iqamahMinutes: number } {
   const rule = rules.find((r) => r.prayerName === prayerName);
   if (!rule) {
-    const defaultOffset = prayerName === 'maghrib' ? 10 : 15;
+    const defaultOffset = prayerName === "maghrib" ? 10 : 15;
     const mins = adhanMinutes + defaultOffset;
     return { iqamah: minutesToHhMm(mins), iqamahMinutes: mins };
   }
 
-  if (rule.mode === 'fixed_time' && rule.fixedTime) {
+  if (rule.mode === "fixed_time" && rule.fixedTime) {
     const parsed = parseHhMmToMinutes(rule.fixedTime);
     if (parsed !== null && parsed >= adhanMinutes) {
       return { iqamah: minutesToHhMm(parsed), iqamahMinutes: parsed };
     }
   }
 
-  const offset = Number.isFinite(rule.offsetMinutes)
-    ? Math.max(0, rule.offsetMinutes)
-    : 15;
+  const offset = Number.isFinite(rule.offsetMinutes) ? Math.max(0, rule.offsetMinutes) : 15;
   const mins = adhanMinutes + offset;
   return { iqamah: minutesToHhMm(mins), iqamahMinutes: mins };
 }
@@ -218,10 +207,10 @@ function detectProhibitedReason(
   dhuhrMin: number,
   sunsetStart: number,
   maghribMin: number
-): 'sunrise' | 'zawal' | 'sunset' | null {
-  if (nowMinutes >= sunriseMin && nowMinutes < sunriseEnd) return 'sunrise';
-  if (nowMinutes >= zawalStart && nowMinutes < dhuhrMin) return 'zawal';
-  if (nowMinutes >= sunsetStart && nowMinutes < maghribMin) return 'sunset';
+): "sunrise" | "zawal" | "sunset" | null {
+  if (nowMinutes >= sunriseMin && nowMinutes < sunriseEnd) return "sunrise";
+  if (nowMinutes >= zawalStart && nowMinutes < dhuhrMin) return "zawal";
+  if (nowMinutes >= sunsetStart && nowMinutes < maghribMin) return "sunset";
   return null;
 }
 

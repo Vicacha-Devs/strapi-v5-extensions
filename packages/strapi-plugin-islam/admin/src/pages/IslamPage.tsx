@@ -1,7 +1,8 @@
-import { useIntl } from 'react-intl';
-import React, { useEffect, useState } from 'react';
-import { Main, Box, Flex, Typography, Button } from '@strapi/design-system';
-import { useFetchClient } from '@strapi/strapi/admin';
+import { Main, Box, Flex, Typography, Button } from "@strapi/design-system";
+import { useFetchClient } from "@strapi/strapi/admin";
+import React, { useEffect, useState } from "react";
+import { useIntl } from "react-intl";
+
 import {
   PLUGIN_ID,
   type CuratedAyahItem,
@@ -12,20 +13,20 @@ import {
   type IslamicObservanceItem,
   type IslamPluginSettings,
   type NisabThresholdResult,
-} from '../../../shared';
+} from "../../../shared";
 import {
   HilalCockpitTab,
   SalahCockpitTab,
   type HilalOccasionKey,
-} from '../components/SalahAndHilalTabs';
+} from "../components/SalahAndHilalTabs";
 import {
   FiqhCockpitTab,
   ScriptureCockpitTab,
   type InspirationPinPatch,
-} from '../components/ScriptureAndFiqhTabs';
-import type { TranslateFn } from '../components/SettingsTabs';
+} from "../components/ScriptureAndFiqhTabs";
+import type { TranslateFn } from "../components/SettingsTabs";
 
-type CockpitTab = 'salah' | 'hilal' | 'scripture' | 'fiqh';
+type CockpitTab = "salah" | "hilal" | "scripture" | "fiqh";
 
 interface OverviewResponsePayload {
   settings?: IslamPluginSettings;
@@ -55,23 +56,13 @@ const CockpitHeaderBar: React.FC<{
   loading: boolean;
   onRefresh: () => void;
   t: TranslateFn;
-}> = ({
-  settings,
-  timetable,
-  activeTab,
-  setActiveTab,
-  loading,
-  onRefresh,
-  t,
-}) => {
+}> = ({ settings, timetable, activeTab, setActiveTab, loading, onRefresh, t }) => {
   const mosqueLabel =
-    settings?.mosqueName ||
-    t('page.ui.mosque_control_center', 'Mosque Control Center');
+    settings?.mosqueName || t("page.ui.mosque_control_center", "Mosque Control Center");
   const hijriLabel =
-    timetable?.hijri?.formatted ||
-    t('page.ui.hijri_calendar_label', 'Hijri Calendar');
+    timetable?.hijri?.formatted || t("page.ui.hijri_calendar_label", "Hijri Calendar");
   const qiblaDegrees = timetable?.qibla?.direction?.degrees ?? 65.24;
-  const qiblaCardinal = timetable?.qibla?.direction?.cardinal ?? 'ENE';
+  const qiblaCardinal = timetable?.qibla?.direction?.cardinal ?? "ENE";
 
   return (
     <Flex
@@ -84,14 +75,14 @@ const CockpitHeaderBar: React.FC<{
       <Flex direction="column" alignItems="flex-start" gap={1}>
         <Typography variant="alpha" tag="h1">
           {t(
-            'page.ui.islam_liturgical_scriptural_fiqh_cockpit',
-            'Islam Liturgical, Scriptural & Fiqh Cockpit'
+            "page.ui.islam_liturgical_scriptural_fiqh_cockpit",
+            "Islam Liturgical, Scriptural & Fiqh Cockpit"
           )}
         </Typography>
         <Typography variant="epsilon" textColor="neutral600">
           {t(
-            'page.ui.cockpit_header_subtitle',
-            '{mosque} • {hijri} • Qibla {degrees}° ({cardinal})',
+            "page.ui.cockpit_header_subtitle",
+            "{mosque} • {hijri} • Qibla {degrees}° ({cardinal})",
             {
               mosque: mosqueLabel,
               hijri: hijriLabel,
@@ -103,31 +94,31 @@ const CockpitHeaderBar: React.FC<{
       </Flex>
       <Flex gap={2} wrap="wrap">
         <Button
-          variant={activeTab === 'salah' ? 'default' : 'tertiary'}
-          onClick={() => setActiveTab('salah')}
+          variant={activeTab === "salah" ? "default" : "tertiary"}
+          onClick={() => setActiveTab("salah")}
         >
-          {t('page.ui.1_salah_adhan_iqamah', 'Salah, Adhan & Iqamah')}
+          {t("page.ui.1_salah_adhan_iqamah", "Salah, Adhan & Iqamah")}
         </Button>
         <Button
-          variant={activeTab === 'hilal' ? 'default' : 'tertiary'}
-          onClick={() => setActiveTab('hilal')}
+          variant={activeTab === "hilal" ? "default" : "tertiary"}
+          onClick={() => setActiveTab("hilal")}
         >
-          {t('page.ui.2_hilal_ramadan_eid', 'Hilal, Ramadan & Eid')}
+          {t("page.ui.2_hilal_ramadan_eid", "Hilal, Ramadan & Eid")}
         </Button>
         <Button
-          variant={activeTab === 'scripture' ? 'default' : 'tertiary'}
-          onClick={() => setActiveTab('scripture')}
+          variant={activeTab === "scripture" ? "default" : "tertiary"}
+          onClick={() => setActiveTab("scripture")}
         >
-          {t('page.ui.3_quran_hadith_dua', 'Quran, Hadith & Dua')}
+          {t("page.ui.3_quran_hadith_dua", "Quran, Hadith & Dua")}
         </Button>
         <Button
-          variant={activeTab === 'fiqh' ? 'default' : 'tertiary'}
-          onClick={() => setActiveTab('fiqh')}
+          variant={activeTab === "fiqh" ? "default" : "tertiary"}
+          onClick={() => setActiveTab("fiqh")}
         >
-          {t('page.ui.4_zakat_nisab_qibla', 'Zakat, Nisab & Qibla')}
+          {t("page.ui.4_zakat_nisab_qibla", "Zakat, Nisab & Qibla")}
         </Button>
         <Button variant="secondary" onClick={onRefresh} loading={loading}>
-          {t('page.ui.refresh', 'Refresh')}
+          {t("page.ui.refresh", "Refresh")}
         </Button>
       </Flex>
     </Flex>
@@ -139,7 +130,7 @@ export const IslamPage: React.FC = () => {
   const t: TranslateFn = (id, defaultMessage, values) =>
     formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
   const { get, post } = useFetchClient();
-  const [activeTab, setActiveTab] = useState<CockpitTab>('salah');
+  const [activeTab, setActiveTab] = useState<CockpitTab>("salah");
   const [loading, setLoading] = useState(true);
   const [savingAction, setSavingAction] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -147,28 +138,25 @@ export const IslamPage: React.FC = () => {
   const [settings, setSettings] = useState<IslamPluginSettings | null>(null);
   const [timetable, setTimetable] = useState<DailyPrayerTimetable | null>(null);
   const [observances, setObservances] = useState<IslamicObservanceItem[]>([]);
-  const [dailyInspiration, setDailyInspiration] =
-    useState<DailyInspirationBundle | null>(null);
+  const [dailyInspiration, setDailyInspiration] = useState<DailyInspirationBundle | null>(null);
   const [ayat, setAyat] = useState<CuratedAyahItem[]>([]);
   const [hadiths, setHadiths] = useState<CuratedHadithItem[]>([]);
   const [duas, setDuas] = useState<CuratedDuaItem[]>([]);
   const [nisabCop, setNisabCop] = useState<NisabThresholdResult | null>(null);
   const [nisabUsd, setNisabUsd] = useState<NisabThresholdResult | null>(null);
 
-  const [hilalOccasion, setHilalOccasion] = useState<HilalOccasionKey>('ramadan');
+  const [hilalOccasion, setHilalOccasion] = useState<HilalOccasionKey>("ramadan");
   const [hilalGregorianDate, setHilalGregorianDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
-  const [hilalShifting, setHilalShifting] = useState('0');
-  const [hilalImamName, setHilalImamName] = useState(
-    'Sheikh Principal de la Mezquita'
-  );
+  const [hilalShifting, setHilalShifting] = useState("0");
+  const [hilalImamName, setHilalImamName] = useState("Sheikh Principal de la Mezquita");
   const [hilalActivateBanner, setHilalActivateBanner] = useState(true);
 
   const applyOverviewPayload = (payload: OverviewResponsePayload) => {
     if (payload.settings) {
       setSettings(payload.settings);
-      setHilalShifting(payload.settings.shifting || '0');
+      setHilalShifting(payload.settings.shifting || "0");
     }
     if (payload.todayTimetable) setTimetable(payload.todayTimetable);
     if (Array.isArray(payload.observances?.upcomingObservances)) {
@@ -214,8 +202,8 @@ export const IslamPage: React.FC = () => {
       });
       setStatusMessage(
         t(
-          'page.ui.hilal_confirmed_status',
-          'Official Hilal sighting and Hijri offset updated successfully.'
+          "page.ui.hilal_confirmed_status",
+          "Official Hilal sighting and Hijri offset updated successfully."
         )
       );
       await loadOverview();
@@ -233,9 +221,7 @@ export const IslamPage: React.FC = () => {
         ...currentPins,
         ...patch,
       });
-      setStatusMessage(
-        t('page.ui.daily_pin_updated_status', 'Daily Inspiration pin updated.')
-      );
+      setStatusMessage(t("page.ui.daily_pin_updated_status", "Daily Inspiration pin updated."));
       await loadOverview();
     } finally {
       setSavingAction(false);
@@ -263,15 +249,11 @@ export const IslamPage: React.FC = () => {
           </Box>
         )}
 
-        {activeTab === 'salah' && timetable && (
-          <SalahCockpitTab
-            timetable={timetable}
-            settings={settings}
-            t={t}
-          />
+        {activeTab === "salah" && timetable && (
+          <SalahCockpitTab timetable={timetable} settings={settings} t={t} />
         )}
 
-        {activeTab === 'hilal' && (
+        {activeTab === "hilal" && (
           <HilalCockpitTab
             hilalOccasion={hilalOccasion}
             setHilalOccasion={setHilalOccasion}
@@ -290,7 +272,7 @@ export const IslamPage: React.FC = () => {
           />
         )}
 
-        {activeTab === 'scripture' && (
+        {activeTab === "scripture" && (
           <ScriptureCockpitTab
             dailyInspiration={dailyInspiration}
             ayat={ayat}
@@ -301,7 +283,7 @@ export const IslamPage: React.FC = () => {
           />
         )}
 
-        {activeTab === 'fiqh' && (
+        {activeTab === "fiqh" && (
           <FiqhCockpitTab
             nisabCop={nisabCop}
             nisabUsd={nisabUsd}

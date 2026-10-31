@@ -1,8 +1,4 @@
-import {
-  GOLD_CARAT_PURITY_FACTORS,
-  NISAB_STANDARDS,
-  TROY_OUNCE_IN_GRAMS,
-} from './constants';
+import { GOLD_CARAT_PURITY_FACTORS, NISAB_STANDARDS, TROY_OUNCE_IN_GRAMS } from "./constants";
 import type {
   FiqhRatesConfig,
   FitranaFidyahKaffarahInput,
@@ -12,15 +8,11 @@ import type {
   SupportedCurrency,
   ZakatAlMalCalculationInput,
   ZakatAlMalCalculationResult,
-} from './types';
-import {
-  sanitizeCurrency,
-  sanitizeNisabStandard,
-  sanitizeNonNegativeNumber,
-} from './validation';
+} from "./types";
+import { sanitizeCurrency, sanitizeNisabStandard, sanitizeNonNegativeNumber } from "./validation";
 
 function roundMoney(value: number, currency: SupportedCurrency): number {
-  if (currency === 'COP') {
+  if (currency === "COP") {
     return Math.round(value);
   }
   return Math.round(value * 100) / 100;
@@ -38,15 +30,11 @@ function resolveSpotPricePerGram(
 }
 
 function convertGramToUnitPrice(pricePerGram: number, isTroyOz: boolean): number {
-  return isTroyOz
-    ? Math.round(pricePerGram * TROY_OUNCE_IN_GRAMS * 100) / 100
-    : pricePerGram;
+  return isTroyOz ? Math.round(pricePerGram * TROY_OUNCE_IN_GRAMS * 100) / 100 : pricePerGram;
 }
 
 function convertWeightToUnit(weightGrams: number, isTroyOz: boolean): number {
-  return isTroyOz
-    ? Math.round((weightGrams / TROY_OUNCE_IN_GRAMS) * 1000) / 1000
-    : weightGrams;
+  return isTroyOz ? Math.round((weightGrams / TROY_OUNCE_IN_GRAMS) * 1000) / 1000 : weightGrams;
 }
 
 function computeCaratPrices(
@@ -65,15 +53,15 @@ export function calculateNisabThresholds(
   options?: {
     currency?: SupportedCurrency;
     standard?: NisabStandardId;
-    unit?: 'g' | 'oz';
+    unit?: "g" | "oz";
     goldSpotOverridePerGram?: number;
     silverSpotOverridePerGram?: number;
-    source?: 'configured_or_live' | 'external_api';
+    source?: "configured_or_live" | "external_api";
   }
 ): NisabThresholdResult {
   const currency = sanitizeCurrency(options?.currency, ratesConfig.defaultCurrency);
   const standard = sanitizeNisabStandard(options?.standard, ratesConfig.defaultStandard);
-  const isTroyOz = options?.unit === 'oz';
+  const isTroyOz = options?.unit === "oz";
   const spec = NISAB_STANDARDS[standard];
 
   const goldPerGram = resolveSpotPricePerGram(
@@ -91,7 +79,7 @@ export function calculateNisabThresholds(
     fetchedAt: new Date().toISOString(),
     standard,
     currency,
-    weightUnit: isTroyOz ? 'troy_oz' : 'gram',
+    weightUnit: isTroyOz ? "troy_oz" : "gram",
     zakatRate: 0.025,
     zakatRatePercent: 2.5,
     gold: {
@@ -107,7 +95,7 @@ export function calculateNisabThresholds(
       unitPrice: convertGramToUnitPrice(silverPerGram, isTroyOz),
       nisabAmount: roundMoney(spec.silverGrams * silverPerGram, currency),
     },
-    source: options?.source ?? 'configured_or_live',
+    source: options?.source ?? "configured_or_live",
   };
 }
 
@@ -118,7 +106,7 @@ const USHR_RATE_BY_IRRIGATION: Record<string, number> = {
 };
 
 function resolveUshrRatePercent(
-  irrigation?: ZakatAlMalCalculationInput['agriculturalIrrigation']
+  irrigation?: ZakatAlMalCalculationInput["agriculturalIrrigation"]
 ): number {
   return irrigation ? (USHR_RATE_BY_IRRIGATION[irrigation] ?? 0) : 0;
 }
@@ -140,13 +128,11 @@ export function calculateZakatAlMal(
 ): ZakatAlMalCalculationResult {
   const currency = sanitizeCurrency(input.currency, ratesConfig.defaultCurrency);
   const standard = sanitizeNisabStandard(input.standard, ratesConfig.defaultStandard);
-  const benchmark: 'gold' | 'silver' = input.benchmark === 'silver' ? 'silver' : 'gold';
+  const benchmark: "gold" | "silver" = input.benchmark === "silver" ? "silver" : "gold";
 
   const nisabDetails = calculateNisabThresholds(ratesConfig, { currency, standard });
   const nisabThresholdAmount =
-    benchmark === 'silver'
-      ? nisabDetails.silver.nisabAmount
-      : nisabDetails.gold.nisabAmount;
+    benchmark === "silver" ? nisabDetails.silver.nisabAmount : nisabDetails.gold.nisabAmount;
 
   const goldPerGram24K = resolveSpotPricePerGram(
     undefined,
@@ -165,9 +151,9 @@ export function calculateZakatAlMal(
   const silverG = sanitizeNonNegativeNumber(input.silverGrams, 10_000_000);
 
   const pureGoldEquivalentGrams =
-    gold24g * GOLD_CARAT_PURITY_FACTORS['24K'] +
-    gold22g * GOLD_CARAT_PURITY_FACTORS['22K'] +
-    gold18g * GOLD_CARAT_PURITY_FACTORS['18K'];
+    gold24g * GOLD_CARAT_PURITY_FACTORS["24K"] +
+    gold22g * GOLD_CARAT_PURITY_FACTORS["22K"] +
+    gold18g * GOLD_CARAT_PURITY_FACTORS["18K"];
 
   const goldAndSilverComputedValue = roundMoney(
     pureGoldEquivalentGrams * goldPerGram24K + silverG * silverPerGram,
@@ -199,14 +185,10 @@ export function calculateZakatAlMal(
   );
 
   const meetsNisab = netZakatableWealth >= nisabThresholdAmount;
-  const wealthZakatDue = meetsNisab
-    ? roundMoney(netZakatableWealth * 0.025, currency)
-    : 0;
+  const wealthZakatDue = meetsNisab ? roundMoney(netZakatableWealth * 0.025, currency) : 0;
 
   const agriValue = sanitizeNonNegativeNumber(input.agriculturalProduceValue);
-  const agriculturalUshrRatePercent = resolveUshrRatePercent(
-    input.agriculturalIrrigation
-  );
+  const agriculturalUshrRatePercent = resolveUshrRatePercent(input.agriculturalIrrigation);
   const agriculturalUshrDue = computeAgriculturalUshrDue(
     agriValue,
     agriculturalUshrRatePercent,
@@ -253,26 +235,17 @@ export function calculateFitranaFidyahKaffarah(
     ratesConfig.zakatAlFitrPerPersonByCurrency.COP;
   const fitranaDue = roundMoney(householdMembers * fitranaRate, currency);
 
-  const missedDays = Math.trunc(
-    sanitizeNonNegativeNumber(input.missedFastDaysForFidyah, 3650)
-  );
+  const missedDays = Math.trunc(sanitizeNonNegativeNumber(input.missedFastDaysForFidyah, 3650));
   const fidyahRate =
-    ratesConfig.fidyahPerDayByCurrency[currency] ||
-    ratesConfig.fidyahPerDayByCurrency.COP;
+    ratesConfig.fidyahPerDayByCurrency[currency] || ratesConfig.fidyahPerDayByCurrency.COP;
   const fidyahDue = roundMoney(missedDays * fidyahRate, currency);
 
-  const brokenFastCount = Math.trunc(
-    sanitizeNonNegativeNumber(input.brokenFastKaffarahCount, 100)
-  );
-  const brokenOathCount = Math.trunc(
-    sanitizeNonNegativeNumber(input.brokenOathKaffarahCount, 100)
-  );
+  const brokenFastCount = Math.trunc(sanitizeNonNegativeNumber(input.brokenFastKaffarahCount, 100));
+  const brokenOathCount = Math.trunc(sanitizeNonNegativeNumber(input.brokenOathKaffarahCount, 100));
   const kaffarahFastRate =
-    ratesConfig.kaffarahFastByCurrency[currency] ||
-    ratesConfig.kaffarahFastByCurrency.COP;
+    ratesConfig.kaffarahFastByCurrency[currency] || ratesConfig.kaffarahFastByCurrency.COP;
   const kaffarahOathRate =
-    ratesConfig.kaffarahOathByCurrency[currency] ||
-    ratesConfig.kaffarahOathByCurrency.COP;
+    ratesConfig.kaffarahOathByCurrency[currency] || ratesConfig.kaffarahOathByCurrency.COP;
   const kaffarahTotal = roundMoney(
     brokenFastCount * kaffarahFastRate + brokenOathCount * kaffarahOathRate,
     currency

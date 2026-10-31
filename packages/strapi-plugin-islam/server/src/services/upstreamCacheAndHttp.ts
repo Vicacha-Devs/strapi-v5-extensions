@@ -1,7 +1,4 @@
-import type {
-  QuranFoundationConfig,
-  QuranFoundationEnvironment,
-} from '../../../shared';
+import type { QuranFoundationConfig, QuranFoundationEnvironment } from "../../../shared";
 
 interface CacheEntry<T> {
   expiresAt: number;
@@ -32,7 +29,7 @@ export interface QfCredentials {
 
 export interface QfUpstreamPayload {
   data: Record<string, unknown>;
-  source: 'quran_foundation_oauth2' | 'quran_foundation_public_v4';
+  source: "quran_foundation_oauth2" | "quran_foundation_public_v4";
 }
 
 const upstreamCache = new Map<string, CacheEntry<unknown>>();
@@ -70,26 +67,21 @@ function readFirstEnv(...keys: string[]): string {
       return val.trim();
     }
   }
-  return '';
+  return "";
 }
 
-export function resolveQuranFoundationCredentials(
-  qfConfig: QuranFoundationConfig
-): QfCredentials {
-  const clientId = readFirstEnv('QF_CLIENT_ID', 'QURAN_FOUNDATION_CLIENT_ID');
-  const clientSecret = readFirstEnv('QF_CLIENT_SECRET', 'QURAN_FOUNDATION_CLIENT_SECRET');
-  const envOverride = readFirstEnv('QF_ENV', 'QURAN_FOUNDATION_ENV');
-  const envRaw = (envOverride || qfConfig.environment || 'production').toLowerCase();
-  const environment: QuranFoundationEnvironment =
-    envRaw === 'prelive' ? 'prelive' : 'production';
+export function resolveQuranFoundationCredentials(qfConfig: QuranFoundationConfig): QfCredentials {
+  const clientId = readFirstEnv("QF_CLIENT_ID", "QURAN_FOUNDATION_CLIENT_ID");
+  const clientSecret = readFirstEnv("QF_CLIENT_SECRET", "QURAN_FOUNDATION_CLIENT_SECRET");
+  const envOverride = readFirstEnv("QF_ENV", "QURAN_FOUNDATION_ENV");
+  const envRaw = (envOverride || qfConfig.environment || "production").toLowerCase();
+  const environment: QuranFoundationEnvironment = envRaw === "prelive" ? "prelive" : "production";
 
-  const isPrelive = environment === 'prelive';
+  const isPrelive = environment === "prelive";
   const oauth2BaseUrl = isPrelive
     ? qfConfig.oauth2BaseUrlPrelive
     : qfConfig.oauth2BaseUrlProduction;
-  const apiBaseUrl = isPrelive
-    ? qfConfig.apiBaseUrlPrelive
-    : qfConfig.apiBaseUrlProduction;
+  const apiBaseUrl = isPrelive ? qfConfig.apiBaseUrlPrelive : qfConfig.apiBaseUrlProduction;
 
   return {
     clientId,
@@ -110,22 +102,20 @@ function isTokenCacheValid(creds: QfCredentials): boolean {
 }
 
 async function requestOAuth2Token(creds: QfCredentials): Promise<QfTokenBundle | null> {
-  const tokenEndpoint = `${creds.oauth2BaseUrl.replace(/\/+$/, '')}/oauth2/token`;
-  const basicAuth = Buffer.from(`${creds.clientId}:${creds.clientSecret}`).toString(
-    'base64'
-  );
+  const tokenEndpoint = `${creds.oauth2BaseUrl.replace(/\/+$/, "")}/oauth2/token`;
+  const basicAuth = Buffer.from(`${creds.clientId}:${creds.clientSecret}`).toString("base64");
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 3500);
   try {
     const response = await fetch(tokenEndpoint, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        Authorization: `Basic ${basicAuth}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Accept: 'application/json',
+        "Authorization": `Basic ${basicAuth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json",
       },
-      body: 'grant_type=client_credentials&scope=content',
+      body: "grant_type=client_credentials&scope=content",
       signal: controller.signal,
     });
 
@@ -191,10 +181,10 @@ function buildQueryUrl(
   subPath: string,
   queryParams: Record<string, string | number | boolean | undefined>
 ): string {
-  const normalizedBase = base.endsWith('/') ? base : `${base}/`;
-  const url = new URL(subPath.replace(/^\/+/, ''), normalizedBase);
+  const normalizedBase = base.endsWith("/") ? base : `${base}/`;
+  const url = new URL(subPath.replace(/^\/+/, ""), normalizedBase);
   for (const [k, v] of Object.entries(queryParams)) {
-    if (v !== undefined && v !== null && String(v).trim() !== '') {
+    if (v !== undefined && v !== null && String(v).trim() !== "") {
       url.searchParams.set(k, String(v));
     }
   }
@@ -217,15 +207,8 @@ async function fetchWithTimeout(
   }
 }
 
-function isPreliveSurahSupported(
-  creds: QfCredentials,
-  targetSurah?: number
-): boolean {
-  return (
-    creds.environment !== 'prelive' ||
-    targetSurah === undefined ||
-    targetSurah <= 2
-  );
+function isPreliveSurahSupported(creds: QfCredentials, targetSurah?: number): boolean {
+  return creds.environment !== "prelive" || targetSurah === undefined || targetSurah <= 2;
 }
 
 async function executeSingleQfAttempt(
@@ -235,9 +218,9 @@ async function executeSingleQfAttempt(
   const res = await fetchWithTimeout(
     url,
     {
-      Accept: 'application/json',
-      'x-auth-token': tokenBundle.accessToken,
-      'x-client-id': tokenBundle.clientId,
+      "Accept": "application/json",
+      "x-auth-token": tokenBundle.accessToken,
+      "x-client-id": tokenBundle.clientId,
     },
     3500
   );
@@ -265,16 +248,14 @@ async function tryAuthenticatedQfFetch(
   const url = buildQueryUrl(tokenBundle.apiBaseUrl, subPath, queryParams);
   const first = await executeSingleQfAttempt(url, tokenBundle);
   if (first?.payload) {
-    return { data: first.payload, source: 'quran_foundation_oauth2' };
+    return { data: first.payload, source: "quran_foundation_oauth2" };
   }
   if (first?.status !== 401) return null;
 
   tokenBundle = await getQuranFoundationAccessToken(qfConfig, true);
   if (!tokenBundle) return null;
   const retry = await executeSingleQfAttempt(url, tokenBundle);
-  return retry?.payload
-    ? { data: retry.payload, source: 'quran_foundation_oauth2' }
-    : null;
+  return retry?.payload ? { data: retry.payload, source: "quran_foundation_oauth2" } : null;
 }
 
 export async function fetchQuranFoundationV4Json(
@@ -296,12 +277,12 @@ export async function fetchQuranFoundationV4Json(
   if (!qfConfig.publicFallbackBaseUrl) return null;
   const fallbackRes = await fetchWithTimeout(
     buildQueryUrl(qfConfig.publicFallbackBaseUrl, subPath, queryParams),
-    { Accept: 'application/json' },
+    { Accept: "application/json" },
     3500
   );
   if (fallbackRes?.ok) {
     const payload = (await fallbackRes.json()) as Record<string, unknown>;
-    return { data: payload, source: 'quran_foundation_public_v4' };
+    return { data: payload, source: "quran_foundation_public_v4" };
   }
   return null;
 }
@@ -315,7 +296,7 @@ export async function tryFetchUpstreamJson(
   if (!apiKey) return null;
 
   const url = buildQueryUrl(baseUrl, path, { ...params, api_key: apiKey });
-  const res = await fetchWithTimeout(url, { Accept: 'application/json' }, 2000);
+  const res = await fetchWithTimeout(url, { Accept: "application/json" }, 2000);
   if (!res?.ok) return null;
   try {
     return (await res.json()) as Record<string, unknown>;

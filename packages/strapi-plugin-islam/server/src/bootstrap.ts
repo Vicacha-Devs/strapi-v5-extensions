@@ -1,19 +1,20 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../shared';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../shared";
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
   try {
     const actions = [
       {
-        section: 'plugins',
-        displayName: 'Access Islam Cockpit & Salah/Hilal/Scripture Suite',
-        uid: 'read',
+        section: "plugins",
+        displayName: "Access Islam Cockpit & Salah/Hilal/Scripture Suite",
+        uid: "read",
         pluginName: PLUGIN_ID,
       },
       {
-        section: 'plugins',
-        displayName: 'Manage Islam Settings, Hilal Moon-Sighting & Nisab Rates',
-        uid: 'settings.update',
+        section: "plugins",
+        displayName: "Manage Islam Settings, Hilal Moon-Sighting & Nisab Rates",
+        uid: "settings.update",
         pluginName: PLUGIN_ID,
       },
     ];

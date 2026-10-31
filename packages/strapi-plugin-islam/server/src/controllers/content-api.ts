@@ -1,10 +1,11 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   type FitranaFidyahKaffarahInput,
   type ZakatAlMalCalculationInput,
-} from '../../../shared';
-import type createIslamService from '../services/islamService';
+} from "../../../shared";
+import type createIslamService from "../services/islamService";
 
 type IslamServiceInstance = ReturnType<typeof createIslamService>;
 
@@ -29,23 +30,23 @@ function getParams(ctx: KoaContentContext): Record<string, string | undefined> {
 
 function getRequestBody<T>(ctx: KoaContentContext): T {
   const rawBody = ctx.request?.body;
-  return (rawBody && typeof rawBody === 'object' ? rawBody : {}) as T;
+  return (rawBody && typeof rawBody === "object" ? rawBody : {}) as T;
 }
 
 function setNoTranslateHeader(ctx: KoaContentContext): void {
-  if (typeof ctx.set === 'function') {
-    ctx.set('X-Translation-Integrity', 'notranslate');
+  if (typeof ctx.set === "function") {
+    ctx.set("X-Translation-Integrity", "notranslate");
   }
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getIslamService = () =>
-    strapi.plugin(PLUGIN_ID).service<IslamServiceInstance>('islamService');
+    strapi.plugin(PLUGIN_ID).service<IslamServiceInstance>("islamService");
 
   return {
     async getPrayerTimes(ctx: KoaContentContext) {
       const q = getQuery(ctx);
-      const dateParam = typeof q.date === 'string' ? q.date.trim() : undefined;
+      const dateParam = typeof q.date === "string" ? q.date.trim() : undefined;
 
       if (dateParam && /^\d{4}-\d{2}$/.test(dateParam)) {
         const monthly = await getIslamService().getMonthlyPrayerTimes({
@@ -92,9 +93,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         lon: q.lon,
         locale: q.locale,
       });
-      ctx.set('Content-Type', 'text/calendar; charset=utf-8');
-      ctx.set('Content-Disposition', 'attachment; filename="salah-timetable.ics"');
-      ctx.set('X-Content-Type-Options', 'nosniff');
+      ctx.set("Content-Type", "text/calendar; charset=utf-8");
+      ctx.set("Content-Disposition", 'attachment; filename="salah-timetable.ics"');
+      ctx.set("X-Content-Type-Options", "nosniff");
       ctx.body = icsContent;
     },
 
@@ -121,7 +122,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async convertDate(ctx: KoaContentContext) {
       const q = getQuery(ctx);
       const direction =
-        q.direction === 'hijri_to_gregorian' ? 'hijri_to_gregorian' : 'gregorian_to_hijri';
+        q.direction === "hijri_to_gregorian" ? "hijri_to_gregorian" : "gregorian_to_hijri";
       const data = await getIslamService().convertDate({
         direction,
         date: q.date,
@@ -196,7 +197,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const q = getQuery(ctx);
       const params = getParams(ctx);
       const data = await getIslamService().getQuranVerseByKey({
-        verseKey: params.verseKey ?? q.verseKey ?? '1:1',
+        verseKey: params.verseKey ?? q.verseKey ?? "1:1",
         locale: q.locale,
         words: q.words,
         reciterId: q.reciterId ?? q.audio,
@@ -211,7 +212,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const q = getQuery(ctx);
       const params = getParams(ctx);
       const data = await getIslamService().getQuranAyahHadiths({
-        verseKey: params.verseKey ?? q.verseKey ?? '1:1',
+        verseKey: params.verseKey ?? q.verseKey ?? "1:1",
         locale: q.locale,
         page: q.page,
         limit: q.limit,
@@ -241,7 +242,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async getNisab(ctx: KoaContentContext) {
       const q = getQuery(ctx);
-      if (q.allCurrencies === 'true' || q.allCurrencies === '1') {
+      if (q.allCurrencies === "true" || q.allCurrencies === "1") {
         const entries = await getIslamService().getAllCurrencyNisabEntries({
           standard: q.standard,
           unit: q.unit,

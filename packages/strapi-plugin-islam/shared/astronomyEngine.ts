@@ -10,17 +10,17 @@ import {
   RAD_TO_DEG,
   resolveIqamahTime,
   solarPosition,
-} from './astronomyMath';
-import { PRAYER_CALCULATION_METHODS } from './constants';
-import { gregorianToHijri } from './hijriEngine';
+} from "./astronomyMath";
+import { PRAYER_CALCULATION_METHODS } from "./constants";
+import { gregorianToHijri } from "./hijriEngine";
 import type {
   DailyFivePrayerId,
   DailyPrayerTimetable,
   IslamPluginSettings,
   PrayerWithIqamah,
   SupportedLocale,
-} from './types';
-import { sanitizeCoordinates, sanitizeIcsText } from './validation';
+} from "./types";
+import { sanitizeCoordinates, sanitizeIcsText } from "./validation";
 
 export {
   calculateQiblaCompass,
@@ -48,11 +48,11 @@ interface ComputedDayMinutes {
   sunsetMin: number;
   maghribMin: number;
   ishaMin: number;
-  source: 'astronomical_engine' | 'external_api';
+  source: "astronomical_engine" | "external_api";
 }
 
 function normalizeDateInput(dateIsoOrDate: string | Date): Date {
-  return typeof dateIsoOrDate === 'string'
+  return typeof dateIsoOrDate === "string"
     ? new Date(`${dateIsoOrDate.slice(0, 10)}T12:00:00Z`)
     : new Date(dateIsoOrDate.getTime());
 }
@@ -67,19 +67,11 @@ function computeJulianDayAtNoonUtc(dateObj: Date): number {
   }
   const a = Math.floor(y / 100);
   const b = 2 - a + Math.floor(a / 4);
-  return (
-    Math.floor(365.25 * (y + 4716)) +
-    Math.floor(30.6001 * (m + 1)) +
-    day +
-    b -
-    1524.5
-  );
+  return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524.5;
 }
 
 function resolveMethodSpec(methodId: string) {
-  return (
-    PRAYER_CALCULATION_METHODS[methodId] || PRAYER_CALCULATION_METHODS['3']
-  );
+  return PRAYER_CALCULATION_METHODS[methodId] || PRAYER_CALCULATION_METHODS["3"];
 }
 
 function computeBaseSolarMinutes(
@@ -88,9 +80,9 @@ function computeBaseSolarMinutes(
   lon: number,
   timezone: string,
   settings: IslamPluginSettings
-): Omit<ComputedDayMinutes, 'source'> {
+): Omit<ComputedDayMinutes, "source"> {
   const methodSpec = resolveMethodSpec(settings.method);
-  const shadowFactor = settings.school === '2' ? 2 : 1;
+  const shadowFactor = settings.school === "2" ? 2 : 1;
   const jd = computeJulianDayAtNoonUtc(dateObj);
   const tzOffsetHours = getTimezoneOffsetHours(dateObj, timezone);
   const { declinationRad, equationOfTimeHours } = solarPosition(jd - lon / 360);
@@ -100,52 +92,37 @@ function computeBaseSolarMinutes(
   const elevation = Math.max(0, settings.elevationMeters || 0);
   const horizonAltitudeDeg = -0.8333 - 0.0347 * Math.sqrt(elevation);
 
-  const sunriseDiffHours = computeHourAngleHours(
-    latRad,
-    declinationRad,
-    horizonAltitudeDeg
-  );
-  const fajrDiffHours = computeHourAngleHours(
-    latRad,
-    declinationRad,
-    -methodSpec.fajrAngle
-  );
+  const sunriseDiffHours = computeHourAngleHours(latRad, declinationRad, horizonAltitudeDeg);
+  const fajrDiffHours = computeHourAngleHours(latRad, declinationRad, -methodSpec.fajrAngle);
   const asrAltitudeRad = Math.atan(
     1 / (shadowFactor + Math.tan(Math.abs(latRad - declinationRad)))
   );
-  const asrDiffHours = computeHourAngleHours(
-    latRad,
-    declinationRad,
-    asrAltitudeRad * RAD_TO_DEG
-  );
+  const asrDiffHours = computeHourAngleHours(latRad, declinationRad, asrAltitudeRad * RAD_TO_DEG);
   const maghribDiffHours = methodSpec.maghribAngle
     ? computeHourAngleHours(latRad, declinationRad, -methodSpec.maghribAngle)
     : sunriseDiffHours;
   const ishaHours = methodSpec.ishaIntervalMinutes
     ? solarNoonHours + maghribDiffHours + methodSpec.ishaIntervalMinutes / 60
-    : solarNoonHours +
-      computeHourAngleHours(latRad, declinationRad, -methodSpec.ishaAngle);
+    : solarNoonHours + computeHourAngleHours(latRad, declinationRad, -methodSpec.ishaAngle);
 
   const adj = settings.minuteAdjustments;
   return {
     fajrMin: Math.round((solarNoonHours - fajrDiffHours) * 60) + adj.fajr,
-    sunriseMin:
-      Math.round((solarNoonHours - sunriseDiffHours) * 60) + adj.sunrise,
+    sunriseMin: Math.round((solarNoonHours - sunriseDiffHours) * 60) + adj.sunrise,
     dhuhrMin: Math.round(solarNoonHours * 60) + 1 + adj.dhuhr,
     asrMin: Math.round((solarNoonHours + asrDiffHours) * 60) + adj.asr,
     sunsetMin: Math.round((solarNoonHours + sunriseDiffHours) * 60),
-    maghribMin:
-      Math.round((solarNoonHours + maghribDiffHours) * 60) + 1 + adj.maghrib,
+    maghribMin: Math.round((solarNoonHours + maghribDiffHours) * 60) + 1 + adj.maghrib,
     ishaMin: Math.round(ishaHours * 60) + adj.isha,
   };
 }
 
 function applyExternalTimesOverride(
-  base: Omit<ComputedDayMinutes, 'source'>,
+  base: Omit<ComputedDayMinutes, "source">,
   ext?: Partial<Record<string, string>>
 ): ComputedDayMinutes {
   if (!ext) {
-    return { ...base, source: 'astronomical_engine' };
+    return { ...base, source: "astronomical_engine" };
   }
   const parsed = [
     parseHhMmToMinutes(ext.Fajr ?? ext.fajr),
@@ -156,10 +133,9 @@ function applyExternalTimesOverride(
     parseHhMmToMinutes(ext.Isha ?? ext.isha),
   ];
   if (parsed.some((val) => val === null)) {
-    return { ...base, source: 'astronomical_engine' };
+    return { ...base, source: "astronomical_engine" };
   }
-  const [fajrMin, sunriseMin, dhuhrMin, asrMin, maghribMin, ishaMin] =
-    parsed as number[];
+  const [fajrMin, sunriseMin, dhuhrMin, asrMin, maghribMin, ishaMin] = parsed as number[];
   return {
     fajrMin,
     sunriseMin,
@@ -168,27 +144,23 @@ function applyExternalTimesOverride(
     sunsetMin: base.sunsetMin,
     maghribMin,
     ishaMin,
-    source: 'external_api',
+    source: "external_api",
   };
 }
 
-function resolveCurrentMinutesInTimezone(
-  timezone: string,
-  nowMinutesOverride?: number
-): number {
+function resolveCurrentMinutesInTimezone(timezone: string, nowMinutesOverride?: number): number {
   if (nowMinutesOverride !== undefined) {
     return nowMinutesOverride;
   }
   try {
-    const nowParts = new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      minute: 'numeric',
+    const nowParts = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "numeric",
       hour12: false,
       timeZone: timezone,
     }).formatToParts(new Date());
-    const h =
-      Number(nowParts.find((p) => p.type === 'hour')?.value ?? 0) % 24;
-    const min = Number(nowParts.find((p) => p.type === 'minute')?.value ?? 0);
+    const h = Number(nowParts.find((p) => p.type === "hour")?.value ?? 0) % 24;
+    const min = Number(nowParts.find((p) => p.type === "minute")?.value ?? 0);
     return h * 60 + min;
   } catch {
     const now = new Date();
@@ -199,21 +171,19 @@ function resolveCurrentMinutesInTimezone(
 function determineActivePrayer(
   nowMinutes: number,
   isProhibited: boolean,
-  times: Omit<ComputedDayMinutes, 'source'>
+  times: Omit<ComputedDayMinutes, "source">
 ): DailyFivePrayerId | null {
   if (isProhibited) {
     return null;
   }
-  if (nowMinutes >= times.ishaMin || nowMinutes < times.fajrMin) return 'isha';
+  if (nowMinutes >= times.ishaMin || nowMinutes < times.fajrMin) return "isha";
   const windows: Array<[DailyFivePrayerId, number, number]> = [
-    ['fajr', times.fajrMin, times.sunriseMin],
-    ['dhuhr', times.dhuhrMin, times.asrMin],
-    ['asr', times.asrMin, times.maghribMin],
-    ['maghrib', times.maghribMin, times.ishaMin],
+    ["fajr", times.fajrMin, times.sunriseMin],
+    ["dhuhr", times.dhuhrMin, times.asrMin],
+    ["asr", times.asrMin, times.maghribMin],
+    ["maghrib", times.maghribMin, times.ishaMin],
   ];
-  const matched = windows.find(
-    ([, start, end]) => nowMinutes >= start && nowMinutes < end
-  );
+  const matched = windows.find(([, start, end]) => nowMinutes >= start && nowMinutes < end);
   return matched ? matched[0] : null;
 }
 
@@ -244,13 +214,11 @@ function buildPrayersMap(
 
 function resolveCalculationMetadata(
   settings: IslamPluginSettings,
-  source: 'astronomical_engine' | 'external_api'
-): DailyPrayerTimetable['calculation'] {
+  source: "astronomical_engine" | "external_api"
+): DailyPrayerTimetable["calculation"] {
   const methodSpec = resolveMethodSpec(settings.method);
   const schoolName =
-    settings.school === '2'
-      ? 'Hanafi (Shadow Factor 2)'
-      : "Shafi'i / Standard (Shadow Factor 1)";
+    settings.school === "2" ? "Hanafi (Shadow Factor 2)" : "Shafi'i / Standard (Shadow Factor 1)";
   return {
     methodId: methodSpec.id,
     methodName: methodSpec.name,
@@ -262,14 +230,11 @@ function resolveCalculationMetadata(
   };
 }
 
-function resolveJumuahSummary(
-  settings: IslamPluginSettings
-): DailyPrayerTimetable['jumuah'] {
-  const primaryJumuah =
-    settings.jumuahShifts.find((s) => s.isPrimary) ?? settings.jumuahShifts[0];
+function resolveJumuahSummary(settings: IslamPluginSettings): DailyPrayerTimetable["jumuah"] {
+  const primaryJumuah = settings.jumuahShifts.find((s) => s.isPrimary) ?? settings.jumuahShifts[0];
   return {
-    primaryKhutbahTime: primaryJumuah?.khutbahTime ?? '12:15',
-    primaryPrayerTime: primaryJumuah?.prayerTime ?? '12:45',
+    primaryKhutbahTime: primaryJumuah?.khutbahTime ?? "12:15",
+    primaryPrayerTime: primaryJumuah?.prayerTime ?? "12:45",
     shifts: settings.jumuahShifts,
   };
 }
@@ -280,14 +245,13 @@ function resolveRamadanSummary(
   isRamadanMonth: boolean,
   imsakMin: number,
   maghribMin: number
-): DailyPrayerTimetable['ramadan'] {
+): DailyPrayerTimetable["ramadan"] {
   return {
     bannerActive: Boolean(settings.ramadan.bannerActive || isRamadanMonth),
     suhoorEndsAt: minutesToHhMm(imsakMin),
     iftarAt: minutesToHhMm(maghribMin),
-    taraweehTime: settings.ramadan.taraweehTime || '20:00',
-    notes:
-      settings.ramadan.notes[locale] ?? settings.ramadan.notes.es ?? '',
+    taraweehTime: settings.ramadan.taraweehTime || "20:00",
+    notes: settings.ramadan.notes[locale] ?? settings.ramadan.notes.es ?? "",
   };
 }
 
@@ -309,30 +273,15 @@ export function computeDailyPrayerTimetable(
   const country = overrides?.country ?? settings.country;
   const timezone = settings.timezone;
 
-  const baseMinutes = computeBaseSolarMinutes(
-    dateObj,
-    lat,
-    lon,
-    timezone,
-    settings
-  );
-  const dayMinutes = applyExternalTimesOverride(
-    baseMinutes,
-    overrides?.externalTimesOverride
-  );
+  const baseMinutes = computeBaseSolarMinutes(dateObj, lat, lon, timezone, settings);
+  const dayMinutes = applyExternalTimesOverride(baseMinutes, overrides?.externalTimesOverride);
 
   const imsakMin = dayMinutes.fajrMin - settings.ramadan.imsakOffsetMinutes;
-  const nightDurationMinutes =
-    (dayMinutes.fajrMin + 1440 - dayMinutes.sunsetMin) % 1440;
-  const midnightMin =
-    (dayMinutes.sunsetMin + Math.round(nightDurationMinutes / 2)) % 1440;
-  const lastThirdMin =
-    (dayMinutes.sunsetMin + Math.round((nightDurationMinutes * 2) / 3)) % 1440;
+  const nightDurationMinutes = (dayMinutes.fajrMin + 1440 - dayMinutes.sunsetMin) % 1440;
+  const midnightMin = (dayMinutes.sunsetMin + Math.round(nightDurationMinutes / 2)) % 1440;
+  const lastThirdMin = (dayMinutes.sunsetMin + Math.round((nightDurationMinutes * 2) / 3)) % 1440;
 
-  const nowMinutes = resolveCurrentMinutesInTimezone(
-    timezone,
-    overrides?.nowMinutesOverride
-  );
+  const nowMinutes = resolveCurrentMinutesInTimezone(timezone, overrides?.nowMinutesOverride);
   const prohibitedTimes = computeProhibitedWindows(
     dayMinutes.sunriseMin,
     dayMinutes.dhuhrMin,
@@ -347,26 +296,20 @@ export function computeDailyPrayerTimetable(
   );
 
   const ordered: Array<{ name: DailyFivePrayerId; min: number }> = [
-    { name: 'fajr', min: dayMinutes.fajrMin },
-    { name: 'dhuhr', min: dayMinutes.dhuhrMin },
-    { name: 'asr', min: dayMinutes.asrMin },
-    { name: 'maghrib', min: dayMinutes.maghribMin },
-    { name: 'isha', min: dayMinutes.ishaMin },
+    { name: "fajr", min: dayMinutes.fajrMin },
+    { name: "dhuhr", min: dayMinutes.dhuhrMin },
+    { name: "asr", min: dayMinutes.asrMin },
+    { name: "maghrib", min: dayMinutes.maghribMin },
+    { name: "isha", min: dayMinutes.ishaMin },
   ];
 
   const upcoming = ordered.find((p) => p.min > nowMinutes);
-  const nextPrayer: DailyFivePrayerId = upcoming ? upcoming.name : 'fajr';
+  const nextPrayer: DailyFivePrayerId = upcoming ? upcoming.name : "fajr";
   const minutesUntilNextAdhan = upcoming
     ? upcoming.min - nowMinutes
     : 1440 - nowMinutes + dayMinutes.fajrMin;
 
-  const prayers = buildPrayersMap(
-    ordered,
-    locale,
-    settings,
-    activePrayer,
-    nextPrayer
-  );
+  const prayers = buildPrayersMap(ordered, locale, settings, activePrayer, nextPrayer);
   const hijri = gregorianToHijri(dateObj, Number(settings.shifting), locale);
 
   return {
@@ -414,14 +357,14 @@ export function computeMonthlyPrayerTimetable(
     locale?: SupportedLocale;
   }
 ): DailyPrayerTimetable[] {
-  const [yearStr, monthStr] = yearMonth.split('-');
+  const [yearStr, monthStr] = yearMonth.split("-");
   const year = Number(yearStr);
   const month = Number(monthStr);
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const result: DailyPrayerTimetable[] = [];
 
   for (let d = 1; d <= daysInMonth; d++) {
-    const isoDay = `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const isoDay = `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     result.push(computeDailyPrayerTimetable(isoDay, settings, overrides));
   }
 
@@ -432,46 +375,38 @@ export function generatePrayerCalendarIcs(
   days: DailyPrayerTimetable[],
   mosqueName: string
 ): string {
-  const safeMosque = sanitizeIcsText(mosqueName || 'Central Mosque');
+  const safeMosque = sanitizeIcsText(mosqueName || "Central Mosque");
   const lines: string[] = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Vicacha Devs//Strapi Plugin Islam Salah Timetable//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Vicacha Devs//Strapi Plugin Islam Salah Timetable//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
     `X-WR-CALNAME:${safeMosque} — Salah & Iqamah`,
   ];
 
   const dtStamp = new Date()
     .toISOString()
-    .replace(/[-:]/g, '')
-    .replace(/\.\d{3}/, '');
-  const prayerKeys: DailyFivePrayerId[] = [
-    'fajr',
-    'dhuhr',
-    'asr',
-    'maghrib',
-    'isha',
-  ];
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
+  const prayerKeys: DailyFivePrayerId[] = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
 
   for (const day of days) {
-    const dateCompact = day.dateGregorian.replace(/-/g, '');
+    const dateCompact = day.dateGregorian.replace(/-/g, "");
     const safeTz = sanitizeIcsText(day.location.timezone);
     for (const pKey of prayerKeys) {
       const p = day.prayers[pKey];
-      const startCompact = p.adhan.replace(':', '');
+      const startCompact = p.adhan.replace(":", "");
       const endMin = Math.min(1439, p.iqamahMinutes + 15);
-      const endCompact = minutesToHhMm(endMin).replace(':', '');
+      const endCompact = minutesToHhMm(endMin).replace(":", "");
       const uid = `salah-${dateCompact}-${pKey}@vicacha-islam`;
-      const summary = sanitizeIcsText(
-        `${p.label} — Adhan ${p.adhan} / Iqamah ${p.iqamah}`
-      );
+      const summary = sanitizeIcsText(`${p.label} — Adhan ${p.adhan} / Iqamah ${p.iqamah}`);
       const description = sanitizeIcsText(
         `${safeMosque} (${day.hijri.formatted}) • Adhan: ${p.adhan} • Iqamah: ${p.iqamah}`
       );
 
       lines.push(
-        'BEGIN:VEVENT',
+        "BEGIN:VEVENT",
         `UID:${uid}`,
         `DTSTAMP:${dtStamp}`,
         `DTSTART;TZID=${safeTz}:${dateCompact}T${startCompact}00`,
@@ -479,11 +414,11 @@ export function generatePrayerCalendarIcs(
         `SUMMARY:${summary}`,
         `DESCRIPTION:${description}`,
         `LOCATION:${safeMosque}`,
-        'END:VEVENT'
+        "END:VEVENT"
       );
     }
   }
 
-  lines.push('END:VCALENDAR');
-  return lines.join('\r\n');
+  lines.push("END:VCALENDAR");
+  return lines.join("\r\n");
 }
