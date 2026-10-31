@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Box,
   Button,
@@ -11,11 +10,13 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { Check, Pencil, Plus, Trash } from '@strapi/icons';
-import { useIntl } from 'react-intl';
-import type { SitemapDefinition } from '../SitemapDefinitionModal';
-import getTrad from '../../utils/getTrad';
+} from "@strapi/design-system";
+import { Check, Pencil, Plus, Trash } from "@strapi/icons";
+import React from "react";
+import { useIntl } from "react-intl";
+
+import getTrad from "../../utils/getTrad";
+import type { SitemapDefinition } from "../SitemapDefinitionModal";
 
 interface SitemapIndexSectionProps {
   useSitemapIndex: boolean;
@@ -42,17 +43,17 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
 
   return (
     <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
-      <Typography variant="delta" as="h2">
+      <Typography variant="delta" tag="h2">
         {formatMessage({
-          id: getTrad('settings.index.title'),
-          defaultMessage: 'Sitemap Settings',
+          id: getTrad("settings.index.title"),
+          defaultMessage: "Sitemap Settings",
         })}
       </Typography>
       <Box paddingBottom={4}>
         <Typography variant="pi" textColor="neutral600">
           {formatMessage({
-            id: getTrad('settings.index.description'),
-            defaultMessage: 'Use a single sitemap or a sitemap index with multiple sitemaps',
+            id: getTrad("settings.index.description"),
+            defaultMessage: "Use a single sitemap or a sitemap index with multiple sitemaps",
           })}
         </Typography>
       </Box>
@@ -62,8 +63,8 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
           onCheckedChange={(checked: boolean) => setUseSitemapIndex(checked === true)}
         >
           {formatMessage({
-            id: getTrad('settings.index.checkbox'),
-            defaultMessage: 'Use sitemap index with multiple sitemaps',
+            id: getTrad("settings.index.checkbox"),
+            defaultMessage: "Use sitemap index with multiple sitemaps",
           })}
         </Checkbox>
       </Box>
@@ -72,9 +73,9 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
           <Box paddingBottom={2}>
             <Typography variant="pi" textColor="neutral600">
               {formatMessage({
-                id: getTrad('settings.index.info'),
+                id: getTrad("settings.index.info"),
                 defaultMessage:
-                  'Each sitemap is available at /api/sitemap/sitemap-[name].xml. The index at /api/sitemap/sitemap.xml lists all of them.',
+                  "Each sitemap is available at /api/sitemap/sitemap-[name].xml. The index at /api/sitemap/sitemap.xml lists all of them.",
               })}
             </Typography>
           </Box>
@@ -84,38 +85,38 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                 <Th>
                   <Typography variant="sigma">
                     {formatMessage({
-                      id: getTrad('settings.index.table.name'),
-                      defaultMessage: 'Name (slug)',
+                      id: getTrad("settings.index.table.name"),
+                      defaultMessage: "Name (slug)",
                     })}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
                     {formatMessage({
-                      id: getTrad('settings.index.table.url'),
-                      defaultMessage: 'URL',
+                      id: getTrad("settings.index.table.url"),
+                      defaultMessage: "URL",
                     })}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
                     {formatMessage({
-                      id: getTrad('settings.index.table.collectionTypes'),
-                      defaultMessage: 'Collection types',
+                      id: getTrad("settings.index.table.collectionTypes"),
+                      defaultMessage: "Collection types",
                     })}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
                     {formatMessage({
-                      id: getTrad('settings.index.table.customUrls'),
-                      defaultMessage: 'Include custom URLs',
+                      id: getTrad("settings.index.table.customUrls"),
+                      defaultMessage: "Include custom URLs",
                     })}
                   </Typography>
                 </Th>
                 <Th>
                   <Typography variant="sigma">
-                    {formatMessage({ id: getTrad('table.actions'), defaultMessage: 'Actions' })}
+                    {formatMessage({ id: getTrad("table.actions"), defaultMessage: "Actions" })}
                   </Typography>
                 </Th>
               </Tr>
@@ -135,8 +136,8 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                     <Typography textColor="neutral800">
                       {formatMessage(
                         {
-                          id: getTrad('settings.index.table.configsCount'),
-                          defaultMessage: '{count} config(s)',
+                          id: getTrad("settings.index.table.configsCount"),
+                          defaultMessage: "{count} config(s)",
                         },
                         { count: def.collectionTypeConfigIndices?.length ?? 0 }
                       )}
@@ -145,8 +146,8 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                   <Td>
                     <Typography textColor="neutral800">
                       {def.includeCustomUrls
-                        ? formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })
-                        : formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
+                        ? formatMessage({ id: getTrad("common.yes"), defaultMessage: "Yes" })
+                        : formatMessage({ id: getTrad("common.no"), defaultMessage: "No" })}
                     </Typography>
                   </Td>
                   <Td>
@@ -156,7 +157,7 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                         startIcon={<Pencil />}
                         onClick={() => onEditSitemap(idx)}
                       >
-                        {formatMessage({ id: getTrad('action.edit'), defaultMessage: 'Edit' })}
+                        {formatMessage({ id: getTrad("action.edit"), defaultMessage: "Edit" })}
                       </Button>
                       <Button
                         variant="danger-light"
@@ -164,8 +165,8 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                         onClick={() => onDeleteSitemap(idx)}
                       >
                         {formatMessage({
-                          id: getTrad('action.delete'),
-                          defaultMessage: 'Delete',
+                          id: getTrad("action.delete"),
+                          defaultMessage: "Delete",
                         })}
                       </Button>
                     </Flex>
@@ -177,8 +178,8 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
           <Box paddingTop={4} paddingBottom={2}>
             <Button startIcon={<Plus />} variant="secondary" onClick={onAddSitemap}>
               {formatMessage({
-                id: getTrad('settings.index.add'),
-                defaultMessage: 'Add sitemap',
+                id: getTrad("settings.index.add"),
+                defaultMessage: "Add sitemap",
               })}
             </Button>
           </Box>
@@ -189,9 +190,9 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
           startIcon={<Check />}
           onClick={onSaveSitemapSettings}
           disabled={!isSitemapSettingsModified}
-          variant={isSitemapSettingsModified ? 'default' : 'tertiary'}
+          variant={isSitemapSettingsModified ? "default" : "tertiary"}
         >
-          {formatMessage({ id: getTrad('settings.save'), defaultMessage: 'Save' })}
+          {formatMessage({ id: getTrad("settings.save"), defaultMessage: "Save" })}
         </Button>
       </Box>
     </Box>

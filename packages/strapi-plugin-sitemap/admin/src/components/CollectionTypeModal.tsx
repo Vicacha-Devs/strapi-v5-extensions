@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Button,
@@ -6,10 +5,12 @@ import {
   SingleSelectOption,
   TextInput,
   Field,
-} from '@strapi/design-system';
-import { useFetchClient } from '@strapi/strapi/admin';
-import { useIntl } from 'react-intl';
-import getTrad from '../utils/getTrad';
+} from "@strapi/design-system";
+import { useFetchClient } from "@strapi/strapi/admin";
+import React, { useState, useEffect } from "react";
+import { useIntl } from "react-intl";
+
+import getTrad from "../utils/getTrad";
 
 export interface CollectionTypeConfig {
   type: string;
@@ -37,13 +38,13 @@ interface CollectionTypeModalProps {
 }
 
 const DEFAULT_CONFIG: CollectionTypeConfig = {
-  type: '',
-  langcode: '-',
-  pattern: '',
+  type: "",
+  langcode: "-",
+  pattern: "",
   priority: 0.5,
-  frequency: 'monthly',
+  frequency: "monthly",
   lastModified: false,
-  thumbnail: '',
+  thumbnail: "",
   populateLinkedModels: false,
 };
 
@@ -88,20 +89,20 @@ const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> 
       <Field.Root id="lastModified" style={{ marginBottom: 16 }}>
         <Field.Label>
           {formatMessage({
-            id: getTrad('modal.collectionType.lastModified'),
-            defaultMessage: 'Add last modified?',
+            id: getTrad("modal.collectionType.lastModified"),
+            defaultMessage: "Add last modified?",
           })}
         </Field.Label>
         <SingleSelect
           value={lastModified.toString()}
-          onChange={(value: string | number) => setLastModified(String(value) === 'true')}
+          onChange={(value: string | number) => setLastModified(String(value) === "true")}
           disabled={isTypeEmpty}
         >
           <SingleSelectOption value="false">
-            {formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
+            {formatMessage({ id: getTrad("common.no"), defaultMessage: "No" })}
           </SingleSelectOption>
           <SingleSelectOption value="true">
-            {formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })}
+            {formatMessage({ id: getTrad("common.yes"), defaultMessage: "Yes" })}
           </SingleSelectOption>
         </SingleSelect>
       </Field.Root>
@@ -109,20 +110,20 @@ const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> 
       <Field.Root id="populateLinkedModels" style={{ marginBottom: 16 }}>
         <Field.Label>
           {formatMessage({
-            id: getTrad('modal.collectionType.populateLinkedModels'),
-            defaultMessage: 'Populate linked models? (Only checks one level deep)',
+            id: getTrad("modal.collectionType.populateLinkedModels"),
+            defaultMessage: "Populate linked models? (Only checks one level deep)",
           })}
         </Field.Label>
         <SingleSelect
           value={populateLinkedModels.toString()}
-          onChange={(value: string | number) => setPopulateLinkedModels(String(value) === 'true')}
+          onChange={(value: string | number) => setPopulateLinkedModels(String(value) === "true")}
           disabled={isTypeEmpty}
         >
           <SingleSelectOption value="false">
-            {formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
+            {formatMessage({ id: getTrad("common.no"), defaultMessage: "No" })}
           </SingleSelectOption>
           <SingleSelectOption value="true">
-            {formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })}
+            {formatMessage({ id: getTrad("common.yes"), defaultMessage: "Yes" })}
           </SingleSelectOption>
         </SingleSelect>
       </Field.Root>
@@ -130,8 +131,8 @@ const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> 
       <Field.Root id="thumbnail" style={{ marginBottom: 16 }}>
         <Field.Label>
           {formatMessage({
-            id: getTrad('modal.collectionType.thumbnail'),
-            defaultMessage: 'Optional: Select a thumbnail field',
+            id: getTrad("modal.collectionType.thumbnail"),
+            defaultMessage: "Optional: Select a thumbnail field",
           })}
         </Field.Label>
         <SingleSelect
@@ -140,7 +141,7 @@ const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> 
           disabled={isThumbnailDisabled}
         >
           <SingleSelectOption value="">
-            {formatMessage({ id: getTrad('common.none'), defaultMessage: 'None' })}
+            {formatMessage({ id: getTrad("common.none"), defaultMessage: "None" })}
           </SingleSelectOption>
           {mediaFields.map((field) => (
             <SingleSelectOption key={field} value={field}>
@@ -190,15 +191,15 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
     const fetchCollectionTypes = async () => {
       try {
         const response = await get<{ collectionTypes?: AdminContentTypeItem[] }>(
-          '/sitemap/admin-get-content-types'
+          "/sitemap/admin-get-content-types"
         );
         const list = response?.data?.collectionTypes ?? [];
         const types = list
-          .filter((ct) => ct.uid.startsWith('api::'))
+          .filter((ct) => ct.uid.startsWith("api::"))
           .map((ct) => ct.info.singularName);
         setCollectionTypes(types);
       } catch (err) {
-        console.error('Failed to fetch collection types:', err);
+        console.error("Failed to fetch collection types:", err);
       }
     };
     void fetchCollectionTypes();
@@ -207,10 +208,10 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
   useEffect(() => {
     const fetchLocales = async () => {
       try {
-        const response = await get<{ locales?: string[] }>('/sitemap/admin-get-locales');
+        const response = await get<{ locales?: string[] }>("/sitemap/admin-get-locales");
         setLocales(response?.data?.locales ?? []);
       } catch (err) {
-        console.error('Failed to fetch locales:', err);
+        console.error("Failed to fetch locales:", err);
       }
     };
     void fetchLocales();
@@ -227,7 +228,7 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
         setFields(response?.data?.allowedFields ?? []);
         setMediaFields(response?.data?.mediaFields ?? []);
       } catch (err) {
-        console.error('Failed to fetch fields:', err);
+        console.error("Failed to fetch fields:", err);
       }
     };
 
@@ -273,8 +274,8 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
         <Modal.Header>
           <Modal.Title>
             {formatMessage({
-              id: getTrad('modal.collectionType.title'),
-              defaultMessage: 'Collection Type Sitemap Entry',
+              id: getTrad("modal.collectionType.title"),
+              defaultMessage: "Collection Type Sitemap Entry",
             })}
           </Modal.Title>
         </Modal.Header>
@@ -282,8 +283,8 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
           <Field.Root id="collection_type" style={{ marginBottom: 16 }}>
             <Field.Label>
               {formatMessage({
-                id: getTrad('modal.collectionType.selectType'),
-                defaultMessage: 'Select a collection type',
+                id: getTrad("modal.collectionType.selectType"),
+                defaultMessage: "Select a collection type",
               })}
             </Field.Label>
             <SingleSelect
@@ -301,8 +302,8 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
           <Field.Root id="langcode" style={{ marginBottom: 16 }}>
             <Field.Label>
               {formatMessage({
-                id: getTrad('modal.collectionType.selectLang'),
-                defaultMessage: 'Select a language',
+                id: getTrad("modal.collectionType.selectLang"),
+                defaultMessage: "Select a language",
               })}
             </Field.Label>
             <SingleSelect
@@ -325,14 +326,14 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
             id="pattern"
             style={{ marginBottom: 16 }}
             hint={`${formatMessage({
-              id: getTrad('modal.collectionType.patternHint'),
-              defaultMessage: 'How will the URL formatted look like? Available fields:',
-            })} ${fields.map((field) => `[${field}]`).join(', ')}`}
+              id: getTrad("modal.collectionType.patternHint"),
+              defaultMessage: "How will the URL formatted look like? Available fields:",
+            })} ${fields.map((field) => `[${field}]`).join(", ")}`}
           >
             <Field.Label>
               {formatMessage({
-                id: getTrad('modal.collectionType.pattern'),
-                defaultMessage: 'Pattern',
+                id: getTrad("modal.collectionType.pattern"),
+                defaultMessage: "Pattern",
               })}
             </Field.Label>
             <TextInput
@@ -347,8 +348,8 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
           <Field.Root id="priority" style={{ marginBottom: 16 }}>
             <Field.Label>
               {formatMessage({
-                id: getTrad('modal.collectionType.priority'),
-                defaultMessage: 'Select a priority',
+                id: getTrad("modal.collectionType.priority"),
+                defaultMessage: "Select a priority",
               })}
             </Field.Label>
             <SingleSelect
@@ -367,8 +368,8 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
           <Field.Root id="frequency" style={{ marginBottom: 16 }}>
             <Field.Label>
               {formatMessage({
-                id: getTrad('modal.collectionType.frequency'),
-                defaultMessage: 'Select a change frequency',
+                id: getTrad("modal.collectionType.frequency"),
+                defaultMessage: "Select a change frequency",
               })}
             </Field.Label>
             <SingleSelect
@@ -376,7 +377,7 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
               onChange={(value: string | number) => setFrequency(String(value))}
               disabled={!type}
             >
-              {['always', 'hourly', 'daily', 'weekly', 'monthly', 'yearly', 'never'].map((freq) => (
+              {["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"].map((freq) => (
                 <SingleSelectOption key={freq} value={freq}>
                   {freq}
                 </SingleSelectOption>
@@ -397,10 +398,10 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: getTrad('action.cancel'), defaultMessage: 'Cancel' })}
+            {formatMessage({ id: getTrad("action.cancel"), defaultMessage: "Cancel" })}
           </Button>
           <Button onClick={handleSave} variant="default" disabled={!canSave}>
-            {formatMessage({ id: getTrad('action.save'), defaultMessage: 'Save' })}
+            {formatMessage({ id: getTrad("action.save"), defaultMessage: "Save" })}
           </Button>
         </Modal.Footer>
       </Modal.Content>

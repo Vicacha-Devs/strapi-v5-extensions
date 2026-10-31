@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Box,
   Button,
@@ -10,11 +9,13 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { Pencil, Plus, Trash } from '@strapi/icons';
-import { useIntl } from 'react-intl';
-import type { CustomURLConfig } from '../CustomURLModal';
-import getTrad from '../../utils/getTrad';
+} from "@strapi/design-system";
+import { Pencil, Plus, Trash } from "@strapi/icons";
+import React from "react";
+import { useIntl } from "react-intl";
+
+import getTrad from "../../utils/getTrad";
+import type { CustomURLConfig } from "../CustomURLModal";
 
 interface CustomUrlsSectionProps {
   customURLs: CustomURLConfig[];
@@ -33,17 +34,17 @@ export const CustomUrlsSection: React.FC<CustomUrlsSectionProps> = ({
 
   return (
     <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
-      <Typography variant="delta" as="h2">
+      <Typography variant="delta" tag="h2">
         {formatMessage({
-          id: getTrad('settings.customUrls.title'),
-          defaultMessage: 'Custom URLs',
+          id: getTrad("settings.customUrls.title"),
+          defaultMessage: "Custom URLs",
         })}
       </Typography>
       <Box paddingBottom={4}>
         <Typography variant="pi" textColor="neutral600">
           {formatMessage({
-            id: getTrad('settings.customUrls.description'),
-            defaultMessage: 'Add custom static URLs to your sitemap',
+            id: getTrad("settings.customUrls.description"),
+            defaultMessage: "Add custom static URLs to your sitemap",
           })}
         </Typography>
       </Box>
@@ -52,27 +53,27 @@ export const CustomUrlsSection: React.FC<CustomUrlsSectionProps> = ({
           <Tr>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad('table.id'), defaultMessage: 'ID' })}
+                {formatMessage({ id: getTrad("table.id"), defaultMessage: "ID" })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad('table.url'), defaultMessage: 'URL' })}
+                {formatMessage({ id: getTrad("table.url"), defaultMessage: "URL" })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad('table.priority'), defaultMessage: 'Priority' })}
+                {formatMessage({ id: getTrad("table.priority"), defaultMessage: "Priority" })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad('table.frequency'), defaultMessage: 'Frequency' })}
+                {formatMessage({ id: getTrad("table.frequency"), defaultMessage: "Frequency" })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad('table.actions'), defaultMessage: 'Actions' })}
+                {formatMessage({ id: getTrad("table.actions"), defaultMessage: "Actions" })}
               </Typography>
             </Th>
           </Tr>
@@ -99,14 +100,14 @@ export const CustomUrlsSection: React.FC<CustomUrlsSectionProps> = ({
                     startIcon={<Pencil />}
                     onClick={() => onEditCustomUrl(index)}
                   >
-                    {formatMessage({ id: getTrad('action.edit'), defaultMessage: 'Edit' })}
+                    {formatMessage({ id: getTrad("action.edit"), defaultMessage: "Edit" })}
                   </Button>
                   <Button
                     variant="danger-light"
                     startIcon={<Trash />}
                     onClick={() => onDeleteCustomUrl(index)}
                   >
-                    {formatMessage({ id: getTrad('action.delete'), defaultMessage: 'Delete' })}
+                    {formatMessage({ id: getTrad("action.delete"), defaultMessage: "Delete" })}
                   </Button>
                 </Flex>
               </Td>
@@ -117,8 +118,8 @@ export const CustomUrlsSection: React.FC<CustomUrlsSectionProps> = ({
       <Box paddingTop={4}>
         <Button startIcon={<Plus />} variant="secondary" onClick={onAddCustomUrl}>
           {formatMessage({
-            id: getTrad('settings.customUrls.add'),
-            defaultMessage: 'Add another URL',
+            id: getTrad("settings.customUrls.add"),
+            defaultMessage: "Add another URL",
           })}
         </Button>
       </Box>

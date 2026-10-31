@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Box,
   Button,
@@ -11,10 +10,12 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { Check, Plus, Trash } from '@strapi/icons';
-import { useIntl } from 'react-intl';
-import getTrad from '../../utils/getTrad';
+} from "@strapi/design-system";
+import { Check, Plus, Trash } from "@strapi/icons";
+import React from "react";
+import { useIntl } from "react-intl";
+
+import getTrad from "../../utils/getTrad";
 
 interface ExcludedUrlsSectionProps {
   excludedUrls: string[];
@@ -39,18 +40,18 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
 
   return (
     <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
-      <Typography variant="delta" as="h2">
+      <Typography variant="delta" tag="h2">
         {formatMessage({
-          id: getTrad('settings.excludedUrls.title'),
-          defaultMessage: 'Excluded URLs',
+          id: getTrad("settings.excludedUrls.title"),
+          defaultMessage: "Excluded URLs",
         })}
       </Typography>
       <Box paddingBottom={4}>
         <Typography variant="pi" textColor="neutral600">
           {formatMessage({
-            id: getTrad('settings.excludedUrls.description'),
+            id: getTrad("settings.excludedUrls.description"),
             defaultMessage:
-              'Paths listed here will not be included in the sitemap (e.g. /admin or /private-page). Save using the Save button below.',
+              "Paths listed here will not be included in the sitemap (e.g. /admin or /private-page). Save using the Save button below.",
           })}
         </Typography>
       </Box>
@@ -58,15 +59,15 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
         <Box style={{ flex: 1, maxWidth: 400 }}>
           <TextInput
             placeholder={formatMessage({
-              id: getTrad('settings.excludedUrls.placeholder'),
-              defaultMessage: '/path-to-exclude',
+              id: getTrad("settings.excludedUrls.placeholder"),
+              defaultMessage: "/path-to-exclude",
             })}
             value={newExcludedPath}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               setNewExcludedPath(e.target.value)
             }
             onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key === 'Enter') {
+              if (e.key === "Enter") {
                 e.preventDefault();
                 onAddExcludedUrl();
               }
@@ -79,7 +80,7 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
           onClick={onAddExcludedUrl}
           disabled={!newExcludedPath.trim()}
         >
-          {formatMessage({ id: getTrad('settings.excludedUrls.add'), defaultMessage: 'Add' })}
+          {formatMessage({ id: getTrad("settings.excludedUrls.add"), defaultMessage: "Add" })}
         </Button>
       </Flex>
       {excludedUrls.length > 0 && (
@@ -88,20 +89,20 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
             <Tr>
               <Th>
                 <Typography variant="sigma">
-                  {formatMessage({ id: getTrad('table.id'), defaultMessage: 'ID' })}
+                  {formatMessage({ id: getTrad("table.id"), defaultMessage: "ID" })}
                 </Typography>
               </Th>
               <Th>
                 <Typography variant="sigma">
                   {formatMessage({
-                    id: getTrad('settings.excludedUrls.table.path'),
-                    defaultMessage: 'Path',
+                    id: getTrad("settings.excludedUrls.table.path"),
+                    defaultMessage: "Path",
                   })}
                 </Typography>
               </Th>
               <Th>
                 <Typography variant="sigma">
-                  {formatMessage({ id: getTrad('table.actions'), defaultMessage: 'Actions' })}
+                  {formatMessage({ id: getTrad("table.actions"), defaultMessage: "Actions" })}
                 </Typography>
               </Th>
             </Tr>
@@ -121,7 +122,7 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
                     startIcon={<Trash />}
                     onClick={() => onDeleteExcludedUrl(index)}
                   >
-                    {formatMessage({ id: getTrad('action.delete'), defaultMessage: 'Delete' })}
+                    {formatMessage({ id: getTrad("action.delete"), defaultMessage: "Delete" })}
                   </Button>
                 </Td>
               </Tr>
@@ -134,9 +135,9 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
           startIcon={<Check />}
           onClick={onSaveExcludedUrls}
           disabled={!isExcludedUrlsModified}
-          variant={isExcludedUrlsModified ? 'default' : 'tertiary'}
+          variant={isExcludedUrlsModified ? "default" : "tertiary"}
         >
-          {formatMessage({ id: getTrad('settings.save'), defaultMessage: 'Save' })}
+          {formatMessage({ id: getTrad("settings.save"), defaultMessage: "Save" })}
         </Button>
       </Box>
     </Box>

@@ -1,1 +1,1 @@
-export const PLUGIN_ID = 'sitemap';
+export const PLUGIN_ID = "sitemap";

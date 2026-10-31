@@ -65,6 +65,6 @@
   "modal.sitemapDef.noCollectionTypes": "Aucune configuration de type de collection pour le moment.",
   "modal.sitemapDef.includeCustomUrls": "Inclure les URLs personnalisées dans ce sitemap",
   "modal.sitemapDef.namePlaceholder": "ex. articles ou pages",
-  "settings.index.table.configsCount": "{count} configuration(s)"
+  "settings.index.table.configsCount": "{count} configuration(s)",
+  "settings.tabs.general": "Général & Index du Sitemap"
 }
-
