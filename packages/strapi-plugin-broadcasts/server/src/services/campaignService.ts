@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   CAMPAIGN_UID,
   PLUGIN_ID,
@@ -11,59 +12,52 @@ import {
   type CampaignStats,
   type ChannelDispatchResult,
   type SubscriberRecipient,
-} from '../../../shared';
+} from "../../../shared";
 import {
   buildCampaignDocumentData,
   buildPresetCampaignPayload,
   dispatchAllActiveChannels,
   mapRawSubscriber,
   type TransportServiceContract,
-} from './campaignChannelDispatch';
-import { createEmptyStats } from './campaignHelpers';
+} from "./campaignChannelDispatch";
+import { createEmptyStats } from "./campaignHelpers";
 
 function computeCampaignSecondaryDate(
   campaign: CampaignRecord,
   settings: BroadcastSettings
-): NonNullable<CampaignRecord['secondaryDate']> {
+): NonNullable<CampaignRecord["secondaryDate"]> {
   if (campaign.secondaryDate?.formatted) {
     return campaign.secondaryDate;
   }
-  const secondaryCal = settings.secondaryCalendars?.[0] || 'islamic-umalqura';
+  const secondaryCal = settings.secondaryCalendars?.[0] || "islamic-umalqura";
   return formatSecondaryDate(
     new Date().toISOString().slice(0, 10),
     secondaryCal,
-    settings.defaultLocale || 'es'
+    settings.defaultLocale || "es"
   );
 }
 
 const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
   getSettingsService() {
-    return strapi.plugin(PLUGIN_ID).service('settings') as {
+    return strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings(): Promise<BroadcastSettings>;
     };
   },
 
   getTransportService(): TransportServiceContract {
-    return strapi
-      .plugin(PLUGIN_ID)
-      .service('transportService') as TransportServiceContract;
+    return strapi.plugin(PLUGIN_ID).service("transportService") as TransportServiceContract;
   },
 
-  async listCampaigns(params?: {
-    status?: string;
-    topic?: string;
-  }): Promise<CampaignRecord[]> {
+  async listCampaigns(params?: { status?: string; topic?: string }): Promise<CampaignRecord[]> {
     const filters: Record<string, unknown> = {};
     if (params?.status) filters.status = params.status;
     if (params?.topic) filters.topic = params.topic;
-    const docs = await strapi
-      .documents(CAMPAIGN_UID)
-      .findMany({ filters, limit: 100 });
+    const docs = await strapi.documents(CAMPAIGN_UID).findMany({ filters, limit: 100 });
     return docs as unknown as CampaignRecord[];
   },
 
   async listPublicArchive(params?: { topic?: string; limit?: number }) {
-    const filters: Record<string, unknown> = { status: 'sent' };
+    const filters: Record<string, unknown> = { status: "sent" };
     if (params?.topic) filters.topic = params.topic;
     const docs = (await strapi.documents(CAMPAIGN_UID).findMany({
       filters,
@@ -92,9 +86,7 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     return (docs[0] as unknown as CampaignRecord) || null;
   },
 
-  async findCampaignByDocIdOrSlug(
-    documentIdOrSlug: string
-  ): Promise<CampaignRecord | null> {
+  async findCampaignByDocIdOrSlug(documentIdOrSlug: string): Promise<CampaignRecord | null> {
     const byDoc = (await strapi
       .documents(CAMPAIGN_UID)
       .findOne({ documentId: documentIdOrSlug })) as unknown as CampaignRecord | null;
@@ -106,30 +98,27 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const candidate: Partial<CampaignRecord> = { ...input, channels };
     const validation = validateCampaignInput(candidate);
     if (!validation.valid) {
-      throw new Error(validation.errors.join('; '));
+      throw new Error(validation.errors.join("; "));
     }
 
     const settings = await this.getSettingsService().getSettings();
-    const secondaryCal = settings.secondaryCalendars?.[0] || 'islamic-umalqura';
-    const referenceIso = (input.scheduledAt || new Date().toISOString()).slice(
-      0,
-      10
-    );
+    const secondaryCal = settings.secondaryCalendars?.[0] || "islamic-umalqura";
+    const referenceIso = (input.scheduledAt || new Date().toISOString()).slice(0, 10);
     const secondaryDate = formatSecondaryDate(
       referenceIso,
       secondaryCal,
-      settings.defaultLocale || 'es'
+      settings.defaultLocale || "es"
     );
 
     const created = await strapi.documents(CAMPAIGN_UID).create({
       data: {
-        ...buildCampaignDocumentData(candidate, channels, 'draft'),
+        ...buildCampaignDocumentData(candidate, channels, "draft"),
         secondaryDate,
         secondaryDateLabel: secondaryDate.formatted,
         stats: candidate.stats || createEmptyStats(),
         metadata: candidate.metadata || {},
       },
-      status: 'published',
+      status: "published",
     });
 
     return created as unknown as CampaignRecord;
@@ -152,21 +141,15 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     };
     const validation = validateCampaignInput(merged);
     if (!validation.valid) {
-      throw new Error(validation.errors.join('; '));
+      throw new Error(validation.errors.join("; "));
     }
 
     const updated = await strapi.documents(CAMPAIGN_UID).update({
       documentId: existing.documentId,
-      data: buildCampaignDocumentData(
-        merged,
-        channels,
-        existing.status || 'draft'
-      ),
+      data: buildCampaignDocumentData(merged, channels, existing.status || "draft"),
     });
 
-    return (
-      (updated as unknown as CampaignRecord) || (merged as CampaignRecord)
-    );
+    return (updated as unknown as CampaignRecord) || (merged as CampaignRecord);
   },
 
   async createFromStarterTemplate(templateId: string): Promise<CampaignRecord> {
@@ -204,22 +187,20 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!settings.enableInboxSubscriberBridge) return [];
 
     try {
-      const inboxPlugin = strapi.plugin('inbox');
+      const inboxPlugin = strapi.plugin("inbox");
       const subscriberService = inboxPlugin?.service<{
         listSubscribers?: (params: {
           status?: string;
           topic?: string;
         }) => Promise<Array<Record<string, unknown>>>;
-      }>('subscriberService');
+      }>("subscriberService");
 
       if (subscriberService?.listSubscribers) {
         const list = await subscriberService.listSubscribers({
-          status: 'confirmed',
+          status: "confirmed",
           topic,
         });
-        return list.map((sub) =>
-          mapRawSubscriber(sub, settings.defaultLocale || 'es')
-        );
+        return list.map((sub) => mapRawSubscriber(sub, settings.defaultLocale || "es"));
       }
     } catch {
       // Fallback when inbox plugin is not registered in isolated unit tests
@@ -236,9 +217,7 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
       testRecipientPhone?: string;
     }
   ): Promise<{ isTestDispatch: boolean; recipients: SubscriberRecipient[] }> {
-    const isTestDispatch = Boolean(
-      options.testRecipientEmail || options.testRecipientPhone
-    );
+    const isTestDispatch = Boolean(options.testRecipientEmail || options.testRecipientPhone);
     if (isTestDispatch) {
       return {
         isTestDispatch: true,
@@ -246,7 +225,7 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
           {
             email: options.testRecipientEmail,
             phone: options.testRecipientPhone,
-            fullName: 'Test Recipient',
+            fullName: "Test Recipient",
             locale: settings.defaultLocale,
             topics: [campaign.topic],
           },
@@ -264,14 +243,12 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async finalizeDispatchedCampaign(
     campaign: CampaignRecord,
-    secondaryDate: CampaignRecord['secondaryDate'],
+    secondaryDate: CampaignRecord["secondaryDate"],
     secondaryDateLabel: string,
     stats: CampaignStats
   ): Promise<CampaignRecord> {
     const finalStatus =
-      stats.totalRecipients > 0 && stats.failedCount === stats.totalRecipients
-        ? 'failed'
-        : 'sent';
+      stats.totalRecipients > 0 && stats.failedCount === stats.totalRecipients ? "failed" : "sent";
     const sentAt = new Date().toISOString();
 
     let updatedCampaign: CampaignRecord = {
@@ -296,7 +273,7 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
       if (updated) updatedCampaign = updated as unknown as CampaignRecord;
     }
 
-    strapi.eventHub?.emit('broadcasts.campaign.sent', {
+    strapi.eventHub?.emit("broadcasts.campaign.sent", {
       slug: updatedCampaign.slug,
       topic: updatedCampaign.topic,
       stats,
@@ -319,8 +296,7 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const settings = await this.getSettingsService().getSettings();
     const transport = this.getTransportService();
     const secondaryDate = computeCampaignSecondaryDate(campaign, settings);
-    const secondaryDateLabel =
-      campaign.secondaryDateLabel || secondaryDate.formatted;
+    const secondaryDateLabel = campaign.secondaryDateLabel || secondaryDate.formatted;
 
     const { isTestDispatch, recipients } = await this.selectCampaignRecipients(
       campaign,

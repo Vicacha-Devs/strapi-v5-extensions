@@ -8,39 +8,35 @@ import {
   type CampaignStats,
   type ChannelDispatchResult,
   type SubscriberRecipient,
-} from '../../../shared';
+} from "../../../shared";
 import {
   recordResultInStats,
   resolveTelegramTargets,
   resolveWhatsAppRecipients,
-} from './campaignHelpers';
+} from "./campaignHelpers";
 import type {
   EmailSendPayload,
   TelegramSendPayload,
   WhatsAppSendPayload,
-} from './transportService';
+} from "./transportService";
 
 export interface TransportServiceContract {
   sendEmailBroadcast(payload: EmailSendPayload): Promise<ChannelDispatchResult>;
-  sendTelegramBroadcast(
-    payload: TelegramSendPayload
-  ): Promise<ChannelDispatchResult>;
-  sendWhatsAppBroadcast(
-    payload: WhatsAppSendPayload
-  ): Promise<ChannelDispatchResult>;
+  sendTelegramBroadcast(payload: TelegramSendPayload): Promise<ChannelDispatchResult>;
+  sendWhatsAppBroadcast(payload: WhatsAppSendPayload): Promise<ChannelDispatchResult>;
 }
 
 export function buildCampaignDocumentData(
   candidate: Partial<CampaignRecord>,
   channels: BroadcastChannel[],
-  fallbackStatus = 'draft'
+  fallbackStatus = "draft"
 ): Record<string, unknown> {
   return {
     title: candidate.title,
     slug: candidate.slug,
-    topic: candidate.topic || 'announcements',
+    topic: candidate.topic || "announcements",
     channels,
-    priority: candidate.priority || 'normal',
+    priority: candidate.priority || "normal",
     status: candidate.status || fallbackStatus,
     scheduledAt: candidate.scheduledAt,
     subject: candidate.subject,
@@ -51,9 +47,7 @@ export function buildCampaignDocumentData(
     mediaUrl: candidate.mediaUrl,
     emailTemplateRef: candidate.emailTemplateRef,
     whatsappTemplateName: candidate.whatsappTemplateName,
-    whatsappGroupIds: Array.isArray(candidate.whatsappGroupIds)
-      ? candidate.whatsappGroupIds
-      : [],
+    whatsappGroupIds: Array.isArray(candidate.whatsappGroupIds) ? candidate.whatsappGroupIds : [],
     telegramChatId: candidate.telegramChatId,
     telegramThreadId: candidate.telegramThreadId,
     translations: candidate.translations || {},
@@ -66,9 +60,9 @@ export function buildPresetCampaignPayload(
   return {
     slug: preset.slug,
     title: preset.title,
-    topic: preset.topic || 'announcements',
-    channels: preset.channels || ['email', 'telegram'],
-    priority: preset.priority || 'normal',
+    topic: preset.topic || "announcements",
+    channels: preset.channels || ["email", "telegram"],
+    priority: preset.priority || "normal",
     subject: preset.subject || preset.title,
     bodyText: preset.bodyText || preset.title,
     bodyHtml: preset.bodyHtml,
@@ -84,18 +78,12 @@ export function mapRawSubscriber(
   defaultLocale: string
 ): SubscriberRecipient {
   return {
-    email: typeof sub.email === 'string' ? sub.email : undefined,
-    phone: typeof sub.phone === 'string' ? sub.phone : undefined,
-    fullName: typeof sub.fullName === 'string' ? sub.fullName : undefined,
-    locale:
-      typeof sub.locale === 'string' && sub.locale ? sub.locale : defaultLocale,
-    topics: Array.isArray(sub.topics)
-      ? sub.topics.map((t) => String(t))
-      : ['announcements'],
-    unsubscribeToken:
-      typeof sub.unsubscribeToken === 'string'
-        ? sub.unsubscribeToken
-        : undefined,
+    email: typeof sub.email === "string" ? sub.email : undefined,
+    phone: typeof sub.phone === "string" ? sub.phone : undefined,
+    fullName: typeof sub.fullName === "string" ? sub.fullName : undefined,
+    locale: typeof sub.locale === "string" && sub.locale ? sub.locale : defaultLocale,
+    topics: Array.isArray(sub.topics) ? sub.topics.map((t) => String(t)) : ["announcements"],
+    unsubscribeToken: typeof sub.unsubscribeToken === "string" ? sub.unsubscribeToken : undefined,
   };
 }
 
@@ -107,22 +95,16 @@ async function dispatchTelegramChannel(
   stats: CampaignStats,
   results: ChannelDispatchResult[]
 ): Promise<void> {
-  const channelLocale = settings.defaultLocale || 'es';
-  const localized = resolveLocalizedCampaignCopy(
-    campaign,
-    channelLocale,
-    settings.defaultLocale
-  );
+  const channelLocale = settings.defaultLocale || "es";
+  const localized = resolveLocalizedCampaignCopy(campaign, channelLocale, settings.defaultLocale);
   const vars = {
-    recipientName: 'Comunidad',
+    recipientName: "Comunidad",
     organizationName: settings.organizationName,
     secondaryDate: secondaryDateLabel,
     siteBaseUrl: settings.siteBaseUrl,
   };
   const tgTargets = resolveTelegramTargets(campaign, settings);
-  const threadId =
-    campaign.telegramThreadId ??
-    settings.telegramTopicThreadMap?.[campaign.topic];
+  const threadId = campaign.telegramThreadId ?? settings.telegramTopicThreadMap?.[campaign.topic];
 
   for (const chatId of tgTargets) {
     const tgRes = await transport.sendTelegramBroadcast({
@@ -133,11 +115,9 @@ async function dispatchTelegramChannel(
       subject: interpolateBroadcastTemplate(localized.subject, vars, {
         escapeHtmlValues: true,
       }),
-      htmlBody: interpolateBroadcastTemplate(
-        localized.bodyHtml || localized.bodyText,
-        vars,
-        { escapeHtmlValues: true }
-      ),
+      htmlBody: interpolateBroadcastTemplate(localized.bodyHtml || localized.bodyText, vars, {
+        escapeHtmlValues: true,
+      }),
       ctaLabel: localized.ctaLabel,
       ctaUrl: localized.ctaUrl,
       secondaryDateLabel,
@@ -153,13 +133,9 @@ function buildEmailSendPayloadForRecipient(
   settings: BroadcastSettings,
   secondaryDateLabel: string
 ): EmailSendPayload {
-  const locale = recipient.locale || settings.defaultLocale || 'es';
-  const localized = resolveLocalizedCampaignCopy(
-    campaign,
-    locale,
-    settings.defaultLocale
-  );
-  const baseSite = settings.siteBaseUrl.replace(/\/+$/, '');
+  const locale = recipient.locale || settings.defaultLocale || "es";
+  const localized = resolveLocalizedCampaignCopy(campaign, locale, settings.defaultLocale);
+  const baseSite = settings.siteBaseUrl.replace(/\/+$/, "");
   const unsubscribeUrl = recipient.unsubscribeToken
     ? `${baseSite}/api/inbox/public/unsubscribe?token=${encodeURIComponent(
         recipient.unsubscribeToken
@@ -180,17 +156,13 @@ function buildEmailSendPayloadForRecipient(
     locale,
     subject: interpolateBroadcastTemplate(localized.subject, vars),
     text: interpolateBroadcastTemplate(localized.bodyText, vars),
-    html: interpolateBroadcastTemplate(
-      localized.bodyHtml || `<p>${localized.bodyText}</p>`,
-      vars,
-      { escapeHtmlValues: true }
-    ),
+    html: interpolateBroadcastTemplate(localized.bodyHtml || `<p>${localized.bodyText}</p>`, vars, {
+      escapeHtmlValues: true,
+    }),
     ctaLabel: localized.ctaLabel
       ? interpolateBroadcastTemplate(localized.ctaLabel, vars)
       : undefined,
-    ctaUrl: localized.ctaUrl
-      ? interpolateBroadcastTemplate(localized.ctaUrl, vars)
-      : undefined,
+    ctaUrl: localized.ctaUrl ? interpolateBroadcastTemplate(localized.ctaUrl, vars) : undefined,
     unsubscribeUrl,
     emailTemplateRef: campaign.emailTemplateRef,
     secondaryDateLabel,
@@ -235,22 +207,13 @@ async function dispatchWhatsAppChannel(
   stats: CampaignStats,
   results: ChannelDispatchResult[]
 ): Promise<void> {
-  const waRecipients = resolveWhatsAppRecipients(
-    campaign,
-    settings,
-    recipients,
-    isTestDispatch
-  );
+  const waRecipients = resolveWhatsAppRecipients(campaign, settings, recipients, isTestDispatch);
   for (const recipient of waRecipients) {
     if (!recipient.phone) continue;
-    const locale = recipient.locale || settings.defaultLocale || 'es';
-    const localized = resolveLocalizedCampaignCopy(
-      campaign,
-      locale,
-      settings.defaultLocale
-    );
+    const locale = recipient.locale || settings.defaultLocale || "es";
+    const localized = resolveLocalizedCampaignCopy(campaign, locale, settings.defaultLocale);
     const vars = {
-      recipientName: recipient.fullName || 'Comunidad',
+      recipientName: recipient.fullName || "Comunidad",
       organizationName: settings.organizationName,
       secondaryDate: secondaryDateLabel,
       siteBaseUrl: settings.siteBaseUrl,
@@ -278,19 +241,12 @@ export async function dispatchAllActiveChannels(params: {
   secondaryDateLabel: string;
   stats: CampaignStats;
 }): Promise<ChannelDispatchResult[]> {
-  const {
-    transport,
-    campaign,
-    settings,
-    recipients,
-    isTestDispatch,
-    secondaryDateLabel,
-    stats,
-  } = params;
+  const { transport, campaign, settings, recipients, isTestDispatch, secondaryDateLabel, stats } =
+    params;
   const results: ChannelDispatchResult[] = [];
   const activeChannels = normalizeChannels(campaign.channels);
 
-  if (activeChannels.includes('telegram') && settings.telegramEnabled) {
+  if (activeChannels.includes("telegram") && settings.telegramEnabled) {
     await dispatchTelegramChannel(
       transport,
       campaign,
@@ -301,7 +257,7 @@ export async function dispatchAllActiveChannels(params: {
     );
   }
 
-  if (activeChannels.includes('email')) {
+  if (activeChannels.includes("email")) {
     await dispatchEmailChannel(
       transport,
       campaign,
@@ -313,7 +269,7 @@ export async function dispatchAllActiveChannels(params: {
     );
   }
 
-  if (activeChannels.includes('whatsapp') && settings.whatsappEnabled) {
+  if (activeChannels.includes("whatsapp") && settings.whatsappEnabled) {
     await dispatchWhatsAppChannel(
       transport,
       campaign,

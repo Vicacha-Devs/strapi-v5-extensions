@@ -1,17 +1,17 @@
-import { SUPPORTED_CHANNELS, SUPPORTED_WHATSAPP_DRIVERS } from './constants';
+import { SUPPORTED_CHANNELS, SUPPORTED_WHATSAPP_DRIVERS } from "./constants";
 import type {
   AutomationRuleRecord,
   BroadcastChannel,
   CampaignRecord,
   WhatsAppDriver,
-} from './types';
+} from "./types";
 
 const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const BLOCKED_PRIVATE_HOSTS = new Set([
-  '169.254.169.254',
-  '100.100.100.200',
-  'metadata.google.internal',
-  '0.0.0.0',
+  "169.254.169.254",
+  "100.100.100.200",
+  "metadata.google.internal",
+  "0.0.0.0",
 ]);
 
 export interface ValidationOutcome {
@@ -24,14 +24,14 @@ function checkGatewayProtocol(
   hostname: string,
   allowLocalhost?: boolean
 ): string | null {
-  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-  if (protocol === 'http:') {
+  const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+  if (protocol === "http:") {
     return !isLocalhost || !allowLocalhost
-      ? 'HTTPS protocol is required for external gateway URLs'
+      ? "HTTPS protocol is required for external gateway URLs"
       : null;
   }
-  if (protocol !== 'https:') {
-    return 'Only HTTPS (or explicitly allowed localhost HTTP) protocol is permitted';
+  if (protocol !== "https:") {
+    return "Only HTTPS (or explicitly allowed localhost HTTP) protocol is permitted";
   }
   return null;
 }
@@ -41,30 +41,24 @@ export function validateGatewayUrl(
   options: { allowLocalhost?: boolean } = {}
 ): ValidationOutcome {
   const errors: string[] = [];
-  const trimmed = String(rawUrl || '').trim();
+  const trimmed = String(rawUrl || "").trim();
   if (!trimmed) {
-    return { valid: false, errors: ['Gateway URL is required'] };
+    return { valid: false, errors: ["Gateway URL is required"] };
   }
 
   let parsed: URL;
   try {
     parsed = new URL(trimmed);
   } catch {
-    return { valid: false, errors: ['Invalid URL format'] };
+    return { valid: false, errors: ["Invalid URL format"] };
   }
 
   const hostname = parsed.hostname.toLowerCase();
-  if (BLOCKED_PRIVATE_HOSTS.has(hostname) || hostname.startsWith('169.254.')) {
-    errors.push(
-      'Cloud metadata and link-local hosts are forbidden (SSRF protection)'
-    );
+  if (BLOCKED_PRIVATE_HOSTS.has(hostname) || hostname.startsWith("169.254.")) {
+    errors.push("Cloud metadata and link-local hosts are forbidden (SSRF protection)");
   }
 
-  const protoErr = checkGatewayProtocol(
-    parsed.protocol,
-    hostname,
-    options.allowLocalhost
-  );
+  const protoErr = checkGatewayProtocol(parsed.protocol, hostname, options.allowLocalhost);
   if (protoErr) errors.push(protoErr);
 
   return {
@@ -75,31 +69,22 @@ export function validateGatewayUrl(
 
 export function normalizeChannels(rawChannels: unknown): BroadcastChannel[] {
   if (!Array.isArray(rawChannels)) {
-    return ['email'];
+    return ["email"];
   }
   const filtered = rawChannels
     .map((c) => String(c).trim().toLowerCase() as BroadcastChannel)
-    .filter((c): c is BroadcastChannel =>
-      (SUPPORTED_CHANNELS as readonly string[]).includes(c)
-    );
-  return filtered.length > 0 ? Array.from(new Set(filtered)) : ['email'];
+    .filter((c): c is BroadcastChannel => (SUPPORTED_CHANNELS as readonly string[]).includes(c));
+  return filtered.length > 0 ? Array.from(new Set(filtered)) : ["email"];
 }
 
-export function isSupportedWhatsAppDriver(
-  driver: unknown
-): driver is WhatsAppDriver {
-  return (SUPPORTED_WHATSAPP_DRIVERS as readonly string[]).includes(
-    String(driver || '').trim()
-  );
+export function isSupportedWhatsAppDriver(driver: unknown): driver is WhatsAppDriver {
+  return (SUPPORTED_WHATSAPP_DRIVERS as readonly string[]).includes(String(driver || "").trim());
 }
 
-function validateCampaignChannelsList(
-  rawChannels: unknown,
-  errors: string[]
-): void {
+function validateCampaignChannelsList(rawChannels: unknown, errors: string[]): void {
   const channels = Array.isArray(rawChannels) ? rawChannels : [];
   if (channels.length === 0) {
-    errors.push('At least one broadcast channel is required');
+    errors.push("At least one broadcast channel is required");
     return;
   }
   for (const ch of channels) {
@@ -109,41 +94,36 @@ function validateCampaignChannelsList(
   }
 }
 
-function validateOptionalCtaUrl(
-  ctaUrl: string | undefined,
-  errors: string[]
-): void {
+function validateOptionalCtaUrl(ctaUrl: string | undefined, errors: string[]): void {
   if (!ctaUrl) return;
   try {
     const parsed = new URL(ctaUrl);
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-      errors.push('ctaUrl must use http or https protocol');
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      errors.push("ctaUrl must use http or https protocol");
     }
   } catch {
-    errors.push('ctaUrl must be a valid URL');
+    errors.push("ctaUrl must be a valid URL");
   }
 }
 
-export function validateCampaignInput(
-  input: Partial<CampaignRecord>
-): ValidationOutcome {
+export function validateCampaignInput(input: Partial<CampaignRecord>): ValidationOutcome {
   const errors: string[] = [];
-  const slug = String(input.slug || '').trim();
-  const title = String(input.title || '').trim();
-  const subject = String(input.subject || '').trim();
-  const bodyText = String(input.bodyText || '').trim();
+  const slug = String(input.slug || "").trim();
+  const title = String(input.title || "").trim();
+  const subject = String(input.subject || "").trim();
+  const bodyText = String(input.bodyText || "").trim();
 
   if (!slug || !SLUG_REGEX.test(slug)) {
-    errors.push('Campaign slug must be lowercase kebab-case');
+    errors.push("Campaign slug must be lowercase kebab-case");
   }
   if (title.length < 3) {
-    errors.push('Campaign title must be at least 3 characters');
+    errors.push("Campaign title must be at least 3 characters");
   }
   if (subject.length < 3) {
-    errors.push('Campaign subject must be at least 3 characters');
+    errors.push("Campaign subject must be at least 3 characters");
   }
   if (bodyText.length < 5) {
-    errors.push('Campaign bodyText must be at least 5 characters');
+    errors.push("Campaign bodyText must be at least 5 characters");
   }
 
   validateCampaignChannelsList(input.channels, errors);
@@ -160,7 +140,7 @@ function requireNonEmptyFields(
   errors: string[]
 ): void {
   for (const [val, errMessage] of fields) {
-    if (!String(val || '').trim()) {
+    if (!String(val || "").trim()) {
       errors.push(errMessage);
     }
   }
@@ -170,21 +150,21 @@ export function validateAutomationRuleInput(
   input: Partial<AutomationRuleRecord>
 ): ValidationOutcome {
   const errors: string[] = [];
-  const slug = String(input.slug || '').trim();
-  const name = String(input.name || '').trim();
+  const slug = String(input.slug || "").trim();
+  const name = String(input.name || "").trim();
 
   if (!slug || !SLUG_REGEX.test(slug)) {
-    errors.push('Automation rule slug must be lowercase kebab-case');
+    errors.push("Automation rule slug must be lowercase kebab-case");
   }
   if (name.length < 3) {
-    errors.push('Automation rule name must be at least 3 characters');
+    errors.push("Automation rule name must be at least 3 characters");
   }
 
   requireNonEmptyFields(
     [
-      [input.eventName, 'eventName is required'],
-      [input.subjectTemplate, 'subjectTemplate is required'],
-      [input.bodyTextTemplate, 'bodyTextTemplate is required'],
+      [input.eventName, "eventName is required"],
+      [input.subjectTemplate, "subjectTemplate is required"],
+      [input.bodyTextTemplate, "bodyTextTemplate is required"],
     ],
     errors
   );

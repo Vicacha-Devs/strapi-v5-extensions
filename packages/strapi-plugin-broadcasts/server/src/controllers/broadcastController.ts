@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   STARTER_CAMPAIGN_TEMPLATES,
@@ -10,7 +11,7 @@ import {
   type DeliveryLogRecord,
   type EmailDesignerTemplateSummary,
   type SubscriberRecipient,
-} from '../../../shared';
+} from "../../../shared";
 
 interface ControllerCtx {
   params?: Record<string, string>;
@@ -26,7 +27,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async getSettings(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       getPublicSafeSettings(): Promise<BroadcastSettings>;
-    }>('settings');
+    }>("settings");
     const data = await svc.getPublicSafeSettings();
     ctx.body = { data };
   },
@@ -35,12 +36,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const svc = strapi.plugin(PLUGIN_ID).service<{
       updateSettings(patch: Partial<BroadcastSettings>): Promise<BroadcastSettings>;
       getPublicSafeSettings(): Promise<BroadcastSettings>;
-    }>('settings');
+    }>("settings");
 
     try {
-      await svc.updateSettings(
-        (ctx.request.body || {}) as Partial<BroadcastSettings>
-      );
+      await svc.updateSettings((ctx.request.body || {}) as Partial<BroadcastSettings>);
       const data = await svc.getPublicSafeSettings();
       ctx.body = { data };
     } catch (err) {
@@ -56,18 +55,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async listEmailTemplates(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       listEmailDesignerTemplates(): Promise<EmailDesignerTemplateSummary[]>;
-    }>('transportService');
+    }>("transportService");
     const data = await svc.listEmailDesignerTemplates();
     ctx.body = { data };
   },
 
   async listCampaigns(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      listCampaigns(params?: {
-        status?: string;
-        topic?: string;
-      }): Promise<CampaignRecord[]>;
-    }>('campaignService');
+      listCampaigns(params?: { status?: string; topic?: string }): Promise<CampaignRecord[]>;
+    }>("campaignService");
 
     const data = await svc.listCampaigns({
       status: ctx.query?.status,
@@ -79,12 +75,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async createCampaign(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       createCampaign(input: Partial<CampaignRecord>): Promise<CampaignRecord>;
-    }>('campaignService');
+    }>("campaignService");
 
     try {
-      const data = await svc.createCampaign(
-        (ctx.request.body || {}) as Partial<CampaignRecord>
-      );
+      const data = await svc.createCampaign((ctx.request.body || {}) as Partial<CampaignRecord>);
       ctx.status = 201;
       ctx.body = { data };
     } catch (err) {
@@ -94,13 +88,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async updateCampaign(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || '';
+    const documentId = ctx.params?.documentId || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       updateCampaign(
         documentIdOrSlug: string,
         input: Partial<CampaignRecord>
       ): Promise<CampaignRecord>;
-    }>('campaignService');
+    }>("campaignService");
 
     try {
       const data = await svc.updateCampaign(
@@ -117,7 +111,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async createFromTemplate(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       createFromStarterTemplate(templateId: string): Promise<CampaignRecord>;
-    }>('campaignService');
+    }>("campaignService");
 
     try {
       const body = (ctx.request.body || {}) as { templateId: string };
@@ -131,7 +125,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async sendCampaign(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || '';
+    const documentId = ctx.params?.documentId || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       dispatchCampaign(
         documentIdOrSlug: string,
@@ -144,7 +138,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         campaign: CampaignRecord;
         results: ChannelDispatchResult[];
       }>;
-    }>('campaignService');
+    }>("campaignService");
 
     try {
       const body = (ctx.request.body || {}) as {
@@ -163,7 +157,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async listAutomationRules(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       listRules(): Promise<AutomationRuleRecord[]>;
-    }>('automationService');
+    }>("automationService");
 
     const data = await svc.listRules();
     ctx.body = { data };
@@ -171,15 +165,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async createAutomationRule(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      createRule(
-        input: Partial<AutomationRuleRecord>
-      ): Promise<AutomationRuleRecord>;
-    }>('automationService');
+      createRule(input: Partial<AutomationRuleRecord>): Promise<AutomationRuleRecord>;
+    }>("automationService");
 
     try {
-      const data = await svc.createRule(
-        (ctx.request.body || {}) as Partial<AutomationRuleRecord>
-      );
+      const data = await svc.createRule((ctx.request.body || {}) as Partial<AutomationRuleRecord>);
       ctx.status = 201;
       ctx.body = { data };
     } catch (err) {
@@ -189,13 +179,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async updateAutomationRule(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || '';
+    const documentId = ctx.params?.documentId || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       updateRule(
         documentIdOrSlug: string,
         input: Partial<AutomationRuleRecord>
       ): Promise<AutomationRuleRecord>;
-    }>('automationService');
+    }>("automationService");
 
     try {
       const data = await svc.updateRule(
@@ -215,7 +205,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         campaignSlug?: string;
         channel?: BroadcastChannel;
       }): Promise<DeliveryLogRecord[]>;
-    }>('transportService');
+    }>("transportService");
 
     const data = await svc.listDeliveryLogs({
       campaignSlug: ctx.query?.campaignSlug,
@@ -227,7 +217,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async listPublicChannels(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       getSettings(): Promise<BroadcastSettings>;
-    }>('settings');
+    }>("settings");
     const settings = await svc.getSettings();
     ctx.body = {
       data: {
@@ -246,7 +236,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         topic?: string;
         limit?: number;
       }): Promise<Array<Partial<CampaignRecord>>>;
-    }>('campaignService');
+    }>("campaignService");
 
     const data = await svc.listPublicArchive({
       topic: ctx.query?.topic,

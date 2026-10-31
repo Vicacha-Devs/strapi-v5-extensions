@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   AUTOMATION_RULE_UID,
   PLUGIN_ID,
@@ -12,7 +13,7 @@ import {
   type BroadcastSettings,
   type CampaignRecord,
   type ChannelDispatchResult,
-} from '../../../shared';
+} from "../../../shared";
 
 function buildRuleDocumentData(
   rule: Partial<AutomationRuleRecord>,
@@ -24,14 +25,13 @@ function buildRuleDocumentData(
     name: rule.name,
     eventName: rule.eventName,
     targetContentType: rule.targetContentType,
-    topic: rule.topic || 'announcements',
+    topic: rule.topic || "announcements",
     channels,
     active: rule.active ?? fallbackActive,
-    priority: rule.priority || 'normal',
+    priority: rule.priority || "normal",
     subjectTemplate: rule.subjectTemplate,
     bodyTextTemplate: rule.bodyTextTemplate,
-    bodyHtmlTemplate:
-      rule.bodyHtmlTemplate || `<p>${rule.bodyTextTemplate}</p>`,
+    bodyHtmlTemplate: rule.bodyHtmlTemplate || `<p>${rule.bodyTextTemplate}</p>`,
     ctaLabelTemplate: rule.ctaLabelTemplate,
     ctaUrlTemplate: rule.ctaUrlTemplate,
     translations: rule.translations || {},
@@ -46,13 +46,12 @@ function buildPresetRulePayload(
     name: preset.name,
     eventName: preset.eventName,
     targetContentType: preset.targetContentType,
-    topic: preset.topic || 'announcements',
-    channels: preset.channels || ['telegram'],
+    topic: preset.topic || "announcements",
+    channels: preset.channels || ["telegram"],
     active: preset.active ?? true,
-    priority: preset.priority || 'normal',
-    subjectTemplate: preset.subjectTemplate || '📢 {{title}}',
-    bodyTextTemplate:
-      preset.bodyTextTemplate || '{{title}}: {{message}} ({{secondaryDate}})',
+    priority: preset.priority || "normal",
+    subjectTemplate: preset.subjectTemplate || "📢 {{title}}",
+    bodyTextTemplate: preset.bodyTextTemplate || "{{title}}: {{message}} ({{secondaryDate}})",
     bodyHtmlTemplate: preset.bodyHtmlTemplate,
     ctaLabelTemplate: preset.ctaLabelTemplate,
     ctaUrlTemplate: preset.ctaUrlTemplate,
@@ -66,11 +65,7 @@ function doesRuleMatchTrigger(
   payload: Record<string, unknown>
 ): boolean {
   if (!rule.active || rule.eventName !== eventName) return false;
-  if (
-    rule.targetContentType &&
-    payload.model &&
-    String(payload.model) !== rule.targetContentType
-  ) {
+  if (rule.targetContentType && payload.model && String(payload.model) !== rule.targetContentType) {
     return false;
   }
   return true;
@@ -83,7 +78,7 @@ function firstNonEmptyString(
 ): string {
   for (const key of keys) {
     const val = record[key];
-    if (val !== undefined && val !== null && String(val) !== '') {
+    if (val !== undefined && val !== null && String(val) !== "") {
       return String(val);
     }
   }
@@ -96,26 +91,13 @@ function extractTriggerVariables(
   settings: BroadcastSettings,
   secondaryDateFormatted: string
 ): Record<string, string | number | undefined> {
-  const entryRecord =
-    (payload.entry as Record<string, unknown> | undefined) ?? payload;
+  const entryRecord = (payload.entry as Record<string, unknown> | undefined) ?? payload;
 
   return {
-    title: firstNonEmptyString(
-      entryRecord,
-      ['title', 'name', 'subject'],
-      eventName
-    ),
-    message: firstNonEmptyString(
-      entryRecord,
-      ['message', 'summary', 'description'],
-      ''
-    ),
-    summary: firstNonEmptyString(
-      entryRecord,
-      ['summary', 'description', 'message'],
-      ''
-    ),
-    code: firstNonEmptyString(entryRecord, ['code', 'slug'], 'event'),
+    title: firstNonEmptyString(entryRecord, ["title", "name", "subject"], eventName),
+    message: firstNonEmptyString(entryRecord, ["message", "summary", "description"], ""),
+    summary: firstNonEmptyString(entryRecord, ["summary", "description", "message"], ""),
+    code: firstNonEmptyString(entryRecord, ["code", "slug"], "event"),
     organizationName: settings.organizationName,
     siteBaseUrl: settings.siteBaseUrl,
     secondaryDate: secondaryDateFormatted,
@@ -126,11 +108,11 @@ function buildAutoCampaignInput(
   rule: AutomationRuleRecord,
   vars: Record<string, string | number | undefined>
 ): Partial<CampaignRecord> {
-  const rawCode = String(vars.code || 'item')
+  const rawCode = String(vars.code || "item")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  const safeCode = rawCode || 'item';
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const safeCode = rawCode || "item";
 
   return {
     slug: `auto-${rule.slug}-${safeCode}`,
@@ -156,13 +138,13 @@ function buildAutoCampaignInput(
 
 const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
   getSettingsService() {
-    return strapi.plugin(PLUGIN_ID).service('settings') as {
+    return strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings(): Promise<BroadcastSettings>;
     };
   },
 
   getCampaignService() {
-    return strapi.plugin(PLUGIN_ID).service('campaignService') as {
+    return strapi.plugin(PLUGIN_ID).service("campaignService") as {
       createCampaign(input: Partial<CampaignRecord>): Promise<CampaignRecord>;
       dispatchCampaign(
         documentIdOrSlug: string
@@ -185,18 +167,14 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
     return (docs[0] as unknown as AutomationRuleRecord) || null;
   },
 
-  async findRuleByDocIdOrSlug(
-    documentIdOrSlug: string
-  ): Promise<AutomationRuleRecord | null> {
+  async findRuleByDocIdOrSlug(documentIdOrSlug: string): Promise<AutomationRuleRecord | null> {
     const byDoc = (await strapi
       .documents(AUTOMATION_RULE_UID)
       .findOne({ documentId: documentIdOrSlug })) as unknown as AutomationRuleRecord | null;
     return byDoc ?? (await this.getRuleBySlug(documentIdOrSlug));
   },
 
-  async createRule(
-    input: Partial<AutomationRuleRecord>
-  ): Promise<AutomationRuleRecord> {
+  async createRule(input: Partial<AutomationRuleRecord>): Promise<AutomationRuleRecord> {
     const channels = normalizeChannels(input.channels);
     const candidate: Partial<AutomationRuleRecord> = {
       ...input,
@@ -205,7 +183,7 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const validation = validateAutomationRuleInput(candidate);
     if (!validation.valid) {
-      throw new Error(validation.errors.join('; '));
+      throw new Error(validation.errors.join("; "));
     }
 
     const created = await strapi.documents(AUTOMATION_RULE_UID).create({
@@ -236,7 +214,7 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const validation = validateAutomationRuleInput(merged);
     if (!validation.valid) {
-      throw new Error(validation.errors.join('; '));
+      throw new Error(validation.errors.join("; "));
     }
 
     const updated = await strapi.documents(AUTOMATION_RULE_UID).update({
@@ -244,10 +222,7 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
       data: buildRuleDocumentData(merged, channels, existing.active ?? true),
     });
 
-    return (
-      (updated as unknown as AutomationRuleRecord) ||
-      (merged as AutomationRuleRecord)
-    );
+    return (updated as unknown as AutomationRuleRecord) || (merged as AutomationRuleRecord);
   },
 
   async seedStarterRules(): Promise<number> {
@@ -276,12 +251,8 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
     results: ChannelDispatchResult[];
   }> {
     const campaignService = this.getCampaignService();
-    const campaign = await campaignService.createCampaign(
-      buildAutoCampaignInput(rule, vars)
-    );
-    const dispatched = await campaignService.dispatchCampaign(
-      campaign.documentId || campaign.slug
-    );
+    const campaign = await campaignService.createCampaign(buildAutoCampaignInput(rule, vars));
+    const dispatched = await campaignService.dispatchCampaign(campaign.documentId || campaign.slug);
 
     if (rule.documentId) {
       await strapi.documents(AUTOMATION_RULE_UID).update({
@@ -314,23 +285,16 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!settings.enableEventHubAutomations) return [];
 
     const allRules = await this.listRules();
-    const matchingRules = allRules.filter((rule) =>
-      doesRuleMatchTrigger(rule, eventName, payload)
-    );
+    const matchingRules = allRules.filter((rule) => doesRuleMatchTrigger(rule, eventName, payload));
     if (matchingRules.length === 0) return [];
 
-    const secondaryCal = settings.secondaryCalendars?.[0] || 'islamic-umalqura';
+    const secondaryCal = settings.secondaryCalendars?.[0] || "islamic-umalqura";
     const secondaryDate = formatSecondaryDate(
       new Date().toISOString().slice(0, 10),
       secondaryCal,
-      settings.defaultLocale || 'es'
+      settings.defaultLocale || "es"
     );
-    const vars = extractTriggerVariables(
-      eventName,
-      payload,
-      settings,
-      secondaryDate.formatted
-    );
+    const vars = extractTriggerVariables(eventName, payload, settings, secondaryDate.formatted);
 
     const outcomes = [];
     for (const rule of matchingRules) {

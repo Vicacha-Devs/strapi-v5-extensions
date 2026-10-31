@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Badge,
   Box,
@@ -11,12 +10,11 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { AUTOMATION_RULE_UID } from '../../../shared/constants';
-import type {
-  AutomationRuleRecord,
-  DeliveryLogRecord,
-} from '../../../shared/types';
+} from "@strapi/design-system";
+import * as React from "react";
+
+import { AUTOMATION_RULE_UID } from "../../../shared/constants";
+import type { AutomationRuleRecord, DeliveryLogRecord } from "../../../shared/types";
 
 export type TranslateFn = (id: string, defaultMessage: string) => string;
 
@@ -25,26 +23,23 @@ export interface DeliveryLedgerSectionProps {
   logs: DeliveryLogRecord[];
 }
 
-export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({
-  t,
-  logs,
-}) => (
+export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({ t, logs }) => (
   <Box paddingTop={6}>
     <Box
       padding={4}
       marginBottom={4}
       background="neutral100"
       hasRadius
-      style={{ border: '1px solid rgba(128, 128, 128, 0.18)' }}
+      style={{ border: "1px solid rgba(128, 128, 128, 0.18)" }}
     >
       <Typography variant="delta" tag="h2" fontWeight="bold">
-        {t('page.ui.what_is_the_delivery_ledger', 'What is the Delivery Ledger?')}
+        {t("page.ui.what_is_the_delivery_ledger", "What is the Delivery Ledger?")}
       </Typography>
       <Box paddingTop={1}>
         <Typography variant="omega" textColor="neutral600">
           {t(
-            'page.ui.delivery_ledger_description',
-            'The Delivery Ledger is an immutable audit and idempotency log of every message dispatched across Email, Telegram, and WhatsApp. Each delivery records a deterministic idempotency key (campaignSlug + channel + recipient) so retrying a campaign never sends duplicate messages, masks recipient PII (e.g. a***@domain.org, +57***4567), and tracks whether the message was sent live or simulated in Dry-Run mode.'
+            "page.ui.delivery_ledger_description",
+            "The Delivery Ledger is an immutable audit and idempotency log of every message dispatched across Email, Telegram, and WhatsApp. Each delivery records a deterministic idempotency key (campaignSlug + channel + recipient) so retrying a campaign never sends duplicate messages, masks recipient PII (e.g. a***@domain.org, +57***4567), and tracks whether the message was sent live or simulated in Dry-Run mode."
           )}
         </Typography>
       </Box>
@@ -54,34 +49,26 @@ export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({
       <Thead>
         <Tr>
           <Th>
+            <Typography variant="sigma">{t("page.ui.campaign", "Campaign")}</Typography>
+          </Th>
+          <Th>
             <Typography variant="sigma">
-              {t('page.ui.campaign', 'Campaign')}
+              {t("page.ui.channel_driver", "Channel / Driver")}
             </Typography>
           </Th>
           <Th>
             <Typography variant="sigma">
-              {t('page.ui.channel_driver', 'Channel / Driver')}
+              {t("page.ui.masked_recipient", "Masked Recipient")}
             </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('page.ui.masked_recipient', 'Masked Recipient')}
-            </Typography>
+            <Typography variant="sigma">{t("page.ui.locale", "Locale")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('page.ui.locale', 'Locale')}
-            </Typography>
+            <Typography variant="sigma">{t("page.ui.status", "Status")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('page.ui.status', 'Status')}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {t('page.ui.sent_at', 'Sent At')}
-            </Typography>
+            <Typography variant="sigma">{t("page.ui.sent_at", "Sent At")}</Typography>
           </Th>
         </Tr>
       </Thead>
@@ -92,7 +79,7 @@ export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({
               <Box padding={4}>
                 <Typography textColor="neutral600">
                   {t(
-                    'page.ui.no_deliveries_recorded_yet',
+                    "page.ui.no_deliveries_recorded_yet",
                     'No deliveries recorded yet. Click "Dispatch Now" on any campaign in the Campaigns tab to dispatch (or simulate in Dry-Run mode) and populate the ledger.'
                   )}
                 </Typography>
@@ -149,37 +136,27 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
     <Thead>
       <Tr>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.rule_slug', 'Rule Slug')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.rule_slug", "Rule Slug")}</Typography>
         </Th>
         <Th>
           <Typography variant="sigma">
-            {t('page.ui.eventhub_trigger', 'EventHub Trigger')}
+            {t("page.ui.eventhub_trigger", "EventHub Trigger")}
           </Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t('page.ui.topic', 'Topic')}</Typography>
+          <Typography variant="sigma">{t("page.ui.topic", "Topic")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.channels', 'Channels')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.channels", "Channels")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.trigger_count', 'Trigger Count')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.trigger_count", "Trigger Count")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.status', 'Status')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.status", "Status")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.actions', 'Actions')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.actions", "Actions")}</Typography>
         </Th>
       </Tr>
     </Thead>
@@ -201,35 +178,23 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
             <Typography>{rule.topic}</Typography>
           </Td>
           <Td>
-            <Typography>{(rule.channels || []).join(', ')}</Typography>
+            <Typography>{(rule.channels || []).join(", ")}</Typography>
           </Td>
           <Td>
             <Typography>{rule.triggerCount || 0}</Typography>
           </Td>
           <Td>
             <Badge active={rule.active}>
-              {rule.active
-                ? t('common.active', 'active')
-                : t('common.paused', 'paused')}
+              {rule.active ? t("common.active", "active") : t("common.paused", "paused")}
             </Badge>
           </Td>
           <Td>
             <Flex gap={2} wrap="wrap">
-              <Button
-                variant="tertiary"
-                size="S"
-                onClick={() => onEdit(rule)}
-              >
-                {t('common.edit', 'Edit')}
+              <Button variant="tertiary" size="S" onClick={() => onEdit(rule)}>
+                {t("common.edit", "Edit")}
               </Button>
-              <Button
-                variant="secondary"
-                size="S"
-                onClick={() => onToggleActive(rule)}
-              >
-                {rule.active
-                  ? t('common.pause', 'Pause')
-                  : t('common.activate', 'Activate')}
+              <Button variant="secondary" size="S" onClick={() => onToggleActive(rule)}>
+                {rule.active ? t("common.pause", "Pause") : t("common.activate", "Activate")}
               </Button>
               {rule.documentId && (
                 <Button
@@ -241,7 +206,7 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
                     )
                   }
                 >
-                  {t('common.content_manager', 'Content Manager')}
+                  {t("common.content_manager", "Content Manager")}
                 </Button>
               )}
             </Flex>

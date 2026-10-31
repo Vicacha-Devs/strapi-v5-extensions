@@ -1,5 +1,10 @@
-import assert from 'node:assert/strict';
-import { describe, it } from 'node:test';
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+
+import automationServiceFactory from "../server/src/services/automationService";
+import campaignServiceFactory from "../server/src/services/campaignService";
+import settingsServiceFactory from "../server/src/services/settings";
+import transportServiceFactory from "../server/src/services/transportService";
 import {
   AUTOMATION_RULE_UID,
   CAMPAIGN_UID,
@@ -19,11 +24,7 @@ import {
   validateCampaignInput,
   validateGatewayUrl,
   type BroadcastSettings,
-} from '../shared';
-import settingsServiceFactory from '../server/src/services/settings';
-import transportServiceFactory from '../server/src/services/transportService';
-import campaignServiceFactory from '../server/src/services/campaignService';
-import automationServiceFactory from '../server/src/services/automationService';
+} from "../shared";
 
 function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
   const storeMap = new Map<string, unknown>();
@@ -37,30 +38,30 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
 
   const mockSubscribers = [
     {
-      email: 'ahmad@mezquitabogota.org',
-      phone: '3101234567',
-      fullName: 'Ahmad Al-Mansoor',
-      locale: 'ar',
-      topics: ['announcements', 'urgent_janazah', 'events'],
-      status: 'confirmed',
-      unsubscribeToken: 'tok_ahmad_123',
+      email: "ahmad@mezquitabogota.org",
+      phone: "3101234567",
+      fullName: "Ahmad Al-Mansoor",
+      locale: "ar",
+      topics: ["announcements", "urgent_janazah", "events"],
+      status: "confirmed",
+      unsubscribeToken: "tok_ahmad_123",
     },
     {
-      email: 'maria@example.com',
-      phone: '+573159876543',
-      fullName: 'María Rodríguez',
-      locale: 'es',
-      topics: ['announcements', 'courses'],
-      status: 'confirmed',
-      unsubscribeToken: 'tok_maria_456',
+      email: "maria@example.com",
+      phone: "+573159876543",
+      fullName: "María Rodríguez",
+      locale: "es",
+      topics: ["announcements", "courses"],
+      status: "confirmed",
+      unsubscribeToken: "tok_maria_456",
     },
     {
-      email: 'pending@example.com',
-      phone: '+573001112233',
-      fullName: 'Pending User',
-      locale: 'en',
-      topics: ['announcements'],
-      status: 'pending',
+      email: "pending@example.com",
+      phone: "+573001112233",
+      fullName: "Pending User",
+      locale: "en",
+      topics: ["announcements"],
+      status: "pending",
     },
   ];
 
@@ -96,8 +97,8 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
           Object.entries(filters).every(([k, v]) => {
             if (
               v &&
-              typeof v === 'object' &&
-              '$in' in (v as Record<string, unknown>) &&
+              typeof v === "object" &&
+              "$in" in (v as Record<string, unknown>) &&
               Array.isArray((v as { $in: unknown[] }).$in)
             ) {
               return (v as { $in: unknown[] }).$in.includes(item[k]);
@@ -138,7 +139,7 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
   const services: Record<string, unknown> = {};
 
   strapi.plugin = (name: string) => {
-    if (name === 'inbox') {
+    if (name === "inbox") {
       return {
         service: () => ({
           listSubscribers: async (params?: { status?: string; topic?: string }) =>
@@ -155,7 +156,7 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
     };
   };
 
-  const typedStrapi = strapi as unknown as Parameters<typeof settingsServiceFactory>[0]['strapi'];
+  const typedStrapi = strapi as unknown as Parameters<typeof settingsServiceFactory>[0]["strapi"];
   services.settings = settingsServiceFactory({ strapi: typedStrapi });
   services.transportService = transportServiceFactory({ strapi: typedStrapi });
   services.campaignService = campaignServiceFactory({ strapi: typedStrapi });
@@ -174,9 +175,9 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
   };
 }
 
-describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
-  it('escapes HTML entities in interpolated templates and masks PII', () => {
-    const rawHtml = '<p>As-salamu alaykum {{recipientName}}</p>';
+describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
+  it("escapes HTML entities in interpolated templates and masks PII", () => {
+    const rawHtml = "<p>As-salamu alaykum {{recipientName}}</p>";
     const rendered = interpolateBroadcastTemplate(
       rawHtml,
       { recipientName: '<script>alert("xss")</script>' },
@@ -184,97 +185,94 @@ describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
     );
     assert.equal(
       rendered,
-      '<p>As-salamu alaykum &lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</p>'
+      "<p>As-salamu alaykum &lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;</p>"
     );
-    assert.equal(escapeHtml("O'Connor & <Sons>"), 'O&#39;Connor &amp; &lt;Sons&gt;');
+    assert.equal(escapeHtml("O'Connor & <Sons>"), "O&#39;Connor &amp; &lt;Sons&gt;");
 
-    assert.equal(maskEmail('ahmad@mezquitabogota.org'), 'a***@mezquitabogota.org');
-    assert.equal(normalizeE164Phone('3101234567', '57'), '+573101234567');
-    assert.equal(maskPhone('3101234567'), '+57***4567');
-    assert.equal(
-      maskRecipientIdentifier('@MezquitaCentralBogota'),
-      '@MezquitaCentralBogota'
-    );
+    assert.equal(maskEmail("ahmad@mezquitabogota.org"), "a***@mezquitabogota.org");
+    assert.equal(normalizeE164Phone("3101234567", "57"), "+573101234567");
+    assert.equal(maskPhone("3101234567"), "+57***4567");
+    assert.equal(maskRecipientIdentifier("@MezquitaCentralBogota"), "@MezquitaCentralBogota");
   });
 
-  it('enforces SSRF protection and HTTPS on gateway URLs', () => {
-    const metadataBlocked = validateGatewayUrl('https://169.254.169.254/latest/meta-data');
+  it("enforces SSRF protection and HTTPS on gateway URLs", () => {
+    const metadataBlocked = validateGatewayUrl("https://169.254.169.254/latest/meta-data");
     assert.equal(metadataBlocked.valid, false);
 
-    const httpExternalBlocked = validateGatewayUrl('http://gateway.example.com/api');
+    const httpExternalBlocked = validateGatewayUrl("http://gateway.example.com/api");
     assert.equal(httpExternalBlocked.valid, false);
 
-    const localhostBlockedByDefault = validateGatewayUrl('http://localhost:3000/api');
+    const localhostBlockedByDefault = validateGatewayUrl("http://localhost:3000/api");
     assert.equal(localhostBlockedByDefault.valid, false);
 
-    const localhostAllowedExplicitly = validateGatewayUrl('http://localhost:3000/api', {
+    const localhostAllowedExplicitly = validateGatewayUrl("http://localhost:3000/api", {
       allowLocalhost: true,
     });
     assert.equal(localhostAllowedExplicitly.valid, true);
 
-    const validHttps = validateGatewayUrl('https://wa-gateway.mezquitabogota.org');
+    const validHttps = validateGatewayUrl("https://wa-gateway.mezquitabogota.org");
     assert.equal(validHttps.valid, true);
   });
 
-  it('validates campaign and automation rule inputs and resolves localized copy', () => {
+  it("validates campaign and automation rule inputs and resolves localized copy", () => {
     const invalidCamp = validateCampaignInput({
-      slug: 'Invalid Slug!',
-      title: 'Hi',
-      subject: 'No',
-      bodyText: '123',
+      slug: "Invalid Slug!",
+      title: "Hi",
+      subject: "No",
+      bodyText: "123",
       channels: [],
     });
     assert.equal(invalidCamp.valid, false);
     assert.ok(invalidCamp.errors.length >= 4);
 
     const validRule = validateAutomationRuleInput({
-      slug: 'alert-rule',
-      name: 'Urgent Alert Rule',
-      eventName: 'inbox.alert.published',
-      subjectTemplate: '🚨 {{title}}',
-      bodyTextTemplate: '{{message}}',
+      slug: "alert-rule",
+      name: "Urgent Alert Rule",
+      eventName: "inbox.alert.published",
+      subjectTemplate: "🚨 {{title}}",
+      bodyTextTemplate: "{{message}}",
     });
     assert.equal(validRule.valid, true);
 
     const copy = resolveLocalizedCampaignCopy(
       {
-        subject: 'Default Subject',
-        bodyText: 'Default Body',
+        subject: "Default Subject",
+        bodyText: "Default Body",
         translations: {
           ar: {
-            subject: 'عنوان بالعربية',
-            bodyText: 'نص الرسالة بالعربية',
+            subject: "عنوان بالعربية",
+            bodyText: "نص الرسالة بالعربية",
           },
         },
       },
-      'ar',
-      'es'
+      "ar",
+      "es"
     );
-    assert.equal(copy.subject, 'عنوان بالعربية');
+    assert.equal(copy.subject, "عنوان بالعربية");
   });
 
-  it('masks secrets in public-safe settings while preserving stored tokens', async () => {
+  it("masks secrets in public-safe settings while preserving stored tokens", async () => {
     const { services } = createMockStrapi({
       ...DEFAULT_BROADCAST_SETTINGS,
-      telegramBotToken: 'secret_tg_token_123',
-      whatsappAccessToken: 'secret_wa_token_456',
+      telegramBotToken: "secret_tg_token_123",
+      whatsappAccessToken: "secret_wa_token_456",
     });
 
     const publicSettings = await services.settings.getPublicSafeSettings();
-    assert.equal(publicSettings.telegramBotToken, '••••••••');
-    assert.equal(publicSettings.whatsappAccessToken, '••••••••');
+    assert.equal(publicSettings.telegramBotToken, "••••••••");
+    assert.equal(publicSettings.whatsappAccessToken, "••••••••");
 
     await services.settings.updateSettings({
-      organizationName: 'Mezquita Central Bogotá Updated',
-      telegramBotToken: '••••••••',
+      organizationName: "Mezquita Central Bogotá Updated",
+      telegramBotToken: "••••••••",
     });
 
     const fullSettings = await services.settings.getSettings();
-    assert.equal(fullSettings.organizationName, 'Mezquita Central Bogotá Updated');
-    assert.equal(fullSettings.telegramBotToken, 'secret_tg_token_123');
+    assert.equal(fullSettings.organizationName, "Mezquita Central Bogotá Updated");
+    assert.equal(fullSettings.telegramBotToken, "secret_tg_token_123");
   });
 
-  it('seeds starter campaigns, segments inbox subscribers by topic & locale, and prevents duplicate dispatches', async () => {
+  it("seeds starter campaigns, segments inbox subscribers by topic & locale, and prevents duplicate dispatches", async () => {
     const { services, collections, emittedEvents } = createMockStrapi({
       ...DEFAULT_BROADCAST_SETTINGS,
       dryRun: true,
@@ -283,50 +281,43 @@ describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
     const seededCount = await services.campaignService.seedStarterCampaigns();
     assert.equal(seededCount, 2);
 
-    const jumuah = await services.campaignService.getCampaignBySlug(
-      'jumuah-weekly-reminder'
-    );
+    const jumuah = await services.campaignService.getCampaignBySlug("jumuah-weekly-reminder");
     assert.ok(jumuah);
     assert.ok(jumuah.secondaryDateLabel);
 
     const updatedJumuah = await services.campaignService.updateCampaign(
-      jumuah.documentId || 'jumuah-weekly-reminder',
+      jumuah.documentId || "jumuah-weekly-reminder",
       {
-        title: 'Recordatorio Semanal de Jumu’ah (Actualizado)',
+        title: "Recordatorio Semanal de Jumu’ah (Actualizado)",
       }
     );
-    assert.equal(updatedJumuah.title, 'Recordatorio Semanal de Jumu’ah (Actualizado)');
+    assert.equal(updatedJumuah.title, "Recordatorio Semanal de Jumu’ah (Actualizado)");
 
-    const firstDispatch = await services.campaignService.dispatchCampaign(
-      'jumuah-weekly-reminder'
-    );
+    const firstDispatch = await services.campaignService.dispatchCampaign("jumuah-weekly-reminder");
     // 1 Telegram channel + 2 confirmed email subscribers + 2 confirmed WhatsApp phone subscribers = 5 dispatches
     assert.equal(firstDispatch.results.length, 5);
-    assert.equal(firstDispatch.campaign.status, 'sent');
+    assert.equal(firstDispatch.campaign.status, "sent");
     assert.equal(firstDispatch.campaign.stats?.simulatedCount, 5);
 
     const logs = collections[DELIVERY_LOG_UID];
     assert.equal(logs.length, 5);
     // Verify PII masking in delivery logs
-    const emailLogs = logs.filter((l) => l.channel === 'email');
+    const emailLogs = logs.filter((l) => l.channel === "email");
     assert.equal(emailLogs.length, 2);
     assert.ok(
-      emailLogs.some((l) => l.recipientMasked === 'a***@mezquitabogota.org' && l.locale === 'ar')
+      emailLogs.some((l) => l.recipientMasked === "a***@mezquitabogota.org" && l.locale === "ar")
     );
-    assert.ok(
-      emailLogs.some((l) => l.recipientMasked === 'm***@example.com' && l.locale === 'es')
-    );
+    assert.ok(emailLogs.some((l) => l.recipientMasked === "m***@example.com" && l.locale === "es"));
 
     // Second dispatch of the same campaign should be skipped as duplicate via idempotencyKey
-    const secondDispatch = await services.campaignService.dispatchCampaign(
-      'jumuah-weekly-reminder'
-    );
+    const secondDispatch =
+      await services.campaignService.dispatchCampaign("jumuah-weekly-reminder");
     assert.equal(secondDispatch.campaign.stats?.skippedCount, 5);
     assert.equal(secondDispatch.campaign.stats?.simulatedCount, 0);
-    assert.ok(emittedEvents.some((e) => e.event === 'broadcasts.campaign.sent'));
+    assert.ok(emittedEvents.some((e) => e.event === "broadcasts.campaign.sent"));
   });
 
-  it('triggers automated omnichannel broadcasts when EventHub events fire', async () => {
+  it("triggers automated omnichannel broadcasts when EventHub events fire", async () => {
     const { services } = createMockStrapi({
       ...DEFAULT_BROADCAST_SETTINGS,
       dryRun: true,
@@ -336,36 +327,33 @@ describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
     assert.equal(seededRules, 2);
 
     const toggledRule = await services.automationService.updateRule(
-      'auto-event-published-broadcast',
+      "auto-event-published-broadcast",
       { active: false }
     );
     assert.equal(toggledRule.active, false);
 
-    const outcomes = await services.automationService.handleEventTrigger(
-      'inbox.alert.published',
-      {
-        code: 'ramadan-1447-sighting',
-        title: 'Inicio Oficial de Ramadán 1447 AH',
-        message: 'Esta noche inicia el mes sagrado de Ramadán con oración de Tarawih a las 7:30 PM.',
-      }
-    );
+    const outcomes = await services.automationService.handleEventTrigger("inbox.alert.published", {
+      code: "ramadan-1447-sighting",
+      title: "Inicio Oficial de Ramadán 1447 AH",
+      message: "Esta noche inicia el mes sagrado de Ramadán con oración de Tarawih a las 7:30 PM.",
+    });
 
     assert.equal(outcomes.length, 1);
-    assert.equal(outcomes[0].ruleSlug, 'auto-alert-banner-broadcast');
+    assert.equal(outcomes[0].ruleSlug, "auto-alert-banner-broadcast");
     assert.equal(
       outcomes[0].campaignSlug,
-      'auto-auto-alert-banner-broadcast-ramadan-1447-sighting'
+      "auto-auto-alert-banner-broadcast-ramadan-1447-sighting"
     );
     // Rule channels: telegram (1) + whatsapp (2 confirmed subscribers on 'announcements') = 3
     assert.equal(outcomes[0].results.length, 3);
 
-    const key1 = computeIdempotencyKey('camp-1', 'email', 'Test@Example.com');
-    const key2 = computeIdempotencyKey('camp-1', 'email', 'test@example.com');
+    const key1 = computeIdempotencyKey("camp-1", "email", "Test@Example.com");
+    const key2 = computeIdempotencyKey("camp-1", "email", "test@example.com");
     assert.equal(key1, key2);
   });
 
-  it('ensures all 10 Admin locales contain identical keys and non-empty translations', async () => {
-    const locales = ['en', 'es', 'ar', 'fr', 'de', 'pt', 'it', 'tr', 'ru', 'zh'];
+  it("ensures all 10 Admin locales contain identical keys and non-empty translations", async () => {
+    const locales = ["en", "es", "ar", "fr", "de", "pt", "it", "tr", "ru", "zh"];
     const loaded: Array<{ locale: string; data: Record<string, string> }> = [];
 
     for (const locale of locales) {
@@ -385,24 +373,24 @@ describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
     }
   });
 
-  it('discovers Email Designer 5 templates, resolves localized variants, and renders HTML email broadcasts', async () => {
+  it("discovers Email Designer 5 templates, resolves localized variants, and renders HTML email broadcasts", async () => {
     const { services, collections } = createMockStrapi({
       ...DEFAULT_BROADCAST_SETTINGS,
       dryRun: true,
       enableEmailDesignerBridge: true,
     });
 
-    collections['plugin::email-designer-5.email-designer-template'] = [
+    collections["plugin::email-designer-5.email-designer-template"] = [
       {
         templateReferenceId: 401,
-        name: 'broadcastNewsletter_es',
-        subject: '🕌 {{subject}}',
-        bodyHtml: '<div><h1>{{subject}}</h1>{{bodyHtml}}<footer>{{secondaryDate}}</footer></div>',
+        name: "broadcastNewsletter_es",
+        subject: "🕌 {{subject}}",
+        bodyHtml: "<div><h1>{{subject}}</h1>{{bodyHtml}}<footer>{{secondaryDate}}</footer></div>",
       },
       {
         templateReferenceId: 403,
-        name: 'broadcastNewsletter_ar',
-        subject: '🕌 {{subject}}',
+        name: "broadcastNewsletter_ar",
+        subject: "🕌 {{subject}}",
         bodyHtml: '<div dir="rtl"><h1>{{subject}}</h1>{{bodyHtml}}</div>',
       },
     ];
@@ -412,85 +400,82 @@ describe('@vicacha-devs/strapi-plugin-broadcasts', () => {
     assert.equal(templates[0].templateReferenceId, 401);
 
     // Resolving "401" for an Arabic ("ar") recipient automatically resolves sibling "broadcastNewsletter_ar" (403)
-    const resolvedAr = await services.transportService.resolveEmailDesignerTemplate('401', 'ar');
+    const resolvedAr = await services.transportService.resolveEmailDesignerTemplate("401", "ar");
     assert.equal(resolvedAr?.templateReferenceId, 403);
 
     const camp = await services.campaignService.createCampaign({
-      slug: 'ed5-newsletter-test',
-      title: 'Boletín con Email Designer 5',
-      topic: 'announcements',
-      channels: ['email'],
-      emailTemplateRef: '401',
-      subject: 'Boletín Comunitario',
-      bodyText: 'Contenido del boletín para {{recipientName}}.',
+      slug: "ed5-newsletter-test",
+      title: "Boletín con Email Designer 5",
+      topic: "announcements",
+      channels: ["email"],
+      emailTemplateRef: "401",
+      subject: "Boletín Comunitario",
+      bodyText: "Contenido del boletín para {{recipientName}}.",
     });
-    assert.equal(camp.emailTemplateRef, '401');
+    assert.equal(camp.emailTemplateRef, "401");
 
-    const dispatched = await services.campaignService.dispatchCampaign('ed5-newsletter-test');
+    const dispatched = await services.campaignService.dispatchCampaign("ed5-newsletter-test");
     assert.equal(dispatched.results.length, 2);
-    assert.ok(
-      dispatched.results.every((r) => r.driver === 'email-designer-5-dryrun')
-    );
+    assert.ok(dispatched.results.every((r) => r.driver === "email-designer-5-dryrun"));
   });
 
-  it('normalizes and dispatches to WhatsApp Groups (@g.us), WhatsApp Channels (@newsletter), and Telegram Groups', async () => {
-    assert.equal(isWhatsAppGroupOrChannelJid('120363025891234567@g.us'), true);
-    assert.equal(isWhatsAppGroupOrChannelJid('120363099999999999@newsletter'), true);
-    assert.equal(isWhatsAppGroupOrChannelJid('+573101234567'), false);
+  it("normalizes and dispatches to WhatsApp Groups (@g.us), WhatsApp Channels (@newsletter), and Telegram Groups", async () => {
+    assert.equal(isWhatsAppGroupOrChannelJid("120363025891234567@g.us"), true);
+    assert.equal(isWhatsAppGroupOrChannelJid("120363099999999999@newsletter"), true);
+    assert.equal(isWhatsAppGroupOrChannelJid("+573101234567"), false);
 
-    const groupTarget = normalizeWhatsAppTarget('120363025891234567@g.us', '57');
+    const groupTarget = normalizeWhatsAppTarget("120363025891234567@g.us", "57");
     assert.equal(groupTarget.isGroupOrChannel, true);
-    assert.equal(groupTarget.evolutionNumber, '120363025891234567@g.us');
-    assert.equal(groupTarget.chatId, '120363025891234567@g.us');
+    assert.equal(groupTarget.evolutionNumber, "120363025891234567@g.us");
+    assert.equal(groupTarget.chatId, "120363025891234567@g.us");
 
-    const phoneTarget = normalizeWhatsAppTarget('3101234567', '57');
+    const phoneTarget = normalizeWhatsAppTarget("3101234567", "57");
     assert.equal(phoneTarget.isGroupOrChannel, false);
-    assert.equal(phoneTarget.normalized, '+573101234567');
-    assert.equal(phoneTarget.evolutionNumber, '573101234567');
-    assert.equal(phoneTarget.chatId, '573101234567@c.us');
+    assert.equal(phoneTarget.normalized, "+573101234567");
+    assert.equal(phoneTarget.evolutionNumber, "573101234567");
+    assert.equal(phoneTarget.chatId, "573101234567@c.us");
 
-    assert.equal(maskRecipientIdentifier('120363025891234567@g.us'), '120363025891234567@g.us');
-    assert.equal(maskRecipientIdentifier('-1001234567890'), '-1001234567890');
+    assert.equal(maskRecipientIdentifier("120363025891234567@g.us"), "120363025891234567@g.us");
+    assert.equal(maskRecipientIdentifier("-1001234567890"), "-1001234567890");
 
     const { services } = createMockStrapi({
       ...DEFAULT_BROADCAST_SETTINGS,
       dryRun: true,
-      whatsappDriver: 'evolution',
-      whatsappDefaultRecipients: ['120363011111111111@g.us'],
+      whatsappDriver: "evolution",
+      whatsappDefaultRecipients: ["120363011111111111@g.us"],
       whatsappTopicGroupMap: {
-        urgent_janazah: ['120363022222222222@g.us', '120363099999999999@newsletter'],
+        urgent_janazah: ["120363022222222222@g.us", "120363099999999999@newsletter"],
       },
       telegramTopicChatMap: {
-        urgent_janazah: ['@MezquitaCentralBogota', '-1009876543210'],
+        urgent_janazah: ["@MezquitaCentralBogota", "-1009876543210"],
       },
     });
 
     await services.campaignService.createCampaign({
-      slug: 'janazah-group-broadcast',
-      title: 'Aviso Janazah en Grupos',
-      topic: 'urgent_janazah',
-      channels: ['telegram', 'whatsapp'],
-      whatsappGroupIds: ['120363033333333333@g.us'],
-      subject: 'Salat al-Janazah',
-      bodyText: 'Oración funeraria hoy después de Dhuhr.',
+      slug: "janazah-group-broadcast",
+      title: "Aviso Janazah en Grupos",
+      topic: "urgent_janazah",
+      channels: ["telegram", "whatsapp"],
+      whatsappGroupIds: ["120363033333333333@g.us"],
+      subject: "Salat al-Janazah",
+      bodyText: "Oración funeraria hoy después de Dhuhr.",
     });
 
-    const dispatched = await services.campaignService.dispatchCampaign('janazah-group-broadcast');
+    const dispatched = await services.campaignService.dispatchCampaign("janazah-group-broadcast");
     const tgRecipients = dispatched.results
-      .filter((r) => r.channel === 'telegram')
+      .filter((r) => r.channel === "telegram")
       .map((r) => r.recipientMasked);
     const waRecipients = dispatched.results
-      .filter((r) => r.channel === 'whatsapp')
+      .filter((r) => r.channel === "whatsapp")
       .map((r) => r.recipientMasked);
 
-    assert.deepEqual(tgRecipients, ['@MezquitaCentralBogota', '-1009876543210']);
+    assert.deepEqual(tgRecipients, ["@MezquitaCentralBogota", "-1009876543210"]);
     // 1 subscriber on urgent_janazah (+57***4567) + 1 default group + 2 topic groups/channels + 1 campaign group = 5
     assert.equal(waRecipients.length, 5);
-    assert.ok(waRecipients.includes('+57***4567'));
-    assert.ok(waRecipients.includes('120363011111111111@g.us'));
-    assert.ok(waRecipients.includes('120363022222222222@g.us'));
-    assert.ok(waRecipients.includes('120363099999999999@newsletter'));
-    assert.ok(waRecipients.includes('120363033333333333@g.us'));
+    assert.ok(waRecipients.includes("+57***4567"));
+    assert.ok(waRecipients.includes("120363011111111111@g.us"));
+    assert.ok(waRecipients.includes("120363022222222222@g.us"));
+    assert.ok(waRecipients.includes("120363099999999999@newsletter"));
+    assert.ok(waRecipients.includes("120363033333333333@g.us"));
   });
 });
-

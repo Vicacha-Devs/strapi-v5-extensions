@@ -1,7 +1,7 @@
-import settings from './settings';
-import transportService from './transportService';
-import campaignService from './campaignService';
-import automationService from './automationService';
+import automationService from "./automationService";
+import campaignService from "./campaignService";
+import settings from "./settings";
+import transportService from "./transportService";
 
 export default {
   settings,

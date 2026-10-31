@@ -1,4 +1,4 @@
-import broadcastController from './broadcastController';
+import broadcastController from "./broadcastController";
 
 export default {
   broadcastController,
