@@ -1,4 +1,3 @@
-import * as React from 'react';
 import {
   Badge,
   Button,
@@ -14,13 +13,12 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { CAMPAIGN_UID } from '../../../shared/constants';
-import type {
-  CampaignRecord,
-  EmailDesignerTemplateSummary,
-} from '../../../shared/types';
-import type { TranslateFn } from './DeliveryLedgerSection';
+} from "@strapi/design-system";
+import * as React from "react";
+
+import { CAMPAIGN_UID } from "../../../shared/constants";
+import type { CampaignRecord, EmailDesignerTemplateSummary } from "../../../shared/types";
+import type { TranslateFn } from "./DeliveryLedgerSection";
 
 export interface EmailTemplateFieldProps {
   t: TranslateFn;
@@ -35,34 +33,32 @@ export const EmailTemplateSelectorField: React.FC<EmailTemplateFieldProps> = ({
   value,
   onChange,
 }) => (
-  <Field.Root name="emailTemplateRef">
+  <Field.Root
+    name="emailTemplateRef"
+    hint={t(
+      "page.ui.email_designer_template_hint",
+      "Wraps email broadcasts in an Email Designer 5 layout (injects {{subject}}, {{bodyHtml}}, {{recipientName}}, {{secondaryDate}})."
+    )}
+  >
     <Field.Label>
-      {t(
-        'field.email_designer_html_template_optional',
-        'Email Designer HTML Template (optional)'
-      )}
+      {t("field.email_designer_html_template_optional", "Email Designer HTML Template (optional)")}
     </Field.Label>
     {emailTemplates.length > 0 ? (
       <SingleSelect
         placeholder={t(
-          'placeholder.none_use_inline_campaign_body',
-          'None (use inline campaign body)'
+          "placeholder.none_use_inline_campaign_body",
+          "None (use inline campaign body)"
         )}
-        value={value || '__none__'}
-        onChange={(val: string | number) =>
-          onChange(val === '__none__' ? '' : String(val))
-        }
+        value={value || "__none__"}
+        onChange={(val: string | number) => onChange(val === "__none__" ? "" : String(val))}
       >
         <SingleSelectOption value="__none__">
-          {t(
-            'page.ui.none_use_inline_campaign_html',
-            'None (use inline campaign HTML / text)'
-          )}
+          {t("page.ui.none_use_inline_campaign_html", "None (use inline campaign HTML / text)")}
         </SingleSelectOption>
         <SingleSelectOption value="broadcastNewsletter">
           {t(
-            'page.ui.broadcast_newsletter_auto_localized',
-            'broadcastNewsletter (Auto-localized es / en / ar / tr)'
+            "page.ui.broadcast_newsletter_auto_localized",
+            "broadcastNewsletter (Auto-localized es / en / ar / tr)"
           )}
         </SingleSelectOption>
         {emailTemplates.map((tpl) => (
@@ -78,21 +74,14 @@ export const EmailTemplateSelectorField: React.FC<EmailTemplateFieldProps> = ({
       <TextInput
         name="emailTemplateRef"
         placeholder={t(
-          'placeholder.optional_e_g_401_or_broadcastnewsletter',
-          'Optional: e.g. 401 or broadcastNewsletter'
+          "placeholder.optional_e_g_401_or_broadcastnewsletter",
+          "Optional: e.g. 401 or broadcastNewsletter"
         )}
         value={value}
-        onChange={(e: { target: { value: string } }) =>
-          onChange(e.target.value)
-        }
+        onChange={(e: { target: { value: string } }) => onChange(e.target.value)}
       />
     )}
-    <Field.Hint>
-      {t(
-        'page.ui.email_designer_template_hint',
-        'Wraps email broadcasts in an Email Designer 5 layout (injects {{subject}}, {{bodyHtml}}, {{recipientName}}, {{secondaryDate}}).'
-      )}
-    </Field.Hint>
+    <Field.Hint />
   </Field.Root>
 );
 
@@ -115,44 +104,33 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
     <Thead>
       <Tr>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.slug_title', 'Slug / Title')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.slug_title", "Slug / Title")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t('page.ui.topic', 'Topic')}</Typography>
+          <Typography variant="sigma">{t("page.ui.topic", "Topic")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.channels', 'Channels')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.channels", "Channels")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.status', 'Status')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.status", "Status")}</Typography>
         </Th>
         <Th>
           <Typography variant="sigma">
-            {t('page.ui.hijri_secondary_date', 'Hijri / Secondary Date')}
+            {t("page.ui.hijri_secondary_date", "Hijri / Secondary Date")}
           </Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.delivery_stats', 'Delivery Stats')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.delivery_stats", "Delivery Stats")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">
-            {t('page.ui.actions', 'Actions')}
-          </Typography>
+          <Typography variant="sigma">{t("page.ui.actions", "Actions")}</Typography>
         </Th>
       </Tr>
     </Thead>
     <Tbody>
       {campaigns.map((camp) => {
-        const sentTotal =
-          (camp.stats?.sentCount || 0) + (camp.stats?.simulatedCount || 0);
+        const sentTotal = (camp.stats?.sentCount || 0) + (camp.stats?.simulatedCount || 0);
         const failedTotal = camp.stats?.failedCount || 0;
 
         return (
@@ -166,8 +144,7 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
                   </Typography>
                   {camp.emailTemplateRef && (
                     <Badge>
-                      {t('page.ui.email_template_badge', 'Email Template:')}{' '}
-                      {camp.emailTemplateRef}
+                      {t("page.ui.email_template_badge", "Email Template:")} {camp.emailTemplateRef}
                     </Badge>
                   )}
                 </Flex>
@@ -177,28 +154,24 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
               <Badge>{camp.topic}</Badge>
             </Td>
             <Td>
-              <Typography>{(camp.channels || []).join(', ')}</Typography>
+              <Typography>{(camp.channels || []).join(", ")}</Typography>
             </Td>
             <Td>
               <Badge>{camp.status}</Badge>
             </Td>
             <Td>
-              <Typography>{camp.secondaryDateLabel || '-'}</Typography>
+              <Typography>{camp.secondaryDateLabel || "-"}</Typography>
             </Td>
             <Td>
               <Typography>
-                {t('page.ui.sent_label', 'Sent:')} {sentTotal} /{' '}
-                {t('page.ui.failed_label', 'Failed:')} {failedTotal}
+                {t("page.ui.sent_label", "Sent:")} {sentTotal} /{" "}
+                {t("page.ui.failed_label", "Failed:")} {failedTotal}
               </Typography>
             </Td>
             <Td>
               <Flex gap={2} wrap="wrap">
-                <Button
-                  variant="tertiary"
-                  size="S"
-                  onClick={() => onEdit(camp)}
-                >
-                  {t('common.edit', 'Edit')}
+                <Button variant="tertiary" size="S" onClick={() => onEdit(camp)}>
+                  {t("common.edit", "Edit")}
                 </Button>
                 {camp.documentId && (
                   <Button
@@ -210,7 +183,7 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
                       )
                     }
                   >
-                    {t('common.content_manager', 'Content Manager')}
+                    {t("common.content_manager", "Content Manager")}
                   </Button>
                 )}
                 <Button
@@ -218,7 +191,7 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
                   size="S"
                   onClick={() => onDispatch(camp.documentId || camp.slug)}
                 >
-                  {t('page.ui.dispatch_now', 'Dispatch Now')}
+                  {t("page.ui.dispatch_now", "Dispatch Now")}
                 </Button>
               </Flex>
             </Td>

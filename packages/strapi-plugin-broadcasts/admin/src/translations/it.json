@@ -301,5 +301,15 @@
   "settings.ui.topic_segments_used_to_target_confirmed_subscrib": "Topic segments used to target confirmed subscribers and Telegram forum threads.",
   "settings.ui.verified_sender_address_used_when_dispatching_em": "Verified sender address used when dispatching email newsletters and bulletins.",
   "settings.ui.whatsapp_badge_prefix": "WhatsApp:",
-  "settings.ui.whatsapp_default_recipients_hint": "WhatsApp Group JIDs (@g.us), Channel JIDs (@newsletter), or E.164 phone numbers that receive WhatsApp broadcasts alongside topic subscribers."
+  "settings.ui.whatsapp_default_recipients_hint": "WhatsApp Group JIDs (@g.us), Channel JIDs (@newsletter), or E.164 phone numbers that receive WhatsApp broadcasts alongside topic subscribers.",
+  "field.supported_locales": "Supported Locales",
+  "field.broadcast_topic_segments": "Broadcast Topic Segments",
+  "field.channels": "Channels",
+  "placeholder.select_supported_locales": "Select supported locales...",
+  "placeholder.select_broadcast_topic_segments": "Select broadcast topic segments...",
+  "placeholder.select_channels": "Select channels...",
+  "settings.tab.organization": "Organizzazione, Lingue ed Email",
+  "settings.tab.telegram": "Bot e Canale Telegram",
+  "settings.tab.whatsapp": "Trasporto WhatsApp",
+  "settings.tab.bridges": "Bridge e Modalità Sandbox"
 }

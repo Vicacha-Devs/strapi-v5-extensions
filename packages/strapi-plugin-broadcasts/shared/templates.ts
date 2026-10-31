@@ -1,12 +1,13 @@
-import { createHmac } from 'node:crypto';
-import type { CampaignRecord, CampaignTranslation } from './types';
+import { createHmac } from "node:crypto";
+
+import type { CampaignRecord, CampaignTranslation } from "./types";
 
 const HTML_ESCAPE_MAP: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
 };
 
 export function escapeHtml(raw: string): string {
@@ -18,12 +19,12 @@ export function interpolateBroadcastTemplate(
   variables: Record<string, string | number | undefined>,
   options: { escapeHtmlValues?: boolean } = {}
 ): string {
-  if (!template) return '';
+  if (!template) return "";
   const shouldEscape = Boolean(options.escapeHtmlValues);
   return template.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, key: string) => {
     const rawValue = variables[key];
     if (rawValue === undefined || rawValue === null) {
-      return '';
+      return "";
     }
     const strValue = String(rawValue);
     return shouldEscape ? escapeHtml(strValue) : strValue;
@@ -31,15 +32,17 @@ export function interpolateBroadcastTemplate(
 }
 
 export function maskEmail(email: string): string {
-  const trimmed = String(email || '').trim().toLowerCase();
-  const atIndex = trimmed.indexOf('@');
+  const trimmed = String(email || "")
+    .trim()
+    .toLowerCase();
+  const atIndex = trimmed.indexOf("@");
   if (atIndex <= 0) {
-    return '***@invalid';
+    return "***@invalid";
   }
   const local = trimmed.slice(0, atIndex);
   const domain = trimmed.slice(atIndex + 1);
   if (!domain) {
-    return '***@invalid';
+    return "***@invalid";
   }
   const visiblePrefix = local.slice(0, 1);
   return `${visiblePrefix}***@${domain}`;
@@ -48,9 +51,9 @@ export function maskEmail(email: string): string {
 export function maskPhone(phone: string): string {
   const normalized = normalizeE164Phone(phone);
   if (normalized.length <= 4) {
-    return '***';
+    return "***";
   }
-  const prefix = normalized.startsWith('+') ? normalized.slice(0, 3) : normalized.slice(0, 2);
+  const prefix = normalized.startsWith("+") ? normalized.slice(0, 3) : normalized.slice(0, 2);
   const suffix = normalized.slice(-4);
   return `${prefix}***${suffix}`;
 }
@@ -67,21 +70,23 @@ export interface NormalizedWhatsAppTarget {
 }
 
 export function isWhatsAppGroupOrChannelJid(raw: string): boolean {
-  const trimmed = String(raw || '').trim().toLowerCase();
+  const trimmed = String(raw || "")
+    .trim()
+    .toLowerCase();
   return /^[\d-]+@g\.us$/.test(trimmed) || /^[\d-]+@newsletter$/.test(trimmed);
 }
 
 export function normalizeWhatsAppTarget(
   raw: string,
-  defaultCountryCode = '57'
+  defaultCountryCode = "57"
 ): NormalizedWhatsAppTarget {
-  const trimmed = String(raw || '').trim();
+  const trimmed = String(raw || "").trim();
   if (!trimmed) {
     return {
-      normalized: '',
+      normalized: "",
       isGroupOrChannel: false,
-      chatId: '',
-      evolutionNumber: '',
+      chatId: "",
+      evolutionNumber: "",
     };
   }
 
@@ -95,63 +100,63 @@ export function normalizeWhatsAppTarget(
     };
   }
 
-  if (lower.endsWith('@c.us') || lower.endsWith('@s.whatsapp.net')) {
-    const userPart = lower.split('@')[0];
+  if (lower.endsWith("@c.us") || lower.endsWith("@s.whatsapp.net")) {
+    const userPart = lower.split("@")[0];
     const e164 = normalizeE164Phone(userPart, defaultCountryCode);
-    const digits = e164.replace(/^\+/, '');
+    const digits = e164.replace(/^\+/, "");
     return {
       normalized: e164,
       isGroupOrChannel: false,
-      chatId: digits ? `${digits}@c.us` : '',
+      chatId: digits ? `${digits}@c.us` : "",
       evolutionNumber: digits,
     };
   }
 
   const e164 = normalizeE164Phone(trimmed, defaultCountryCode);
-  const digits = e164.replace(/^\+/, '');
+  const digits = e164.replace(/^\+/, "");
   return {
     normalized: e164,
     isGroupOrChannel: false,
-    chatId: digits ? `${digits}@c.us` : '',
+    chatId: digits ? `${digits}@c.us` : "",
     evolutionNumber: digits,
   };
 }
 
 export function maskRecipientIdentifier(identifier: string): string {
-  const trimmed = String(identifier || '').trim();
-  if (!trimmed) return '***';
+  const trimmed = String(identifier || "").trim();
+  if (!trimmed) return "***";
   const lower = trimmed.toLowerCase();
   if (isWhatsAppGroupOrChannelJid(lower)) {
     // WhatsApp Group (@g.us) & Channel (@newsletter) JIDs are non-PII group/channel identifiers
     return lower;
   }
-  if (trimmed.includes('@') && !trimmed.startsWith('@')) {
+  if (trimmed.includes("@") && !trimmed.startsWith("@")) {
     return maskEmail(trimmed);
   }
-  if (trimmed.startsWith('@') || /^-\d+$/.test(trimmed)) {
+  if (trimmed.startsWith("@") || /^-\d+$/.test(trimmed)) {
     // Public/group Telegram channel and group/supergroup IDs (@handle or -100... / -...) are non-PII channel identifiers
     return trimmed;
   }
   return maskPhone(trimmed);
 }
 
-export function normalizeE164Phone(phone: string, defaultCountryCode = '57'): string {
-  const raw = String(phone || '').trim();
-  if (!raw) return '';
+export function normalizeE164Phone(phone: string, defaultCountryCode = "57"): string {
+  const raw = String(phone || "").trim();
+  if (!raw) return "";
   if (isWhatsAppGroupOrChannelJid(raw)) {
     return raw.toLowerCase();
   }
-  const hasPlus = raw.startsWith('+');
-  const digitsOnly = raw.replace(/\D+/g, '');
-  if (!digitsOnly) return '';
+  const hasPlus = raw.startsWith("+");
+  const digitsOnly = raw.replace(/\D+/g, "");
+  if (!digitsOnly) return "";
   if (hasPlus) {
     return `+${digitsOnly}`;
   }
-  if (digitsOnly.startsWith('00') && digitsOnly.length > 4) {
+  if (digitsOnly.startsWith("00") && digitsOnly.length > 4) {
     return `+${digitsOnly.slice(2)}`;
   }
   if (digitsOnly.length === 10 && defaultCountryCode) {
-    return `+${defaultCountryCode.replace(/\D+/g, '')}${digitsOnly}`;
+    return `+${defaultCountryCode.replace(/\D+/g, "")}${digitsOnly}`;
   }
   return `+${digitsOnly}`;
 }
@@ -161,10 +166,12 @@ export function computeIdempotencyKey(
   channel: string,
   recipient: string
 ): string {
-  const normalizedRecipient = String(recipient || '').trim().toLowerCase();
-  const digest = createHmac('sha256', 'vicacha-broadcasts-idempotency-v1')
-    .update(`${campaignSlug}:${channel}:${normalizedRecipient}`, 'utf8')
-    .digest('hex')
+  const normalizedRecipient = String(recipient || "")
+    .trim()
+    .toLowerCase();
+  const digest = createHmac("sha256", "vicacha-broadcasts-idempotency-v1")
+    .update(`${campaignSlug}:${channel}:${normalizedRecipient}`, "utf8")
+    .digest("hex")
     .slice(0, 24);
   return `${campaignSlug}:${channel}:${digest}`;
 }
@@ -172,10 +179,10 @@ export function computeIdempotencyKey(
 export function resolveLocalizedCampaignCopy(
   campaign: Pick<
     CampaignRecord,
-    'subject' | 'bodyText' | 'bodyHtml' | 'ctaLabel' | 'ctaUrl' | 'translations'
+    "subject" | "bodyText" | "bodyHtml" | "ctaLabel" | "ctaUrl" | "translations"
   >,
   locale: string,
-  defaultLocale = 'es'
+  defaultLocale = "es"
 ): CampaignTranslation {
   const translations = campaign.translations || {};
   const match = translations[locale] || translations[defaultLocale];

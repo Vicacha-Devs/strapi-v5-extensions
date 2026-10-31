@@ -1,8 +1,8 @@
-import type { Core } from '@strapi/strapi';
-import type { EmailDesignerTemplateSummary } from '../../../shared';
+import type { Core } from "@strapi/strapi";
 
-export const EMAIL_DESIGNER_TEMPLATE_UID =
-  'plugin::email-designer-5.email-designer-template';
+import type { EmailDesignerTemplateSummary } from "../../../shared";
+
+export const EMAIL_DESIGNER_TEMPLATE_UID = "plugin::email-designer-5.email-designer-template";
 
 export interface EmailDesignerTemplateRow {
   id?: number;
@@ -16,7 +16,7 @@ export interface EmailDesignerTemplateRow {
   updatedAt?: string;
 }
 
-const KNOWN_LOCALES = ['es', 'en', 'ar', 'tr', 'fr', 'pt', 'de', 'it'];
+const KNOWN_LOCALES = ["es", "en", "ar", "tr", "fr", "pt", "de", "it"];
 
 function getNormalizedTags(row: EmailDesignerTemplateRow): string[] {
   if (!Array.isArray(row.tags)) return [];
@@ -31,9 +31,7 @@ export async function fetchRawEmailDesignerTemplates(
       strapi as unknown as {
         db?: {
           query?: (uid: string) => {
-            findMany?: (
-              params?: Record<string, unknown>
-            ) => Promise<EmailDesignerTemplateRow[]>;
+            findMany?: (params?: Record<string, unknown>) => Promise<EmailDesignerTemplateRow[]>;
           };
         };
       }
@@ -41,7 +39,7 @@ export async function fetchRawEmailDesignerTemplates(
 
     if (dbQuery?.findMany) {
       const rows = await dbQuery.findMany({
-        orderBy: { templateReferenceId: 'asc' },
+        orderBy: { templateReferenceId: "asc" },
         limit: 200,
       });
       if (Array.isArray(rows)) return rows;
@@ -52,9 +50,7 @@ export async function fetchRawEmailDesignerTemplates(
 
   try {
     const docs = (await strapi
-      .documents(
-        EMAIL_DESIGNER_TEMPLATE_UID as Parameters<typeof strapi.documents>[0]
-      )
+      .documents(EMAIL_DESIGNER_TEMPLATE_UID as Parameters<typeof strapi.documents>[0])
       .findMany({ limit: 200 })) as unknown as EmailDesignerTemplateRow[];
     if (Array.isArray(docs)) return docs;
   } catch {
@@ -64,19 +60,17 @@ export async function fetchRawEmailDesignerTemplates(
   return [];
 }
 
-function toTemplateSummary(
-  row: EmailDesignerTemplateRow
-): EmailDesignerTemplateSummary | null {
+function toTemplateSummary(row: EmailDesignerTemplateRow): EmailDesignerTemplateSummary | null {
   const refId = Number(row.templateReferenceId ?? row.id ?? 0);
-  const name = String(row.name || '').trim();
+  const name = String(row.name || "").trim();
   if (!refId && !name) return null;
 
   return {
     templateReferenceId: refId,
     name: name || `Template #${refId}`,
-    subject: typeof row.subject === 'string' ? row.subject : undefined,
+    subject: typeof row.subject === "string" ? row.subject : undefined,
     tags: Array.isArray(row.tags) ? row.tags.map((t) => String(t)) : undefined,
-    updatedAt: typeof row.updatedAt === 'string' ? row.updatedAt : undefined,
+    updatedAt: typeof row.updatedAt === "string" ? row.updatedAt : undefined,
   };
 }
 
@@ -106,12 +100,10 @@ function findDirectLocalizedTemplate(
 ): EmailDesignerTemplateRow | undefined {
   const lowerRef = trimmedRef.toLowerCase();
   const expectedName = `${lowerRef}_${normLocale}`;
-  const normalizedGroupTag = trimmedRef
-    .replace(/([a-z])([A-Z])/g, '$1-$2')
-    .toLowerCase();
+  const normalizedGroupTag = trimmedRef.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 
   return rows.find((r) => {
-    const rowName = String(r.name || '').toLowerCase();
+    const rowName = String(r.name || "").toLowerCase();
     if (rowName === expectedName) return true;
     const rowTags = getNormalizedTags(r);
     return (
@@ -126,15 +118,13 @@ function findSiblingBySuffix(
   primary: EmailDesignerTemplateRow,
   normLocale: string
 ): EmailDesignerTemplateRow | undefined {
-  if (typeof primary.name !== 'string') return undefined;
+  if (typeof primary.name !== "string") return undefined;
   const suffixMatch = primary.name.match(/^(.+)_([a-z]{2,3})$/i);
   if (!suffixMatch || suffixMatch[2].toLowerCase() === normLocale) {
     return undefined;
   }
   const targetSiblingName = `${suffixMatch[1]}_${normLocale}`.toLowerCase();
-  return rows.find(
-    (r) => String(r.name || '').toLowerCase() === targetSiblingName
-  );
+  return rows.find((r) => String(r.name || "").toLowerCase() === targetSiblingName);
 }
 
 function findSiblingByCategoryTags(
@@ -146,16 +136,13 @@ function findSiblingByCategoryTags(
   if (primaryTags.includes(normLocale)) return undefined;
 
   const categoryTags = primaryTags.filter(
-    (t) => !KNOWN_LOCALES.includes(t) && t !== 'visitor' && t !== 'community'
+    (t) => !KNOWN_LOCALES.includes(t) && t !== "visitor" && t !== "community"
   );
   if (categoryTags.length === 0) return undefined;
 
   return rows.find((r) => {
     const rTags = getNormalizedTags(r);
-    return (
-      rTags.includes(normLocale) &&
-      categoryTags.some((cat) => rTags.includes(cat))
-    );
+    return rTags.includes(normLocale) && categoryTags.some((cat) => rTags.includes(cat));
   });
 }
 
@@ -168,7 +155,7 @@ function findPrimaryTemplate(
   return rows.find(
     (r) =>
       (numericRef !== null && Number(r.templateReferenceId) === numericRef) ||
-      String(r.name || '').toLowerCase() === lowerTrimmed
+      String(r.name || "").toLowerCase() === lowerTrimmed
   );
 }
 
@@ -189,7 +176,7 @@ export async function resolveEmailDesignerTemplateFromDb(
   templateRef: string,
   locale?: string
 ): Promise<EmailDesignerTemplateRow | null> {
-  const trimmed = String(templateRef || '').trim();
+  const trimmed = String(templateRef || "").trim();
   if (!trimmed) return null;
 
   const rows = await fetchRawEmailDesignerTemplates(strapi);
@@ -197,11 +184,7 @@ export async function resolveEmailDesignerTemplateFromDb(
 
   const normLocale = locale ? locale.toLowerCase() : undefined;
   if (normLocale) {
-    const localizedDirect = findDirectLocalizedTemplate(
-      rows,
-      trimmed,
-      normLocale
-    );
+    const localizedDirect = findDirectLocalizedTemplate(rows, trimmed, normLocale);
     if (localizedDirect) return localizedDirect;
   }
 
@@ -223,14 +206,14 @@ async function trySendViaPluginService(
 ): Promise<string | null> {
   if (!numericTemplateId) return null;
   try {
-    const emailDesignerPlugin = strapi.plugin('email-designer-5');
+    const emailDesignerPlugin = strapi.plugin("email-designer-5");
     const emailDesignerService = emailDesignerPlugin?.service<{
       sendTemplatedEmail?: (
         emailOptions: Record<string, unknown>,
         emailTemplate: Record<string, unknown>,
         data: Record<string, unknown>
       ) => Promise<unknown>;
-    }>('email');
+    }>("email");
 
     if (emailDesignerService?.sendTemplatedEmail) {
       await emailDesignerService.sendTemplatedEmail(
@@ -265,10 +248,7 @@ export async function trySendEmailViaDesigner5(params: {
   text: string;
   headers: Record<string, string>;
   templateVars: Record<string, string | number | undefined>;
-  interpolate: (
-    tpl: string,
-    vars: Record<string, string | number | undefined>
-  ) => string;
+  interpolate: (tpl: string, vars: Record<string, string | number | undefined>) => string;
 }): Promise<string | null> {
   const {
     strapi,
@@ -305,9 +285,9 @@ export async function trySendEmailViaDesigner5(params: {
   );
   if (pluginSentId) return pluginSentId;
 
-  const emailService = strapi.plugin('email')?.service<{
+  const emailService = strapi.plugin("email")?.service<{
     send?: (opts: Record<string, unknown>) => Promise<unknown>;
-  }>('email');
+  }>("email");
 
   if (!resolvedTemplate?.bodyHtml || !emailService?.send) {
     return null;
@@ -325,7 +305,7 @@ export async function trySendEmailViaDesigner5(params: {
     subject ||
     (resolvedTemplate.subject
       ? interpolate(resolvedTemplate.subject, { ...templateVars, subject })
-      : '');
+      : "");
 
   await emailService.send({
     to: recipientEmail,

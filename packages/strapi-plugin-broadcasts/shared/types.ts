@@ -1,23 +1,14 @@
-import type {
-  CalendarSystemId,
-  SecondaryDateDisplay,
-} from './calendarSystems';
+import type { CalendarSystemId, SecondaryDateDisplay } from "./calendarSystems";
 
-export type BroadcastChannel = 'email' | 'telegram' | 'whatsapp';
+export type BroadcastChannel = "email" | "telegram" | "whatsapp";
 
-export type WhatsAppDriver = 'meta-cloud' | 'openwa' | 'evolution';
+export type WhatsAppDriver = "meta-cloud" | "openwa" | "evolution";
 
-export type CampaignStatus =
-  | 'draft'
-  | 'scheduled'
-  | 'sending'
-  | 'sent'
-  | 'failed'
-  | 'cancelled';
+export type CampaignStatus = "draft" | "scheduled" | "sending" | "sent" | "failed" | "cancelled";
 
-export type DeliveryStatus = 'sent' | 'simulated' | 'skipped_duplicate' | 'failed';
+export type DeliveryStatus = "sent" | "simulated" | "skipped_duplicate" | "failed";
 
-export type BroadcastPriority = 'low' | 'normal' | 'high' | 'urgent';
+export type BroadcastPriority = "low" | "normal" | "high" | "urgent";
 
 export interface CampaignTranslation {
   subject: string;

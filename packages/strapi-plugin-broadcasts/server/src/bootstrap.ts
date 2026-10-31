@@ -1,31 +1,29 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID, type BroadcastSettings } from '../../shared';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID, type BroadcastSettings } from "../../shared";
 
 const MONITORED_EVENTS = [
-  'inbox.alert.published',
-  'inbox.subscriber.confirmed',
-  'event.published',
-  'media-feeds.episode.synced',
+  "inbox.alert.published",
+  "inbox.subscriber.confirmed",
+  "event.published",
+  "media-feeds.episode.synced",
 ] as const;
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   const settingsService = strapi.plugin(PLUGIN_ID).service<{
     getSettings(): Promise<BroadcastSettings>;
-  }>('settings');
+  }>("settings");
   await settingsService.getSettings();
 
   const campaignService = strapi.plugin(PLUGIN_ID).service<{
     seedStarterCampaigns(): Promise<number>;
-  }>('campaignService');
+  }>("campaignService");
   await campaignService.seedStarterCampaigns();
 
   const automationService = strapi.plugin(PLUGIN_ID).service<{
     seedStarterRules(): Promise<number>;
-    handleEventTrigger(
-      eventName: string,
-      payload?: Record<string, unknown>
-    ): Promise<unknown>;
-  }>('automationService');
+    handleEventTrigger(eventName: string, payload?: Record<string, unknown>): Promise<unknown>;
+  }>("automationService");
   await automationService.seedStarterRules();
 
   if (strapi.eventHub?.on) {
@@ -48,27 +46,27 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.admin?.services?.permission?.actionProvider?.registerMany) {
     await strapi.admin.services.permission.actionProvider.registerMany([
       {
-        section: 'plugins',
-        displayName: 'Manage Broadcast Campaigns',
-        uid: 'campaigns.manage',
+        section: "plugins",
+        displayName: "Manage Broadcast Campaigns",
+        uid: "campaigns.manage",
         pluginName: PLUGIN_ID,
       },
       {
-        section: 'plugins',
-        displayName: 'Send & Dispatch Broadcasts',
-        uid: 'campaigns.send',
+        section: "plugins",
+        displayName: "Send & Dispatch Broadcasts",
+        uid: "campaigns.send",
         pluginName: PLUGIN_ID,
       },
       {
-        section: 'plugins',
-        displayName: 'Manage EventHub Automation Rules',
-        uid: 'automations.manage',
+        section: "plugins",
+        displayName: "Manage EventHub Automation Rules",
+        uid: "automations.manage",
         pluginName: PLUGIN_ID,
       },
       {
-        section: 'plugins',
-        displayName: 'Manage Broadcast Transport Settings',
-        uid: 'settings.manage',
+        section: "plugins",
+        displayName: "Manage Broadcast Transport Settings",
+        uid: "settings.manage",
         pluginName: PLUGIN_ID,
       },
     ]);
