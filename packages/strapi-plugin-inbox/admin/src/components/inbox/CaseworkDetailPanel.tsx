@@ -1,5 +1,3 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
 import {
   Badge,
   Box,
@@ -13,7 +11,10 @@ import {
   Textarea,
   TextInput,
   Typography,
-} from '@strapi/design-system';
+} from "@strapi/design-system";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
 import {
   PLUGIN_ID,
   SUBMISSION_PRIORITIES,
@@ -23,11 +24,11 @@ import {
   type SubmissionPriority,
   type SubmissionRecord,
   type SubmissionStatus,
-} from '../../../../shared';
+} from "../../../../shared";
 import {
   CaseworkPayloadChecklistColumn,
   formatFieldKeyLabel,
-} from './CaseworkPayloadChecklistColumn';
+} from "./CaseworkPayloadChecklistColumn";
 
 export { formatFieldKeyLabel };
 
@@ -48,15 +49,11 @@ interface CaseworkHeaderBarProps {
   onClose: () => void;
 }
 
-const CaseworkHeaderBar: React.FC<CaseworkHeaderBarProps> = ({
-  t,
-  submission,
-  onClose,
-}) => (
+const CaseworkHeaderBar: React.FC<CaseworkHeaderBarProps> = ({ t, submission, onClose }) => (
   <Flex justifyContent="space-between" alignItems="center" paddingBottom={3} wrap="wrap" gap={2}>
     <Flex gap={3} alignItems="center" wrap="wrap">
       <Typography variant="delta" fontWeight="bold">
-        {t('page.ui.casework_inspector', 'Casework Inspector')}: {submission.referenceCode}
+        {t("page.ui.casework_inspector", "Casework Inspector")}: {submission.referenceCode}
       </Typography>
       <Badge>{submission.formSlug}</Badge>
       {submission.secondaryDate?.formatted ? (
@@ -64,17 +61,17 @@ const CaseworkHeaderBar: React.FC<CaseworkHeaderBarProps> = ({
       ) : null}
       {submission.linkedBookingId ? (
         <Badge active>
-          {t('page.ui.booking_badge', 'Booking')}: {submission.linkedBookingId}
+          {t("page.ui.booking_badge", "Booking")}: {submission.linkedBookingId}
         </Badge>
       ) : null}
       {submission.linkedCertificateNumber ? (
         <Badge active>
-          {t('page.ui.cert_badge', 'Cert')}: {submission.linkedCertificateNumber}
+          {t("page.ui.cert_badge", "Cert")}: {submission.linkedCertificateNumber}
         </Badge>
       ) : null}
     </Flex>
     <Button variant="tertiary" size="S" onClick={onClose}>
-      {t('page.ui.close_inspector', 'Close Inspector')}
+      {t("page.ui.close_inspector", "Close Inspector")}
     </Button>
   </Flex>
 );
@@ -115,14 +112,14 @@ const CaseworkQuickBridges: React.FC<CaseworkQuickBridgesProps> = ({
   onIssueCert,
 }) => (
   <Flex gap={3} paddingTop={3} wrap="wrap" alignItems="stretch">
-    <Box background="neutral100" padding={3} hasRadius style={{ flex: '1 1 180px' }}>
+    <Box background="neutral100" padding={3} hasRadius style={{ flex: "1 1 180px" }}>
       <Typography variant="sigma">
-        {t('page.ui.schedule_appointment', 'Schedule Appointment')}
+        {t("page.ui.schedule_appointment", "Schedule Appointment")}
       </Typography>
       <Flex direction="column" alignItems="stretch" gap={2} paddingTop={2}>
         <TextInput
           name="bookingServiceSlug"
-          placeholder={t('placeholder.service_slug', 'Service slug')}
+          placeholder={t("placeholder.service_slug", "Service slug")}
           value={bookingServiceSlug}
           onChange={(e: { target: { value: string } }) =>
             onBookingServiceSlugChange(e.target.value)
@@ -133,54 +130,44 @@ const CaseworkQuickBridges: React.FC<CaseworkQuickBridgesProps> = ({
             name="bookingDate"
             type="date"
             value={bookingDate}
-            onChange={(e: { target: { value: string } }) =>
-              onBookingDateChange(e.target.value)
-            }
+            onChange={(e: { target: { value: string } }) => onBookingDateChange(e.target.value)}
           />
           <TextInput
             name="bookingTime"
             placeholder="10:00"
             value={bookingTime}
-            onChange={(e: { target: { value: string } }) =>
-              onBookingTimeChange(e.target.value)
-            }
+            onChange={(e: { target: { value: string } }) => onBookingTimeChange(e.target.value)}
           />
         </Flex>
         <Button size="S" variant="secondary" onClick={onBookSlot}>
-          {t('page.ui.book_slot', 'Book Slot')}
+          {t("page.ui.book_slot", "Book Slot")}
         </Button>
       </Flex>
     </Box>
 
-    <Box background="neutral100" padding={3} hasRadius style={{ flex: '1 1 180px' }}>
-      <Typography variant="sigma">
-        {t('page.ui.issue_certificate', 'Issue Certificate')}
-      </Typography>
+    <Box background="neutral100" padding={3} hasRadius style={{ flex: "1 1 180px" }}>
+      <Typography variant="sigma">{t("page.ui.issue_certificate", "Issue Certificate")}</Typography>
       <Flex direction="column" alignItems="stretch" gap={2} paddingTop={2}>
         <TextInput
           name="certTemplateSlug"
-          placeholder={t('placeholder.template_slug', 'Template slug')}
+          placeholder={t("placeholder.template_slug", "Template slug")}
           value={certTemplateSlug}
-          onChange={(e: { target: { value: string } }) =>
-            onCertTemplateSlugChange(e.target.value)
-          }
+          onChange={(e: { target: { value: string } }) => onCertTemplateSlugChange(e.target.value)}
         />
         <TextInput
           name="certRecipient"
-          placeholder={t('placeholder.recipient_full_name', 'Recipient full name')}
+          placeholder={t("placeholder.recipient_full_name", "Recipient full name")}
           value={certRecipient}
-          onChange={(e: { target: { value: string } }) =>
-            onCertRecipientChange(e.target.value)
-          }
+          onChange={(e: { target: { value: string } }) => onCertRecipientChange(e.target.value)}
         />
         <Checkbox
           checked={requireVerifiedChecklist}
           onCheckedChange={(c: boolean) => onRequireVerifiedChecklistChange(Boolean(c))}
         >
-          {t('page.ui.require_verified_checklist', 'Require verified checklist')}
+          {t("page.ui.require_verified_checklist", "Require verified checklist")}
         </Checkbox>
         <Button size="S" variant="secondary" onClick={onIssueCert}>
-          {t('page.ui.issue_cert', 'Issue Cert')}
+          {t("page.ui.issue_cert", "Issue Cert")}
         </Button>
       </Flex>
     </Box>
@@ -198,42 +185,39 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
   onClose,
 }) => {
   const { locale } = useIntl();
-  const shortLocale = (locale || 'es').split('-')[0].toLowerCase();
+  const shortLocale = (locale || "es").split("-")[0].toLowerCase();
 
   const [status, setStatus] = React.useState<SubmissionStatus>(submission.status);
   const [priority, setPriority] = React.useState<SubmissionPriority>(submission.priority);
-  const [department, setDepartment] = React.useState<string>(submission.department || 'general');
-  const [assignedTo, setAssignedTo] = React.useState<string>(submission.assignedTo || '');
-  const [staffNotes, setStaffNotes] = React.useState<string>(submission.staffNotes || '');
+  const [department, setDepartment] = React.useState<string>(submission.department || "general");
+  const [assignedTo, setAssignedTo] = React.useState<string>(submission.assignedTo || "");
+  const [staffNotes, setStaffNotes] = React.useState<string>(submission.staffNotes || "");
   const [checklist, setChecklist] = React.useState<ChecklistItem[]>(
     submission.checklistItems || []
   );
 
   const [bookingServiceSlug, setBookingServiceSlug] = React.useState<string>(
-    form?.settings?.defaultBookingServiceSlug || 'general-appointment'
+    form?.settings?.defaultBookingServiceSlug || "general-appointment"
   );
   const [bookingDate, setBookingDate] = React.useState<string>(
     new Date().toISOString().slice(0, 10)
   );
-  const [bookingTime, setBookingTime] = React.useState<string>('10:00');
+  const [bookingTime, setBookingTime] = React.useState<string>("10:00");
 
   const [certTemplateSlug, setCertTemplateSlug] = React.useState<string>(
-    form?.settings?.defaultCertificateTemplateId || 'official-service-certificate'
+    form?.settings?.defaultCertificateTemplateId || "official-service-certificate"
   );
-  const [certRecipient, setCertRecipient] = React.useState<string>(
-    submission.applicantName || ''
-  );
-  const [requireVerifiedChecklist, setRequireVerifiedChecklist] =
-    React.useState<boolean>(true);
+  const [certRecipient, setCertRecipient] = React.useState<string>(submission.applicantName || "");
+  const [requireVerifiedChecklist, setRequireVerifiedChecklist] = React.useState<boolean>(true);
 
   React.useEffect(() => {
     setStatus(submission.status);
     setPriority(submission.priority);
-    setDepartment(submission.department || 'general');
-    setAssignedTo(submission.assignedTo || '');
-    setStaffNotes(submission.staffNotes || '');
+    setDepartment(submission.department || "general");
+    setAssignedTo(submission.assignedTo || "");
+    setStaffNotes(submission.staffNotes || "");
     setChecklist(submission.checklistItems || []);
-    setCertRecipient(submission.applicantName || '');
+    setCertRecipient(submission.applicantName || "");
   }, [submission]);
 
   const handleToggleChecklistItem = async (itemId: string, verified: boolean) => {
@@ -252,7 +236,7 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
       checklistItems: nextChecklist,
     });
     onStatusMessage(
-      `${t('page.ui.checklist_updated', 'Checklist updated')}: ${submission.referenceCode}`
+      `${t("page.ui.checklist_updated", "Checklist updated")}: ${submission.referenceCode}`
     );
     await onReload();
   };
@@ -268,7 +252,7 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
       checklistItems: checklist,
     });
     onStatusMessage(
-      `${t('page.ui.casework_saved', 'Saved casework updates')}: ${submission.referenceCode}`
+      `${t("page.ui.casework_saved", "Saved casework updates")}: ${submission.referenceCode}`
     );
     await onReload();
   };
@@ -282,7 +266,7 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
       notes: staffNotes || `Casework Ref: ${submission.referenceCode}`,
     });
     onStatusMessage(
-      `${t('page.ui.appointment_scheduled', 'Appointment scheduled')} (${bookingDate} ${bookingTime})`
+      `${t("page.ui.appointment_scheduled", "Appointment scheduled")} (${bookingDate} ${bookingTime})`
     );
     await onReload();
   };
@@ -296,13 +280,13 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
         requireChecklistVerified: requireVerifiedChecklist,
       });
       onStatusMessage(
-        `${t('page.ui.certificate_issued', 'Certificate issued')}: ${submission.referenceCode}`
+        `${t("page.ui.certificate_issued", "Certificate issued")}: ${submission.referenceCode}`
       );
       await onReload();
     } catch (err) {
       const fallbackError = t(
-        'page.ui.verify_checklist_error',
-        'Cannot issue certificate: verify required checklist items first'
+        "page.ui.verify_checklist_error",
+        "Cannot issue certificate: verify required checklist items first"
       );
       onStatusMessage(err instanceof Error ? err.message : fallbackError);
     }
@@ -311,13 +295,7 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
   const dataEntries = Object.entries(submission.data || {});
 
   return (
-    <Box
-      background="neutral0"
-      padding={5}
-      shadow="filterShadow"
-      hasRadius
-      marginBottom={5}
-    >
+    <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius marginBottom={5}>
       <CaseworkHeaderBar t={t} submission={submission} onClose={onClose} />
 
       <Divider />
@@ -332,11 +310,11 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
           onToggleChecklistItem={handleToggleChecklistItem}
         />
 
-        <Box style={{ flex: '1 1 400px' }}>
+        <Box style={{ flex: "1 1 400px" }}>
           <Flex gap={3} wrap="wrap">
-            <Box style={{ flex: '1 1 130px' }}>
+            <Box style={{ flex: "1 1 130px" }}>
               <Field.Root>
-                <Field.Label>{t('page.ui.status', 'Status')}</Field.Label>
+                <Field.Label>{t("page.ui.status", "Status")}</Field.Label>
                 <SingleSelect
                   value={status}
                   onChange={(v: string | number) => setStatus(v as SubmissionStatus)}
@@ -349,9 +327,9 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
                 </SingleSelect>
               </Field.Root>
             </Box>
-            <Box style={{ flex: '1 1 130px' }}>
+            <Box style={{ flex: "1 1 130px" }}>
               <Field.Root>
-                <Field.Label>{t('page.ui.priority', 'Priority')}</Field.Label>
+                <Field.Label>{t("page.ui.priority", "Priority")}</Field.Label>
                 <SingleSelect
                   value={priority}
                   onChange={(v: string | number) => setPriority(v as SubmissionPriority)}
@@ -364,12 +342,12 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
                 </SingleSelect>
               </Field.Root>
             </Box>
-            <Box style={{ flex: '1 1 150px' }}>
+            <Box style={{ flex: "1 1 150px" }}>
               <Field.Root>
-                <Field.Label>{t('page.ui.assignee', 'Assignee')}</Field.Label>
+                <Field.Label>{t("page.ui.assignee", "Assignee")}</Field.Label>
                 <TextInput
                   name="assignedTo"
-                  placeholder={t('placeholder.assignee_example', 'e.g. Sheikh Ahmad')}
+                  placeholder={t("placeholder.assignee_example", "e.g. Sheikh Ahmad")}
                   value={assignedTo}
                   onChange={(e: { target: { value: string } }) => setAssignedTo(e.target.value)}
                 />
@@ -379,7 +357,7 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
 
           <Box paddingTop={3} paddingBottom={3}>
             <Field.Root>
-              <Field.Label>{t('page.ui.internal_staff_notes', 'Internal Staff Notes')}</Field.Label>
+              <Field.Label>{t("page.ui.internal_staff_notes", "Internal Staff Notes")}</Field.Label>
               <Textarea
                 name="staffNotes"
                 value={staffNotes}
@@ -388,7 +366,7 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
             </Field.Root>
             <Flex justifyContent="flex-end" paddingTop={2}>
               <Button size="S" onClick={handleSaveCasework}>
-                {t('page.ui.save_casework_notes', 'Save Casework & Notes')}
+                {t("page.ui.save_casework_notes", "Save Casework & Notes")}
               </Button>
             </Flex>
           </Box>

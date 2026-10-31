@@ -1,34 +1,34 @@
-import type { CalendarSystemId } from './calendarSystems';
+import type { CalendarSystemId } from "./calendarSystems";
 
 export type FormFieldType =
-  | 'text'
-  | 'email'
-  | 'number'
-  | 'phone'
-  | 'url'
-  | 'password'
-  | 'date'
-  | 'time'
-  | 'textarea'
-  | 'select'
-  | 'radio'
-  | 'checkbox'
-  | 'checkbox-group'
-  | 'file'
-  | 'hidden'
-  | 'heading'
-  | 'paragraph'
-  | 'divider';
+  | "text"
+  | "email"
+  | "number"
+  | "phone"
+  | "url"
+  | "password"
+  | "date"
+  | "time"
+  | "textarea"
+  | "select"
+  | "radio"
+  | "checkbox"
+  | "checkbox-group"
+  | "file"
+  | "hidden"
+  | "heading"
+  | "paragraph"
+  | "divider";
 
 export type ValidationRuleType =
-  | 'required'
-  | 'minLength'
-  | 'maxLength'
-  | 'min'
-  | 'max'
-  | 'pattern'
-  | 'email'
-  | 'url';
+  | "required"
+  | "minLength"
+  | "maxLength"
+  | "min"
+  | "max"
+  | "pattern"
+  | "email"
+  | "url";
 
 export interface ValidationRule {
   type: ValidationRuleType;
@@ -52,7 +52,7 @@ export interface FormField {
   helpText?: string;
   defaultValue?: unknown;
   required: boolean;
-  width?: 'full' | 'half' | 'third';
+  width?: "full" | "half" | "third";
   options?: FormFieldOption[];
   validation?: ValidationRule[];
   localizedLabels?: Record<string, string>;
@@ -70,26 +70,26 @@ export interface ChecklistItem {
   localizedLabels?: Record<string, string>;
 }
 
-export type CaptchaProvider = 'none' | 'turnstile' | 'recaptcha';
+export type CaptchaProvider = "none" | "turnstile" | "recaptcha";
 
 export type FormCategory =
-  | 'contact'
-  | 'service_desk'
-  | 'inquiry'
-  | 'application'
-  | 'volunteer'
-  | 'custom';
+  | "contact"
+  | "service_desk"
+  | "inquiry"
+  | "application"
+  | "volunteer"
+  | "custom";
 
 export type SubmissionStatus =
-  | 'new'
-  | 'read'
-  | 'under_review'
-  | 'scheduled'
-  | 'completed'
-  | 'rejected'
-  | 'archived';
+  | "new"
+  | "read"
+  | "under_review"
+  | "scheduled"
+  | "completed"
+  | "rejected"
+  | "archived";
 
-export type SubmissionPriority = 'low' | 'normal' | 'high' | 'urgent';
+export type SubmissionPriority = "low" | "normal" | "high" | "urgent";
 
 export interface FormSettings {
   submitButtonLabel?: string;
@@ -186,7 +186,7 @@ export interface SubmissionRecord {
   };
 }
 
-export type SubscriberStatus = 'pending' | 'confirmed' | 'unsubscribed';
+export type SubscriberStatus = "pending" | "confirmed" | "unsubscribed";
 
 export interface SubscriberRecord {
   documentId?: string;
@@ -203,7 +203,7 @@ export interface SubscriberRecord {
   sourceFormSlug?: string;
 }
 
-export type AlertSeverity = 'info' | 'warning' | 'urgent' | 'celebration';
+export type AlertSeverity = "info" | "warning" | "urgent" | "celebration";
 
 export interface AlertTranslation {
   title: string;

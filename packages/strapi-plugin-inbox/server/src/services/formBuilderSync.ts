@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   FORM_BUILDER_CMS_FORM_UID,
   FORM_BUILDER_CMS_SUBMISSION_UID,
@@ -6,23 +7,17 @@ import {
   SUBMISSION_UID,
   type FormBuilderCmsFormSummary,
   type FormRecord,
-} from '../../../shared';
-import {
-  fromFormBuilderCmsRow,
-  toFormBuilderCmsPayload,
-} from './formBuilderMapper';
+} from "../../../shared";
+import { fromFormBuilderCmsRow, toFormBuilderCmsPayload } from "./formBuilderMapper";
 
 export function isFormBuilderCmsAvailable(strapi: Core.Strapi): boolean {
   const hasContentType = Boolean(
-    strapi.contentTypes?.[
-      FORM_BUILDER_CMS_FORM_UID as keyof typeof strapi.contentTypes
-    ]
+    strapi.contentTypes?.[FORM_BUILDER_CMS_FORM_UID as keyof typeof strapi.contentTypes]
   );
-  const hasDbQuery = typeof strapi.db?.query === 'function';
+  const hasDbQuery = typeof strapi.db?.query === "function";
   return (
     hasDbQuery &&
-    (hasContentType ||
-      Boolean((strapi as unknown as Record<string, unknown>).__hasFormBuilderCms))
+    (hasContentType || Boolean((strapi as unknown as Record<string, unknown>).__hasFormBuilderCms))
   );
 }
 
@@ -31,8 +26,8 @@ export async function countSubmissionsForForm(
   formId: number,
   slug: string
 ): Promise<number> {
-  let cmsCount = 0;
-  let inboxCount = 0;
+  let cmsCount: number;
+  let inboxCount: number;
   try {
     cmsCount = await strapi.db
       .query(FORM_BUILDER_CMS_SUBMISSION_UID)
@@ -62,7 +57,7 @@ export async function listFormBuilderForms(strapi: Core.Strapi): Promise<{
 
   const cmsForms = (await strapi.db
     .query(FORM_BUILDER_CMS_FORM_UID)
-    .findMany({ orderBy: { createdAt: 'desc' } })) as Array<Record<string, unknown>>;
+    .findMany({ orderBy: { createdAt: "desc" } })) as Array<Record<string, unknown>>;
 
   const summaries: FormBuilderCmsFormSummary[] = await Promise.all(
     (cmsForms || []).map(async (cf) => {
@@ -75,7 +70,7 @@ export async function listFormBuilderForms(strapi: Core.Strapi): Promise<{
         documentId: parsed.documentId,
         slug,
         title: parsed.title,
-        description: parsed.description || '',
+        description: parsed.description || "",
         fieldCount: parsed.fields.length,
         submissionCount: Math.max(submissionCount, parsed.submissionCount || 0),
         publishedAt: parsed.publishedAt || null,
@@ -129,60 +124,43 @@ export async function syncFormToBuilderCms(
   };
 }
 
-function shouldBackfillStarterTemplate(
-  parsed: FormRecord,
-  starterTpl?: FormRecord
-): boolean {
+function shouldBackfillStarterTemplate(parsed: FormRecord, starterTpl?: FormRecord): boolean {
   if (!starterTpl) return false;
   const hasTranslations = Object.keys(parsed.translations || {}).length > 0;
   if (hasTranslations) return false;
   return !parsed.checklistTemplate?.length || !starterTpl.checklistTemplate?.length;
 }
 
-function pickNonDefaultSetting<T>(
-  val: T | undefined,
-  fallback: T | undefined,
-  defaultVal: T
-): T {
+function pickNonDefaultSetting<T>(val: T | undefined, fallback: T | undefined, defaultVal: T): T {
   if (val && val !== defaultVal) return val;
   return fallback || defaultVal;
 }
 
 function mergeStarterSettings(
-  parsedSettings: FormRecord['settings'],
-  starterSettings: FormRecord['settings']
-): FormRecord['settings'] {
+  parsedSettings: FormRecord["settings"],
+  starterSettings: FormRecord["settings"]
+): FormRecord["settings"] {
   const baseStarter = starterSettings ?? {};
   const baseParsed = parsedSettings ?? {};
   return {
     ...baseStarter,
     ...baseParsed,
-    department: pickNonDefaultSetting(
-      baseParsed.department,
-      baseStarter.department,
-      'general'
-    ),
+    department: pickNonDefaultSetting(baseParsed.department, baseStarter.department, "general"),
     defaultPriority: pickNonDefaultSetting(
       baseParsed.defaultPriority,
       baseStarter.defaultPriority,
-      'normal'
+      "normal"
     ),
-    enableBookingBridge:
-      baseParsed.enableBookingBridge ?? baseStarter.enableBookingBridge,
+    enableBookingBridge: baseParsed.enableBookingBridge ?? baseStarter.enableBookingBridge,
     enableCertificateBridge:
       baseParsed.enableCertificateBridge ?? baseStarter.enableCertificateBridge,
   };
 }
 
-function enrichFormWithStarterTemplate(
-  parsed: FormRecord,
-  starterTpl?: FormRecord
-): FormRecord {
+function enrichFormWithStarterTemplate(parsed: FormRecord, starterTpl?: FormRecord): FormRecord {
   if (!starterTpl) return parsed;
   const category =
-    parsed.category && parsed.category !== 'contact'
-      ? parsed.category
-      : starterTpl.category;
+    parsed.category && parsed.category !== "contact" ? parsed.category : starterTpl.category;
   const checklistTemplate = parsed.checklistTemplate?.length
     ? parsed.checklistTemplate
     : starterTpl.checklistTemplate || [];
@@ -210,8 +188,7 @@ export async function syncFormFromBuilderCms(
     (t) => t.form.slug === parsed.slug || t.id === parsed.slug
   )?.form;
 
-  const needsBackfill =
-    !rawSettings.inbox || shouldBackfillStarterTemplate(parsed, starterTpl);
+  const needsBackfill = !rawSettings.inbox || shouldBackfillStarterTemplate(parsed, starterTpl);
 
   if (needsBackfill && cmsForm.id && isFormBuilderCmsAvailable(strapi)) {
     const enriched = enrichFormWithStarterTemplate(parsed, starterTpl);

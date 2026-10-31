@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   type CaptchaProvider,
@@ -6,8 +7,8 @@ import {
   type SubmissionPriority,
   type SubmissionRecord,
   type SubmissionStatus,
-} from '../../../shared';
-import type { ControllerCtx } from './inboxController';
+} from "../../../shared";
+import type { ControllerCtx } from "./inboxController";
 
 export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
   async listSubmissions(ctx: ControllerCtx) {
@@ -18,7 +19,7 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
         priority?: SubmissionPriority;
         department?: string;
       }): Promise<SubmissionRecord[]>;
-    }>('submissionService');
+    }>("submissionService");
 
     const data = await svc.listSubmissions({
       formSlug: ctx.query?.formSlug,
@@ -30,7 +31,7 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
   },
 
   async updateCasework(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || '';
+    const documentId = ctx.params?.documentId || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       updateCasework(
         documentId: string,
@@ -43,7 +44,7 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
           checklistItems?: ChecklistItem[];
         }
       ): Promise<SubmissionRecord>;
-    }>('submissionService');
+    }>("submissionService");
 
     const data = await svc.updateCasework(
       documentId,
@@ -53,7 +54,7 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
   },
 
   async scheduleBooking(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || '';
+    const documentId = ctx.params?.documentId || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       scheduleBookingFromSubmission(
         documentId: string,
@@ -65,7 +66,7 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
           notes?: string;
         }
       ): Promise<{ submission: SubmissionRecord; bookingId: string }>;
-    }>('submissionService');
+    }>("submissionService");
 
     const body = (ctx.request.body || {}) as {
       serviceSlug: string;
@@ -79,7 +80,7 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
   },
 
   async issueCertificate(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || '';
+    const documentId = ctx.params?.documentId || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       issueCertificateFromSubmission(
         documentId: string,
@@ -89,7 +90,7 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
           requireChecklistVerified?: boolean;
         }
       ): Promise<{ submission: SubmissionRecord; certificateNumber: string }>;
-    }>('submissionService');
+    }>("submissionService");
 
     const body = (ctx.request.body || {}) as {
       templateSlug?: string;
@@ -103,10 +104,10 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
   async exportCsv(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       exportCsv(formSlug?: string): Promise<string>;
-    }>('submissionService');
+    }>("submissionService");
 
     const csv = await svc.exportCsv(ctx.query?.formSlug);
-    ctx.set?.('Content-Type', 'text/csv; charset=utf-8');
+    ctx.set?.("Content-Type", "text/csv; charset=utf-8");
     ctx.body = csv;
   },
 
@@ -116,7 +117,7 @@ export const createCaseworkHandlers = (strapi: Core.Strapi) => ({
         provider: CaptchaProvider,
         secret: string
       ): Promise<{ ok: boolean; reason?: string }>;
-    }>('submissionService');
+    }>("submissionService");
     const body = (ctx.request.body || {}) as {
       provider: CaptchaProvider;
       secret: string;

@@ -1,7 +1,8 @@
-import type { Core } from '@strapi/strapi';
-import { createCaseworkHandlers } from './caseworkHandlers';
-import { createCommunityHandlers } from './communityHandlers';
-import { createFormHandlers } from './formHandlers';
+import type { Core } from "@strapi/strapi";
+
+import { createCaseworkHandlers } from "./caseworkHandlers";
+import { createCommunityHandlers } from "./communityHandlers";
+import { createFormHandlers } from "./formHandlers";
 
 export interface ControllerCtx {
   params?: Record<string, string>;

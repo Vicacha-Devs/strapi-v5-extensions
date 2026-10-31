@@ -1,17 +1,22 @@
 export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
-  "en": {
+  en: {
     "content-manager.content-types.plugin::inbox.alert-banner.code": "Unique Code",
     "content-manager.content-types.plugin::inbox.alert-banner.title": "Title",
-    "content-manager.content-types.plugin::inbox.alert-banner.message": "Banner / Notification Message",
+    "content-manager.content-types.plugin::inbox.alert-banner.message":
+      "Banner / Notification Message",
     "content-manager.content-types.plugin::inbox.alert-banner.severity": "Alert Severity Level",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel": "Call-to-Action Button Label",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel":
+      "Call-to-Action Button Label",
     "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl": "Call-to-Action URL",
-    "content-manager.content-types.plugin::inbox.alert-banner.dismissible": "Allow Visitors to Dismiss Banner",
+    "content-manager.content-types.plugin::inbox.alert-banner.dismissible":
+      "Allow Visitors to Dismiss Banner",
     "content-manager.content-types.plugin::inbox.alert-banner.active": "Active",
     "content-manager.content-types.plugin::inbox.alert-banner.priority": "Priority",
-    "content-manager.content-types.plugin::inbox.alert-banner.startsAt": "Display Start Date & Time",
+    "content-manager.content-types.plugin::inbox.alert-banner.startsAt":
+      "Display Start Date & Time",
     "content-manager.content-types.plugin::inbox.alert-banner.endsAt": "Display End Date & Time",
-    "content-manager.content-types.plugin::inbox.alert-banner.translations": "Localized Translations",
+    "content-manager.content-types.plugin::inbox.alert-banner.translations":
+      "Localized Translations",
     "content-manager.content-types.plugin::inbox.alert-banner.documentId": "Document ID",
     "content-manager.content-types.plugin::inbox.submission.referenceCode": "Reference Code",
     "content-manager.content-types.plugin::inbox.submission.formSlug": "Form Slug",
@@ -20,29 +25,37 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::inbox.submission.status": "Status",
     "content-manager.content-types.plugin::inbox.submission.priority": "Priority",
     "content-manager.content-types.plugin::inbox.submission.department": "Target Department",
-    "content-manager.content-types.plugin::inbox.submission.applicantName": "Applicant / Sender Name",
-    "content-manager.content-types.plugin::inbox.submission.applicantEmail": "Applicant / Sender Email",
-    "content-manager.content-types.plugin::inbox.submission.applicantPhone": "Applicant / Sender Phone",
+    "content-manager.content-types.plugin::inbox.submission.applicantName":
+      "Applicant / Sender Name",
+    "content-manager.content-types.plugin::inbox.submission.applicantEmail":
+      "Applicant / Sender Email",
+    "content-manager.content-types.plugin::inbox.submission.applicantPhone":
+      "Applicant / Sender Phone",
     "content-manager.content-types.plugin::inbox.submission.data": "Submitted Form Payload (JSON)",
-    "content-manager.content-types.plugin::inbox.submission.checklistItems": "Workflow Checklist Items",
+    "content-manager.content-types.plugin::inbox.submission.checklistItems":
+      "Workflow Checklist Items",
     "content-manager.content-types.plugin::inbox.submission.staffNotes": "Internal Staff Notes",
     "content-manager.content-types.plugin::inbox.submission.assignedTo": "Assigned Staff Member",
     "content-manager.content-types.plugin::inbox.submission.linkedBookingId": "Linked Booking ID",
-    "content-manager.content-types.plugin::inbox.submission.linkedCertificateNumber": "Linked Certificate Serial Number",
+    "content-manager.content-types.plugin::inbox.submission.linkedCertificateNumber":
+      "Linked Certificate Serial Number",
     "content-manager.content-types.plugin::inbox.submission.ipAddress": "Sender IP Address",
     "content-manager.content-types.plugin::inbox.submission.userAgent": "Browser User-Agent",
     "content-manager.content-types.plugin::inbox.submission.submittedAt": "Submitted Date & Time",
-    "content-manager.content-types.plugin::inbox.submission.secondaryDate": "Secondary Calendar Date",
+    "content-manager.content-types.plugin::inbox.submission.secondaryDate":
+      "Secondary Calendar Date",
     "content-manager.content-types.plugin::inbox.submission.documentId": "Document ID",
     "content-manager.content-types.plugin::inbox.subscriber.email": "Email Address",
     "content-manager.content-types.plugin::inbox.subscriber.fullName": "Subscriber Full Name",
     "content-manager.content-types.plugin::inbox.subscriber.phone": "Phone Number",
     "content-manager.content-types.plugin::inbox.subscriber.topics": "Subscribed Topics",
     "content-manager.content-types.plugin::inbox.subscriber.status": "Status",
-    "content-manager.content-types.plugin::inbox.subscriber.confirmToken": "Double Opt-In Confirmation Token",
+    "content-manager.content-types.plugin::inbox.subscriber.confirmToken":
+      "Double Opt-In Confirmation Token",
     "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken": "Unsubscribe Token",
     "content-manager.content-types.plugin::inbox.subscriber.confirmedAt": "Confirmed Date & Time",
-    "content-manager.content-types.plugin::inbox.subscriber.unsubscribedAt": "Unsubscribed Date & Time",
+    "content-manager.content-types.plugin::inbox.subscriber.unsubscribedAt":
+      "Unsubscribed Date & Time",
     "content-manager.content-types.plugin::inbox.subscriber.sourceFormSlug": "Source Form Slug",
     "content-manager.content-types.plugin::inbox.subscriber.documentId": "Document ID",
     "content-manager.enum.scheduled": "Scheduled",
@@ -67,21 +80,28 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.urgent": "Urgent",
     "content-manager.enum.info": "Information",
     "content-manager.enum.warning": "Warning",
-    "content-manager.enum.celebration": "Celebration / Eid"
+    "content-manager.enum.celebration": "Celebration / Eid",
   },
-  "es": {
+  es: {
     "content-manager.content-types.plugin::inbox.alert-banner.code": "Código Único",
     "content-manager.content-types.plugin::inbox.alert-banner.title": "Título",
     "content-manager.content-types.plugin::inbox.alert-banner.message": "Mensaje del Aviso",
-    "content-manager.content-types.plugin::inbox.alert-banner.severity": "Nivel de Importancia / Severidad",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel": "Texto del Botón de Acción (CTA)",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl": "Enlace del Botón de Acción (CTA)",
-    "content-manager.content-types.plugin::inbox.alert-banner.dismissible": "Permitir Cerrar el Aviso",
+    "content-manager.content-types.plugin::inbox.alert-banner.severity":
+      "Nivel de Importancia / Severidad",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel":
+      "Texto del Botón de Acción (CTA)",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl":
+      "Enlace del Botón de Acción (CTA)",
+    "content-manager.content-types.plugin::inbox.alert-banner.dismissible":
+      "Permitir Cerrar el Aviso",
     "content-manager.content-types.plugin::inbox.alert-banner.active": "Activo",
     "content-manager.content-types.plugin::inbox.alert-banner.priority": "Prioridad",
-    "content-manager.content-types.plugin::inbox.alert-banner.startsAt": "Fecha y Hora de Inicio de Publicación",
-    "content-manager.content-types.plugin::inbox.alert-banner.endsAt": "Fecha y Hora de Fin de Publicación",
-    "content-manager.content-types.plugin::inbox.alert-banner.translations": "Traducciones Localizadas",
+    "content-manager.content-types.plugin::inbox.alert-banner.startsAt":
+      "Fecha y Hora de Inicio de Publicación",
+    "content-manager.content-types.plugin::inbox.alert-banner.endsAt":
+      "Fecha y Hora de Fin de Publicación",
+    "content-manager.content-types.plugin::inbox.alert-banner.translations":
+      "Traducciones Localizadas",
     "content-manager.content-types.plugin::inbox.alert-banner.documentId": "ID del Documento",
     "content-manager.content-types.plugin::inbox.submission.referenceCode": "Código de Referencia",
     "content-manager.content-types.plugin::inbox.submission.formSlug": "Slug del Formulario",
@@ -89,29 +109,45 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::inbox.submission.category": "Categoría",
     "content-manager.content-types.plugin::inbox.submission.status": "Estado",
     "content-manager.content-types.plugin::inbox.submission.priority": "Prioridad",
-    "content-manager.content-types.plugin::inbox.submission.department": "Departamento o Área Destino",
-    "content-manager.content-types.plugin::inbox.submission.applicantName": "Nombre del Solicitante o Remitente",
-    "content-manager.content-types.plugin::inbox.submission.applicantEmail": "Correo del Solicitante o Remitente",
-    "content-manager.content-types.plugin::inbox.submission.applicantPhone": "Teléfono del Solicitante o Remitente",
-    "content-manager.content-types.plugin::inbox.submission.data": "Datos Enviados en el Formulario (JSON)",
-    "content-manager.content-types.plugin::inbox.submission.checklistItems": "Lista de Verificación de Seguimiento",
-    "content-manager.content-types.plugin::inbox.submission.staffNotes": "Notas Internas del Personal",
+    "content-manager.content-types.plugin::inbox.submission.department":
+      "Departamento o Área Destino",
+    "content-manager.content-types.plugin::inbox.submission.applicantName":
+      "Nombre del Solicitante o Remitente",
+    "content-manager.content-types.plugin::inbox.submission.applicantEmail":
+      "Correo del Solicitante o Remitente",
+    "content-manager.content-types.plugin::inbox.submission.applicantPhone":
+      "Teléfono del Solicitante o Remitente",
+    "content-manager.content-types.plugin::inbox.submission.data":
+      "Datos Enviados en el Formulario (JSON)",
+    "content-manager.content-types.plugin::inbox.submission.checklistItems":
+      "Lista de Verificación de Seguimiento",
+    "content-manager.content-types.plugin::inbox.submission.staffNotes":
+      "Notas Internas del Personal",
     "content-manager.content-types.plugin::inbox.submission.assignedTo": "Responsable Asignado",
-    "content-manager.content-types.plugin::inbox.submission.linkedBookingId": "ID de Reserva Vinculada",
-    "content-manager.content-types.plugin::inbox.submission.linkedCertificateNumber": "Número de Certificado Vinculado",
+    "content-manager.content-types.plugin::inbox.submission.linkedBookingId":
+      "ID de Reserva Vinculada",
+    "content-manager.content-types.plugin::inbox.submission.linkedCertificateNumber":
+      "Número de Certificado Vinculado",
     "content-manager.content-types.plugin::inbox.submission.ipAddress": "Dirección IP de Origen",
-    "content-manager.content-types.plugin::inbox.submission.userAgent": "Navegador / Dispositivo (User-Agent)",
-    "content-manager.content-types.plugin::inbox.submission.submittedAt": "Fecha y Hora de Recepción",
-    "content-manager.content-types.plugin::inbox.submission.secondaryDate": "Fecha en Calendario Secundario",
+    "content-manager.content-types.plugin::inbox.submission.userAgent":
+      "Navegador / Dispositivo (User-Agent)",
+    "content-manager.content-types.plugin::inbox.submission.submittedAt":
+      "Fecha y Hora de Recepción",
+    "content-manager.content-types.plugin::inbox.submission.secondaryDate":
+      "Fecha en Calendario Secundario",
     "content-manager.content-types.plugin::inbox.submission.documentId": "ID del Documento",
     "content-manager.content-types.plugin::inbox.subscriber.email": "Correo Electrónico",
-    "content-manager.content-types.plugin::inbox.subscriber.fullName": "Nombre Completo del Suscriptor",
+    "content-manager.content-types.plugin::inbox.subscriber.fullName":
+      "Nombre Completo del Suscriptor",
     "content-manager.content-types.plugin::inbox.subscriber.phone": "Número de Teléfono",
     "content-manager.content-types.plugin::inbox.subscriber.topics": "Temas de Suscripción",
     "content-manager.content-types.plugin::inbox.subscriber.status": "Estado",
-    "content-manager.content-types.plugin::inbox.subscriber.confirmToken": "Token de Confirmación de Suscripción",
-    "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken": "Token de Cancelación de Suscripción",
-    "content-manager.content-types.plugin::inbox.subscriber.confirmedAt": "Fecha y Hora de Confirmación",
+    "content-manager.content-types.plugin::inbox.subscriber.confirmToken":
+      "Token de Confirmación de Suscripción",
+    "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken":
+      "Token de Cancelación de Suscripción",
+    "content-manager.content-types.plugin::inbox.subscriber.confirmedAt":
+      "Fecha y Hora de Confirmación",
     "content-manager.content-types.plugin::inbox.subscriber.unsubscribedAt": "Fecha y Hora de Baja",
     "content-manager.content-types.plugin::inbox.subscriber.sourceFormSlug": "Formulario de Origen",
     "content-manager.content-types.plugin::inbox.subscriber.documentId": "ID del Documento",
@@ -137,9 +173,9 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.urgent": "Urgente",
     "content-manager.enum.info": "Información",
     "content-manager.enum.warning": "Advertencia",
-    "content-manager.enum.celebration": "Celebración / Eid"
+    "content-manager.enum.celebration": "Celebración / Eid",
   },
-  "ar": {
+  ar: {
     "content-manager.content-types.plugin::inbox.alert-banner.code": "الرمز الفريد",
     "content-manager.content-types.plugin::inbox.alert-banner.title": "العنوان",
     "content-manager.content-types.plugin::inbox.alert-banner.message": "نص الإشعار / التنبيه",
@@ -160,17 +196,21 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::inbox.submission.status": "الحالة",
     "content-manager.content-types.plugin::inbox.submission.priority": "الأولوية",
     "content-manager.content-types.plugin::inbox.submission.department": "القسم أو الإدارة المختصة",
-    "content-manager.content-types.plugin::inbox.submission.applicantName": "اسم مقدم الطلب أو المرسل",
-    "content-manager.content-types.plugin::inbox.submission.applicantEmail": "البريد الإلكتروني لمقدم الطلب",
+    "content-manager.content-types.plugin::inbox.submission.applicantName":
+      "اسم مقدم الطلب أو المرسل",
+    "content-manager.content-types.plugin::inbox.submission.applicantEmail":
+      "البريد الإلكتروني لمقدم الطلب",
     "content-manager.content-types.plugin::inbox.submission.applicantPhone": "رقم هاتف مقدم الطلب",
     "content-manager.content-types.plugin::inbox.submission.data": "بيانات النموذج المرسلة (JSON)",
     "content-manager.content-types.plugin::inbox.submission.checklistItems": "قائمة مهام المتابعة",
     "content-manager.content-types.plugin::inbox.submission.staffNotes": "ملاحظات الموظفين",
     "content-manager.content-types.plugin::inbox.submission.assignedTo": "الموظف المسؤول",
     "content-manager.content-types.plugin::inbox.submission.linkedBookingId": "معرف الحجز المرتبط",
-    "content-manager.content-types.plugin::inbox.submission.linkedCertificateNumber": "رقم الشهادة المرتبطة",
+    "content-manager.content-types.plugin::inbox.submission.linkedCertificateNumber":
+      "رقم الشهادة المرتبطة",
     "content-manager.content-types.plugin::inbox.submission.ipAddress": "عنوان IP للمرسل",
-    "content-manager.content-types.plugin::inbox.submission.userAgent": "متصفح وجهاز المرسل (User-Agent)",
+    "content-manager.content-types.plugin::inbox.submission.userAgent":
+      "متصفح وجهاز المرسل (User-Agent)",
     "content-manager.content-types.plugin::inbox.submission.submittedAt": "تاريخ ووقت الاستلام",
     "content-manager.content-types.plugin::inbox.submission.secondaryDate": "التاريخ الإضافي",
     "content-manager.content-types.plugin::inbox.submission.documentId": "معرف المستند",
@@ -182,7 +222,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::inbox.subscriber.confirmToken": "رمز تأكيد الاشتراك",
     "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken": "رمز إلغاء الاشتراك",
     "content-manager.content-types.plugin::inbox.subscriber.confirmedAt": "تاريخ ووقت التأكيد",
-    "content-manager.content-types.plugin::inbox.subscriber.unsubscribedAt": "تاريخ ووقت إلغاء الاشتراك",
+    "content-manager.content-types.plugin::inbox.subscriber.unsubscribedAt":
+      "تاريخ ووقت إلغاء الاشتراك",
     "content-manager.content-types.plugin::inbox.subscriber.sourceFormSlug": "معرف نموذج المصدر",
     "content-manager.content-types.plugin::inbox.subscriber.documentId": "معرف المستند",
     "content-manager.enum.scheduled": "مجدول",
@@ -207,21 +248,27 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.urgent": "عاجلة",
     "content-manager.enum.info": "معلومة",
     "content-manager.enum.warning": "تنبيه",
-    "content-manager.enum.celebration": "احتفال / عيد"
+    "content-manager.enum.celebration": "احتفال / عيد",
   },
-  "tr": {
+  tr: {
     "content-manager.content-types.plugin::inbox.alert-banner.code": "Benzersiz Kod",
     "content-manager.content-types.plugin::inbox.alert-banner.title": "Başlık",
     "content-manager.content-types.plugin::inbox.alert-banner.message": "Duyuru / Bildirim Mesajı",
     "content-manager.content-types.plugin::inbox.alert-banner.severity": "Uyarı Önem Derecesi",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel": "Eylem Çağrısı (CTA) Düğme Metni",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl": "Eylem Çağrısı (CTA) Bağlantısı",
-    "content-manager.content-types.plugin::inbox.alert-banner.dismissible": "Ziyaretçilerin Kapatmasına İzin Ver",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel":
+      "Eylem Çağrısı (CTA) Düğme Metni",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl":
+      "Eylem Çağrısı (CTA) Bağlantısı",
+    "content-manager.content-types.plugin::inbox.alert-banner.dismissible":
+      "Ziyaretçilerin Kapatmasına İzin Ver",
     "content-manager.content-types.plugin::inbox.alert-banner.active": "Aktif",
     "content-manager.content-types.plugin::inbox.alert-banner.priority": "Öncelik",
-    "content-manager.content-types.plugin::inbox.alert-banner.startsAt": "Gösterim Başlangıç Tarihi ve Saati",
-    "content-manager.content-types.plugin::inbox.alert-banner.endsAt": "Gösterim Bitiş Tarihi ve Saati",
-    "content-manager.content-types.plugin::inbox.alert-banner.translations": "Yerelleştirilmiş Çeviriler",
+    "content-manager.content-types.plugin::inbox.alert-banner.startsAt":
+      "Gösterim Başlangıç Tarihi ve Saati",
+    "content-manager.content-types.plugin::inbox.alert-banner.endsAt":
+      "Gösterim Bitiş Tarihi ve Saati",
+    "content-manager.content-types.plugin::inbox.alert-banner.translations":
+      "Yerelleştirilmiş Çeviriler",
     "content-manager.content-types.plugin::inbox.alert-banner.documentId": "Belge Kimliği (ID)",
     "content-manager.content-types.plugin::inbox.submission.referenceCode": "Referans Kodu",
     "content-manager.content-types.plugin::inbox.submission.formSlug": "Form Kısa Adı (Slug)",
@@ -230,18 +277,27 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::inbox.submission.status": "Durum",
     "content-manager.content-types.plugin::inbox.submission.priority": "Öncelik",
     "content-manager.content-types.plugin::inbox.submission.department": "İlgili Birim / Departman",
-    "content-manager.content-types.plugin::inbox.submission.applicantName": "Başvuru Sahibi / Gönderen Adı",
-    "content-manager.content-types.plugin::inbox.submission.applicantEmail": "Başvuru Sahibi E-posta Adresi",
-    "content-manager.content-types.plugin::inbox.submission.applicantPhone": "Başvuru Sahibi Telefon Numarası",
-    "content-manager.content-types.plugin::inbox.submission.data": "Gönderilen Form Verileri (JSON)",
-    "content-manager.content-types.plugin::inbox.submission.checklistItems": "İş Akışı Kontrol Listesi",
+    "content-manager.content-types.plugin::inbox.submission.applicantName":
+      "Başvuru Sahibi / Gönderen Adı",
+    "content-manager.content-types.plugin::inbox.submission.applicantEmail":
+      "Başvuru Sahibi E-posta Adresi",
+    "content-manager.content-types.plugin::inbox.submission.applicantPhone":
+      "Başvuru Sahibi Telefon Numarası",
+    "content-manager.content-types.plugin::inbox.submission.data":
+      "Gönderilen Form Verileri (JSON)",
+    "content-manager.content-types.plugin::inbox.submission.checklistItems":
+      "İş Akışı Kontrol Listesi",
     "content-manager.content-types.plugin::inbox.submission.staffNotes": "Personel Notları",
     "content-manager.content-types.plugin::inbox.submission.assignedTo": "Atanan Personel",
-    "content-manager.content-types.plugin::inbox.submission.linkedBookingId": "Bağlı Rezervasyon Kimliği",
-    "content-manager.content-types.plugin::inbox.submission.linkedCertificateNumber": "Bağlı Sertifika Seri Numarası",
+    "content-manager.content-types.plugin::inbox.submission.linkedBookingId":
+      "Bağlı Rezervasyon Kimliği",
+    "content-manager.content-types.plugin::inbox.submission.linkedCertificateNumber":
+      "Bağlı Sertifika Seri Numarası",
     "content-manager.content-types.plugin::inbox.submission.ipAddress": "Gönderen IP Adresi",
-    "content-manager.content-types.plugin::inbox.submission.userAgent": "Tarayıcı / Cihaz Bilgisi (User-Agent)",
-    "content-manager.content-types.plugin::inbox.submission.submittedAt": "Gönderilme Tarihi ve Saati",
+    "content-manager.content-types.plugin::inbox.submission.userAgent":
+      "Tarayıcı / Cihaz Bilgisi (User-Agent)",
+    "content-manager.content-types.plugin::inbox.submission.submittedAt":
+      "Gönderilme Tarihi ve Saati",
     "content-manager.content-types.plugin::inbox.submission.secondaryDate": "İkincil Takvim Tarihi",
     "content-manager.content-types.plugin::inbox.submission.documentId": "Belge Kimliği (ID)",
     "content-manager.content-types.plugin::inbox.subscriber.email": "E-posta Adresi",
@@ -250,9 +306,12 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::inbox.subscriber.topics": "Abone Olunan Konular",
     "content-manager.content-types.plugin::inbox.subscriber.status": "Durum",
     "content-manager.content-types.plugin::inbox.subscriber.confirmToken": "Abonelik Onay Jetonu",
-    "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken": "Abonelik İptal Jetonu",
-    "content-manager.content-types.plugin::inbox.subscriber.confirmedAt": "Onaylanma Tarihi ve Saati",
-    "content-manager.content-types.plugin::inbox.subscriber.unsubscribedAt": "Abonelikten Çıkış Tarihi",
+    "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken":
+      "Abonelik İptal Jetonu",
+    "content-manager.content-types.plugin::inbox.subscriber.confirmedAt":
+      "Onaylanma Tarihi ve Saati",
+    "content-manager.content-types.plugin::inbox.subscriber.unsubscribedAt":
+      "Abonelikten Çıkış Tarihi",
     "content-manager.content-types.plugin::inbox.subscriber.sourceFormSlug": "Kaynak Form Kısa Adı",
     "content-manager.content-types.plugin::inbox.subscriber.documentId": "Belge Kimliği (ID)",
     "content-manager.enum.scheduled": "Planlandı",
@@ -277,6 +336,6 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.urgent": "Acil",
     "content-manager.enum.info": "Bilgi",
     "content-manager.enum.warning": "Uyarı",
-    "content-manager.enum.celebration": "Kutlama / Bayram"
-  }
+    "content-manager.enum.celebration": "Kutlama / Bayram",
+  },
 };

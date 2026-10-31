@@ -1,12 +1,13 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   ALERT_BANNER_UID,
   PLUGIN_ID,
   convertIsoDateToCalendar,
   type AlertBannerRecord,
   type InboxSettings,
-} from '../../../shared';
-import { getDocuments } from './docHelper';
+} from "../../../shared";
+import { getDocuments } from "./docHelper";
 
 function buildAlertBannerPayload(
   input: Partial<AlertBannerRecord> & {
@@ -19,9 +20,9 @@ function buildAlertBannerPayload(
     code: input.code,
     title: input.title,
     message: input.message,
-    severity: input.severity ?? 'info',
-    ctaLabel: input.ctaLabel ?? '',
-    ctaUrl: input.ctaUrl ?? '',
+    severity: input.severity ?? "info",
+    ctaLabel: input.ctaLabel ?? "",
+    ctaUrl: input.ctaUrl ?? "",
     dismissible: input.dismissible ?? true,
     active: input.active ?? true,
     priority: input.priority ?? 10,
@@ -38,9 +39,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   }): Promise<AlertBannerRecord[]> {
     const settingsService = strapi.plugin(PLUGIN_ID).service<{
       getSettings(): Promise<InboxSettings>;
-    }>('settings');
+    }>("settings");
     const settings = await settingsService.getSettings();
-    const locale = params?.locale || settings.defaultLocale || 'es';
+    const locale = params?.locale || settings.defaultLocale || "es";
     const nowMs = new Date(params?.nowIso || Date.now()).getTime();
 
     const docs = (await getDocuments(strapi, ALERT_BANNER_UID).findMany({
@@ -63,7 +64,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     activeInWindow.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0));
 
-    const secondaryCal = settings.secondaryCalendars?.[0] || 'islamic-umalqura';
+    const secondaryCal = settings.secondaryCalendars?.[0] || "islamic-umalqura";
     const refDateIso = new Date(nowMs).toISOString().slice(0, 10);
     const secondaryDate = convertIsoDateToCalendar(refDateIso, secondaryCal, locale);
 

@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   STARTER_FORM_TEMPLATES,
@@ -6,24 +7,23 @@ import {
   type FormRecord,
   type InboxSettings,
   type SubmissionRecord,
-} from '../../../shared';
-import type { ControllerCtx } from './inboxController';
+} from "../../../shared";
+import type { ControllerCtx } from "./inboxController";
 
 function extractPlainObject(val: unknown): Record<string, unknown> | null {
-  return val && typeof val === 'object' && !Array.isArray(val)
+  return val && typeof val === "object" && !Array.isArray(val)
     ? (val as Record<string, unknown>)
     : null;
 }
 
 function normalizeSubmitPayload(rawBody: Record<string, unknown>): Record<string, unknown> {
-  const nestedData =
-    extractPlainObject(rawBody.data) || extractPlainObject(rawBody.payload);
+  const nestedData = extractPlainObject(rawBody.data) || extractPlainObject(rawBody.payload);
   return nestedData ? { ...rawBody, ...nestedData } : rawBody;
 }
 
 function resolveClientIp(ctx: ControllerCtx): string {
-  const forwarded = ctx.request.headers?.['x-forwarded-for']?.split(',')[0]?.trim();
-  return forwarded || ctx.request.ip || '127.0.0.1';
+  const forwarded = ctx.request.headers?.["x-forwarded-for"]?.split(",")[0]?.trim();
+  return forwarded || ctx.request.ip || "127.0.0.1";
 }
 
 const ERROR_STATUS_MAP: Record<string, number> = {
@@ -36,7 +36,7 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
   async getSettings(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       getSettings(): Promise<InboxSettings>;
-    }>('settings');
+    }>("settings");
     const data = await svc.getSettings();
     ctx.body = { data };
   },
@@ -44,10 +44,8 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
   async updateSettings(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       updateSettings(patch: Partial<InboxSettings>): Promise<InboxSettings>;
-    }>('settings');
-    const data = await svc.updateSettings(
-      (ctx.request.body || {}) as Partial<InboxSettings>
-    );
+    }>("settings");
+    const data = await svc.updateSettings((ctx.request.body || {}) as Partial<InboxSettings>);
     ctx.body = { data };
   },
 
@@ -61,7 +59,7 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
         available: boolean;
         forms: unknown[];
       }>;
-    }>('formService');
+    }>("formService");
     const data = await svc.listFormBuilderForms();
     ctx.body = { data };
   },
@@ -74,7 +72,7 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
         syncedFromBuilder: number;
         forms: FormRecord[];
       }>;
-    }>('formService');
+    }>("formService");
     const data = await svc.syncWithFormBuilderCms();
     ctx.body = { data };
   },
@@ -87,25 +85,25 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
         locale?: string;
         publicSafe?: boolean;
       }): Promise<FormRecord[]>;
-    }>('formService');
+    }>("formService");
 
     const data = await svc.listForms({
       category: ctx.query?.category as FormCategory | undefined,
-      activeOnly: ctx.query?.activeOnly !== 'false',
+      activeOnly: ctx.query?.activeOnly !== "false",
       locale: ctx.query?.locale,
-      publicSafe: ctx.query?.admin !== 'true',
+      publicSafe: ctx.query?.admin !== "true",
     });
     ctx.body = { data };
   },
 
   async getFormBySlug(ctx: ControllerCtx) {
-    const slug = ctx.params?.slug || '';
+    const slug = ctx.params?.slug || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       findBySlug(
         slug: string,
         opts?: { locale?: string; publicSafe?: boolean }
       ): Promise<FormRecord | null>;
-    }>('formService');
+    }>("formService");
 
     const form = await svc.findBySlug(slug, {
       locale: ctx.query?.locale,
@@ -121,10 +119,8 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
 
   async saveForm(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      saveForm(
-        input: Partial<FormRecord> & { slug: string; title: string }
-      ): Promise<FormRecord>;
-    }>('formService');
+      saveForm(input: Partial<FormRecord> & { slug: string; title: string }): Promise<FormRecord>;
+    }>("formService");
     const body = (ctx.request.body || {}) as Partial<FormRecord> & {
       slug: string;
       title: string;
@@ -135,11 +131,8 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
 
   async createFromTemplate(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      createFromTemplate(
-        templateId: string,
-        overrides?: Partial<FormRecord>
-      ): Promise<FormRecord>;
-    }>('formService');
+      createFromTemplate(templateId: string, overrides?: Partial<FormRecord>): Promise<FormRecord>;
+    }>("formService");
     const body = (ctx.request.body || {}) as {
       templateId: string;
       overrides?: Partial<FormRecord>;
@@ -149,7 +142,7 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
   },
 
   async submitForm(ctx: ControllerCtx) {
-    const slug = ctx.params?.slug || '';
+    const slug = ctx.params?.slug || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       submitForm(
         slug: string,
@@ -161,18 +154,17 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
           captchaToken?: string;
         }
       ): Promise<SubmissionRecord>;
-    }>('submissionService');
+    }>("submissionService");
 
     try {
       const rawBody = (ctx.request.body || {}) as Record<string, unknown>;
       const payload = normalizeSubmitPayload(rawBody);
       const data = await svc.submitForm(slug, payload, {
         ip: resolveClientIp(ctx),
-        userAgent: ctx.request.headers?.['user-agent'] || '',
+        userAgent: ctx.request.headers?.["user-agent"] || "",
         locale: (rawBody.locale as string) || ctx.query?.locale,
         captchaToken:
-          (rawBody.captchaToken as string) ||
-          (payload.captchaToken as string | undefined),
+          (rawBody.captchaToken as string) || (payload.captchaToken as string | undefined),
       });
       ctx.status = 201;
       ctx.body = { data };

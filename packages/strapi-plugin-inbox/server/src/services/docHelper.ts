@@ -1,10 +1,10 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
 
 export interface DocumentServiceLike {
   findMany(params?: {
     limit?: number;
     locale?: string;
-    status?: 'draft' | 'published';
+    status?: "draft" | "published";
     filters?: Record<string, unknown>;
     populate?: string[];
     sort?: string;
@@ -17,22 +17,17 @@ export interface DocumentServiceLike {
   create(params: {
     data: Record<string, unknown>;
     locale?: string;
-    status?: 'draft' | 'published';
+    status?: "draft" | "published";
   }): Promise<Record<string, unknown>>;
   update(params: {
     documentId: string;
     locale?: string;
-    status?: 'draft' | 'published';
+    status?: "draft" | "published";
     data: Record<string, unknown>;
   }): Promise<Record<string, unknown> | null>;
 }
 
-export function getDocuments(
-  strapi: Core.Strapi,
-  uid: string
-): DocumentServiceLike {
-  const docsFn = strapi.documents as unknown as (
-    targetUid: string
-  ) => DocumentServiceLike;
+export function getDocuments(strapi: Core.Strapi, uid: string): DocumentServiceLike {
+  const docsFn = strapi.documents as unknown as (targetUid: string) => DocumentServiceLike;
   return docsFn(uid);
 }

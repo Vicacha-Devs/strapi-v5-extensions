@@ -1,3 +1,7 @@
+import alertServiceFactory from "../server/src/services/alertService";
+import formServiceFactory from "../server/src/services/formService";
+import submissionServiceFactory from "../server/src/services/submissionService";
+import subscriberServiceFactory from "../server/src/services/subscriberService";
 import {
   DEFAULT_INBOX_SETTINGS,
   FORM_BUILDER_CMS_FORM_UID,
@@ -6,11 +10,7 @@ import {
   SUBMISSION_UID,
   SUBSCRIBER_UID,
   ALERT_BANNER_UID,
-} from '../shared';
-import formServiceFactory from '../server/src/services/formService';
-import submissionServiceFactory from '../server/src/services/submissionService';
-import subscriberServiceFactory from '../server/src/services/subscriberService';
-import alertServiceFactory from '../server/src/services/alertService';
+} from "../shared";
 
 export function createMockStrapi() {
   const storeMap = new Map<string, unknown>();
@@ -56,25 +56,20 @@ export function createMockStrapi() {
         findMany: async (params?: { where?: Record<string, unknown> }) => {
           const list = collections[uid] || [];
           const where = params?.where || {};
-          return list.filter((item) =>
-            Object.entries(where).every(([k, v]) => item[k] === v)
-          );
+          return list.filter((item) => Object.entries(where).every(([k, v]) => item[k] === v));
         },
         findOne: async (params?: { where?: Record<string, unknown> }) => {
           const list = collections[uid] || [];
           const where = params?.where || {};
           return (
-            list.find((item) =>
-              Object.entries(where).every(([k, v]) => item[k] === v)
-            ) ?? null
+            list.find((item) => Object.entries(where).every(([k, v]) => item[k] === v)) ?? null
           );
         },
         count: async (params?: { where?: Record<string, unknown> }) => {
           const list = collections[uid] || [];
           const where = params?.where || {};
-          return list.filter((item) =>
-            Object.entries(where).every(([k, v]) => item[k] === v)
-          ).length;
+          return list.filter((item) => Object.entries(where).every(([k, v]) => item[k] === v))
+            .length;
         },
         create: async ({ data }: { data: Record<string, unknown> }) => {
           const numId = idCounter++;
@@ -109,9 +104,7 @@ export function createMockStrapi() {
       findMany: async (params?: { filters?: Record<string, unknown>; limit?: number }) => {
         const list = collections[uid] || [];
         const filters = params?.filters || {};
-        return list.filter((item) =>
-          Object.entries(filters).every(([k, v]) => item[k] === v)
-        );
+        return list.filter((item) => Object.entries(filters).every(([k, v]) => item[k] === v));
       },
       findOne: async ({ documentId }: { documentId: string }) => {
         const list = collections[uid] || [];
@@ -146,23 +139,23 @@ export function createMockStrapi() {
     settings: {
       getSettings: async () => ({
         ...DEFAULT_INBOX_SETTINGS,
-        supportedLocales: ['es', 'en', 'ar', 'tr'],
+        supportedLocales: ["es", "en", "ar", "tr"],
       }),
     },
   };
 
   strapi.plugin = (name: string) => {
-    if (name === 'bookings') {
+    if (name === "bookings") {
       return {
         service: () => ({
           createBooking: async (input: { serviceSlug: string; date: string }) => ({
-            documentId: 'bkg_doc_1',
+            documentId: "bkg_doc_1",
             referenceCode: `BKG-${input.serviceSlug.toUpperCase()}-${input.date}`,
           }),
         }),
       };
     }
-    if (name === 'certificates') {
+    if (name === "certificates") {
       return {
         service: () => ({
           issueCertificate: async (input: { templateSlug: string }) => ({
