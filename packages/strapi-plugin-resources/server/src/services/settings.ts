@@ -1,13 +1,15 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   DEFAULT_RESOURCES_SETTINGS,
   PLUGIN_ID,
   SECONDARY_CALENDAR_IDS,
   type ResourcesPluginSettings,
-} from '../../../shared';
+} from "../../../shared";
 
 function getDefaultSettings(strapi: Core.Strapi): ResourcesPluginSettings {
-  const cfg = (strapi.config?.get(`plugin::${PLUGIN_ID}`) ?? {}) as Partial<ResourcesPluginSettings>;
+  const cfg = (strapi.config?.get(`plugin::${PLUGIN_ID}`) ??
+    {}) as Partial<ResourcesPluginSettings>;
   return {
     ...DEFAULT_RESOURCES_SETTINGS,
     ...cfg,
@@ -16,53 +18,40 @@ function getDefaultSettings(strapi: Core.Strapi): ResourcesPluginSettings {
         ? cfg.supportedLocales
         : [...DEFAULT_RESOURCES_SETTINGS.supportedLocales],
     allowedDownloadExtensions:
-      Array.isArray(cfg.allowedDownloadExtensions) &&
-      cfg.allowedDownloadExtensions.length > 0
+      Array.isArray(cfg.allowedDownloadExtensions) && cfg.allowedDownloadExtensions.length > 0
         ? cfg.allowedDownloadExtensions
         : [...DEFAULT_RESOURCES_SETTINGS.allowedDownloadExtensions],
     allowedDownloadMimeTypes:
-      Array.isArray(cfg.allowedDownloadMimeTypes) &&
-      cfg.allowedDownloadMimeTypes.length > 0
+      Array.isArray(cfg.allowedDownloadMimeTypes) && cfg.allowedDownloadMimeTypes.length > 0
         ? cfg.allowedDownloadMimeTypes
         : [...DEFAULT_RESOURCES_SETTINGS.allowedDownloadMimeTypes],
   };
 }
 
-function pickTrimmedString(
-  val: unknown,
-  fallback: string,
-  maxLen?: number
-): string {
-  if (typeof val !== 'string' || !val.trim()) return fallback;
+function pickTrimmedString(val: unknown, fallback: string, maxLen?: number): string {
+  if (typeof val !== "string" || !val.trim()) return fallback;
   const trimmed = val.trim();
   return maxLen ? trimmed.slice(0, maxLen) : trimmed;
 }
 
 function pickStringList(val: unknown, fallback: string[]): string[] {
   if (!Array.isArray(val) || val.length === 0) return fallback;
-  return val.filter((x): x is string => typeof x === 'string');
+  return val.filter((x): x is string => typeof x === "string");
 }
 
 function pickBoolean(val: unknown, fallback: boolean): boolean {
-  return typeof val === 'boolean' ? val : fallback;
+  return typeof val === "boolean" ? val : fallback;
 }
 
-function pickBoundedInt(
-  val: unknown,
-  min: number,
-  max: number,
-  fallback: number
-): number {
+function pickBoundedInt(val: unknown, min: number, max: number, fallback: number): number {
   const num = Number(val);
-  return Number.isFinite(num) && num >= min && num <= max
-    ? Math.round(num)
-    : fallback;
+  return Number.isFinite(num) && num >= min && num <= max ? Math.round(num) : fallback;
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getStore = () =>
     strapi.store({
-      type: 'plugin',
+      type: "plugin",
       name: PLUGIN_ID,
     });
 
@@ -71,9 +60,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const defaults = getDefaultSettings(strapi);
       try {
         const stored = (await getStore().get({
-          key: 'settings',
+          key: "settings",
         })) as Partial<ResourcesPluginSettings> | null;
-        if (!stored || typeof stored !== 'object') {
+        if (!stored || typeof stored !== "object") {
           return defaults;
         }
         return {
@@ -91,35 +80,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const current = await this.getSettings();
       const allowedCalendars: readonly string[] = SECONDARY_CALENDAR_IDS;
       const secondaryCalendar =
-        typeof input.secondaryCalendar === 'string' &&
+        typeof input.secondaryCalendar === "string" &&
         allowedCalendars.includes(input.secondaryCalendar)
           ? input.secondaryCalendar
           : current.secondaryCalendar;
 
       const next: ResourcesPluginSettings = {
         ...current,
-        organizationName: pickTrimmedString(
-          input.organizationName,
-          current.organizationName,
-          140
-        ),
-        defaultLocale: pickTrimmedString(
-          input.defaultLocale,
-          current.defaultLocale
-        ),
-        supportedLocales: pickStringList(
-          input.supportedLocales,
-          current.supportedLocales
-        ),
+        organizationName: pickTrimmedString(input.organizationName, current.organizationName, 140),
+        defaultLocale: pickTrimmedString(input.defaultLocale, current.defaultLocale),
+        supportedLocales: pickStringList(input.supportedLocales, current.supportedLocales),
         secondaryCalendar,
         enableCloudinaryOptimization: pickBoolean(
           input.enableCloudinaryOptimization,
           current.enableCloudinaryOptimization
         ),
-        autoSyncMediaFolders: pickBoolean(
-          input.autoSyncMediaFolders,
-          current.autoSyncMediaFolders
-        ),
+        autoSyncMediaFolders: pickBoolean(input.autoSyncMediaFolders, current.autoSyncMediaFolders),
         defaultPublicationsFolderPath: pickTrimmedString(
           input.defaultPublicationsFolderPath,
           current.defaultPublicationsFolderPath,
@@ -147,7 +123,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       };
 
       await getStore().set({
-        key: 'settings',
+        key: "settings",
         value: next,
       });
       return next;

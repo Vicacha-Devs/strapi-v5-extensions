@@ -1,18 +1,18 @@
 declare const Buffer: {
   from(
     input: string,
-    encoding?: 'utf8' | 'utf-8' | 'hex' | 'base64' | 'base64url'
+    encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
   ): Uint8Array & {
-    toString(encoding?: 'utf8' | 'utf-8' | 'hex' | 'base64' | 'base64url'): string;
+    toString(encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"): string;
   };
-  byteLength(input: string, encoding?: 'utf8' | 'utf-8'): number;
+  byteLength(input: string, encoding?: "utf8" | "utf-8"): number;
 };
 
 declare const process: {
   env: Record<string, string | undefined>;
 };
 
-declare module 'node:assert/strict' {
+declare module "node:assert/strict" {
   const assert: {
     equal(actual: unknown, expected: unknown, message?: string): void;
     notEqual(actual: unknown, expected: unknown, message?: string): void;
@@ -23,12 +23,12 @@ declare module 'node:assert/strict' {
   export default assert;
 }
 
-declare module 'node:test' {
+declare module "node:test" {
   export function describe(name: string, fn: () => void | Promise<void>): void;
   export function it(name: string, fn: () => void | Promise<void>): void;
 }
 
-declare module '@strapi/strapi' {
+declare module "@strapi/strapi" {
   export namespace Core {
     export interface PluginStore {
       get(params: { key: string }): Promise<unknown>;
@@ -55,7 +55,7 @@ declare module '@strapi/strapi' {
     export interface DocumentQueryOptions {
       limit?: number;
       locale?: string;
-      status?: 'draft' | 'published';
+      status?: "draft" | "published";
       filters?: Record<string, unknown>;
       populate?: string[];
       sort?: string | Record<string, string>;
@@ -71,7 +71,7 @@ declare module '@strapi/strapi' {
       create(params: {
         data: Record<string, unknown>;
         locale?: string;
-        status?: 'draft' | 'published';
+        status?: "draft" | "published";
         populate?: string[];
       }): Promise<Record<string, unknown>>;
       update(params: {
@@ -87,7 +87,7 @@ declare module '@strapi/strapi' {
       findMany(params?: {
         where?: Record<string, unknown>;
         populate?: string[] | Record<string, unknown>;
-        orderBy?: Record<string, 'asc' | 'desc'>;
+        orderBy?: Record<string, "asc" | "desc">;
         limit?: number;
       }): Promise<Array<Record<string, unknown>>>;
       findOne(params?: {
@@ -141,7 +141,7 @@ declare module '@strapi/strapi' {
   }
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, unknown>;
   export default value;
 }

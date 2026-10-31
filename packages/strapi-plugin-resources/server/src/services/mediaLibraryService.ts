@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   CONTENT_TYPE_UIDS,
   normalizeUploadFile,
@@ -6,18 +7,13 @@ import {
   validateMediaFolderPath,
   type MediaLibraryAsset,
   type MediaLibraryFolderSummary,
-} from '../../../shared';
+} from "../../../shared";
 
 type UploadQueryFn = (uid: string) => {
-  findMany: (
-    opts?: Record<string, unknown>
-  ) => Promise<Record<string, unknown>[]>;
+  findMany: (opts?: Record<string, unknown>) => Promise<Record<string, unknown>[]>;
 };
 
-function getUploadQuery(
-  strapi: Core.Strapi,
-  uid: string
-): ReturnType<UploadQueryFn> | undefined {
+function getUploadQuery(strapi: Core.Strapi, uid: string): ReturnType<UploadQueryFn> | undefined {
   return (
     strapi as unknown as {
       db?: { query?: UploadQueryFn };
@@ -29,7 +25,7 @@ function resolveSafeFolderPath(folderPath?: string): string | undefined {
   if (!folderPath) return undefined;
   const check = validateMediaFolderPath(folderPath);
   if (!check.valid) {
-    throw new Error(check.errors.join('; '));
+    throw new Error(check.errors.join("; "));
   }
   return check.data;
 }
@@ -39,7 +35,7 @@ function buildFolderWhereFilter(
   folderId: number | null | undefined
 ): Record<string, unknown> {
   if (safeFolderPath) return { folderPath: safeFolderPath };
-  if (typeof folderId === 'number' && folderId > 0) return { folder: folderId };
+  if (typeof folderId === "number" && folderId > 0) return { folder: folderId };
   return {};
 }
 
@@ -62,19 +58,16 @@ function extractFolderCoordinates(existing: Record<string, unknown>): {
   folderId: number | null;
 } {
   const folderPath =
-    typeof existing.mediaFolderPath === 'string' &&
-    existing.mediaFolderPath.trim()
+    typeof existing.mediaFolderPath === "string" && existing.mediaFolderPath.trim()
       ? existing.mediaFolderPath.trim()
       : undefined;
   const folderId =
-    typeof existing.mediaFolderId === 'number' && existing.mediaFolderId > 0
+    typeof existing.mediaFolderId === "number" && existing.mediaFolderId > 0
       ? existing.mediaFolderId
       : null;
 
   if (!folderPath && !folderId) {
-    throw new Error(
-      'Album does not have a mediaFolderPath or mediaFolderId configured'
-    );
+    throw new Error("Album does not have a mediaFolderPath or mediaFolderId configured");
   }
   return { folderPath, folderId };
 }
@@ -106,20 +99,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
    */
   async listMediaFolders(): Promise<MediaLibraryFolderSummary[]> {
     try {
-      const folderQuery = getUploadQuery(strapi, 'plugin::upload.folder');
+      const folderQuery = getUploadQuery(strapi, "plugin::upload.folder");
       if (!folderQuery) return [];
 
       const rawFolders = await folderQuery.findMany({
-        orderBy: { name: 'asc' },
+        orderBy: { name: "asc" },
       });
 
       return (rawFolders || []).map((folder) => ({
         id: (folder.id as number | string) ?? 0,
-        documentId:
-          typeof folder.documentId === 'string' ? folder.documentId : undefined,
-        name: typeof folder.name === 'string' ? folder.name : 'Folder',
-        path: typeof folder.path === 'string' ? folder.path : '/',
-        pathId: typeof folder.pathId === 'number' ? folder.pathId : undefined,
+        documentId: typeof folder.documentId === "string" ? folder.documentId : undefined,
+        name: typeof folder.name === "string" ? folder.name : "Folder",
+        path: typeof folder.path === "string" ? folder.path : "/",
+        pathId: typeof folder.pathId === "number" ? folder.pathId : undefined,
       }));
     } catch {
       return [];
@@ -135,9 +127,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     mimePrefix?: string;
     limit?: number;
   }): Promise<MediaLibraryAsset[]> {
-    const settingsService = strapi
-      .plugin(PLUGIN_ID)
-      .service('settings') as {
+    const settingsService = strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings: () => Promise<{
         enableCloudinaryOptimization: boolean;
         maxPhotosPerAlbum: number;
@@ -147,18 +137,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const safeFolderPath = resolveSafeFolderPath(params.folderPath);
 
     try {
-      const fileQuery = getUploadQuery(strapi, 'plugin::upload.file');
+      const fileQuery = getUploadQuery(strapi, "plugin::upload.file");
       if (!fileQuery) return [];
 
       const where = buildFolderWhereFilter(safeFolderPath, params.folderId);
-      const maxLimit = Math.min(
-        params.limit || settings.maxPhotosPerAlbum || 120,
-        500
-      );
+      const maxLimit = Math.min(params.limit || settings.maxPhotosPerAlbum || 120, 500);
 
       const rawFiles = await fileQuery.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         limit: maxLimit,
       });
 
@@ -198,15 +185,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     photoCount: number;
     photos: MediaLibraryAsset[];
   }> {
-    if (!albumDocumentId || typeof albumDocumentId !== 'string') {
-      throw new Error('albumDocumentId is required');
+    if (!albumDocumentId || typeof albumDocumentId !== "string") {
+      throw new Error("albumDocumentId is required");
     }
 
     const docService = strapi.documents(CONTENT_TYPE_UIDS.galleryAlbum);
     const existing = (await docService.findOne({
       documentId: albumDocumentId,
       ...(locale ? { locale } : {}),
-      populate: ['coverPhoto', 'photos'],
+      populate: ["coverPhoto", "photos"],
     })) as Record<string, unknown> | null;
 
     if (!existing) {
@@ -217,13 +204,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const syncedPhotos = await this.listFilesInFolder({
       folderPath,
       folderId,
-      mimePrefix: 'image/',
+      mimePrefix: "image/",
     });
 
-    const updateData = buildSyncedAlbumUpdateData(
-      syncedPhotos,
-      existing.coverPhoto
-    );
+    const updateData = buildSyncedAlbumUpdateData(syncedPhotos, existing.coverPhoto);
 
     await docService.update({
       documentId: albumDocumentId,
@@ -233,7 +217,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     return {
       documentId: albumDocumentId,
-      slug: typeof existing.slug === 'string' ? existing.slug : albumDocumentId,
+      slug: typeof existing.slug === "string" ? existing.slug : albumDocumentId,
       photoCount: syncedPhotos.length,
       photos: syncedPhotos,
     };

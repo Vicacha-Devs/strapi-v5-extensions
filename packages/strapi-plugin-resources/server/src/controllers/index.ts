@@ -1,4 +1,4 @@
-import resourcesController from './resourcesController';
+import resourcesController from "./resourcesController";
 
 const controllers: Record<string, unknown> = {
   resourcesController,

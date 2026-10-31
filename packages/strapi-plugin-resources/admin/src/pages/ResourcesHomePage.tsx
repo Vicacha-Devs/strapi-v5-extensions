@@ -1,38 +1,30 @@
-import * as React from 'react';
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Main,
-  Typography,
-} from '@strapi/design-system';
-import { useFetchClient } from '@strapi/strapi/admin';
+import { Box, Button, Divider, Flex, Main, Typography } from "@strapi/design-system";
+import { useFetchClient } from "@strapi/strapi/admin";
+import * as React from "react";
+
 import {
   PLUGIN_ID,
   type GalleryAlbumRecord,
   type GlossaryTermRecord,
   type MediaLibraryAsset,
   type PublicationRecord,
-} from '../../../shared';
-import { GlossaryTab } from '../components/resources/GlossaryTab';
-import { PhotoGalleriesTab } from '../components/resources/PhotoGalleriesTab';
-import { PublicationsTab } from '../components/resources/PublicationsTab';
-import { useResourcesTranslation } from '../components/resources/uploadHelper';
+} from "../../../shared";
+import { GlossaryTab } from "../components/resources/GlossaryTab";
+import { PhotoGalleriesTab } from "../components/resources/PhotoGalleriesTab";
+import { PublicationsTab } from "../components/resources/PublicationsTab";
+import { useResourcesTranslation } from "../components/resources/uploadHelper";
 
-type ActiveTab = 'publications' | 'galleries' | 'glossary';
+type ActiveTab = "publications" | "galleries" | "glossary";
 
 export const ResourcesHomePage: React.FC = () => {
   const { t } = useResourcesTranslation();
   const { get, post, put, del } = useFetchClient();
-  const [activeTab, setActiveTab] = React.useState<ActiveTab>('publications');
-  const [publications, setPublications] = React.useState<PublicationRecord[]>(
-    []
-  );
+  const [activeTab, setActiveTab] = React.useState<ActiveTab>("publications");
+  const [publications, setPublications] = React.useState<PublicationRecord[]>([]);
   const [galleries, setGalleries] = React.useState<GalleryAlbumRecord[]>([]);
   const [glossary, setGlossary] = React.useState<GlossaryTermRecord[]>([]);
   const [mediaFiles, setMediaFiles] = React.useState<MediaLibraryAsset[]>([]);
-  const [statusMessage, setStatusMessage] = React.useState<string>('');
+  const [statusMessage, setStatusMessage] = React.useState<string>("");
 
   const loadHub = React.useCallback(async () => {
     try {
@@ -66,37 +58,35 @@ export const ResourcesHomePage: React.FC = () => {
           <Flex direction="column" alignItems="flex-start" gap={1}>
             <Typography variant="alpha" tag="h1">
               {t(
-                'page.ui.resources_media_galleries_glossary',
-                'Resources, Media Galleries & Glossary'
+                "page.ui.resources_media_galleries_glossary",
+                "Resources, Media Galleries & Glossary"
               )}
             </Typography>
             <Typography variant="epsilon" textColor="neutral600">
               {t(
-                'page.ui.hub_subtitle',
-                'Manage downloadable PDFs, photo albums, and glossary terms — or click Edit to open any entry in Content Manager.'
+                "page.ui.hub_subtitle",
+                "Manage downloadable PDFs, photo albums, and glossary terms — or click Edit to open any entry in Content Manager."
               )}
             </Typography>
           </Flex>
           <Flex gap={2} wrap="wrap">
             <Button
-              variant={activeTab === 'publications' ? 'default' : 'tertiary'}
-              onClick={() => setActiveTab('publications')}
+              variant={activeTab === "publications" ? "default" : "tertiary"}
+              onClick={() => setActiveTab("publications")}
             >
-              {t('page.ui.tab_publications', 'Publications')} (
-              {publications.length})
+              {t("page.ui.tab_publications", "Publications")} ({publications.length})
             </Button>
             <Button
-              variant={activeTab === 'galleries' ? 'default' : 'tertiary'}
-              onClick={() => setActiveTab('galleries')}
+              variant={activeTab === "galleries" ? "default" : "tertiary"}
+              onClick={() => setActiveTab("galleries")}
             >
-              {t('page.ui.tab_photo_galleries', 'Photo Galleries')} (
-              {galleries.length})
+              {t("page.ui.tab_photo_galleries", "Photo Galleries")} ({galleries.length})
             </Button>
             <Button
-              variant={activeTab === 'glossary' ? 'default' : 'tertiary'}
-              onClick={() => setActiveTab('glossary')}
+              variant={activeTab === "glossary" ? "default" : "tertiary"}
+              onClick={() => setActiveTab("glossary")}
             >
-              {t('page.ui.tab_glossary', 'Glossary')} ({glossary.length})
+              {t("page.ui.tab_glossary", "Glossary")} ({glossary.length})
             </Button>
           </Flex>
         </Flex>
@@ -107,12 +97,8 @@ export const ResourcesHomePage: React.FC = () => {
               <Typography variant="omega" fontWeight="bold">
                 {statusMessage}
               </Typography>
-              <Button
-                size="S"
-                variant="tertiary"
-                onClick={() => setStatusMessage('')}
-              >
-                {t('page.ui.dismiss', 'Dismiss')}
+              <Button size="S" variant="tertiary" onClick={() => setStatusMessage("")}>
+                {t("page.ui.dismiss", "Dismiss")}
               </Button>
             </Flex>
           </Box>
@@ -120,7 +106,7 @@ export const ResourcesHomePage: React.FC = () => {
 
         <Divider />
 
-        {activeTab === 'publications' && (
+        {activeTab === "publications" && (
           <PublicationsTab
             publications={publications}
             mediaFiles={mediaFiles}
@@ -132,7 +118,7 @@ export const ResourcesHomePage: React.FC = () => {
           />
         )}
 
-        {activeTab === 'galleries' && (
+        {activeTab === "galleries" && (
           <PhotoGalleriesTab
             galleries={galleries}
             mediaFiles={mediaFiles}
@@ -144,7 +130,7 @@ export const ResourcesHomePage: React.FC = () => {
           />
         )}
 
-        {activeTab === 'glossary' && (
+        {activeTab === "glossary" && (
           <GlossaryTab
             glossary={glossary}
             mediaFiles={mediaFiles}

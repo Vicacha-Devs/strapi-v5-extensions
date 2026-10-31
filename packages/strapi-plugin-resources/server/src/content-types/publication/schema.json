@@ -53,14 +53,7 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": [
-        "guide",
-        "book",
-        "pamphlet",
-        "press_kit",
-        "academic",
-        "general"
-      ],
+      "enum": ["guide", "book", "pamphlet", "press_kit", "academic", "general"],
       "default": "guide",
       "required": true,
       "pluginOptions": {

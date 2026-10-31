@@ -1,8 +1,9 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../../shared';
-import type catalogServiceFactory from '../services/catalogService';
-import type mediaLibraryServiceFactory from '../services/mediaLibraryService';
-import type settingsFactory from '../services/settings';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../../shared";
+import type catalogServiceFactory from "../services/catalogService";
+import type mediaLibraryServiceFactory from "../services/mediaLibraryService";
+import type settingsFactory from "../services/settings";
 
 export interface ControllerCtx {
   query?: Record<string, string | undefined>;
@@ -19,32 +20,28 @@ export interface ControllerCtx {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsSvc = () =>
-    strapi.plugin(PLUGIN_ID).service<ReturnType<typeof settingsFactory>>('settings');
+    strapi.plugin(PLUGIN_ID).service<ReturnType<typeof settingsFactory>>("settings");
   const getCatalogSvc = () =>
-    strapi.plugin(PLUGIN_ID).service<ReturnType<typeof catalogServiceFactory>>('catalogService');
+    strapi.plugin(PLUGIN_ID).service<ReturnType<typeof catalogServiceFactory>>("catalogService");
   const getMediaSvc = () =>
-    strapi.plugin(PLUGIN_ID).service<ReturnType<typeof mediaLibraryServiceFactory>>('mediaLibraryService');
+    strapi
+      .plugin(PLUGIN_ID)
+      .service<ReturnType<typeof mediaLibraryServiceFactory>>("mediaLibraryService");
 
   return {
     async getHubOverview(ctx: ControllerCtx) {
       const locale = ctx.query?.locale;
-      const [
-        settings,
-        publications,
-        galleries,
-        glossary,
-        mediaFolders,
-        mediaFiles,
-      ] = await Promise.all([
-        getSettingsSvc().getPublicSummary(),
-        getCatalogSvc().listPublications({ locale }),
-        getCatalogSvc().listGalleryAlbums({ locale }),
-        getCatalogSvc().listGlossaryTerms({ locale }),
-        getMediaSvc().listMediaFolders(),
-        getMediaSvc().listMediaFiles
-          ? getMediaSvc().listMediaFiles({ limit: 200 })
-          : Promise.resolve([]),
-      ]);
+      const [settings, publications, galleries, glossary, mediaFolders, mediaFiles] =
+        await Promise.all([
+          getSettingsSvc().getPublicSummary(),
+          getCatalogSvc().listPublications({ locale }),
+          getCatalogSvc().listGalleryAlbums({ locale }),
+          getCatalogSvc().listGlossaryTerms({ locale }),
+          getMediaSvc().listMediaFolders(),
+          getMediaSvc().listMediaFiles
+            ? getMediaSvc().listMediaFiles({ limit: 200 })
+            : Promise.resolve([]),
+        ]);
 
       ctx.body = {
         data: {
@@ -69,11 +66,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const locale = ctx.query?.locale;
       const category = ctx.query?.category;
       const featured =
-        ctx.query?.featured === 'true'
-          ? true
-          : ctx.query?.featured === 'false'
-            ? false
-            : undefined;
+        ctx.query?.featured === "true" ? true : ctx.query?.featured === "false" ? false : undefined;
       const q = ctx.query?.q;
 
       const items = await getCatalogSvc().listPublications({
@@ -86,11 +79,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async getPublicationBySlug(ctx: ControllerCtx) {
-      const slug = ctx.params?.slug || '';
+      const slug = ctx.params?.slug || "";
       const locale = ctx.query?.locale;
       const item = await getCatalogSvc().getPublicationBySlug(slug, locale);
       if (!item) {
-        return ctx.notFound('Publication not found');
+        return ctx.notFound("Publication not found");
       }
       ctx.body = { data: item };
     },
@@ -98,10 +91,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async createPublication(ctx: ControllerCtx) {
       try {
         const locale = ctx.query?.locale;
-        const created = await getCatalogSvc().createPublication(
-          ctx.request?.body,
-          locale
-        );
+        const created = await getCatalogSvc().createPublication(ctx.request?.body, locale);
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err) {
@@ -111,7 +101,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async updatePublication(ctx: ControllerCtx) {
       try {
-        const documentId = ctx.params?.documentId || '';
+        const documentId = ctx.params?.documentId || "";
         const locale = ctx.query?.locale;
         const updated = await getCatalogSvc().updatePublication(
           documentId,
@@ -126,7 +116,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async deletePublication(ctx: ControllerCtx) {
       try {
-        const documentId = ctx.params?.documentId || '';
+        const documentId = ctx.params?.documentId || "";
         const result = await getCatalogSvc().deletePublication(documentId);
         ctx.body = { data: result };
       } catch (err) {
@@ -136,12 +126,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async downloadPublication(ctx: ControllerCtx) {
       try {
-        const slug = ctx.params?.slug || '';
+        const slug = ctx.params?.slug || "";
         const locale = ctx.query?.locale;
-        const ticket = await getCatalogSvc().recordPublicationDownload(
-          slug,
-          locale
-        );
+        const ticket = await getCatalogSvc().recordPublicationDownload(slug, locale);
         if (ctx.set && ticket.headers) {
           for (const [k, v] of Object.entries(ticket.headers)) {
             ctx.set(k, v as string);
@@ -157,11 +144,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const locale = ctx.query?.locale;
       const category = ctx.query?.category;
       const featured =
-        ctx.query?.featured === 'true'
-          ? true
-          : ctx.query?.featured === 'false'
-            ? false
-            : undefined;
+        ctx.query?.featured === "true" ? true : ctx.query?.featured === "false" ? false : undefined;
       const items = await getCatalogSvc().listGalleryAlbums({
         locale,
         category,
@@ -171,11 +154,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async getGalleryBySlug(ctx: ControllerCtx) {
-      const slug = ctx.params?.slug || '';
+      const slug = ctx.params?.slug || "";
       const locale = ctx.query?.locale;
       const item = await getCatalogSvc().getGalleryAlbumBySlug(slug, locale);
       if (!item) {
-        return ctx.notFound('Gallery album not found');
+        return ctx.notFound("Gallery album not found");
       }
       ctx.body = { data: item };
     },
@@ -183,10 +166,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async createGalleryAlbum(ctx: ControllerCtx) {
       try {
         const locale = ctx.query?.locale;
-        const created = await getCatalogSvc().createGalleryAlbum(
-          ctx.request?.body,
-          locale
-        );
+        const created = await getCatalogSvc().createGalleryAlbum(ctx.request?.body, locale);
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err) {
@@ -196,7 +176,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async updateGalleryAlbum(ctx: ControllerCtx) {
       try {
-        const documentId = ctx.params?.documentId || '';
+        const documentId = ctx.params?.documentId || "";
         const locale = ctx.query?.locale;
         const updated = await getCatalogSvc().updateGalleryAlbum(
           documentId,
@@ -211,7 +191,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async deleteGalleryAlbum(ctx: ControllerCtx) {
       try {
-        const documentId = ctx.params?.documentId || '';
+        const documentId = ctx.params?.documentId || "";
         const result = await getCatalogSvc().deleteGalleryAlbum(documentId);
         ctx.body = { data: result };
       } catch (err) {
@@ -236,10 +216,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async createGlossaryTerm(ctx: ControllerCtx) {
       try {
         const locale = ctx.query?.locale;
-        const created = await getCatalogSvc().createGlossaryTerm(
-          ctx.request?.body,
-          locale
-        );
+        const created = await getCatalogSvc().createGlossaryTerm(ctx.request?.body, locale);
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err) {
@@ -249,7 +226,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async updateGlossaryTerm(ctx: ControllerCtx) {
       try {
-        const documentId = ctx.params?.documentId || '';
+        const documentId = ctx.params?.documentId || "";
         const locale = ctx.query?.locale;
         const updated = await getCatalogSvc().updateGlossaryTerm(
           documentId,
@@ -264,7 +241,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async deleteGlossaryTerm(ctx: ControllerCtx) {
       try {
-        const documentId = ctx.params?.documentId || '';
+        const documentId = ctx.params?.documentId || "";
         const result = await getCatalogSvc().deleteGlossaryTerm(documentId);
         ctx.body = { data: result };
       } catch (err) {
@@ -288,14 +265,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async syncAlbumMediaFolder(ctx: ControllerCtx) {
       try {
         const documentId =
-          ctx.params?.documentId ||
-          (ctx.request?.body?.documentId as string | undefined) ||
-          '';
+          ctx.params?.documentId || (ctx.request?.body?.documentId as string | undefined) || "";
         const locale = ctx.query?.locale;
-        const result = await getMediaSvc().syncAlbumFromMediaFolder(
-          documentId,
-          locale
-        );
+        const result = await getMediaSvc().syncAlbumFromMediaFolder(documentId, locale);
         ctx.body = { data: result };
       } catch (err) {
         return ctx.badRequest((err as Error).message);
@@ -309,9 +281,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async updateSettings(ctx: ControllerCtx) {
       try {
-        const data = await getSettingsSvc().updateSettings(
-          ctx.request?.body || {}
-        );
+        const data = await getSettingsSvc().updateSettings(ctx.request?.body || {});
         ctx.body = { data };
       } catch (err) {
         return ctx.badRequest((err as Error).message);
