@@ -1,13 +1,14 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Typography } from '@strapi/design-system';
-import isEqual from 'lodash/isEqual';
-import isNull from 'lodash/isNull';
-import type { SeoChecksState, SeoCheckStatus } from '../../../../../../../shared';
-import { getTrad } from '../../../../../utils/getTrad';
-import { qualityVerdict } from '../../../utils/checks';
-import { SeoCheckerContext } from '../../Summary';
-import { SEOAccordion } from '../SEOAccordion';
+import { Box, Typography } from "@strapi/design-system";
+import isEqual from "lodash/isEqual";
+import isNull from "lodash/isNull";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import { getTrad } from "../../../../../utils/getTrad";
+import { qualityVerdict } from "../../../utils/checks";
+import { SeoCheckerContext } from "../../Summary";
+import { SEOAccordion } from "../SEOAccordion";
 
 interface CanonicalUrlCheckProps {
   canonicalUrl: string | null;
@@ -20,8 +21,8 @@ export const CanonicalUrlCheck = ({ canonicalUrl, checks }: CanonicalUrlCheckPro
 
   let status: SeoCheckStatus = {
     message: formatMessage({
-      id: getTrad('SEOChecks.canonicalUrlCheck.found'),
-      defaultMessage: 'A canonical URL has been found.',
+      id: getTrad("SEOChecks.canonicalUrlCheck.found"),
+      defaultMessage: "A canonical URL has been found.",
     }),
     qualityVerdict: qualityVerdict.good,
   };
@@ -30,16 +31,16 @@ export const CanonicalUrlCheck = ({ canonicalUrl, checks }: CanonicalUrlCheckPro
     if (isNull(canonicalUrl)) {
       status = {
         message: formatMessage({
-          id: getTrad('SEOChecks.canonicalUrlCheck.default'),
-          defaultMessage: 'No Canonical URL has been found.',
+          id: getTrad("SEOChecks.canonicalUrlCheck.default"),
+          defaultMessage: "No Canonical URL has been found.",
         }),
         qualityVerdict: qualityVerdict.bad,
       };
     }
     if (!isEqual(status, checks.canonicalUrl) && dispatch) {
       dispatch({
-        type: 'UPDATE_PONCTUAL',
-        value: { ...status, entity: 'canonicalUrl' },
+        type: "UPDATE_PONCTUAL",
+        value: { ...status, entity: "canonicalUrl" },
       });
     }
   }, []);
@@ -47,13 +48,13 @@ export const CanonicalUrlCheck = ({ canonicalUrl, checks }: CanonicalUrlCheckPro
   return (
     <SEOAccordion
       title={formatMessage({
-        id: getTrad('SEOModal.summary-title.canonical-url'),
-        defaultMessage: 'Canonical URL',
+        id: getTrad("SEOModal.summary-title.canonical-url"),
+        defaultMessage: "Canonical URL",
       })}
       status={checks.canonicalUrl}
       label={formatMessage({
-        id: getTrad('SEOChecks.canonicalUrlCheck.label'),
-        defaultMessage: 'This will check if you have a canonical URL.',
+        id: getTrad("SEOChecks.canonicalUrlCheck.label"),
+        defaultMessage: "This will check if you have a canonical URL.",
       })}
       component={
         <Box padding={canonicalUrl ? 4 : 0} background="neutral100">

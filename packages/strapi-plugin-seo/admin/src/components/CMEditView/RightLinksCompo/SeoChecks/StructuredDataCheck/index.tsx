@@ -1,12 +1,13 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import isEmpty from 'lodash/isEmpty';
-import isEqual from 'lodash/isEqual';
-import type { SeoChecksState, SeoCheckStatus } from '../../../../../../../shared';
-import { getTrad } from '../../../../../utils/getTrad';
-import { qualityVerdict } from '../../../utils/checks';
-import { SeoCheckerContext } from '../../Summary';
-import { SEOAccordion } from '../SEOAccordion';
+import isEmpty from "lodash/isEmpty";
+import isEqual from "lodash/isEqual";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import { getTrad } from "../../../../../utils/getTrad";
+import { qualityVerdict } from "../../../utils/checks";
+import { SeoCheckerContext } from "../../Summary";
+import { SEOAccordion } from "../SEOAccordion";
 
 interface StructuredDataCheckProps {
   structuredData: unknown;
@@ -19,9 +20,9 @@ export const StructuredDataCheck = ({ structuredData, checks }: StructuredDataCh
 
   let status: SeoCheckStatus = {
     message: formatMessage({
-      id: getTrad('SEOChecks.structuredDataCheck.default'),
+      id: getTrad("SEOChecks.structuredDataCheck.default"),
       defaultMessage:
-        'A Structured Data json has been found! However we can validate the accuracy of its content.',
+        "A Structured Data json has been found! However we can validate the accuracy of its content.",
     }),
     qualityVerdict: qualityVerdict.good,
   };
@@ -30,16 +31,16 @@ export const StructuredDataCheck = ({ structuredData, checks }: StructuredDataCh
     if (isEmpty(structuredData)) {
       status = {
         message: formatMessage({
-          id: getTrad('SEOChecks.structuredDataCheck.not-found'),
-          defaultMessage: 'No Structured Data json has been found.',
+          id: getTrad("SEOChecks.structuredDataCheck.not-found"),
+          defaultMessage: "No Structured Data json has been found.",
         }),
         qualityVerdict: qualityVerdict.bad,
       };
     }
     if (!isEqual(status, checks.structuredData) && dispatch) {
       dispatch({
-        type: 'UPDATE_PONCTUAL',
-        value: { ...status, entity: 'structuredData' },
+        type: "UPDATE_PONCTUAL",
+        value: { ...status, entity: "structuredData" },
       });
     }
   }, []);
@@ -47,14 +48,14 @@ export const StructuredDataCheck = ({ structuredData, checks }: StructuredDataCh
   return (
     <SEOAccordion
       title={formatMessage({
-        id: getTrad('SEOModal.summary-title.structured-data'),
-        defaultMessage: 'JSON Structured Data',
+        id: getTrad("SEOModal.summary-title.structured-data"),
+        defaultMessage: "JSON Structured Data",
       })}
       status={checks.structuredData}
       label={formatMessage({
-        id: getTrad('SEOChecks.structuredDataCheck.label'),
+        id: getTrad("SEOChecks.structuredDataCheck.label"),
         defaultMessage:
-          'Structured data is a standardized format for providing information about a page and classifying the page content.',
+          "Structured data is a standardized format for providing information about a page and classifying the page content.",
       })}
     />
   );

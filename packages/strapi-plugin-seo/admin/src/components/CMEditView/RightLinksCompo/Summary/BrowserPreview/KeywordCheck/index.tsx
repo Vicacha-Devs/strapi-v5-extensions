@@ -1,8 +1,9 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Flex, Typography } from '@strapi/design-system';
-import { CheckCircle, WarningCircle } from '@strapi/icons';
-import { getTrad } from '../../../../../../utils/getTrad';
+import { Flex, Typography } from "@strapi/design-system";
+import { CheckCircle, WarningCircle } from "@strapi/icons";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import { getTrad } from "../../../../../../utils/getTrad";
 
 interface KeywordCheckProps {
   item: string;
@@ -12,7 +13,7 @@ interface KeywordCheckProps {
 
 export const KeywordCheck = ({ item, keywords, label }: KeywordCheckProps) => {
   const { formatMessage } = useIntl();
-  const _keywords = keywords.split(',');
+  const _keywords = keywords.split(",");
   const matches = _keywords.filter((x) => item.toLowerCase().includes(x.toLowerCase().trim()));
 
   const getIcon = () => {
@@ -28,13 +29,13 @@ export const KeywordCheck = ({ item, keywords, label }: KeywordCheckProps) => {
       <Typography>
         {formatMessage(
           {
-            id: getTrad('SEOSocialPreview.keyword-check'),
-            defaultMessage: 'You use {count} keyword(s) in your {label} ({matches})',
+            id: getTrad("SEOSocialPreview.keyword-check"),
+            defaultMessage: "You use {count} keyword(s) in your {label} ({matches})",
           },
           {
             count: matches.length,
             label,
-            matches: matches.join(', ').trim(),
+            matches: matches.join(", ").trim(),
           }
         )}
       </Typography>

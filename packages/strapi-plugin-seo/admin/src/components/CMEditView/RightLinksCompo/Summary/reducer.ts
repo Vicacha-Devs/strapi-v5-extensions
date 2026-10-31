@@ -1,8 +1,8 @@
-import type { SeoCheckerAction, SeoChecksState } from '../../../../../../shared';
+import type { SeoCheckerAction, SeoChecksState } from "../../../../../../shared";
 
 export function reducer(state: SeoChecksState, action: SeoCheckerAction): SeoChecksState {
   switch (action.type) {
-    case 'UPDATE_PONCTUAL':
+    case "UPDATE_PONCTUAL":
       return {
         ...state,
         [action.value.entity]: {
@@ -10,7 +10,7 @@ export function reducer(state: SeoChecksState, action: SeoCheckerAction): SeoChe
           message: action.value.message,
         },
       };
-    case 'UPDATE_FOR_PREVIEW':
+    case "UPDATE_FOR_PREVIEW":
       return action.value;
     default:
       return state;

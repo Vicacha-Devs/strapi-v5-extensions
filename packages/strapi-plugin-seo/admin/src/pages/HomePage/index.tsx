@@ -1,18 +1,19 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box } from '@strapi/design-system';
-import { Information } from '@strapi/icons';
+import { Box } from "@strapi/design-system";
+import { Information } from "@strapi/icons";
 import {
   ContentBox,
   Page,
   private_useAutoReloadOverlayBlocker as useAutoReloadOverlayBlocker,
   useFetchClient,
-} from '@strapi/strapi/admin';
-import type { ContentTypesResponse } from '../../../../shared';
-import { Header } from '../../components/HomePage/Header';
-import { Main } from '../../components/HomePage/Main';
-import { pluginId } from '../../pluginId';
-import { getTrad } from '../../utils/getTrad';
+} from "@strapi/strapi/admin";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { ContentTypesResponse } from "../../../../shared";
+import { Header } from "../../components/HomePage/Header";
+import { Main } from "../../components/HomePage/Main";
+import { pluginId } from "../../pluginId";
+import { getTrad } from "../../utils/getTrad";
 
 export const HomePage = React.memo(() => {
   const { get, post } = useFetchClient();
@@ -86,11 +87,11 @@ export const HomePage = React.memo(() => {
       <Box paddingLeft={8} paddingRight={8}>
         <ContentBox
           title={formatMessage({
-            id: getTrad('Information'),
-            defaultMessage: 'Information',
+            id: getTrad("Information"),
+            defaultMessage: "Information",
           })}
           subtitle={formatMessage({
-            id: getTrad('SEOPage.info.information'),
+            id: getTrad("SEOPage.info.information"),
             defaultMessage:
               "When adding your SEO component, make sure to name it 'seo' and to include it in the root of your Content-Type.",
           })}

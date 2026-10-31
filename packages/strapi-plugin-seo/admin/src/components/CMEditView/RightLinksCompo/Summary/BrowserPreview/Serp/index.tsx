@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from "@strapi/design-system";
+import * as React from "react";
 
 interface SerpProps {
   metaTitle: string;

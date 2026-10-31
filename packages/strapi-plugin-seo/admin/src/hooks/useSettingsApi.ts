@@ -1,6 +1,7 @@
-import { useFetchClient } from '@strapi/strapi/admin';
-import type { SeoSettingsMap } from '../../../shared';
-import { pluginId } from '../pluginId';
+import { useFetchClient } from "@strapi/strapi/admin";
+
+import type { SeoSettingsMap } from "../../../shared";
+import { pluginId } from "../pluginId";
 
 export const useSettingsApi = () => {
   const { get, post } = useFetchClient();

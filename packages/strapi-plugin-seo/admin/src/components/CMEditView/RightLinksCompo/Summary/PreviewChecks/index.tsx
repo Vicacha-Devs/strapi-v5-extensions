@@ -1,10 +1,11 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Flex, Typography } from '@strapi/design-system';
-import { CheckCircle, CrossCircle, WarningCircle } from '@strapi/icons';
-import type { SeoChecksState, SeoCheckStatus } from '../../../../../../../shared';
-import { getTrad } from '../../../../../utils/getTrad';
-import { qualityVerdict } from '../../../utils/checks';
+import { Box, Flex, Typography } from "@strapi/design-system";
+import { CheckCircle, CrossCircle, WarningCircle } from "@strapi/icons";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import { getTrad } from "../../../../../utils/getTrad";
+import { qualityVerdict } from "../../../utils/checks";
 
 interface PreviewChecksProps {
   checks: SeoChecksState;
@@ -12,8 +13,8 @@ interface PreviewChecksProps {
 
 export const PreviewChecks = ({ checks }: PreviewChecksProps) => {
   const { formatMessage } = useIntl();
-  const values = Object.values(checks || {}).filter(
-    (c): c is SeoCheckStatus => Boolean(c && typeof c === 'object' && 'qualityVerdict' in c)
+  const values = Object.values(checks || {}).filter((c): c is SeoCheckStatus =>
+    Boolean(c && typeof c === "object" && "qualityVerdict" in c)
   );
 
   const good = values.filter((check) => check.qualityVerdict === qualityVerdict.good).length;
@@ -28,8 +29,8 @@ export const PreviewChecks = ({ checks }: PreviewChecksProps) => {
         <CheckCircle aria-hidden={true} fill="success600" />
         <Typography>
           {formatMessage({
-            id: getTrad('Good'),
-            defaultMessage: 'Good',
+            id: getTrad("Good"),
+            defaultMessage: "Good",
           })}
           {`: ${good}`}
         </Typography>
@@ -38,8 +39,8 @@ export const PreviewChecks = ({ checks }: PreviewChecksProps) => {
         <WarningCircle aria-hidden={true} fill="warning600" />
         <Typography>
           {formatMessage({
-            id: getTrad('Improvements'),
-            defaultMessage: 'Improvements',
+            id: getTrad("Improvements"),
+            defaultMessage: "Improvements",
           })}
           {`: ${improvements}`}
         </Typography>
@@ -48,8 +49,8 @@ export const PreviewChecks = ({ checks }: PreviewChecksProps) => {
         <CrossCircle aria-hidden={true} fill="danger600" />
         <Typography>
           {formatMessage({
-            id: getTrad('Bad'),
-            defaultMessage: 'Bad',
+            id: getTrad("Bad"),
+            defaultMessage: "Bad",
           })}
           {`: ${bad}`}
         </Typography>

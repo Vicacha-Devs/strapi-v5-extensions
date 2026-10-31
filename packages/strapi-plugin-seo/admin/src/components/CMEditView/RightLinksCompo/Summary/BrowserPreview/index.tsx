@@ -1,13 +1,14 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Divider, EmptyStateLayout, Flex, Modal, Typography } from '@strapi/design-system';
-import get from 'lodash/get';
-import type { ContentManagerFormValues, SeoComponentValues } from '../../../../../../../shared';
-import { getTrad } from '../../../../../utils/getTrad';
-import { Illo } from '../../../../HomePage/Main/EmptyComponentLayout/illo';
-import { KeywordCheck } from './KeywordCheck';
-import { MetaChecks } from './MetaChecks';
-import { Serp } from './Serp';
+import { Box, Divider, EmptyStateLayout, Flex, Modal, Typography } from "@strapi/design-system";
+import get from "lodash/get";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { ContentManagerFormValues, SeoComponentValues } from "../../../../../../../shared";
+import { getTrad } from "../../../../../utils/getTrad";
+import { Illo } from "../../../../HomePage/Main/EmptyComponentLayout/illo";
+import { KeywordCheck } from "./KeywordCheck";
+import { MetaChecks } from "./MetaChecks";
+import { Serp } from "./Serp";
 
 interface BrowserPreviewProps {
   modifiedData: ContentManagerFormValues;
@@ -16,18 +17,18 @@ interface BrowserPreviewProps {
 export const BrowserPreview = ({ modifiedData }: BrowserPreviewProps) => {
   const { formatMessage } = useIntl();
 
-  const seo = get<SeoComponentValues | null>(modifiedData, 'seo', null);
-  const metaTitle = get<string | null>(seo, 'metaTitle', null);
-  const metaDescription = get<string | null>(seo, 'metaDescription', null);
-  const keywords = get<string | null>(seo, 'keywords', null);
+  const seo = get<SeoComponentValues | null>(modifiedData, "seo", null);
+  const metaTitle = get<string | null>(seo, "metaTitle", null);
+  const metaDescription = get<string | null>(seo, "metaDescription", null);
+  const keywords = get<string | null>(seo, "keywords", null);
 
   return (
     <Modal.Content labelledBy="title">
       <Modal.Header>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
-            id: getTrad('Button.browser-preview'),
-            defaultMessage: 'Browser Preview',
+            id: getTrad("Button.browser-preview"),
+            defaultMessage: "Browser Preview",
           })}
         </Typography>
       </Modal.Header>
@@ -60,8 +61,8 @@ export const BrowserPreview = ({ modifiedData }: BrowserPreviewProps) => {
             <EmptyStateLayout
               icon={<Illo />}
               content={formatMessage({
-                id: getTrad('Modal.seo-component-empty'),
-                defaultMessage: 'Your SEO component is empty...',
+                id: getTrad("Modal.seo-component-empty"),
+                defaultMessage: "Your SEO component is empty...",
               })}
             />
           </Box>

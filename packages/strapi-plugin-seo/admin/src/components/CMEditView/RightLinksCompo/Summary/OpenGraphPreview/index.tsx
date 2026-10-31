@@ -1,12 +1,13 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Badge, Box, EmptyStateLayout, Flex, Modal, Typography } from '@strapi/design-system';
-import type { ContentManagerFormValues, OpenGraphData } from '../../../../../../../shared';
-import { getTrad } from '../../../../../utils/getTrad';
-import { Illo } from '../../../../HomePage/Main/EmptyComponentLayout/illo';
-import { FacebookOGPreview } from './Facebook';
-import { LinkedInOGPreview } from './LinkedIn';
-import { TwitterOGPreview } from './X';
+import { Badge, Box, EmptyStateLayout, Flex, Modal, Typography } from "@strapi/design-system";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { ContentManagerFormValues, OpenGraphData } from "../../../../../../../shared";
+import { getTrad } from "../../../../../utils/getTrad";
+import { Illo } from "../../../../HomePage/Main/EmptyComponentLayout/illo";
+import { FacebookOGPreview } from "./Facebook";
+import { LinkedInOGPreview } from "./LinkedIn";
+import { TwitterOGPreview } from "./X";
 
 interface OpenGraphPreviewProps {
   modifiedData: ContentManagerFormValues;
@@ -21,8 +22,8 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
       <Modal.Header>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
-            id: getTrad('Button.open-graph-preview'),
-            defaultMessage: 'Open Graph Preview',
+            id: getTrad("Button.open-graph-preview"),
+            defaultMessage: "Open Graph Preview",
           })}
         </Typography>
       </Modal.Header>
@@ -33,8 +34,8 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
                   {formatMessage({
-                    id: getTrad('Social-network.platform.facebook'),
-                    defaultMessage: 'Facebook',
+                    id: getTrad("Social-network.platform.facebook"),
+                    defaultMessage: "Facebook",
                   })}
                 </Badge>
               </Flex>
@@ -48,8 +49,8 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
                   {formatMessage({
-                    id: getTrad('Social-network.platform.twitter'),
-                    defaultMessage: 'X (Twitter)',
+                    id: getTrad("Social-network.platform.twitter"),
+                    defaultMessage: "X (Twitter)",
                   })}
                 </Badge>
               </Flex>
@@ -63,8 +64,8 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
                   {formatMessage({
-                    id: getTrad('Social-network.platform.linkedin'),
-                    defaultMessage: 'LinkedIn',
+                    id: getTrad("Social-network.platform.linkedin"),
+                    defaultMessage: "LinkedIn",
                   })}
                 </Badge>
               </Flex>
@@ -80,8 +81,8 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
             <EmptyStateLayout
               icon={<Illo />}
               content={formatMessage({
-                id: getTrad('Modal.seo-component-empty-open-graph'),
-                defaultMessage: 'The Open Graph metadata is empty...',
+                id: getTrad("Modal.seo-component-empty-open-graph"),
+                defaultMessage: "The Open Graph metadata is empty...",
               })}
             />
           </Box>

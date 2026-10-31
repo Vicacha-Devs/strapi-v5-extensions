@@ -1,5 +1,5 @@
-import { seoRoutes } from './seo';
-import { settingsRoutes } from './settings';
+import { seoRoutes } from "./seo";
+import { settingsRoutes } from "./settings";
 
 export default {
   seo: seoRoutes,

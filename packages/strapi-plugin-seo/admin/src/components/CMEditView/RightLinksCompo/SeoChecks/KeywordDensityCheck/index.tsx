@@ -1,18 +1,19 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Badge, Box, Flex } from '@strapi/design-system';
-import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
-import isEqual from 'lodash/isEqual';
+import { Badge, Box, Flex } from "@strapi/design-system";
+import get from "lodash/get";
+import isEmpty from "lodash/isEmpty";
+import isEqual from "lodash/isEqual";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
 import type {
   KeywordDensityMap,
   SeoChecksState,
   SeoCheckStatus,
-} from '../../../../../../../shared';
-import { getTrad } from '../../../../../utils/getTrad';
-import { qualityVerdict } from '../../../utils/checks';
-import { SeoCheckerContext } from '../../Summary';
-import { SEOAccordion } from '../SEOAccordion';
+} from "../../../../../../../shared";
+import { getTrad } from "../../../../../utils/getTrad";
+import { qualityVerdict } from "../../../utils/checks";
+import { SeoCheckerContext } from "../../Summary";
+import { SEOAccordion } from "../SEOAccordion";
 
 interface KeywordDensityCheckProps {
   keywordsDensity: KeywordDensityMap;
@@ -25,8 +26,8 @@ export const KeywordDensityCheck = ({ keywordsDensity, checks }: KeywordDensityC
 
   let status: SeoCheckStatus = {
     message: formatMessage({
-      id: getTrad('SEOChecks.keywordsDensityCheck.default'),
-      defaultMessage: 'Every keywords are used more than 2 times.',
+      id: getTrad("SEOChecks.keywordsDensityCheck.default"),
+      defaultMessage: "Every keywords are used more than 2 times.",
     }),
     qualityVerdict: qualityVerdict.good,
   };
@@ -35,27 +36,27 @@ export const KeywordDensityCheck = ({ keywordsDensity, checks }: KeywordDensityC
     if (isEmpty(keywordsDensity)) {
       status = {
         message: formatMessage({
-          id: getTrad('SEOChecks.keywordsDensityCheck.no-keywords'),
-          defaultMessage: 'No keywords were found in your SEO component.',
+          id: getTrad("SEOChecks.keywordsDensityCheck.no-keywords"),
+          defaultMessage: "No keywords were found in your SEO component.",
         }),
         qualityVerdict: qualityVerdict.improvements,
       };
     } else {
       Object.keys(keywordsDensity).forEach((keyword) => {
-        const count = get<number>(keywordsDensity[keyword], 'count', 0);
+        const count = get<number>(keywordsDensity[keyword], "count", 0);
         if (count === 0) {
           status = {
             message: formatMessage({
-              id: getTrad('SEOChecks.keywordsDensityCheck.one-not-used'),
-              defaultMessage: 'One keyword is not being used in your content.',
+              id: getTrad("SEOChecks.keywordsDensityCheck.one-not-used"),
+              defaultMessage: "One keyword is not being used in your content.",
             }),
             qualityVerdict: qualityVerdict.improvements,
           };
         } else if (count <= 1) {
           status = {
             message: formatMessage({
-              id: getTrad('SEOChecks.keywordsDensityCheck.one-used-once'),
-              defaultMessage: 'One keyword is only used once in your content.',
+              id: getTrad("SEOChecks.keywordsDensityCheck.one-used-once"),
+              defaultMessage: "One keyword is only used once in your content.",
             }),
             qualityVerdict: qualityVerdict.bad,
           };
@@ -65,8 +66,8 @@ export const KeywordDensityCheck = ({ keywordsDensity, checks }: KeywordDensityC
 
     if (!isEqual(status, checks.keywordsDensity) && dispatch) {
       dispatch({
-        type: 'UPDATE_PONCTUAL',
-        value: { ...status, entity: 'keywordsDensity' },
+        type: "UPDATE_PONCTUAL",
+        value: { ...status, entity: "keywordsDensity" },
       });
     }
   }, []);
@@ -74,14 +75,14 @@ export const KeywordDensityCheck = ({ keywordsDensity, checks }: KeywordDensityC
   return (
     <SEOAccordion
       title={formatMessage({
-        id: getTrad('SEOModal.summary-title.word-densisty'),
-        defaultMessage: 'Keyword Density',
+        id: getTrad("SEOModal.summary-title.word-densisty"),
+        defaultMessage: "Keyword Density",
       })}
       status={checks.keywordsDensity}
       label={formatMessage({
-        id: getTrad('SEOChecks.keywordsDensityCheck.label'),
+        id: getTrad("SEOChecks.keywordsDensityCheck.label"),
         defaultMessage:
-          'Define keywords you want to rank for in your SEO component. This will analyse the density of your keywords in your 1st level richtext editors.',
+          "Define keywords you want to rank for in your SEO component. This will analyse the density of your keywords in your 1st level richtext editors.",
       })}
       component={
         keywordsDensity &&
@@ -91,7 +92,7 @@ export const KeywordDensityCheck = ({ keywordsDensity, checks }: KeywordDensityC
               {Object.keys(keywordsDensity).map((keyword) => (
                 <Box padding={2} key={keyword}>
                   <Badge>
-                    {`${keyword}: ${get<number>(keywordsDensity[keyword], 'count', 0).toString()}`}
+                    {`${keyword}: ${get<number>(keywordsDensity[keyword], "count", 0).toString()}`}
                   </Badge>
                 </Box>
               ))}

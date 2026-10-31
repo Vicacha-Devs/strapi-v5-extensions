@@ -1,6 +1,3 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 import {
   Box,
   EmptyStateLayout,
@@ -14,12 +11,16 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
-import type { ContentTypeSeoItem, ContentTypesResponse } from '../../../../../shared';
-import { getTrad } from '../../../utils/getTrad';
-import { Illo } from './EmptyComponentLayout/illo';
-import { SettingsModal } from './SettingsModal';
+} from "@strapi/design-system";
+import { Plus } from "@strapi/icons";
+import * as React from "react";
+import { useIntl } from "react-intl";
+import { NavLink } from "react-router-dom";
+
+import type { ContentTypeSeoItem, ContentTypesResponse } from "../../../../../shared";
+import { getTrad } from "../../../utils/getTrad";
+import { Illo } from "./EmptyComponentLayout/illo";
+import { SettingsModal } from "./SettingsModal";
 
 interface MainProps {
   contentTypes?: ContentTypesResponse | null;
@@ -48,8 +49,8 @@ const ContentTypeRow = ({ item }: ContentTypeRowProps) => {
               href={`/admin/plugins/content-type-builder/content-types/${item.uid}`}
             >
               {formatMessage({
-                id: getTrad('SEOPage.info.add'),
-                defaultMessage: 'Add component',
+                id: getTrad("SEOPage.info.add"),
+                defaultMessage: "Add component",
               })}
             </LinkButton>
           )}
@@ -96,8 +97,8 @@ const ContentTypeTabTable = ({
           <Th>
             <Typography variant="sigma">
               {formatMessage({
-                id: getTrad('SEOPage.tab-panel.column-name'),
-                defaultMessage: 'Name',
+                id: getTrad("SEOPage.tab-panel.column-name"),
+                defaultMessage: "Name",
               })}
             </Typography>
           </Th>
@@ -127,9 +128,9 @@ export const Main = ({ contentTypes }: MainProps) => {
   const { formatMessage } = useIntl();
 
   const TabValues = {
-    collectionTypes: 'collection-types',
-    singleTypes: 'single-types',
-    plugins: 'plugins',
+    collectionTypes: "collection-types",
+    singleTypes: "single-types",
+    plugins: "plugins",
   };
 
   return (
@@ -139,24 +140,24 @@ export const Main = ({ contentTypes }: MainProps) => {
           <Tabs.Trigger value={TabValues.collectionTypes}>
             <Typography>
               {formatMessage({
-                id: getTrad('SEOPage.tab.collection-type-title'),
-                defaultMessage: 'Collection Types',
+                id: getTrad("SEOPage.tab.collection-type-title"),
+                defaultMessage: "Collection Types",
               })}
             </Typography>
           </Tabs.Trigger>
           <Tabs.Trigger value={TabValues.singleTypes}>
             <Typography variant="omega">
               {formatMessage({
-                id: getTrad('SEOPage.tab.single-type-title'),
-                defaultMessage: 'Single Types',
+                id: getTrad("SEOPage.tab.single-type-title"),
+                defaultMessage: "Single Types",
               })}
             </Typography>
           </Tabs.Trigger>
           <Tabs.Trigger value={TabValues.plugins}>
             <Typography variant="omega">
               {formatMessage({
-                id: getTrad('SEOPage.tab.plugin-title'),
-                defaultMessage: 'Plugins',
+                id: getTrad("SEOPage.tab.plugin-title"),
+                defaultMessage: "Plugins",
               })}
             </Typography>
           </Tabs.Trigger>

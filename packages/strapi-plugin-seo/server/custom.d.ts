@@ -1,6 +1,6 @@
 declare function setImmediate(callback: (...args: unknown[]) => void, ...args: unknown[]): unknown;
 
-declare module 'lodash' {
+declare module "lodash" {
   export function get<T = unknown>(object: unknown, path: string | string[], defaultValue?: T): T;
   const lodashDefault: {
     get: typeof get;
@@ -8,7 +8,7 @@ declare module 'lodash' {
   export default lodashDefault;
 }
 
-declare module '@strapi/strapi' {
+declare module "@strapi/strapi" {
   export namespace Core {
     export interface PluginStore {
       get<T = unknown>(params: { key: string }): Promise<T>;
@@ -16,7 +16,7 @@ declare module '@strapi/strapi' {
     }
 
     export interface ContentTypePluginOptions {
-      'content-manager'?: {
+      "content-manager"?: {
         visible?: boolean;
         [key: string]: unknown;
       };
@@ -97,7 +97,7 @@ declare module '@strapi/strapi' {
   }
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: {
     collectionName?: string;
     info: {

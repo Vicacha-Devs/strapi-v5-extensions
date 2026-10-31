@@ -1,8 +1,9 @@
-import * as React from 'react';
-import { Accordion, Box, IconButton, Typography } from '@strapi/design-system';
-import { CheckCircle, CrossCircle, Information, WarningCircle } from '@strapi/icons';
-import type { SeoCheckStatus } from '../../../../../../../shared';
-import { qualityVerdict } from '../../../utils/checks';
+import { Accordion, Box, IconButton, Typography } from "@strapi/design-system";
+import { CheckCircle, CrossCircle, Information, WarningCircle } from "@strapi/icons";
+import * as React from "react";
+
+import type { SeoCheckStatus } from "../../../../../../../shared";
+import { qualityVerdict } from "../../../utils/checks";
 
 interface SEOAccordionProps {
   title: string;
@@ -40,7 +41,7 @@ export const SEOAccordion = ({ title, status, component, label }: SEOAccordionPr
           <Box paddingTop={4} paddingLeft={4} paddingBottom={4}>
             <Typography variant="omega">{status?.message}</Typography>
           </Box>
-          {component && component}
+          {component}
         </Accordion.Content>
       </Accordion.Item>
     </Accordion.Root>

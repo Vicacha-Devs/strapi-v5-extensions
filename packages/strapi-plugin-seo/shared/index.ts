@@ -1,6 +1,6 @@
-export const PLUGIN_ID = 'seo';
+export const PLUGIN_ID = "seo";
 
-export type SeoQualityVerdict = 'good' | 'improvements' | 'bad';
+export type SeoQualityVerdict = "good" | "improvements" | "bad";
 
 export interface SeoCheckStatus {
   message: string;
@@ -138,11 +138,11 @@ export interface SeoChecksState {
 
 export type SeoCheckerAction =
   | {
-      type: 'UPDATE_PONCTUAL';
+      type: "UPDATE_PONCTUAL";
       value: SeoCheckStatus & { entity: string };
     }
   | {
-      type: 'UPDATE_FOR_PREVIEW';
+      type: "UPDATE_FOR_PREVIEW";
       value: SeoChecksState;
     };
 

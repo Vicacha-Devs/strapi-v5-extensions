@@ -1,11 +1,12 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Button, Modal, TextButton, Typography } from '@strapi/design-system';
-import { ArrowRight, Eye } from '@strapi/icons';
+import { Box, Button, Modal, TextButton, Typography } from "@strapi/design-system";
+import { ArrowRight, Eye } from "@strapi/icons";
 import {
   unstable_useContentManagerContext as useContentManagerContext,
   unstable_useDocument as useDocument,
-} from '@strapi/strapi/admin';
+} from "@strapi/strapi/admin";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
 import {
   type ComponentSchemasMap,
   type ContentManagerFormValues,
@@ -14,9 +15,9 @@ import {
   type SeoCheckerAction,
   type SeoChecksConfig,
   type SeoChecksState,
-} from '../../../../../../shared';
-import { useSettingsApi } from '../../../../hooks/useSettingsApi';
-import { getTrad } from '../../../../utils/getTrad';
+} from "../../../../../../shared";
+import { useSettingsApi } from "../../../../hooks/useSettingsApi";
+import { getTrad } from "../../../../utils/getTrad";
 import {
   canonicalUrlPreview,
   getAlternativeTextPreview,
@@ -28,13 +29,13 @@ import {
   metaRobotPreview,
   openGraphPreview,
   structuredDataPreview,
-} from '../../utils/checks';
-import { getRichTextData } from '../../utils/getRichTextData';
-import { SeoChecks } from '../SeoChecks';
-import { BrowserPreview } from './BrowserPreview';
-import { OpenGraphPreview } from './OpenGraphPreview';
-import { PreviewChecks } from './PreviewChecks';
-import { reducer } from './reducer';
+} from "../../utils/checks";
+import { getRichTextData } from "../../utils/getRichTextData";
+import { SeoChecks } from "../SeoChecks";
+import { BrowserPreview } from "./BrowserPreview";
+import { OpenGraphPreview } from "./OpenGraphPreview";
+import { PreviewChecks } from "./PreviewChecks";
+import { reducer } from "./reducer";
 
 const initialState: SeoChecksState = {
   preview: true,
@@ -94,7 +95,7 @@ export const Summary = () => {
     currentContentType: ContentTypeSchemaInfo
   ): Promise<SeoChecksState> => {
     const { data: defaultSettings } = await getSettings();
-    const uid = currentContentType?.uid ?? '';
+    const uid = currentContentType?.uid ?? "";
     const seoChecks = defaultSettings?.[uid]?.seoChecks ?? DEFAULT_SEO_CHECKS;
 
     const { wordCount, keywordsDensity, emptyAltCount } = getRichTextData(
@@ -124,12 +125,12 @@ export const Summary = () => {
           const status = await getAllChecks(modifiedData, components, contentType);
 
           dispatch({
-            type: 'UPDATE_FOR_PREVIEW',
+            type: "UPDATE_FOR_PREVIEW",
             value: status,
           });
         } else {
           dispatch({
-            type: 'UPDATE_FOR_PREVIEW',
+            type: "UPDATE_FOR_PREVIEW",
             value: checks,
           });
         }
@@ -147,8 +148,8 @@ export const Summary = () => {
       <Box paddingTop={4} width="100%">
         <Typography tag="h2" variant="sigma" textTransform="uppercase" textColor="neutral600">
           {formatMessage({
-            id: getTrad('Plugin.name'),
-            defaultMessage: 'SEO Plugin',
+            id: getTrad("Plugin.name"),
+            defaultMessage: "SEO Plugin",
           })}
         </Typography>
 
@@ -158,8 +159,8 @@ export const Summary = () => {
               <Box paddingTop={1}>
                 <Button fullWidth variant="secondary" startIcon={<Eye />}>
                   {formatMessage({
-                    id: getTrad('Button.browser-preview'),
-                    defaultMessage: 'Browser Preview',
+                    id: getTrad("Button.browser-preview"),
+                    defaultMessage: "Browser Preview",
                   })}
                 </Button>
               </Box>
@@ -174,8 +175,8 @@ export const Summary = () => {
               <Box paddingTop={2}>
                 <Button fullWidth variant="secondary" startIcon={<Eye />}>
                   {formatMessage({
-                    id: getTrad('Button.open-graph-preview'),
-                    defaultMessage: 'Open Graph Preview',
+                    id: getTrad("Button.open-graph-preview"),
+                    defaultMessage: "Open Graph Preview",
                   })}
                 </Button>
               </Box>
@@ -191,8 +192,8 @@ export const Summary = () => {
             <Box paddingTop={4}>
               <TextButton startIcon={<ArrowRight />}>
                 {formatMessage({
-                  id: getTrad('Button.see-details'),
-                  defaultMessage: 'SEE DETAILS',
+                  id: getTrad("Button.see-details"),
+                  defaultMessage: "SEE DETAILS",
                 })}
               </TextButton>
             </Box>

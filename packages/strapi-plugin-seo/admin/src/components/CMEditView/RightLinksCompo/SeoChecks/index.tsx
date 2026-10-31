@@ -1,6 +1,7 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, EmptyStateLayout, Modal, Typography } from '@strapi/design-system';
+import { Box, EmptyStateLayout, Modal, Typography } from "@strapi/design-system";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
 import type {
   ComponentSchemasMap,
   ContentManagerFormValues,
@@ -9,20 +10,20 @@ import type {
   KeywordDensityMap,
   SeoChecksState,
   SeoComponentValues,
-} from '../../../../../../shared';
-import { getTrad } from '../../../../utils/getTrad';
-import { Illo } from '../../../HomePage/Main/EmptyComponentLayout/illo';
-import { getRichTextData } from '../../utils/getRichTextData';
-import { AlternativeTextCheck } from './AlternativeTextCheck';
-import { CanonicalUrlCheck } from './CanonicalUrlCheck';
-import { KeywordDensityCheck } from './KeywordDensityCheck';
-import { LastUpdatedAtCheck } from './LastUpdatedAtCheck';
-import { MetaDescriptionCheck } from './MetaDescriptionCheck';
-import { MetaRobotCheck } from './MetaRobotCheck';
-import { MetaTitleCheck } from './MetaTitleCheck';
-import { OpenGraphCheck } from './OpenGraphCheck';
-import { StructuredDataCheck } from './StructuredDataCheck';
-import { WordCountCheck } from './WordCountCheck';
+} from "../../../../../../shared";
+import { getTrad } from "../../../../utils/getTrad";
+import { Illo } from "../../../HomePage/Main/EmptyComponentLayout/illo";
+import { getRichTextData } from "../../utils/getRichTextData";
+import { AlternativeTextCheck } from "./AlternativeTextCheck";
+import { CanonicalUrlCheck } from "./CanonicalUrlCheck";
+import { KeywordDensityCheck } from "./KeywordDensityCheck";
+import { LastUpdatedAtCheck } from "./LastUpdatedAtCheck";
+import { MetaDescriptionCheck } from "./MetaDescriptionCheck";
+import { MetaRobotCheck } from "./MetaRobotCheck";
+import { MetaTitleCheck } from "./MetaTitleCheck";
+import { OpenGraphCheck } from "./OpenGraphCheck";
+import { StructuredDataCheck } from "./StructuredDataCheck";
+import { WordCountCheck } from "./WordCountCheck";
 
 interface SeoChecksProps {
   updatedAt: string | null;
@@ -122,8 +123,8 @@ export const SeoChecks = ({
       <Modal.Header>
         <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
           {formatMessage({
-            id: getTrad('Button.seo-analyze'),
-            defaultMessage: 'SEO Analyze',
+            id: getTrad("Button.seo-analyze"),
+            defaultMessage: "SEO Analyze",
           })}
         </Typography>
       </Modal.Header>
@@ -148,8 +149,8 @@ export const SeoChecks = ({
             <EmptyStateLayout
               icon={<Illo />}
               content={formatMessage({
-                id: getTrad('Modal.seo-component-empty'),
-                defaultMessage: 'Your SEO component is empty...',
+                id: getTrad("Modal.seo-component-empty"),
+                defaultMessage: "Your SEO component is empty...",
               })}
             />
           </Box>

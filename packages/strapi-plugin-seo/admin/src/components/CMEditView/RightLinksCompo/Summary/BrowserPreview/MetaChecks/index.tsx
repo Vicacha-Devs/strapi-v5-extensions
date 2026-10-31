@@ -1,8 +1,9 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Flex, Typography } from '@strapi/design-system';
-import { CheckCircle, WarningCircle } from '@strapi/icons';
-import { getTrad } from '../../../../../../utils/getTrad';
+import { Flex, Typography } from "@strapi/design-system";
+import { CheckCircle, WarningCircle } from "@strapi/icons";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import { getTrad } from "../../../../../../utils/getTrad";
 
 interface MetaChecksProps {
   item: string;
@@ -17,8 +18,8 @@ export const MetaChecks = ({ item, max, label, minLimit = false }: MetaChecksPro
   const getIcon = () => {
     if (
       item.length >= max ||
-      (label === 'title' && item.length === 0) ||
-      (minLimit && label === 'description' && item.length <= 50)
+      (label === "title" && item.length === 0) ||
+      (minLimit && label === "description" && item.length <= 50)
     ) {
       return <WarningCircle aria-hidden={true} fill="warning600" />;
     }
@@ -31,8 +32,8 @@ export const MetaChecks = ({ item, max, label, minLimit = false }: MetaChecksPro
       <Typography>
         {formatMessage(
           {
-            id: getTrad('SEOSocialPreview.meta-length-check'),
-            defaultMessage: 'Your {label} is {length} characters long (max {max})',
+            id: getTrad("SEOSocialPreview.meta-length-check"),
+            defaultMessage: "Your {label} is {length} characters long (max {max})",
           },
           {
             label,

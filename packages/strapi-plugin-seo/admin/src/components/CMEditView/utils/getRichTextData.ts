@@ -1,8 +1,9 @@
-import get from 'lodash/get';
-import isArray from 'lodash/isArray';
-import isEmpty from 'lodash/isEmpty';
-import isNull from 'lodash/isNull';
-import showdown from 'showdown';
+import get from "lodash/get";
+import isArray from "lodash/isArray";
+import isEmpty from "lodash/isEmpty";
+import isNull from "lodash/isNull";
+import showdown from "showdown";
+
 import type {
   ComponentSchemasMap,
   ContentManagerFormValues,
@@ -12,17 +13,17 @@ import type {
   KeywordDensityMap,
   RichTextAnalysisResult,
   RichTextBlockNode,
-} from '../../../../../shared';
-import { getRegularImageAltTexts } from './getRegularImageAltTexts';
-import { type FieldDescriptor, getRichTextAndBlocksFields } from './getRichTextAndBlocksFields';
+} from "../../../../../shared";
+import { getRegularImageAltTexts } from "./getRegularImageAltTexts";
+import { type FieldDescriptor, getRichTextAndBlocksFields } from "./getRichTextAndBlocksFields";
 
 const converter = new showdown.Converter();
 
 const extractTextFromBlocks = (blocks: RichTextBlockNode[]): string => {
-  let textContent = '';
+  let textContent = "";
 
   blocks.forEach((block) => {
-    if (block.type === 'text' && typeof block.text === 'string') {
+    if (block.type === "text" && typeof block.text === "string") {
       textContent += `${block.text} `;
     } else if (block.children && isArray(block.children)) {
       textContent += `${extractTextFromBlocks(block.children)} `;
@@ -35,13 +36,13 @@ const extractTextFromBlocks = (blocks: RichTextBlockNode[]): string => {
 };
 
 const isImageElementMissingAlt = (element: RichTextBlockNode): boolean => {
-  if (element.type !== 'image' || !element.image) return false;
+  if (element.type !== "image" || !element.image) return false;
   return !element.image.alternativeText;
 };
 
 const isMediaAttrElementMissingAlt = (element: RichTextBlockNode): boolean => {
-  if (element.type === 'image' && element.image) return false;
-  const isMediaType = element.type === 'image' || element.type === 'mediaLibraryImage';
+  if (element.type === "image" && element.image) return false;
+  const isMediaType = element.type === "image" || element.type === "mediaLibraryImage";
   if (!isMediaType || !element.attrs) return false;
   return !element.attrs.alt && !element.attrs.alternativeText;
 };
@@ -50,7 +51,7 @@ const countMissingBlockImageAlts = (nodes: RichTextBlockNode[]): number => {
   let missingCount = 0;
 
   nodes.forEach((element) => {
-    if (!element || typeof element !== 'object') return;
+    if (!element || typeof element !== "object") return;
 
     if (isImageElementMissingAlt(element) || isMediaAttrElementMissingAlt(element)) {
       missingCount += 1;
@@ -71,7 +72,7 @@ const extractNodesFromParsedObject = (value: unknown): RichTextBlockNode[] | nul
   if (Array.isArray(value)) {
     return value as RichTextBlockNode[];
   }
-  if (value && typeof value === 'object') {
+  if (value && typeof value === "object") {
     const obj = value as { content?: unknown };
     if (Array.isArray(obj.content)) {
       return obj.content as RichTextBlockNode[];
@@ -82,7 +83,7 @@ const extractNodesFromParsedObject = (value: unknown): RichTextBlockNode[] | nul
 
 const tryParseJsonStringNodes = (rawString: string): RichTextBlockNode[] | null => {
   const trimmed = rawString.trim();
-  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
     return null;
   }
   try {
@@ -93,7 +94,7 @@ const tryParseJsonStringNodes = (rawString: string): RichTextBlockNode[] | null 
 };
 
 const tryParseRichTextNodes = (rawValue: unknown): RichTextBlockNode[] | null => {
-  if (typeof rawValue === 'string') {
+  if (typeof rawValue === "string") {
     return tryParseJsonStringNodes(rawValue);
   }
   return extractNodesFromParsedObject(rawValue);
@@ -101,8 +102,8 @@ const tryParseRichTextNodes = (rawValue: unknown): RichTextBlockNode[] | null =>
 
 const formatAltFieldName = (field: string, name: string | null): string => {
   if (!name) return field;
-  if (name.includes('.')) {
-    return `[dynamic-zone].${name.split('.').pop()}.${field}`;
+  if (name.includes(".")) {
+    return `[dynamic-zone].${name.split(".").pop()}.${field}`;
   }
   return `${name}.${field}`;
 };
@@ -119,11 +120,11 @@ const getEmptyAltCount = (
 
   if (isBlock && Array.isArray(richtext)) {
     blockOccurences = countMissingBlockImageAlts(richtext as RichTextBlockNode[]);
-  } else if (typeof richtext === 'string' && richtext) {
-    markdownOccurrences = richtext.split('\n').filter((entry) => entry.includes('![](')).length;
+  } else if (typeof richtext === "string" && richtext) {
+    markdownOccurrences = richtext.split("\n").filter((entry) => entry.includes("![](")).length;
 
     const htmlImages = richtext.match(/<img[^>]*\/?>/g) || [];
-    htmlOccurrences = htmlImages.filter((image) => !image.includes('alt=')).length;
+    htmlOccurrences = htmlImages.filter((image) => !image.includes("alt=")).length;
   }
 
   return {
@@ -138,8 +139,8 @@ const increaseCounter = (
   isBlock = false,
   name: string | null = null
 ): { words: string[]; length: number; emptyAlts: EmptyAltOccurrence } => {
-  let richtext = '';
-  let emptyAlts: EmptyAltOccurrence = { field, occurences: 0 };
+  let richtext: string;
+  let emptyAlts: EmptyAltOccurrence;
   let parsedAsTree = isBlock;
   const rawValue = base?.[field];
 
@@ -150,18 +151,18 @@ const increaseCounter = (
     emptyAlts = getEmptyAltCount(blocks, field, name, true);
     parsedAsTree = true;
   } else {
-    richtext = typeof rawValue === 'string' ? rawValue : '';
+    richtext = typeof rawValue === "string" ? rawValue : "";
     emptyAlts = getEmptyAltCount(richtext, field, name);
   }
 
   if (richtext) {
     const html = parsedAsTree ? richtext : converter.makeHtml(richtext);
     const words = html
-      .replace(/<\/?[^>]+(>|$)/g, '')
-      .replace(/\n/g, ' ')
+      .replace(/<\/?[^>]+(>|$)/g, "")
+      .replace(/\n/g, " ")
       .toLowerCase()
-      .split(' ')
-      .filter((entry) => entry !== '' && entry !== '\n');
+      .split(" ")
+      .filter((entry) => entry !== "" && entry !== "\n");
 
     return { words, length: words.length, emptyAlts };
   }
@@ -179,8 +180,8 @@ const buildKeywordDensityObject = (
   keywords.forEach((keyword) => {
     if (!isEmpty(keyword)) {
       const trimmedKeyword = keyword.trim();
-      const regex = new RegExp(trimmedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-      const count = (words.join(' ').match(regex) || []).length;
+      const regex = new RegExp(trimmedKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
+      const count = (words.join(" ").match(regex) || []).length;
 
       if (!Object.prototype.hasOwnProperty.call(tempKeywordsDensity, trimmedKeyword)) {
         tempKeywordsDensity[trimmedKeyword] = { count };
@@ -239,7 +240,7 @@ const processComponentFieldItem = (
 ) => {
   if (isArray(item)) {
     item.forEach((entry) => {
-      if (entry && typeof entry === 'object') {
+      if (entry && typeof entry === "object") {
         recordIncrease(acc, entry as Record<string, unknown>, field, isBlock, name);
       }
     });
@@ -260,9 +261,9 @@ const processSingleFieldDescriptor = (
   }
 
   if (!data.inDz) {
-    const compKey = data.name.split('.').pop() || '';
-    const item = get<unknown>(modifiedData, compKey, '');
-    if (item && typeof item === 'object') {
+    const compKey = data.name.split(".").pop() || "";
+    const item = get<unknown>(modifiedData, compKey, "");
+    if (item && typeof item === "object") {
       processComponentFieldItem(
         acc,
         item,
@@ -305,9 +306,9 @@ export const getRichTextData = (
     altTexts,
   };
 
-  const seoKeywords = modifiedData?.seo?.keywords ?? '';
+  const seoKeywords = modifiedData?.seo?.keywords ?? "";
   const keywords =
-    typeof seoKeywords === 'string' && seoKeywords ? seoKeywords.toLowerCase().split(',') : [];
+    typeof seoKeywords === "string" && seoKeywords ? seoKeywords.toLowerCase().split(",") : [];
 
   const richTextAcc: AnalysisAccumulator = {
     wordCount: 0,

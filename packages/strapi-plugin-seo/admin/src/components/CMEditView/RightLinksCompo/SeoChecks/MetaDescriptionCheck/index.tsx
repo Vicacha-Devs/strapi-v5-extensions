@@ -1,14 +1,15 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Flex, ProgressBar, Typography } from '@strapi/design-system';
-import isEmpty from 'lodash/isEmpty';
-import isEqual from 'lodash/isEqual';
-import isNull from 'lodash/isNull';
-import type { SeoChecksState, SeoCheckStatus } from '../../../../../../../shared';
-import { getTrad } from '../../../../../utils/getTrad';
-import { qualityVerdict } from '../../../utils/checks';
-import { SeoCheckerContext } from '../../Summary';
-import { SEOAccordion } from '../SEOAccordion';
+import { Box, Flex, ProgressBar, Typography } from "@strapi/design-system";
+import isEmpty from "lodash/isEmpty";
+import isEqual from "lodash/isEqual";
+import isNull from "lodash/isNull";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import { getTrad } from "../../../../../utils/getTrad";
+import { qualityVerdict } from "../../../utils/checks";
+import { SeoCheckerContext } from "../../Summary";
+import { SEOAccordion } from "../SEOAccordion";
 
 interface MetaDescriptionCheckProps {
   metaDescription: string | null;
@@ -24,8 +25,8 @@ export const MetaDescriptionCheck = ({ metaDescription, checks }: MetaDescriptio
 
   let status: SeoCheckStatus = {
     message: formatMessage({
-      id: getTrad('SEOChecks.metaDescriptionCheck.default'),
-      defaultMessage: 'A Meta Description has been found!',
+      id: getTrad("SEOChecks.metaDescriptionCheck.default"),
+      defaultMessage: "A Meta Description has been found!",
     }),
     qualityVerdict: qualityVerdict.good,
   };
@@ -34,32 +35,32 @@ export const MetaDescriptionCheck = ({ metaDescription, checks }: MetaDescriptio
     if (isNull(metaDescription) || isEmpty(metaDescription)) {
       status = {
         message: formatMessage({
-          id: getTrad('SEOChecks.metaDescriptionCheck.not-found'),
-          defaultMessage: 'No Meta Description has been found.',
+          id: getTrad("SEOChecks.metaDescriptionCheck.not-found"),
+          defaultMessage: "No Meta Description has been found.",
         }),
         qualityVerdict: qualityVerdict.improvements,
       };
     } else if (metaDescription.length > maxLength) {
       status = {
         message: formatMessage({
-          id: getTrad('Title-settings.metaDescription-too-long'),
-          defaultMessage: 'Meta Description is too long',
+          id: getTrad("Title-settings.metaDescription-too-long"),
+          defaultMessage: "Meta Description is too long",
         }),
         qualityVerdict: qualityVerdict.bad,
       };
     } else if (metaDescription.length < minimumLength) {
       status = {
         message: formatMessage({
-          id: getTrad('Title-settings.metaDescription-too-short'),
-          defaultMessage: 'Meta Description is too short',
+          id: getTrad("Title-settings.metaDescription-too-short"),
+          defaultMessage: "Meta Description is too short",
         }),
         qualityVerdict: qualityVerdict.bad,
       };
     }
     if (!isEqual(status, checks.metaDescription) && dispatch) {
       dispatch({
-        type: 'UPDATE_PONCTUAL',
-        value: { ...status, entity: 'metaDescription' },
+        type: "UPDATE_PONCTUAL",
+        value: { ...status, entity: "metaDescription" },
       });
     }
   }, []);
@@ -67,12 +68,12 @@ export const MetaDescriptionCheck = ({ metaDescription, checks }: MetaDescriptio
   return (
     <SEOAccordion
       title={formatMessage({
-        id: getTrad('SEOModal.summary-title.meta-description'),
-        defaultMessage: 'Meta description',
+        id: getTrad("SEOModal.summary-title.meta-description"),
+        defaultMessage: "Meta description",
       })}
       status={checks.metaDescription}
       label={formatMessage({
-        id: getTrad('Title-settings.metaDescription-tooltip'),
+        id: getTrad("Title-settings.metaDescription-tooltip"),
         defaultMessage: `A meta description is an HTML tag used to describe the content of a web page.\n This description appears below the title and URL of your page as it appears in search engine results.\n For it to remain visible in Google, it must not exceed 140-${maxLength} characters.`,
       })}
       component={
