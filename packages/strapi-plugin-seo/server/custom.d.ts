@@ -1,7 +1,7 @@
-declare function setImmediate(callback: (...args: any[]) => void, ...args: any[]): unknown;
+declare function setImmediate(callback: (...args: unknown[]) => void, ...args: unknown[]): unknown;
 
 declare module 'lodash' {
-  export function get<T = any>(object: any, path: string | string[], defaultValue?: T): T;
+  export function get<T = unknown>(object: unknown, path: string | string[], defaultValue?: T): T;
   const lodashDefault: {
     get: typeof get;
   };
@@ -11,8 +11,16 @@ declare module 'lodash' {
 declare module '@strapi/strapi' {
   export namespace Core {
     export interface PluginStore {
-      get<T = any>(params: { key: string }): Promise<T>;
+      get<T = unknown>(params: { key: string }): Promise<T>;
       set(params: { key: string; value: unknown }): Promise<void>;
+    }
+
+    export interface ContentTypePluginOptions {
+      'content-manager'?: {
+        visible?: boolean;
+        [key: string]: unknown;
+      };
+      [key: string]: unknown;
     }
 
     export interface ContentTypeSchema {
@@ -24,11 +32,11 @@ declare module '@strapi/strapi' {
         singularName?: string;
         pluralName?: string;
       };
-      pluginOptions?: Record<string, any>;
+      pluginOptions?: ContentTypePluginOptions;
       __schema__?: {
-        pluginOptions?: Record<string, any>;
+        pluginOptions?: ContentTypePluginOptions;
       };
-      attributes?: Record<string, any>;
+      attributes?: Record<string, unknown>;
     }
 
     export interface ComponentSchema {
@@ -38,12 +46,22 @@ declare module '@strapi/strapi' {
         displayName?: string;
         icon?: string;
       };
-      attributes?: Record<string, any>;
+      attributes?: Record<string, unknown>;
+    }
+
+    export interface PluginServiceMethods {
+      getSeoComponent(): { attributes?: Record<string, unknown>; category?: string } | null;
+      getContentTypes(): unknown;
+      createSeoComponent(): Promise<unknown>;
+      getSettings(): Promise<unknown>;
+      setSettings(value: unknown): Promise<unknown>;
+      createComponent(params: Record<string, unknown>): Promise<unknown>;
+      [key: string]: unknown;
     }
 
     export interface PluginInstance {
-      service<T = any>(name: string): T;
-      services: Record<string, any>;
+      service<T = PluginServiceMethods>(name: string): T;
+      services: Record<string, PluginServiceMethods>;
     }
 
     export interface Strapi {
@@ -80,6 +98,16 @@ declare module '@strapi/strapi' {
 }
 
 declare module '*.json' {
-  const value: Record<string, any>;
+  const value: {
+    collectionName?: string;
+    info: {
+      displayName: string;
+      icon: string;
+      description?: string;
+    };
+    options?: Record<string, unknown>;
+    attributes: Record<string, unknown>;
+    [key: string]: unknown;
+  };
   export default value;
 }

@@ -1,13 +1,17 @@
 import type { Core } from '@strapi/strapi';
 
+interface SeoControllerContext {
+  body?: unknown;
+}
+
 export const seoController = ({ strapi }: { strapi: Core.Strapi }) => ({
-  findSeoComponent(ctx: Record<string, any>) {
+  findSeoComponent(ctx: SeoControllerContext) {
     ctx.body = strapi.plugin('seo').service('seo').getSeoComponent();
   },
-  findContentTypes(ctx: Record<string, any>) {
+  findContentTypes(ctx: SeoControllerContext) {
     ctx.body = strapi.plugin('seo').service('seo').getContentTypes();
   },
-  async createSeoComponent(ctx: Record<string, any>) {
+  async createSeoComponent(ctx: SeoControllerContext) {
     if (strapi.reload) {
       strapi.reload.isWatching = false;
     }

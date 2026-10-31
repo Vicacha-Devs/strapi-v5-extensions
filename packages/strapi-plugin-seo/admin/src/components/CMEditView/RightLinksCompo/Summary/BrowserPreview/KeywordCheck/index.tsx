@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { useIntl } from 'react-intl';
 import { Flex, Typography } from '@strapi/design-system';
 import { CheckCircle, WarningCircle } from '@strapi/icons';
+import { getTrad } from '../../../../../../utils/getTrad';
 
 interface KeywordCheckProps {
   item: string;
@@ -9,6 +11,7 @@ interface KeywordCheckProps {
 }
 
 export const KeywordCheck = ({ item, keywords, label }: KeywordCheckProps) => {
+  const { formatMessage } = useIntl();
   const _keywords = keywords.split(',');
   const matches = _keywords.filter((x) => item.toLowerCase().includes(x.toLowerCase().trim()));
 
@@ -22,9 +25,19 @@ export const KeywordCheck = ({ item, keywords, label }: KeywordCheckProps) => {
   return (
     <Flex spacing={1} horizontal>
       {getIcon()}
-      <Typography>{`You use ${matches.length} keyword${
-        matches.length > 1 ? 's' : ''
-      } in your ${label} (${matches.join(', ').trim()})`}</Typography>
+      <Typography>
+        {formatMessage(
+          {
+            id: getTrad('SEOSocialPreview.keyword-check'),
+            defaultMessage: 'You use {count} keyword(s) in your {label} ({matches})',
+          },
+          {
+            count: matches.length,
+            label,
+            matches: matches.join(', ').trim(),
+          }
+        )}
+      </Typography>
     </Flex>
   );
 };

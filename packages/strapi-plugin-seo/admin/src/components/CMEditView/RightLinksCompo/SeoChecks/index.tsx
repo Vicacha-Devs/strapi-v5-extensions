@@ -1,7 +1,15 @@
 import * as React from 'react';
 import { useIntl } from 'react-intl';
 import { Box, EmptyStateLayout, Modal, Typography } from '@strapi/design-system';
-import type { SeoChecksState } from '../../../../../../shared';
+import type {
+  ComponentSchemasMap,
+  ContentManagerFormValues,
+  ContentTypeSchemaInfo,
+  EmptyAltCount,
+  KeywordDensityMap,
+  SeoChecksState,
+  SeoComponentValues,
+} from '../../../../../../shared';
 import { getTrad } from '../../../../utils/getTrad';
 import { Illo } from '../../../HomePage/Main/EmptyComponentLayout/illo';
 import { getRichTextData } from '../../utils/getRichTextData';
@@ -18,11 +26,78 @@ import { WordCountCheck } from './WordCountCheck';
 
 interface SeoChecksProps {
   updatedAt: string | null;
-  modifiedData: Record<string, any>;
-  components: Record<string, any>;
-  contentType: Record<string, any>;
+  modifiedData: ContentManagerFormValues;
+  components: ComponentSchemasMap;
+  contentType: ContentTypeSchemaInfo;
   checks: SeoChecksState;
 }
+
+interface BasicMetaChecksSectionProps {
+  seo: SeoComponentValues;
+  checks: SeoChecksState;
+  wordCount: number;
+  keywordsDensity: KeywordDensityMap;
+}
+
+const BasicMetaChecksSection = ({
+  seo,
+  checks,
+  wordCount,
+  keywordsDensity,
+}: BasicMetaChecksSectionProps) => (
+  <>
+    {checks?.metaTitle && <MetaTitleCheck metaTitle={seo.metaTitle ?? null} checks={checks} />}
+    {checks?.metaDescription && (
+      <MetaDescriptionCheck metaDescription={seo.metaDescription ?? null} checks={checks} />
+    )}
+    {checks?.wordCount && <WordCountCheck wordCount={wordCount} checks={checks} />}
+    {checks?.keywordsDensity && (
+      <KeywordDensityCheck keywordsDensity={keywordsDensity} checks={checks} />
+    )}
+  </>
+);
+
+interface TechnicalMetaChecksSectionProps {
+  seo: SeoComponentValues;
+  checks: SeoChecksState;
+}
+
+const TechnicalMetaChecksSection = ({ seo, checks }: TechnicalMetaChecksSectionProps) => (
+  <>
+    {checks?.openGraph && <OpenGraphCheck openGraph={seo.openGraph ?? null} checks={checks} />}
+    {checks?.canonicalUrl && (
+      <CanonicalUrlCheck canonicalUrl={seo.canonicalURL ?? null} checks={checks} />
+    )}
+    {checks?.structuredData && (
+      <StructuredDataCheck structuredData={seo.structuredData ?? null} checks={checks} />
+    )}
+    {checks?.metaRobots && <MetaRobotCheck metaRobots={seo.metaRobots ?? null} checks={checks} />}
+  </>
+);
+
+interface MediaAndFreshnessChecksSectionProps {
+  checks: SeoChecksState;
+  emptyAltCount: EmptyAltCount;
+  updatedAt: string | null;
+}
+
+const MediaAndFreshnessChecksSection = ({
+  checks,
+  emptyAltCount,
+  updatedAt,
+}: MediaAndFreshnessChecksSectionProps) => (
+  <>
+    {checks?.alternativeText && (
+      <AlternativeTextCheck
+        intersections={emptyAltCount?.intersections ?? null}
+        richTextAlts={emptyAltCount?.richTextAlts ?? []}
+        altTexts={emptyAltCount?.altTexts ?? []}
+        checks={checks}
+      />
+    )}
+    {checks?.lastUpdatedAt && <LastUpdatedAtCheck updatedAt={updatedAt} checks={checks} />}
+  </>
+);
 
 export const SeoChecks = ({
   updatedAt,
@@ -53,42 +128,20 @@ export const SeoChecks = ({
         </Typography>
       </Modal.Header>
       <Modal.Body>
-        {hasSeo ? (
+        {hasSeo && seo ? (
           <Box>
-            {checks?.metaTitle && (
-              <MetaTitleCheck metaTitle={seo?.metaTitle ?? null} checks={checks} />
-            )}
-            {checks?.metaDescription && (
-              <MetaDescriptionCheck
-                metaDescription={seo?.metaDescription ?? null}
-                checks={checks}
-              />
-            )}
-            {checks?.wordCount && <WordCountCheck wordCount={wordCount} checks={checks} />}
-            {checks?.keywordsDensity && (
-              <KeywordDensityCheck keywordsDensity={keywordsDensity} checks={checks} />
-            )}
-            {checks?.openGraph && (
-              <OpenGraphCheck openGraph={seo?.openGraph ?? null} checks={checks} />
-            )}
-            {checks?.canonicalUrl && (
-              <CanonicalUrlCheck canonicalUrl={seo?.canonicalURL ?? null} checks={checks} />
-            )}
-            {checks?.structuredData && (
-              <StructuredDataCheck structuredData={seo?.structuredData ?? null} checks={checks} />
-            )}
-            {checks?.metaRobots && (
-              <MetaRobotCheck metaRobots={seo?.metaRobots ?? null} checks={checks} />
-            )}
-            {checks?.alternativeText && (
-              <AlternativeTextCheck
-                intersections={emptyAltCount?.intersections ?? null}
-                richTextAlts={emptyAltCount?.richTextAlts ?? []}
-                altTexts={emptyAltCount?.altTexts ?? []}
-                checks={checks}
-              />
-            )}
-            {checks?.lastUpdatedAt && <LastUpdatedAtCheck updatedAt={updatedAt} checks={checks} />}
+            <BasicMetaChecksSection
+              seo={seo}
+              checks={checks}
+              wordCount={wordCount}
+              keywordsDensity={keywordsDensity}
+            />
+            <TechnicalMetaChecksSection seo={seo} checks={checks} />
+            <MediaAndFreshnessChecksSection
+              checks={checks}
+              emptyAltCount={emptyAltCount}
+              updatedAt={updatedAt}
+            />
           </Box>
         ) : (
           <Box paddingLeft={4}>

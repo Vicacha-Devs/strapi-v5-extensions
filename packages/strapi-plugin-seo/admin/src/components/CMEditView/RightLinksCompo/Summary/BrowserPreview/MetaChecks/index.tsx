@@ -1,6 +1,8 @@
 import * as React from 'react';
+import { useIntl } from 'react-intl';
 import { Flex, Typography } from '@strapi/design-system';
 import { CheckCircle, WarningCircle } from '@strapi/icons';
+import { getTrad } from '../../../../../../utils/getTrad';
 
 interface MetaChecksProps {
   item: string;
@@ -10,6 +12,8 @@ interface MetaChecksProps {
 }
 
 export const MetaChecks = ({ item, max, label, minLimit = false }: MetaChecksProps) => {
+  const { formatMessage } = useIntl();
+
   const getIcon = () => {
     if (
       item.length >= max ||
@@ -24,7 +28,19 @@ export const MetaChecks = ({ item, max, label, minLimit = false }: MetaChecksPro
   return (
     <Flex spacing={1} horizontal>
       {getIcon()}
-      <Typography>{`Your ${label} is ${item.length || 0} characters long (max ${max})`}</Typography>
+      <Typography>
+        {formatMessage(
+          {
+            id: getTrad('SEOSocialPreview.meta-length-check'),
+            defaultMessage: 'Your {label} is {length} characters long (max {max})',
+          },
+          {
+            label,
+            length: item.length || 0,
+            max,
+          }
+        )}
+      </Typography>
     </Flex>
   );
 };

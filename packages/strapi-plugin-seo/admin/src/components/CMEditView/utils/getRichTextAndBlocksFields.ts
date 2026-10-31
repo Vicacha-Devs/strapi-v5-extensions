@@ -3,6 +3,12 @@ import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
 import isObject from 'lodash/isObject';
 import pull from 'lodash/pull';
+import type {
+  ComponentSchemasMap,
+  ContentManagerFormValues,
+  ContentTypeSchemaInfo,
+  SchemaAttribute,
+} from '../../../../../shared';
 
 export interface FieldDescriptor {
   name: string;
@@ -11,7 +17,7 @@ export interface FieldDescriptor {
 }
 
 const matchesFieldType = (
-  fieldProperties: Record<string, any> | undefined,
+  fieldProperties: SchemaAttribute | undefined,
   fieldType: 'richtext' | 'blocks'
 ): boolean => {
   if (!fieldProperties) return false;
@@ -28,19 +34,19 @@ const matchesFieldType = (
 };
 
 const collectFieldsByType = (
-  contentType: Record<string, any>,
-  components: Record<string, any>,
+  contentType: ContentTypeSchemaInfo,
+  components: ComponentSchemasMap,
   fieldType: 'richtext' | 'blocks'
 ): FieldDescriptor[] => {
   const fields: FieldDescriptor[] = [];
-  const attributes: Record<string, any> = contentType?.attributes ?? {};
-  const safeComponents: Record<string, any> = components ?? {};
+  const attributes: Record<string, SchemaAttribute> = contentType?.attributes ?? {};
+  const safeComponents: ComponentSchemasMap = components ?? {};
 
   Object.entries(attributes).forEach(([field, fieldProperties]) => {
     if (matchesFieldType(fieldProperties, fieldType)) {
       fields.push({ name: field, field: null });
-    } else if (fieldProperties?.type === 'component') {
-      const compAttrs: Record<string, any> =
+    } else if (fieldProperties?.type === 'component' && fieldProperties.component) {
+      const compAttrs: Record<string, SchemaAttribute> =
         safeComponents[fieldProperties.component]?.attributes ?? {};
       Object.entries(compAttrs).forEach(([field2, fieldProperties2]) => {
         if (matchesFieldType(fieldProperties2, fieldType)) {
@@ -51,7 +57,7 @@ const collectFieldsByType = (
   });
 
   Object.entries(safeComponents).forEach(([componentName, componentData]) => {
-    const compAttrs: Record<string, any> = componentData?.attributes ?? {};
+    const compAttrs: Record<string, SchemaAttribute> = componentData?.attributes ?? {};
     Object.entries(compAttrs).forEach(([field, fieldProperties]) => {
       if (matchesFieldType(fieldProperties, fieldType)) {
         fields.push({ name: componentName, field });
@@ -63,9 +69,9 @@ const collectFieldsByType = (
 };
 
 export const getRichTextAndBlocksFields = (
-  contentType: Record<string, any>,
-  components: Record<string, any>,
-  modifiedData: Record<string, any>
+  contentType: ContentTypeSchemaInfo,
+  components: ComponentSchemasMap,
+  modifiedData: ContentManagerFormValues
 ): { richTextFields: FieldDescriptor[]; blockFields: FieldDescriptor[] } => {
   const dynamicZones: string[] = [];
 
@@ -83,7 +89,7 @@ export const getRichTextAndBlocksFields = (
 
   const filterFields = (fields: FieldDescriptor[]) => {
     dynamicZones.forEach((dz) => {
-      const dynamicZoneData = get<Array<Record<string, any>>>(modifiedData, dz, []);
+      const dynamicZoneData = get<Array<Record<string, unknown>>>(modifiedData, dz, []);
 
       fields.forEach((field, index) => {
         const componentExistsInDZ = dynamicZoneData.filter((x) => x.__component === field.name);

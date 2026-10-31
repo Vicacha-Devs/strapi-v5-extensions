@@ -8,8 +8,8 @@ declare module 'react' {
     | ReactElement
     | ReactNode[];
 
-  export interface ReactElement<P = any> {
-    type: any;
+  export interface ReactElement<P = unknown> {
+    type: unknown;
     props: P;
     key: string | number | null;
   }
@@ -53,7 +53,7 @@ declare module 'react' {
     deps?: readonly unknown[]
   ): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
-  export function useCallback<T extends (...args: any[]) => any>(
+  export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
     deps: readonly unknown[]
   ): T;
@@ -65,13 +65,16 @@ declare module 'react' {
   export function createContext<T>(defaultValue: T): Context<T>;
   export function useContext<T>(context: Context<T>): T;
   export function memo<P = {}>(component: FC<P>): FC<P>;
-  export function createElement(...args: any[]): ReactElement;
+  export function createElement(...args: unknown[]): ReactElement;
   export const Fragment: FC<{ children?: ReactNode }>;
 
   export namespace JSX {
     interface Element extends ReactElement {}
+    interface IntrinsicAttributes {
+      key?: string | number | null;
+    }
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 
@@ -81,13 +84,16 @@ declare module 'react' {
 declare module 'react/jsx-runtime' {
   import type { ReactElement } from 'react';
   export const Fragment: unknown;
-  export function jsx(type: any, props: any, key?: any): ReactElement;
-  export function jsxs(type: any, props: any, key?: any): ReactElement;
+  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
+    interface IntrinsicAttributes {
+      key?: string | number | null;
+    }
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 }
@@ -115,22 +121,27 @@ declare module 'react-router-dom' {
     path?: string;
     element?: ReactNode;
   }>;
-  export const NavLink: FC<Record<string, any>>;
+  export const NavLink: FC<Record<string, unknown>>;
   export function useNavigate(): (to: string) => void;
 }
 
 declare module '@strapi/strapi/admin' {
   import type { FC, ReactNode } from 'react';
+  import type {
+    ComponentSchemasMap,
+    ContentManagerFormValues,
+    ContentTypeSchemaInfo,
+  } from '../shared';
 
-  export interface FetchResponse<T = any> {
+  export interface FetchResponse<T = unknown> {
     data: T;
   }
 
   export interface FetchClient {
-    get<T = any>(url: string): Promise<FetchResponse<T>>;
-    post<T = any>(url: string, body?: unknown): Promise<FetchResponse<T>>;
-    put<T = any>(url: string, body?: unknown): Promise<FetchResponse<T>>;
-    del<T = any>(url: string): Promise<FetchResponse<T>>;
+    get<T = unknown>(url: string): Promise<FetchResponse<T>>;
+    post<T = unknown>(url: string, body?: unknown): Promise<FetchResponse<T>>;
+    put<T = unknown>(url: string, body?: unknown): Promise<FetchResponse<T>>;
+    del<T = unknown>(url: string): Promise<FetchResponse<T>>;
   }
 
   export function useFetchClient(): FetchClient;
@@ -154,10 +165,10 @@ declare module '@strapi/strapi/admin' {
     collectionType: string;
     id?: string;
     form: {
-      values: Record<string, any>;
+      values: ContentManagerFormValues;
     };
-    contentType: Record<string, any>;
-    components: Record<string, any>;
+    contentType: ContentTypeSchemaInfo;
+    components: ComponentSchemasMap;
   };
 
   export function unstable_useDocument(params: {
@@ -172,17 +183,17 @@ declare module '@strapi/strapi/admin' {
   };
 
   export const Page: {
-    Loading: FC<Record<string, any>>;
-    Protect: FC<Record<string, any> & { children?: ReactNode }>;
-    Error: FC<Record<string, any>>;
+    Loading: FC<Record<string, unknown>>;
+    Protect: FC<Record<string, unknown> & { children?: ReactNode }>;
+    Error: FC<Record<string, unknown>>;
   };
 
-  export const ContentBox: FC<Record<string, any>>;
+  export const ContentBox: FC<Record<string, unknown>>;
 
   export const Layouts: {
-    Root: FC<Record<string, any>>;
-    Header: FC<Record<string, any>>;
-    Content: FC<Record<string, any>>;
+    Root: FC<Record<string, unknown>>;
+    Header: FC<Record<string, unknown>>;
+    Content: FC<Record<string, unknown>>;
   };
 
   export interface StrapiAdminApp {
@@ -193,7 +204,7 @@ declare module '@strapi/strapi/admin' {
       injectComponent: (
         viewName: string,
         zoneName: string,
-        componentConfig: { name: string; Component: FC<any> }
+        componentConfig: { name: string; Component: FC }
       ) => void;
     };
   }
@@ -201,7 +212,7 @@ declare module '@strapi/strapi/admin' {
 
 declare module '@strapi/design-system' {
   import type { FC, ReactNode } from 'react';
-  export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
+  export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Alert: FC<DesignComponentProps>;
   export const Badge: FC<DesignComponentProps>;
@@ -259,45 +270,45 @@ declare module '@strapi/design-system' {
 
 declare module '@strapi/icons' {
   import type { FC } from 'react';
-  export const ArrowLeft: FC<Record<string, any>>;
-  export const ArrowRight: FC<Record<string, any>>;
-  export const CheckCircle: FC<Record<string, any>>;
-  export const Cog: FC<Record<string, any>>;
-  export const CrossCircle: FC<Record<string, any>>;
-  export const Eye: FC<Record<string, any>>;
-  export const Information: FC<Record<string, any>>;
-  export const Pencil: FC<Record<string, any>>;
-  export const Plus: FC<Record<string, any>>;
-  export const Search: FC<Record<string, any>>;
-  export const WarningCircle: FC<Record<string, any>>;
+  export const ArrowLeft: FC<Record<string, unknown>>;
+  export const ArrowRight: FC<Record<string, unknown>>;
+  export const CheckCircle: FC<Record<string, unknown>>;
+  export const Cog: FC<Record<string, unknown>>;
+  export const CrossCircle: FC<Record<string, unknown>>;
+  export const Eye: FC<Record<string, unknown>>;
+  export const Information: FC<Record<string, unknown>>;
+  export const Pencil: FC<Record<string, unknown>>;
+  export const Plus: FC<Record<string, unknown>>;
+  export const Search: FC<Record<string, unknown>>;
+  export const WarningCircle: FC<Record<string, unknown>>;
 }
 
 declare module 'lodash/get' {
-  export default function get<T = any>(object: any, path: string | string[], defaultValue?: T): T;
+  export default function get<T = unknown>(object: unknown, path: string | string[], defaultValue?: T): T;
 }
 
 declare module 'lodash/isEmpty' {
-  export default function isEmpty(value: any): boolean;
+  export default function isEmpty(value: unknown): boolean;
 }
 
 declare module 'lodash/isEqual' {
-  export default function isEqual(value: any, other: any): boolean;
+  export default function isEqual(value: unknown, other: unknown): boolean;
 }
 
 declare module 'lodash/isNull' {
-  export default function isNull(value: any): value is null;
+  export default function isNull(value: unknown): value is null;
 }
 
 declare module 'lodash/isNumber' {
-  export default function isNumber(value: any): value is number;
+  export default function isNumber(value: unknown): value is number;
 }
 
 declare module 'lodash/isArray' {
-  export default function isArray(value: any): value is any[];
+  export default function isArray(value: unknown): value is unknown[];
 }
 
 declare module 'lodash/isObject' {
-  export default function isObject(value: any): value is Record<string, any>;
+  export default function isObject(value: unknown): value is Record<string, unknown>;
 }
 
 declare module 'lodash/pull' {
@@ -323,10 +334,10 @@ declare module 'date-fns' {
 }
 
 declare module '*.json' {
-  const value: Record<string, any>;
+  const value: Record<string, string>;
   export default value;
 }
 
 declare module 'styled-components' {
-  export function useTheme(): Record<string, any>;
+  export function useTheme(): Record<string, unknown>;
 }

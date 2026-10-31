@@ -1,11 +1,22 @@
 import { Search } from '@strapi/icons';
-import type { StrapiAdminApp } from '@strapi/strapi/admin';
 import pluginPkg from '../../package.json';
 import { SeoChecker } from './components/CMEditView/RightLinksCompo';
 import { Initializer } from './components/Initializer';
 import App from './pages/App';
 import { pluginPermissions } from './permissions';
 import { pluginId } from './pluginId';
+
+interface StrapiAdminApp {
+  addMenuLink: (link: Record<string, unknown>) => void;
+  registerPlugin: (plugin: Record<string, unknown>) => void;
+  getPlugin: (name: string) => {
+    injectComponent: (
+      containerName: string,
+      blockName: string,
+      component: Record<string, unknown>
+    ) => void;
+  };
+}
 import ar from './translations/ar.json';
 import en from './translations/en.json';
 import es from './translations/es.json';

@@ -123,10 +123,23 @@ export const AlternativeTextCheck = ({
           <Flex spacing={2} paddingTop={4} paddingLeft={2} paddingRight={2} paddingBottom={4}>
             <Status variant="secondary" showBullet={false}>
               <Typography>
-                <Typography fontWeight="bold">Tip: </Typography>
-                Implement a rule in your front-end code that uses the name of your images if the
+                <Typography fontWeight="bold">
+                  {formatMessage({
+                    id: getTrad('SEOChecks.alternativeTextCheck.tip-label'),
+                    defaultMessage: 'Tip:',
+                  })}{' '}
+                </Typography>
+                {formatMessage({
+                  id: getTrad('SEOChecks.alternativeTextCheck.tip-before'),
+                  defaultMessage:
+                    'Implement a rule in your front-end code that uses the name of your images if the',
+                })}
                 <Typography fontWeight="bold"> alternativeText </Typography>
-                field is empty to further reduce the risk of an empty alt attribute on your website.
+                {formatMessage({
+                  id: getTrad('SEOChecks.alternativeTextCheck.tip-after'),
+                  defaultMessage:
+                    'field is empty to further reduce the risk of an empty alt attribute on your website.',
+                })}
               </Typography>
             </Status>
           </Flex>

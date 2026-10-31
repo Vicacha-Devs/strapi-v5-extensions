@@ -1,7 +1,8 @@
 import isNull from 'lodash/isNull';
+import type { ContentManagerFormValues, ContentTypeSchemaInfo } from '../../../../../shared';
 
 const recursiveSearch = (
-  obj: Record<string, any>,
+  obj: Record<string, unknown>,
   keyword: string,
   relations: string[],
   results: string[] = [],
@@ -21,7 +22,13 @@ const recursiveSearch = (
       alternativeTexts.push(typeof value === 'string' ? value : '');
       imageNames.push(typeof obj.name === 'string' ? obj.name : '');
     } else if (typeof value === 'object' && !relations.includes(key) && !isNull(value)) {
-      recursiveSearch(value as Record<string, any>, keyword, relations, alternativeTexts, imageNames);
+      recursiveSearch(
+        value as Record<string, unknown>,
+        keyword,
+        relations,
+        alternativeTexts,
+        imageNames
+      );
     }
   });
 
@@ -29,8 +36,8 @@ const recursiveSearch = (
 };
 
 export const getRegularImageAltTexts = (
-  contentType: Record<string, any>,
-  modifiedData: Record<string, any>
+  contentType: ContentTypeSchemaInfo,
+  modifiedData: ContentManagerFormValues
 ): { intersections: number; altTexts: string[] } => {
   const relations = ['localizations'];
   const attributes = contentType?.attributes ?? {};
