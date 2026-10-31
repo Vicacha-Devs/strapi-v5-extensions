@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { fetchSearchableTypes } from '../api/searchApi';
-import type { ContentTypeSummary, PluginSettings, SchemaResponse } from '../types';
+import { useEffect, useState } from "react";
+
+import { fetchSearchableTypes } from "../api/searchApi";
+import type { ContentTypeSummary, PluginSettings, SchemaResponse } from "../types";
 
 // The schema barely changes at runtime, and both the page and the palette ask
 // for it — resolve it once per admin session.
@@ -18,14 +19,14 @@ const load = (): Promise<SchemaResponse> => {
 };
 
 interface SearchableTypesState {
-  status: 'loading' | 'success' | 'error';
+  status: "loading" | "success" | "error";
   contentTypes: ContentTypeSummary[];
   settings: Partial<PluginSettings>;
 }
 
 const useSearchableTypes = (): SearchableTypesState => {
   const [state, setState] = useState<SearchableTypesState>({
-    status: 'loading',
+    status: "loading",
     contentTypes: [],
     settings: {},
   });
@@ -37,14 +38,14 @@ const useSearchableTypes = (): SearchableTypesState => {
       .then((data) => {
         if (cancelled) return;
         setState({
-          status: 'success',
+          status: "success",
           contentTypes: data.contentTypes || [],
           settings: data.settings || {},
         });
       })
       .catch(() => {
         if (cancelled) return;
-        setState({ status: 'error', contentTypes: [], settings: {} });
+        setState({ status: "error", contentTypes: [], settings: {} });
       });
 
     return () => {

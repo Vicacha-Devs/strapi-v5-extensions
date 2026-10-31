@@ -1,15 +1,16 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import pluginId from './pluginId';
-import pluginPermissions from './permissions';
-import { Initializer } from './components/Initializer';
-import { PluginIcon } from './components/PluginIcon';
-import { GlobalSearchPortal } from './components/GlobalSearchPortal';
-import en from './translations/en.json';
-import fr from './translations/fr.json';
-import es from './translations/es.json';
-import ar from './translations/ar.json';
-import tr from './translations/tr.json';
+import React from "react";
+import { createRoot } from "react-dom/client";
+
+import { GlobalSearchPortal } from "./components/GlobalSearchPortal";
+import { Initializer } from "./components/Initializer";
+import { PluginIcon } from "./components/PluginIcon";
+import pluginPermissions from "./permissions";
+import pluginId from "./pluginId";
+import ar from "./translations/ar.json";
+import en from "./translations/en.json";
+import es from "./translations/es.json";
+import fr from "./translations/fr.json";
+import tr from "./translations/tr.json";
 
 const BUILTIN_TRANSLATIONS: Record<string, Record<string, string>> = {
   en,
@@ -19,7 +20,7 @@ const BUILTIN_TRANSLATIONS: Record<string, Record<string, string>> = {
   tr,
 };
 
-const PORTAL_ROOT_ID = 'global-search-portal-root';
+const PORTAL_ROOT_ID = "global-search-portal-root";
 
 interface StrapiApp {
   addMenuLink: (options: Record<string, unknown>) => void;
@@ -37,24 +38,24 @@ export default {
       icon: PluginIcon,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
-        defaultMessage: 'Global Search',
+        defaultMessage: "Global Search",
       },
       permissions: pluginPermissions.main,
-      Component: () => import('./pages/App'),
+      Component: () => import("./pages/App"),
     });
 
     app.addSettingsLink(
       {
         id: pluginId,
-        intlLabel: { id: `${pluginId}.settings.section`, defaultMessage: 'Global Search' },
+        intlLabel: { id: `${pluginId}.settings.section`, defaultMessage: "Global Search" },
       },
       [
         {
-          intlLabel: { id: `${pluginId}.settings.link`, defaultMessage: 'Configuration' },
+          intlLabel: { id: `${pluginId}.settings.link`, defaultMessage: "Configuration" },
           id: `${pluginId}-settings`,
           to: pluginId,
           permissions: pluginPermissions.settings,
-          Component: () => import('./pages/Settings'),
+          Component: () => import("./pages/Settings"),
         },
       ]
     );
@@ -72,9 +73,9 @@ export default {
    * every admin screen, not only the plugin page.
    */
   bootstrap() {
-    if (typeof document === 'undefined' || document.getElementById(PORTAL_ROOT_ID)) return;
+    if (typeof document === "undefined" || document.getElementById(PORTAL_ROOT_ID)) return;
 
-    const container = document.createElement('div');
+    const container = document.createElement("div");
     container.id = PORTAL_ROOT_ID;
     document.body.appendChild(container);
 

@@ -1,9 +1,9 @@
-import pluginId from '../pluginId';
-import en from '../translations/en.json';
-import fr from '../translations/fr.json';
-import es from '../translations/es.json';
-import ar from '../translations/ar.json';
-import tr from '../translations/tr.json';
+import pluginId from "../pluginId";
+import ar from "../translations/ar.json";
+import en from "../translations/en.json";
+import es from "../translations/es.json";
+import fr from "../translations/fr.json";
+import tr from "../translations/tr.json";
 
 const TRANSLATIONS: Record<string, Record<string, string>> = {
   en,
@@ -14,11 +14,11 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
 };
 
 const getActiveLocale = (): string => {
-  if (typeof window === 'undefined') return 'en';
+  if (typeof window === "undefined") return "en";
   try {
-    return window.localStorage.getItem('strapi-admin-language') || 'en';
+    return window.localStorage.getItem("strapi-admin-language") || "en";
   } catch {
-    return 'en';
+    return "en";
   }
 };
 
@@ -33,7 +33,7 @@ export const t = (
   if (!values) return template;
 
   return Object.entries(values).reduce(
-    (result, [key, value]) => result.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value)),
+    (result, [key, value]) => result.replace(new RegExp(`\\{${key}\\}`, "g"), String(value)),
     template
   );
 };

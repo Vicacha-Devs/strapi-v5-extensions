@@ -1,6 +1,6 @@
-import type { ContentTypeDescriptor } from '../types';
+import type { ContentTypeDescriptor } from "../types";
 
-const CM_READ_ACTION = 'plugin::content-manager.explorer.read';
+const CM_READ_ACTION = "plugin::content-manager.explorer.read";
 
 export default () => ({
   /**
@@ -12,12 +12,12 @@ export default () => ({
     types: ContentTypeDescriptor[],
     userAbility?: { can: (action: string, subject: string) => boolean } | null
   ): ContentTypeDescriptor[] {
-    if (!userAbility || typeof userAbility.can !== 'function') return types;
+    if (!userAbility || typeof userAbility.can !== "function") return types;
 
     return types.filter((type) => {
       try {
         return userAbility.can(CM_READ_ACTION, type.uid);
-      } catch (error) {
+      } catch {
         return false;
       }
     });

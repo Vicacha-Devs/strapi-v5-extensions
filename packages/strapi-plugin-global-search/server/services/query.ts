@@ -1,9 +1,9 @@
-import type { ContentTypeDescriptor } from '../types';
+import type { ContentTypeDescriptor } from "../types";
 
 /** `seo.metaTitle` + condition -> `{ seo: { metaTitle: condition } }` */
 const nest = (path: string, condition: Record<string, unknown>): Record<string, unknown> =>
   path
-    .split('.')
+    .split(".")
     .reverse()
     .reduce((acc, segment) => ({ [segment]: acc }), condition as Record<string, unknown>);
 
@@ -16,7 +16,7 @@ const buildPopulate = (paths: string[]): Record<string, unknown> | undefined => 
   const tree: Record<string, Record<string, unknown>> = {};
 
   paths.forEach((path) => {
-    const segments = path.split('.');
+    const segments = path.split(".");
     segments.pop(); // drop the scalar field itself
 
     let node: Record<string, unknown> = tree;
@@ -44,7 +44,7 @@ export default () => ({
   searchablePaths(descriptor: ContentTypeDescriptor): string[] {
     return [
       ...descriptor.idFields,
-      ...(descriptor.mainField && descriptor.mainField !== 'id' ? [descriptor.mainField] : []),
+      ...(descriptor.mainField && descriptor.mainField !== "id" ? [descriptor.mainField] : []),
       ...descriptor.topLevelFields,
       ...descriptor.nestedFields,
     ];
@@ -64,7 +64,7 @@ export default () => ({
     }
 
     this.searchablePaths(descriptor).forEach((path) => {
-      if (path === 'documentId') return;
+      if (path === "documentId") return;
       conditions.push(nest(path, { $containsi: query }));
     });
 
@@ -87,22 +87,22 @@ export default () => ({
     const fields = Array.from(
       new Set(
         [
-          'documentId',
+          "documentId",
           ...descriptor.idFields,
           descriptor.mainField,
           ...descriptor.topLevelFields,
-          'createdAt',
-          'updatedAt',
-          ...(descriptor.draftAndPublish ? ['publishedAt'] : []),
-          ...(descriptor.localized ? ['locale'] : []),
-        ].filter((field) => field && field !== 'id')
+          "createdAt",
+          "updatedAt",
+          ...(descriptor.draftAndPublish ? ["publishedAt"] : []),
+          ...(descriptor.localized ? ["locale"] : []),
+        ].filter((field) => field && field !== "id")
       )
     );
 
     const params: Record<string, unknown> = {
       filters,
       fields,
-      sort: { updatedAt: 'desc' },
+      sort: { updatedAt: "desc" },
       limit,
       start: 0,
     };
@@ -111,11 +111,11 @@ export default () => ({
     if (populate) params.populate = populate;
 
     if (descriptor.draftAndPublish) {
-      params.status = includeDrafts ? 'draft' : 'published';
+      params.status = includeDrafts ? "draft" : "published";
     }
 
     if (descriptor.localized) {
-      params.locale = locale && locale !== 'all' ? locale : '*';
+      params.locale = locale && locale !== "all" ? locale : "*";
     }
 
     return params;

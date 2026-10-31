@@ -1,1 +1,1 @@
-export { default } from './admin/src';
+export { default } from "./admin/src";

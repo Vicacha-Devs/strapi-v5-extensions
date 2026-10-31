@@ -1,10 +1,10 @@
-import { PLUGIN_ID } from '../utils/constants';
-import { defaults, validator } from '../config';
-import type { PluginSettings, StrapiLike } from '../types';
+import { defaults, validator } from "../config";
+import type { PluginSettings, StrapiLike } from "../types";
+import { PLUGIN_ID } from "../utils/constants";
 
-const STORE_KEY = 'settings';
+const STORE_KEY = "settings";
 
-const getStore = (strapi: StrapiLike) => strapi.store({ type: 'plugin', name: PLUGIN_ID });
+const getStore = (strapi: StrapiLike) => strapi.store({ type: "plugin", name: PLUGIN_ID });
 
 export default ({ strapi }: { strapi: StrapiLike }) => ({
   /**
@@ -20,13 +20,11 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
 
   async set(patch: Partial<PluginSettings> = {}): Promise<PluginSettings> {
     const allowedKeys = Object.keys(defaults);
-    const sanitized = Object.entries(patch).reduce(
-      (acc, [key, value]) => {
-        if (allowedKeys.includes(key) && value !== undefined) (acc as Record<string, unknown>)[key] = value;
-        return acc;
-      },
-      {} as Partial<PluginSettings>
-    );
+    const sanitized = Object.entries(patch).reduce((acc, [key, value]) => {
+      if (allowedKeys.includes(key) && value !== undefined)
+        (acc as Record<string, unknown>)[key] = value;
+      return acc;
+    }, {} as Partial<PluginSettings>);
 
     validator(sanitized);
 
@@ -36,14 +34,14 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     await getStore(strapi).set({ key: STORE_KEY, value: next });
 
     // Field lists and depth feed the introspection cache — rebuild it.
-    strapi.plugin(PLUGIN_ID).service('schema').clearCache();
+    strapi.plugin(PLUGIN_ID).service("schema").clearCache();
 
     return this.get();
   },
 
   async reset(): Promise<PluginSettings> {
     await getStore(strapi).set({ key: STORE_KEY, value: {} });
-    strapi.plugin(PLUGIN_ID).service('schema').clearCache();
+    strapi.plugin(PLUGIN_ID).service("schema").clearCache();
 
     return this.get();
   },

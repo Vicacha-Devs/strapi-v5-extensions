@@ -1,5 +1,9 @@
 /** Rejects if `factory()` has not settled within `ms`. Always clears its timer. */
-export const withTimeout = <T>(factory: () => T | Promise<T>, ms: number, label: string): Promise<T> => {
+export const withTimeout = <T>(
+  factory: () => T | Promise<T>,
+  ms: number,
+  label: string
+): Promise<T> => {
   let timer: ReturnType<typeof setTimeout>;
 
   return Promise.race([
@@ -21,7 +25,7 @@ export const mapWithConcurrency = async <T, R>(
   concurrency: number,
   worker: (item: T, index: number) => Promise<R>
 ): Promise<R[]> => {
-  const results = new Array(items.length) as R[];
+  const results = Array.from<R>({ length: items.length });
   let cursor = 0;
 
   const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {

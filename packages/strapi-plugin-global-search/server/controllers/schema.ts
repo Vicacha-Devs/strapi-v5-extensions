@@ -1,5 +1,5 @@
-import { PLUGIN_ID } from '../utils/constants';
-import type { ContentTypeDescriptor, StrapiLike } from '../types';
+import type { ContentTypeDescriptor, StrapiLike } from "../types";
+import { PLUGIN_ID } from "../utils/constants";
 
 type Ctx = {
   request: { query: Record<string, unknown>; body?: Record<string, unknown> };
@@ -23,13 +23,13 @@ const toSummary = (type: ContentTypeDescriptor) => ({
 export default ({ strapi }: { strapi: StrapiLike }) => ({
   /** Powers the content-type filter chips on the search page. */
   async find(ctx: Ctx) {
-    const types = await strapi.plugin(PLUGIN_ID).service('schema').getSearchableContentTypes();
+    const types = await strapi.plugin(PLUGIN_ID).service("schema").getSearchableContentTypes();
     const readable = strapi
       .plugin(PLUGIN_ID)
-      .service('permissions')
+      .service("permissions")
       .filterReadableTypes(types, ctx.state.userAbility);
 
-    const settings = await strapi.plugin(PLUGIN_ID).service('settings').get();
+    const settings = await strapi.plugin(PLUGIN_ID).service("settings").get();
 
     ctx.body = {
       contentTypes: readable.map(toSummary),
@@ -39,8 +39,8 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
 
   /** Full picture, including excluded and unsearchable types, for Settings. */
   async findAll(ctx: Ctx) {
-    const types = await strapi.plugin(PLUGIN_ID).service('schema').getAllContentTypes();
-    const settings = await strapi.plugin(PLUGIN_ID).service('settings').get();
+    const types = await strapi.plugin(PLUGIN_ID).service("schema").getAllContentTypes();
+    const settings = await strapi.plugin(PLUGIN_ID).service("settings").get();
 
     ctx.body = {
       contentTypes: types.map((type: ContentTypeDescriptor) => ({

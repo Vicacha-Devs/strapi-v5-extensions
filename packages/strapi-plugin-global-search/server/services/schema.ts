@@ -1,3 +1,4 @@
+import type { ContentTypeDescriptor, PluginSettings, StrapiLike } from "../types";
 import {
   PLUGIN_ID,
   SEARCHABLE_SCALAR_TYPES,
@@ -6,8 +7,7 @@ import {
   BLOCKLISTED_ATTRIBUTE_NAMES,
   IDENTIFIER_FIELDS,
   MAIN_FIELD_FALLBACKS,
-} from '../utils/constants';
-import type { ContentTypeDescriptor, PluginSettings, StrapiLike } from '../types';
+} from "../utils/constants";
 
 export interface AttributeLike {
   type?: string;
@@ -24,8 +24,8 @@ export interface ContentTypeLike {
   attributes?: Record<string, AttributeLike>;
   info?: { displayName?: string; singularName?: string };
   pluginOptions?: {
-    i18n?: { localized?: boolean };
-    'content-manager'?: { visible?: boolean };
+    "i18n"?: { localized?: boolean };
+    "content-manager"?: { visible?: boolean };
   };
   options?: { draftAndPublish?: boolean };
 }
@@ -45,12 +45,12 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
    */
   listCandidateUids(includePluginContentTypes = true): string[] {
     return Object.keys(strapi.contentTypes).filter((uid) => {
-      if (uid.startsWith('api::')) return true;
-      if (!includePluginContentTypes || !uid.startsWith('plugin::')) return false;
+      if (uid.startsWith("api::")) return true;
+      if (!includePluginContentTypes || !uid.startsWith("plugin::")) return false;
       if (SYSTEM_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix))) return false;
 
       const contentType = strapi.contentTypes[uid] as ContentTypeLike | undefined;
-      if (contentType?.pluginOptions?.['content-manager']?.visible === false) return false;
+      if (contentType?.pluginOptions?.["content-manager"]?.visible === false) return false;
 
       return true;
     });
@@ -75,7 +75,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     {
       maxDepth,
       depth = 0,
-      prefix = '',
+      prefix = "",
       visited = new Set<string>(),
     }: { maxDepth: number; depth?: number; prefix?: string; visited?: Set<string> } = {
       maxDepth: 0,
@@ -91,7 +91,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
         return;
       }
 
-      if (attribute.type !== 'component' || depth >= maxDepth) return;
+      if (attribute.type !== "component" || depth >= maxDepth) return;
 
       const component = strapi.components[attribute.component as string];
       if (!component || !attribute.component || visited.has(attribute.component)) return;
@@ -113,13 +113,13 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
   async resolveMainField(contentType: ContentTypeLike): Promise<string> {
     try {
       const configuration = await strapi
-        .plugin('content-manager')
-        .service('content-types')
+        .plugin("content-manager")
+        .service("content-types")
         .findConfiguration(contentType);
 
       const mainField = configuration && configuration.settings && configuration.settings.mainField;
 
-      if (mainField && mainField !== 'id' && contentType.attributes?.[mainField]) {
+      if (mainField && mainField !== "id" && contentType.attributes?.[mainField]) {
         return mainField;
       }
     } catch (error) {
@@ -132,7 +132,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       this.isSearchableAttribute(name, contentType.attributes?.[name])
     );
 
-    return fallback || 'id';
+    return fallback || "id";
   },
 
   extractExcludedFields(uid: string, excludedFields?: string[]): Set<string> {
@@ -143,7 +143,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     );
   },
 
-  resolveDisplayName(uid: string, info?: ContentTypeLike['info']): string {
+  resolveDisplayName(uid: string, info?: ContentTypeLike["info"]): string {
     return info?.displayName || info?.singularName || uid;
   },
 
@@ -155,7 +155,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     return fields.nestedFields.length > 0 || isMainSearchable;
   },
 
-  async describeContentType(uid: string, settings: PluginSettings): Promise<ContentTypeDescriptor | null> {
+  async describeContentType(
+    uid: string,
+    settings: PluginSettings
+  ): Promise<ContentTypeDescriptor | null> {
     const contentType = strapi.contentTypes[uid] as ContentTypeLike | undefined;
     if (!contentType) return null;
 
@@ -167,17 +170,17 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     const mainField = await this.resolveMainField(contentType);
 
     const idFields = [
-      'documentId',
+      "documentId",
       ...IDENTIFIER_FIELDS.filter((name) => this.isSearchableAttribute(name, attributes[name])),
     ];
     const topLevelFields = allPaths.filter(
-      (path) => !path.includes('.') && path !== mainField && !idFields.includes(path)
+      (path) => !path.includes(".") && path !== mainField && !idFields.includes(path)
     );
-    const nestedFields = settings.deep ? allPaths.filter((path) => path.includes('.')) : [];
+    const nestedFields = settings.deep ? allPaths.filter((path) => path.includes(".")) : [];
 
     return {
       uid,
-      kind: contentType.kind || 'collectionType',
+      kind: contentType.kind || "collectionType",
       displayName: this.resolveDisplayName(uid, contentType.info),
       apiName: contentType.apiName,
       mainField,
@@ -197,7 +200,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
   async getSearchableContentTypes({ force = false }: { force?: boolean } = {}): Promise<
     ContentTypeDescriptor[]
   > {
-    const settings = (await strapi.plugin(PLUGIN_ID).service('settings').get()) as PluginSettings;
+    const settings = (await strapi.plugin(PLUGIN_ID).service("settings").get()) as PluginSettings;
 
     if (cache && !force && cache.signature === JSON.stringify(settings)) {
       return cache.types;
@@ -223,7 +226,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
 
   /** Every candidate type, searchable or not — the Settings page needs the full list. */
   async getAllContentTypes(): Promise<ContentTypeDescriptor[]> {
-    const settings = (await strapi.plugin(PLUGIN_ID).service('settings').get()) as PluginSettings;
+    const settings = (await strapi.plugin(PLUGIN_ID).service("settings").get()) as PluginSettings;
     const includePlugins = settings.includePluginContentTypes !== false;
     const described = await Promise.all(
       this.listCandidateUids(includePlugins).map((uid) => this.describeContentType(uid, settings))

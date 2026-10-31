@@ -14,7 +14,7 @@ export interface PluginSettings {
   displayFields: Record<string, string[]>;
 }
 
-export type ContentTypeKind = 'collectionType' | 'singleType';
+export type ContentTypeKind = "collectionType" | "singleType";
 
 export interface ContentTypeDescriptor {
   uid: string;
@@ -47,7 +47,7 @@ export interface RankedHit {
   mainField: string;
   extra: Array<{ field: string; value: unknown }>;
   locale: string | null;
-  status: 'published' | 'draft' | null;
+  status: "published" | "draft" | null;
   updatedAt: string | null;
   adminUrl: string;
 }
@@ -93,16 +93,16 @@ export interface ContentTypeShape {
   attributes?: Record<string, AttributeShape>;
   info?: { displayName?: string; singularName?: string };
   pluginOptions?: {
-    i18n?: { localized?: boolean };
-    'content-manager'?: { visible?: boolean };
+    "i18n"?: { localized?: boolean };
+    "content-manager"?: { visible?: boolean };
   };
   options?: { draftAndPublish?: boolean };
 }
 
 export interface StrapiPluginService {
-  findConfiguration: (
-    contentType: { uid: string }
-  ) => Promise<{ settings?: { mainField?: string } } | undefined>;
+  findConfiguration: (contentType: {
+    uid: string;
+  }) => Promise<{ settings?: { mainField?: string } } | undefined>;
   getSearchableContentTypes: (opts?: { force?: boolean }) => Promise<ContentTypeDescriptor[]>;
   getAllContentTypes: () => Promise<ContentTypeDescriptor[]>;
   clearCache: () => void;
@@ -124,13 +124,13 @@ export interface StrapiPluginService {
     query: string
   ) => Pick<
     RankedHit,
-    | 'tier'
-    | 'tierLabel'
-    | 'matchedField'
-    | 'matchedFieldLabel'
-    | 'matchedSnippet'
-    | 'exactCase'
-    | 'valueLength'
+    | "tier"
+    | "tierLabel"
+    | "matchedField"
+    | "matchedFieldLabel"
+    | "matchedSnippet"
+    | "exactCase"
+    | "valueLength"
   >;
   sort: (hits: RankedHit[]) => RankedHit[];
 }
@@ -147,6 +147,7 @@ export interface StrapiLike {
   log: { debug: (msg: string) => void; warn: (msg: string) => void; error: (msg: string) => void };
   plugin: (id: string) => { service: (name: string) => StrapiPluginService };
   documents: (uid: string) => { findMany: (params: unknown) => Promise<unknown> };
-  admin?: { services: { permission: { actionProvider: { registerMany: (actions: unknown[]) => void } } } };
+  admin?: {
+    services: { permission: { actionProvider: { registerMany: (actions: unknown[]) => void } } };
+  };
 }
-

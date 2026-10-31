@@ -1,4 +1,4 @@
-import pluginId from './pluginId';
+import pluginId from "./pluginId";
 
 const pluginPermissions = {
   main: [{ action: `plugin::${pluginId}.read`, subject: null }],

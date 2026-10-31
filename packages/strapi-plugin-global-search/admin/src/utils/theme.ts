@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react';
-import { darkTheme, lightTheme } from '@strapi/design-system';
+import { darkTheme, lightTheme } from "@strapi/design-system";
+import { useEffect, useState } from "react";
 
-const THEME_STORAGE_KEY = 'STRAPI_THEME';
-const DARK_QUERY = '(prefers-color-scheme: dark)';
+const THEME_STORAGE_KEY = "STRAPI_THEME";
+const DARK_QUERY = "(prefers-color-scheme: dark)";
 
 const readStoredTheme = (): string => {
   try {
     const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (!raw) return 'system';
+    if (!raw) return "system";
 
-    return raw.replace(/^"|"$/g, '');
-  } catch (error) {
-    return 'system';
+    return raw.replace(/^"|"$/g, "");
+  } catch {
+    return "system";
   }
 };
 
 const resolve = (preference: string) => {
-  if (preference === 'dark') return darkTheme;
-  if (preference === 'light') return lightTheme;
+  if (preference === "dark") return darkTheme;
+  if (preference === "light") return lightTheme;
 
   const prefersDark = window.matchMedia && window.matchMedia(DARK_QUERY).matches;
 
@@ -34,16 +34,16 @@ export const useAdminTheme = () => {
   useEffect(() => {
     const sync = () => setTheme(resolve(readStoredTheme()));
 
-    window.addEventListener('storage', sync);
+    window.addEventListener("storage", sync);
 
     const media = window.matchMedia ? window.matchMedia(DARK_QUERY) : null;
-    if (media && media.addEventListener) media.addEventListener('change', sync);
+    if (media && media.addEventListener) media.addEventListener("change", sync);
 
     const interval = window.setInterval(sync, 2000);
 
     return () => {
-      window.removeEventListener('storage', sync);
-      if (media && media.removeEventListener) media.removeEventListener('change', sync);
+      window.removeEventListener("storage", sync);
+      if (media && media.removeEventListener) media.removeEventListener("change", sync);
       window.clearInterval(interval);
     };
   }, []);
