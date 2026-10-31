@@ -8,6 +8,16 @@ import type {
 
 const YOUTUBE_ID_REGEX = /^[a-zA-Z0-9_-]{11}$/;
 
+const VALID_PROVIDERS: MediaProviderType[] = [
+  'youtube',
+  'spotify',
+  'apple_podcasts',
+  'vimeo',
+  'soundcloud',
+  'direct',
+  'upload',
+];
+
 export function extractYouTubeVideoId(rawUrl: string): string | null {
   const trimmed = rawUrl.trim();
   if (!trimmed) return null;
@@ -28,12 +38,7 @@ export function extractYouTubeVideoId(rawUrl: string): string | null {
   return null;
 }
 
-export function parseMediaUrl(
-  rawUrl?: string | null,
-  explicitProvider?: MediaProviderType | string | null
-): ParsedMediaProviderInfo {
-  const url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
-
+function tryParseKnownPlatformUrl(url: string): ParsedMediaProviderInfo | null {
   const ytId = extractYouTubeVideoId(url);
   if (ytId) {
     return {
@@ -49,8 +54,7 @@ export function parseMediaUrl(
     /open\.spotify\.com\/(episode|show|track)\/([a-zA-Z0-9]+)/
   );
   if (spotifyMatch?.[1] && spotifyMatch?.[2]) {
-    const kind = spotifyMatch[1];
-    const id = spotifyMatch[2];
+    const [, kind, id] = spotifyMatch;
     return {
       provider: 'spotify',
       externalId: id,
@@ -60,7 +64,9 @@ export function parseMediaUrl(
     };
   }
 
-  const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
+  const vimeoMatch = url.match(
+    /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/
+  );
   if (vimeoMatch?.[1]) {
     const id = vimeoMatch[1];
     return {
@@ -72,6 +78,10 @@ export function parseMediaUrl(
     };
   }
 
+  return null;
+}
+
+function tryParsePodcastPlatformUrl(url: string): ParsedMediaProviderInfo | null {
   if (/podcasts\.apple\.com\//i.test(url)) {
     const idMatch = url.match(/id(\d+)/);
     return {
@@ -93,21 +103,29 @@ export function parseMediaUrl(
     };
   }
 
-  const validProviders: MediaProviderType[] = [
-    'youtube',
-    'spotify',
-    'apple_podcasts',
-    'vimeo',
-    'soundcloud',
-    'direct',
-    'upload',
-  ];
-  const fallbackProvider: MediaProviderType =
-    explicitProvider && validProviders.includes(explicitProvider as MediaProviderType)
-      ? (explicitProvider as MediaProviderType)
-      : url.startsWith('/')
-        ? 'upload'
-        : 'direct';
+  return null;
+}
+
+export function parseMediaUrl(
+  rawUrl?: string | null,
+  explicitProvider?: MediaProviderType | string | null
+): ParsedMediaProviderInfo {
+  const url = typeof rawUrl === 'string' ? rawUrl.trim() : '';
+
+  const matchedPlatform =
+    tryParseKnownPlatformUrl(url) ?? tryParsePodcastPlatformUrl(url);
+  if (matchedPlatform) {
+    return matchedPlatform;
+  }
+
+  const isExplicitValid =
+    Boolean(explicitProvider) &&
+    VALID_PROVIDERS.includes(explicitProvider as MediaProviderType);
+  const fallbackProvider: MediaProviderType = isExplicitValid
+    ? (explicitProvider as MediaProviderType)
+    : url.startsWith('/')
+      ? 'upload'
+      : 'direct';
 
   return {
     provider: fallbackProvider,
@@ -118,7 +136,33 @@ export function parseMediaUrl(
   };
 }
 
-export function parseDurationToSeconds(raw?: string | number | null): number | null {
+function tryParseColonDuration(text: string): number | null {
+  const colonParts = text.split(':').map((p) => Number(p.trim()));
+  const validParts =
+    (colonParts.length === 2 || colonParts.length === 3) &&
+    colonParts.every((n) => Number.isFinite(n) && n >= 0);
+  if (!validParts) return null;
+
+  if (colonParts.length === 3) {
+    return colonParts[0] * 3600 + colonParts[1] * 60 + colonParts[2];
+  }
+  return colonParts[0] * 60 + colonParts[1];
+}
+
+function tryParseIso8601Duration(text: string): number | null {
+  const isoMatch = text.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i);
+  if (!isoMatch || !(isoMatch[1] || isoMatch[2] || isoMatch[3])) {
+    return null;
+  }
+  const h = Number(isoMatch[1] ?? 0);
+  const m = Number(isoMatch[2] ?? 0);
+  const s = Number(isoMatch[3] ?? 0);
+  return h * 3600 + m * 60 + s;
+}
+
+export function parseDurationToSeconds(
+  raw?: string | number | null
+): number | null {
   if (typeof raw === 'number' && Number.isFinite(raw) && raw >= 0) {
     return Math.round(raw);
   }
@@ -126,35 +170,14 @@ export function parseDurationToSeconds(raw?: string | number | null): number | n
   const text = raw.trim();
   if (!text) return null;
 
-  // HH:MM:SS or MM:SS
-  const colonParts = text.split(':').map((p) => Number(p.trim()));
-  if (
-    colonParts.length >= 2 &&
-    colonParts.length <= 3 &&
-    colonParts.every((n) => Number.isFinite(n) && n >= 0)
-  ) {
-    if (colonParts.length === 3) {
-      return colonParts[0] * 3600 + colonParts[1] * 60 + colonParts[2];
-    }
-    return colonParts[0] * 60 + colonParts[1];
-  }
+  const colonResult = tryParseColonDuration(text);
+  if (colonResult !== null) return colonResult;
 
-  // ISO-8601 duration e.g. PT1H28M40S
-  const isoMatch = text.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i);
-  if (isoMatch && (isoMatch[1] || isoMatch[2] || isoMatch[3])) {
-    const h = Number(isoMatch[1] ?? 0);
-    const m = Number(isoMatch[2] ?? 0);
-    const s = Number(isoMatch[3] ?? 0);
-    return h * 3600 + m * 60 + s;
-  }
+  const isoResult = tryParseIso8601Duration(text);
+  if (isoResult !== null) return isoResult;
 
-  // Human labels e.g. "32 min", "28 دقائق", "24 dk"
   const minMatch = text.match(/(\d+)\s*(?:min|mins|minutes|dk|دقيقة|دقائق)/i);
-  if (minMatch?.[1]) {
-    return Number(minMatch[1]) * 60;
-  }
-
-  return null;
+  return minMatch?.[1] ? Number(minMatch[1]) * 60 : null;
 }
 
 export function formatSecondsToDuration(seconds?: number | null): string | null {
@@ -166,7 +189,9 @@ export function formatSecondsToDuration(seconds?: number | null): string | null 
   const mins = Math.floor((total % 3600) / 60);
   const secs = total % 60;
   const pad = (n: number) => String(n).padStart(2, '0');
-  return hrs > 0 ? `${hrs}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
+  return hrs > 0
+    ? `${hrs}:${pad(mins)}:${pad(secs)}`
+    : `${pad(mins)}:${pad(secs)}`;
 }
 
 export function normalizeSpokenLanguages(
@@ -189,59 +214,80 @@ export function normalizeSpokenLanguages(
   return fallback;
 }
 
+function trimmedStringOrNull(val: unknown): string | null {
+  return typeof val === 'string' ? val.trim() : null;
+}
+
+function parseSingleLanguageTrack(entry: unknown): MediaLanguageTrack | null {
+  if (!entry || typeof entry !== 'object') return null;
+  const obj = entry as Record<string, unknown>;
+  const locale = (trimmedStringOrNull(obj.locale) ?? '').toLowerCase();
+  if (!locale) return null;
+
+  return {
+    locale,
+    label: trimmedStringOrNull(obj.label) ?? undefined,
+    audioUrl: trimmedStringOrNull(obj.audioUrl),
+    videoUrl: trimmedStringOrNull(obj.videoUrl),
+    captionsUrl: trimmedStringOrNull(obj.captionsUrl),
+    transcriptUrl: trimmedStringOrNull(obj.transcriptUrl),
+    transcriptText: typeof obj.transcriptText === 'string' ? obj.transcriptText : null,
+    translatedTitle: trimmedStringOrNull(obj.translatedTitle),
+    translatedDescription: trimmedStringOrNull(obj.translatedDescription),
+  };
+}
+
 export function normalizeLanguageTracks(raw: unknown): MediaLanguageTrack[] {
   if (!Array.isArray(raw)) return [];
-  const tracks: MediaLanguageTrack[] = [];
-  for (const entry of raw) {
-    if (!entry || typeof entry !== 'object') continue;
-    const obj = entry as Record<string, unknown>;
-    const locale =
-      typeof obj.locale === 'string' ? obj.locale.trim().toLowerCase() : '';
-    if (!locale) continue;
-    tracks.push({
-      locale,
-      label: typeof obj.label === 'string' ? obj.label.trim() : undefined,
-      audioUrl: typeof obj.audioUrl === 'string' ? obj.audioUrl.trim() : null,
-      videoUrl: typeof obj.videoUrl === 'string' ? obj.videoUrl.trim() : null,
-      captionsUrl:
-        typeof obj.captionsUrl === 'string' ? obj.captionsUrl.trim() : null,
-      transcriptUrl:
-        typeof obj.transcriptUrl === 'string' ? obj.transcriptUrl.trim() : null,
-      transcriptText:
-        typeof obj.transcriptText === 'string' ? obj.transcriptText : null,
-      translatedTitle:
-        typeof obj.translatedTitle === 'string' ? obj.translatedTitle.trim() : null,
-      translatedDescription:
-        typeof obj.translatedDescription === 'string'
-          ? obj.translatedDescription.trim()
-          : null,
-    });
-  }
-  return tracks;
+  return raw
+    .map(parseSingleLanguageTrack)
+    .filter((t): t is MediaLanguageTrack => t !== null);
+}
+
+function parseSingleChapterMarker(item: unknown): MediaChapterMarker | null {
+  if (!item || typeof item !== 'object') return null;
+  const obj = item as Record<string, unknown>;
+  const label = trimmedStringOrNull(obj.label) ?? '';
+  if (!label) return null;
+
+  const seconds =
+    typeof obj.startSeconds === 'number'
+      ? obj.startSeconds
+      : parseDurationToSeconds(obj.timecode as string) ?? 0;
+  const timecode =
+    typeof obj.timecode === 'string'
+      ? obj.timecode
+      : formatSecondsToDuration(seconds) ?? '00:00';
+
+  return {
+    startSeconds: Math.max(0, seconds),
+    timecode,
+    label,
+  };
 }
 
 export function normalizeChapterMarkers(raw: unknown): MediaChapterMarker[] {
   if (!Array.isArray(raw)) return [];
-  const chapters: MediaChapterMarker[] = [];
-  for (const item of raw) {
-    if (!item || typeof item !== 'object') continue;
-    const obj = item as Record<string, unknown>;
-    const label = typeof obj.label === 'string' ? obj.label.trim() : '';
-    if (!label) continue;
-    const seconds =
-      typeof obj.startSeconds === 'number'
-        ? obj.startSeconds
-        : parseDurationToSeconds(obj.timecode as string) ?? 0;
-    chapters.push({
-      startSeconds: Math.max(0, seconds),
-      timecode:
-        typeof obj.timecode === 'string'
-          ? obj.timecode
-          : formatSecondsToDuration(seconds) ?? '00:00',
-      label,
-    });
-  }
-  return chapters.sort((a, b) => a.startSeconds - b.startSeconds);
+  return raw
+    .map(parseSingleChapterMarker)
+    .filter((c): c is MediaChapterMarker => c !== null)
+    .sort((a, b) => a.startSeconds - b.startSeconds);
+}
+
+function findMatchingTrack(
+  tracks: MediaLanguageTrack[],
+  targetLocale: string,
+  defaultLocale: string
+): MediaLanguageTrack | null {
+  const baseLang = targetLocale.split('-')[0];
+  const defaultLower = defaultLocale.toLowerCase();
+
+  return (
+    tracks.find((t) => t.locale.toLowerCase() === targetLocale) ??
+    tracks.find((t) => t.locale.toLowerCase().split('-')[0] === baseLang) ??
+    tracks.find((t) => t.locale.toLowerCase() === defaultLower) ??
+    null
+  );
 }
 
 export function resolveEpisodeForLocale(
@@ -252,17 +298,11 @@ export function resolveEpisodeForLocale(
   const targetLocale = (requestedLocale || episode.locale || defaultLocale)
     .trim()
     .toLowerCase();
-  const baseLang = targetLocale.split('-')[0];
-
-  const exactTrack =
-    episode.languageTracks.find((t) => t.locale.toLowerCase() === targetLocale) ??
-    episode.languageTracks.find(
-      (t) => t.locale.toLowerCase().split('-')[0] === baseLang
-    ) ??
-    episode.languageTracks.find(
-      (t) => t.locale.toLowerCase() === defaultLocale.toLowerCase()
-    ) ??
-    null;
+  const exactTrack = findMatchingTrack(
+    episode.languageTracks,
+    targetLocale,
+    defaultLocale
+  );
 
   if (!exactTrack) {
     return {

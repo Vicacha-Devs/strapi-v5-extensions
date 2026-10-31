@@ -6,6 +6,7 @@ import {
   MEDIA_SERIES_UID,
   parseMediaUrl,
   PLUGIN_ID,
+  type AlternateDateValue,
   type LiveBroadcastState,
   type MediaFeedItem,
   type MediaFeedsSettings,
@@ -22,6 +23,164 @@ export interface QueryMediaFeedOptions {
   featured?: boolean;
   search?: string;
   limit?: number;
+}
+
+function matchesSpokenLanguage(item: MediaFeedItem, lang: string): boolean {
+  return (
+    item.spokenLanguages.includes(lang) ||
+    item.languageTracks.some((tr) => tr.locale.toLowerCase() === lang)
+  );
+}
+
+function matchesSearchQuery(item: MediaFeedItem, q: string): boolean {
+  return (
+    item.title.toLowerCase().includes(q) ||
+    item.description.toLowerCase().includes(q) ||
+    (item.speaker ?? '').toLowerCase().includes(q)
+  );
+}
+
+function matchesCategoryAndProvider(
+  item: MediaFeedItem,
+  options: QueryMediaFeedOptions
+): boolean {
+  const typeMatch =
+    !options.type ||
+    options.type === 'all' ||
+    item.type.toLowerCase() === options.type.toLowerCase();
+  const providerMatch =
+    !options.provider ||
+    item.provider.toLowerCase() === options.provider.toLowerCase();
+  const seriesMatch =
+    !options.seriesSlug ||
+    (item.seriesSlug ?? '').toLowerCase() === options.seriesSlug.toLowerCase();
+  return typeMatch && providerMatch && seriesMatch;
+}
+
+function matchesSingleEpisodeFilter(
+  item: MediaFeedItem,
+  options: QueryMediaFeedOptions
+): boolean {
+  if (!matchesCategoryAndProvider(item, options)) return false;
+  if (
+    options.spokenLanguage &&
+    !matchesSpokenLanguage(item, options.spokenLanguage.toLowerCase())
+  ) {
+    return false;
+  }
+  if (typeof options.featured === 'boolean') {
+    return item.featured === options.featured;
+  }
+  return true;
+}
+
+function filterAndSortEpisodes(
+  items: MediaFeedItem[],
+  options: QueryMediaFeedOptions
+): MediaFeedItem[] {
+  const searchQuery = options.search?.trim().toLowerCase() ?? '';
+  const filtered = items.filter((item) => {
+    if (!matchesSingleEpisodeFilter(item, options)) return false;
+    return !searchQuery || matchesSearchQuery(item, searchQuery);
+  });
+
+  filtered.sort(
+    (a, b) =>
+      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+  );
+
+  if (options.limit && options.limit > 0) {
+    return filtered.slice(0, options.limit);
+  }
+  return filtered;
+}
+
+function stringOrNull(value: unknown): string | null {
+  return typeof value === 'string' ? value : null;
+}
+
+function mapRawSeriesItem(
+  r: Record<string, unknown>,
+  supportedLocales: string[]
+): MediaSeriesItem {
+  const slug = String(r.slug ?? '');
+  const id = (r.id as string | number) ?? slug;
+  const documentId = String(r.documentId ?? id);
+  const spokenLanguages = Array.isArray(r.spokenLanguages)
+    ? (r.spokenLanguages as string[])
+    : supportedLocales;
+
+  return {
+    id,
+    documentId,
+    title: String(r.title ?? 'Series'),
+    slug,
+    description: String(r.description ?? ''),
+    author: stringOrNull(r.author),
+    coverImageUrl: stringOrNull(r.coverImageUrl),
+    category: stringOrNull(r.category) ?? 'Education',
+    defaultType: String(r.defaultType ?? 'podcast'),
+    spokenLanguages,
+    rssEnabled: r.rssEnabled !== false,
+    youtubePlaylistId: stringOrNull(r.youtubePlaylistId),
+    spotifyShowUrl: stringOrNull(r.spotifyShowUrl),
+    applePodcastsUrl: stringOrNull(r.applePodcastsUrl),
+    active: r.active !== false,
+  };
+}
+
+function buildActiveLiveBroadcastState(
+  liveEpisode: MediaFeedItem,
+  settings: MediaFeedsSettings,
+  secondaryDates?: Record<string, AlternateDateValue>
+): LiveBroadcastState {
+  return {
+    status: 'live',
+    title: liveEpisode.title,
+    description: liveEpisode.description,
+    scheduleLabel:
+      liveEpisode.publishedAtLabel || settings.liveStream.scheduleLabel,
+    provider: liveEpisode.provider,
+    watchUrl: liveEpisode.sourceUrl || settings.liveStream.watchUrl,
+    embedUrl: liveEpisode.embedUrl ?? null,
+    thumbnailUrl:
+      liveEpisode.thumbnailUrl ?? settings.liveStream.thumbnailUrl ?? null,
+    spokenLanguages: liveEpisode.spokenLanguages,
+    activeEpisodeDocumentId: liveEpisode.documentId,
+    secondaryDates,
+    streams: settings.liveStreams ?? [],
+  };
+}
+
+function buildStandbyLiveBroadcastState(
+  settings: MediaFeedsSettings,
+  episodes: MediaFeedItem[],
+  secondaryDates?: Record<string, AlternateDateValue>
+): LiveBroadcastState {
+  const parsedWatch = parseMediaUrl(
+    settings.liveStream.watchUrl,
+    settings.liveStream.provider
+  );
+  const thumbnailUrl =
+    settings.liveStream.thumbnailUrl ??
+    parsedWatch.thumbnailUrl ??
+    episodes[0]?.thumbnailUrl ??
+    null;
+
+  return {
+    status: settings.liveStream.enabled ? 'upcoming' : 'offline',
+    title: settings.liveStream.title,
+    description: settings.liveStream.description,
+    scheduleLabel: settings.liveStream.scheduleLabel,
+    provider: parsedWatch.provider,
+    watchUrl: settings.liveStream.watchUrl,
+    embedUrl: settings.liveStream.embedUrl ?? parsedWatch.embedUrl,
+    thumbnailUrl,
+    spokenLanguages: settings.liveStream.spokenLanguages ?? ['es'],
+    activeEpisodeDocumentId: null,
+    secondaryDates,
+    streams: settings.liveStreams ?? [],
+  };
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -66,15 +225,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
   },
 
-  async getEpisodes(options: QueryMediaFeedOptions = {}): Promise<MediaFeedItem[]> {
-    const settings = await this.getSettingsService().getSettings();
-    const activeLocale = (options.locale || settings.defaultLocale)
-      .trim()
-      .toLowerCase();
-
+  async collectSourceEpisodes(
+    activeLocale: string,
+    settings: MediaFeedsSettings
+  ): Promise<MediaFeedItem[]> {
     const allItems: MediaFeedItem[] = [];
-
-    // 1. Built-in collection (`plugin::media-feeds.media-item`)
     const builtInRecords = await this.fetchRecordsWithLocaleFallback(
       MEDIA_ITEM_UID,
       activeLocale,
@@ -83,14 +238,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     );
     for (const rec of builtInRecords) {
       allItems.push(
-        normalizeRawMediaRecord(rec, {
-          settings,
-          requestedLocale: activeLocale,
-        })
+        normalizeRawMediaRecord(rec, { settings, requestedLocale: activeLocale })
       );
     }
 
-    // 2. Host collection sources (e.g. `api::media-highlight.media-highlight`)
     for (const source of settings.sources ?? []) {
       if (!source.enabled || !source.uid) continue;
       const populateFields = [
@@ -105,7 +256,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         settings,
         populateFields
       );
-
       for (const rec of sourceRecords) {
         allItems.push(
           normalizeRawMediaRecord(rec, {
@@ -116,53 +266,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         );
       }
     }
+    return allItems;
+  },
 
-    // 3. Apply filters
-    let filtered = allItems;
-    if (options.type && options.type !== 'all') {
-      const t = options.type.toLowerCase();
-      filtered = filtered.filter((item) => item.type.toLowerCase() === t);
-    }
-    if (options.provider) {
-      const p = options.provider.toLowerCase();
-      filtered = filtered.filter((item) => item.provider.toLowerCase() === p);
-    }
-    if (options.seriesSlug) {
-      const s = options.seriesSlug.toLowerCase();
-      filtered = filtered.filter(
-        (item) => (item.seriesSlug ?? '').toLowerCase() === s
-      );
-    }
-    if (options.spokenLanguage) {
-      const lang = options.spokenLanguage.toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          item.spokenLanguages.includes(lang) ||
-          item.languageTracks.some((tr) => tr.locale.toLowerCase() === lang)
-      );
-    }
-    if (typeof options.featured === 'boolean') {
-      filtered = filtered.filter((item) => item.featured === options.featured);
-    }
-    if (options.search?.trim()) {
-      const q = options.search.trim().toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          item.title.toLowerCase().includes(q) ||
-          item.description.toLowerCase().includes(q) ||
-          (item.speaker ?? '').toLowerCase().includes(q)
-      );
-    }
-
-    filtered.sort(
-      (a, b) =>
-        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-    );
-
-    if (options.limit && options.limit > 0) {
-      return filtered.slice(0, options.limit);
-    }
-    return filtered;
+  async getEpisodes(options: QueryMediaFeedOptions = {}): Promise<MediaFeedItem[]> {
+    const settings = await this.getSettingsService().getSettings();
+    const activeLocale = (options.locale || settings.defaultLocale)
+      .trim()
+      .toLowerCase();
+    const allItems = await this.collectSourceEpisodes(activeLocale, settings);
+    return filterAndSortEpisodes(allItems, options);
   },
 
   async getSeriesList(locale?: string): Promise<MediaSeriesItem[]> {
@@ -176,29 +289,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     return records
       .filter((r) => r.active !== false)
-      .map((r) => ({
-        id: (r.id as string | number) ?? String(r.slug ?? ''),
-        documentId: String(r.documentId ?? r.id ?? r.slug ?? ''),
-        title: String(r.title ?? 'Series'),
-        slug: String(r.slug ?? ''),
-        description: String(r.description ?? ''),
-        author: typeof r.author === 'string' ? r.author : null,
-        coverImageUrl:
-          typeof r.coverImageUrl === 'string' ? r.coverImageUrl : null,
-        category: typeof r.category === 'string' ? r.category : 'Education',
-        defaultType: String(r.defaultType ?? 'podcast'),
-        spokenLanguages: Array.isArray(r.spokenLanguages)
-          ? (r.spokenLanguages as string[])
-          : settings.supportedLocales,
-        rssEnabled: r.rssEnabled !== false,
-        youtubePlaylistId:
-          typeof r.youtubePlaylistId === 'string' ? r.youtubePlaylistId : null,
-        spotifyShowUrl:
-          typeof r.spotifyShowUrl === 'string' ? r.spotifyShowUrl : null,
-        applePodcastsUrl:
-          typeof r.applePodcastsUrl === 'string' ? r.applePodcastsUrl : null,
-        active: r.active !== false,
-      }));
+      .map((r) => mapRawSeriesItem(r, settings.supportedLocales));
   },
 
   async getLiveStatus(locale?: string): Promise<LiveBroadcastState> {
@@ -215,47 +306,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         : undefined;
 
     if (liveEpisode) {
-      return {
-        status: 'live',
-        title: liveEpisode.title,
-        description: liveEpisode.description,
-        scheduleLabel:
-          liveEpisode.publishedAtLabel || settings.liveStream.scheduleLabel,
-        provider: liveEpisode.provider,
-        watchUrl: liveEpisode.sourceUrl || settings.liveStream.watchUrl,
-        embedUrl: liveEpisode.embedUrl ?? null,
-        thumbnailUrl:
-          liveEpisode.thumbnailUrl ?? settings.liveStream.thumbnailUrl ?? null,
-        spokenLanguages: liveEpisode.spokenLanguages,
-        activeEpisodeDocumentId: liveEpisode.documentId,
-        secondaryDates,
-        streams: settings.liveStreams ?? [],
-      };
+      return buildActiveLiveBroadcastState(
+        liveEpisode,
+        settings,
+        secondaryDates
+      );
     }
-
-    const parsedWatch = parseMediaUrl(
-      settings.liveStream.watchUrl,
-      settings.liveStream.provider
-    );
-
-    return {
-      status: settings.liveStream.enabled ? 'upcoming' : 'offline',
-      title: settings.liveStream.title,
-      description: settings.liveStream.description,
-      scheduleLabel: settings.liveStream.scheduleLabel,
-      provider: parsedWatch.provider,
-      watchUrl: settings.liveStream.watchUrl,
-      embedUrl: settings.liveStream.embedUrl ?? parsedWatch.embedUrl,
-      thumbnailUrl:
-        settings.liveStream.thumbnailUrl ??
-        parsedWatch.thumbnailUrl ??
-        episodes[0]?.thumbnailUrl ??
-        null,
-      spokenLanguages: settings.liveStream.spokenLanguages ?? ['es'],
-      activeEpisodeDocumentId: null,
-      secondaryDates,
-      streams: settings.liveStreams ?? [],
-    };
+    return buildStandbyLiveBroadcastState(settings, episodes, secondaryDates);
   },
 
   async generateRssFeed(options: {

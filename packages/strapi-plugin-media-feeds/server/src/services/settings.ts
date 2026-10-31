@@ -12,6 +12,16 @@ function getPluginConfig(strapi: Core.Strapi): Partial<MediaFeedsSettings> {
   );
 }
 
+function pickNonEmptyArray<T>(
+  primary?: T[],
+  secondary?: T[],
+  fallback: T[] = []
+): T[] {
+  if (primary && primary.length > 0) return primary;
+  if (secondary && secondary.length > 0) return secondary;
+  return fallback;
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   getStore() {
     return strapi.store({
@@ -24,46 +34,43 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     fileConfig: Partial<MediaFeedsSettings>,
     stored: Partial<MediaFeedsSettings> | null
   ): MediaFeedsSettings {
-    const merged: MediaFeedsSettings = {
+    const safeStored = stored ?? {};
+    return {
       ...DEFAULT_MEDIA_FEEDS_SETTINGS,
       ...fileConfig,
-      ...(stored ?? {}),
+      ...safeStored,
       podcastFeed: {
         ...DEFAULT_MEDIA_FEEDS_SETTINGS.podcastFeed,
         ...(fileConfig.podcastFeed ?? {}),
-        ...(stored?.podcastFeed ?? {}),
+        ...(safeStored.podcastFeed ?? {}),
       },
       liveStream: {
         ...DEFAULT_MEDIA_FEEDS_SETTINGS.liveStream,
         ...(fileConfig.liveStream ?? {}),
-        ...(stored?.liveStream ?? {}),
+        ...(safeStored.liveStream ?? {}),
       },
-      liveStreams:
-        stored?.liveStreams?.length
-          ? stored.liveStreams
-          : fileConfig.liveStreams?.length
-            ? fileConfig.liveStreams
-            : DEFAULT_MEDIA_FEEDS_SETTINGS.liveStreams ?? [],
-      supportedLocales:
-        stored?.supportedLocales?.length
-          ? stored.supportedLocales
-          : fileConfig.supportedLocales?.length
-            ? fileConfig.supportedLocales
-            : DEFAULT_MEDIA_FEEDS_SETTINGS.supportedLocales,
-      youtubeSyncSources:
-        stored?.youtubeSyncSources?.length
-          ? stored.youtubeSyncSources
-          : fileConfig.youtubeSyncSources ?? [],
-      secondaryCalendars:
-        stored?.secondaryCalendars?.length
-          ? stored.secondaryCalendars
-          : fileConfig.secondaryCalendars ?? [],
-      sources:
-        stored?.sources?.length
-          ? stored.sources
-          : fileConfig.sources ?? [],
+      liveStreams: pickNonEmptyArray(
+        safeStored.liveStreams,
+        fileConfig.liveStreams,
+        DEFAULT_MEDIA_FEEDS_SETTINGS.liveStreams ?? []
+      ),
+      supportedLocales: pickNonEmptyArray(
+        safeStored.supportedLocales,
+        fileConfig.supportedLocales,
+        DEFAULT_MEDIA_FEEDS_SETTINGS.supportedLocales
+      ),
+      youtubeSyncSources: pickNonEmptyArray(
+        safeStored.youtubeSyncSources,
+        fileConfig.youtubeSyncSources,
+        []
+      ),
+      secondaryCalendars: pickNonEmptyArray(
+        safeStored.secondaryCalendars,
+        fileConfig.secondaryCalendars,
+        []
+      ),
+      sources: pickNonEmptyArray(safeStored.sources, fileConfig.sources, []),
     };
-    return merged;
   },
 
   async getSettings(): Promise<MediaFeedsSettings> {

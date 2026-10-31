@@ -14,6 +14,31 @@ export interface EnrichedMediaMetadata extends ParsedMediaProviderInfo {
   authorName?: string | null;
 }
 
+const OEMBED_BUILDERS: Record<string, (url: string) => string> = {
+  youtube: (url) =>
+    `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
+  vimeo: (url) =>
+    `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`,
+  spotify: (url) =>
+    `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`,
+};
+
+function mergeOembedPayload(
+  parsed: ParsedMediaProviderInfo,
+  payload: Record<string, unknown>
+): EnrichedMediaMetadata {
+  return {
+    ...parsed,
+    title: typeof payload.title === 'string' ? payload.title : null,
+    authorName:
+      typeof payload.author_name === 'string' ? payload.author_name : null,
+    thumbnailUrl:
+      typeof payload.thumbnail_url === 'string'
+        ? payload.thumbnail_url
+        : parsed.thumbnailUrl,
+  };
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   getSettingsService() {
     return strapi.plugin(PLUGIN_ID).service('settings') as {
@@ -26,43 +51,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     fetchOembed = false
   ): Promise<EnrichedMediaMetadata> {
     const parsed = parseMediaUrl(rawUrl);
-    if (!fetchOembed || !parsed.canonicalUrl) {
-      return parsed;
-    }
-
-    let oembedEndpoint: string | null = null;
-    if (parsed.provider === 'youtube') {
-      oembedEndpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(
-        parsed.canonicalUrl
-      )}&format=json`;
-    } else if (parsed.provider === 'vimeo') {
-      oembedEndpoint = `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(
-        parsed.canonicalUrl
-      )}`;
-    } else if (parsed.provider === 'spotify') {
-      oembedEndpoint = `https://open.spotify.com/oembed?url=${encodeURIComponent(
-        parsed.canonicalUrl
-      )}`;
-    }
-
-    if (!oembedEndpoint || typeof globalThis.fetch !== 'function') {
+    const buildEndpoint = OEMBED_BUILDERS[parsed.provider];
+    if (
+      !fetchOembed ||
+      !parsed.canonicalUrl ||
+      !buildEndpoint ||
+      typeof globalThis.fetch !== 'function'
+    ) {
       return parsed;
     }
 
     try {
-      const response = await globalThis.fetch(oembedEndpoint);
+      const response = await globalThis.fetch(
+        buildEndpoint(parsed.canonicalUrl)
+      );
       if (!response.ok) return parsed;
       const payload = (await response.json()) as Record<string, unknown>;
-      return {
-        ...parsed,
-        title: typeof payload.title === 'string' ? payload.title : null,
-        authorName:
-          typeof payload.author_name === 'string' ? payload.author_name : null,
-        thumbnailUrl:
-          typeof payload.thumbnail_url === 'string'
-            ? payload.thumbnail_url
-            : parsed.thumbnailUrl,
-      };
+      return mergeOembedPayload(parsed, payload);
     } catch {
       return parsed;
     }

@@ -52,6 +52,64 @@ export function buildYouTubeAtomFeedUrl(
   return null;
 }
 
+function matchXmlTag(entry: string, regex: RegExp): string | null {
+  const m = entry.match(regex);
+  return m?.[1]?.trim() || null;
+}
+
+function resolveAtomDefaults(sourceConfig?: Partial<YouTubeSyncSourceConfig>) {
+  return {
+    defaultSpeaker: sourceConfig?.defaultSpeaker || 'Official Channel',
+    type: (sourceConfig?.defaultType || 'video') as MediaFeedType,
+    seriesSlug: sourceConfig?.defaultSeriesSlug || null,
+    spokenLanguages: sourceConfig?.defaultSpokenLanguages ?? ['es'],
+  };
+}
+
+function parseSingleYouTubeAtomEntry(
+  entry: string,
+  sourceConfig?: Partial<YouTubeSyncSourceConfig>
+): ParsedYouTubeFeedVideo | null {
+  const videoId = matchXmlTag(entry, /<yt:videoId>([^<]+)<\/yt:videoId>/i);
+  if (!videoId) return null;
+
+  const defaults = resolveAtomDefaults(sourceConfig);
+  const rawTitle =
+    matchXmlTag(entry, /<title>([\s\S]*?)<\/title>/i) ?? `Video ${videoId}`;
+  const title = unescapeXmlEntities(rawTitle);
+  const rawDesc =
+    matchXmlTag(
+      entry,
+      /<media:description>([\s\S]*?)<\/media:description>/i
+    ) ?? title;
+  const publishedAt =
+    matchXmlTag(entry, /<published>([^<]+)<\/published>/i) ??
+    new Date().toISOString();
+  const rawAuthor =
+    matchXmlTag(
+      entry,
+      /<author>[\s\S]*?<name>([\s\S]*?)<\/name>[\s\S]*?<\/author>/i
+    ) ?? defaults.defaultSpeaker;
+  const thumbnailUrl =
+    matchXmlTag(entry, /<media:thumbnail[^>]+url="([^"]+)"/i) ??
+    `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+  return {
+    videoId,
+    title,
+    slug: slugifyTitle(title, videoId),
+    description: unescapeXmlEntities(rawDesc),
+    publishedAt,
+    authorName: unescapeXmlEntities(rawAuthor),
+    watchUrl: `https://www.youtube.com/watch?v=${videoId}`,
+    embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
+    thumbnailUrl,
+    type: defaults.type,
+    seriesSlug: defaults.seriesSlug,
+    spokenLanguages: defaults.spokenLanguages,
+  };
+}
+
 export function parseYouTubeAtomFeedXml(
   xml: string,
   sourceConfig?: Partial<YouTubeSyncSourceConfig>
@@ -59,51 +117,7 @@ export function parseYouTubeAtomFeedXml(
   if (!xml || typeof xml !== 'string') return [];
 
   const entries = xml.match(/<entry>[\s\S]*?<\/entry>/gi) ?? [];
-  const results: ParsedYouTubeFeedVideo[] = [];
-
-  for (const entry of entries) {
-    const idMatch = entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/i);
-    const videoId = idMatch?.[1]?.trim();
-    if (!videoId) continue;
-
-    const titleMatch = entry.match(/<title>([\s\S]*?)<\/title>/i);
-    const rawTitle = titleMatch?.[1]?.trim() ?? `Video ${videoId}`;
-    const title = unescapeXmlEntities(rawTitle);
-
-    const descMatch = entry.match(
-      /<media:description>([\s\S]*?)<\/media:description>/i
-    );
-    const description = unescapeXmlEntities(descMatch?.[1]?.trim() ?? title);
-
-    const publishedMatch = entry.match(/<published>([^<]+)<\/published>/i);
-    const publishedAt = publishedMatch?.[1]?.trim() ?? new Date().toISOString();
-
-    const authorMatch = entry.match(
-      /<author>[\s\S]*?<name>([\s\S]*?)<\/name>[\s\S]*?<\/author>/i
-    );
-    const authorName = unescapeXmlEntities(
-      authorMatch?.[1]?.trim() || sourceConfig?.defaultSpeaker || 'Official Channel'
-    );
-
-    const thumbMatch = entry.match(/<media:thumbnail[^>]+url="([^"]+)"/i);
-    const thumbnailUrl =
-      thumbMatch?.[1]?.trim() || `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
-
-    results.push({
-      videoId,
-      title,
-      slug: slugifyTitle(title, videoId),
-      description,
-      publishedAt,
-      authorName,
-      watchUrl: `https://www.youtube.com/watch?v=${videoId}`,
-      embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}`,
-      thumbnailUrl,
-      type: sourceConfig?.defaultType || 'video',
-      seriesSlug: sourceConfig?.defaultSeriesSlug || null,
-      spokenLanguages: sourceConfig?.defaultSpokenLanguages ?? ['es'],
-    });
-  }
-
-  return results;
+  return entries
+    .map((entry) => parseSingleYouTubeAtomEntry(entry, sourceConfig))
+    .filter((v): v is ParsedYouTubeFeedVideo => v !== null);
 }

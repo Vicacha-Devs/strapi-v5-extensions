@@ -1,4 +1,8 @@
-import type { MediaFeedItem, PodcastFeedConfig } from './types';
+import type {
+  MediaFeedItem,
+  MediaLanguageTrack,
+  PodcastFeedConfig,
+} from './types';
 import { formatSecondsToDuration, resolveEpisodeForLocale } from './urlParser';
 
 export function escapeXml(value?: string | null): string {
@@ -27,11 +31,127 @@ export interface GeneratePodcastRssOptions {
   seriesDescription?: string;
 }
 
+function toAbsoluteUrl(rawUrl: string, siteUrl: string): string {
+  if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+  return `${siteUrl}${rawUrl.startsWith('/') ? '' : '/'}${rawUrl}`;
+}
+
+function resolveEnclosureMimeType(
+  audioMimeType: string | undefined,
+  enclosureUrl: string
+): string {
+  if (audioMimeType) return audioMimeType;
+  if (enclosureUrl.endsWith('.m4a')) return 'audio/x-m4a';
+  if (enclosureUrl.endsWith('.mp4')) return 'video/mp4';
+  return 'audio/mpeg';
+}
+
+function resolveTranscriptMimeType(absUrl: string): string {
+  if (absUrl.endsWith('.vtt')) return 'text/vtt';
+  if (absUrl.endsWith('.srt')) return 'application/x-subrip';
+  return 'application/pdf';
+}
+
+function renderTranscriptLines(
+  tracks: MediaLanguageTrack[],
+  siteUrl: string
+): string {
+  return tracks
+    .filter((t) => Boolean(t.transcriptUrl || t.captionsUrl))
+    .map((t) => {
+      const trUrl = t.transcriptUrl || t.captionsUrl || '';
+      const absUrl = toAbsoluteUrl(trUrl, siteUrl);
+      const trType = resolveTranscriptMimeType(absUrl);
+      return `      <podcast:transcript url="${escapeXml(absUrl)}" type="${trType}" language="${escapeXml(t.locale)}" />`;
+    })
+    .join('\n');
+}
+
+function resolveItemUrl(
+  item: MediaFeedItem,
+  siteUrl: string,
+  activeLocale: string
+): string {
+  if (item.sourceUrl && /^https?:\/\//i.test(item.sourceUrl)) {
+    return item.sourceUrl;
+  }
+  return `${siteUrl}/${activeLocale}/media#${item.slug}`;
+}
+
+function renderItemImageTag(
+  thumbnailUrl: string | null | undefined,
+  siteUrl: string
+): string {
+  if (!thumbnailUrl) return '';
+  return `\n      <itunes:image href="${escapeXml(
+    toAbsoluteUrl(thumbnailUrl, siteUrl)
+  )}" />`;
+}
+
+function renderPodcastItemXml(
+  item: MediaFeedItem,
+  feed: PodcastFeedConfig,
+  siteUrl: string,
+  activeLocale: string
+): string {
+  const itemUrl = resolveItemUrl(item, siteUrl, activeLocale);
+  const enclosureUrl = item.audioUrl
+    ? toAbsoluteUrl(item.audioUrl, siteUrl)
+    : itemUrl;
+  const mimeType = resolveEnclosureMimeType(item.audioMimeType, enclosureUrl);
+  const byteLength = item.audioByteLength ?? 0;
+  const durationFormatted =
+    formatSecondsToDuration(item.durationSeconds) || item.duration || '00:30:00';
+  const guid = `${item.documentId || item.slug}:${activeLocale}`;
+  const transcriptLines = renderTranscriptLines(item.languageTracks, siteUrl);
+  const imageTag = renderItemImageTag(item.thumbnailUrl, siteUrl);
+
+  return [
+    '    <item>',
+    `      <title>${escapeXml(item.title)}</title>`,
+    `      <link>${escapeXml(itemUrl)}</link>`,
+    `      <guid isPermaLink="false">${escapeXml(guid)}</guid>`,
+    `      <pubDate>${escapeXml(toRfc2822Date(item.publishedAt))}</pubDate>`,
+    `      <description>${escapeXml(item.description)}</description>`,
+    `      <itunes:summary>${escapeXml(item.description)}</itunes:summary>`,
+    `      <itunes:author>${escapeXml(item.speaker || feed.author)}</itunes:author>`,
+    `      <itunes:duration>${escapeXml(durationFormatted)}</itunes:duration>`,
+    `      <itunes:explicit>${feed.explicit ? 'true' : 'false'}</itunes:explicit>`,
+    `      <enclosure url="${escapeXml(enclosureUrl)}" length="${byteLength}" type="${escapeXml(mimeType)}" />${imageTag}`,
+    transcriptLines,
+    '    </item>',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+function renderOwnerXml(feed: PodcastFeedConfig): string {
+  if (!feed.ownerName && !feed.ownerEmail) return '';
+  return [
+    '    <itunes:owner>',
+    feed.ownerName
+      ? `      <itunes:name>${escapeXml(feed.ownerName)}</itunes:name>`
+      : '',
+    feed.ownerEmail
+      ? `      <itunes:email>${escapeXml(feed.ownerEmail)}</itunes:email>`
+      : '',
+    '    </itunes:owner>',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
 export function generatePodcastRssXml(
   episodes: MediaFeedItem[],
   options: GeneratePodcastRssOptions
 ): string {
-  const { feed, locale, defaultLocale = 'es', seriesTitle, seriesDescription } = options;
+  const {
+    feed,
+    locale,
+    defaultLocale = 'es',
+    seriesTitle,
+    seriesDescription,
+  } = options;
   const activeLocale = (locale || defaultLocale).trim().toLowerCase();
   const channelTitle = seriesTitle
     ? `${feed.title} — ${seriesTitle}`
@@ -39,96 +159,22 @@ export function generatePodcastRssXml(
   const channelDescription = seriesDescription || feed.description;
   const siteUrl = feed.siteUrl.replace(/\/$/, '');
   const selfFeedUrl =
-    feed.feedUrl || `${siteUrl}/api/media-feeds/rss.xml?locale=${encodeURIComponent(activeLocale)}`;
+    feed.feedUrl ||
+    `${siteUrl}/api/media-feeds/rss.xml?locale=${encodeURIComponent(activeLocale)}`;
 
-  const resolvedItems = episodes.map((ep) =>
-    resolveEpisodeForLocale(ep, activeLocale, defaultLocale)
+  const itemXmlBlocks = episodes.map((ep) =>
+    renderPodcastItemXml(
+      resolveEpisodeForLocale(ep, activeLocale, defaultLocale),
+      feed,
+      siteUrl,
+      activeLocale
+    )
   );
-
-  const itemXmlBlocks = resolvedItems.map((item) => {
-    const itemUrl =
-      item.sourceUrl && /^https?:\/\//i.test(item.sourceUrl)
-        ? item.sourceUrl
-        : `${siteUrl}/${activeLocale}/media#${item.slug}`;
-    const enclosureUrl =
-      item.audioUrl && /^https?:\/\//i.test(item.audioUrl)
-        ? item.audioUrl
-        : item.audioUrl
-          ? `${siteUrl}${item.audioUrl.startsWith('/') ? '' : '/'}${item.audioUrl}`
-          : itemUrl;
-    const mimeType =
-      item.audioMimeType ||
-      (enclosureUrl.endsWith('.m4a')
-        ? 'audio/x-m4a'
-        : enclosureUrl.endsWith('.mp4')
-          ? 'video/mp4'
-          : 'audio/mpeg');
-    const byteLength = item.audioByteLength ?? 0;
-    const durationFormatted =
-      formatSecondsToDuration(item.durationSeconds) || item.duration || '00:30:00';
-    const guid = `${item.documentId || item.slug}:${activeLocale}`;
-
-    const transcriptLines = item.languageTracks
-      .filter((t) => Boolean(t.transcriptUrl || t.captionsUrl))
-      .map((t) => {
-        const trUrl = t.transcriptUrl || t.captionsUrl || '';
-        const absUrl = /^https?:\/\//i.test(trUrl)
-          ? trUrl
-          : `${siteUrl}${trUrl.startsWith('/') ? '' : '/'}${trUrl}`;
-        const trType = absUrl.endsWith('.vtt')
-          ? 'text/vtt'
-          : absUrl.endsWith('.srt')
-            ? 'application/x-subrip'
-            : 'application/pdf';
-        return `      <podcast:transcript url="${escapeXml(absUrl)}" type="${trType}" language="${escapeXml(t.locale)}" />`;
-      })
-      .join('\n');
-
-    const imageTag = item.thumbnailUrl
-      ? `\n      <itunes:image href="${escapeXml(
-          /^https?:\/\//i.test(item.thumbnailUrl)
-            ? item.thumbnailUrl
-            : `${siteUrl}${item.thumbnailUrl}`
-        )}" />`
-      : '';
-
-    return [
-      '    <item>',
-      `      <title>${escapeXml(item.title)}</title>`,
-      `      <link>${escapeXml(itemUrl)}</link>`,
-      `      <guid isPermaLink="false">${escapeXml(guid)}</guid>`,
-      `      <pubDate>${escapeXml(toRfc2822Date(item.publishedAt))}</pubDate>`,
-      `      <description>${escapeXml(item.description)}</description>`,
-      `      <itunes:summary>${escapeXml(item.description)}</itunes:summary>`,
-      `      <itunes:author>${escapeXml(item.speaker || feed.author)}</itunes:author>`,
-      `      <itunes:duration>${escapeXml(durationFormatted)}</itunes:duration>`,
-      `      <itunes:explicit>${feed.explicit ? 'true' : 'false'}</itunes:explicit>`,
-      `      <enclosure url="${escapeXml(enclosureUrl)}" length="${byteLength}" type="${escapeXml(mimeType)}" />${imageTag}`,
-      transcriptLines,
-      '    </item>',
-    ]
-      .filter(Boolean)
-      .join('\n');
-  });
 
   const channelImageXml = feed.imageUrl
     ? `    <itunes:image href="${escapeXml(feed.imageUrl)}" />`
     : '';
-  const ownerXml =
-    feed.ownerName || feed.ownerEmail
-      ? [
-          '    <itunes:owner>',
-          feed.ownerName
-            ? `      <itunes:name>${escapeXml(feed.ownerName)}</itunes:name>`
-            : '',
-          feed.ownerEmail
-            ? `      <itunes:email>${escapeXml(feed.ownerEmail)}</itunes:email>`
-            : '',
-          '    </itunes:owner>',
-        ]
-          .filter(Boolean)
-          .join('\n')
-      : '';
+  const ownerXml = renderOwnerXml(feed);
 
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
