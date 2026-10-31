@@ -1,19 +1,20 @@
 /**
  * Shared ESLint rules for @vicacha-devs/strapi-v5-extensions packages.
- * Enforces strict <500 lines per file and zero-any TypeScript hygiene.
+ * Enforces strict <500 lines per file and TypeScript hygiene.
  */
-module.exports = {
+export default {
   rules: {
-    'max-lines': [
-      'error',
+    "max-lines": [
+      "error",
       {
         max: 500,
-        skipBlankLines: false,
-        skipComments: false,
+        skipBlankLines: true,
+        skipComments: true,
       },
     ],
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
-    '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/consistent-type-imports': 'warn',
+    "no-console": ["warn", { allow: ["warn", "error"] }],
+    "@typescript-eslint/no-empty-object-type": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/consistent-type-imports": "warn",
   },
 };

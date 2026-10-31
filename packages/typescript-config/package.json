@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "description": "Shared TypeScript configurations for @vicacha-devs/strapi-v5-extensions packages",
-  "author": "Vicacha Devs",
   "license": "MIT",
+  "author": "Vicacha Devs",
   "files": [
     "base.json",
     "strapi-admin.json",
