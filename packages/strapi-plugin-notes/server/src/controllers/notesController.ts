@@ -1,8 +1,8 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../../shared';
-import createNotesService, {
-  NotesValidationError,
-} from '../services/notesService';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../../shared";
+import type createNotesService from "../services/notesService";
+import { NotesValidationError } from "../services/notesService";
 
 type NotesServiceInstance = ReturnType<typeof createNotesService>;
 
@@ -24,7 +24,7 @@ export interface KoaContext {
 
 function sendJson(ctx: KoaContext, payload: unknown, statusCode = 200) {
   ctx.status = statusCode;
-  if (typeof ctx.send === 'function' && statusCode === 200) {
+  if (typeof ctx.send === "function" && statusCode === 200) {
     ctx.send(payload);
   }
   ctx.body = payload;
@@ -32,7 +32,7 @@ function sendJson(ctx: KoaContext, payload: unknown, statusCode = 200) {
 }
 
 function sendBadRequest(ctx: KoaContext, message: string, details?: string[]) {
-  if (typeof ctx.badRequest === 'function') {
+  if (typeof ctx.badRequest === "function") {
     return ctx.badRequest(message, { errors: details ?? [message] });
   }
   return sendJson(
@@ -41,7 +41,7 @@ function sendBadRequest(ctx: KoaContext, message: string, details?: string[]) {
       data: null,
       error: {
         status: 400,
-        name: 'ValidationError',
+        name: "ValidationError",
         message,
         details: { errors: details ?? [message] },
       },
@@ -50,8 +50,8 @@ function sendBadRequest(ctx: KoaContext, message: string, details?: string[]) {
   );
 }
 
-function sendNotFound(ctx: KoaContext, message = 'Note not found.') {
-  if (typeof ctx.notFound === 'function') {
+function sendNotFound(ctx: KoaContext, message = "Note not found.") {
+  if (typeof ctx.notFound === "function") {
     return ctx.notFound(message);
   }
   return sendJson(
@@ -60,7 +60,7 @@ function sendNotFound(ctx: KoaContext, message = 'Note not found.') {
       data: null,
       error: {
         status: 404,
-        name: 'NotFoundError',
+        name: "NotFoundError",
         message,
       },
     },
@@ -70,7 +70,7 @@ function sendNotFound(ctx: KoaContext, message = 'Note not found.') {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getService = (): NotesServiceInstance =>
-    strapi.plugin(PLUGIN_ID).service<NotesServiceInstance>('notesService');
+    strapi.plugin(PLUGIN_ID).service<NotesServiceInstance>("notesService");
 
   return {
     async find(ctx: KoaContext) {
@@ -94,9 +94,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async findOne(ctx: KoaContext) {
-      const id = ctx.params?.id ?? '';
+      const id = ctx.params?.id ?? "";
       if (!id) {
-        return sendBadRequest(ctx, 'Note identifier is required.');
+        return sendBadRequest(ctx, "Note identifier is required.");
       }
       const note = await getService().findOne(id);
       if (!note) {
@@ -107,10 +107,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async create(ctx: KoaContext) {
       try {
-        const created = await getService().create(
-          ctx.request?.body ?? {},
-          ctx.state?.user
-        );
+        const created = await getService().create(ctx.request?.body ?? {}, ctx.state?.user);
         return sendJson(ctx, { data: created }, 201);
       } catch (err) {
         if (err instanceof NotesValidationError) {
@@ -121,16 +118,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async update(ctx: KoaContext) {
-      const id = ctx.params?.id ?? '';
+      const id = ctx.params?.id ?? "";
       if (!id) {
-        return sendBadRequest(ctx, 'Note identifier is required.');
+        return sendBadRequest(ctx, "Note identifier is required.");
       }
       try {
-        const updated = await getService().update(
-          id,
-          ctx.request?.body ?? {},
-          ctx.state?.user
-        );
+        const updated = await getService().update(id, ctx.request?.body ?? {}, ctx.state?.user);
         if (!updated) {
           return sendNotFound(ctx);
         }
@@ -144,9 +137,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async delete(ctx: KoaContext) {
-      const id = ctx.params?.id ?? '';
+      const id = ctx.params?.id ?? "";
       if (!id) {
-        return sendBadRequest(ctx, 'Note identifier is required.');
+        return sendBadRequest(ctx, "Note identifier is required.");
       }
       const deleted = await getService().delete(id);
       if (!deleted) {

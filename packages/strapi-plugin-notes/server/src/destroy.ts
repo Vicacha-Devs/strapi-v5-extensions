@@ -1,5 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  strapi.log?.debug?.('[@vicacha-devs/strapi-plugin-notes] Destroyed plugin.');
+  strapi.log?.debug?.("[@vicacha-devs/strapi-plugin-notes] Destroyed plugin.");
 };

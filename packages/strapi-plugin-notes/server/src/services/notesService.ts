@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   computeNotesSummaryStats,
   filterNotesList,
@@ -16,33 +17,33 @@ import {
   type NoteFilterParams,
   type NoteRecord,
   type NotesSummaryStats,
-} from '../../../shared';
+} from "../../../shared";
 
 export class NotesValidationError extends Error {
   status = 400;
   details: string[];
 
   constructor(errors: string[]) {
-    super(errors.join(' '));
-    this.name = 'NotesValidationError';
+    super(errors.join(" "));
+    this.name = "NotesValidationError";
     this.details = errors;
   }
 }
 
 function getDbQuery(strapi: Core.Strapi) {
-  if (typeof strapi?.db?.query === 'function') {
+  if (typeof strapi?.db?.query === "function") {
     return strapi.db.query(NOTE_CONTENT_TYPE_UID);
   }
-  if (typeof strapi?.query === 'function') {
+  if (typeof strapi?.query === "function") {
     return strapi.query(NOTE_CONTENT_TYPE_UID);
   }
   return null;
 }
 
 function extractFilterValue(value: unknown): unknown {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
     const obj = value as Record<string, unknown>;
-    if ('$eq' in obj) {
+    if ("$eq" in obj) {
       return obj.$eq;
     }
   }
@@ -50,7 +51,7 @@ function extractFilterValue(value: unknown): unknown {
 }
 
 function asObjectRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === 'object' && !Array.isArray(value)
+  return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
 }
@@ -71,45 +72,35 @@ function pickQueryField(
 function resolveSortDirection(
   rawQuery: Record<string, unknown>,
   sortObj: Record<string, unknown>
-): 'ASC' | 'DESC' {
-  const candidates = [
-    rawQuery.sort,
-    sortObj.createdAt,
-    rawQuery['sort[createdAt]'],
-  ];
-  const rawSort = candidates.find((val) => typeof val === 'string') ?? 'DESC';
-  return String(rawSort).toUpperCase().includes('ASC') ? 'ASC' : 'DESC';
+): "ASC" | "DESC" {
+  const candidates = [rawQuery.sort, sortObj.createdAt, rawQuery["sort[createdAt]"]];
+  const rawSort = candidates.find((val) => typeof val === "string") ?? "DESC";
+  return String(rawSort).toUpperCase().includes("ASC") ? "ASC" : "DESC";
 }
 
 function parseOptionalBoolean(value: unknown): boolean | undefined {
-  if (value === true || value === 'true') return true;
-  if (value === false || value === 'false') return false;
+  if (value === true || value === "true") return true;
+  if (value === false || value === "false") return false;
   return undefined;
 }
 
-function parseCategoryFilter(
-  rawCategory: unknown
-): NoteFilterParams['category'] {
-  if (rawCategory === 'all' || !rawCategory) {
-    return 'all';
+function parseCategoryFilter(rawCategory: unknown): NoteFilterParams["category"] {
+  if (rawCategory === "all" || !rawCategory) {
+    return "all";
   }
   return normalizeNoteCategory(rawCategory);
 }
 
-export function parseNoteQueryFilters(
-  rawQuery: Record<string, unknown> = {}
-): NoteFilterParams {
+export function parseNoteQueryFilters(rawQuery: Record<string, unknown> = {}): NoteFilterParams {
   const filtersObj = asObjectRecord(rawQuery.filters);
   const sortObj = asObjectRecord(rawQuery.sort);
 
-  const rawSlug = pickQueryField(rawQuery, filtersObj, 'entitySlug');
-  const rawDocId = pickQueryField(rawQuery, filtersObj, 'entityDocumentId');
-  const rawEntityId = pickQueryField(rawQuery, filtersObj, 'entityId');
-  const rawLocale = pickQueryField(rawQuery, filtersObj, 'entityLocale');
-  const rawCategory =
-    rawQuery.category ?? extractFilterValue(filtersObj.category);
-  const rawPinned =
-    rawQuery.isPinned ?? extractFilterValue(filtersObj.isPinned);
+  const rawSlug = pickQueryField(rawQuery, filtersObj, "entitySlug");
+  const rawDocId = pickQueryField(rawQuery, filtersObj, "entityDocumentId");
+  const rawEntityId = pickQueryField(rawQuery, filtersObj, "entityId");
+  const rawLocale = pickQueryField(rawQuery, filtersObj, "entityLocale");
+  const rawCategory = rawQuery.category ?? extractFilterValue(filtersObj.category);
+  const rawPinned = rawQuery.isPinned ?? extractFilterValue(filtersObj.isPinned);
 
   return {
     entitySlug: sanitizeEntitySlug(rawSlug) || undefined,
@@ -124,13 +115,8 @@ export function parseNoteQueryFilters(
   };
 }
 
-function resolvePopulatedAuthor(
-  dbValue: unknown,
-  fallbackAuthor: unknown
-): unknown {
-  return typeof dbValue === 'object' && dbValue !== null
-    ? dbValue
-    : fallbackAuthor ?? dbValue;
+function resolvePopulatedAuthor(dbValue: unknown, fallbackAuthor: unknown): unknown {
+  return typeof dbValue === "object" && dbValue !== null ? dbValue : (fallbackAuthor ?? dbValue);
 }
 
 function mergeUpdatedNoteRecord(
@@ -142,10 +128,7 @@ function mergeUpdatedNoteRecord(
     ...existing,
     ...updated,
     createdBy: resolvePopulatedAuthor(updated.createdBy, existing.createdBy),
-    updatedBy: resolvePopulatedAuthor(
-      updated.updatedBy,
-      actor ?? existing.updatedBy
-    ),
+    updatedBy: resolvePopulatedAuthor(updated.updatedBy, actor ?? existing.updatedBy),
   });
 }
 
@@ -154,22 +137,20 @@ async function queryDbByIdentifier(
   cleanStr: string
 ): Promise<Record<string, unknown> | null> {
   const dbQuery = getDbQuery(strapi);
-  if (!dbQuery || typeof dbQuery.findOne !== 'function') {
+  if (!dbQuery || typeof dbQuery.findOne !== "function") {
     return null;
   }
-  const numericId = /^\d+$/.test(cleanStr)
-    ? Number.parseInt(cleanStr, 10)
-    : null;
+  const numericId = /^\d+$/.test(cleanStr) ? Number.parseInt(cleanStr, 10) : null;
   if (numericId !== null) {
     const byId = await dbQuery.findOne({
       where: { id: numericId },
-      populate: ['createdBy', 'updatedBy'],
+      populate: ["createdBy", "updatedBy"],
     });
     if (byId) return byId;
   }
   const byDocId = await dbQuery.findOne({
     where: { documentId: cleanStr },
-    populate: ['createdBy', 'updatedBy'],
+    populate: ["createdBy", "updatedBy"],
   });
   return byDocId ?? null;
 }
@@ -178,16 +159,16 @@ async function queryDocServiceByIdentifier(
   strapi: Core.Strapi,
   cleanStr: string
 ): Promise<Record<string, unknown> | null> {
-  if (typeof strapi?.documents !== 'function') {
+  if (typeof strapi?.documents !== "function") {
     return null;
   }
   const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-  if (!docService || typeof docService.findOne !== 'function') {
+  if (!docService || typeof docService.findOne !== "function") {
     return null;
   }
   const found = await docService.findOne({
     documentId: cleanStr,
-    populate: ['createdBy', 'updatedBy'],
+    populate: ["createdBy", "updatedBy"],
   });
   return found ?? null;
 }
@@ -198,10 +179,10 @@ async function persistCreatedNote(
   actor: unknown
 ): Promise<NoteRecord | null> {
   const dbQuery = getDbQuery(strapi);
-  if (dbQuery && typeof dbQuery.create === 'function') {
+  if (dbQuery && typeof dbQuery.create === "function") {
     const created = await dbQuery.create({
       data: createData,
-      populate: ['createdBy', 'updatedBy'],
+      populate: ["createdBy", "updatedBy"],
     });
     return normalizeNoteRecord({
       ...created,
@@ -210,12 +191,12 @@ async function persistCreatedNote(
     });
   }
 
-  if (typeof strapi?.documents === 'function') {
+  if (typeof strapi?.documents === "function") {
     const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-    if (docService && typeof docService.create === 'function') {
+    if (docService && typeof docService.create === "function") {
       const created = await docService.create({
         data: createData,
-        populate: ['createdBy', 'updatedBy'],
+        populate: ["createdBy", "updatedBy"],
       });
       return normalizeNoteRecord({
         ...created,
@@ -235,28 +216,24 @@ async function persistUpdatedNote(
   actor: unknown
 ): Promise<NoteRecord | null> {
   const dbQuery = getDbQuery(strapi);
-  if (
-    dbQuery &&
-    typeof dbQuery.update === 'function' &&
-    existing.id !== undefined
-  ) {
+  if (dbQuery && typeof dbQuery.update === "function" && existing.id !== undefined) {
     const updated = await dbQuery.update({
       where: { id: existing.id },
       data: updateData,
-      populate: ['createdBy', 'updatedBy'],
+      populate: ["createdBy", "updatedBy"],
     });
     if (updated) {
       return mergeUpdatedNoteRecord(existing, updated, actor);
     }
   }
 
-  if (typeof strapi?.documents === 'function' && existing.documentId) {
+  if (typeof strapi?.documents === "function" && existing.documentId) {
     const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-    if (docService && typeof docService.update === 'function') {
+    if (docService && typeof docService.update === "function") {
       const updated = await docService.update({
         documentId: String(existing.documentId),
         data: updateData,
-        populate: ['createdBy', 'updatedBy'],
+        populate: ["createdBy", "updatedBy"],
       });
       if (updated) {
         return mergeUpdatedNoteRecord(existing, updated, actor);
@@ -273,20 +250,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function fetchRawNotes(): Promise<Array<Record<string, unknown>>> {
     const dbQuery = getDbQuery(strapi);
-    if (dbQuery && typeof dbQuery.findMany === 'function') {
+    if (dbQuery && typeof dbQuery.findMany === "function") {
       const rows = await dbQuery.findMany({
-        populate: ['createdBy', 'updatedBy'],
-        orderBy: { createdAt: 'desc' },
+        populate: ["createdBy", "updatedBy"],
+        orderBy: { createdAt: "desc" },
       });
       return Array.isArray(rows) ? rows : [];
     }
 
-    if (typeof strapi?.documents === 'function') {
+    if (typeof strapi?.documents === "function") {
       const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-      if (docService && typeof docService.findMany === 'function') {
+      if (docService && typeof docService.findMany === "function") {
         const docs = await docService.findMany({
-          populate: ['createdBy', 'updatedBy'],
-          sort: { createdAt: 'desc' },
+          populate: ["createdBy", "updatedBy"],
+          sort: { createdAt: "desc" },
         });
         return Array.isArray(docs) ? docs : [];
       }
@@ -298,7 +275,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   async function findRawNoteByIdentifier(
     identifier: string | number
   ): Promise<Record<string, unknown> | null> {
-    const cleanStr = String(identifier ?? '').trim();
+    const cleanStr = String(identifier ?? "").trim();
     if (!cleanStr) {
       return null;
     }
@@ -310,8 +287,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     if (fromDoc) return fromDoc;
 
     const fromMemory = memoryFallback.find(
-      (item) =>
-        String(item.id) === cleanStr || String(item.documentId) === cleanStr
+      (item) => String(item.id) === cleanStr || String(item.documentId) === cleanStr
     );
     return fromMemory ?? null;
   }
@@ -324,24 +300,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return filterNotesList(normalized, filters);
     },
 
-    async findOne(
-      identifier: string | number
-    ): Promise<NoteRecord | null> {
+    async findOne(identifier: string | number): Promise<NoteRecord | null> {
       const found = await findRawNoteByIdentifier(identifier);
       return found ? normalizeNoteRecord(found) : null;
     },
 
-    async getSummaryStats(
-      rawQuery: Record<string, unknown> = {}
-    ): Promise<NotesSummaryStats> {
+    async getSummaryStats(rawQuery: Record<string, unknown> = {}): Promise<NotesSummaryStats> {
       const notes = await this.find(rawQuery);
       return computeNotesSummaryStats(notes);
     },
 
-    async create(
-      input: unknown,
-      actorUser?: unknown
-    ): Promise<NoteRecord> {
+    async create(input: unknown, actorUser?: unknown): Promise<NoteRecord> {
       const validation = validateNoteCreatePayload(input);
       if (!validation.valid) {
         throw new NotesValidationError(validation.errors);
@@ -350,9 +319,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const actor = sanitizeNoteAuthor(actorUser);
       const nowIso = new Date().toISOString();
       const numericEntityId =
-        typeof validation.data.entityId === 'number'
-          ? validation.data.entityId
-          : null;
+        typeof validation.data.entityId === "number" ? validation.data.entityId : null;
 
       const createData: Record<string, unknown> = {
         title: validation.data.title,
@@ -363,8 +330,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         entityId: numericEntityId,
         entityDocumentId: validation.data.entityDocumentId,
         entityLocale: validation.data.entityLocale,
-        createdByName: actor?.displayName ?? '',
-        updatedByName: actor?.displayName ?? '',
+        createdByName: actor?.displayName ?? "",
+        updatedByName: actor?.displayName ?? "",
       };
 
       if (actor?.id !== null && actor?.id !== undefined) {
@@ -419,12 +386,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         updateData.updatedBy = actor.id;
       }
 
-      const persisted = await persistUpdatedNote(
-        strapi,
-        existing,
-        updateData,
-        actor
-      );
+      const persisted = await persistUpdatedNote(strapi, existing, updateData, actor);
       if (persisted) {
         return persisted;
       }
@@ -454,16 +416,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const normalized = normalizeNoteRecord(existing);
 
       const dbQuery = getDbQuery(strapi);
-      if (dbQuery && typeof dbQuery.delete === 'function' && existing.id !== undefined) {
+      if (dbQuery && typeof dbQuery.delete === "function" && existing.id !== undefined) {
         await dbQuery.delete({
           where: { id: existing.id },
         });
         return normalized;
       }
 
-      if (typeof strapi?.documents === 'function' && existing.documentId) {
+      if (typeof strapi?.documents === "function" && existing.documentId) {
         const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-        if (docService && typeof docService.delete === 'function') {
+        if (docService && typeof docService.delete === "function") {
           await docService.delete({
             documentId: String(existing.documentId),
           });

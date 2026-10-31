@@ -1,4 +1,4 @@
-import noteSchema from './note/schema.json';
+import noteSchema from "./note/schema.json";
 
 export default {
   note: {

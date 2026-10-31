@@ -1,4 +1,4 @@
-import notesController from './notesController';
+import notesController from "./notesController";
 
 const controllers: Record<string, unknown> = {
   notesController,

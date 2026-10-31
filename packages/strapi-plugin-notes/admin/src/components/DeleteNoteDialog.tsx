@@ -1,9 +1,10 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Button, Dialog } from '@strapi/design-system';
-import { Trash, WarningCircle } from '@strapi/icons';
-import type { NoteRecord } from '../../../shared';
-import { getTrad } from '../utils';
+import { Button, Dialog } from "@strapi/design-system";
+import { Trash, WarningCircle } from "@strapi/icons";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { NoteRecord } from "../../../shared";
+import { getTrad } from "../utils";
 
 export interface DeleteNoteDialogProps {
   note: NoteRecord | null;
@@ -24,24 +25,16 @@ export const DeleteNoteDialog: React.FC<DeleteNoteDialogProps> = ({
     return null;
   }
 
-  const t = (
-    id: string,
-    defaultMessage: string,
-    values?: Record<string, string | number>
-  ) => formatMessage({ id: getTrad(id), defaultMessage }, values);
+  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
+    formatMessage({ id: getTrad(id), defaultMessage }, values);
 
   return (
-    <Dialog.Root
-      open={Boolean(note)}
-      onOpenChange={(open: boolean) => !open && onCancel()}
-    >
+    <Dialog.Root open={Boolean(note)} onOpenChange={(open: boolean) => !open && onCancel()}>
       <Dialog.Content>
-        <Dialog.Header>
-          {t('note.delete.dialog.title', 'Confirmation')}
-        </Dialog.Header>
+        <Dialog.Header>{t("note.delete.dialog.title", "Confirmation")}</Dialog.Header>
         <Dialog.Body icon={<WarningCircle />}>
           {t(
-            'note.delete.dialog.description',
+            "note.delete.dialog.description",
             'Are you sure you want to delete the note "{title}"?',
             { title: note.title }
           )}
@@ -49,7 +42,7 @@ export const DeleteNoteDialog: React.FC<DeleteNoteDialogProps> = ({
         <Dialog.Footer>
           <Dialog.Cancel>
             <Button fullWidth variant="tertiary" onClick={onCancel}>
-              {t('note.modal.actions.cancel', 'Cancel')}
+              {t("note.modal.actions.cancel", "Cancel")}
             </Button>
           </Dialog.Cancel>
           <Dialog.Action>
@@ -61,7 +54,7 @@ export const DeleteNoteDialog: React.FC<DeleteNoteDialogProps> = ({
               disabled={isSubmitting}
               onClick={() => onConfirm(note)}
             >
-              {t('note.delete.dialog.confirm', 'Confirm')}
+              {t("note.delete.dialog.confirm", "Confirm")}
             </Button>
           </Dialog.Action>
         </Dialog.Footer>

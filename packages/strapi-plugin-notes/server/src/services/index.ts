@@ -1,4 +1,4 @@
-import notesService from './notesService';
+import notesService from "./notesService";
 
 const services: Record<string, unknown> = {
   notesService,

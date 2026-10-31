@@ -1,18 +1,18 @@
 export default {
-  type: 'content-api',
+  type: "content-api",
   routes: [
     {
-      method: 'GET',
-      path: '/notes',
-      handler: 'notesController.find',
+      method: "GET",
+      path: "/notes",
+      handler: "notesController.find",
       config: {
         policies: [],
       },
     },
     {
-      method: 'GET',
-      path: '/notes/:id',
-      handler: 'notesController.findOne',
+      method: "GET",
+      path: "/notes/:id",
+      handler: "notesController.findOne",
       config: {
         policies: [],
       },

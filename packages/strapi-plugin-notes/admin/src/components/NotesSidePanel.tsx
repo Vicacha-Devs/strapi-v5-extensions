@@ -1,5 +1,3 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
 import {
   Badge,
   Box,
@@ -11,8 +9,11 @@ import {
   SingleSelectOption,
   TextInput,
   Typography,
-} from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
+} from "@strapi/design-system";
+import { Plus } from "@strapi/icons";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
 import {
   filterNotesList,
   NOTE_CATEGORIES,
@@ -20,12 +21,12 @@ import {
   type NoteCategory,
   type NoteRecord,
   type NoteUpsertInput,
-} from '../../../shared';
-import { useNotes } from '../hooks/useNotes';
-import { getTrad } from '../utils';
-import { DeleteNoteDialog } from './DeleteNoteDialog';
-import { NoteListItem } from './NoteListItem';
-import { NoteModal, type NoteEntityContext } from './NoteModal';
+} from "../../../shared";
+import { useNotes } from "../hooks/useNotes";
+import { getTrad } from "../utils";
+import { DeleteNoteDialog } from "./DeleteNoteDialog";
+import { NoteListItem } from "./NoteListItem";
+import { NoteModal, type NoteEntityContext } from "./NoteModal";
 
 export interface SidePanelProps {
   activeTab?: string;
@@ -37,13 +38,11 @@ export interface SidePanelProps {
 }
 
 function detectDocumentLocale(props: SidePanelProps): string | null {
-  if (typeof props.document?.locale === 'string' && props.document.locale) {
+  if (typeof props.document?.locale === "string" && props.document.locale) {
     return props.document.locale;
   }
-  if (typeof window !== 'undefined') {
-    const fromUrl = new URLSearchParams(window.location.search).get(
-      'plugins[i18n][locale]'
-    );
+  if (typeof window !== "undefined") {
+    const fromUrl = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
     if (fromUrl) {
       return fromUrl;
     }
@@ -61,7 +60,7 @@ function interpolateTemplateValues(
 ): string {
   if (!values) return template;
   return Object.entries(values).reduce(
-    (acc, [k, v]) => acc.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v)),
+    (acc, [k, v]) => acc.replace(new RegExp(`\\{${k}\\}`, "g"), String(v)),
     template
   );
 }
@@ -79,11 +78,10 @@ function formatNoteMessageWithLocale(
   const fullKey = getTrad(id);
   const activeLoc =
     locale ||
-    (typeof window !== 'undefined'
-      ? new URLSearchParams(window.location.search).get('plugins[i18n][locale]')
+    (typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("plugins[i18n][locale]")
       : null);
-  const globalMessages = (globalThis as unknown as GlobalCmI18nWindow)
-    .__CM_I18N_MESSAGES__;
+  const globalMessages = (globalThis as unknown as GlobalCmI18nWindow).__CM_I18N_MESSAGES__;
   const override = activeLoc ? globalMessages?.[activeLoc]?.[fullKey] : undefined;
   if (override) {
     return interpolateTemplateValues(override, values);
@@ -95,62 +93,36 @@ interface NotesSidePanelContentProps {
   entity: NoteEntityContext;
 }
 
-const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
-  entity,
-}) => {
+const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({ entity }) => {
   const { formatMessage } = useIntl();
-  const [searchQuery, setSearchQuery] = React.useState<string>('');
-  const [categoryFilter, setCategoryFilter] = React.useState<
-    NoteCategory | 'all'
-  >('all');
+  const [searchQuery, setSearchQuery] = React.useState<string>("");
+  const [categoryFilter, setCategoryFilter] = React.useState<NoteCategory | "all">("all");
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
   const [activeNote, setActiveNote] = React.useState<NoteRecord | null>(null);
-  const [noteToDelete, setNoteToDelete] = React.useState<NoteRecord | null>(
-    null
-  );
+  const [noteToDelete, setNoteToDelete] = React.useState<NoteRecord | null>(null);
 
-  const {
-    notes,
-    isLoading,
-    isMutating,
-    createNote,
-    updateNote,
-    deleteNote,
-  } = useNotes({
+  const { notes, isLoading, isMutating, createNote, updateNote, deleteNote } = useNotes({
     entitySlug: entity.slug,
     entityDocumentId: entity.documentId,
     entityId: entity.id,
     entityLocale: entity.locale,
   });
 
-  const t = (
-    id: string,
-    defaultMessage: string,
-    values?: Record<string, string | number>
-  ) =>
-    formatNoteMessageWithLocale(
-      id,
-      defaultMessage,
-      formatMessage,
-      entity.locale,
-      values
-    );
+  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
+    formatNoteMessageWithLocale(id, defaultMessage, formatMessage, entity.locale, values);
 
   const visibleNotes = React.useMemo(
     () =>
       filterNotesList(notes, {
         category: categoryFilter,
         search: searchQuery,
-        sort: 'DESC',
+        sort: "DESC",
       }),
     [notes, categoryFilter, searchQuery]
   );
 
-  const handleUpsert = async (
-    payload: NoteUpsertInput,
-    existingId?: string | number
-  ) => {
-    if (existingId !== undefined && existingId !== '') {
+  const handleUpsert = async (payload: NoteUpsertInput, existingId?: string | number) => {
+    if (existingId !== undefined && existingId !== "") {
       await updateNote(existingId, payload);
     } else {
       await createNote(payload);
@@ -177,7 +149,7 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
       <Flex direction="column" alignItems="stretch" gap={3}>
         <Flex justifyContent="space-between" alignItems="center">
           <Typography variant="pi" textColor="neutral600">
-            {t('notes.sidePanel.count', '{count} note(s)', {
+            {t("notes.sidePanel.count", "{count} note(s)", {
               count: notes.length,
             })}
           </Typography>
@@ -194,30 +166,22 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
               name="noteSearch"
               size="S"
               value={searchQuery}
-              onChange={(e: { target: { value: string } }) =>
-                setSearchQuery(e.target.value)
-              }
-              placeholder={t(
-                'notes.sidePanel.search.placeholder',
-                'Filter notes...'
-              )}
+              onChange={(e: { target: { value: string } }) => setSearchQuery(e.target.value)}
+              placeholder={t("notes.sidePanel.search.placeholder", "Filter notes...")}
             />
             <SingleSelect
               size="S"
               value={categoryFilter}
               onChange={(val: string | number) =>
-                setCategoryFilter((String(val) || 'all') as NoteCategory | 'all')
+                setCategoryFilter((String(val) || "all") as NoteCategory | "all")
               }
             >
               <SingleSelectOption value="all">
-                {t('category.all', 'All categories')}
+                {t("category.all", "All categories")}
               </SingleSelectOption>
               {NOTE_CATEGORIES.map((cat) => (
                 <SingleSelectOption key={cat} value={cat}>
-                  {t(
-                    NOTE_CATEGORY_META[cat].labelKey,
-                    NOTE_CATEGORY_META[cat].defaultLabel
-                  )}
+                  {t(NOTE_CATEGORY_META[cat].labelKey, NOTE_CATEGORY_META[cat].defaultLabel)}
                 </SingleSelectOption>
               ))}
             </SingleSelect>
@@ -228,22 +192,14 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
 
         {isLoading ? (
           <Flex justifyContent="center" paddingTop={3} paddingBottom={3}>
-            <Loader small>
-              {t('notes.loading', 'Loading Content ...')}
-            </Loader>
+            <Loader small>{t("notes.loading", "Loading Content ...")}</Loader>
           </Flex>
         ) : visibleNotes.length === 0 ? (
           <Box padding={3} background="neutral100" hasRadius>
             <Typography variant="pi" textColor="neutral600">
               {notes.length === 0
-                ? t(
-                    'notes.sidePanel.empty',
-                    'No editorial notes attached to this entry yet.'
-                  )
-                : t(
-                    'notes.sidePanel.noMatches',
-                    'No notes match the current filter.'
-                  )}
+                ? t("notes.sidePanel.empty", "No editorial notes attached to this entry yet.")
+                : t("notes.sidePanel.noMatches", "No notes match the current filter.")}
             </Typography>
           </Box>
         ) : (
@@ -252,9 +208,9 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
             alignItems="stretch"
             gap={2}
             style={{
-              maxHeight: '240px',
-              overflowY: 'auto',
-              overflowX: 'hidden',
+              maxHeight: "240px",
+              overflowY: "auto",
+              overflowX: "hidden",
             }}
           >
             {visibleNotes.map((item) => (
@@ -282,7 +238,7 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
             setIsModalOpen(true);
           }}
         >
-          {t('note.modal.new.title', 'Add a note')}
+          {t("note.modal.new.title", "Add a note")}
         </Button>
 
         <NoteModal
@@ -311,23 +267,19 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
 function resolveSidePanelDocumentId(props: SidePanelProps): string {
   if (props.documentId) return props.documentId;
   const docId = props.document?.documentId;
-  return typeof docId === 'string' ? docId : '';
+  return typeof docId === "string" ? docId : "";
 }
 
-function resolveSidePanelNumericId(
-  props: SidePanelProps
-): number | string | null {
+function resolveSidePanelNumericId(props: SidePanelProps): number | string | null {
   const id = props.document?.id;
-  if (typeof id === 'number' || typeof id === 'string') {
+  if (typeof id === "number" || typeof id === "string") {
     return id;
   }
   return null;
 }
 
-function resolveSidePanelEntity(
-  props: SidePanelProps
-): NoteEntityContext | null {
-  const slug = props.model ?? '';
+function resolveSidePanelEntity(props: SidePanelProps): NoteEntityContext | null {
+  const slug = props.model ?? "";
   const documentId = resolveSidePanelDocumentId(props);
   const numericId = resolveSidePanelNumericId(props);
   const hasIdentifier = Boolean(documentId || numericId !== null);
@@ -351,12 +303,7 @@ export const NotesSidePanel = (props: SidePanelProps) => {
   }
 
   return {
-    title: formatNoteMessageWithLocale(
-      'plugin.name',
-      'Notes',
-      formatMessage,
-      entity.locale
-    ),
+    title: formatNoteMessageWithLocale("plugin.name", "Notes", formatMessage, entity.locale),
     content: <NotesSidePanelContent entity={entity} />,
   };
 };

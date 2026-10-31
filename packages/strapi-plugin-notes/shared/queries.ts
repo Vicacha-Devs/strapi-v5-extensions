@@ -1,9 +1,4 @@
-import type {
-  NoteCategory,
-  NoteFilterParams,
-  NoteRecord,
-  NotesSummaryStats,
-} from './types';
+import type { NoteCategory, NoteFilterParams, NoteRecord, NotesSummaryStats } from "./types";
 import {
   normalizeNoteCategory,
   sanitizeEntityDocumentId,
@@ -11,11 +6,11 @@ import {
   sanitizeEntityLocale,
   sanitizeEntitySlug,
   sanitizePlainText,
-} from './validator';
+} from "./validator";
 
 export function sortNotesPinnedFirst(
   notes: readonly NoteRecord[],
-  direction: 'ASC' | 'DESC' = 'DESC'
+  direction: "ASC" | "DESC" = "DESC"
 ): NoteRecord[] {
   return [...notes].sort((a, b) => {
     if (a.isPinned !== b.isPinned) {
@@ -24,7 +19,7 @@ export function sortNotesPinnedFirst(
     const timeA = a.createdAt ? Date.parse(a.createdAt) : 0;
     const timeB = b.createdAt ? Date.parse(b.createdAt) : 0;
     if (timeA !== timeB && !Number.isNaN(timeA) && !Number.isNaN(timeB)) {
-      return direction === 'ASC' ? timeA - timeB : timeB - timeA;
+      return direction === "ASC" ? timeA - timeB : timeB - timeA;
     }
     return String(a.id).localeCompare(String(b.id));
   });
@@ -38,7 +33,7 @@ function matchesEntityIdentifier(
   if (!docIdFilter && entityIdFilter === null) {
     return true;
   }
-  const noteIdStr = note.entityId !== null ? String(note.entityId) : '';
+  const noteIdStr = note.entityId !== null ? String(note.entityId) : "";
   if (docIdFilter) {
     if (note.entityDocumentId === docIdFilter || noteIdStr === docIdFilter) {
       return true;
@@ -72,10 +67,10 @@ function matchesSearchFilter(note: NoteRecord, searchFilter: string): boolean {
     note.title,
     note.content,
     note.entitySlug,
-    note.createdBy?.displayName ?? '',
-    note.updatedBy?.displayName ?? '',
+    note.createdBy?.displayName ?? "",
+    note.updatedBy?.displayName ?? "",
   ]
-    .join(' ')
+    .join(" ")
     .toLowerCase();
   return haystack.includes(searchFilter);
 }
@@ -91,34 +86,20 @@ interface NormalizedNoteFilters {
   searchFilter: string;
 }
 
-function matchesAllNoteFilters(
-  note: NoteRecord,
-  filters: NormalizedNoteFilters
-): boolean {
+function matchesAllNoteFilters(note: NoteRecord, filters: NormalizedNoteFilters): boolean {
   if (filters.slugFilter && note.entitySlug !== filters.slugFilter) {
     return false;
   }
-  if (
-    !matchesEntityIdentifier(
-      note,
-      filters.docIdFilter,
-      filters.entityIdFilter
-    )
-  ) {
+  if (!matchesEntityIdentifier(note, filters.docIdFilter, filters.entityIdFilter)) {
     return false;
   }
-  if (
-    !matchesLocaleFilter(note, filters.localeFilter, filters.includeAllLocales)
-  ) {
+  if (!matchesLocaleFilter(note, filters.localeFilter, filters.includeAllLocales)) {
     return false;
   }
   if (filters.categoryFilter && note.category !== filters.categoryFilter) {
     return false;
   }
-  if (
-    typeof filters.isPinned === 'boolean' &&
-    note.isPinned !== filters.isPinned
-  ) {
+  if (typeof filters.isPinned === "boolean" && note.isPinned !== filters.isPinned) {
     return false;
   }
   return matchesSearchFilter(note, filters.searchFilter);
@@ -129,10 +110,8 @@ export function filterNotesList(
   params: NoteFilterParams = {}
 ): NoteRecord[] {
   const filters: NormalizedNoteFilters = {
-    slugFilter: params.entitySlug ? sanitizeEntitySlug(params.entitySlug) : '',
-    docIdFilter: params.entityDocumentId
-      ? sanitizeEntityDocumentId(params.entityDocumentId)
-      : '',
+    slugFilter: params.entitySlug ? sanitizeEntitySlug(params.entitySlug) : "",
+    docIdFilter: params.entityDocumentId ? sanitizeEntityDocumentId(params.entityDocumentId) : "",
     entityIdFilter:
       params.entityId !== undefined && params.entityId !== null
         ? sanitizeEntityId(params.entityId)
@@ -140,20 +119,16 @@ export function filterNotesList(
     localeFilter: sanitizeEntityLocale(params.entityLocale),
     includeAllLocales: params.includeAllLocales,
     categoryFilter:
-      params.category && params.category !== 'all'
-        ? normalizeNoteCategory(params.category)
-        : null,
+      params.category && params.category !== "all" ? normalizeNoteCategory(params.category) : null,
     isPinned: params.isPinned,
     searchFilter: sanitizePlainText(params.search, 160).toLowerCase(),
   };
 
   const filtered = notes.filter((note) => matchesAllNoteFilters(note, filters));
-  return sortNotesPinnedFirst(filtered, params.sort ?? 'DESC');
+  return sortNotesPinnedFirst(filtered, params.sort ?? "DESC");
 }
 
-export function computeNotesSummaryStats(
-  notes: readonly NoteRecord[]
-): NotesSummaryStats {
+export function computeNotesSummaryStats(notes: readonly NoteRecord[]): NotesSummaryStats {
   const byCategory: Record<NoteCategory, number> = {
     general: 0,
     todo: 0,
@@ -183,14 +158,14 @@ export function computeNotesSummaryStats(
 }
 
 export function buildContentManagerNoteLink(
-  note: Pick<NoteRecord, 'entitySlug' | 'entityDocumentId' | 'entityId' | 'entityLocale'>
+  note: Pick<NoteRecord, "entitySlug" | "entityDocumentId" | "entityId" | "entityLocale">
 ): string | null {
   const slug = sanitizeEntitySlug(note.entitySlug);
   const targetId =
     sanitizeEntityDocumentId(note.entityDocumentId) ||
     (note.entityId !== null && note.entityId !== undefined
       ? sanitizeEntityDocumentId(String(note.entityId))
-      : '');
+      : "");
   if (!slug || !targetId) {
     return null;
   }

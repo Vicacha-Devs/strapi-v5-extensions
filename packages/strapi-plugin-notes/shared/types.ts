@@ -1,4 +1,4 @@
-import { NOTE_CATEGORIES } from './constants';
+import type { NOTE_CATEGORIES } from "./constants";
 
 export type NoteCategory = (typeof NOTE_CATEGORIES)[number];
 
@@ -52,10 +52,10 @@ export interface NoteFilterParams {
   entityDocumentId?: string;
   entityLocale?: string | null;
   includeAllLocales?: boolean;
-  category?: NoteCategory | 'all';
+  category?: NoteCategory | "all";
   isPinned?: boolean;
   search?: string;
-  sort?: 'ASC' | 'DESC';
+  sort?: "ASC" | "DESC";
   limit?: number;
   offset?: number;
 }

@@ -1,7 +1,3 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
-import { Layouts } from '@strapi/strapi/admin';
 import {
   Badge,
   Button,
@@ -17,8 +13,13 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import { ExternalLink, Pencil, Pin, Trash } from '@strapi/icons';
+} from "@strapi/design-system";
+import { ExternalLink, Pencil, Pin, Trash } from "@strapi/icons";
+import { Layouts } from "@strapi/strapi/admin";
+import * as React from "react";
+import { useIntl } from "react-intl";
+import { useNavigate } from "react-router-dom";
+
 import {
   buildContentManagerNoteLink,
   filterNotesList,
@@ -28,12 +29,12 @@ import {
   type NoteCategory,
   type NoteRecord,
   type NoteUpsertInput,
-} from '../../../shared';
-import { DeleteNoteDialog } from '../components/DeleteNoteDialog';
-import { NoteModal } from '../components/NoteModal';
-import { NotesHubFilterBar } from '../components/NotesHubFilterBar';
-import { useNotes } from '../hooks/useNotes';
-import { getTrad } from '../utils';
+} from "../../../shared";
+import { DeleteNoteDialog } from "../components/DeleteNoteDialog";
+import { NoteModal } from "../components/NoteModal";
+import { NotesHubFilterBar } from "../components/NotesHubFilterBar";
+import { useNotes } from "../hooks/useNotes";
+import { getTrad } from "../utils";
 
 function formatNoteContentPreview(content: string): string {
   return content.length > 90 ? `${content.slice(0, 90)}…` : content;
@@ -42,11 +43,7 @@ function formatNoteContentPreview(content: string): string {
 interface NoteHubActionsCellProps {
   note: NoteRecord;
   deepLink: string | null;
-  t: (
-    id: string,
-    defaultMessage: string,
-    values?: Record<string, string | number>
-  ) => string;
+  t: (id: string, defaultMessage: string, values?: Record<string, string | number>) => string;
   onNavigate: (to: string) => void;
   onEdit: (note: NoteRecord) => void;
   onDelete: (note: NoteRecord) => void;
@@ -62,10 +59,10 @@ const NoteHubActionsCell: React.FC<NoteHubActionsCellProps> = ({
   onDelete,
   onTogglePin,
 }) => {
-  const pinVariant = note.isPinned ? 'secondary' : 'ghost';
+  const pinVariant = note.isPinned ? "secondary" : "ghost";
   const pinLabel = note.isPinned
-    ? t('note.actions.unpin', 'Unpin note')
-    : t('note.actions.pin', 'Pin note');
+    ? t("note.actions.unpin", "Unpin note")
+    : t("note.actions.pin", "Pin note");
 
   return (
     <Flex gap={1} alignItems="center">
@@ -73,7 +70,7 @@ const NoteHubActionsCell: React.FC<NoteHubActionsCellProps> = ({
         <IconButton
           withTooltip={false}
           variant="ghost"
-          label={t('hub.actions.openEntry', 'Open Content Manager entry')}
+          label={t("hub.actions.openEntry", "Open Content Manager entry")}
           onClick={() => onNavigate(deepLink)}
         >
           <ExternalLink />
@@ -90,7 +87,7 @@ const NoteHubActionsCell: React.FC<NoteHubActionsCellProps> = ({
       <IconButton
         withTooltip={false}
         variant="ghost"
-        label={t('note.actions.edit', 'Edit')}
+        label={t("note.actions.edit", "Edit")}
         onClick={() => onEdit(note)}
       >
         <Pencil />
@@ -98,7 +95,7 @@ const NoteHubActionsCell: React.FC<NoteHubActionsCellProps> = ({
       <IconButton
         withTooltip={false}
         variant="ghost"
-        label={t('note.actions.delete', 'Delete')}
+        label={t("note.actions.delete", "Delete")}
         onClick={() => onDelete(note)}
       >
         <Trash />
@@ -110,11 +107,7 @@ const NoteHubActionsCell: React.FC<NoteHubActionsCellProps> = ({
 interface NoteHubRowProps {
   note: NoteRecord;
   locale: string;
-  t: (
-    id: string,
-    defaultMessage: string,
-    values?: Record<string, string | number>
-  ) => string;
+  t: (id: string, defaultMessage: string, values?: Record<string, string | number>) => string;
   onNavigate: (to: string) => void;
   onEdit: (note: NoteRecord) => void;
   onDelete: (note: NoteRecord) => void;
@@ -130,10 +123,9 @@ const NoteHubRow: React.FC<NoteHubRowProps> = ({
   onDelete,
   onTogglePin,
 }) => {
-  const catMeta =
-    NOTE_CATEGORY_META[note.category] ?? NOTE_CATEGORY_META.general;
+  const catMeta = NOTE_CATEGORY_META[note.category] ?? NOTE_CATEGORY_META.general;
   const deepLink = buildContentManagerNoteLink(note);
-  const entityBadgeText = note.entityDocumentId || String(note.entityId ?? '');
+  const entityBadgeText = note.entityDocumentId || String(note.entityId ?? "");
 
   return (
     <Tr>
@@ -142,13 +134,13 @@ const NoteHubRow: React.FC<NoteHubRowProps> = ({
           <Flex gap={2} alignItems="center">
             {note.isPinned && (
               <Badge backgroundColor="primary100" textColor="primary700">
-                {t('hub.badge.pinned', 'PINNED')}
+                {t("hub.badge.pinned", "PINNED")}
               </Badge>
             )}
             <Typography
               fontWeight="bold"
               textColor="neutral800"
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: "pointer" }}
               onClick={() => onEdit(note)}
             >
               {note.title}
@@ -163,10 +155,7 @@ const NoteHubRow: React.FC<NoteHubRowProps> = ({
       </Td>
 
       <Td>
-        <Badge
-          backgroundColor={catMeta.badgeBackground}
-          textColor={catMeta.badgeTextColor}
-        >
+        <Badge backgroundColor={catMeta.badgeBackground} textColor={catMeta.badgeTextColor}>
           {t(catMeta.labelKey, catMeta.defaultLabel)}
         </Badge>
       </Td>
@@ -225,52 +214,36 @@ export const NotesHomePage: React.FC = () => {
   const { formatMessage, locale } = useIntl();
   const navigate = useNavigate();
 
-  const {
-    notes,
-    summary,
-    isLoading,
-    isMutating,
-    refetch,
-    updateNote,
-    deleteNote,
-  } = useNotes({ includeAllLocales: true });
+  const { notes, summary, isLoading, isMutating, refetch, updateNote, deleteNote } = useNotes({
+    includeAllLocales: true,
+  });
 
-  const [search, setSearch] = React.useState<string>('');
-  const [selectedCategory, setSelectedCategory] = React.useState<
-    NoteCategory | 'all'
-  >('all');
-  const [selectedSlug, setSelectedSlug] = React.useState<string>('all');
+  const [search, setSearch] = React.useState<string>("");
+  const [selectedCategory, setSelectedCategory] = React.useState<NoteCategory | "all">("all");
+  const [selectedSlug, setSelectedSlug] = React.useState<string>("all");
   const [pinnedOnly, setPinnedOnly] = React.useState<boolean>(false);
 
   const [editingNote, setEditingNote] = React.useState<NoteRecord | null>(null);
-  const [deletingNote, setDeletingNote] = React.useState<NoteRecord | null>(
-    null
-  );
+  const [deletingNote, setDeletingNote] = React.useState<NoteRecord | null>(null);
 
-  const t = (
-    id: string,
-    defaultMessage: string,
-    values?: Record<string, string | number>
-  ) => formatMessage({ id: getTrad(id), defaultMessage }, values);
+  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
+    formatMessage({ id: getTrad(id), defaultMessage }, values);
 
   const filteredNotes = React.useMemo(
     () =>
       filterNotesList(notes, {
         search,
         category: selectedCategory,
-        entitySlug: selectedSlug === 'all' ? undefined : selectedSlug,
+        entitySlug: selectedSlug === "all" ? undefined : selectedSlug,
         isPinned: pinnedOnly ? true : undefined,
         includeAllLocales: true,
-        sort: 'DESC',
+        sort: "DESC",
       }),
     [notes, search, selectedCategory, selectedSlug, pinnedOnly]
   );
 
-  const handleSaveEdit = async (
-    payload: NoteUpsertInput,
-    existingId?: string | number
-  ) => {
-    if (existingId !== undefined && existingId !== '') {
+  const handleSaveEdit = async (payload: NoteUpsertInput, existingId?: string | number) => {
+    if (existingId !== undefined && existingId !== "") {
       await updateNote(existingId, payload);
     }
     setEditingNote(null);
@@ -292,18 +265,14 @@ export const NotesHomePage: React.FC = () => {
   return (
     <Main>
       <Layouts.Header
-        title={t('hub.title', 'Editorial Notes Hub')}
+        title={t("hub.title", "Editorial Notes Hub")}
         subtitle={t(
-          'hub.subtitle',
-          'Search, filter, and manage editorial notes across all Strapi v5 Content Manager entries.'
+          "hub.subtitle",
+          "Search, filter, and manage editorial notes across all Strapi v5 Content Manager entries."
         )}
         primaryAction={
-          <Button
-            variant="secondary"
-            onClick={() => void refetch()}
-            loading={isLoading}
-          >
-            {t('hub.actions.refresh', 'Refresh')}
+          <Button variant="secondary" onClick={() => void refetch()} loading={isLoading}>
+            {t("hub.actions.refresh", "Refresh")}
           </Button>
         }
       />
@@ -325,48 +294,41 @@ export const NotesHomePage: React.FC = () => {
           {/* Notes Table */}
           {isLoading ? (
             <Flex justifyContent="center" padding={8}>
-              <Loader>{t('notes.loading', 'Loading Content ...')}</Loader>
+              <Loader>{t("notes.loading", "Loading Content ...")}</Loader>
             </Flex>
           ) : filteredNotes.length === 0 ? (
             <EmptyStateLayout
-              content={t(
-                'hub.empty',
-                'No editorial notes found matching your current filters.'
-              )}
+              content={t("hub.empty", "No editorial notes found matching your current filters.")}
             />
           ) : (
             <Table colCount={6} rowCount={filteredNotes.length + 1}>
               <Thead>
                 <Tr>
                   <Th>
+                    <Typography variant="sigma">{t("note.modal.fields.title", "Title")}</Typography>
+                  </Th>
+                  <Th>
                     <Typography variant="sigma">
-                      {t('note.modal.fields.title', 'Title')}
+                      {t("note.modal.fields.category", "Category")}
                     </Typography>
                   </Th>
                   <Th>
                     <Typography variant="sigma">
-                      {t('note.modal.fields.category', 'Category')}
+                      {t("hub.table.targetEntity", "Target Entry")}
                     </Typography>
                   </Th>
                   <Th>
                     <Typography variant="sigma">
-                      {t('hub.table.targetEntity', 'Target Entry')}
+                      {t("note.modal.meta.createdBy", "Created By")}
                     </Typography>
                   </Th>
                   <Th>
                     <Typography variant="sigma">
-                      {t('note.modal.meta.createdBy', 'Created By')}
+                      {t("note.modal.meta.updatedAt", "Updated At")}
                     </Typography>
                   </Th>
                   <Th>
-                    <Typography variant="sigma">
-                      {t('note.modal.meta.updatedAt', 'Updated At')}
-                    </Typography>
-                  </Th>
-                  <Th>
-                    <Typography variant="sigma">
-                      {t('hub.table.actions', 'Actions')}
-                    </Typography>
+                    <Typography variant="sigma">{t("hub.table.actions", "Actions")}</Typography>
                   </Th>
                 </Tr>
               </Thead>

@@ -1,1 +1,1 @@
-export { getTrad } from './getTrad';
+export { getTrad } from "./getTrad";

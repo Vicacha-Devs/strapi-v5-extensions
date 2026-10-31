@@ -5,23 +5,19 @@ import {
   MAX_NOTE_CONTENT_LENGTH,
   MAX_NOTE_TITLE_LENGTH,
   NOTE_CATEGORIES,
-} from './constants';
+} from "./constants";
 import type {
   NoteAttributes,
   NoteAuthorMeta,
   NoteCategory,
   NoteRecord,
   NoteUpsertInput,
-} from './types';
+} from "./types";
 
 const ENTITY_SLUG_PATTERN = /^[a-zA-Z0-9_:.-]{1,160}$/;
 const SAFE_ID_PATTERN = /^[a-zA-Z0-9_-]{1,128}$/;
 const LOCALE_PATTERN = /^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/;
-const FORBIDDEN_IDENTIFIER_TOKENS = new Set([
-  '__proto__',
-  'constructor',
-  'prototype',
-]);
+const FORBIDDEN_IDENTIFIER_TOKENS = new Set(["__proto__", "constructor", "prototype"]);
 
 function isForbiddenIdentifier(value: string): boolean {
   const lower = value.toLowerCase();
@@ -29,48 +25,43 @@ function isForbiddenIdentifier(value: string): boolean {
     return true;
   }
   if (
-    value === '.' ||
-    value === '..' ||
-    value.includes('..') ||
-    value.startsWith('.') ||
-    value.endsWith('.')
+    value === "." ||
+    value === ".." ||
+    value.includes("..") ||
+    value.startsWith(".") ||
+    value.endsWith(".")
   ) {
     return true;
   }
-  return lower
-    .split(/[:._/-]+/)
-    .some((segment) => FORBIDDEN_IDENTIFIER_TOKENS.has(segment));
+  return lower.split(/[:._/-]+/).some((segment) => FORBIDDEN_IDENTIFIER_TOKENS.has(segment));
 }
 
 export function isValidNoteCategory(value: unknown): value is NoteCategory {
-  return (
-    typeof value === 'string' &&
-    (NOTE_CATEGORIES as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (NOTE_CATEGORIES as readonly string[]).includes(value);
 }
 
 export function normalizeNoteCategory(value: unknown): NoteCategory {
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
     if (isValidNoteCategory(normalized)) {
       return normalized;
     }
   }
-  return 'general';
+  return "general";
 }
 
 export function sanitizePlainText(input: unknown, maxLength: number): string {
-  if (typeof input !== 'string') {
-    return '';
+  if (typeof input !== "string") {
+    return "";
   }
   // Remove null bytes and normalize line endings while preserving user text
-  const cleaned = input.replace(/\0/g, '').replace(/\r\n/g, '\n').trim();
+  const cleaned = input.replace(/\0/g, "").replace(/\r\n/g, "\n").trim();
   return cleaned.length > maxLength ? cleaned.slice(0, maxLength) : cleaned;
 }
 
 export function sanitizeEntitySlug(input: unknown): string {
-  if (typeof input !== 'string' || input.includes('\0')) {
-    return '';
+  if (typeof input !== "string" || input.includes("\0")) {
+    return "";
   }
   const cleaned = input.trim();
   if (
@@ -79,17 +70,17 @@ export function sanitizeEntitySlug(input: unknown): string {
     isForbiddenIdentifier(cleaned) ||
     !ENTITY_SLUG_PATTERN.test(cleaned)
   ) {
-    return '';
+    return "";
   }
   return cleaned;
 }
 
 export function sanitizeEntityDocumentId(input: unknown): string {
-  if (typeof input === 'number' && Number.isFinite(input) && input > 0) {
+  if (typeof input === "number" && Number.isFinite(input) && input > 0) {
     return String(Math.trunc(input));
   }
-  if (typeof input !== 'string' || input.includes('\0')) {
-    return '';
+  if (typeof input !== "string" || input.includes("\0")) {
+    return "";
   }
   const cleaned = input.trim();
   if (
@@ -98,21 +89,17 @@ export function sanitizeEntityDocumentId(input: unknown): string {
     isForbiddenIdentifier(cleaned) ||
     !SAFE_ID_PATTERN.test(cleaned)
   ) {
-    return '';
+    return "";
   }
   return cleaned;
 }
 
 function parseStringEntityId(input: string): number | string | null {
-  if (input.includes('\0')) {
+  if (input.includes("\0")) {
     return null;
   }
   const trimmed = input.trim();
-  if (
-    !trimmed ||
-    trimmed.length > MAX_ENTITY_ID_LENGTH ||
-    isForbiddenIdentifier(trimmed)
-  ) {
+  if (!trimmed || trimmed.length > MAX_ENTITY_ID_LENGTH || isForbiddenIdentifier(trimmed)) {
     return null;
   }
   if (/^\d+$/.test(trimmed)) {
@@ -123,26 +110,24 @@ function parseStringEntityId(input: string): number | string | null {
 }
 
 export function sanitizeEntityId(input: unknown): number | string | null {
-  if (typeof input === 'number' && Number.isFinite(input) && input > 0) {
+  if (typeof input === "number" && Number.isFinite(input) && input > 0) {
     return Math.trunc(input);
   }
-  if (typeof input === 'string') {
+  if (typeof input === "string") {
     return parseStringEntityId(input);
   }
   return null;
 }
 
 function isWildcardOrInvalidLocale(cleaned: string): boolean {
-  if (!cleaned || cleaned === 'all' || cleaned === '*') {
+  if (!cleaned || cleaned === "all" || cleaned === "*") {
     return true;
   }
-  return (
-    cleaned.length > MAX_LOCALE_LENGTH || isForbiddenIdentifier(cleaned)
-  );
+  return cleaned.length > MAX_LOCALE_LENGTH || isForbiddenIdentifier(cleaned);
 }
 
 export function sanitizeEntityLocale(input: unknown): string | null {
-  if (typeof input !== 'string' || input.includes('\0')) {
+  if (typeof input !== "string" || input.includes("\0")) {
     return null;
   }
   const cleaned = input.trim();
@@ -153,46 +138,38 @@ export function sanitizeEntityLocale(input: unknown): string | null {
 }
 
 function extractPrimitiveAuthorId(rawUser: unknown): number | string | null {
-  if (typeof rawUser === 'number' && Number.isFinite(rawUser) && rawUser > 0) {
+  if (typeof rawUser === "number" && Number.isFinite(rawUser) && rawUser > 0) {
     return Math.trunc(rawUser);
   }
-  if (typeof rawUser === 'string' && rawUser.trim()) {
+  if (typeof rawUser === "string" && rawUser.trim()) {
     return sanitizeEntityDocumentId(rawUser) || null;
   }
   return null;
 }
 
-function sanitizePrimitiveAuthor(
-  rawUser: unknown,
-  fallback: string
-): NoteAuthorMeta | null {
+function sanitizePrimitiveAuthor(rawUser: unknown, fallback: string): NoteAuthorMeta | null {
   const primitiveId = extractPrimitiveAuthorId(rawUser);
   if (!fallback && primitiveId === null) {
     return null;
   }
   return {
     id: primitiveId,
-    firstname: '',
-    lastname: '',
-    username: '',
+    firstname: "",
+    lastname: "",
+    username: "",
     displayName: fallback || `#${String(primitiveId)}`,
   };
 }
 
-function asPlainObject(
-  value: unknown,
-  fallback: Record<string, unknown>
-): Record<string, unknown> {
-  return value && typeof value === 'object'
-    ? (value as Record<string, unknown>)
-    : fallback;
+function asPlainObject(value: unknown, fallback: Record<string, unknown>): Record<string, unknown> {
+  return value && typeof value === "object" ? (value as Record<string, unknown>) : fallback;
 }
 
 function normalizeRawAuthorId(rawId: unknown): number | string | null {
-  if (typeof rawId === 'number' && Number.isFinite(rawId)) {
+  if (typeof rawId === "number" && Number.isFinite(rawId)) {
     return rawId;
   }
-  if (typeof rawId === 'string' && rawId.trim()) {
+  if (typeof rawId === "string" && rawId.trim()) {
     return rawId.trim();
   }
   return null;
@@ -218,7 +195,7 @@ export function sanitizeNoteAuthor(
 ): NoteAuthorMeta | null {
   const fallback = sanitizePlainText(fallbackDisplayName, 120);
 
-  if (!rawUser || typeof rawUser !== 'object') {
+  if (!rawUser || typeof rawUser !== "object") {
     return sanitizePrimitiveAuthor(rawUser, fallback);
   }
 
@@ -228,9 +205,8 @@ export function sanitizeNoteAuthor(
   const username = sanitizePlainText(attrs.username, 80);
   const explicitDisplayName = sanitizePlainText(attrs.displayName, 120);
 
-  const fullName = [firstname, lastname].filter(Boolean).join(' ').trim();
-  const displayName =
-    fullName || username || explicitDisplayName || fallback || '';
+  const fullName = [firstname, lastname].filter(Boolean).join(" ").trim();
+  const displayName = fullName || username || explicitDisplayName || fallback || "";
 
   if (!displayName && id === null) {
     return null;
@@ -247,15 +223,12 @@ export function sanitizeNoteAuthor(
 
 export function formatNoteAuthorDisplay(
   author: NoteAuthorMeta | null | undefined,
-  emptyFallback = '-'
+  emptyFallback = "-"
 ): string {
   if (!author) {
     return emptyFallback;
   }
-  const fullName = [author.firstname, author.lastname]
-    .filter(Boolean)
-    .join(' ')
-    .trim();
+  const fullName = [author.firstname, author.lastname].filter(Boolean).join(" ").trim();
   if (fullName) {
     return fullName;
   }
@@ -270,10 +243,10 @@ export function formatNoteAuthorDisplay(
 
 export function formatNoteTimestamp(
   isoString: string | null | undefined,
-  locale = 'en',
-  emptyFallback = '-'
+  locale = "en",
+  emptyFallback = "-"
 ): string {
-  if (!isoString || typeof isoString !== 'string') {
+  if (!isoString || typeof isoString !== "string") {
     return emptyFallback;
   }
   const date = new Date(isoString);
@@ -281,9 +254,9 @@ export function formatNoteTimestamp(
     return emptyFallback;
   }
   try {
-    return new Intl.DateTimeFormat(locale || 'en', {
-      dateStyle: 'medium',
-      timeStyle: 'short',
+    return new Intl.DateTimeFormat(locale || "en", {
+      dateStyle: "medium",
+      timeStyle: "short",
     }).format(date);
   } catch {
     return date.toISOString();
@@ -294,27 +267,26 @@ function extractRecordId(
   root: Record<string, unknown>,
   attrs: Record<string, unknown>
 ): number | string {
-  if (typeof root.id === 'number' || typeof root.id === 'string') {
+  if (typeof root.id === "number" || typeof root.id === "string") {
     return root.id;
   }
-  if (typeof attrs.id === 'number' || typeof attrs.id === 'string') {
+  if (typeof attrs.id === "number" || typeof attrs.id === "string") {
     return attrs.id;
   }
-  return '';
+  return "";
 }
 
 function sanitizeOptionalIsoString(value: unknown): string | null {
-  return typeof value === 'string' && value.trim() ? value.trim() : null;
+  return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
 function unwrapRawNoteAttributes(raw: unknown): {
   root: Record<string, unknown>;
   attrs: Record<string, unknown>;
 } {
-  const root =
-    raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const root = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const attrs =
-    root.attributes && typeof root.attributes === 'object'
+    root.attributes && typeof root.attributes === "object"
       ? { ...root, ...(root.attributes as Record<string, unknown>) }
       : root;
   return { root, attrs };
@@ -324,20 +296,14 @@ export function normalizeNoteRecord(raw: unknown): NoteRecord {
   const { root, attrs } = unwrapRawNoteAttributes(raw);
   const id = extractRecordId(root, attrs);
   const documentId =
-    sanitizeEntityDocumentId(root.documentId ?? attrs.documentId) ||
-    String(id || '');
+    sanitizeEntityDocumentId(root.documentId ?? attrs.documentId) || String(id || "");
 
   const entityId = sanitizeEntityId(attrs.entityId);
   const entityDocumentId =
-    sanitizeEntityDocumentId(attrs.entityDocumentId) ||
-    (entityId !== null ? String(entityId) : '');
+    sanitizeEntityDocumentId(attrs.entityDocumentId) || (entityId !== null ? String(entityId) : "");
 
-  const createdBy = sanitizeNoteAuthor(
-    attrs.createdBy,
-    attrs.createdByName ?? attrs.authorName
-  );
-  const updatedBy =
-    sanitizeNoteAuthor(attrs.updatedBy, attrs.updatedByName) ?? createdBy;
+  const createdBy = sanitizeNoteAuthor(attrs.createdBy, attrs.createdByName ?? attrs.authorName);
+  const updatedBy = sanitizeNoteAuthor(attrs.updatedBy, attrs.updatedByName) ?? createdBy;
 
   const createdAt = sanitizeOptionalIsoString(attrs.createdAt);
   const updatedAt = sanitizeOptionalIsoString(attrs.updatedAt) ?? createdAt;
@@ -389,18 +355,17 @@ export function validateNoteCreatePayload(input: unknown): {
   const entitySlug = sanitizeEntitySlug(raw.entitySlug);
   const entityId = sanitizeEntityId(raw.entityId);
   const entityDocumentId =
-    sanitizeEntityDocumentId(raw.entityDocumentId) ||
-    (entityId !== null ? String(entityId) : '');
+    sanitizeEntityDocumentId(raw.entityDocumentId) || (entityId !== null ? String(entityId) : "");
   const entityLocale = sanitizeEntityLocale(raw.entityLocale);
 
   if (!title) {
-    errors.push('Note title is required.');
+    errors.push("Note title is required.");
   }
   if (!entitySlug) {
-    errors.push('A valid target entitySlug is required.');
+    errors.push("A valid target entitySlug is required.");
   }
   if (!entityDocumentId && entityId === null) {
-    errors.push('Either entityDocumentId or entityId is required.');
+    errors.push("Either entityDocumentId or entityId is required.");
   }
 
   return {
@@ -427,36 +392,35 @@ export function validateNoteUpdatePayload(input: unknown): {
   const raw = unwrapDataEnvelope(input);
   const errors: string[] = [];
   const data: Partial<NoteUpsertInput> = {};
-  const hasOwn = (key: string) =>
-    Object.prototype.hasOwnProperty.call(raw, key);
+  const hasOwn = (key: string) => Object.prototype.hasOwnProperty.call(raw, key);
 
-  if (hasOwn('title')) {
+  if (hasOwn("title")) {
     const title = sanitizePlainText(raw.title, MAX_NOTE_TITLE_LENGTH);
     if (!title) {
-      errors.push('Note title cannot be empty.');
+      errors.push("Note title cannot be empty.");
     } else {
       data.title = title;
     }
   }
 
-  if (hasOwn('content')) {
+  if (hasOwn("content")) {
     data.content = sanitizePlainText(raw.content, MAX_NOTE_CONTENT_LENGTH);
   }
 
-  if (hasOwn('category')) {
+  if (hasOwn("category")) {
     data.category = normalizeNoteCategory(raw.category);
   }
 
-  if (hasOwn('isPinned')) {
+  if (hasOwn("isPinned")) {
     data.isPinned = Boolean(raw.isPinned);
   }
 
-  if (hasOwn('entityLocale')) {
+  if (hasOwn("entityLocale")) {
     data.entityLocale = sanitizeEntityLocale(raw.entityLocale);
   }
 
   if (Object.keys(data).length === 0 && errors.length === 0) {
-    errors.push('At least one valid note field must be provided for update.');
+    errors.push("At least one valid note field must be provided for update.");
   }
 
   return {
@@ -467,24 +431,15 @@ export function validateNoteUpdatePayload(input: unknown): {
 }
 
 export function unwrapDataEnvelope(input: unknown): Record<string, unknown> {
-  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
     return {};
   }
   const obj = input as Record<string, unknown>;
-  if (
-    obj.data &&
-    typeof obj.data === 'object' &&
-    !Array.isArray(obj.data)
-  ) {
+  if (obj.data && typeof obj.data === "object" && !Array.isArray(obj.data)) {
     return obj.data as Record<string, unknown>;
   }
-  if (
-    obj.body &&
-    typeof obj.body === 'object' &&
-    !Array.isArray(obj.body)
-  ) {
+  if (obj.body && typeof obj.body === "object" && !Array.isArray(obj.body)) {
     return obj.body as Record<string, unknown>;
   }
   return obj;
 }
-
