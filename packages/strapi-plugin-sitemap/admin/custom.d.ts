@@ -8,8 +8,8 @@ declare module 'react' {
     | ReactElement
     | ReactNode[];
 
-  export interface ReactElement<P = any> {
-    type: any;
+  export interface ReactElement<P = unknown> {
+    type: unknown;
     props: P;
     key: string | number | null;
   }
@@ -21,6 +21,13 @@ declare module 'react' {
   export interface ChangeEvent<T = Element> {
     target: T & { value: string };
     currentTarget: T & { value: string };
+  }
+
+  export interface KeyboardEvent<T = Element> {
+    key: string;
+    preventDefault(): void;
+    stopPropagation(): void;
+    currentTarget: T;
   }
 
   export interface RefObject<T> {
@@ -42,7 +49,7 @@ declare module 'react' {
     deps?: readonly unknown[]
   ): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
-  export function useCallback<T extends (...args: any[]) => any>(
+  export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
     deps: readonly unknown[]
   ): T;
@@ -51,8 +58,11 @@ declare module 'react' {
 
   export namespace JSX {
     interface Element extends ReactElement {}
+    interface IntrinsicAttributes {
+      key?: string | number | null;
+    }
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 
@@ -62,13 +72,16 @@ declare module 'react' {
 declare module 'react/jsx-runtime' {
   import type { ReactElement } from 'react';
   export const Fragment: unknown;
-  export function jsx(type: any, props: any, key?: any): ReactElement;
-  export function jsxs(type: any, props: any, key?: any): ReactElement;
+  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
+    interface IntrinsicAttributes {
+      key?: string | number | null;
+    }
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 }
@@ -89,17 +102,15 @@ declare module 'react-intl' {
 }
 
 declare module '@strapi/strapi/admin' {
-  import type { FC, ReactNode } from 'react';
-
-  export interface FetchResponse<T = any> {
+  export interface FetchResponse<T = unknown> {
     data: T;
   }
 
   export interface FetchClient {
-    get<T = any>(url: string): Promise<FetchResponse<T>>;
-    post<T = any>(url: string, body?: unknown): Promise<FetchResponse<T>>;
-    put<T = any>(url: string, body?: unknown): Promise<FetchResponse<T>>;
-    del<T = any>(url: string): Promise<FetchResponse<T>>;
+    get<T = unknown>(url: string): Promise<FetchResponse<T>>;
+    post<T = unknown>(url: string, body?: unknown): Promise<FetchResponse<T>>;
+    put<T = unknown>(url: string, body?: unknown): Promise<FetchResponse<T>>;
+    del<T = unknown>(url: string): Promise<FetchResponse<T>>;
   }
 
   export function useFetchClient(): FetchClient;
@@ -116,7 +127,7 @@ declare module '@strapi/strapi/admin' {
         intlLabel: { id: string; defaultMessage: string };
         id: string;
         to: string;
-        Component: () => Promise<any>;
+        Component: () => Promise<unknown>;
         permissions?: Array<{ action: string; subject: string | null }>;
       }>
     ): void;
@@ -126,7 +137,7 @@ declare module '@strapi/strapi/admin' {
 
 declare module '@strapi/design-system' {
   import type { FC, ReactNode } from 'react';
-  export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
+  export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Box: FC<DesignComponentProps>;
   export const Button: FC<DesignComponentProps>;
@@ -140,6 +151,7 @@ declare module '@strapi/design-system' {
   export const Table: FC<DesignComponentProps>;
   export const Tbody: FC<DesignComponentProps>;
   export const Td: FC<DesignComponentProps>;
+  export const TextInput: FC<DesignComponentProps>;
   export const TFooter: FC<DesignComponentProps>;
   export const Th: FC<DesignComponentProps>;
   export const Thead: FC<DesignComponentProps>;
@@ -173,12 +185,13 @@ declare module '@strapi/design-system' {
 
 declare module '@strapi/icons' {
   import type { FC } from 'react';
-  export const Pencil: FC<Record<string, any>>;
-  export const Plus: FC<Record<string, any>>;
-  export const Trash: FC<Record<string, any>>;
+  export const Check: FC<Record<string, unknown>>;
+  export const Pencil: FC<Record<string, unknown>>;
+  export const Plus: FC<Record<string, unknown>>;
+  export const Trash: FC<Record<string, unknown>>;
 }
 
 declare module '*.json' {
-  const value: Record<string, any>;
+  const value: Record<string, string>;
   export default value;
 }

@@ -63,5 +63,8 @@
   "modal.sitemapDef.nameHint": "URL'de kullanılır: /api/sitemap/sitemap-[ad].xml",
   "modal.sitemapDef.collectionTypesLabel": "Dahil edilecek koleksiyon türü yapılandırmaları",
   "modal.sitemapDef.noCollectionTypes": "Henüz koleksiyon türü yapılandırması yok.",
-  "modal.sitemapDef.includeCustomUrls": "Bu site haritasına özel URL'leri dahil et"
+  "modal.sitemapDef.includeCustomUrls": "Bu site haritasına özel URL'leri dahil et",
+  "modal.sitemapDef.namePlaceholder": "örn. makaleler veya sayfalar",
+  "settings.index.table.configsCount": "{count} yapılandırma"
 }
+

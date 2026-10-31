@@ -63,5 +63,8 @@
   "modal.sitemapDef.nameHint": "Used in URL: /api/sitemap/sitemap-[name].xml (letters, numbers, hyphens, underscores only)",
   "modal.sitemapDef.collectionTypesLabel": "Collection type configs to include",
   "modal.sitemapDef.noCollectionTypes": "No collection type configs yet. Add some in the Collection Types section first.",
-  "modal.sitemapDef.includeCustomUrls": "Include custom URLs in this sitemap"
+  "modal.sitemapDef.includeCustomUrls": "Include custom URLs in this sitemap",
+  "modal.sitemapDef.namePlaceholder": "e.g. articles or pages",
+  "settings.index.table.configsCount": "{count} config(s)"
 }
+

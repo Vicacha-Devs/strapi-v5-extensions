@@ -1,18 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Main, Box, Button, Flex, Typography } from '@strapi/design-system';
+import { Main, Box, Button, Grid, Flex, Typography, TextInput } from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 import { useFetchClient } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import CollectionTypeModal, { CollectionTypeConfig } from '../components/CollectionTypeModal';
 import CustomURLModal, { CustomURLConfig } from '../components/CustomURLModal';
 import SitemapDefinitionModal, { SitemapDefinition } from '../components/SitemapDefinitionModal';
-import BaseUrlSection from '../components/settings/BaseUrlSection';
-import CollectionTypesSection from '../components/settings/CollectionTypesSection';
-import CustomUrlsSection from '../components/settings/CustomUrlsSection';
-import ExcludedUrlsSection from '../components/settings/ExcludedUrlsSection';
-import SitemapIndexSection from '../components/settings/SitemapIndexSection';
+import { CollectionTypesSection } from '../components/settings/CollectionTypesSection';
+import { CustomUrlsSection } from '../components/settings/CustomUrlsSection';
+import { ExcludedUrlsSection } from '../components/settings/ExcludedUrlsSection';
+import { SitemapIndexSection } from '../components/settings/SitemapIndexSection';
 import getTrad from '../utils/getTrad';
 
-interface SettingsPayload {
+interface SitemapSettingsPayload {
+  baseUrl?: string;
+  collectionTypes?: CollectionTypeConfig[];
+  customURLs?: CustomURLConfig[];
+  excludedUrls?: string[];
+  useSitemapIndex?: boolean;
+  sitemaps?: SitemapDefinition[];
+}
+
+interface NormalizedSitemapSettings {
   baseUrl: string;
   collectionTypes: CollectionTypeConfig[];
   customURLs: CustomURLConfig[];
@@ -21,10 +30,21 @@ interface SettingsPayload {
   sitemaps: SitemapDefinition[];
 }
 
-const removeAt = <T,>(items: T[], index: number): T[] => items.filter((_, i) => i !== index);
+const normalizeFetchedSettings = (data?: SitemapSettingsPayload): NormalizedSitemapSettings => ({
+  baseUrl: data?.baseUrl || '',
+  collectionTypes: data?.collectionTypes || [],
+  customURLs: data?.customURLs || [],
+  excludedUrls: data?.excludedUrls || [],
+  useSitemapIndex: Boolean(data?.useSitemapIndex),
+  sitemaps: data?.sitemaps || [],
+});
 
-const upsertAt = <T,>(items: T[], index: number | null, value: T): T[] =>
-  index !== null ? items.map((item, i) => (i === index ? value : item)) : [...items, value];
+const upsertAtIndex = <T,>(items: T[], index: number | null, nextItem: T): T[] => {
+  if (index === null) {
+    return [...items, nextItem];
+  }
+  return items.map((item, i) => (i === index ? nextItem : item));
+};
 
 const Settings: React.FC = () => {
   const { get, put } = useFetchClient();
@@ -54,42 +74,24 @@ const Settings: React.FC = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const { data } = await get('/sitemap/settings');
-        setBaseUrl(data.baseUrl || '');
-        setInitialBaseUrl(data.baseUrl || '');
-        setCollectionTypes(data.collectionTypes || []);
-        setCustomURLs(data.customURLs || []);
-        setExcludedUrls(data.excludedUrls || []);
-        setInitialExcludedUrls(data.excludedUrls || []);
-        setUseSitemapIndex(data.useSitemapIndex ?? false);
-        setSitemaps(data.sitemaps || []);
-        setInitialUseSitemapIndex(data.useSitemapIndex ?? false);
-        setInitialSitemaps(data.sitemaps || []);
+        const { data } = await get<SitemapSettingsPayload>('/sitemap/settings');
+        const normalized = normalizeFetchedSettings(data);
+        setBaseUrl(normalized.baseUrl);
+        setInitialBaseUrl(normalized.baseUrl);
+        setCollectionTypes(normalized.collectionTypes);
+        setCustomURLs(normalized.customURLs);
+        setExcludedUrls(normalized.excludedUrls);
+        setInitialExcludedUrls(normalized.excludedUrls);
+        setUseSitemapIndex(normalized.useSitemapIndex);
+        setSitemaps(normalized.sitemaps);
+        setInitialUseSitemapIndex(normalized.useSitemapIndex);
+        setInitialSitemaps(normalized.sitemaps);
       } catch (err) {
         console.error('Failed to fetch settings:', err);
       }
     };
-    fetchSettings();
+    void fetchSettings();
   }, [get]);
-
-  const settings: SettingsPayload = {
-    baseUrl,
-    collectionTypes,
-    customURLs,
-    excludedUrls,
-    useSitemapIndex,
-    sitemaps,
-  };
-
-  const persist = async (next: Partial<SettingsPayload>, errorLabel: string): Promise<boolean> => {
-    try {
-      await put('/sitemap/settings', { ...settings, ...next });
-      return true;
-    } catch (err) {
-      console.error(`Failed to ${errorLabel}:`, err);
-      return false;
-    }
-  };
 
   const isUrlModified = baseUrl !== initialBaseUrl;
   const isSitemapSettingsModified =
@@ -98,19 +100,35 @@ const Settings: React.FC = () => {
   const isExcludedUrlsModified =
     JSON.stringify(excludedUrls) !== JSON.stringify(initialExcludedUrls);
 
-  const handleSaveBaseUrl = async () => {
-    if (await persist({}, 'update baseUrl')) setInitialBaseUrl(baseUrl);
+  const persistSettings = async (overrides: Partial<NormalizedSitemapSettings> = {}) => {
+    await put('/sitemap/settings', {
+      baseUrl,
+      collectionTypes,
+      customURLs,
+      excludedUrls,
+      useSitemapIndex,
+      sitemaps,
+      ...overrides,
+    });
   };
 
-  const handleSaveSitemapSettings = async () => {
-    if (await persist({}, 'update sitemap settings')) {
-      setInitialUseSitemapIndex(useSitemapIndex);
-      setInitialSitemaps(sitemaps);
+  const handleSaveBaseUrl = async () => {
+    try {
+      await persistSettings();
+      setInitialBaseUrl(baseUrl);
+    } catch (err) {
+      console.error('Failed to update baseUrl:', err);
     }
   };
 
-  const handleSaveExcludedUrls = async () => {
-    if (await persist({}, 'update excluded URLs')) setInitialExcludedUrls(excludedUrls);
+  const handleSaveSitemapSettings = async () => {
+    try {
+      await persistSettings();
+      setInitialUseSitemapIndex(useSitemapIndex);
+      setInitialSitemaps(sitemaps);
+    } catch (err) {
+      console.error('Failed to update sitemap settings:', err);
+    }
   };
 
   const handleAddExcludedUrl = () => {
@@ -123,56 +141,89 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleDeleteExcludedUrl = (index: number) => {
+    setExcludedUrls(excludedUrls.filter((_, i) => i !== index));
+  };
+
+  const handleSaveExcludedUrls = async () => {
+    try {
+      await persistSettings();
+      setInitialExcludedUrls(excludedUrls);
+    } catch (err) {
+      console.error('Failed to update excluded URLs:', err);
+    }
+  };
+
   const handleSaveSitemapDef = async (def: SitemapDefinition) => {
-    const updated = upsertAt(sitemaps, editingSitemapIndex, def);
+    const updated = upsertAtIndex(sitemaps, editingSitemapIndex, def);
     setSitemaps(updated);
     setIsSitemapModalOpen(false);
     setEditingSitemapIndex(null);
-    if (await persist({ sitemaps: updated }, 'save sitemap definition')) setInitialSitemaps(updated);
+    try {
+      await persistSettings({ sitemaps: updated });
+      setInitialSitemaps(updated);
+    } catch (err) {
+      console.error('Failed to save sitemap definition:', err);
+    }
   };
 
   const handleDeleteSitemapDef = async (index: number) => {
-    const updated = removeAt(sitemaps, index);
+    const updated = sitemaps.filter((_, i) => i !== index);
     setSitemaps(updated);
-    if (await persist({ sitemaps: updated }, 'delete sitemap definition')) setInitialSitemaps(updated);
+    try {
+      await persistSettings({ sitemaps: updated });
+      setInitialSitemaps(updated);
+    } catch (err) {
+      console.error('Failed to delete sitemap definition:', err);
+    }
   };
 
   const handleSaveCollectionType = async (data: CollectionTypeConfig) => {
-    const updated = upsertAt(collectionTypes, editingCollectionIndex, data);
-    setCollectionTypes(updated);
+    const updatedCollectionTypes = upsertAtIndex(collectionTypes, editingCollectionIndex, data);
+    setCollectionTypes(updatedCollectionTypes);
     setIsCollectionModalOpen(false);
     setEditingCollectionIndex(null);
-    await persist({ collectionTypes: updated }, 'save collection types');
+
+    try {
+      await persistSettings({ collectionTypes: updatedCollectionTypes });
+    } catch (err) {
+      console.error('Failed to save collection types:', err);
+    }
   };
 
   const handleDeleteCollectionType = async (index: number) => {
-    const updated = removeAt(collectionTypes, index);
-    // Sitemap definitions reference collection types by position, so drop/shift them.
-    const updatedSitemaps = sitemaps.map((def) => ({
-      ...def,
-      collectionTypeConfigIndices: (def.collectionTypeConfigIndices ?? [])
-        .filter((i) => i !== index)
-        .map((i) => (i > index ? i - 1 : i)),
-    }));
-    setCollectionTypes(updated);
-    setSitemaps(updatedSitemaps);
-    if (await persist({ collectionTypes: updated, sitemaps: updatedSitemaps }, 'delete collection type')) {
-      setInitialSitemaps(updatedSitemaps);
+    const updatedCollectionTypes = collectionTypes.filter((_, i) => i !== index);
+    setCollectionTypes(updatedCollectionTypes);
+
+    try {
+      await persistSettings({ collectionTypes: updatedCollectionTypes });
+    } catch (err) {
+      console.error('Failed to delete collection type:', err);
     }
   };
 
   const handleSaveCustomURL = async (data: CustomURLConfig) => {
-    const updated = upsertAt(customURLs, editingCustomIndex, data);
-    setCustomURLs(updated);
+    const updatedCustomURLs = upsertAtIndex(customURLs, editingCustomIndex, data);
+    setCustomURLs(updatedCustomURLs);
     setIsCustomURLModalOpen(false);
     setEditingCustomIndex(null);
-    await persist({ customURLs: updated }, 'save custom URLs');
+
+    try {
+      await persistSettings({ customURLs: updatedCustomURLs });
+    } catch (err) {
+      console.error('Failed to save custom URLs:', err);
+    }
   };
 
   const handleDeleteCustomURL = async (index: number) => {
-    const updated = removeAt(customURLs, index);
-    setCustomURLs(updated);
-    await persist({ customURLs: updated }, 'delete custom URL');
+    const updatedCustomURLs = customURLs.filter((_, i) => i !== index);
+    setCustomURLs(updatedCustomURLs);
+
+    try {
+      await persistSettings({ customURLs: updatedCustomURLs });
+    } catch (err) {
+      console.error('Failed to delete custom URL:', err);
+    }
   };
 
   return (
@@ -203,108 +254,132 @@ const Settings: React.FC = () => {
           </Flex>
         </Box>
 
-        <BaseUrlSection
-          baseUrl={baseUrl}
-          isModified={isUrlModified}
-          onChange={setBaseUrl}
-          onSave={handleSaveBaseUrl}
-        />
+        <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+          <Typography variant="delta" as="h2">
+            {formatMessage({ id: getTrad('settings.baseUrl.title'), defaultMessage: 'Base URL' })}
+          </Typography>
+          <Box paddingBottom={4}>
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage({
+                id: getTrad('settings.baseUrl.description'),
+                defaultMessage: 'Enter the base URL used for all sitemap entries',
+              })}
+            </Typography>
+          </Box>
+          <Grid.Root gap={4}>
+            <Grid.Item col={6} s={12}>
+              <Box style={{ width: '100%' }}>
+                <TextInput
+                  placeholder={formatMessage({
+                    id: getTrad('settings.baseUrl.placeholder'),
+                    defaultMessage: 'https://example.com',
+                  })}
+                  value={baseUrl}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBaseUrl(e.target.value)}
+                />
+              </Box>
+            </Grid.Item>
+          </Grid.Root>
+          <Box paddingTop={4}>
+            <Button
+              startIcon={<Check />}
+              onClick={handleSaveBaseUrl}
+              disabled={!isUrlModified}
+              variant={isUrlModified ? 'default' : 'tertiary'}
+            >
+              {formatMessage({ id: getTrad('settings.save'), defaultMessage: 'Save' })}
+            </Button>
+          </Box>
+        </Box>
 
         <SitemapIndexSection
           useSitemapIndex={useSitemapIndex}
+          setUseSitemapIndex={setUseSitemapIndex}
           sitemaps={sitemaps}
-          isModified={isSitemapSettingsModified}
-          onToggle={setUseSitemapIndex}
-          onAdd={() => {
+          isSitemapSettingsModified={isSitemapSettingsModified}
+          onSaveSitemapSettings={handleSaveSitemapSettings}
+          onAddSitemap={() => {
             setEditingSitemapIndex(null);
             setIsSitemapModalOpen(true);
           }}
-          onEdit={(index) => {
-            setEditingSitemapIndex(index);
+          onEditSitemap={(idx) => {
+            setEditingSitemapIndex(idx);
             setIsSitemapModalOpen(true);
           }}
-          onDelete={handleDeleteSitemapDef}
-          onSave={handleSaveSitemapSettings}
+          onDeleteSitemap={handleDeleteSitemapDef}
         />
 
         <CollectionTypesSection
-          items={collectionTypes}
-          onAdd={() => {
+          collectionTypes={collectionTypes}
+          onAddCollectionType={() => {
             setEditingCollectionIndex(null);
             setIsCollectionModalOpen(true);
           }}
-          onEdit={(index) => {
-            setEditingCollectionIndex(index);
+          onEditCollectionType={(idx) => {
+            setEditingCollectionIndex(idx);
             setIsCollectionModalOpen(true);
           }}
-          onDelete={handleDeleteCollectionType}
+          onDeleteCollectionType={handleDeleteCollectionType}
         />
 
         <CustomUrlsSection
-          items={customURLs}
-          onAdd={() => {
+          customURLs={customURLs}
+          onAddCustomUrl={() => {
             setEditingCustomIndex(null);
             setIsCustomURLModalOpen(true);
           }}
-          onEdit={(index) => {
-            setEditingCustomIndex(index);
+          onEditCustomUrl={(idx) => {
+            setEditingCustomIndex(idx);
             setIsCustomURLModalOpen(true);
           }}
-          onDelete={handleDeleteCustomURL}
+          onDeleteCustomUrl={handleDeleteCustomURL}
         />
 
         <ExcludedUrlsSection
-          paths={excludedUrls}
-          newPath={newExcludedPath}
-          isModified={isExcludedUrlsModified}
-          onNewPathChange={setNewExcludedPath}
-          onAdd={handleAddExcludedUrl}
-          onDelete={(index) => setExcludedUrls(removeAt(excludedUrls, index))}
-          onSave={handleSaveExcludedUrls}
+          excludedUrls={excludedUrls}
+          newExcludedPath={newExcludedPath}
+          setNewExcludedPath={setNewExcludedPath}
+          isExcludedUrlsModified={isExcludedUrlsModified}
+          onAddExcludedUrl={handleAddExcludedUrl}
+          onDeleteExcludedUrl={handleDeleteExcludedUrl}
+          onSaveExcludedUrls={handleSaveExcludedUrls}
         />
       </Box>
 
-      {isCollectionModalOpen && (
-        <CollectionTypeModal
-          isOpen={isCollectionModalOpen}
-          onClose={() => {
-            setIsCollectionModalOpen(false);
-            setEditingCollectionIndex(null);
-          }}
-          onSave={handleSaveCollectionType}
-          existingData={
-            editingCollectionIndex !== null ? collectionTypes[editingCollectionIndex] : null
-          }
-        />
-      )}
+      <CollectionTypeModal
+        isOpen={isCollectionModalOpen}
+        onClose={() => {
+          setIsCollectionModalOpen(false);
+          setEditingCollectionIndex(null);
+        }}
+        onSave={handleSaveCollectionType}
+        existingData={
+          editingCollectionIndex !== null ? collectionTypes[editingCollectionIndex] : null
+        }
+      />
 
-      {isCustomURLModalOpen && (
-        <CustomURLModal
-          isOpen={isCustomURLModalOpen}
-          onClose={() => {
-            setIsCustomURLModalOpen(false);
-            setEditingCustomIndex(null);
-          }}
-          onSave={handleSaveCustomURL}
-          existingData={editingCustomIndex !== null ? customURLs[editingCustomIndex] : null}
-        />
-      )}
+      <CustomURLModal
+        isOpen={isCustomURLModalOpen}
+        onClose={() => {
+          setIsCustomURLModalOpen(false);
+          setEditingCustomIndex(null);
+        }}
+        onSave={handleSaveCustomURL}
+        existingData={editingCustomIndex !== null ? customURLs[editingCustomIndex] : null}
+      />
 
-      {isSitemapModalOpen && (
-        <SitemapDefinitionModal
-          isOpen={isSitemapModalOpen}
-          onClose={() => {
-            setIsSitemapModalOpen(false);
-            setEditingSitemapIndex(null);
-          }}
-          onSave={handleSaveSitemapDef}
-          existingDef={editingSitemapIndex !== null ? sitemaps[editingSitemapIndex] : null}
-          collectionTypes={collectionTypes}
-        />
-      )}
+      <SitemapDefinitionModal
+        isOpen={isSitemapModalOpen}
+        onClose={() => {
+          setIsSitemapModalOpen(false);
+          setEditingSitemapIndex(null);
+        }}
+        onSave={handleSaveSitemapDef}
+        existingDef={editingSitemapIndex !== null ? sitemaps[editingSitemapIndex] : null}
+        collectionTypes={collectionTypes}
+      />
     </Main>
   );
 };
 
 export default Settings;
-

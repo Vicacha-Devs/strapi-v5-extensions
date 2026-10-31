@@ -1,54 +1,107 @@
 import React from 'react';
-import { Box, Button, Table, Tbody, Td, Thead, Tr, Typography } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
+import {
+  Box,
+  Button,
+  Flex,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  Typography,
+} from '@strapi/design-system';
+import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { CollectionTypeConfig } from '../CollectionTypeModal';
+import type { CollectionTypeConfig } from '../CollectionTypeModal';
 import getTrad from '../../utils/getTrad';
-import SectionCard from './SectionCard';
-import { HeadCell, RowActions, useYesNo } from './TableParts';
 
 interface CollectionTypesSectionProps {
-  items: CollectionTypeConfig[];
-  onAdd: () => void;
-  onEdit: (index: number) => void;
-  onDelete: (index: number) => void;
+  collectionTypes: CollectionTypeConfig[];
+  onAddCollectionType: () => void;
+  onEditCollectionType: (index: number) => void;
+  onDeleteCollectionType: (index: number) => void;
 }
 
-const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
-  items,
-  onAdd,
-  onEdit,
-  onDelete,
+export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
+  collectionTypes,
+  onAddCollectionType,
+  onEditCollectionType,
+  onDeleteCollectionType,
 }) => {
   const { formatMessage } = useIntl();
-  const yesNo = useYesNo();
-  const t = (id: string, defaultMessage: string) =>
-    formatMessage({ id: getTrad(id), defaultMessage });
 
   return (
-    <SectionCard
-      title={t('settings.collectionTypes.title', 'Collection Types')}
-      description={t(
-        'settings.collectionTypes.description',
-        'Configure how your collection types are included in the sitemap'
-      )}
-    >
-      <Table colCount={9} rowCount={items.length + 1}>
+    <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+      <Typography variant="delta" as="h2">
+        {formatMessage({
+          id: getTrad('settings.collectionTypes.title'),
+          defaultMessage: 'Collection Types',
+        })}
+      </Typography>
+      <Box paddingBottom={4}>
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: getTrad('settings.collectionTypes.description'),
+            defaultMessage: 'Configure how your collection types are included in the sitemap',
+          })}
+        </Typography>
+      </Box>
+      <Table colCount={9} rowCount={collectionTypes.length + 1}>
         <Thead>
           <Tr>
-            <HeadCell label={t('table.id', 'ID')} />
-            <HeadCell label={t('table.type', 'Type')} />
-            <HeadCell label={t('table.langcode', 'Langcode')} />
-            <HeadCell label={t('table.pattern', 'Pattern')} />
-            <HeadCell label={t('table.priority', 'Priority')} />
-            <HeadCell label={t('table.frequency', 'Frequency')} />
-            <HeadCell label={t('table.lastModified', 'Last Modified')} />
-            <HeadCell label={t('table.thumbnail', 'Thumbnail')} />
-            <HeadCell label={t('table.actions', 'Actions')} />
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({ id: getTrad('table.id'), defaultMessage: 'ID' })}
+              </Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({ id: getTrad('table.type'), defaultMessage: 'Type' })}
+              </Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({ id: getTrad('table.langcode'), defaultMessage: 'Langcode' })}
+              </Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({ id: getTrad('table.pattern'), defaultMessage: 'Pattern' })}
+              </Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({ id: getTrad('table.priority'), defaultMessage: 'Priority' })}
+              </Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({ id: getTrad('table.frequency'), defaultMessage: 'Frequency' })}
+              </Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({
+                  id: getTrad('table.lastModified'),
+                  defaultMessage: 'Last Modified',
+                })}
+              </Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({ id: getTrad('table.thumbnail'), defaultMessage: 'Thumbnail' })}
+              </Typography>
+            </Th>
+            <Th>
+              <Typography variant="sigma">
+                {formatMessage({ id: getTrad('table.actions'), defaultMessage: 'Actions' })}
+              </Typography>
+            </Th>
           </Tr>
         </Thead>
         <Tbody>
-          {items.map((item, index) => (
+          {collectionTypes.map((item, index) => (
             <Tr key={index}>
               <Td>
                 <Typography textColor="neutral800">{index + 1}</Typography>
@@ -69,25 +122,45 @@ const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
                 <Typography textColor="neutral800">{item.frequency}</Typography>
               </Td>
               <Td>
-                <Typography textColor="neutral800">{yesNo(item.lastModified)}</Typography>
+                <Typography textColor="neutral800">
+                  {item.lastModified
+                    ? formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })
+                    : formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
+                </Typography>
               </Td>
               <Td>
                 <Typography textColor="neutral800">{item.thumbnail || '-'}</Typography>
               </Td>
               <Td>
-                <RowActions onEdit={() => onEdit(index)} onDelete={() => onDelete(index)} />
+                <Flex gap={2}>
+                  <Button
+                    variant="tertiary"
+                    startIcon={<Pencil />}
+                    onClick={() => onEditCollectionType(index)}
+                  >
+                    {formatMessage({ id: getTrad('action.edit'), defaultMessage: 'Edit' })}
+                  </Button>
+                  <Button
+                    variant="danger-light"
+                    startIcon={<Trash />}
+                    onClick={() => onDeleteCollectionType(index)}
+                  >
+                    {formatMessage({ id: getTrad('action.delete'), defaultMessage: 'Delete' })}
+                  </Button>
+                </Flex>
               </Td>
             </Tr>
           ))}
         </Tbody>
       </Table>
       <Box paddingTop={4}>
-        <Button startIcon={<Plus />} variant="secondary" onClick={onAdd}>
-          {t('settings.collectionTypes.add', 'Add another collection type')}
+        <Button startIcon={<Plus />} variant="secondary" onClick={onAddCollectionType}>
+          {formatMessage({
+            id: getTrad('settings.collectionTypes.add'),
+            defaultMessage: 'Add another collection type',
+          })}
         </Button>
       </Box>
-    </SectionCard>
+    </Box>
   );
 };
-
-export default CollectionTypesSection;

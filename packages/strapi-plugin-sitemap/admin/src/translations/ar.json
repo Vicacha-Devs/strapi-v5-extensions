@@ -63,5 +63,8 @@
   "modal.sitemapDef.nameHint": "يُستخدم في الرابط: /api/sitemap/sitemap-[name].xml",
   "modal.sitemapDef.collectionTypesLabel": "إعدادات أنواع المجموعات المراد تضمينها",
   "modal.sitemapDef.noCollectionTypes": "لا توجد أنواع مجموعات مضافة بعد.",
-  "modal.sitemapDef.includeCustomUrls": "تضمين الروابط المخصصة في خريطة الموقع هذه"
+  "modal.sitemapDef.includeCustomUrls": "تضمين الروابط المخصصة في خريطة الموقع هذه",
+  "modal.sitemapDef.namePlaceholder": "مثال: articles أو pages",
+  "settings.index.table.configsCount": "{count} إعداد(ات)"
 }
+

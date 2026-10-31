@@ -1,72 +1,123 @@
 import React from 'react';
-import { Box, Button, Checkbox, Table, Tbody, Td, Thead, Tr, Typography } from '@strapi/design-system';
-import { Plus } from '@strapi/icons';
+import {
+  Box,
+  Button,
+  Checkbox,
+  Flex,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  Typography,
+} from '@strapi/design-system';
+import { Check, Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { SitemapDefinition } from '../SitemapDefinitionModal';
+import type { SitemapDefinition } from '../SitemapDefinitionModal';
 import getTrad from '../../utils/getTrad';
-import SectionCard from './SectionCard';
-import { HeadCell, RowActions, SaveButton, useYesNo } from './TableParts';
 
 interface SitemapIndexSectionProps {
   useSitemapIndex: boolean;
+  setUseSitemapIndex: (val: boolean) => void;
   sitemaps: SitemapDefinition[];
-  isModified: boolean;
-  onToggle: (value: boolean) => void;
-  onAdd: () => void;
-  onEdit: (index: number) => void;
-  onDelete: (index: number) => void;
-  onSave: () => void;
+  isSitemapSettingsModified: boolean;
+  onSaveSitemapSettings: () => void;
+  onAddSitemap: () => void;
+  onEditSitemap: (index: number) => void;
+  onDeleteSitemap: (index: number) => void;
 }
 
-const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
+export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
   useSitemapIndex,
+  setUseSitemapIndex,
   sitemaps,
-  isModified,
-  onToggle,
-  onAdd,
-  onEdit,
-  onDelete,
-  onSave,
+  isSitemapSettingsModified,
+  onSaveSitemapSettings,
+  onAddSitemap,
+  onEditSitemap,
+  onDeleteSitemap,
 }) => {
   const { formatMessage } = useIntl();
-  const yesNo = useYesNo();
-  const t = (id: string, defaultMessage: string) =>
-    formatMessage({ id: getTrad(id), defaultMessage });
 
   return (
-    <SectionCard
-      title={t('settings.index.title', 'Sitemap Settings')}
-      description={t(
-        'settings.index.description',
-        'Use a single sitemap or a sitemap index with multiple sitemaps'
-      )}
-    >
+    <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+      <Typography variant="delta" as="h2">
+        {formatMessage({
+          id: getTrad('settings.index.title'),
+          defaultMessage: 'Sitemap Settings',
+        })}
+      </Typography>
+      <Box paddingBottom={4}>
+        <Typography variant="pi" textColor="neutral600">
+          {formatMessage({
+            id: getTrad('settings.index.description'),
+            defaultMessage: 'Use a single sitemap or a sitemap index with multiple sitemaps',
+          })}
+        </Typography>
+      </Box>
       <Box paddingBottom={4}>
         <Checkbox
           checked={useSitemapIndex}
-          onCheckedChange={(checked: boolean) => onToggle(checked === true)}
+          onCheckedChange={(checked: boolean) => setUseSitemapIndex(checked === true)}
         >
-          {t('settings.index.checkbox', 'Use sitemap index with multiple sitemaps')}
+          {formatMessage({
+            id: getTrad('settings.index.checkbox'),
+            defaultMessage: 'Use sitemap index with multiple sitemaps',
+          })}
         </Checkbox>
       </Box>
       {useSitemapIndex && (
         <>
           <Box paddingBottom={2}>
             <Typography variant="pi" textColor="neutral600">
-              {t(
-                'settings.index.info',
-                'Each sitemap is available at /api/sitemap/sitemap-[name].xml. The index at /api/sitemap/sitemap.xml lists all of them.'
-              )}
+              {formatMessage({
+                id: getTrad('settings.index.info'),
+                defaultMessage:
+                  'Each sitemap is available at /api/sitemap/sitemap-[name].xml. The index at /api/sitemap/sitemap.xml lists all of them.',
+              })}
             </Typography>
           </Box>
           <Table colCount={5} rowCount={sitemaps.length + 1}>
             <Thead>
               <Tr>
-                <HeadCell label={t('settings.index.table.name', 'Name (slug)')} />
-                <HeadCell label={t('settings.index.table.url', 'URL')} />
-                <HeadCell label={t('settings.index.table.collectionTypes', 'Collection types')} />
-                <HeadCell label={t('settings.index.table.customUrls', 'Include custom URLs')} />
-                <HeadCell label={t('table.actions', 'Actions')} />
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTrad('settings.index.table.name'),
+                      defaultMessage: 'Name (slug)',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTrad('settings.index.table.url'),
+                      defaultMessage: 'URL',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTrad('settings.index.table.collectionTypes'),
+                      defaultMessage: 'Collection types',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTrad('settings.index.table.customUrls'),
+                      defaultMessage: 'Include custom URLs',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({ id: getTrad('table.actions'), defaultMessage: 'Actions' })}
+                  </Typography>
+                </Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -82,31 +133,67 @@ const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                   </Td>
                   <Td>
                     <Typography textColor="neutral800">
-                      {def.collectionTypeConfigIndices?.length ?? 0} config(s)
+                      {formatMessage(
+                        {
+                          id: getTrad('settings.index.table.configsCount'),
+                          defaultMessage: '{count} config(s)',
+                        },
+                        { count: def.collectionTypeConfigIndices?.length ?? 0 }
+                      )}
                     </Typography>
                   </Td>
                   <Td>
-                    <Typography textColor="neutral800">{yesNo(def.includeCustomUrls)}</Typography>
+                    <Typography textColor="neutral800">
+                      {def.includeCustomUrls
+                        ? formatMessage({ id: getTrad('common.yes'), defaultMessage: 'Yes' })
+                        : formatMessage({ id: getTrad('common.no'), defaultMessage: 'No' })}
+                    </Typography>
                   </Td>
                   <Td>
-                    <RowActions onEdit={() => onEdit(idx)} onDelete={() => onDelete(idx)} />
+                    <Flex gap={2}>
+                      <Button
+                        variant="tertiary"
+                        startIcon={<Pencil />}
+                        onClick={() => onEditSitemap(idx)}
+                      >
+                        {formatMessage({ id: getTrad('action.edit'), defaultMessage: 'Edit' })}
+                      </Button>
+                      <Button
+                        variant="danger-light"
+                        startIcon={<Trash />}
+                        onClick={() => onDeleteSitemap(idx)}
+                      >
+                        {formatMessage({
+                          id: getTrad('action.delete'),
+                          defaultMessage: 'Delete',
+                        })}
+                      </Button>
+                    </Flex>
                   </Td>
                 </Tr>
               ))}
             </Tbody>
           </Table>
           <Box paddingTop={4} paddingBottom={2}>
-            <Button startIcon={<Plus />} variant="secondary" onClick={onAdd}>
-              {t('settings.index.add', 'Add sitemap')}
+            <Button startIcon={<Plus />} variant="secondary" onClick={onAddSitemap}>
+              {formatMessage({
+                id: getTrad('settings.index.add'),
+                defaultMessage: 'Add sitemap',
+              })}
             </Button>
           </Box>
         </>
       )}
       <Box paddingTop={4}>
-        <SaveButton modified={isModified} onClick={onSave} />
+        <Button
+          startIcon={<Check />}
+          onClick={onSaveSitemapSettings}
+          disabled={!isSitemapSettingsModified}
+          variant={isSitemapSettingsModified ? 'default' : 'tertiary'}
+        >
+          {formatMessage({ id: getTrad('settings.save'), defaultMessage: 'Save' })}
+        </Button>
       </Box>
-    </SectionCard>
+    </Box>
   );
 };
-
-export default SitemapIndexSection;
