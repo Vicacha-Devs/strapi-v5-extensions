@@ -28,6 +28,37 @@ function getDefaultSettings(strapi: Core.Strapi): ResourcesPluginSettings {
   };
 }
 
+function pickTrimmedString(
+  val: unknown,
+  fallback: string,
+  maxLen?: number
+): string {
+  if (typeof val !== 'string' || !val.trim()) return fallback;
+  const trimmed = val.trim();
+  return maxLen ? trimmed.slice(0, maxLen) : trimmed;
+}
+
+function pickStringList(val: unknown, fallback: string[]): string[] {
+  if (!Array.isArray(val) || val.length === 0) return fallback;
+  return val.filter((x): x is string => typeof x === 'string');
+}
+
+function pickBoolean(val: unknown, fallback: boolean): boolean {
+  return typeof val === 'boolean' ? val : fallback;
+}
+
+function pickBoundedInt(
+  val: unknown,
+  min: number,
+  max: number,
+  fallback: number
+): number {
+  const num = Number(val);
+  return Number.isFinite(num) && num >= min && num <= max
+    ? Math.round(num)
+    : fallback;
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getStore = () =>
     strapi.store({
@@ -65,57 +96,54 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           ? input.secondaryCalendar
           : current.secondaryCalendar;
 
-      const maxPhotosNum = Number(input.maxPhotosPerAlbum);
-
       const next: ResourcesPluginSettings = {
         ...current,
-        organizationName:
-          typeof input.organizationName === 'string' &&
-          input.organizationName.trim()
-            ? input.organizationName.trim().slice(0, 140)
-            : current.organizationName,
-        defaultLocale:
-          typeof input.defaultLocale === 'string' && input.defaultLocale.trim()
-            ? input.defaultLocale.trim()
-            : current.defaultLocale,
-        supportedLocales:
-          Array.isArray(input.supportedLocales) &&
-          input.supportedLocales.length > 0
-            ? input.supportedLocales.filter((x) => typeof x === 'string')
-            : current.supportedLocales,
+        organizationName: pickTrimmedString(
+          input.organizationName,
+          current.organizationName,
+          140
+        ),
+        defaultLocale: pickTrimmedString(
+          input.defaultLocale,
+          current.defaultLocale
+        ),
+        supportedLocales: pickStringList(
+          input.supportedLocales,
+          current.supportedLocales
+        ),
         secondaryCalendar,
-        enableCloudinaryOptimization:
-          typeof input.enableCloudinaryOptimization === 'boolean'
-            ? input.enableCloudinaryOptimization
-            : current.enableCloudinaryOptimization,
-        autoSyncMediaFolders:
-          typeof input.autoSyncMediaFolders === 'boolean'
-            ? input.autoSyncMediaFolders
-            : current.autoSyncMediaFolders,
-        defaultPublicationsFolderPath:
-          typeof input.defaultPublicationsFolderPath === 'string' &&
-          input.defaultPublicationsFolderPath.trim()
-            ? input.defaultPublicationsFolderPath.trim().slice(0, 140)
-            : current.defaultPublicationsFolderPath,
-        defaultGalleriesFolderPath:
-          typeof input.defaultGalleriesFolderPath === 'string' &&
-          input.defaultGalleriesFolderPath.trim()
-            ? input.defaultGalleriesFolderPath.trim().slice(0, 140)
-            : current.defaultGalleriesFolderPath,
-        allowedDownloadExtensions:
-          Array.isArray(input.allowedDownloadExtensions) &&
-          input.allowedDownloadExtensions.length > 0
-            ? input.allowedDownloadExtensions.filter((x) => typeof x === 'string')
-            : current.allowedDownloadExtensions,
-        allowedDownloadMimeTypes:
-          Array.isArray(input.allowedDownloadMimeTypes) &&
-          input.allowedDownloadMimeTypes.length > 0
-            ? input.allowedDownloadMimeTypes.filter((x) => typeof x === 'string')
-            : current.allowedDownloadMimeTypes,
-        maxPhotosPerAlbum:
-          Number.isFinite(maxPhotosNum) && maxPhotosNum >= 1 && maxPhotosNum <= 500
-            ? Math.round(maxPhotosNum)
-            : current.maxPhotosPerAlbum,
+        enableCloudinaryOptimization: pickBoolean(
+          input.enableCloudinaryOptimization,
+          current.enableCloudinaryOptimization
+        ),
+        autoSyncMediaFolders: pickBoolean(
+          input.autoSyncMediaFolders,
+          current.autoSyncMediaFolders
+        ),
+        defaultPublicationsFolderPath: pickTrimmedString(
+          input.defaultPublicationsFolderPath,
+          current.defaultPublicationsFolderPath,
+          140
+        ),
+        defaultGalleriesFolderPath: pickTrimmedString(
+          input.defaultGalleriesFolderPath,
+          current.defaultGalleriesFolderPath,
+          140
+        ),
+        allowedDownloadExtensions: pickStringList(
+          input.allowedDownloadExtensions,
+          current.allowedDownloadExtensions
+        ),
+        allowedDownloadMimeTypes: pickStringList(
+          input.allowedDownloadMimeTypes,
+          current.allowedDownloadMimeTypes
+        ),
+        maxPhotosPerAlbum: pickBoundedInt(
+          input.maxPhotosPerAlbum,
+          1,
+          500,
+          current.maxPhotosPerAlbum
+        ),
       };
 
       await getStore().set({

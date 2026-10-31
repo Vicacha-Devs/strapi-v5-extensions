@@ -117,6 +117,64 @@ export function formatMediaSizeFromKB(sizeInKB: unknown): string {
   return `${mb.toFixed(1)} MB`;
 }
 
+function optNumber(val: unknown): number | undefined {
+  return typeof val === 'number' ? val : undefined;
+}
+
+function optString(val: unknown): string | undefined {
+  return typeof val === 'string' ? val : undefined;
+}
+
+function normalizeFormatVariants(
+  rawFormats: unknown,
+  enableCloudinaryOptimization: boolean
+): Record<string, MediaLibraryFormatVariant> {
+  if (!rawFormats || typeof rawFormats !== 'object') return {};
+  const formats: Record<string, MediaLibraryFormatVariant> = {};
+  for (const [key, variant] of Object.entries(
+    rawFormats as Record<string, Record<string, unknown>>
+  )) {
+    if (variant && typeof variant.url === 'string' && variant.url.trim()) {
+      formats[key] = {
+        url: optimizeCloudinaryMediaUrl(
+          variant.url,
+          enableCloudinaryOptimization
+        ),
+        width: optNumber(variant.width),
+        height: optNumber(variant.height),
+        mime: optString(variant.mime),
+        sizeInKB: optNumber(variant.size),
+      };
+    }
+  }
+  return formats;
+}
+
+function resolveThumbnailUrl(
+  formats: Record<string, MediaLibraryFormatVariant>,
+  rawUrl: string,
+  enableCloudinaryOptimization: boolean
+): string {
+  const candidate =
+    formats.medium?.url ?? formats.small?.url ?? formats.thumbnail?.url;
+  return (
+    candidate ??
+    optimizeCloudinaryMediaUrl(rawUrl, enableCloudinaryOptimization, 640)
+  );
+}
+
+function resolveAssetId(val: unknown): number | string | undefined {
+  return typeof val === 'number' || typeof val === 'string' ? val : undefined;
+}
+
+function resolveAltText(val: unknown, fallback: string): string {
+  return typeof val === 'string' && val.trim() ? val.trim() : fallback;
+}
+
+function resolveFiniteSizeKB(val: unknown): number {
+  return typeof val === 'number' && Number.isFinite(val) ? val : 0;
+}
+
 /**
  * Normalizes a raw `plugin::upload.file` record from Strapi v5 Media Library into `MediaLibraryAsset`.
  */
@@ -129,58 +187,37 @@ export function normalizeUploadFile(
   const rawUrl = typeof f.url === 'string' ? f.url.trim() : '';
   if (!rawUrl) return null;
 
-  const rawFormats =
-    f.formats && typeof f.formats === 'object'
-      ? (f.formats as Record<string, Record<string, unknown>>)
-      : {};
-  const formats: Record<string, MediaLibraryFormatVariant> = {};
-  for (const [key, variant] of Object.entries(rawFormats)) {
-    if (variant && typeof variant.url === 'string' && variant.url.trim()) {
-      formats[key] = {
-        url: optimizeCloudinaryMediaUrl(
-          variant.url,
-          enableCloudinaryOptimization
-        ),
-        width: typeof variant.width === 'number' ? variant.width : undefined,
-        height: typeof variant.height === 'number' ? variant.height : undefined,
-        mime: typeof variant.mime === 'string' ? variant.mime : undefined,
-        sizeInKB: typeof variant.size === 'number' ? variant.size : undefined,
-      };
-    }
-  }
-
-  const sizeInKB = typeof f.size === 'number' && Number.isFinite(f.size) ? f.size : 0;
-  const ext = typeof f.ext === 'string' ? f.ext : '';
-  const name = sanitizeFilename(f.name || rawUrl, ext || '.bin');
-  const optimizedUrl = optimizeCloudinaryMediaUrl(
-    rawUrl,
+  const formats = normalizeFormatVariants(
+    f.formats,
     enableCloudinaryOptimization
   );
-  const thumbnailUrl =
-    formats.medium?.url ||
-    formats.small?.url ||
-    formats.thumbnail?.url ||
-    optimizeCloudinaryMediaUrl(rawUrl, enableCloudinaryOptimization, 640);
+  const sizeInKB = resolveFiniteSizeKB(f.size);
+  const ext = optString(f.ext) ?? '';
+  const name = sanitizeFilename(f.name || rawUrl, ext || '.bin');
 
   return {
-    id: typeof f.id === 'number' || typeof f.id === 'string' ? f.id : undefined,
-    documentId: typeof f.documentId === 'string' ? f.documentId : undefined,
+    id: resolveAssetId(f.id),
+    documentId: optString(f.documentId),
     name,
-    alternativeText:
-      typeof f.alternativeText === 'string' && f.alternativeText.trim()
-        ? f.alternativeText.trim()
-        : name,
+    alternativeText: resolveAltText(f.alternativeText, name),
     caption: typeof f.caption === 'string' ? f.caption.trim() : '',
     url: rawUrl,
-    optimizedUrl,
-    thumbnailUrl,
-    mime: typeof f.mime === 'string' ? f.mime : 'application/octet-stream',
+    optimizedUrl: optimizeCloudinaryMediaUrl(
+      rawUrl,
+      enableCloudinaryOptimization
+    ),
+    thumbnailUrl: resolveThumbnailUrl(
+      formats,
+      rawUrl,
+      enableCloudinaryOptimization
+    ),
+    mime: optString(f.mime) ?? 'application/octet-stream',
     ext,
     sizeInKB,
     formattedSize: formatMediaSizeFromKB(sizeInKB),
-    width: typeof f.width === 'number' ? f.width : undefined,
-    height: typeof f.height === 'number' ? f.height : undefined,
-    folderPath: typeof f.folderPath === 'string' ? f.folderPath : undefined,
+    width: optNumber(f.width),
+    height: optNumber(f.height),
+    folderPath: optString(f.folderPath),
     formats,
   };
 }

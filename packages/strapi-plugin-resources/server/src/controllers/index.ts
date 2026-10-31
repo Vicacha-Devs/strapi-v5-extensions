@@ -1,5 +1,7 @@
 import resourcesController from './resourcesController';
 
-export default {
+const controllers: Record<string, unknown> = {
   resourcesController,
 };
+
+export default controllers;

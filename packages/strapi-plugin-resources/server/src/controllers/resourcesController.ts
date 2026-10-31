@@ -1,7 +1,10 @@
 import type { Core } from '@strapi/strapi';
 import { PLUGIN_ID } from '../../../shared';
+import type catalogServiceFactory from '../services/catalogService';
+import type mediaLibraryServiceFactory from '../services/mediaLibraryService';
+import type settingsFactory from '../services/settings';
 
-interface ControllerCtx {
+export interface ControllerCtx {
   query?: Record<string, string | undefined>;
   params?: Record<string, string | undefined>;
   request?: {
@@ -15,22 +18,33 @@ interface ControllerCtx {
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getSettingsSvc = () => strapi.plugin(PLUGIN_ID).service('settings');
-  const getCatalogSvc = () => strapi.plugin(PLUGIN_ID).service('catalogService');
+  const getSettingsSvc = () =>
+    strapi.plugin(PLUGIN_ID).service<ReturnType<typeof settingsFactory>>('settings');
+  const getCatalogSvc = () =>
+    strapi.plugin(PLUGIN_ID).service<ReturnType<typeof catalogServiceFactory>>('catalogService');
   const getMediaSvc = () =>
-    strapi.plugin(PLUGIN_ID).service('mediaLibraryService');
+    strapi.plugin(PLUGIN_ID).service<ReturnType<typeof mediaLibraryServiceFactory>>('mediaLibraryService');
 
   return {
     async getHubOverview(ctx: ControllerCtx) {
       const locale = ctx.query?.locale;
-      const [settings, publications, galleries, glossary, mediaFolders] =
-        await Promise.all([
-          getSettingsSvc().getPublicSummary(),
-          getCatalogSvc().listPublications({ locale }),
-          getCatalogSvc().listGalleryAlbums({ locale }),
-          getCatalogSvc().listGlossaryTerms({ locale }),
-          getMediaSvc().listMediaFolders(),
-        ]);
+      const [
+        settings,
+        publications,
+        galleries,
+        glossary,
+        mediaFolders,
+        mediaFiles,
+      ] = await Promise.all([
+        getSettingsSvc().getPublicSummary(),
+        getCatalogSvc().listPublications({ locale }),
+        getCatalogSvc().listGalleryAlbums({ locale }),
+        getCatalogSvc().listGlossaryTerms({ locale }),
+        getMediaSvc().listMediaFolders(),
+        getMediaSvc().listMediaFiles
+          ? getMediaSvc().listMediaFiles({ limit: 200 })
+          : Promise.resolve([]),
+      ]);
 
       ctx.body = {
         data: {
@@ -39,11 +53,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           galleries,
           glossary,
           mediaFolders,
+          mediaFiles,
           counts: {
             publications: publications.length,
             galleries: galleries.length,
             glossary: glossary.length,
             mediaFolders: mediaFolders.length,
+            mediaFiles: mediaFiles.length,
           },
         },
       };
@@ -56,8 +72,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.query?.featured === 'true'
           ? true
           : ctx.query?.featured === 'false'
-          ? false
-          : undefined;
+            ? false
+            : undefined;
       const q = ctx.query?.q;
 
       const items = await getCatalogSvc().listPublications({
@@ -93,6 +109,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
 
+    async updatePublication(ctx: ControllerCtx) {
+      try {
+        const documentId = ctx.params?.documentId || '';
+        const locale = ctx.query?.locale;
+        const updated = await getCatalogSvc().updatePublication(
+          documentId,
+          ctx.request?.body,
+          locale
+        );
+        ctx.body = { data: updated };
+      } catch (err) {
+        return ctx.badRequest((err as Error).message);
+      }
+    },
+
+    async deletePublication(ctx: ControllerCtx) {
+      try {
+        const documentId = ctx.params?.documentId || '';
+        const result = await getCatalogSvc().deletePublication(documentId);
+        ctx.body = { data: result };
+      } catch (err) {
+        return ctx.badRequest((err as Error).message);
+      }
+    },
+
     async downloadPublication(ctx: ControllerCtx) {
       try {
         const slug = ctx.params?.slug || '';
@@ -119,8 +160,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.query?.featured === 'true'
           ? true
           : ctx.query?.featured === 'false'
-          ? false
-          : undefined;
+            ? false
+            : undefined;
       const items = await getCatalogSvc().listGalleryAlbums({
         locale,
         category,
@@ -148,6 +189,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.status = 201;
         ctx.body = { data: created };
+      } catch (err) {
+        return ctx.badRequest((err as Error).message);
+      }
+    },
+
+    async updateGalleryAlbum(ctx: ControllerCtx) {
+      try {
+        const documentId = ctx.params?.documentId || '';
+        const locale = ctx.query?.locale;
+        const updated = await getCatalogSvc().updateGalleryAlbum(
+          documentId,
+          ctx.request?.body,
+          locale
+        );
+        ctx.body = { data: updated };
+      } catch (err) {
+        return ctx.badRequest((err as Error).message);
+      }
+    },
+
+    async deleteGalleryAlbum(ctx: ControllerCtx) {
+      try {
+        const documentId = ctx.params?.documentId || '';
+        const result = await getCatalogSvc().deleteGalleryAlbum(documentId);
+        ctx.body = { data: result };
       } catch (err) {
         return ctx.badRequest((err as Error).message);
       }
@@ -181,9 +247,42 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
 
+    async updateGlossaryTerm(ctx: ControllerCtx) {
+      try {
+        const documentId = ctx.params?.documentId || '';
+        const locale = ctx.query?.locale;
+        const updated = await getCatalogSvc().updateGlossaryTerm(
+          documentId,
+          ctx.request?.body,
+          locale
+        );
+        ctx.body = { data: updated };
+      } catch (err) {
+        return ctx.badRequest((err as Error).message);
+      }
+    },
+
+    async deleteGlossaryTerm(ctx: ControllerCtx) {
+      try {
+        const documentId = ctx.params?.documentId || '';
+        const result = await getCatalogSvc().deleteGlossaryTerm(documentId);
+        ctx.body = { data: result };
+      } catch (err) {
+        return ctx.badRequest((err as Error).message);
+      }
+    },
+
     async listMediaFolders(ctx: ControllerCtx) {
       const folders = await getMediaSvc().listMediaFolders();
       ctx.body = { data: folders };
+    },
+
+    async listMediaFiles(ctx: ControllerCtx) {
+      const mimePrefix = ctx.query?.mimePrefix;
+      const files = getMediaSvc().listMediaFiles
+        ? await getMediaSvc().listMediaFiles({ mimePrefix })
+        : [];
+      ctx.body = { data: files };
     },
 
     async syncAlbumMediaFolder(ctx: ControllerCtx) {

@@ -57,7 +57,12 @@ export const SettingsPage: React.FC = () => {
       const res = await put(`/${PLUGIN_ID}/settings`, settings);
       if (res?.data?.data) {
         setSettings(res.data.data);
-        setSavedNotice('Resources & Media Library settings saved.');
+        setSavedNotice(
+          t(
+            'settings.ui.saved_notice',
+            'Resources & Media Library settings saved.'
+          )
+        );
       }
     } catch (err) {
       setSavedNotice(`Error saving settings: ${(err as Error).message}`);
@@ -119,8 +124,11 @@ export const SettingsPage: React.FC = () => {
                     {t('settings.ui.1_media_library_folders_calendar_formatting', 'Media Library Folders & Organization')}
                   </Typography>
                   <Typography variant="pi" textColor="neutral600">
-                    Default folder hierarchy in Strapi Media Library (
-                    <code style={INLINE_CODE_STYLE}>plugin::upload.folder</code>).
+                    {t(
+                      'settings.ui.default_folder_hierarchy',
+                      'Default folder hierarchy in Strapi Media Library'
+                    )}{' '}
+                    (<code style={INLINE_CODE_STYLE}>plugin::upload.folder</code>).
                   </Typography>
                 </Box>
 
@@ -225,10 +233,10 @@ export const SettingsPage: React.FC = () => {
                     </Checkbox>
                     <Box paddingTop={2}>
                       <Typography variant="pi" textColor="neutral600">
-                        Automatically rewrites Cloudinary (
-                        <code style={INLINE_CODE_STYLE}>f_auto</code>,{' '}
-                        <code style={INLINE_CODE_STYLE}>q_auto</code>) and Strapi
-                        responsive image formats for gallery thumbnails.
+                        {t(
+                          'settings.ui.cloudinary_rewrite_hint',
+                          'Automatically rewrites Cloudinary (f_auto, q_auto) and Strapi responsive image formats for gallery thumbnails.'
+                        )}
                       </Typography>
                     </Box>
                   </Box>
@@ -248,8 +256,11 @@ export const SettingsPage: React.FC = () => {
                         })
                       }
                     >
-                      One-Click Media Folder Sync (
-                      <code style={INLINE_CODE_STYLE}>plugin::upload.folder</code>)
+                      {t(
+                        'settings.ui.one_click_media_folder_sync',
+                        'One-Click Media Folder Sync'
+                      )}{' '}
+                      (<code style={INLINE_CODE_STYLE}>plugin::upload.folder</code>)
                     </Checkbox>
                     <Box paddingTop={2}>
                       <Typography variant="pi" textColor="neutral600">{t('settings.ui.allows_editors_to_synchronize_all_photos_inside_', 'Allows editors to synchronize all photos inside a Strapi v5 Media Library folder directly into an album.')}</Typography>
