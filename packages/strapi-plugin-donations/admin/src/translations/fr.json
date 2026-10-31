@@ -424,5 +424,8 @@
   "placeholder.add_currency_iso": "+ Ajouter / Basculer une devise ISO 4217...",
   "settings.tab.currency": "Devise, localisation et texte enrichi",
   "settings.tab.categories": "Catégories de dons ({count})",
-  "settings.tab.certificates": "Pont de certificats fiscaux cryptographiques"
+  "settings.tab.certificates": "Pont de certificats fiscaux cryptographiques",
+  "field.supported_locales": "Supported Locales",
+  "field.supported_donor_currencies": "Supported Donor Currencies (ISO 4217)",
+  "placeholder.select_supported_locales": "Select supported locales..."
 }

@@ -9,9 +9,9 @@ Generic **Crowdfunding Campaigns, Donor Pledges, Utility Invoice Sponsorship, Co
 - **Fundraising Campaigns & Utility Invoice Transparency (`plugin::donations.campaign`)**:
   - Track campaign goals (`goalAmount`), raised totals (`raisedAmount`), donor counts, urgency badges, and recurring monthly utility bills (`category: 'utility_invoice'`, e.g., Electricity, Water, Gas, Internet).
 - **Donor Pledges & Payment Proof Verification (`plugin::donations.pledge`)**:
-  - Public pledge submission (`POST /api/donations/pledges`) and HMAC-verified payment gateway webhook receiver (`POST /api/donations/webhooks/:provider`).
+  - Public pledge submission (`POST /api/donations/pledges`) and HMAC-verified payment gateway webhook receiver (`POST /api/donations/webhook`).
   - Automatic campaign progress recalculation and tax-deductible receipt issuance via `@vicacha-devs/strapi-plugin-certificates`.
 - **Rule-Based Assessment & Commodity Threshold Calculator**:
   - Configurable precious-metal/commodity thresholds (`GET /api/donations/calculator`, `POST /api/donations/calculate`) supporting multi-currency (`COP`, `USD`, `EUR`, `TRY`) assessments.
-- **10-Locale Admin UI**:
-  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `id`, `ur`, and `zh`.
+- **13-Locale Admin UI**:
+  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur`, and `zh`.

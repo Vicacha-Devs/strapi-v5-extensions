@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   computeSecondaryDates,
@@ -15,7 +16,7 @@ import {
   type DonationsSettings,
   type PaymentChannel,
   type PledgeStatus,
-} from '../../../shared';
+} from "../../../shared";
 import {
   createFieldGetter,
   createFieldMapper,
@@ -26,9 +27,9 @@ import {
   resolveDocIdentifiers,
   strOrNull,
   strVal,
-} from './campaignNormalizers';
-import type campaignServiceFactory from './campaignService';
-import type settingsServiceFactory from './settings';
+} from "./campaignNormalizers";
+import type campaignServiceFactory from "./campaignService";
+import type settingsServiceFactory from "./settings";
 
 export interface CreatePledgeInput {
   donorName: string;
@@ -68,7 +69,7 @@ function resolveCampaignOverrides(
   resolvedCurrency: string;
 } {
   let resolvedAmount = numVal(input.amount, 0);
-  let resolvedCampaignKind: CampaignKind = input.campaignKind || 'major_campaign';
+  let resolvedCampaignKind: CampaignKind = input.campaignKind || "major_campaign";
   let resolvedCurrency = strVal(input.currency, defaultCurrency).toUpperCase();
 
   if (!targetCampaign) {
@@ -97,29 +98,29 @@ function buildCreatePledgePayload(
   }
 ): Record<string, unknown> {
   const mapField = createFieldMapper(settings.pledgeMapping);
-  const locale = strVal(input.locale, strVal(settings.defaultLocale, 'en'));
+  const locale = strVal(input.locale, strVal(settings.defaultLocale, "en"));
 
   return {
-    [mapField('referenceCode')]: resolved.referenceCode,
-    [mapField('donorName')]: strVal(input.donorName, 'Anonymous Donor'),
-    [mapField('donorEmail')]: input.donorEmail,
-    [mapField('donorPhone')]: strOrNull(input.donorPhone),
-    [mapField('donorTaxId')]: strOrNull(input.donorTaxId),
-    [mapField('donorTaxIdType')]: strOrNull(input.donorTaxIdType),
-    [mapField('isAnonymous')]: Boolean(input.isAnonymous),
-    [mapField('amount')]: resolved.resolvedAmount,
-    [mapField('currency')]: resolved.resolvedCurrency,
-    [mapField('convertedBaseAmount')]: resolved.convertedBaseAmount,
-    [mapField('categoryKey')]: strVal(input.categoryKey, 'general_fund'),
-    [mapField('campaignSlug')]: strOrNull(input.campaignSlug),
-    [mapField('campaignKind')]: resolved.resolvedCampaignKind,
-    [mapField('coversRemainingBalance')]: Boolean(input.coversRemainingBalance),
-    [mapField('paymentChannel')]: strVal(input.paymentChannel, 'bank_transfer'),
-    [mapField('paymentProvider')]: strOrNull(input.paymentProvider),
-    [mapField('transactionReference')]: strOrNull(input.transactionReference),
-    [mapField('receiptProofUrl')]: strOrNull(input.receiptProofUrl),
-    [mapField('donorNotes')]: strOrNull(input.donorNotes),
-    [mapField('status')]: 'pending',
+    [mapField("referenceCode")]: resolved.referenceCode,
+    [mapField("donorName")]: strVal(input.donorName, "Anonymous Donor"),
+    [mapField("donorEmail")]: input.donorEmail,
+    [mapField("donorPhone")]: strOrNull(input.donorPhone),
+    [mapField("donorTaxId")]: strOrNull(input.donorTaxId),
+    [mapField("donorTaxIdType")]: strOrNull(input.donorTaxIdType),
+    [mapField("isAnonymous")]: Boolean(input.isAnonymous),
+    [mapField("amount")]: resolved.resolvedAmount,
+    [mapField("currency")]: resolved.resolvedCurrency,
+    [mapField("convertedBaseAmount")]: resolved.convertedBaseAmount,
+    [mapField("categoryKey")]: strVal(input.categoryKey, "general_fund"),
+    [mapField("campaignSlug")]: strOrNull(input.campaignSlug),
+    [mapField("campaignKind")]: resolved.resolvedCampaignKind,
+    [mapField("coversRemainingBalance")]: Boolean(input.coversRemainingBalance),
+    [mapField("paymentChannel")]: strVal(input.paymentChannel, "bank_transfer"),
+    [mapField("paymentProvider")]: strOrNull(input.paymentProvider),
+    [mapField("transactionReference")]: strOrNull(input.transactionReference),
+    [mapField("receiptProofUrl")]: strOrNull(input.receiptProofUrl),
+    [mapField("donorNotes")]: strOrNull(input.donorNotes),
+    [mapField("status")]: "pending",
     locale,
   };
 }
@@ -130,21 +131,28 @@ async function tryIssueTaxCertificate(
   settings: DonationsSettings
 ): Promise<{ serialNumber: string; verifyUrl: string } | null> {
   try {
-    const certPlugin = strapi.plugin('certificates');
+    const certPlugin = strapi.plugin("certificates");
     const certService =
-      certPlugin?.service<CertificateServiceBridge>('certificate') ||
-      certPlugin?.service<CertificateServiceBridge>('certificateService');
-    if (typeof certService?.issueCertificate !== 'function') return null;
+      certPlugin?.service<CertificateServiceBridge>("issuance") ||
+      certPlugin?.service<CertificateServiceBridge>("certificate") ||
+      certPlugin?.service<CertificateServiceBridge>("certificateService");
+    if (typeof certService?.issueCertificate !== "function") return null;
 
     const issued = await certService.issueCertificate({
-      templateSlug: strVal(
-        settings.taxCertificateTemplateSlug,
-        'tax-donation-certificate'
-      ),
+      templateSlug: strVal(settings.taxCertificateTemplateSlug, "tax-donation-certificate"),
+      recipientFullName: currentPledge.donorName,
       recipientName: currentPledge.donorName,
       recipientEmail: currentPledge.donorEmail,
+      nationalIdRaw: strVal(currentPledge.donorTaxId),
       recipientDocumentNumber: strVal(currentPledge.donorTaxId),
       locale: strVal(currentPledge.locale, settings.defaultLocale),
+      customData: {
+        referenceCode: currentPledge.referenceCode,
+        amount: currentPledge.amount,
+        currency: currentPledge.currency,
+        categoryKey: currentPledge.categoryKey,
+        campaignSlug: currentPledge.campaignSlug,
+      },
       metadata: {
         referenceCode: currentPledge.referenceCode,
         amount: currentPledge.amount,
@@ -171,7 +179,7 @@ async function maybeIssueCertificateForVerify(
 ): Promise<{ serialNumber: string; verifyUrl: string } | null> {
   const shouldIssue = Boolean(
     (issueTaxCertificate ?? settings.autoIssueCertificateOnVerify) &&
-      settings.enableCertificatesBridge
+    settings.enableCertificatesBridge
   );
   if (!shouldIssue) return null;
   return tryIssueTaxCertificate(strapi, currentPledge, settings);
@@ -188,31 +196,27 @@ function buildVerifyPledgeUpdateData(
   }
 ): Record<string, unknown> {
   const updateData: Record<string, unknown> = {
-    [mapField('status')]: params.nextStatus,
-    [mapField('verifiedAt')]: new Date().toISOString(),
-    [mapField('verifiedBy')]: strVal(params.verifiedBy, 'system'),
+    [mapField("status")]: params.nextStatus,
+    [mapField("verifiedAt")]: new Date().toISOString(),
+    [mapField("verifiedBy")]: strVal(params.verifiedBy, "system"),
   };
   if (params.transactionReference) {
-    updateData[mapField('transactionReference')] = params.transactionReference;
+    updateData[mapField("transactionReference")] = params.transactionReference;
   }
   if (params.certificateSerialNumber) {
-    updateData[mapField('certificateSerialNumber')] = params.certificateSerialNumber;
+    updateData[mapField("certificateSerialNumber")] = params.certificateSerialNumber;
   }
   if (params.certificateVerifyUrl) {
-    updateData[mapField('certificateVerifyUrl')] = params.certificateVerifyUrl;
+    updateData[mapField("certificateVerifyUrl")] = params.certificateVerifyUrl;
   }
   return updateData;
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsSvc = () =>
-    strapi.plugin(PLUGIN_ID).service('settings') as ReturnType<
-      typeof settingsServiceFactory
-    >;
+    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<typeof settingsServiceFactory>;
   const getCampaignSvc = () =>
-    strapi.plugin(PLUGIN_ID).service('campaign') as ReturnType<
-      typeof campaignServiceFactory
-    >;
+    strapi.plugin(PLUGIN_ID).service("campaign") as ReturnType<typeof campaignServiceFactory>;
 
   return {
     getTargetUid(settings: DonationsSettings): string {
@@ -222,51 +226,41 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return `plugin::${PLUGIN_ID}.pledge`;
     },
 
-    normalizePledge(
-      raw: Record<string, unknown>,
-      settings: DonationsSettings
-    ): DonationPledgeItem {
+    normalizePledge(raw: Record<string, unknown>, settings: DonationsSettings): DonationPledgeItem {
       const get = createFieldGetter(raw, settings.pledgeMapping);
-      const locale = strVal(raw.locale, strVal(settings.defaultLocale, 'en'));
+      const locale = strVal(raw.locale, strVal(settings.defaultLocale, "en"));
       const createdAt = strVal(raw.createdAt, new Date().toISOString());
-      const secondaryDates = computeSecondaryDates(
-        createdAt,
-        settings.secondaryCalendars,
-        locale
-      );
+      const secondaryDates = computeSecondaryDates(createdAt, settings.secondaryCalendars, locale);
       const ids = resolveDocIdentifiers(raw);
-      const defaultCurr = strVal(settings.baseCurrency, 'COP');
+      const defaultCurr = strVal(settings.baseCurrency, "COP");
 
       return {
         id: ids.id,
         documentId: ids.documentId,
-        referenceCode: strVal(get('referenceCode')),
-        donorName: strVal(get('donorName')),
-        donorEmail: strVal(get('donorEmail')),
-        donorPhone: strOrNull(get('donorPhone')),
-        donorTaxId: strOrNull(get('donorTaxId')),
-        donorTaxIdType: strOrNull(get('donorTaxIdType')),
-        isAnonymous: Boolean(get('isAnonymous', false)),
-        amount: numVal(get('amount'), 0),
-        currency: strVal(get('currency'), defaultCurr).toUpperCase(),
-        convertedBaseAmount: numVal(get('convertedBaseAmount'), 0),
-        categoryKey: strVal(get('categoryKey'), 'general_fund'),
-        campaignSlug: strOrNull(get('campaignSlug')),
-        campaignKind: strVal(get('campaignKind'), 'major_campaign') as CampaignKind,
-        coversRemainingBalance: Boolean(get('coversRemainingBalance', false)),
-        paymentChannel: strVal(
-          get('paymentChannel'),
-          'bank_transfer'
-        ) as PaymentChannel,
-        paymentProvider: strOrNull(get('paymentProvider')),
-        transactionReference: strOrNull(get('transactionReference')),
-        receiptProofUrl: strOrNull(get('receiptProofUrl')),
-        donorNotes: strOrNull(get('donorNotes')),
-        status: strVal(get('status'), 'pending') as PledgeStatus,
-        verifiedAt: strOrNull(get('verifiedAt')),
-        verifiedBy: strOrNull(get('verifiedBy')),
-        certificateSerialNumber: strOrNull(get('certificateSerialNumber')),
-        certificateVerifyUrl: strOrNull(get('certificateVerifyUrl')),
+        referenceCode: strVal(get("referenceCode")),
+        donorName: strVal(get("donorName")),
+        donorEmail: strVal(get("donorEmail")),
+        donorPhone: strOrNull(get("donorPhone")),
+        donorTaxId: strOrNull(get("donorTaxId")),
+        donorTaxIdType: strOrNull(get("donorTaxIdType")),
+        isAnonymous: Boolean(get("isAnonymous", false)),
+        amount: numVal(get("amount"), 0),
+        currency: strVal(get("currency"), defaultCurr).toUpperCase(),
+        convertedBaseAmount: numVal(get("convertedBaseAmount"), 0),
+        categoryKey: strVal(get("categoryKey"), "general_fund"),
+        campaignSlug: strOrNull(get("campaignSlug")),
+        campaignKind: strVal(get("campaignKind"), "major_campaign") as CampaignKind,
+        coversRemainingBalance: Boolean(get("coversRemainingBalance", false)),
+        paymentChannel: strVal(get("paymentChannel"), "bank_transfer") as PaymentChannel,
+        paymentProvider: strOrNull(get("paymentProvider")),
+        transactionReference: strOrNull(get("transactionReference")),
+        receiptProofUrl: strOrNull(get("receiptProofUrl")),
+        donorNotes: strOrNull(get("donorNotes")),
+        status: strVal(get("status"), "pending") as PledgeStatus,
+        verifiedAt: strOrNull(get("verifiedAt")),
+        verifiedBy: strOrNull(get("verifiedBy")),
+        certificateSerialNumber: strOrNull(get("certificateSerialNumber")),
+        certificateVerifyUrl: strOrNull(get("certificateVerifyUrl")),
         locale,
         createdAt,
         secondaryDates,
@@ -282,15 +276,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           )
         : null;
 
-      const { resolvedAmount, resolvedCampaignKind, resolvedCurrency } =
-        resolveCampaignOverrides(
-          input,
-          targetCampaign,
-          strVal(settings.baseCurrency, 'COP')
-        );
+      const { resolvedAmount, resolvedCampaignKind, resolvedCurrency } = resolveCampaignOverrides(
+        input,
+        targetCampaign,
+        strVal(settings.baseCurrency, "COP")
+      );
 
       if (!(resolvedAmount > 0)) {
-        throw new Error('Contribution amount must be greater than zero.');
+        throw new Error("Contribution amount must be greater than zero.");
       }
 
       const convertedBaseAmount = convertToBaseCurrency(
@@ -300,7 +293,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         settings.exchangeRatesToBase
       );
 
-      const prefix = resolvedCampaignKind === 'utility_invoice' ? 'INV' : 'DON';
+      const prefix = resolvedCampaignKind === "utility_invoice" ? "INV" : "DON";
       const referenceCode = generateDonationReferenceCode(prefix);
       const uid = this.getTargetUid(settings);
 
@@ -322,7 +315,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const settings = await getSettingsSvc().getSettings();
       const uid = this.getTargetUid(settings);
       const rawList = await queryRecords(strapi, uid, {
-        sort: { createdAt: 'desc' },
+        sort: { createdAt: "desc" },
       });
 
       let normalized = rawList.map((item) => this.normalizePledge(item, settings));
@@ -330,16 +323,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         normalized = normalized.filter((p) => p.status === filters.status);
       }
       if (filters.campaignSlug) {
-        normalized = normalized.filter(
-          (p) => p.campaignSlug === filters.campaignSlug
-        );
+        normalized = normalized.filter((p) => p.campaignSlug === filters.campaignSlug);
       }
       return normalized;
     },
 
     async verifyPledge(params: {
       referenceCode: string;
-      decision: 'verified' | 'rejected';
+      decision: "verified" | "rejected";
       verifiedBy?: string;
       transactionReference?: string;
       issueTaxCertificate?: boolean;
@@ -347,7 +338,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const settings = await getSettingsSvc().getSettings();
       const uid = this.getTargetUid(settings);
       const mapField = createFieldMapper(settings.pledgeMapping);
-      const refField = mapField('referenceCode');
+      const refField = mapField("referenceCode");
 
       const list = await queryRecords(strapi, uid, {
         filters: { [refField]: params.referenceCode },
@@ -357,14 +348,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const currentPledge = this.normalizePledge(existing, settings);
       const wasAlreadyVerified =
-        currentPledge.status === 'verified' ||
-        currentPledge.status === 'certificate_issued';
+        currentPledge.status === "verified" || currentPledge.status === "certificate_issued";
 
       let nextStatus: PledgeStatus = params.decision;
       let certificateSerialNumber = currentPledge.certificateSerialNumber;
       let certificateVerifyUrl = currentPledge.certificateVerifyUrl;
 
-      if (params.decision === 'verified' && !wasAlreadyVerified) {
+      if (params.decision === "verified" && !wasAlreadyVerified) {
         if (currentPledge.campaignSlug) {
           await getCampaignSvc().recordVerifiedContribution({
             campaignSlug: currentPledge.campaignSlug,
@@ -381,7 +371,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (cert) {
           certificateSerialNumber = cert.serialNumber;
           certificateVerifyUrl = cert.verifyUrl;
-          nextStatus = 'certificate_issued';
+          nextStatus = "certificate_issued";
         }
       }
 
@@ -411,12 +401,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           settings.webhookSigningSecret
         );
         if (!valid) {
-          throw new Error('Invalid webhook HMAC-SHA256 signature.');
+          throw new Error("Invalid webhook HMAC-SHA256 signature.");
         }
       }
 
       const event = parseGatewayWebhookPayload(params.payload);
-      if (!event || event.status === 'pending') {
+      if (!event || event.status === "pending") {
         return { handled: false, pledge: null };
       }
 
@@ -442,7 +432,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         settings.assessmentProfiles[0];
 
       if (!profile) {
-        throw new Error('No assessment calculator profile is configured.');
+        throw new Error("No assessment calculator profile is configured.");
       }
 
       return evaluateAssessmentCalculation(profile, input);

@@ -1,20 +1,17 @@
-import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
-import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
-import { PLUGIN_ID } from '../../shared';
+import { PLUGIN_ID } from "../../shared";
 import {
   CountryCustomFieldInput,
   CurrencyCustomFieldInput,
   CurrencySelectField,
-} from './components/CurrencyCountryInput';
-import { PluginIcon } from './components/PluginIcon';
-import {
-  countryCustomField,
-  currencyCustomField,
-} from './fields/currencyCountryFields';
+} from "./components/CurrencyCountryInput";
+import { PluginIcon } from "./components/PluginIcon";
+import { countryCustomField, currencyCustomField } from "./fields/currencyCountryFields";
+import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
+import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
 
 export { CurrencySelectField, CurrencyCustomFieldInput, CountryCustomFieldInput };
 
-const ALL_TRANSLATION_LOCALES = ['en', 'es', 'ar', 'tr', 'fr', 'de', 'pt', 'id', 'ms', 'ur'];
+export const ALL_TRANSLATION_LOCALES = ["en", "es", "ar", "tr", "fr", "de", "pt", "id", "ms", "ur"];
 
 interface StrapiAdminApp {
   customFields?: {
@@ -38,10 +35,10 @@ export default {
       icon: PluginIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.plugin.name`,
-        defaultMessage: 'Donations & Campaigns',
+        defaultMessage: "Donations & Campaigns",
       },
       Component: () =>
-        import('./pages/DonationsPage').then((mod) => ({
+        import("./pages/DonationsPage").then((mod) => ({
           default: mod.DonationsPage,
         })),
       permissions: [],
@@ -52,19 +49,19 @@ export default {
         id: PLUGIN_ID,
         intlLabel: {
           id: `${PLUGIN_ID}.settings.section`,
-          defaultMessage: 'Donations & Campaigns',
+          defaultMessage: "Donations & Campaigns",
         },
       },
       [
         {
           intlLabel: {
             id: `${PLUGIN_ID}.settings.title`,
-            defaultMessage: 'Campaigns, Gateways & Tax Certificates',
+            defaultMessage: "Campaigns, Gateways & Tax Certificates",
           },
           id: `${PLUGIN_ID}-settings`,
           to: `${PLUGIN_ID}`,
           Component: () =>
-            import('./pages/SettingsPage').then((mod) => ({
+            import("./pages/SettingsPage").then((mod) => ({
               default: mod.SettingsPage,
             })),
           permissions: [],
@@ -86,7 +83,10 @@ export default {
       allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          const prefixed: Record<string, string> = { ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en ?? {}), ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en ?? {}) };
+          const prefixed: Record<string, string> = {
+            ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en),
+            ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en),
+          };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
             const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;

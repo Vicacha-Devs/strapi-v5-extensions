@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   computeCampaignProgress,
   computeSecondaryDates,
@@ -9,9 +10,9 @@ import {
   type DonationCampaignItem,
   type DonationsSettings,
   type InvoiceStatus,
-} from '../../../shared';
+} from "../../../shared";
 
-export function strVal(val: unknown, fallback = ''): string {
+export function strVal(val: unknown, fallback = ""): string {
   return val ? String(val) : fallback;
 }
 
@@ -30,10 +31,7 @@ export function resolveDocIdentifiers(raw: Record<string, unknown>): {
 } {
   const rawId = raw.id;
   const rawDocId = raw.documentId;
-  const id =
-    typeof rawId === 'string' || typeof rawId === 'number'
-      ? rawId
-      : strVal(rawDocId);
+  const id = typeof rawId === "string" || typeof rawId === "number" ? rawId : strVal(rawDocId);
   const documentId = strVal(rawDocId, strVal(rawId));
   return { id, documentId };
 }
@@ -60,41 +58,41 @@ export function createFieldMapper(mapping?: {
 
 export function extractMediaUrl(val: unknown): string | null {
   if (!val) return null;
-  if (typeof val === 'string') return val.trim() || null;
+  if (typeof val === "string") return val.trim() || null;
   const obj = val as {
     url?: unknown;
     data?: { attributes?: { url?: unknown } };
   };
-  if (typeof obj.url === 'string') return obj.url;
+  if (typeof obj.url === "string") return obj.url;
   const nestedUrl = obj.data?.attributes?.url;
-  return typeof nestedUrl === 'string' ? nestedUrl : null;
+  return typeof nestedUrl === "string" ? nestedUrl : null;
 }
 
 export function slugifyTitle(title: string): string {
   return (
     title
       .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || `campaign-${Date.now()}`
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || `campaign-${Date.now()}`
   );
 }
 
 const VALID_EVIDENCE_TYPES: CampaignEvidenceType[] = [
-  'paid_receipt',
-  'photo_gallery',
-  'delivery_report',
-  'audit_document',
-  'beneficiary_update',
+  "paid_receipt",
+  "photo_gallery",
+  "delivery_report",
+  "audit_document",
+  "beneficiary_update",
 ];
 
 function parseEvidenceMediaUrls(rawMedia: unknown): string[] {
   let items: unknown[] = [];
   if (Array.isArray(rawMedia)) {
     items = rawMedia;
-  } else if (typeof rawMedia === 'string' && rawMedia.trim()) {
-    items = rawMedia.split(',').map((s) => s.trim());
+  } else if (typeof rawMedia === "string" && rawMedia.trim()) {
+    items = rawMedia.split(",").map((s) => s.trim());
   }
   return items.map(extractMediaUrl).filter((u): u is string => Boolean(u));
 }
@@ -106,10 +104,10 @@ export function normalizeEvidenceItem(
   secondaryCalendars: string[],
   locale: string
 ): CampaignEvidenceItem {
-  const rawType = strVal(rawEv.evidenceType, 'paid_receipt') as CampaignEvidenceType;
+  const rawType = strVal(rawEv.evidenceType, "paid_receipt") as CampaignEvidenceType;
   const evidenceType: CampaignEvidenceType = VALID_EVIDENCE_TYPES.includes(rawType)
     ? rawType
-    : 'paid_receipt';
+    : "paid_receipt";
   const fallbackDate = strVal(rawEv.createdAt, new Date().toISOString().slice(0, 10));
   const date = strVal(rawEv.date, fallbackDate);
   const rawBody = strVal(rawEv.body, strVal(rawEv.description));
@@ -117,7 +115,7 @@ export function normalizeEvidenceItem(
 
   return {
     id: strVal(rawEv.id, `ev-${index + 1}`),
-    title: strVal(rawEv.title, 'Impact Evidence'),
+    title: strVal(rawEv.title, "Impact Evidence"),
     evidenceType,
     description: normalizeRichTextValue(rawDesc),
     body: normalizeRichTextValue(rawBody),
@@ -138,17 +136,12 @@ function resolveSuggestedAmounts(
   settings: DonationsSettings
 ): number[] {
   if (Array.isArray(rawSuggested) && rawSuggested.length > 0) {
-    return rawSuggested
-      .map((n) => Number(n))
-      .filter((n) => Number.isFinite(n) && n > 0);
+    return rawSuggested.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n > 0);
   }
   return settings.defaultSuggestedAmounts?.[currency] || [20000, 50000, 100000];
 }
 
-function resolveAvailableLocales(
-  locale: string,
-  rawLocalizations: unknown
-): string[] {
+function resolveAvailableLocales(locale: string, rawLocalizations: unknown): string[] {
   const localizations = Array.isArray(rawLocalizations) ? rawLocalizations : [];
   const extracted = localizations
     .map((l) => strVal((l as Record<string, unknown>)?.locale))
@@ -160,7 +153,7 @@ function parseRawEvidencesList(rawEvidences: unknown): Array<Record<string, unkn
   if (Array.isArray(rawEvidences)) {
     return rawEvidences as Array<Record<string, unknown>>;
   }
-  if (typeof rawEvidences === 'string' && rawEvidences.trim().startsWith('[')) {
+  if (typeof rawEvidences === "string" && rawEvidences.trim().startsWith("[")) {
     try {
       const parsed = JSON.parse(rawEvidences);
       return Array.isArray(parsed) ? (parsed as Array<Record<string, unknown>>) : [];
@@ -177,12 +170,12 @@ export function normalizeCampaignRecord(
   requestedLocale?: string
 ): DonationCampaignItem {
   const get = createFieldGetter(raw, settings.campaignMapping);
-  const currency = strVal(get('currency'), strVal(settings.baseCurrency, 'COP')).toUpperCase();
-  const goalAmount = numVal(get('goalAmount'), 0);
-  const raisedAmount = numVal(get('raisedAmount'), 0);
-  const campaignKind = strVal(get('campaignKind'), 'major_campaign') as CampaignKind;
-  const dueDate = strOrNull(get('dueDate'));
-  const rawStatus = strVal(get('invoiceStatus'), 'open') as InvoiceStatus;
+  const currency = strVal(get("currency"), strVal(settings.baseCurrency, "COP")).toUpperCase();
+  const goalAmount = numVal(get("goalAmount"), 0);
+  const raisedAmount = numVal(get("raisedAmount"), 0);
+  const campaignKind = strVal(get("campaignKind"), "major_campaign") as CampaignKind;
+  const dueDate = strOrNull(get("dueDate"));
+  const rawStatus = strVal(get("invoiceStatus"), "open") as InvoiceStatus;
 
   const progress = computeCampaignProgress({
     goalAmount,
@@ -191,12 +184,12 @@ export function normalizeCampaignRecord(
     dueDate,
     currentStatus: rawStatus,
   });
-  const isPaid = rawStatus === 'paid';
-  const finalStatus: InvoiceStatus = isPaid ? 'paid' : progress.invoiceStatus;
-  const locale = strVal(raw.locale, strVal(requestedLocale, strVal(settings.defaultLocale, 'en')));
-  const refDate = strVal(dueDate, strVal(get('startDate'), strVal(raw.createdAt)));
+  const isPaid = rawStatus === "paid";
+  const finalStatus: InvoiceStatus = isPaid ? "paid" : progress.invoiceStatus;
+  const locale = strVal(raw.locale, strVal(requestedLocale, strVal(settings.defaultLocale, "en")));
+  const refDate = strVal(dueDate, strVal(get("startDate"), strVal(raw.createdAt)));
 
-  const evidences = parseRawEvidencesList(get('evidences', [])).map((ev, idx) =>
+  const evidences = parseRawEvidencesList(get("evidences", [])).map((ev, idx) =>
     normalizeEvidenceItem(ev, idx, currency, settings.secondaryCalendars, locale)
   );
   const accountedAmount = Number(
@@ -207,34 +200,34 @@ export function normalizeCampaignRecord(
   return {
     id: ids.id,
     documentId: ids.documentId,
-    title: strVal(get('title')),
-    slug: strVal(get('slug')),
-    description: normalizeRichTextValue(get('description', '')),
-    body: normalizeRichTextValue(get('body', '')),
+    title: strVal(get("title")),
+    slug: strVal(get("slug")),
+    description: normalizeRichTextValue(get("description", "")),
+    body: normalizeRichTextValue(get("body", "")),
     campaignKind,
-    categoryKey: strVal(get('categoryKey'), 'general_fund'),
+    categoryKey: strVal(get("categoryKey"), "general_fund"),
     goalAmount: progress.goalAmount,
     raisedAmount: progress.raisedAmount,
     remainingAmount: isPaid ? 0 : progress.remainingAmount,
     progressPercent: isPaid ? 100 : progress.progressPercent,
     currency,
-    donorCount: numVal(get('donorCount'), 0),
-    isUrgent: Boolean(get('isUrgent', false)),
-    isActive: get('isActive', true) !== false,
-    startDate: strOrNull(get('startDate')),
-    endDate: strOrNull(get('endDate')),
+    donorCount: numVal(get("donorCount"), 0),
+    isUrgent: Boolean(get("isUrgent", false)),
+    isActive: get("isActive", true) !== false,
+    startDate: strOrNull(get("startDate")),
+    endDate: strOrNull(get("endDate")),
     dueDate,
-    billingPeriod: strOrNull(get('billingPeriod')),
-    invoiceReference: strOrNull(get('invoiceReference')),
-    invoiceProvider: strOrNull(get('invoiceProvider')),
+    billingPeriod: strOrNull(get("billingPeriod")),
+    invoiceReference: strOrNull(get("invoiceReference")),
+    invoiceProvider: strOrNull(get("invoiceProvider")),
     invoiceStatus: finalStatus,
-    suggestedAmounts: resolveSuggestedAmounts(get('suggestedAmounts'), currency, settings),
-    allowCustomAmount: get('allowCustomAmount', true) !== false,
-    allowFullBalancePayoff: get('allowFullBalancePayoff', true) !== false,
-    coverUrl: extractMediaUrl(get('coverUrl')),
-    invoiceDocumentUrl: extractMediaUrl(get('invoiceDocumentUrl')),
-    paymentGatewayUrl: strOrNull(get('paymentGatewayUrl')),
-    icon: strOrNull(get('icon')),
+    suggestedAmounts: resolveSuggestedAmounts(get("suggestedAmounts"), currency, settings),
+    allowCustomAmount: get("allowCustomAmount", true) !== false,
+    allowFullBalancePayoff: get("allowFullBalancePayoff", true) !== false,
+    coverUrl: extractMediaUrl(get("coverUrl")),
+    invoiceDocumentUrl: extractMediaUrl(get("invoiceDocumentUrl")),
+    paymentGatewayUrl: strOrNull(get("paymentGatewayUrl")),
+    icon: strOrNull(get("icon")),
     evidences,
     evidenceCount: evidences.length,
     accountedAmount,
@@ -253,10 +246,7 @@ export async function queryRecords(
     const docs = await strapi.documents(uid).findMany(queryOpts);
     return Array.isArray(docs) ? docs : [];
   } catch {
-    const entries = await strapi.entityService?.findMany(
-      uid,
-      queryOpts as Record<string, unknown>
-    );
+    const entries = await strapi.entityService?.findMany(uid, queryOpts as Record<string, unknown>);
     if (Array.isArray(entries)) return entries;
     return entries ? [entries] : [];
   }
@@ -272,7 +262,7 @@ export async function persistCreatedRecord(
     const created = await strapi.documents(uid).create({
       data,
       locale,
-      status: 'published',
+      status: "published",
     });
     return created || data;
   } catch {

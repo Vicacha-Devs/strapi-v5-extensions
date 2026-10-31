@@ -424,5 +424,8 @@
   "placeholder.add_currency_iso": "+ Añadir / Alternar Moneda ISO 4217...",
   "settings.tab.currency": "Moneda, Localización y Texto Enriquecido",
   "settings.tab.categories": "Categorías de Donación ({count})",
-  "settings.tab.certificates": "Puente de Certificados Fiscales Criptográficos"
+  "settings.tab.certificates": "Puente de Certificados Fiscales Criptográficos",
+  "field.supported_locales": "Supported Locales",
+  "field.supported_donor_currencies": "Supported Donor Currencies (ISO 4217)",
+  "placeholder.select_supported_locales": "Select supported locales..."
 }

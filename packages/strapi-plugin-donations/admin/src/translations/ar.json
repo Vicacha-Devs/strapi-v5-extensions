@@ -424,5 +424,8 @@
   "placeholder.add_currency_iso": "+ إضافة / تبديل عملة ISO 4217...",
   "settings.tab.currency": "العملة واللغات والنص المنسق",
   "settings.tab.categories": "فئات التبرعات ({count})",
-  "settings.tab.certificates": "جسر الشهادات الضريبية المشفرة"
+  "settings.tab.certificates": "جسر الشهادات الضريبية المشفرة",
+  "field.supported_locales": "Supported Locales",
+  "field.supported_donor_currencies": "Supported Donor Currencies (ISO 4217)",
+  "placeholder.select_supported_locales": "Select supported locales..."
 }

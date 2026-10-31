@@ -1,6 +1,6 @@
-import settings from './settings';
-import campaign from './campaignService';
-import pledge from './pledgeService';
+import campaign from "./campaignService";
+import pledge from "./pledgeService";
+import settings from "./settings";
 
 export default {
   settings,

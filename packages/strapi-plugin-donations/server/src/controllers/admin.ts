@@ -1,13 +1,14 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   type DonationCampaignItem,
   type DonationsSettings,
   type PledgeStatus,
-} from '../../../shared';
-import type campaignServiceFactory from '../services/campaignService';
-import type pledgeServiceFactory from '../services/pledgeService';
-import type settingsServiceFactory from '../services/settings';
+} from "../../../shared";
+import type campaignServiceFactory from "../services/campaignService";
+import type pledgeServiceFactory from "../services/pledgeService";
+import type settingsServiceFactory from "../services/settings";
 
 export interface AdminControllerContext {
   query?: Record<string, string | undefined>;
@@ -31,7 +32,7 @@ export interface AdminControllerContext {
 
 function extractBody(ctx: AdminControllerContext): Record<string, unknown> {
   const rawBody = ctx.request?.body;
-  if (rawBody?.data && typeof rawBody.data === 'object') {
+  if (rawBody?.data && typeof rawBody.data === "object") {
     return rawBody.data;
   }
   return rawBody || {};
@@ -39,17 +40,11 @@ function extractBody(ctx: AdminControllerContext): Record<string, unknown> {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsSvc = () =>
-    strapi.plugin(PLUGIN_ID).service('settings') as ReturnType<
-      typeof settingsServiceFactory
-    >;
+    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<typeof settingsServiceFactory>;
   const getCampaignSvc = () =>
-    strapi.plugin(PLUGIN_ID).service('campaign') as ReturnType<
-      typeof campaignServiceFactory
-    >;
+    strapi.plugin(PLUGIN_ID).service("campaign") as ReturnType<typeof campaignServiceFactory>;
   const getPledgeSvc = () =>
-    strapi.plugin(PLUGIN_ID).service('pledge') as ReturnType<
-      typeof pledgeServiceFactory
-    >;
+    strapi.plugin(PLUGIN_ID).service("pledge") as ReturnType<typeof pledgeServiceFactory>;
 
   return {
     async getSettings(ctx: AdminControllerContext) {
@@ -78,13 +73,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ]);
 
       const majorCampaigns = campaigns.filter(
-        (c: DonationCampaignItem) => c.campaignKind === 'major_campaign'
+        (c: DonationCampaignItem) => c.campaignKind === "major_campaign"
       );
       const utilityInvoices = campaigns.filter(
-        (c: DonationCampaignItem) => c.campaignKind === 'utility_invoice'
+        (c: DonationCampaignItem) => c.campaignKind === "utility_invoice"
       );
       const microNeeds = campaigns.filter(
-        (c: DonationCampaignItem) => c.campaignKind === 'micro_need'
+        (c: DonationCampaignItem) => c.campaignKind === "micro_need"
       );
 
       ctx.body = {
@@ -106,21 +101,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
-        return ctx.badRequest(
-          (err as Error)?.message || 'Unable to create campaign'
-        );
+        return ctx.badRequest((err as Error)?.message || "Unable to create campaign");
       }
     },
 
     async updateCampaign(ctx: AdminControllerContext) {
       const { identifier } = ctx.params || {};
       const body = extractBody(ctx);
-      const updated = await getCampaignSvc().updateCampaign(
-        String(identifier || ''),
-        body
-      );
+      const updated = await getCampaignSvc().updateCampaign(String(identifier || ""), body);
       if (!updated) {
-        return ctx.notFound('Campaign not found');
+        return ctx.notFound("Campaign not found");
       }
       ctx.body = { data: updated };
     },
@@ -129,18 +119,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const { identifier } = ctx.params || {};
       const body = extractBody(ctx);
       const verifiedBy =
-        (typeof body.verifiedBy === 'string' && body.verifiedBy) ||
+        (typeof body.verifiedBy === "string" && body.verifiedBy) ||
         ctx.state?.user?.email ||
-        'admin';
-      const updated = await getCampaignSvc().addCampaignEvidence(
-        String(identifier || ''),
-        {
-          ...body,
-          verifiedBy,
-        }
-      );
+        "admin";
+      const updated = await getCampaignSvc().addCampaignEvidence(String(identifier || ""), {
+        ...body,
+        verifiedBy,
+      });
       if (!updated) {
-        return ctx.notFound('Campaign not found');
+        return ctx.notFound("Campaign not found");
       }
       ctx.body = { data: updated };
     },
@@ -148,11 +135,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async removeEvidence(ctx: AdminControllerContext) {
       const { identifier, evidenceId } = ctx.params || {};
       const updated = await getCampaignSvc().removeCampaignEvidence(
-        String(identifier || ''),
-        String(evidenceId || '')
+        String(identifier || ""),
+        String(evidenceId || "")
       );
       if (!updated) {
-        return ctx.notFound('Campaign not found');
+        return ctx.notFound("Campaign not found");
       }
       ctx.body = { data: updated };
     },
@@ -160,28 +147,24 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async verifyPledge(ctx: AdminControllerContext) {
       const { referenceCode } = ctx.params || {};
       const body = extractBody(ctx);
-      const decision = body.decision === 'rejected' ? 'rejected' : 'verified';
+      const decision = body.decision === "rejected" ? "rejected" : "verified";
       const verifiedBy =
-        (typeof body.verifiedBy === 'string' && body.verifiedBy) ||
+        (typeof body.verifiedBy === "string" && body.verifiedBy) ||
         ctx.state?.user?.email ||
-        'admin';
+        "admin";
 
       const updated = await getPledgeSvc().verifyPledge({
-        referenceCode: String(referenceCode || ''),
+        referenceCode: String(referenceCode || ""),
         decision,
         verifiedBy,
         transactionReference:
-          typeof body.transactionReference === 'string'
-            ? body.transactionReference
-            : undefined,
+          typeof body.transactionReference === "string" ? body.transactionReference : undefined,
         issueTaxCertificate:
-          typeof body.issueTaxCertificate === 'boolean'
-            ? body.issueTaxCertificate
-            : undefined,
+          typeof body.issueTaxCertificate === "boolean" ? body.issueTaxCertificate : undefined,
       });
 
       if (!updated) {
-        return ctx.notFound('Pledge not found');
+        return ctx.notFound("Pledge not found");
       }
       ctx.body = { data: updated };
     },

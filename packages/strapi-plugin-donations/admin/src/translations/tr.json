@@ -424,5 +424,8 @@
   "placeholder.add_currency_iso": "+ ISO 4217 Para Birimi Ekle / Değiştir...",
   "settings.tab.currency": "Para Birimi, Yerelleştirme ve Zengin Metin",
   "settings.tab.categories": "Bağış Kategorileri ({count})",
-  "settings.tab.certificates": "Kriptografik Vergi Sertifikası Köprüsü"
+  "settings.tab.certificates": "Kriptografik Vergi Sertifikası Köprüsü",
+  "field.supported_locales": "Supported Locales",
+  "field.supported_donor_currencies": "Supported Donor Currencies (ISO 4217)",
+  "placeholder.select_supported_locales": "Select supported locales..."
 }

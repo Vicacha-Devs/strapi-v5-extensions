@@ -424,5 +424,8 @@
   "placeholder.add_currency_iso": "+ ISO 4217-Währung hinzufügen / umschalten...",
   "settings.tab.currency": "Währung, Lokalisierung & Rich Text",
   "settings.tab.categories": "Spendenkategorien ({count})",
-  "settings.tab.certificates": "Kryptografische Steuerbescheinigungs-Brücke"
+  "settings.tab.certificates": "Kryptografische Steuerbescheinigungs-Brücke",
+  "field.supported_locales": "Supported Locales",
+  "field.supported_donor_currencies": "Supported Donor Currencies (ISO 4217)",
+  "placeholder.select_supported_locales": "Select supported locales..."
 }

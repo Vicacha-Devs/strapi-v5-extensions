@@ -1,52 +1,37 @@
-import { useIntl } from 'react-intl';
-import React, { useEffect, useState } from 'react';
-import {
-  Badge,
-  Box,
-  Button,
-  Divider,
-  Flex,
-  Main,
-  Tabs,
-  Typography,
-} from '@strapi/design-system';
-import { useFetchClient } from '@strapi/strapi/admin';
-import { PLUGIN_ID, type DonationsSettings } from '../../../shared';
-import { DonationCategoriesManager } from '../components/DonationCategoriesManager';
-import {
-  SettingsCertificatesTab,
-  SettingsCurrencyTab,
-} from '../components/donations/SettingsTabs';
-import type { TranslateFn } from '../components/donations/donationsHelpers';
+import { Badge, Box, Button, Divider, Flex, Main, Tabs, Typography } from "@strapi/design-system";
+import { useFetchClient } from "@strapi/strapi/admin";
+import React, { useEffect, useState } from "react";
+import { useIntl } from "react-intl";
+
+import { PLUGIN_ID, type DonationsSettings } from "../../../shared";
+import { DonationCategoriesManager } from "../components/DonationCategoriesManager";
+import type { TranslateFn } from "../components/donations/donationsHelpers";
+import { SettingsCertificatesTab, SettingsCurrencyTab } from "../components/donations/SettingsTabs";
 
 const SettingsHeaderBadges: React.FC<{
   settings: DonationsSettings;
   t: TranslateFn;
 }> = ({ settings, t }) => {
-  const baseCurr = settings.baseCurrency || 'COP';
-  const currenciesList = (
-    settings.supportedCurrencies || ['COP', 'USD', 'EUR']
-  ).join(', ');
-  const localesList = (
-    settings.supportedLocales || ['es', 'en', 'ar', 'tr']
-  ).join(', ');
+  const baseCurr = settings.baseCurrency || "COP";
+  const currenciesList = (settings.supportedCurrencies || ["COP", "USD", "EUR"]).join(", ");
+  const localesList = (settings.supportedLocales || ["es", "en", "ar", "tr"]).join(", ");
   const certsState = settings.enableCertificatesBridge
-    ? t('common.enabled', 'Enabled')
-    : t('common.disabled', 'Disabled');
+    ? t("common.enabled", "Enabled")
+    : t("common.disabled", "Disabled");
 
   return (
     <Flex gap={2} paddingTop={3} wrap="wrap">
       <Badge>
-        {t('settings.badge.base_currency', 'Base Currency')}: {baseCurr}
+        {t("settings.badge.base_currency", "Base Currency")}: {baseCurr}
       </Badge>
       <Badge>
-        {t('settings.badge.currencies', 'Currencies')}: {currenciesList}
+        {t("settings.badge.currencies", "Currencies")}: {currenciesList}
       </Badge>
       <Badge>
-        {t('settings.badge.locales', 'Locales')}: {localesList}
+        {t("settings.badge.locales", "Locales")}: {localesList}
       </Badge>
       <Badge>
-        {t('settings.badge.tax_certificates', 'Tax Certificates')}: {certsState}
+        {t("settings.badge.tax_certificates", "Tax Certificates")}: {certsState}
       </Badge>
     </Flex>
   );
@@ -59,7 +44,7 @@ export const SettingsPage: React.FC = () => {
   const { get, put } = useFetchClient();
   const [settings, setSettings] = useState<DonationsSettings | null>(null);
   const [saving, setSaving] = useState(false);
-  const [savedNotice, setSavedNotice] = useState('');
+  const [savedNotice, setSavedNotice] = useState("");
 
   useEffect(() => {
     void (async () => {
@@ -81,8 +66,8 @@ export const SettingsPage: React.FC = () => {
         setSettings(res.data.data);
         setSavedNotice(
           t(
-            'settings.saved_notice',
-            'Donations, Assessment Calculator & Tax Certificate settings saved.'
+            "settings.saved_notice",
+            "Donations, Assessment Calculator & Tax Certificate settings saved."
           )
         );
       }
@@ -96,10 +81,7 @@ export const SettingsPage: React.FC = () => {
       <Main>
         <Box padding={8}>
           <Typography>
-            {t(
-              'settings.loading',
-              'Loading donations & utility invoice settings...'
-            )}
+            {t("settings.loading", "Loading donations & utility invoice settings...")}
           </Typography>
         </Box>
       </Main>
@@ -119,22 +101,22 @@ export const SettingsPage: React.FC = () => {
           <Box>
             <Typography variant="alpha" as="h1">
               {t(
-                'settings.page_title',
-                'Donations, Assessment Calculator & Utility Invoices Settings'
+                "settings.page_title",
+                "Donations, Assessment Calculator & Utility Invoices Settings"
               )}
             </Typography>
             <Box paddingTop={1}>
               <Typography variant="epsilon" textColor="neutral600">
                 {t(
-                  'settings.page_subtitle',
-                  'Configure multi-currency conversion, Rich Text editor integration, and cryptographic tax certificates.'
+                  "settings.page_subtitle",
+                  "Configure multi-currency conversion, Rich Text editor integration, and cryptographic tax certificates."
                 )}
               </Typography>
             </Box>
             <SettingsHeaderBadges settings={settings} t={t} />
           </Box>
           <Button onClick={() => void handleSave()} loading={saving}>
-            {t('settings.save_button', 'Save Settings')}
+            {t("settings.save_button", "Save Settings")}
           </Button>
         </Flex>
 
@@ -150,38 +132,29 @@ export const SettingsPage: React.FC = () => {
 
         <Box paddingTop={6}>
           <Tabs.Root defaultValue="currency">
-            <Tabs.List aria-label={t('settings.page_title', 'Donations Settings')}>
+            <Tabs.List aria-label={t("settings.page_title", "Donations Settings")}>
               <Tabs.Trigger value="currency">
-                {t('settings.tab.currency', 'Currency, Localization & Rich Text')}
+                {t("settings.tab.currency", "Currency, Localization & Rich Text")}
               </Tabs.Trigger>
               <Tabs.Trigger value="categories">
-                {t('settings.tab.categories', 'Donation Categories ({count})', {
+                {t("settings.tab.categories", "Donation Categories ({count})", {
                   count: (settings.categories || []).length,
                 })}
               </Tabs.Trigger>
               <Tabs.Trigger value="certificates">
-                {t(
-                  'settings.tab.certificates',
-                  'Cryptographic Tax Certificates Bridge'
-                )}
+                {t("settings.tab.certificates", "Cryptographic Tax Certificates Bridge")}
               </Tabs.Trigger>
             </Tabs.List>
 
             <Tabs.Content value="currency">
-              <SettingsCurrencyTab
-                settings={settings}
-                setSettings={setSettings}
-                t={t}
-              />
+              <SettingsCurrencyTab settings={settings} setSettings={setSettings} t={t} />
             </Tabs.Content>
 
             <Tabs.Content value="categories">
               <DonationCategoriesManager
                 categories={settings.categories || []}
-                defaultLocale={settings.defaultLocale || 'es'}
-                supportedLocales={
-                  settings.supportedLocales || ['es', 'en', 'ar', 'tr']
-                }
+                defaultLocale={settings.defaultLocale || "es"}
+                supportedLocales={settings.supportedLocales || ["es", "en", "ar", "tr"]}
                 onChange={(nextCategories) =>
                   setSettings({ ...settings, categories: nextCategories })
                 }
@@ -189,11 +162,7 @@ export const SettingsPage: React.FC = () => {
             </Tabs.Content>
 
             <Tabs.Content value="certificates">
-              <SettingsCertificatesTab
-                settings={settings}
-                setSettings={setSettings}
-                t={t}
-              />
+              <SettingsCertificatesTab settings={settings} setSettings={setSettings} t={t} />
             </Tabs.Content>
           </Tabs.Root>
         </Box>

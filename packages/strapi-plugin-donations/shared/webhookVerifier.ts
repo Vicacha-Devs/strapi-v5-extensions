@@ -126,8 +126,8 @@ function hmacSha256Hex(keyStr: string, messageStr: string): string {
   const digest = sha256Bytes(outerInput);
 
   return Array.from(digest)
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function constantTimeHexEqual(hexA: string, hexB: string): boolean {
@@ -150,7 +150,7 @@ export interface NormalizedWebhookEvent {
   provider: string;
   referenceCode: string;
   transactionReference: string;
-  status: 'verified' | 'rejected' | 'pending';
+  status: "verified" | "rejected" | "pending";
   amount?: number;
   currency?: string;
 }
@@ -167,34 +167,26 @@ export function verifyWebhookSignature(
     return false;
   }
 
-  const cleanSig = signatureHeader.replace(/^sha256=/i, '').trim();
+  const cleanSig = signatureHeader.replace(/^sha256=/i, "").trim();
   const expectedHex = hmacSha256Hex(secret, rawBody);
   return constantTimeHexEqual(cleanSig, expectedHex);
 }
 
-const DIRECT_VERIFIED_STATUSES = new Set([
-  'approved',
-  'succeeded',
-  'verified',
-  'paid',
-  'complete',
-]);
+const DIRECT_VERIFIED_STATUSES = new Set(["approved", "succeeded", "verified", "paid", "complete"]);
 const DIRECT_REJECTED_STATUSES = new Set([
-  'declined',
-  'failed',
-  'rejected',
-  'canceled',
-  'error',
-  'voided',
+  "declined",
+  "failed",
+  "rejected",
+  "canceled",
+  "error",
+  "voided",
 ]);
 
-function mapWebhookStatus(
-  rawStatus: unknown
-): 'verified' | 'rejected' | 'pending' {
-  const lower = String(rawStatus ?? '').toLowerCase();
-  if (DIRECT_VERIFIED_STATUSES.has(lower)) return 'verified';
-  if (DIRECT_REJECTED_STATUSES.has(lower)) return 'rejected';
-  return 'pending';
+function mapWebhookStatus(rawStatus: unknown): "verified" | "rejected" | "pending" {
+  const lower = String(rawStatus ?? "").toLowerCase();
+  if (DIRECT_VERIFIED_STATUSES.has(lower)) return "verified";
+  if (DIRECT_REJECTED_STATUSES.has(lower)) return "rejected";
+  return "pending";
 }
 
 function normalizeUpperString(val: unknown): string | undefined {
@@ -202,21 +194,16 @@ function normalizeUpperString(val: unknown): string | undefined {
 }
 
 function centsToMajorAmount(cents: unknown): number | undefined {
-  return typeof cents === 'number'
-    ? Number((cents / 100).toFixed(2))
-    : undefined;
+  return typeof cents === "number" ? Number((cents / 100).toFixed(2)) : undefined;
 }
 
 function parseDirectWebhookPayload(
   payload: Record<string, unknown>
 ): NormalizedWebhookEvent | null {
   if (!payload.referenceCode || !payload.status) return null;
-  const txRef =
-    payload.transactionReference ??
-    payload.transactionId ??
-    payload.referenceCode;
+  const txRef = payload.transactionReference ?? payload.transactionId ?? payload.referenceCode;
   return {
-    provider: String(payload.provider || 'gateway'),
+    provider: String(payload.provider || "gateway"),
     referenceCode: String(payload.referenceCode),
     transactionReference: String(txRef),
     status: mapWebhookStatus(payload.status),
@@ -231,7 +218,7 @@ function parseWompiWebhookPayload(
   const wompiTx = dataObj?.transaction as Record<string, unknown> | undefined;
   if (!wompiTx?.reference) return null;
   return {
-    provider: 'wompi',
+    provider: "wompi",
     referenceCode: String(wompiTx.reference),
     transactionReference: String(wompiTx.id || wompiTx.reference),
     status: mapWebhookStatus(wompiTx.status),
@@ -250,7 +237,7 @@ function parseStripeWebhookPayload(
   if (!rawRef) return null;
   const refCode = String(rawRef);
   return {
-    provider: 'stripe',
+    provider: "stripe",
     referenceCode: refCode,
     transactionReference: String(stripeObj.id || refCode),
     status: mapWebhookStatus(stripeObj.status ?? stripeObj.payment_status),
@@ -266,7 +253,7 @@ function parseStripeWebhookPayload(
 export function parseGatewayWebhookPayload(
   payload: Record<string, unknown>
 ): NormalizedWebhookEvent | null {
-  if (!payload || typeof payload !== 'object') {
+  if (!payload || typeof payload !== "object") {
     return null;
   }
   const dataObj = payload.data as Record<string, unknown> | undefined;

@@ -6,7 +6,7 @@ import type {
   AssessmentProfileConfig,
   CampaignKind,
   InvoiceStatus,
-} from './types';
+} from "./types";
 
 export interface CampaignProgressSummary {
   goalAmount: number;
@@ -23,10 +23,7 @@ function computeProgressPercent(goalAmount: number, raisedAmount: number): numbe
   return raisedAmount > 0 ? 100 : 0;
 }
 
-function isPastDueDate(
-  dueDate: string | null | undefined,
-  referenceDate?: Date
-): boolean {
+function isPastDueDate(dueDate: string | null | undefined, referenceDate?: Date): boolean {
   if (!dueDate) return false;
   const dueTime = new Date(dueDate).getTime();
   const nowTime = (referenceDate || new Date()).getTime();
@@ -40,12 +37,12 @@ function resolveInvoiceStatus(
   referenceDate?: Date
 ): InvoiceStatus {
   if (goalAmount > 0 && raisedAmount >= goalAmount) {
-    return 'paid';
+    return "paid";
   }
   if (isPastDueDate(dueDate, referenceDate)) {
-    return 'overdue';
+    return "overdue";
   }
-  return raisedAmount > 0 ? 'partially_funded' : 'open';
+  return raisedAmount > 0 ? "partially_funded" : "open";
 }
 
 /**
@@ -62,10 +59,7 @@ export function computeCampaignProgress(params: {
 }): CampaignProgressSummary {
   const goalAmount = Math.max(0, Number(params.goalAmount) || 0);
   const raisedAmount = Math.max(0, Number(params.raisedAmount) || 0);
-  const remainingAmount = Math.max(
-    0,
-    Number((goalAmount - raisedAmount).toFixed(2))
-  );
+  const remainingAmount = Math.max(0, Number((goalAmount - raisedAmount).toFixed(2)));
   const progressPercent = computeProgressPercent(goalAmount, raisedAmount);
   const invoiceStatus = resolveInvoiceStatus(
     goalAmount,
@@ -93,9 +87,7 @@ function resolveBenchmark(
     profile.benchmarks[0];
 
   if (!benchmark) {
-    throw new Error(
-      `No benchmark configured for assessment profile "${profile.key}"`
-    );
+    throw new Error(`No benchmark configured for assessment profile "${profile.key}"`);
   }
   return benchmark;
 }
@@ -110,7 +102,7 @@ function sumAssessmentFields(
   for (const field of fields) {
     const rawVal = Number(values?.[field.key] ?? 0);
     const val = Number.isFinite(rawVal) && rawVal > 0 ? rawVal : 0;
-    if (field.kind === 'deductible_liability') {
+    if (field.kind === "deductible_liability") {
       totalLiabilities += val;
     } else {
       totalAssets += val;
@@ -119,13 +111,9 @@ function sumAssessmentFields(
   return { totalAssets, totalLiabilities };
 }
 
-function computeBenchmarkThreshold(
-  benchmark: AssessmentBenchmark,
-  currency: string
-): number {
+function computeBenchmarkThreshold(benchmark: AssessmentBenchmark, currency: string): number {
   const unitPrice = Number(benchmark.unitPricesByCurrency[currency] ?? 0);
-  const effectivePrice =
-    benchmark.unitType === 'gram_weight' ? unitPrice : unitPrice || 1;
+  const effectivePrice = benchmark.unitType === "gram_weight" ? unitPrice : unitPrice || 1;
   return Number((benchmark.thresholdUnits * effectivePrice).toFixed(2));
 }
 
@@ -137,22 +125,14 @@ export function evaluateAssessmentCalculation(
   profile: AssessmentProfileConfig,
   input: AssessmentCalculationInput
 ): AssessmentCalculationResult {
-  const currency = (input.currency || 'COP').toUpperCase();
+  const currency = (input.currency || "COP").toUpperCase();
   const benchmark = resolveBenchmark(profile, input.benchmarkKey);
-  const { totalAssets, totalLiabilities } = sumAssessmentFields(
-    profile.fields,
-    input.values
-  );
+  const { totalAssets, totalLiabilities } = sumAssessmentFields(profile.fields, input.values);
 
-  const netAssessableWealth = Math.max(
-    0,
-    Number((totalAssets - totalLiabilities).toFixed(2))
-  );
+  const netAssessableWealth = Math.max(0, Number((totalAssets - totalLiabilities).toFixed(2)));
   const thresholdAmount = computeBenchmarkThreshold(benchmark, currency);
   const meetsThreshold =
-    thresholdAmount > 0
-      ? netAssessableWealth >= thresholdAmount
-      : netAssessableWealth > 0;
+    thresholdAmount > 0 ? netAssessableWealth >= thresholdAmount : netAssessableWealth > 0;
   const rateFraction = (Number(profile.ratePercent) || 0) / 100;
   const payableAmount = meetsThreshold
     ? Number((netAssessableWealth * rateFraction).toFixed(2))
@@ -183,7 +163,7 @@ export function convertToBaseCurrency(
 ): number {
   const cleanAmount = Math.max(0, Number(amount) || 0);
   const normCurrency = (currency || baseCurrency).toUpperCase();
-  const normBase = (baseCurrency || 'COP').toUpperCase();
+  const normBase = (baseCurrency || "COP").toUpperCase();
   if (normCurrency === normBase) {
     return cleanAmount;
   }
@@ -194,8 +174,8 @@ export function convertToBaseCurrency(
 /**
  * Generates a deterministic-format human-readable donation reference code.
  */
-export function generateDonationReferenceCode(prefix = 'DON'): string {
-  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+export function generateDonationReferenceCode(prefix = "DON"): string {
+  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
   return `${prefix.toUpperCase()}-${datePart}-${randomPart}`;
 }
@@ -214,22 +194,22 @@ function getNodeChildren(node: RichTextNode): unknown[] {
 }
 
 function formatBlockNodeText(type: string | undefined, joined: string): string {
-  if (type === 'heading' || type === 'paragraph' || type === 'blockquote') {
+  if (type === "heading" || type === "paragraph" || type === "blockquote") {
     return `${joined}\n`;
   }
-  if (type === 'listItem' || type === 'list-item') {
+  if (type === "listItem" || type === "list-item") {
     return `• ${joined.trim()}\n`;
   }
   return joined;
 }
 
 function extractNodeText(node: unknown): string {
-  if (!node) return '';
-  if (typeof node === 'string') return node;
+  if (!node) return "";
+  if (typeof node === "string") return node;
   const obj = node as RichTextNode;
-  if (typeof obj.text === 'string') return obj.text;
+  if (typeof obj.text === "string") return obj.text;
   const children = getNodeChildren(obj);
-  const separator = obj.type === 'doc' ? '\n\n' : '';
+  const separator = obj.type === "doc" ? "\n\n" : "";
   const joined = children.map(extractNodeText).filter(Boolean).join(separator);
   return formatBlockNodeText(obj.type, joined);
 }
@@ -239,15 +219,15 @@ function extractNodeText(node: unknown): string {
  * Tiptap Editor (Markdown, HTML, or ProseMirror JSON), CKEditor (HTML), or Strapi Blocks.
  */
 export function normalizeRichTextValue(value: unknown): string {
-  if (value === null || value === undefined) return '';
-  if (typeof value === 'string') return value;
-  if (typeof value === 'object') {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "object") {
     const obj = value as Record<string, unknown>;
-    if (obj.type === 'doc' && Array.isArray(obj.content)) {
+    if (obj.type === "doc" && Array.isArray(obj.content)) {
       return extractNodeText(obj).trim();
     }
     if (Array.isArray(value)) {
-      return value.map(extractNodeText).join('\n').trim();
+      return value.map(extractNodeText).join("\n").trim();
     }
     try {
       return JSON.stringify(value);
@@ -263,14 +243,13 @@ export function normalizeRichTextValue(value: unknown): string {
  */
 export function extractRichTextPlainText(value: unknown): string {
   const raw = normalizeRichTextValue(value).trim();
-  if (!raw) return '';
-  if (raw.startsWith('{') || raw.startsWith('[')) {
+  if (!raw) return "";
+  if (raw.startsWith("{") || raw.startsWith("[")) {
     try {
       const parsed = JSON.parse(raw) as Record<string, unknown> | unknown[];
       if (
         parsed &&
-        (Array.isArray(parsed) ||
-          (typeof parsed === 'object' && parsed.type === 'doc'))
+        (Array.isArray(parsed) || (typeof parsed === "object" && parsed.type === "doc"))
       ) {
         return extractNodeText(parsed).trim();
       }
@@ -279,7 +258,7 @@ export function extractRichTextPlainText(value: unknown): string {
     }
   }
   return raw
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
