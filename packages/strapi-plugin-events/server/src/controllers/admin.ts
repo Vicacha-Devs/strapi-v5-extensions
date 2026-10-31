@@ -8,6 +8,42 @@ import {
   getSettingsService,
 } from '../types';
 
+function optStr(val: unknown): string | undefined {
+  return typeof val === 'string' && val ? val : undefined;
+}
+
+function optNum(val: unknown): number | undefined {
+  return typeof val === 'number' ? val : undefined;
+}
+
+function buildRescheduleInput(body: Record<string, unknown>) {
+  return {
+    sourceId: optStr(body.sourceId),
+    uid: optStr(body.uid),
+    documentId: String(body.documentId ?? ''),
+    occurrenceDate: String(body.occurrenceDate ?? ''),
+    newStartDate: String(body.newStartDate ?? ''),
+    newEndDate: optStr(body.newEndDate),
+    applyToSeries: Boolean(body.applyToSeries),
+    cancelOccurrence: Boolean(body.cancelOccurrence),
+  };
+}
+
+function buildQuickCreateInput(body: Record<string, unknown>) {
+  return {
+    sourceId: optStr(body.sourceId),
+    title: String(body.title ?? ''),
+    startDate: String(body.startDate ?? ''),
+    endDate: optStr(body.endDate),
+    location: optStr(body.location),
+    category: optStr(body.category),
+    summary: optStr(body.summary),
+    rrule: optStr(body.rrule),
+    rsvpEnabled: Boolean(body.rsvpEnabled),
+    capacity: optNum(body.capacity),
+  };
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async getSettings(ctx: StrapiKoaContext) {
@@ -22,14 +58,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async getCalendar(ctx: StrapiKoaContext) {
-      const { from, to, category, sourceId, locale } = ctx.query ?? {};
+      const q = ctx.query ?? {};
       const settings = await getSettingsService(strapi).getSettings();
       const occurrences = await getOccurrenceService(strapi).getOccurrences({
-        from: typeof from === 'string' ? from : undefined,
-        to: typeof to === 'string' ? to : undefined,
-        category: typeof category === 'string' ? category : undefined,
-        sourceId: typeof sourceId === 'string' ? sourceId : undefined,
-        locale: typeof locale === 'string' ? locale : undefined,
+        from: optStr(q.from),
+        to: optStr(q.to),
+        category: optStr(q.category),
+        sourceId: optStr(q.sourceId),
+        locale: optStr(q.locale),
         includeDrafts: true,
       });
 
@@ -43,17 +79,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async reschedule(ctx: StrapiKoaContext) {
       try {
-        const body = ctx.request?.body ?? {};
-        const updated = await getOccurrenceService(strapi).rescheduleOccurrence({
-          sourceId: typeof body.sourceId === 'string' ? body.sourceId : undefined,
-          uid: typeof body.uid === 'string' ? body.uid : undefined,
-          documentId: String(body.documentId ?? ''),
-          occurrenceDate: String(body.occurrenceDate ?? ''),
-          newStartDate: String(body.newStartDate ?? ''),
-          newEndDate: body.newEndDate ? String(body.newEndDate) : undefined,
-          applyToSeries: Boolean(body.applyToSeries),
-          cancelOccurrence: Boolean(body.cancelOccurrence),
-        });
+        const body = (ctx.request?.body ?? {}) as Record<string, unknown>;
+        const updated = await getOccurrenceService(strapi).rescheduleOccurrence(
+          buildRescheduleInput(body)
+        );
         ctx.body = { data: updated };
       } catch (err: unknown) {
         ctx.badRequest(getErrorMessage(err, 'Unable to reschedule event occurrence.'));
@@ -62,19 +91,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async quickCreate(ctx: StrapiKoaContext) {
       try {
-        const body = ctx.request?.body ?? {};
-        const created = await getOccurrenceService(strapi).quickCreateEvent({
-          sourceId: typeof body.sourceId === 'string' ? body.sourceId : undefined,
-          title: String(body.title ?? ''),
-          startDate: String(body.startDate ?? ''),
-          endDate: body.endDate ? String(body.endDate) : undefined,
-          location: body.location ? String(body.location) : undefined,
-          category: body.category ? String(body.category) : undefined,
-          summary: body.summary ? String(body.summary) : undefined,
-          rrule: body.rrule ? String(body.rrule) : undefined,
-          rsvpEnabled: Boolean(body.rsvpEnabled),
-          capacity: typeof body.capacity === 'number' ? body.capacity : undefined,
-        });
+        const body = (ctx.request?.body ?? {}) as Record<string, unknown>;
+        const created = await getOccurrenceService(strapi).quickCreateEvent(
+          buildQuickCreateInput(body)
+        );
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
@@ -84,22 +104,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async getEventStats(ctx: StrapiKoaContext) {
       const { documentId } = ctx.params ?? {};
-      const { occurrenceDate, eventUid } = ctx.query ?? {};
+      const q = ctx.query ?? {};
       const data = await getRsvpService(strapi).getEventStats({
-        eventUid: typeof eventUid === 'string' ? eventUid : undefined,
+        eventUid: optStr(q.eventUid),
         eventDocumentId: String(documentId ?? ''),
-        occurrenceDate: typeof occurrenceDate === 'string' ? occurrenceDate : null,
+        occurrenceDate: optStr(q.occurrenceDate) ?? null,
       });
       ctx.body = { data };
     },
 
     async listRegistrations(ctx: StrapiKoaContext) {
-      const { eventDocumentId, occurrenceDate, status, search } = ctx.query ?? {};
+      const q = ctx.query ?? {};
       const data = await getRsvpService(strapi).listRegistrations({
-        eventDocumentId: typeof eventDocumentId === 'string' ? eventDocumentId : undefined,
-        occurrenceDate: typeof occurrenceDate === 'string' ? occurrenceDate : undefined,
-        status: typeof status === 'string' ? (status as RsvpStatus) : undefined,
-        search: typeof search === 'string' ? search : undefined,
+        eventDocumentId: optStr(q.eventDocumentId),
+        occurrenceDate: optStr(q.occurrenceDate),
+        status: optStr(q.status) as RsvpStatus | undefined,
+        search: optStr(q.search),
       });
       ctx.body = { data };
     },
@@ -123,8 +143,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const { documentId } = ctx.params ?? {};
         const { token } = ctx.request?.body ?? {};
         const data = await getRsvpService(strapi).checkInAttendee({
-          documentId: documentId ? String(documentId) : undefined,
-          token: typeof token === 'string' ? token : undefined,
+          documentId: optStr(documentId),
+          token: optStr(token),
         });
         ctx.body = { data };
       } catch (err: unknown) {
@@ -133,11 +153,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async exportRegistrationsCsv(ctx: StrapiKoaContext) {
-      const { eventDocumentId, occurrenceDate, status } = ctx.query ?? {};
+      const q = ctx.query ?? {};
       const csv = await getRsvpService(strapi).exportRegistrationsCsv({
-        eventDocumentId: typeof eventDocumentId === 'string' ? eventDocumentId : undefined,
-        occurrenceDate: typeof occurrenceDate === 'string' ? occurrenceDate : undefined,
-        status: typeof status === 'string' ? (status as RsvpStatus) : undefined,
+        eventDocumentId: optStr(q.eventDocumentId),
+        occurrenceDate: optStr(q.occurrenceDate),
+        status: optStr(q.status) as RsvpStatus | undefined,
       });
 
       ctx.set('Content-Type', 'text/csv; charset=utf-8');

@@ -6,12 +6,31 @@ import { Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
 import { PLUGIN_ID } from '../../../shared/pluginId';
 import type {
   EventsPluginSettings,
+  ExpandedOccurrence,
   RsvpRegistrationRecord,
   RsvpStatus,
 } from '../../../shared/types';
 import { AttendeesManagerPanel } from '../components/events/AttendeesManagerPanel';
 import { DEFAULT_RECURRENCE_PRESETS } from '../components/events/calendarPageHelpers';
+import { EventsDirectoryPanel } from '../components/events/EventsDirectoryPanel';
 import { QuickCreateEventPanel } from '../components/events/QuickCreateEventPanel';
+
+function shouldReplaceRepresentativeOccurrence(
+  existing: ExpandedOccurrence,
+  candidate: ExpandedOccurrence,
+  todayKey: string
+): boolean {
+  const existingIsFuture = existing.occurrenceDate >= todayKey;
+  const currentIsFuture = candidate.occurrenceDate >= todayKey;
+  if (!existingIsFuture && currentIsFuture) return true;
+  if (existingIsFuture && currentIsFuture) {
+    return candidate.occurrenceDate < existing.occurrenceDate;
+  }
+  if (!existingIsFuture && !currentIsFuture) {
+    return candidate.occurrenceDate > existing.occurrenceDate;
+  }
+  return false;
+}
 
 export const CalendarPage: React.FC = () => {
   const { formatMessage } = useIntl();
@@ -25,6 +44,7 @@ export const CalendarPage: React.FC = () => {
   );
 
   const [settings, setSettings] = useState<EventsPluginSettings | null>(null);
+  const [occurrences, setOccurrences] = useState<ExpandedOccurrence[]>([]);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
 
   // Quick-Create modal state
@@ -41,17 +61,40 @@ export const CalendarPage: React.FC = () => {
   const [registrations, setRegistrations] = useState<RsvpRegistrationRecord[]>([]);
   const [rsvpSearch, setRsvpSearch] = useState<string>('');
   const [rsvpStatusFilter, setRsvpStatusFilter] = useState<string>('all');
-  const [rsvpEventFilter, setRsvpEventFilter] = useState<string>('');
+  const [rsvpEventFilter, setRsvpEventFilter] = useState<string>(() => {
+    if (typeof window === 'undefined') return '';
+    return new URLSearchParams(window.location.search).get('eventDocumentId') || '';
+  });
 
-  const fetchSettings = useCallback(async () => {
+  const todayKey = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  const fetchCalendarData = useCallback(async () => {
     try {
-      const res = await get(`/${PLUGIN_ID}/settings`);
-      const payload = res?.data?.data as EventsPluginSettings | undefined;
-      if (payload) {
-        setSettings(payload);
+      const now = new Date();
+      const fromIso = `${now.getFullYear() - 1}-01-01T00:00:00.000Z`;
+      const toIso = `${now.getFullYear() + 2}-12-31T23:59:59.000Z`;
+      const res = await get(
+        `/${PLUGIN_ID}/calendar?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`
+      );
+      const payload = res?.data?.data as
+        | { occurrences?: ExpandedOccurrence[]; settings?: EventsPluginSettings }
+        | undefined;
+      if (payload?.settings) {
+        setSettings(payload.settings);
+      }
+      if (Array.isArray(payload?.occurrences)) {
+        setOccurrences(payload.occurrences);
       }
     } catch {
-      // Optional settings fetch for recurrence presets
+      try {
+        const res = await get(`/${PLUGIN_ID}/settings`);
+        const payload = res?.data?.data as EventsPluginSettings | undefined;
+        if (payload) {
+          setSettings(payload);
+        }
+      } catch {
+        // Ignore fallback failure
+      }
     }
   }, [get]);
 
@@ -73,12 +116,26 @@ export const CalendarPage: React.FC = () => {
   }, [get, rsvpSearch, rsvpStatusFilter, rsvpEventFilter, t]);
 
   useEffect(() => {
-    void fetchSettings();
-  }, [fetchSettings]);
+    void fetchCalendarData();
+  }, [fetchCalendarData]);
 
   useEffect(() => {
     void fetchRegistrations();
   }, [fetchRegistrations]);
+
+  const uniqueEvents = useMemo(() => {
+    const byDoc = new Map<string, ExpandedOccurrence>();
+    for (const occ of occurrences) {
+      const key = `${occ.uid}:${occ.documentId}`;
+      const existing = byDoc.get(key);
+      if (!existing || shouldReplaceRepresentativeOccurrence(existing, occ, todayKey)) {
+        byDoc.set(key, occ);
+      }
+    }
+    return Array.from(byDoc.values()).sort((a, b) =>
+      a.occurrenceDate.localeCompare(b.occurrenceDate)
+    );
+  }, [occurrences, todayKey]);
 
   const recurrencePresets = useMemo(
     () =>
@@ -94,6 +151,12 @@ export const CalendarPage: React.FC = () => {
     let waitlistedSeats = 0;
     const eventsSet = new Set<string>();
 
+    for (const ev of uniqueEvents) {
+      if (ev.rsvp?.rsvpEnabled) {
+        eventsSet.add(ev.documentId);
+      }
+    }
+
     for (const reg of registrations) {
       const seats = Number(reg.guestsCount) || 1;
       if (reg.eventDocumentId) eventsSet.add(reg.eventDocumentId);
@@ -103,13 +166,14 @@ export const CalendarPage: React.FC = () => {
     }
 
     return {
+      totalEvents: uniqueEvents.length,
       totalRegistrations: registrations.length,
       confirmedSeats,
       checkedInSeats,
       waitlistedSeats,
       distinctEvents: eventsSet.size,
     };
-  }, [registrations]);
+  }, [registrations, uniqueEvents]);
 
   const handleQuickCreateSubmit = useCallback(async () => {
     if (!quickTitle.trim() || !quickStart) return;
@@ -135,7 +199,7 @@ export const CalendarPage: React.FC = () => {
       setQuickLocation('');
       setQuickRRule('');
       setBannerMessage(t('calendar.created', 'Event created and published.'));
-      await fetchRegistrations();
+      await Promise.all([fetchCalendarData(), fetchRegistrations()]);
     } catch {
       setBannerMessage(t('calendar.error.create', 'Could not create event.'));
     }
@@ -149,6 +213,7 @@ export const CalendarPage: React.FC = () => {
     quickCapacity,
     post,
     t,
+    fetchCalendarData,
     fetchRegistrations,
   ]);
 
@@ -157,12 +222,12 @@ export const CalendarPage: React.FC = () => {
       try {
         await post(`/${PLUGIN_ID}/registrations/${encodeURIComponent(regDocId)}/check-in`, {});
         setBannerMessage(t('attendees.checkedInSuccess', 'Attendee checked in.'));
-        await fetchRegistrations();
+        await Promise.all([fetchCalendarData(), fetchRegistrations()]);
       } catch {
         setBannerMessage(t('attendees.error.checkIn', 'Check-in failed.'));
       }
     },
-    [post, t, fetchRegistrations]
+    [post, t, fetchCalendarData, fetchRegistrations]
   );
 
   const handleStatusChange = useCallback(
@@ -182,15 +247,13 @@ export const CalendarPage: React.FC = () => {
               )}`
             : t('attendees.statusUpdated', 'Status updated.')
         );
-        await fetchRegistrations();
+        await Promise.all([fetchCalendarData(), fetchRegistrations()]);
       } catch {
         setBannerMessage(t('attendees.error.status', 'Could not update status.'));
       }
     },
-    [post, t, fetchRegistrations]
+    [post, t, fetchCalendarData, fetchRegistrations]
   );
-
-  const todayKey = new Date().toISOString().slice(0, 10);
 
   return (
     <Box padding={6} background="neutral100">
@@ -248,9 +311,19 @@ export const CalendarPage: React.FC = () => {
           </Flex>
         </Flex>
 
-        {/* RSVP Summary KPI Cards */}
+        {/* Events & RSVP Summary KPI Cards */}
         <Flex gap={4} wrap="wrap">
           {[
+            {
+              label: t('stats.totalEvents', 'Registered Events'),
+              value: rsvpStats.totalEvents,
+              badge: 'primary100',
+            },
+            {
+              label: t('stats.eventsWithRsvps', 'Events with RSVPs'),
+              value: rsvpStats.distinctEvents,
+              badge: 'secondary100',
+            },
             {
               label: t('stats.registrations', 'Total Registrations'),
               value: rsvpStats.totalRegistrations,
@@ -271,11 +344,6 @@ export const CalendarPage: React.FC = () => {
               value: rsvpStats.waitlistedSeats,
               badge: 'warning100',
             },
-            {
-              label: t('stats.eventsWithRsvps', 'Events with RSVPs'),
-              value: rsvpStats.distinctEvents,
-              badge: 'secondary100',
-            },
           ].map((card) => (
             <Box
               key={card.label}
@@ -283,7 +351,7 @@ export const CalendarPage: React.FC = () => {
               hasRadius
               shadow="tableShadow"
               padding={4}
-              style={{ flex: '1 1 180px' }}
+              style={{ flex: '1 1 160px' }}
             >
               <Flex direction="column" alignItems="flex-start" gap={1}>
                 <Typography variant="sigma" textColor="neutral600">
@@ -328,6 +396,26 @@ export const CalendarPage: React.FC = () => {
             onSubmit={handleQuickCreateSubmit}
           />
         )}
+
+        <EventsDirectoryPanel
+          t={t}
+          events={uniqueEvents}
+          selectedEventDocId={rsvpEventFilter}
+          onSelectEventDocId={setRsvpEventFilter}
+          onEditInContentManager={(uid, docId, locale) => {
+            const query = locale
+              ? `?plugins[i18n][locale]=${encodeURIComponent(locale)}`
+              : '';
+            navigate(`/content-manager/collection-types/${uid}/${docId}${query}`);
+          }}
+          onOpenInCalendar={(docId) =>
+            navigate(
+              `/plugins/calendar?source=events${
+                docId ? `&documentId=${encodeURIComponent(docId)}` : ''
+              }`
+            )
+          }
+        />
 
         <AttendeesManagerPanel
           t={t}

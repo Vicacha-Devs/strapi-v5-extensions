@@ -41,32 +41,25 @@ export function buildRRule(parsed: Partial<ParsedRRule>): string {
   });
 }
 
+const FREQ_UNITS: Record<string, { singular: string; plural: string }> = {
+  DAILY: { singular: 'day', plural: 'days' },
+  WEEKLY: { singular: 'week', plural: 'weeks' },
+  MONTHLY: { singular: 'month', plural: 'months' },
+  YEARLY: { singular: 'year', plural: 'years' },
+};
+
+function formatIntervalUnit(freq: string, interval: number): string {
+  const unit = FREQ_UNITS[freq] ?? FREQ_UNITS.YEARLY;
+  return interval === 1 ? unit.singular : `${interval} ${unit.plural}`;
+}
+
 export function describeRRule(rruleString: string | undefined | null): string {
   const parsed = parseRRule(rruleString);
   if (parsed.freq === 'NONE') {
     return 'Does not repeat';
   }
 
-  const intervalText =
-    parsed.interval === 1
-      ? parsed.freq === 'DAILY'
-        ? 'day'
-        : parsed.freq === 'WEEKLY'
-          ? 'week'
-          : parsed.freq === 'MONTHLY'
-            ? 'month'
-            : 'year'
-      : `${parsed.interval} ${
-          parsed.freq === 'DAILY'
-            ? 'days'
-            : parsed.freq === 'WEEKLY'
-              ? 'weeks'
-              : parsed.freq === 'MONTHLY'
-                ? 'months'
-                : 'years'
-        }`;
-
-  let summary = `Every ${intervalText}`;
+  let summary = `Every ${formatIntervalUnit(parsed.freq, parsed.interval)}`;
   if (parsed.freq === 'WEEKLY' && parsed.byDay.length > 0) {
     summary += ` on ${parsed.byDay.join(', ')}`;
   } else if (parsed.freq === 'MONTHLY' && parsed.byMonthDay) {

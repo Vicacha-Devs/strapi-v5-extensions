@@ -14,15 +14,146 @@ import type {
 } from '../../../shared/types';
 import { getDocumentsClient } from '../types';
 import {
+  type ResolvedTargetEvent,
+  aggregateRsvpCounts,
   formatRegistrationRecord,
   maskEmail,
+  resolveAssignedRsvpStatus,
   resolveTargetEvent,
   trySendNotificationEmail,
+  validateRegistrationInputAndEvent,
 } from './rsvpHelpers';
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export { maskEmail };
+
+async function resolveStatsEventConfig(
+  strapi: Core.Strapi,
+  params: {
+    eventUid?: string;
+    eventDocumentId: string;
+    capacityOverride?: number | null;
+    waitlistOverride?: boolean;
+    rsvpEnabledOverride?: boolean;
+  }
+): Promise<{
+  eventUid: string;
+  capacity: number | null;
+  waitlistEnabled: boolean;
+  rsvpEnabled: boolean;
+}> {
+  if (params.capacityOverride === undefined) {
+    const resolved = await resolveTargetEvent(strapi, params.eventDocumentId, params.eventUid);
+    if (resolved) {
+      return {
+        eventUid: resolved.uid,
+        capacity: resolved.capacity,
+        waitlistEnabled: resolved.waitlistEnabled,
+        rsvpEnabled: resolved.rsvpEnabled,
+      };
+    }
+  }
+  return {
+    eventUid: params.eventUid ?? EVENT_CONTENT_TYPE_UID,
+    capacity: params.capacityOverride ?? null,
+    waitlistEnabled: params.waitlistOverride ?? true,
+    rsvpEnabled: params.rsvpEnabledOverride ?? true,
+  };
+}
+
+async function fetchRegistrationRecordsSafe(
+  strapi: Core.Strapi,
+  eventDocumentId: string,
+  occurrenceDate: string | null
+): Promise<Array<Record<string, unknown>>> {
+  const filters: Record<string, unknown> = {
+    eventDocumentId: { $eq: eventDocumentId },
+    ...(occurrenceDate ? { occurrenceDate: { $eq: occurrenceDate } } : {}),
+  };
+  try {
+    return await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).findMany({
+      filters,
+      limit: 5000,
+    });
+  } catch {
+    return [];
+  }
+}
+
+function resolveOccurrenceDateForInput(
+  inputDate: string | undefined,
+  eventStartDate: string
+): string {
+  if (inputDate && /^\d{4}-\d{2}-\d{2}$/.test(inputDate)) {
+    return inputDate;
+  }
+  return toDateKey(eventStartDate) || new Date().toISOString().slice(0, 10);
+}
+
+function buildRegistrationCreateData(args: {
+  targetEvent: ResolvedTargetEvent;
+  eventDocumentId: string;
+  occurrenceDate: string;
+  attendeeName: string;
+  attendeeEmail: string;
+  guestsCount: number;
+  assignedStatus: RsvpStatus;
+  checkInToken: string;
+  input: RsvpRegistrationInput;
+}): Record<string, unknown> {
+  const {
+    targetEvent,
+    eventDocumentId,
+    occurrenceDate,
+    attendeeName,
+    attendeeEmail,
+    guestsCount,
+    assignedStatus,
+    checkInToken,
+    input,
+  } = args;
+  return {
+    eventUid: targetEvent.uid,
+    eventDocumentId,
+    eventTitle: targetEvent.title,
+    occurrenceDate,
+    attendeeName,
+    attendeeEmail,
+    attendeePhone: input.attendeePhone ? String(input.attendeePhone).trim().slice(0, 50) : '',
+    guestsCount,
+    status: assignedStatus,
+    checkInToken,
+    locale: input.locale ? String(input.locale).slice(0, 10) : 'es',
+    notes: input.notes ? String(input.notes).trim().slice(0, 2000) : '',
+    metadata: input.metadata ?? null,
+  };
+}
+
+function buildListRegistrationsQueryFilters(filters?: {
+  eventDocumentId?: string;
+  occurrenceDate?: string;
+  status?: RsvpStatus;
+  search?: string;
+}): Record<string, unknown> {
+  const queryFilters: Record<string, unknown> = {};
+  if (filters?.eventDocumentId) {
+    queryFilters.eventDocumentId = { $eq: filters.eventDocumentId };
+  }
+  if (filters?.occurrenceDate) {
+    queryFilters.occurrenceDate = { $eq: filters.occurrenceDate };
+  }
+  if (filters?.status) {
+    queryFilters.status = { $eq: filters.status };
+  }
+  const q = filters?.search?.trim();
+  if (q) {
+    queryFilters.$or = [
+      { attendeeName: { $containsi: q } },
+      { attendeeEmail: { $containsi: q } },
+      { eventTitle: { $containsi: q } },
+    ];
+  }
+  return queryFilters;
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
@@ -35,66 +166,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       rsvpEnabledOverride?: boolean;
     }): Promise<RsvpStats> {
       const { eventDocumentId, occurrenceDate = null } = params;
-      let eventUid = params.eventUid ?? EVENT_CONTENT_TYPE_UID;
-      let capacity = params.capacityOverride ?? null;
-      let waitlistEnabled = params.waitlistOverride ?? true;
-      let rsvpEnabled = params.rsvpEnabledOverride ?? true;
-
-      if (params.capacityOverride === undefined) {
-        const resolved = await resolveTargetEvent(strapi, eventDocumentId, params.eventUid);
-        if (resolved) {
-          eventUid = resolved.uid;
-          capacity = resolved.capacity;
-          waitlistEnabled = resolved.waitlistEnabled;
-          rsvpEnabled = resolved.rsvpEnabled;
-        }
-      }
-
-      const filters: Record<string, unknown> = {
-        eventDocumentId: { $eq: eventDocumentId },
-      };
-      if (occurrenceDate) {
-        filters.occurrenceDate = { $eq: occurrenceDate };
-      }
-
-      let records: Array<Record<string, unknown>> = [];
-      try {
-        records = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).findMany({
-          filters,
-          limit: 5000,
-        });
-      } catch {
-        records = [];
-      }
-
-      let confirmedCount = 0;
-      let confirmedSeats = 0;
-      let checkedInSeats = 0;
-      let waitlistedCount = 0;
-      let waitlistedSeats = 0;
-      let cancelledCount = 0;
-
-      for (const rec of records) {
-        const guests =
-          typeof rec.guestsCount === 'number' && rec.guestsCount > 0 ? rec.guestsCount : 1;
-        const st = rec.status as RsvpStatus;
-        if (st === 'confirmed' || st === 'checked_in') {
-          confirmedCount++;
-          confirmedSeats += guests;
-          if (st === 'checked_in') {
-            checkedInSeats += guests;
-          }
-        } else if (st === 'waitlisted') {
-          waitlistedCount++;
-          waitlistedSeats += guests;
-        } else if (st === 'cancelled') {
-          cancelledCount++;
-        }
-      }
-
+      const { eventUid, capacity, waitlistEnabled, rsvpEnabled } =
+        await resolveStatsEventConfig(strapi, params);
+      const records = await fetchRegistrationRecordsSafe(strapi, eventDocumentId, occurrenceDate);
+      const counts = aggregateRsvpCounts(records);
       const remainingSeats =
-        capacity !== null ? Math.max(0, capacity - confirmedSeats) : null;
-      const isFull = capacity !== null ? confirmedSeats >= capacity : false;
+        capacity !== null ? Math.max(0, capacity - counts.confirmedSeats) : null;
+      const isFull = capacity !== null ? counts.confirmedSeats >= capacity : false;
 
       return {
         eventUid,
@@ -103,12 +181,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         rsvpEnabled,
         capacity,
         waitlistEnabled,
-        confirmedCount,
-        confirmedSeats,
-        checkedInSeats,
-        waitlistedCount,
-        waitlistedSeats,
-        cancelledCount,
+        ...counts,
         remainingSeats,
         isFull,
       };
@@ -118,50 +191,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       eventDocumentId: string,
       input: RsvpRegistrationInput
     ): Promise<RsvpRegistrationRecord & { cancellationToken: string }> {
-      const attendeeName = (input.attendeeName ?? '').trim();
-      const attendeeEmail = (input.attendeeEmail ?? '').trim().toLowerCase();
-
-      if (!attendeeName || attendeeName.length > 160) {
-        throw new Error('Invalid attendeeName: must be between 1 and 160 characters.');
-      }
-      if (!attendeeEmail || !EMAIL_REGEX.test(attendeeEmail)) {
-        throw new Error('Invalid attendeeEmail: must be a valid email address.');
-      }
-
       const targetEvent = await resolveTargetEvent(strapi, eventDocumentId, input.eventUid);
       if (!targetEvent) {
         throw new Error(`Event not found for documentId: ${eventDocumentId}`);
       }
 
-      if (!targetEvent.rsvpEnabled) {
-        throw new Error('Registrations are closed for this event.');
-      }
+      const { attendeeName, attendeeEmail, guestsCount } =
+        validateRegistrationInputAndEvent(input, targetEvent);
+      const occurrenceDate = resolveOccurrenceDateForInput(
+        input.occurrenceDate,
+        targetEvent.startDate
+      );
 
-      if (targetEvent.registrationDeadline) {
-        const deadlineMs = new Date(targetEvent.registrationDeadline).getTime();
-        if (!Number.isNaN(deadlineMs) && Date.now() > deadlineMs) {
-          throw new Error('The registration deadline for this event has passed.');
-        }
-      }
-
-      const guestsCount =
-        typeof input.guestsCount === 'number' && input.guestsCount >= 1
-          ? Math.floor(input.guestsCount)
-          : 1;
-
-      if (guestsCount > targetEvent.maxGuestsPerRegistration) {
-        throw new Error(
-          `Maximum guests per registration is ${targetEvent.maxGuestsPerRegistration}.`
-        );
-      }
-
-      const occurrenceDate =
-        input.occurrenceDate && /^\d{4}-\d{2}-\d{2}$/.test(input.occurrenceDate)
-          ? input.occurrenceDate
-          : toDateKey(targetEvent.startDate) || new Date().toISOString().slice(0, 10);
-
-      // Check duplicate active registration for same email + occurrence
-      const existing = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).findMany({
+      const client = getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID);
+      const existing = await client.findMany({
         filters: {
           eventDocumentId: { $eq: eventDocumentId },
           occurrenceDate: { $eq: occurrenceDate },
@@ -184,38 +227,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         rsvpEnabledOverride: targetEvent.rsvpEnabled,
       });
 
-      let assignedStatus: RsvpStatus = 'confirmed';
-      if (
-        targetEvent.capacity !== null &&
-        stats.confirmedSeats + guestsCount > targetEvent.capacity
-      ) {
-        if (targetEvent.waitlistEnabled) {
-          assignedStatus = 'waitlisted';
-        } else {
-          throw new Error('Event has reached maximum capacity.');
-        }
-      }
-
+      const assignedStatus = resolveAssignedRsvpStatus(
+        targetEvent,
+        stats.confirmedSeats,
+        guestsCount
+      );
       const checkInToken = crypto.randomBytes(24).toString('hex');
 
-      const created = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).create({
-        data: {
-          eventUid: targetEvent.uid,
+      const created = await client.create({
+        data: buildRegistrationCreateData({
+          targetEvent,
           eventDocumentId,
-          eventTitle: targetEvent.title,
           occurrenceDate,
           attendeeName,
           attendeeEmail,
-          attendeePhone: input.attendeePhone
-            ? String(input.attendeePhone).trim().slice(0, 50)
-            : '',
           guestsCount,
-          status: assignedStatus,
+          assignedStatus,
           checkInToken,
-          locale: input.locale ? String(input.locale).slice(0, 10) : 'es',
-          notes: input.notes ? String(input.notes).trim().slice(0, 2000) : '',
-          metadata: input.metadata ?? null,
-        },
+          input,
+        }),
       });
 
       await trySendNotificationEmail(strapi, {
@@ -227,21 +257,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         status: assignedStatus,
       });
 
-      return {
-        documentId: String(created.documentId),
+      const formatted = formatRegistrationRecord({
+        ...created,
         eventUid: targetEvent.uid,
         eventDocumentId,
         eventTitle: targetEvent.title,
         occurrenceDate,
         attendeeName,
         attendeeEmail,
-        attendeePhone: created.attendeePhone ? String(created.attendeePhone) : '',
         guestsCount,
         status: assignedStatus,
-        checkedInAt: null,
-        locale: created.locale ? String(created.locale) : 'es',
-        notes: created.notes ? String(created.notes) : '',
-        createdAt: created.createdAt ? String(created.createdAt) : undefined,
+      });
+
+      return {
+        ...formatted,
+        attendeePhone: formatted.attendeePhone ?? '',
+        notes: formatted.notes ?? '',
         cancellationToken: checkInToken,
       };
     },
@@ -270,11 +301,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       let availableSeats = stats.remainingSeats ?? 0;
-      if (availableSeats <= 0) {
-        return [];
-      }
+      if (availableSeats <= 0) return [];
 
-      const waitlisted = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).findMany({
+      const client = getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID);
+      const waitlisted = await client.findMany({
         filters: {
           eventDocumentId: { $eq: params.eventDocumentId },
           occurrenceDate: { $eq: params.occurrenceDate },
@@ -285,37 +315,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       const promoted: RsvpRegistrationRecord[] = [];
-
       for (const candidate of waitlisted) {
-        const needed =
-          typeof candidate.guestsCount === 'number' && candidate.guestsCount > 0
-            ? candidate.guestsCount
-            : 1;
-        if (needed <= availableSeats) {
-          const updated = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).update({
-            documentId: String(candidate.documentId),
-            data: {
-              status: 'confirmed',
-            },
-          });
+        if (availableSeats <= 0) break;
+        const needed = formatRegistrationRecord(candidate).guestsCount;
+        if (needed > availableSeats) continue;
 
-          availableSeats -= needed;
-          promoted.push(formatRegistrationRecord(updated));
+        const updated = await client.update({
+          documentId: String(candidate.documentId),
+          data: { status: 'confirmed' },
+        });
+        availableSeats -= needed;
+        promoted.push(formatRegistrationRecord(updated));
 
-          await trySendNotificationEmail(strapi, {
-            to: String(candidate.attendeeEmail),
-            attendeeName: String(candidate.attendeeName),
-            eventTitle: String(candidate.eventTitle ?? targetEvent.title),
-            occurrenceDate: params.occurrenceDate,
-            guestsCount: needed,
-            status: 'confirmed',
-            promotedFromWaitlist: true,
-          });
-
-          if (availableSeats <= 0) {
-            break;
-          }
-        }
+        await trySendNotificationEmail(strapi, {
+          to: String(candidate.attendeeEmail),
+          attendeeName: String(candidate.attendeeName),
+          eventTitle: String(candidate.eventTitle ?? targetEvent.title),
+          occurrenceDate: params.occurrenceDate,
+          guestsCount: needed,
+          status: 'confirmed',
+          promotedFromWaitlist: true,
+        });
       }
 
       return promoted;
@@ -330,10 +350,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new Error('Invalid cancellation token.');
       }
 
-      const matches = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).findMany({
-        filters: {
-          checkInToken: { $eq: cleanedToken },
-        },
+      const client = getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID);
+      const matches = await client.findMany({
+        filters: { checkInToken: { $eq: cleanedToken } },
         limit: 1,
       });
 
@@ -343,27 +362,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const record = matches[0];
       const wasConfirmed = record.status === 'confirmed' || record.status === 'checked_in';
-
-      const updated = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).update({
+      const updated = await client.update({
         documentId: String(record.documentId),
-        data: {
-          status: 'cancelled',
-        },
+        data: { status: 'cancelled' },
       });
 
-      let promotedCount = 0;
-      if (wasConfirmed) {
-        const promoted = await this.promoteFromWaitlist({
-          eventUid: String(record.eventUid ?? EVENT_CONTENT_TYPE_UID),
-          eventDocumentId: String(record.eventDocumentId),
-          occurrenceDate: String(record.occurrenceDate),
-        });
-        promotedCount = promoted.length;
-      }
+      const promoted = wasConfirmed
+        ? await this.promoteFromWaitlist({
+            eventUid: String(record.eventUid ?? EVENT_CONTENT_TYPE_UID),
+            eventDocumentId: String(record.eventDocumentId),
+            occurrenceDate: String(record.occurrenceDate),
+          })
+        : [];
 
       return {
         cancelled: formatRegistrationRecord(updated),
-        promotedCount,
+        promotedCount: promoted.length,
       };
     },
 
@@ -379,10 +393,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new Error(`Invalid status: ${newStatus}`);
       }
 
-      const existing = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).findOne({
-        documentId: registrationDocumentId,
-      });
-
+      const client = getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID);
+      const existing = await client.findOne({ documentId: registrationDocumentId });
       if (!existing) {
         throw new Error(`Registration ${registrationDocumentId} not found.`);
       }
@@ -391,29 +403,30 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         existing.status === 'confirmed' || existing.status === 'checked_in';
       const nowOccupyingSeat = newStatus === 'confirmed' || newStatus === 'checked_in';
 
-      const dataPatch: Record<string, unknown> = { status: newStatus };
-      if (newStatus === 'checked_in' && !existing.checkedInAt) {
-        dataPatch.checkedInAt = new Date().toISOString();
-      }
+      const dataPatch: Record<string, unknown> = {
+        status: newStatus,
+        ...(newStatus === 'checked_in' && !existing.checkedInAt
+          ? { checkedInAt: new Date().toISOString() }
+          : {}),
+      };
 
-      const updated = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).update({
+      const updated = await client.update({
         documentId: registrationDocumentId,
         data: dataPatch,
       });
 
-      let promotedCount = 0;
-      if (wasOccupyingSeat && !nowOccupyingSeat) {
-        const promoted = await this.promoteFromWaitlist({
-          eventUid: String(existing.eventUid ?? EVENT_CONTENT_TYPE_UID),
-          eventDocumentId: String(existing.eventDocumentId),
-          occurrenceDate: String(existing.occurrenceDate),
-        });
-        promotedCount = promoted.length;
-      }
+      const promoted =
+        wasOccupyingSeat && !nowOccupyingSeat
+          ? await this.promoteFromWaitlist({
+              eventUid: String(existing.eventUid ?? EVENT_CONTENT_TYPE_UID),
+              eventDocumentId: String(existing.eventDocumentId),
+              occurrenceDate: String(existing.occurrenceDate),
+            })
+          : [];
 
       return {
         registration: formatRegistrationRecord(updated),
-        promotedCount,
+        promotedCount: promoted.length,
       };
     },
 
@@ -425,12 +438,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!targetDocId && identifier.token) {
         const matches = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).findMany({
-          filters: {
-            checkInToken: { $eq: identifier.token.trim() },
-          },
+          filters: { checkInToken: { $eq: identifier.token.trim() } },
           limit: 1,
         });
-
         if (matches.length > 0) {
           targetDocId = String(matches[0].documentId);
         }
@@ -450,28 +460,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       status?: RsvpStatus;
       search?: string;
     }): Promise<RsvpRegistrationRecord[]> {
-      const queryFilters: Record<string, unknown> = {};
-
-      if (filters?.eventDocumentId) {
-        queryFilters.eventDocumentId = { $eq: filters.eventDocumentId };
-      }
-      if (filters?.occurrenceDate) {
-        queryFilters.occurrenceDate = { $eq: filters.occurrenceDate };
-      }
-      if (filters?.status) {
-        queryFilters.status = { $eq: filters.status };
-      }
-      if (filters?.search && filters.search.trim()) {
-        const q = filters.search.trim();
-        queryFilters.$or = [
-          { attendeeName: { $containsi: q } },
-          { attendeeEmail: { $containsi: q } },
-          { eventTitle: { $containsi: q } },
-        ];
-      }
-
       const rows = await getDocumentsClient(strapi, REGISTRATION_CONTENT_TYPE_UID).findMany({
-        filters: queryFilters,
+        filters: buildListRegistrationsQueryFilters(filters),
         sort: 'createdAt:desc',
         limit: 1000,
       });

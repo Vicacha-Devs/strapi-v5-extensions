@@ -199,6 +199,8 @@ export interface SchemaExtensionsConfig {
 export interface EventsPluginSettings {
   /** Default IANA timezone (e.g. "UTC") */
   defaultTimezone: string;
+  /** Optional default locale for querying localized event sources (e.g. "es", "en", "auto") */
+  defaultLocale?: string;
   /** Default seat capacity when RSVP is enabled on an event */
   defaultCapacity: number;
   /** Automatically place excess registrations on the waitlist when capacity is full */
@@ -254,6 +256,8 @@ export interface ExpandedOccurrence {
   uid: string;
   /** Strapi v5 documentId */
   documentId: string;
+  /** Document locale code when localized via Strapi i18n (e.g. "es", "en") */
+  locale?: string;
   /** Occurrence date key (YYYY-MM-DD) */
   occurrenceDate: string;
   /** Effective start ISO timestamp */

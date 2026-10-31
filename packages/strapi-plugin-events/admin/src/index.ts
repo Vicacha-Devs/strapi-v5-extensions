@@ -1,3 +1,5 @@
+import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
+import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
 import type { StrapiApp } from '@strapi/strapi/admin';
 import { PLUGIN_ID } from '../../shared/pluginId';
 import { EventSidePanel } from './components/EventSidePanel';
@@ -35,26 +37,41 @@ export default {
       rruleField as unknown as Parameters<typeof app.customFields.register>[0]
     );
 
+    const calendarSuiteSection = {
+      id: 'calendar',
+      intlLabel: {
+        id: 'calendar.settings.section',
+        defaultMessage: 'Calendar, Events & Bookings',
+      },
+    };
+    const eventsSettingsLink = {
+      intlLabel: {
+        id: `${PLUGIN_ID}.settings.menuLabel`,
+        defaultMessage: 'Events & RSVPs',
+      },
+      id: `${PLUGIN_ID}-settings`,
+      to: `${PLUGIN_ID}`,
+      Component: () =>
+        import('./pages/SettingsPage').then((m) => ({ default: m.default })),
+      permissions: [
+        {
+          action: `plugin::${PLUGIN_ID}.settings.update`,
+          subject: null,
+        },
+      ],
+    };
     const maybeApp = app as unknown as {
       addSettingsLink?: StrapiApp['addSettingsLink'];
+      createSettingSection?: StrapiApp['createSettingSection'];
     };
-    if (typeof maybeApp.addSettingsLink === 'function') {
-      app.addSettingsLink('global', {
-        intlLabel: {
-          id: `${PLUGIN_ID}.settings.menuLabel`,
-          defaultMessage: 'Events & Calendar',
-        },
-        id: `${PLUGIN_ID}-settings`,
-        to: `${PLUGIN_ID}`,
-        Component: () =>
-          import('./pages/SettingsPage').then((m) => ({ default: m.default })),
-        permissions: [
-          {
-            action: `plugin::${PLUGIN_ID}.settings.update`,
-            subject: null,
-          },
-        ],
-      });
+    try {
+      if (typeof maybeApp.addSettingsLink === 'function') {
+        maybeApp.addSettingsLink(calendarSuiteSection.id, eventsSettingsLink);
+      } else if (typeof maybeApp.createSettingSection === 'function') {
+        maybeApp.createSettingSection(calendarSuiteSection, [eventsSettingsLink]);
+      }
+    } catch {
+      maybeApp.createSettingSection?.(calendarSuiteSection, [eventsSettingsLink]);
     }
   },
 
@@ -78,7 +95,7 @@ export default {
       allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          const prefixed: Record<string, string> = {};
+          const prefixed: Record<string, string> = { ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en ?? {}), ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en ?? {}) };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
             const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;

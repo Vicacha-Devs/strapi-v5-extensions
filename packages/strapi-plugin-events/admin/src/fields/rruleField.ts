@@ -15,7 +15,7 @@ export const rruleField = {
     defaultMessage:
       'Configure recurring rules (RFC 5545 RRULE), timezone, exception dates, and single-instance overrides.',
   },
-  icon: Calendar as ComponentType<any>,
+  icon: Calendar as ComponentType<Record<string, unknown>>,
   components: {
     Input: async () =>
       import('../components/RRuleInput').then((m) => ({ default: m.default })),

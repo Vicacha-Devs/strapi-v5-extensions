@@ -4,7 +4,7 @@ import { useFetchClient } from '@strapi/strapi/admin';
 import { Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
 import { formatDateInCalendarSystem } from '../../../shared/calendarSystems';
 import { EVENT_CONTENT_TYPE_UID, PLUGIN_ID } from '../../../shared/pluginId';
-import type { EventsPluginSettings, RsvpStats } from '../../../shared/types';
+import type { CalendarSystemConfig, EventsPluginSettings, RsvpStats } from '../../../shared/types';
 
 interface SidePanelProps {
   activeTab?: string;
@@ -15,6 +15,167 @@ interface SidePanelProps {
   model?: string;
 }
 
+interface ComputedAltDate {
+  id: string;
+  label: string;
+  formatted: string;
+  isOverridden: boolean;
+}
+
+function getStringProp(doc: Record<string, unknown> | undefined, key: string): string {
+  const val = doc?.[key];
+  return typeof val === 'string' ? val : '';
+}
+
+function resolveDocumentStartDate(doc: Record<string, unknown> | undefined): string {
+  return getStringProp(doc, 'startDate') || getStringProp(doc, 'preferredDate');
+}
+
+function isDocumentEventLike(model: string, doc: Record<string, unknown> | undefined, rawStartDate: string): boolean {
+  if (model === EVENT_CONTENT_TYPE_UID) return true;
+  return Boolean(rawStartDate || doc?.recurrence || doc?.rsvpEnabled !== undefined);
+}
+
+function formatSingleCalendarSystem(
+  sys: CalendarSystemConfig,
+  rawStartDate: string,
+  doc: Record<string, unknown> | undefined,
+  locale: string
+): ComputedAltDate {
+  const overrideVal = sys.overrideField ? getStringProp(doc, sys.overrideField).trim() : '';
+  const formatted =
+    overrideVal ||
+    formatDateInCalendarSystem(rawStartDate, sys, locale, { compact: false });
+  return {
+    id: sys.id,
+    label: sys.label,
+    formatted,
+    isOverridden: Boolean(overrideVal),
+  };
+}
+
+function computeCapacityPercent(stats: RsvpStats | null): number {
+  const cap = stats?.capacity ?? 0;
+  if (!stats || cap <= 0) return 0;
+  return Math.min(100, Math.round((stats.confirmedSeats / cap) * 100));
+}
+
+function resolveRsvpEnabled(doc: Record<string, unknown> | undefined, stats: RsvpStats): boolean {
+  return typeof doc?.rsvpEnabled === 'boolean' ? doc.rsvpEnabled : stats.rsvpEnabled;
+}
+
+interface SidePanelRsvpCardProps {
+  stats: RsvpStats;
+  rsvpEnabled: boolean;
+  capacityPercent: number;
+  t: (id: string, defaultMessage: string) => string;
+}
+
+const SidePanelRsvpCard: React.FC<SidePanelRsvpCardProps> = ({
+  stats,
+  rsvpEnabled,
+  capacityPercent,
+  t,
+}) => {
+  const badgeBg = stats.isFull ? 'danger100' : 'success100';
+  const badgeText = stats.isFull ? 'danger700' : 'success700';
+  const badgeLabel = stats.isFull
+    ? t('sidePanel.full', 'Full / Waitlist')
+    : t('sidePanel.open', 'Open');
+
+  return (
+    <Box padding={3} background="neutral100" hasRadius>
+      <Flex justifyContent="space-between" alignItems="center">
+        <Typography variant="sigma" textColor="neutral600">
+          {t('sidePanel.rsvpStatus', 'RSVP & Capacity')}
+        </Typography>
+        {rsvpEnabled ? (
+          <Badge backgroundColor={badgeBg} textColor={badgeText}>
+            {badgeLabel}
+          </Badge>
+        ) : (
+          <Badge backgroundColor="neutral150" textColor="neutral600">
+            {t('events.directory.noRsvp', 'Info / External Link')}
+          </Badge>
+        )}
+      </Flex>
+
+      <Flex justifyContent="space-between" paddingTop={2}>
+        <Typography variant="pi">
+          {t('sidePanel.confirmedSeats', 'Confirmed Seats')}:
+        </Typography>
+        <Typography variant="pi" fontWeight="bold">
+          {stats.confirmedSeats}
+          {stats.capacity ? ` / ${stats.capacity}` : ''}
+        </Typography>
+      </Flex>
+
+      {Boolean(stats.capacity) && (
+        <Box
+          marginTop={2}
+          marginBottom={2}
+          style={{
+            height: 8,
+            borderRadius: 4,
+            background: '#eaeaef',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              width: `${capacityPercent}%`,
+              height: '100%',
+              background: stats.isFull ? '#d02b20' : '#0D9488',
+            }}
+          />
+        </Box>
+      )}
+
+      <Flex justifyContent="space-between" paddingTop={1}>
+        <Typography variant="pi">{t('sidePanel.checkedIn', 'Checked In')}:</Typography>
+        <Typography variant="pi" fontWeight="bold">
+          {stats.checkedInSeats}
+        </Typography>
+      </Flex>
+
+      <Flex justifyContent="space-between" paddingTop={1}>
+        <Typography variant="pi">{t('sidePanel.waitlisted', 'Waitlisted Seats')}:</Typography>
+        <Typography variant="pi" fontWeight="bold">
+          {stats.waitlistedSeats}
+        </Typography>
+      </Flex>
+    </Box>
+  );
+};
+
+interface GlobalCmI18nWindow {
+  __CM_I18N_MESSAGES__?: Record<string, Record<string, string>>;
+}
+
+function resolveActiveContentLocale(fallbackLocale?: string): string {
+  if (typeof window !== 'undefined') {
+    const urlLoc = new URLSearchParams(window.location.search).get('plugins[i18n][locale]');
+    if (urlLoc) return urlLoc;
+  }
+  return fallbackLocale || 'en';
+}
+
+function formatPluginMessageWithUrlLocale(
+  pluginId: string,
+  id: string,
+  defaultMessage: string,
+  formatMessage: (descriptor: { id: string; defaultMessage: string }) => string
+): string {
+  const fullKey = `${pluginId}.${id}`;
+  if (typeof window !== 'undefined') {
+    const urlLoc = new URLSearchParams(window.location.search).get('plugins[i18n][locale]');
+    const globalMessages = (globalThis as unknown as GlobalCmI18nWindow).__CM_I18N_MESSAGES__;
+    const override = urlLoc ? globalMessages?.[urlLoc]?.[fullKey] : undefined;
+    if (override) return override;
+  }
+  return formatMessage({ id: fullKey, defaultMessage });
+}
+
 export const EventSidePanel = (props: SidePanelProps) => {
   const { formatMessage, locale } = useIntl();
   const { get } = useFetchClient();
@@ -22,52 +183,30 @@ export const EventSidePanel = (props: SidePanelProps) => {
   const [settings, setSettings] = useState<EventsPluginSettings | null>(null);
 
   const model = props.model ?? '';
-  const documentId =
-    props.documentId ??
-    (typeof props.document?.documentId === 'string' ? props.document.documentId : '');
-  const rawStartDate =
-    typeof props.document?.startDate === 'string'
-      ? props.document.startDate
-      : typeof props.document?.preferredDate === 'string'
-        ? props.document.preferredDate
-        : '';
-
-  const hasScheduleFields = Boolean(
-    rawStartDate ||
-      props.document?.recurrence ||
-      props.document?.rsvpEnabled !== undefined
-  );
-
-  const isEventLike = model === EVENT_CONTENT_TYPE_UID || hasScheduleFields;
+  const documentId = props.documentId || getStringProp(props.document, 'documentId');
+  const rawStartDate = resolveDocumentStartDate(props.document);
+  const isEventLike = isDocumentEventLike(model, props.document, rawStartDate);
+  const activeLocale = resolveActiveContentLocale(locale);
 
   useEffect(() => {
-    if (!isEventLike) {
-      return;
-    }
-
+    if (!isEventLike) return;
     let mounted = true;
+
     get(`/${PLUGIN_ID}/settings`)
-      .then((res: { data?: { data?: EventsPluginSettings } }) => {
-        if (mounted && res?.data?.data) {
-          setSettings(res.data.data);
-        }
+      .then((res) => {
+        const data = res?.data?.data as EventsPluginSettings | undefined;
+        if (mounted && data) setSettings(data);
       })
-      .catch(() => {
-        // Ignore if settings request fails
-      });
+      .catch(() => {});
 
     if (documentId) {
-      get(
-        `/${PLUGIN_ID}/stats/${encodeURIComponent(documentId)}?eventUid=${encodeURIComponent(model)}`
-      )
-        .then((res: { data?: { data?: RsvpStats } }) => {
-          if (mounted && res?.data?.data) {
-            setStats(res.data.data);
-          }
+      const statsUrl = `/${PLUGIN_ID}/stats/${encodeURIComponent(documentId)}?eventUid=${encodeURIComponent(model)}`;
+      get(statsUrl)
+        .then((res) => {
+          const data = res?.data?.data as RsvpStats | undefined;
+          if (mounted && data) setStats(data);
         })
-        .catch(() => {
-          // Ignore if stats are not yet available for unsaved draft
-        });
+        .catch(() => {});
     }
 
     return () => {
@@ -76,40 +215,23 @@ export const EventSidePanel = (props: SidePanelProps) => {
   }, [documentId, isEventLike, model, get]);
 
   const computedAlternateDates = useMemo(() => {
-    if (!rawStartDate || !settings?.secondaryCalendars) {
-      return [];
-    }
-    return settings.secondaryCalendars
+    const systems = settings?.secondaryCalendars;
+    if (!rawStartDate || !systems) return [];
+    return systems
       .filter((sys) => sys.enabled)
-      .map((sys) => {
-        const rawFieldVal = sys.overrideField ? props.document?.[sys.overrideField] : undefined;
-        const overrideVal = typeof rawFieldVal === 'string' ? rawFieldVal.trim() : '';
-        const formatted =
-          overrideVal ||
-          formatDateInCalendarSystem(rawStartDate, sys, locale || 'en', { compact: false });
-        return {
-          id: sys.id,
-          label: sys.label,
-          formatted,
-          isOverridden: Boolean(overrideVal),
-        };
-      })
+      .map((sys) => formatSingleCalendarSystem(sys, rawStartDate, props.document, activeLocale))
       .filter((item) => Boolean(item.formatted));
-  }, [rawStartDate, settings?.secondaryCalendars, props.document, locale]);
+  }, [rawStartDate, settings?.secondaryCalendars, props.document, activeLocale]);
 
   if (!isEventLike || !documentId) {
     return null;
   }
 
   const t = (id: string, defaultMessage: string) =>
-    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
+    formatPluginMessageWithUrlLocale(PLUGIN_ID, id, defaultMessage, formatMessage);
 
   const icsUrl = `/api/events/${encodeURIComponent(documentId)}/invite.ics`;
-
-  const capacityPercent =
-    stats && stats.capacity && stats.capacity > 0
-      ? Math.min(100, Math.round((stats.confirmedSeats / stats.capacity) * 100))
-      : 0;
+  const capacityPercent = computeCapacityPercent(stats);
 
   return {
     title: t('sidePanel.title', 'Events & RSVP Summary'),
@@ -137,70 +259,12 @@ export const EventSidePanel = (props: SidePanelProps) => {
           )}
 
           {stats && (
-            <Box padding={3} background="neutral100" hasRadius>
-              <Flex justifyContent="space-between" alignItems="center">
-                <Typography variant="sigma" textColor="neutral600">
-                  {t('sidePanel.rsvpStatus', 'RSVP & Capacity')}
-                </Typography>
-                <Badge
-                  backgroundColor={stats.isFull ? 'danger100' : 'success100'}
-                  textColor={stats.isFull ? 'danger700' : 'success700'}
-                >
-                  {stats.isFull
-                    ? t('sidePanel.full', 'Full / Waitlist')
-                    : t('sidePanel.open', 'Open')}
-                </Badge>
-              </Flex>
-
-              <Flex justifyContent="space-between" paddingTop={2}>
-                <Typography variant="pi">
-                  {t('sidePanel.confirmedSeats', 'Confirmed Seats')}:
-                </Typography>
-                <Typography variant="pi" fontWeight="bold">
-                  {stats.confirmedSeats}
-                  {stats.capacity ? ` / ${stats.capacity}` : ''}
-                </Typography>
-              </Flex>
-
-              {stats.capacity && (
-                <Box
-                  marginTop={2}
-                  marginBottom={2}
-                  style={{
-                    height: 8,
-                    borderRadius: 4,
-                    background: '#eaeaef',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${capacityPercent}%`,
-                      height: '100%',
-                      background: stats.isFull ? '#d02b20' : '#0D9488',
-                    }}
-                  />
-                </Box>
-              )}
-
-              <Flex justifyContent="space-between" paddingTop={1}>
-                <Typography variant="pi">
-                  {t('sidePanel.checkedIn', 'Checked In')}:
-                </Typography>
-                <Typography variant="pi" fontWeight="bold">
-                  {stats.checkedInSeats}
-                </Typography>
-              </Flex>
-
-              <Flex justifyContent="space-between" paddingTop={1}>
-                <Typography variant="pi">
-                  {t('sidePanel.waitlisted', 'Waitlisted Seats')}:
-                </Typography>
-                <Typography variant="pi" fontWeight="bold">
-                  {stats.waitlistedSeats}
-                </Typography>
-              </Flex>
-            </Box>
+            <SidePanelRsvpCard
+              stats={stats}
+              rsvpEnabled={resolveRsvpEnabled(props.document, stats)}
+              capacityPercent={capacityPercent}
+              t={t}
+            />
           )}
 
           <Flex direction="column" alignItems="stretch" gap={2}>
