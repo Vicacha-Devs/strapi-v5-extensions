@@ -2,65 +2,73 @@
   "name": "@vicacha-devs/strapi-plugin-media-feeds",
   "version": "1.0.0",
   "description": "Generic Strapi v5 Multi-Language Media Hub, YouTube & OEmbed Enricher, Apple/Spotify Podcast RSS 2.0 Generator & Live Broadcast Status Plugin powered by @vicacha-devs/strapi-plugin-calendar",
-  "author": "Vicacha Devs",
   "keywords": [
-    "strapi",
-    "strapi-v5",
-    "strapi-plugin",
+    "livestream",
     "media",
+    "multilingual",
     "podcast",
     "rss",
-    "youtube",
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5",
     "video",
-    "multilingual",
-    "livestream"
+    "youtube"
   ],
-  "type": "module",
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions/tree/main/packages/strapi-plugin-media-feeds#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
+  },
   "license": "MIT",
+  "author": "Vicacha Devs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vicacha-devs/strapi-v5-extensions.git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
     "directory": "packages/strapi-plugin-media-feeds"
   },
   "files": [
     "dist"
   ],
+  "type": "module",
   "exports": {
     "./package.json": "./package.json",
     "./strapi-admin": {
-      "source": "./admin/src/index.ts",
       "types": "./dist/admin/src/index.d.ts",
-      "import": "./dist/admin/index.js",
-      "require": "./dist/admin/index.cjs",
-      "default": "./dist/admin/index.js"
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.mjs"
     },
     "./strapi-server": {
-      "source": "./server/src/index.ts",
       "types": "./dist/server/src/index.d.ts",
-      "import": "./dist/server/index.js",
-      "require": "./dist/server/index.cjs",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
     "./shared": {
-      "source": "./shared/index.ts",
       "types": "./dist/shared/index.d.ts",
-      "import": "./dist/shared/index.js",
-      "require": "./dist/shared/index.cjs",
-      "default": "./dist/shared/index.js"
+      "source": "./shared/index.ts",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
+      "default": "./dist/shared/index.mjs"
     }
   },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
-    "build": "strapi-plugin build",
-    "watch": "strapi-plugin watch",
-    "watch:link": "strapi-plugin watch:link",
-    "verify": "strapi-plugin verify",
+    "build": "strapi-plugin build && node ../../scripts/ensure-esm-dist.ts",
+    "clean": "rm -rf dist",
+    "test": "node --import ./tests/register-ts-resolver.ts --test tests/*.test.ts",
     "test:ts": "npm run test:ts:front && npm run test:ts:back",
-    "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
     "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
-    "test": "node --import ./tests/register-ts-resolver.mjs --test tests/*.test.ts",
+    "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
     "test:vitest": "vitest run",
     "test:watch": "vitest",
-    "clean": "rm -rf dist"
+    "verify": "strapi-plugin verify",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link"
   },
   "dependencies": {
     "@strapi/design-system": "2.2.0",
@@ -77,7 +85,6 @@
     "@types/react-dom": "19.2.3",
     "@vicacha-devs/eslint-config": "workspace:*",
     "@vicacha-devs/typescript-config": "workspace:*",
-    "prettier": "3.8.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
@@ -94,14 +101,14 @@
     "react-router-dom": "^6.0.0",
     "styled-components": "^6.0.0"
   },
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  },
   "strapi": {
     "kind": "plugin",
     "name": "media-feeds",
     "displayName": "Media Feeds & Podcasts",
     "description": "Generic Strapi v5 Multi-Language Media Hub, YouTube Sync, Podcast RSS 2.0 & Live Stream Status"
-  },
-  "engines": {
-    "node": ">=18.0.0 <=22.x.x",
-    "npm": ">=6.0.0"
   }
 }
