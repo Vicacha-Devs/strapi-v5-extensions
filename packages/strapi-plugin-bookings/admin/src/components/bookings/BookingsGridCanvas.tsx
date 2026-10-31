@@ -1,21 +1,19 @@
-import React from 'react';
-import { Badge, Box, Button, Flex, Typography } from '@strapi/design-system';
+import { Badge, Box, Button, Flex, Typography } from "@strapi/design-system";
 import type {
   CalendarPluginSettings,
   CalendarThemePreset,
   ExpandedCalendarOccurrence,
   SecondaryCalendarLanguageMode,
-} from '@vicacha-devs/strapi-plugin-calendar/shared';
-import type {
-  BookingRecord,
-  SecondaryCalendarConfig,
-} from '../../../../shared/types';
+} from "@vicacha-devs/strapi-plugin-calendar/shared";
+import React from "react";
 
-export type BookingsViewMode = 'list';
+import type { BookingRecord, SecondaryCalendarConfig } from "../../../../shared/types";
+
+export type BookingsViewMode = "list";
 
 export function maskEmailForPreview(email: string): string {
-  const parts = email.split('@');
-  if (parts.length !== 2) return '***';
+  const parts = email.split("@");
+  if (parts.length !== 2) return "***";
   const [local, domain] = parts;
   const visible = local.slice(0, 2);
   return `${visible}***@${domain}`;
@@ -32,11 +30,7 @@ export interface BookingsGridCanvasProps {
   bookings: BookingRecord[];
   activeSecondaryCalendars?: SecondaryCalendarConfig[];
   onSelectBooking: (booking: BookingRecord) => void;
-  onRescheduleBooking?: (
-    booking: BookingRecord,
-    newStartIso: string,
-    newEndIso?: string
-  ) => void;
+  onRescheduleBooking?: (booking: BookingRecord, newStartIso: string, newEndIso?: string) => void;
   onQuickCreateOnDate?: (dateIso: string) => void;
 }
 
@@ -49,26 +43,16 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
     <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
       <Flex direction="column" alignItems="stretch" gap={3}>
         <Typography variant="delta" tag="h3">
-          {t('bookings.listTitle', 'Reservations & Bookings Ledger')}
+          {t("bookings.listTitle", "Reservations & Bookings Ledger")}
         </Typography>
         {bookings.length === 0 ? (
           <Typography variant="omega" textColor="neutral600">
-            {t('bookings.empty', 'No bookings found for the selected filters.')}
+            {t("bookings.empty", "No bookings found for the selected filters.")}
           </Typography>
         ) : (
           bookings.map((b) => (
-            <Box
-              key={b.documentId}
-              padding={3}
-              background="neutral100"
-              hasRadius
-            >
-              <Flex
-                justifyContent="space-between"
-                alignItems="center"
-                wrap="wrap"
-                gap={2}
-              >
+            <Box key={b.documentId} padding={3} background="neutral100" hasRadius>
+              <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
                 <Flex gap={3} alignItems="center" wrap="wrap">
                   <Badge>{b.bookingCode}</Badge>
                   <Typography variant="omega" fontWeight="bold">
@@ -90,33 +74,29 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
                     </Badge>
                   )}
                   <Typography variant="pi" textColor="neutral600">
-                    {b.startDate.slice(0, 16).replace('T', ' ')}
+                    {b.startDate.slice(0, 16).replace("T", " ")}
                   </Typography>
                   <Badge
                     backgroundColor={
-                      b.status === 'confirmed'
-                        ? 'success100'
-                        : b.status === 'pending'
-                          ? 'warning100'
-                          : 'neutral200'
+                      b.status === "confirmed"
+                        ? "success100"
+                        : b.status === "pending"
+                          ? "warning100"
+                          : "neutral200"
                     }
                     textColor={
-                      b.status === 'confirmed'
-                        ? 'success700'
-                        : b.status === 'pending'
-                          ? 'warning700'
-                          : 'neutral700'
+                      b.status === "confirmed"
+                        ? "success700"
+                        : b.status === "pending"
+                          ? "warning700"
+                          : "neutral700"
                     }
                   >
                     {b.status.toUpperCase()} ({b.partySize})
                   </Badge>
                 </Flex>
-                <Button
-                  size="S"
-                  variant="secondary"
-                  onClick={() => onSelectBooking(b)}
-                >
-                  {t('bookings.inspect', 'Inspect')}
+                <Button size="S" variant="secondary" onClick={() => onSelectBooking(b)}>
+                  {t("bookings.inspect", "Inspect")}
                 </Button>
               </Flex>
             </Box>

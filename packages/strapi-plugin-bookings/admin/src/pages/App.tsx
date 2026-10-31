@@ -1,6 +1,7 @@
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import { CalendarPage } from './CalendarPage';
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+
+import { CalendarPage } from "./CalendarPage";
 
 export const App: React.FC = () => {
   return (

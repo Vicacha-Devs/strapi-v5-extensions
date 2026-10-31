@@ -1,6 +1,3 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
 import {
   Badge,
   Box,
@@ -11,20 +8,24 @@ import {
   SingleSelectOption,
   TextInput,
   Typography,
-} from '@strapi/design-system';
-import { Layouts, useFetchClient, useNotification } from '@strapi/strapi/admin';
+} from "@strapi/design-system";
+import { Layouts, useFetchClient, useNotification } from "@strapi/strapi/admin";
+import React, { useCallback, useEffect, useState } from "react";
+import { useIntl } from "react-intl";
+import { useNavigate } from "react-router-dom";
+
 import type {
   BookingRecord,
   BookingResource,
   BookingStats,
   BookingStatus,
   CreateReservationInput,
-} from '../../../shared/types';
-import { BookingsGridCanvas } from '../components/bookings/BookingsGridCanvas';
-import { BookingSidePanel } from '../components/bookings/BookingSidePanel';
-import { QuickCreateBookingModal } from '../components/bookings/QuickCreateBookingModal';
-import { PLUGIN_ID } from '../pluginId';
-import { getTranslation } from '../utils/getTranslation';
+} from "../../../shared/types";
+import { BookingsGridCanvas } from "../components/bookings/BookingsGridCanvas";
+import { BookingSidePanel } from "../components/bookings/BookingSidePanel";
+import { QuickCreateBookingModal } from "../components/bookings/QuickCreateBookingModal";
+import { PLUGIN_ID } from "../pluginId";
+import { getTranslation } from "../utils/getTranslation";
 
 const EMPTY_STATS: BookingStats = {
   totalBookings: 0,
@@ -51,27 +52,23 @@ export const CalendarPage: React.FC = () => {
   const [bookings, setBookings] = useState<BookingRecord[]>([]);
   const [resources, setResources] = useState<BookingResource[]>([]);
   const [stats, setStats] = useState<BookingStats>(EMPTY_STATS);
-  const [selectedResourceId, setSelectedResourceId] = useState<string>('');
-  const [selectedStatus, setSelectedStatus] = useState<string>('');
-  const [search, setSearch] = useState<string>('');
-  const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(
-    null
-  );
-  const [quickCreateStartIso, setQuickCreateStartIso] = useState<string | null>(
-    null
-  );
+  const [selectedResourceId, setSelectedResourceId] = useState<string>("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
+  const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(null);
+  const [quickCreateStartIso, setQuickCreateStartIso] = useState<string | null>(null);
 
   const fetchBookingsData = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (selectedResourceId) {
-        params.set('resourceDocumentId', selectedResourceId);
+        params.set("resourceDocumentId", selectedResourceId);
       }
       if (selectedStatus) {
-        params.set('status', selectedStatus);
+        params.set("status", selectedStatus);
       }
       if (search.trim()) {
-        params.set('search', search.trim());
+        params.set("search", search.trim());
       }
       const res = await get<{
         data?: {
@@ -88,8 +85,8 @@ export const CalendarPage: React.FC = () => {
       }
     } catch {
       toggleNotification({
-        type: 'danger',
-        message: t('notifications.loadError', 'Failed to load bookings'),
+        type: "danger",
+        message: t("notifications.loadError", "Failed to load bookings"),
       });
     }
   }, [get, selectedResourceId, selectedStatus, search, toggleNotification, t]);
@@ -111,14 +108,14 @@ export const CalendarPage: React.FC = () => {
         internalNotes,
       });
       toggleNotification({
-        type: 'success',
-        message: t('notifications.updated', 'Booking updated'),
+        type: "success",
+        message: t("notifications.updated", "Booking updated"),
       });
       await fetchBookingsData();
     } catch {
       toggleNotification({
-        type: 'danger',
-        message: t('notifications.updateError', 'Failed to update booking'),
+        type: "danger",
+        message: t("notifications.updateError", "Failed to update booking"),
       });
     }
   };
@@ -127,58 +124,53 @@ export const CalendarPage: React.FC = () => {
     try {
       await post(`/${PLUGIN_ID}/bookings`, payload);
       toggleNotification({
-        type: 'success',
-        message: t('notifications.created', 'Booking created'),
+        type: "success",
+        message: t("notifications.created", "Booking created"),
       });
       await fetchBookingsData();
     } catch {
       toggleNotification({
-        type: 'danger',
-        message: t('notifications.createError', 'Failed to create booking'),
+        type: "danger",
+        message: t("notifications.createError", "Failed to create booking"),
       });
     }
   };
 
   const handleOpenInContentManager = (booking: BookingRecord) => {
-    const uid = booking.sourceCollection || 'plugin::bookings.booking';
+    const uid = booking.sourceCollection || "plugin::bookings.booking";
     navigate(`/content-manager/collection-types/${uid}/${booking.documentId}`);
   };
 
   return (
     <Layouts.Root>
       <Layouts.Header
-        title={t('plugin.title', 'Bookings & Slot Availability')}
+        title={t("plugin.title", "Bookings & Slot Availability")}
         subtitle={t(
-          'plugin.subtitle',
-          'Manage bookable resources, time-slot availability, staff assignment, and reservation approvals. Schedule views are unified in Calendar.'
+          "plugin.subtitle",
+          "Manage bookable resources, time-slot availability, staff assignment, and reservation approvals. Schedule views are unified in Calendar."
         )}
         primaryAction={
           <Flex gap={2}>
             <Button
               variant="secondary"
-              onClick={() => navigate('/plugins/calendar?source=bookings')}
+              onClick={() => navigate("/plugins/calendar?source=bookings")}
             >
-              {t('actions.openUnifiedCalendar', 'Open in Calendar')}
+              {t("actions.openUnifiedCalendar", "Open in Calendar")}
             </Button>
-            <Button
-              variant="tertiary"
-              onClick={() => navigate(`/settings/${PLUGIN_ID}`)}
-            >
-              {t('actions.settings', 'Settings')}
+            <Button variant="tertiary" onClick={() => navigate(`/settings/${PLUGIN_ID}`)}>
+              {t("actions.settings", "Settings")}
             </Button>
             <Button
               variant="secondary"
-              onClick={() => window.open(`/${PLUGIN_ID}/export.csv`, '_blank')}
+              onClick={() => window.open(`/${PLUGIN_ID}/export.csv`, "_blank")}
             >
-              {t('actions.exportCsv', 'Export CSV')}
+              {t("actions.exportCsv", "Export CSV")}
             </Button>
             <Button
               variant="default"
-              onClick={() =>
-                setQuickCreateStartIso(new Date().toISOString().slice(0, 10))
-              }
+              onClick={() => setQuickCreateStartIso(new Date().toISOString().slice(0, 10))}
             >
-              {t('actions.newBooking', 'New Booking')}
+              {t("actions.newBooking", "New Booking")}
             </Button>
           </Flex>
         }
@@ -190,29 +182,29 @@ export const CalendarPage: React.FC = () => {
           <Flex gap={4} wrap="wrap">
             {[
               {
-                label: t('stats.total', 'Total Bookings'),
+                label: t("stats.total", "Total Bookings"),
                 value: stats.totalBookings,
-                badge: 'neutral100',
+                badge: "neutral100",
               },
               {
-                label: t('stats.confirmed', 'Confirmed'),
+                label: t("stats.confirmed", "Confirmed"),
                 value: stats.confirmedBookings,
-                badge: 'success100',
+                badge: "success100",
               },
               {
-                label: t('stats.pending', 'Pending Approval'),
+                label: t("stats.pending", "Pending Approval"),
                 value: stats.pendingBookings,
-                badge: 'warning100',
+                badge: "warning100",
               },
               {
-                label: t('stats.guests', 'Total Guests / Seats'),
+                label: t("stats.guests", "Total Guests / Seats"),
                 value: stats.totalGuests,
-                badge: 'primary100',
+                badge: "primary100",
               },
               {
-                label: t('stats.resources', 'Active Resources'),
+                label: t("stats.resources", "Active Resources"),
                 value: stats.activeResources,
-                badge: 'secondary100',
+                badge: "secondary100",
               },
             ].map((card) => (
               <Box
@@ -221,7 +213,7 @@ export const CalendarPage: React.FC = () => {
                 hasRadius
                 shadow="tableShadow"
                 padding={4}
-                style={{ flex: '1 1 180px' }}
+                style={{ flex: "1 1 180px" }}
               >
                 <Flex direction="column" alignItems="flex-start" gap={1}>
                   <Typography variant="sigma" textColor="neutral600">
@@ -237,30 +229,25 @@ export const CalendarPage: React.FC = () => {
           <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
             <div
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                 gap: 12,
               }}
             >
               <Field.Root>
-                <Field.Label>
-                  {t('filters.resource', 'Bookable Resource')}
-                </Field.Label>
+                <Field.Label>{t("filters.resource", "Bookable Resource")}</Field.Label>
                 <SingleSelect
-                  placeholder={t('placeholder.all_resources', 'All Resources')}
-                  value={selectedResourceId || 'all'}
+                  placeholder={t("placeholder.all_resources", "All Resources")}
+                  value={selectedResourceId || "all"}
                   onChange={(val: string | number) =>
-                    setSelectedResourceId(String(val) === 'all' ? '' : String(val))
+                    setSelectedResourceId(String(val) === "all" ? "" : String(val))
                   }
                 >
                   <SingleSelectOption value="all">
-                    {t('filters.allResources', 'All Resources')}
+                    {t("filters.allResources", "All Resources")}
                   </SingleSelectOption>
                   {resources.map((res) => (
-                    <SingleSelectOption
-                      key={res.documentId}
-                      value={res.documentId}
-                    >
+                    <SingleSelectOption key={res.documentId} value={res.documentId}>
                       {res.name}
                     </SingleSelectOption>
                   ))}
@@ -268,40 +255,41 @@ export const CalendarPage: React.FC = () => {
               </Field.Root>
 
               <Field.Root>
-                <Field.Label>
-                  {t('filters.status', 'Booking Status')}
-                </Field.Label>
+                <Field.Label>{t("filters.status", "Booking Status")}</Field.Label>
                 <SingleSelect
-                  placeholder={t('placeholder.all_statuses', 'All Statuses')}
-                  value={selectedStatus || 'all'}
+                  placeholder={t("placeholder.all_statuses", "All Statuses")}
+                  value={selectedStatus || "all"}
                   onChange={(val: string | number) =>
-                    setSelectedStatus(String(val) === 'all' ? '' : String(val))
+                    setSelectedStatus(String(val) === "all" ? "" : String(val))
                   }
                 >
                   <SingleSelectOption value="all">
-                    {t('filters.allStatuses', 'All Statuses')}
+                    {t("filters.allStatuses", "All Statuses")}
                   </SingleSelectOption>
-                  <SingleSelectOption value="pending">{t('page.ui.pending', 'PENDING')}</SingleSelectOption>
-                  <SingleSelectOption value="confirmed">{t('page.ui.confirmed', 'CONFIRMED')}</SingleSelectOption>
-                  <SingleSelectOption value="completed">{t('page.ui.completed', 'COMPLETED')}</SingleSelectOption>
-                  <SingleSelectOption value="cancelled">{t('page.ui.cancelled', 'CANCELLED')}</SingleSelectOption>
-                  <SingleSelectOption value="no_show">{t('page.ui.no_show', 'NO SHOW')}</SingleSelectOption>
+                  <SingleSelectOption value="pending">
+                    {t("page.ui.pending", "PENDING")}
+                  </SingleSelectOption>
+                  <SingleSelectOption value="confirmed">
+                    {t("page.ui.confirmed", "CONFIRMED")}
+                  </SingleSelectOption>
+                  <SingleSelectOption value="completed">
+                    {t("page.ui.completed", "COMPLETED")}
+                  </SingleSelectOption>
+                  <SingleSelectOption value="cancelled">
+                    {t("page.ui.cancelled", "CANCELLED")}
+                  </SingleSelectOption>
+                  <SingleSelectOption value="no_show">
+                    {t("page.ui.no_show", "NO SHOW")}
+                  </SingleSelectOption>
                 </SingleSelect>
               </Field.Root>
 
               <Field.Root>
-                <Field.Label>
-                  {t('filters.search', 'Search Reservations')}
-                </Field.Label>
+                <Field.Label>{t("filters.search", "Search Reservations")}</Field.Label>
                 <TextInput
-                  placeholder={t(
-                    'filters.searchPlaceholder',
-                    'Code, customer, host, org...'
-                  )}
+                  placeholder={t("filters.searchPlaceholder", "Code, customer, host, org...")}
                   value={search}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSearch(e.target.value)
-                  }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
                 />
               </Field.Root>
             </div>
@@ -332,9 +320,7 @@ export const CalendarPage: React.FC = () => {
         <QuickCreateBookingModal
           t={t}
           isOpen={Boolean(quickCreateStartIso)}
-          initialStartIso={
-            quickCreateStartIso || new Date().toISOString().slice(0, 10)
-          }
+          initialStartIso={quickCreateStartIso || new Date().toISOString().slice(0, 10)}
           resources={resources}
           onClose={() => setQuickCreateStartIso(null)}
           onSubmit={handleCreateBooking}

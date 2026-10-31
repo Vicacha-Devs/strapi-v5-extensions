@@ -10,7 +10,7 @@ import {
   type AlternateDateValue,
   type CalendarSystemConfig,
   type CalendarSystemFormatterFn,
-} from '@vicacha-devs/strapi-plugin-calendar/shared';
+} from "@vicacha-devs/strapi-plugin-calendar/shared";
 
 export {
   SUPPORTED_INTL_CALENDARS,
@@ -29,7 +29,7 @@ export {
 export function formatSecondaryCalendars(
   date: Date,
   systems: CalendarSystemConfig[],
-  locale = 'en'
+  locale = "en"
 ): Record<string, AlternateDateValue> {
   const result: Record<string, AlternateDateValue> = {};
   const dateStr = date.toISOString().slice(0, 10);

@@ -3,7 +3,7 @@ import type {
   CalendarSystemConfig as SecondaryCalendarConfig,
   CalendarThemePreset,
   SecondaryCalendarLanguageMode,
-} from '@vicacha-devs/strapi-plugin-calendar/shared';
+} from "@vicacha-devs/strapi-plugin-calendar/shared";
 
 export type {
   SecondaryCalendarConfig,
@@ -13,19 +13,14 @@ export type {
 };
 
 export type BookingResourceType =
-  | 'service'
-  | 'appointment'
-  | 'room'
-  | 'staff'
-  | 'equipment'
-  | 'other';
+  | "service"
+  | "appointment"
+  | "room"
+  | "staff"
+  | "equipment"
+  | "other";
 
-export type BookingStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'completed'
-  | 'cancelled'
-  | 'no_show';
+export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled" | "no_show";
 
 export interface DailyTimeWindow {
   /** Start time in HH:mm (24h), e.g. '09:00' */
@@ -38,7 +33,7 @@ export interface DailyTimeWindow {
   capacity?: number;
 }
 
-export type DayOfWeekKey = '0' | '1' | '2' | '3' | '4' | '5' | '6';
+export type DayOfWeekKey = "0" | "1" | "2" | "3" | "4" | "5" | "6";
 
 export interface WeeklyScheduleConfig {
   /**
@@ -46,7 +41,7 @@ export interface WeeklyScheduleConfig {
    * - 'interval': slices each daily window into `slotDurationMinutes` intervals (e.g. 09:00-10:00, 10:00-11:00)
    * - 'window': treats each daily window as a single bookable block (e.g. 'morning' 09:00-12:00, 'afternoon' 14:00-17:00)
    */
-  mode?: 'interval' | 'window';
+  mode?: "interval" | "window";
   /** Operating windows keyed by JS UTC day of week ('0'=Sunday ... '6'=Saturday) */
   days: Partial<Record<DayOfWeekKey, DailyTimeWindow[]>>;
 }
@@ -90,7 +85,7 @@ export interface HolidayScheduleRule {
   /** When true (or when windows is empty/omitted), the resource is closed on this holiday */
   isClosed?: boolean;
   /** Optional slot generation mode when custom holiday windows are provided */
-  mode?: 'interval' | 'window';
+  mode?: "interval" | "window";
   /** Optional reduced/special operating windows when open on a holiday */
   windows?: DailyTimeWindow[];
 }
@@ -264,7 +259,7 @@ export interface BookingFilterQuery {
   to?: string;
   resourceDocumentId?: string;
   resourceSlug?: string;
-  status?: BookingStatus | '';
+  status?: BookingStatus | "";
   preferredLanguage?: string;
   search?: string;
   source?: string;

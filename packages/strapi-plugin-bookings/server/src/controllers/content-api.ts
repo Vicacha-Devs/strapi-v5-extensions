@@ -1,11 +1,12 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../../shared/pluginId';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../../shared/pluginId";
 import type {
   CancelBookingInput,
   CreateReservationInput,
   RescheduleBookingInput,
-} from '../../../shared/types';
-import type { AvailabilityService, ReservationService } from '../types';
+} from "../../../shared/types";
+import type { AvailabilityService, ReservationService } from "../types";
 
 interface ContentApiContext {
   query: Record<string, string | undefined>;
@@ -21,9 +22,9 @@ interface ContentApiContext {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getAvailabilityService = () =>
-    strapi.plugin(PLUGIN_ID).service('availability') as AvailabilityService;
+    strapi.plugin(PLUGIN_ID).service("availability") as AvailabilityService;
   const getReservationService = () =>
-    strapi.plugin(PLUGIN_ID).service('reservation') as ReservationService;
+    strapi.plugin(PLUGIN_ID).service("reservation") as ReservationService;
 
   return {
     async listPublicResources(ctx: ContentApiContext) {
@@ -34,9 +35,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async getAvailableSlots(ctx: ContentApiContext) {
       const now = new Date();
       const from = ctx.query.from || now.toISOString().slice(0, 10);
-      const defaultTo = new Date(now.getTime() + 14 * 86_400_000)
-        .toISOString()
-        .slice(0, 10);
+      const defaultTo = new Date(now.getTime() + 14 * 86_400_000).toISOString().slice(0, 10);
       const to = ctx.query.to || defaultTo;
       const partySize = ctx.query.partySize
         ? Math.max(1, Number.parseInt(ctx.query.partySize, 10) || 1)
@@ -62,9 +61,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
         ctx.body = { data: result };
       } catch (err) {
-        ctx.badRequest(
-          err instanceof Error ? err.message : 'Unable to complete reservation'
-        );
+        ctx.badRequest(err instanceof Error ? err.message : "Unable to complete reservation");
       }
     },
 
@@ -77,9 +74,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
         ctx.body = { data: updated };
       } catch (err) {
-        ctx.badRequest(
-          err instanceof Error ? err.message : 'Unable to reschedule booking'
-        );
+        ctx.badRequest(err instanceof Error ? err.message : "Unable to reschedule booking");
       }
     },
 
@@ -91,9 +86,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
         ctx.body = { data: cancelled };
       } catch (err) {
-        ctx.badRequest(
-          err instanceof Error ? err.message : 'Unable to cancel booking'
-        );
+        ctx.badRequest(err instanceof Error ? err.message : "Unable to cancel booking");
       }
     },
 
@@ -103,11 +96,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         to: ctx.query.to,
         resourceDocumentId: ctx.query.resourceDocumentId,
         resourceSlug: ctx.query.resourceSlug,
-        status: 'confirmed',
+        status: "confirmed",
       });
-      ctx.set('Content-Type', 'text/calendar; charset=utf-8');
-      ctx.set('Content-Disposition', 'inline; filename="bookings.ics"');
-      ctx.set('X-Content-Type-Options', 'nosniff');
+      ctx.set("Content-Type", "text/calendar; charset=utf-8");
+      ctx.set("Content-Disposition", 'inline; filename="bookings.ics"');
+      ctx.set("X-Content-Type-Options", "nosniff");
       ctx.body = ics;
     },
   };

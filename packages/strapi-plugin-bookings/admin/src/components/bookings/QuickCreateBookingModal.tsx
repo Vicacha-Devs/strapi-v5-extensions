@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   Box,
   Button,
@@ -10,11 +9,10 @@ import {
   Textarea,
   TextInput,
   Typography,
-} from '@strapi/design-system';
-import type {
-  BookingResource,
-  CreateReservationInput,
-} from '../../../../shared/types';
+} from "@strapi/design-system";
+import React, { useState } from "react";
+
+import type { BookingResource, CreateReservationInput } from "../../../../shared/types";
 
 export interface QuickCreateBookingModalProps {
   t: (id: string, defaultMessage: string) => string;
@@ -30,37 +28,34 @@ function optionalTrimmed(value: string): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-export const QuickCreateBookingModal: React.FC<
-  QuickCreateBookingModalProps
-> = ({ t, isOpen, initialStartIso, resources, onClose, onSubmit }) => {
+export const QuickCreateBookingModal: React.FC<QuickCreateBookingModalProps> = ({
+  t,
+  isOpen,
+  initialStartIso,
+  resources,
+  onClose,
+  onSubmit,
+}) => {
   const [resourceDocumentId, setResourceDocumentId] = useState<string>(
-    resources[0]?.documentId ?? ''
+    resources[0]?.documentId ?? ""
   );
-  const [customerName, setCustomerName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [organization, setOrganization] = useState('');
-  const [bookingDate, setBookingDate] = useState(
-    initialStartIso.slice(0, 10)
-  );
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [organization, setOrganization] = useState("");
+  const [bookingDate, setBookingDate] = useState(initialStartIso.slice(0, 10));
   const [bookingTime, setBookingTime] = useState(
-    initialStartIso.includes('T')
-      ? initialStartIso.slice(11, 16)
-      : '09:00'
+    initialStartIso.includes("T") ? initialStartIso.slice(11, 16) : "09:00"
   );
   const [partySize, setPartySize] = useState(1);
-  const [preferredLanguage, setPreferredLanguage] = useState('es');
-  const [assignedHost, setAssignedHost] = useState('');
-  const [notes, setNotes] = useState('');
+  const [preferredLanguage, setPreferredLanguage] = useState("es");
+  const [assignedHost, setAssignedHost] = useState("");
+  const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
   React.useEffect(() => {
     setBookingDate(initialStartIso.slice(0, 10));
-    setBookingTime(
-      initialStartIso.includes('T')
-        ? initialStartIso.slice(11, 16)
-        : '09:00'
-    );
+    setBookingTime(initialStartIso.includes("T") ? initialStartIso.slice(11, 16) : "09:00");
     if (!resourceDocumentId && resources[0]?.documentId) {
       setResourceDocumentId(resources[0].documentId);
     }
@@ -78,7 +73,7 @@ export const QuickCreateBookingModal: React.FC<
     }
     setSaving(true);
     try {
-      const startIso = `${bookingDate}T${bookingTime || '09:00'}:00.000Z`;
+      const startIso = `${bookingDate}T${bookingTime || "09:00"}:00.000Z`;
       await onSubmit({
         resourceDocumentId: optionalTrimmed(resourceDocumentId),
         customerName: trimmedName,
@@ -91,11 +86,11 @@ export const QuickCreateBookingModal: React.FC<
         assignedHost: optionalTrimmed(assignedHost),
         notes: optionalTrimmed(notes),
       });
-      setCustomerName('');
-      setCustomerEmail('');
-      setCustomerPhone('');
-      setOrganization('');
-      setNotes('');
+      setCustomerName("");
+      setCustomerEmail("");
+      setCustomerPhone("");
+      setOrganization("");
+      setNotes("");
       onClose();
     } finally {
       setSaving(false);
@@ -105,13 +100,13 @@ export const QuickCreateBookingModal: React.FC<
   return (
     <div
       style={{
-        position: 'fixed',
+        position: "fixed",
         inset: 0,
         zIndex: 1000,
-        backgroundColor: 'rgba(15, 23, 42, 0.65)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        backgroundColor: "rgba(15, 23, 42, 0.65)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         padding: 16,
       }}
       onClick={onClose}
@@ -122,11 +117,11 @@ export const QuickCreateBookingModal: React.FC<
         shadow="popupShadow"
         padding={6}
         style={{
-          width: '100%',
-          maxWidth: '580px',
-          maxHeight: '90vh',
-          overflowY: 'auto',
-          border: '1px solid rgba(186, 230, 253, 0.5)',
+          width: "100%",
+          maxWidth: "580px",
+          maxHeight: "90vh",
+          overflowY: "auto",
+          border: "1px solid rgba(186, 230, 253, 0.5)",
         }}
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
       >
@@ -134,12 +129,12 @@ export const QuickCreateBookingModal: React.FC<
           <Flex justifyContent="space-between" alignItems="center">
             <Box>
               <Typography variant="beta" tag="h2">
-                {t('modal.createTitle', 'New Reservation / Booking')}
+                {t("modal.createTitle", "New Reservation / Booking")}
               </Typography>
               <Typography variant="pi" textColor="neutral600">
                 {t(
-                  'modal.createSubtitle',
-                  'Enter visitor or group details to schedule a confirmed or pending slot'
+                  "modal.createSubtitle",
+                  "Enter visitor or group details to schedule a confirmed or pending slot"
                 )}
               </Typography>
             </Box>
@@ -150,21 +145,14 @@ export const QuickCreateBookingModal: React.FC<
 
           {resources.length > 0 && (
             <Field.Root>
-              <Field.Label>
-                {t('modal.resource', 'Bookable Resource / Service')}
-              </Field.Label>
+              <Field.Label>{t("modal.resource", "Bookable Resource / Service")}</Field.Label>
               <SingleSelect
-                placeholder={t('placeholder.select_bookable_resource', 'Select bookable resource')}
+                placeholder={t("placeholder.select_bookable_resource", "Select bookable resource")}
                 value={resourceDocumentId}
-                onChange={(val: string | number) =>
-                  setResourceDocumentId(String(val))
-                }
+                onChange={(val: string | number) => setResourceDocumentId(String(val))}
               >
                 {resources.map((res) => (
-                  <SingleSelectOption
-                    key={res.documentId}
-                    value={res.documentId}
-                  >
+                  <SingleSelectOption key={res.documentId} value={res.documentId}>
                     {res.name}
                   </SingleSelectOption>
                 ))}
@@ -174,17 +162,15 @@ export const QuickCreateBookingModal: React.FC<
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
               gap: 12,
             }}
           >
             <Field.Root required>
-              <Field.Label>
-                {t('modal.customerName', 'Visitor / Customer Name *')}
-              </Field.Label>
+              <Field.Label>{t("modal.customerName", "Visitor / Customer Name *")}</Field.Label>
               <TextInput
-                placeholder={t('placeholder.e_g_prof_carlos_m_ndez', 'e.g., Prof. Carlos Méndez')}
+                placeholder={t("placeholder.e_g_prof_carlos_m_ndez", "e.g., Prof. Carlos Méndez")}
                 value={customerName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCustomerName(e.target.value)
@@ -193,12 +179,10 @@ export const QuickCreateBookingModal: React.FC<
             </Field.Root>
 
             <Field.Root required>
-              <Field.Label>
-                {t('modal.customerEmail', 'Customer Email *')}
-              </Field.Label>
+              <Field.Label>{t("modal.customerEmail", "Customer Email *")}</Field.Label>
               <TextInput
                 type="email"
-                placeholder={t('placeholder.visitor_example_org', 'visitor@example.org')}
+                placeholder={t("placeholder.visitor_example_org", "visitor@example.org")}
                 value={customerEmail}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCustomerEmail(e.target.value)
@@ -209,17 +193,15 @@ export const QuickCreateBookingModal: React.FC<
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
               gap: 12,
             }}
           >
             <Field.Root>
-              <Field.Label>
-                {t('modal.customerPhone', 'Phone / WhatsApp')}
-              </Field.Label>
+              <Field.Label>{t("modal.customerPhone", "Phone / WhatsApp")}</Field.Label>
               <TextInput
-                placeholder={t('placeholder.57_300_000_0000', '+57 300 000 0000')}
+                placeholder={t("placeholder.57_300_000_0000", "+57 300 000 0000")}
                 value={customerPhone}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setCustomerPhone(e.target.value)
@@ -229,10 +211,13 @@ export const QuickCreateBookingModal: React.FC<
 
             <Field.Root>
               <Field.Label>
-                {t('modal.organization', 'Organization / School / University')}
+                {t("modal.organization", "Organization / School / University")}
               </Field.Label>
               <TextInput
-                placeholder={t('placeholder.e_g_universidad_nacional', 'e.g., Universidad Nacional')}
+                placeholder={t(
+                  "placeholder.e_g_universidad_nacional",
+                  "e.g., Universidad Nacional"
+                )}
                 value={organization}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setOrganization(e.target.value)
@@ -243,18 +228,16 @@ export const QuickCreateBookingModal: React.FC<
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
               gap: 12,
             }}
           >
             <Field.Root required>
-              <Field.Label>
-                {t('modal.bookingDate', 'Preferred Date *')}
-              </Field.Label>
+              <Field.Label>{t("modal.bookingDate", "Preferred Date *")}</Field.Label>
               <TextInput
                 type="date"
-                placeholder={t('placeholder.yyyy_mm_dd', 'YYYY-MM-DD')}
+                placeholder={t("placeholder.yyyy_mm_dd", "YYYY-MM-DD")}
                 value={bookingDate}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setBookingDate(e.target.value)
@@ -263,12 +246,10 @@ export const QuickCreateBookingModal: React.FC<
             </Field.Root>
 
             <Field.Root>
-              <Field.Label>
-                {t('modal.bookingTime', 'Start Time')}
-              </Field.Label>
+              <Field.Label>{t("modal.bookingTime", "Start Time")}</Field.Label>
               <TextInput
                 type="time"
-                placeholder={t('placeholder.09_00', '09:00')}
+                placeholder={t("placeholder.09_00", "09:00")}
                 value={bookingTime}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setBookingTime(e.target.value)
@@ -277,11 +258,9 @@ export const QuickCreateBookingModal: React.FC<
             </Field.Root>
 
             <Field.Root>
-              <Field.Label>
-                {t('modal.partySize', 'Group / Party Size')}
-              </Field.Label>
+              <Field.Label>{t("modal.partySize", "Group / Party Size")}</Field.Label>
               <NumberInput
-                placeholder={t('placeholder.1', '1')}
+                placeholder={t("placeholder.1", "1")}
                 value={partySize}
                 onValueChange={(val: number | undefined) =>
                   setPartySize(Math.max(1, Number(val ?? 1)))
@@ -292,43 +271,43 @@ export const QuickCreateBookingModal: React.FC<
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
               gap: 12,
             }}
           >
             <Field.Root>
-              <Field.Label>
-                {t('modal.preferredLanguage', 'Preferred Guide Language')}
-              </Field.Label>
+              <Field.Label>{t("modal.preferredLanguage", "Preferred Guide Language")}</Field.Label>
               <SingleSelect
-                placeholder={t('placeholder.select_preferred_language', 'Select preferred language')}
-                value={preferredLanguage || 'es'}
-                onChange={(val: string | number) =>
-                  setPreferredLanguage(String(val))
-                }
+                placeholder={t(
+                  "placeholder.select_preferred_language",
+                  "Select preferred language"
+                )}
+                value={preferredLanguage || "es"}
+                onChange={(val: string | number) => setPreferredLanguage(String(val))}
               >
                 <SingleSelectOption value="es">
-                  {t('modal.langEs', 'Español (ES)')}
+                  {t("modal.langEs", "Español (ES)")}
                 </SingleSelectOption>
                 <SingleSelectOption value="en">
-                  {t('modal.langEn', 'English (EN)')}
+                  {t("modal.langEn", "English (EN)")}
                 </SingleSelectOption>
                 <SingleSelectOption value="ar">
-                  {t('modal.langAr', 'العربية — Arabic (AR)')}
+                  {t("modal.langAr", "العربية — Arabic (AR)")}
                 </SingleSelectOption>
                 <SingleSelectOption value="tr">
-                  {t('modal.langTr', 'Türkçe — Turkish (TR)')}
+                  {t("modal.langTr", "Türkçe — Turkish (TR)")}
                 </SingleSelectOption>
               </SingleSelect>
             </Field.Root>
 
             <Field.Root>
-              <Field.Label>
-                {t('modal.assignedHost', 'Assigned Host / Staff')}
-              </Field.Label>
+              <Field.Label>{t("modal.assignedHost", "Assigned Host / Staff")}</Field.Label>
               <TextInput
-                placeholder={t('placeholder.e_g_sheikh_ahmad_guide_team', 'e.g., Sheikh Ahmad / Guide Team')}
+                placeholder={t(
+                  "placeholder.e_g_sheikh_ahmad_guide_team",
+                  "e.g., Sheikh Ahmad / Guide Team"
+                )}
                 value={assignedHost}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setAssignedHost(e.target.value)
@@ -338,28 +317,23 @@ export const QuickCreateBookingModal: React.FC<
           </div>
 
           <Field.Root>
-            <Field.Label>
-              {t('modal.notes', 'Visitor Notes & Special Requests')}
-            </Field.Label>
+            <Field.Label>{t("modal.notes", "Visitor Notes & Special Requests")}</Field.Label>
             <Textarea
-              placeholder={t('placeholder.academic_group_visit_accessibility_needs_or_topi', 'Academic group visit, accessibility needs, or topic requests...')}
+              placeholder={t(
+                "placeholder.academic_group_visit_accessibility_needs_or_topi",
+                "Academic group visit, accessibility needs, or topic requests..."
+              )}
               value={notes}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                setNotes(e.target.value)
-              }
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
             />
           </Field.Root>
 
           <Flex justifyContent="flex-end" gap={2} paddingTop={2}>
             <Button variant="tertiary" onClick={onClose}>
-              {t('modal.cancel', 'Cancel')}
+              {t("modal.cancel", "Cancel")}
             </Button>
-            <Button
-              variant="default"
-              loading={saving}
-              onClick={handleCreate}
-            >
-              {t('modal.create', 'Create Booking')}
+            <Button variant="default" loading={saving} onClick={handleCreate}>
+              {t("modal.create", "Create Booking")}
             </Button>
           </Flex>
         </Flex>

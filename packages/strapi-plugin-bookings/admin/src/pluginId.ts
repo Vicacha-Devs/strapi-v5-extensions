@@ -1,1 +1,1 @@
-export { PLUGIN_ID, default } from '../../shared/pluginId';
+export { PLUGIN_ID, default } from "../../shared/pluginId";
