@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   DEFAULT_ISLAM_SETTINGS,
   PLUGIN_ID,
@@ -13,15 +14,13 @@ import {
   type QuranFoundationConfig,
   type SupportedCurrency,
   type SupportedLocale,
-} from '../../../shared';
+} from "../../../shared";
 
 function getPluginStore(strapi: Core.Strapi) {
-  return strapi.store({ type: 'plugin', name: PLUGIN_ID });
+  return strapi.store({ type: "plugin", name: PLUGIN_ID });
 }
 
-type PrayerMappingFields = NonNullable<
-  IslamPluginSettings['prayerSettingMapping']
->['fields'];
+type PrayerMappingFields = NonNullable<IslamPluginSettings["prayerSettingMapping"]>["fields"];
 
 interface CalendarSecondaryEntry {
   id?: string;
@@ -136,11 +135,7 @@ function mergeBasePluginSettings(
       ...base.ramadan,
       ...fileConfig.ramadan,
       ...stored.ramadan,
-      notes: mergeLocaleNotes(
-        base.ramadan.notes,
-        fileConfig.ramadan?.notes,
-        stored.ramadan?.notes
-      ),
+      notes: mergeLocaleNotes(base.ramadan.notes, fileConfig.ramadan?.notes, stored.ramadan?.notes),
     },
     eid: {
       ...base.eid,
@@ -200,11 +195,11 @@ function applyHostPrayerExtendedFields(
   if (Array.isArray(rawRules) && rawRules.length > 0) {
     merged.iqamahRules = rawRules as IqamahRule[];
   }
-  if (typeof doc[f.ramadanBannerActive] === 'boolean') {
+  if (typeof doc[f.ramadanBannerActive] === "boolean") {
     merged.ramadan.bannerActive = Boolean(doc[f.ramadanBannerActive]);
   }
   const rawNotes = doc[f.ramadanNotes];
-  if (typeof rawNotes === 'string' && rawNotes.trim()) {
+  if (typeof rawNotes === "string" && rawNotes.trim()) {
     merged.ramadan.notes[merged.defaultLocale] = rawNotes;
   }
 }
@@ -220,7 +215,7 @@ async function hydrateFromHostPrayerSetting(
   try {
     const docs = await strapi.documents(mapping.uid).findMany({
       limit: 1,
-      locale: merged.defaultLocale || 'es',
+      locale: merged.defaultLocale || "es",
       populate: [mapping.fields.iqamahRules],
     });
     const doc = docs?.[0];
@@ -267,10 +262,7 @@ function mergePatchedPluginSettings(
       ...current.dailyPins,
       ...patch.dailyPins,
     },
-    quranFoundation: mergeQuranFoundationConfig(
-      current.quranFoundation,
-      patch.quranFoundation
-    ),
+    quranFoundation: mergeQuranFoundationConfig(current.quranFoundation, patch.quranFoundation),
   };
 }
 
@@ -286,11 +278,10 @@ function buildHostPrayerDataPayload(
     [f.shifting]: next.shifting,
     [f.defaultLat]: next.defaultLat,
     [f.defaultLon]: next.defaultLon,
-    [f.jumuahKhutbahTime]: primaryJumuah?.khutbahTime || '12:15 PM',
-    [f.jumuahPrayerTime]: primaryJumuah?.prayerTime || '12:45 PM',
+    [f.jumuahKhutbahTime]: primaryJumuah?.khutbahTime || "12:15 PM",
+    [f.jumuahPrayerTime]: primaryJumuah?.prayerTime || "12:45 PM",
     [f.ramadanBannerActive]: next.ramadan.bannerActive,
-    [f.ramadanNotes]:
-      next.ramadan.notes[next.defaultLocale] || next.ramadan.notes.es || '',
+    [f.ramadanNotes]: next.ramadan.notes[next.defaultLocale] || next.ramadan.notes.es || "",
   };
 }
 
@@ -303,7 +294,7 @@ async function syncToHostPrayerSetting(
     return;
   }
   try {
-    const locale = next.defaultLocale || 'es';
+    const locale = next.defaultLocale || "es";
     const docs = await strapi.documents(mapping.uid).findMany({ limit: 1, locale });
     const existingDoc = docs?.[0];
     if (!existingDoc?.documentId) return;
@@ -318,9 +309,7 @@ async function syncToHostPrayerSetting(
 }
 
 function isHijriSecondaryCalendar(entry: CalendarSecondaryEntry): boolean {
-  return (
-    entry.id === 'hijri' || String(entry.intlCalendar || '').startsWith('islamic')
-  );
+  return entry.id === "hijri" || String(entry.intlCalendar || "").startsWith("islamic");
 }
 
 async function syncHijriOffsetToCalendarBridge(
@@ -330,8 +319,8 @@ async function syncHijriOffsetToCalendarBridge(
   if (!next.enableCalendarBridge) return;
   try {
     const calService = strapi
-      .plugin('calendar')
-      ?.service<CalendarSettingsBridgeService | undefined>('settings');
+      .plugin("calendar")
+      ?.service<CalendarSettingsBridgeService | undefined>("settings");
     if (!calService?.getSettings || !calService?.updateSettings) return;
     const calSettings = await calService.getSettings();
     if (!Array.isArray(calSettings?.secondaryCalendars)) return;
@@ -350,12 +339,9 @@ async function syncHijriOffsetToCalendarBridge(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async getSettings(): Promise<IslamPluginSettings> {
-    const fileConfig = strapi.config.get<Partial<IslamPluginSettings>>(
-      `plugin::${PLUGIN_ID}`,
-      {}
-    );
+    const fileConfig = strapi.config.get<Partial<IslamPluginSettings>>(`plugin::${PLUGIN_ID}`, {});
     const store = getPluginStore(strapi);
-    const rawStored = await store.get({ key: 'settings' });
+    const rawStored = await store.get({ key: "settings" });
     const stored = (rawStored ?? {}) as Partial<IslamPluginSettings>;
 
     const merged = mergeBasePluginSettings(fileConfig, stored);
@@ -368,7 +354,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const next = mergePatchedPluginSettings(current, patch);
 
     const store = getPluginStore(strapi);
-    await store.set({ key: 'settings', value: next });
+    await store.set({ key: "settings", value: next });
 
     await syncToHostPrayerSetting(strapi, next);
     await syncHijriOffsetToCalendarBridge(strapi, next);

@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   calculateFitranaFidyahKaffarah,
@@ -27,12 +28,12 @@ import {
   type SupportedCurrency,
   type SupportedLocale,
   type ZakatAlMalCalculationInput,
-} from '../../../shared';
+} from "../../../shared";
 import {
   confirmHilalSightingOperation,
   getScriptureHubOperation,
   type ConfirmHilalSightingInput,
-} from './hilalAndScriptureHelpers';
+} from "./hilalAndScriptureHelpers";
 import {
   fetchQuranAyahHadithsOperation,
   fetchQuranChapterAudioOperation,
@@ -43,14 +44,14 @@ import {
   fetchQuranVerseByKeyOperation,
   type ChapterVersesQueryParams,
   type VerseByKeyQueryParams,
-} from './quranFoundationOperations';
+} from "./quranFoundationOperations";
 import {
   clearQuranFoundationCaches,
   getCached,
   resolveQuranFoundationCredentials,
   setCached,
   tryFetchUpstreamJson,
-} from './upstreamCacheAndHttp';
+} from "./upstreamCacheAndHttp";
 
 export { clearQuranFoundationCaches };
 
@@ -70,8 +71,7 @@ function resolveLocationWithDefaults(
     settings.defaultLon
   );
   const city = sanitizePlainText(params?.city || settings.city, 80) || settings.city;
-  const country =
-    sanitizePlainText(params?.country || settings.country, 80) || settings.country;
+  const country = sanitizePlainText(params?.country || settings.country, 80) || settings.country;
   return { lat, lon, city, country };
 }
 
@@ -79,9 +79,9 @@ function extractUpstreamPrayerTimes(
   upstream: Record<string, unknown> | null
 ): Record<string, string> | undefined {
   const dataObj = upstream?.data;
-  if (!dataObj || typeof dataObj !== 'object') return undefined;
+  if (!dataObj || typeof dataObj !== "object") return undefined;
   const times = (dataObj as Record<string, unknown>).times;
-  if (!times || typeof times !== 'object') return undefined;
+  if (!times || typeof times !== "object") return undefined;
   return times as Record<string, string>;
 }
 
@@ -98,7 +98,7 @@ async function resolveExternalPrayerTimesOverride(
   const cached = getCached<Record<string, string>>(cacheKey);
   if (cached) return cached;
 
-  const upstream = await tryFetchUpstreamJson(settings.externalApiBaseUrl, 'prayer-time/', {
+  const upstream = await tryFetchUpstreamJson(settings.externalApiBaseUrl, "prayer-time/", {
     lat,
     lon,
     method: settings.method,
@@ -142,10 +142,10 @@ async function resolveExternalNisabSpotPrices(
   const cached = getCached<{ goldUnit: number; silverUnit: number }>(cacheKey);
   if (cached) return cached;
 
-  const upstream = await tryFetchUpstreamJson(settings.externalApiBaseUrl, 'zakat-nisab/', {
+  const upstream = await tryFetchUpstreamJson(settings.externalApiBaseUrl, "zakat-nisab/", {
     standard,
     currency: currency.toLowerCase(),
-    unit: 'g',
+    unit: "g",
   });
 
   const prices = extractUpstreamNisabSpotPrices(upstream);
@@ -157,7 +157,7 @@ async function resolveExternalNisabSpotPrices(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsService = () =>
-    strapi.plugin(PLUGIN_ID).service('settings') as {
+    strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings(): Promise<IslamPluginSettings>;
       updateSettings(patch: Partial<IslamPluginSettings>): Promise<IslamPluginSettings>;
     };
@@ -268,11 +268,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         eidAlAdhaDateGregorian: settings.eid.eidAlAdhaDateGregorian,
       });
 
-      let recentHilalAnnouncements: Array<Record<string, unknown>> = [];
+      let recentHilalAnnouncements: Array<Record<string, unknown>>;
       try {
         recentHilalAnnouncements = await strapi
           .documents(`plugin::${PLUGIN_ID}.hilal-announcement`)
-          .findMany({ limit: 10, sort: 'createdAt:desc' });
+          .findMany({ limit: 10, sort: "createdAt:desc" });
       } catch {
         recentHilalAnnouncements = [];
       }
@@ -289,7 +289,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async convertDate(params: {
-      direction?: 'gregorian_to_hijri' | 'hijri_to_gregorian';
+      direction?: "gregorian_to_hijri" | "hijri_to_gregorian";
       date?: string;
       hijriYear?: number | string;
       hijriMonth?: number | string;
@@ -300,14 +300,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const locale = sanitizeLocale(params?.locale, settings.defaultLocale);
       const shiftingNum = Number(settings.shifting || 0);
 
-      if (params?.direction === 'hijri_to_gregorian') {
+      if (params?.direction === "hijri_to_gregorian") {
         const y = Math.max(1300, Math.min(1600, Number(params.hijriYear) || 1448));
         const m = Math.max(1, Math.min(12, Number(params.hijriMonth) || 1));
         const d = Math.max(1, Math.min(30, Number(params.hijriDay) || 1));
         const gregorian = hijriToGregorian(y, m, d, shiftingNum);
         const hijri = gregorianToHijri(gregorian, shiftingNum, locale);
         return {
-          direction: 'hijri_to_gregorian',
+          direction: "hijri_to_gregorian",
           gregorianDate: gregorian,
           hijri,
         };
@@ -317,7 +317,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const hijri = gregorianToHijri(gregorian, shiftingNum, locale);
       const hawl = calculateHawlMaturity(gregorian, shiftingNum);
       return {
-        direction: 'gregorian_to_hijri',
+        direction: "gregorian_to_hijri",
         gregorianDate: gregorian,
         hijri,
         hawlIfNisabReachedOnDate: hawl,
@@ -389,21 +389,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       unit?: string;
     }): Promise<NisabThresholdResult> {
       const settings = await getSettingsService().getSettings();
-      const currency = sanitizeCurrency(
-        params?.currency,
-        settings.fiqhRates.defaultCurrency
-      );
-      const standard = sanitizeNisabStandard(
-        params?.standard,
-        settings.fiqhRates.defaultStandard
-      );
-      const unit: 'g' | 'oz' = params?.unit === 'oz' ? 'oz' : 'g';
+      const currency = sanitizeCurrency(params?.currency, settings.fiqhRates.defaultCurrency);
+      const standard = sanitizeNisabStandard(params?.standard, settings.fiqhRates.defaultStandard);
+      const unit: "g" | "oz" = params?.unit === "oz" ? "oz" : "g";
 
-      const externalSpot = await resolveExternalNisabSpotPrices(
-        settings,
-        currency,
-        standard
-      );
+      const externalSpot = await resolveExternalNisabSpotPrices(settings, currency, standard);
 
       return calculateNisabThresholds(settings.fiqhRates, {
         currency,
@@ -411,7 +401,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         unit,
         goldSpotOverridePerGram: externalSpot?.goldUnit,
         silverSpotOverridePerGram: externalSpot?.silverUnit,
-        source: externalSpot ? 'external_api' : 'configured_or_live',
+        source: externalSpot ? "external_api" : "configured_or_live",
       });
     },
 
@@ -419,7 +409,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       standard?: string;
       unit?: string;
     }): Promise<NisabThresholdResult[]> {
-      const currencies: SupportedCurrency[] = ['COP', 'USD', 'EUR', 'TRY'];
+      const currencies: SupportedCurrency[] = ["COP", "USD", "EUR", "TRY"];
       return Promise.all(
         currencies.map((currency) =>
           this.getNisabThresholds({
@@ -448,11 +438,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const observances = await this.getHijriAndObservances({ locale });
       const scripture = await this.getScriptureHub({ locale });
       const nisabCop = await this.getNisabThresholds({
-        currency: 'COP',
+        currency: "COP",
         standard: settings.fiqhRates.defaultStandard,
       });
       const nisabUsd = await this.getNisabThresholds({
-        currency: 'USD',
+        currency: "USD",
         standard: settings.fiqhRates.defaultStandard,
       });
 

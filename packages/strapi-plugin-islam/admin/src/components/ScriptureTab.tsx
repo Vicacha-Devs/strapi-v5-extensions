@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Badge,
   Box,
@@ -11,14 +10,16 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
+} from "@strapi/design-system";
+import React from "react";
+
 import type {
   CuratedAyahItem,
   CuratedDuaItem,
   CuratedHadithItem,
   DailyInspirationBundle,
-} from '../../../shared';
-import type { TranslateFn } from './SettingsTabs';
+} from "../../../shared";
+import type { TranslateFn } from "./SettingsTabs";
 
 export interface InspirationPinPatch {
   pinnedAyahId?: string | null;
@@ -33,17 +34,8 @@ const FeaturedInspirationItemCard: React.FC<{
   transliteration?: string;
   translationText: string;
   t: TranslateFn;
-}> = ({
-  titleText,
-  isPinned,
-  arabicText,
-  transliteration,
-  translationText,
-  t,
-}) => {
-  const pinnedSuffix = isPinned
-    ? ` ${t('page.ui.pinned_tag', '[PINNED]')}`
-    : '';
+}> = ({ titleText, isPinned, arabicText, transliteration, translationText, t }) => {
+  const pinnedSuffix = isPinned ? ` ${t("page.ui.pinned_tag", "[PINNED]")}` : "";
 
   return (
     <Box padding={3} background="neutral100" hasRadius>
@@ -53,21 +45,17 @@ const FeaturedInspirationItemCard: React.FC<{
           {pinnedSuffix}
         </Typography>
       </Box>
-      <Box style={{ whiteSpace: 'normal', lineHeight: 1.7 }}>
+      <Box style={{ whiteSpace: "normal", lineHeight: 1.7 }}>
         <Typography>{arabicText}</Typography>
       </Box>
       {transliteration && (
-        <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
-          <Typography
-            variant="pi"
-            textColor="neutral500"
-            style={{ fontStyle: 'italic' }}
-          >
+        <Box paddingTop={1} style={{ whiteSpace: "normal" }}>
+          <Typography variant="pi" textColor="neutral500" style={{ fontStyle: "italic" }}>
             {transliteration}
           </Typography>
         </Box>
       )}
-      <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+      <Box paddingTop={1} style={{ whiteSpace: "normal" }}>
         <Typography variant="pi" textColor="neutral600">
           {translationText}
         </Typography>
@@ -86,13 +74,7 @@ export const ScriptureCockpitTab: React.FC<{
 }> = ({ dailyInspiration, ayat, hadiths, duas, onPinInspiration, t }) => (
   <Box>
     {dailyInspiration && (
-      <Box
-        marginBottom={6}
-        background="neutral0"
-        padding={5}
-        hasRadius
-        shadow="filterShadow"
-      >
+      <Box marginBottom={6} background="neutral0" padding={5} hasRadius shadow="filterShadow">
         <Flex
           justifyContent="space-between"
           alignItems="center"
@@ -101,8 +83,8 @@ export const ScriptureCockpitTab: React.FC<{
         >
           <Typography variant="delta" tag="h2">
             {t(
-              'page.ui.todays_featured_inspiration_title',
-              'Today’s Featured Inspiration ({date})',
+              "page.ui.todays_featured_inspiration_title",
+              "Today’s Featured Inspiration ({date})",
               { date: dailyInspiration.date }
             )}
           </Typography>
@@ -116,19 +98,14 @@ export const ScriptureCockpitTab: React.FC<{
               })
             }
           >
-            {t(
-              'page.ui.reset_all_pins_btn',
-              'Reset All Pins to Automatic Daily Rotation'
-            )}
+            {t("page.ui.reset_all_pins_btn", "Reset All Pins to Automatic Daily Rotation")}
           </Button>
         </Flex>
         <Flex gap={4} direction="column" alignItems="stretch">
           <FeaturedInspirationItemCard
-            titleText={t(
-              'page.ui.ayah_of_the_day_label',
-              'Ayah of the Day ({ref})',
-              { ref: dailyInspiration.ayahOfTheDay.referenceKey }
-            )}
+            titleText={t("page.ui.ayah_of_the_day_label", "Ayah of the Day ({ref})", {
+              ref: dailyInspiration.ayahOfTheDay.referenceKey,
+            })}
             isPinned={dailyInspiration.isPinnedOverride.ayah}
             arabicText={dailyInspiration.ayahOfTheDay.arabicUthmani}
             transliteration={dailyInspiration.ayahOfTheDay.transliteration}
@@ -136,11 +113,9 @@ export const ScriptureCockpitTab: React.FC<{
             t={t}
           />
           <FeaturedInspirationItemCard
-            titleText={t(
-              'page.ui.hadith_of_the_day_label',
-              'Hadith of the Day ({collection})',
-              { collection: dailyInspiration.hadithOfTheDay.collectionNames.es }
-            )}
+            titleText={t("page.ui.hadith_of_the_day_label", "Hadith of the Day ({collection})", {
+              collection: dailyInspiration.hadithOfTheDay.collectionNames.es,
+            })}
             isPinned={dailyInspiration.isPinnedOverride.hadith}
             arabicText={dailyInspiration.hadithOfTheDay.arabicText}
             transliteration={dailyInspiration.hadithOfTheDay.transliteration}
@@ -148,11 +123,9 @@ export const ScriptureCockpitTab: React.FC<{
             t={t}
           />
           <FeaturedInspirationItemCard
-            titleText={t(
-              'page.ui.dua_of_the_day_label',
-              'Dua of the Day ({title})',
-              { title: dailyInspiration.duaOfTheDay.titles.es }
-            )}
+            titleText={t("page.ui.dua_of_the_day_label", "Dua of the Day ({title})", {
+              title: dailyInspiration.duaOfTheDay.titles.es,
+            })}
             isPinned={dailyInspiration.isPinnedOverride.dua}
             arabicText={dailyInspiration.duaOfTheDay.arabicText}
             transliteration={dailyInspiration.duaOfTheDay.transliteration}
@@ -163,18 +136,12 @@ export const ScriptureCockpitTab: React.FC<{
       </Box>
     )}
 
-    <Box
-      marginBottom={6}
-      background="neutral0"
-      padding={5}
-      hasRadius
-      shadow="filterShadow"
-    >
+    <Box marginBottom={6} background="neutral0" padding={5} hasRadius shadow="filterShadow">
       <Box marginBottom={4} style={{ marginBottom: 16 }}>
         <Typography variant="delta" tag="h2">
           {t(
-            'page.ui.curated_ayat_section_title',
-            'Curated Quranic Ayat ({count}) • 114 Surahs Indexed',
+            "page.ui.curated_ayat_section_title",
+            "Curated Quranic Ayat ({count}) • 114 Surahs Indexed",
             { count: ayat.length }
           )}
         </Typography>
@@ -183,24 +150,18 @@ export const ScriptureCockpitTab: React.FC<{
         <Thead>
           <Tr>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.ref', 'Ref')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.ref", "Ref")}</Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {t('page.ui.arabic_translation', 'Arabic & Translation')}
+                {t("page.ui.arabic_translation", "Arabic & Translation")}
               </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.topics', 'Topics')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.topics", "Topics")}</Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.action', 'Action')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.action", "Action")}</Typography>
             </Th>
           </Tr>
         </Thead>
@@ -212,29 +173,25 @@ export const ScriptureCockpitTab: React.FC<{
                   {item.surahNameTranslit} ({item.referenceKey})
                 </Typography>
               </Td>
-              <Td style={{ whiteSpace: 'normal', maxWidth: 680 }}>
-                <Box style={{ whiteSpace: 'normal', lineHeight: 1.7 }}>
+              <Td style={{ whiteSpace: "normal", maxWidth: 680 }}>
+                <Box style={{ whiteSpace: "normal", lineHeight: 1.7 }}>
                   <Typography>{item.arabicUthmani}</Typography>
                 </Box>
                 {item.transliteration && (
-                  <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
-                    <Typography
-                      variant="pi"
-                      textColor="neutral500"
-                      style={{ fontStyle: 'italic' }}
-                    >
+                  <Box paddingTop={1} style={{ whiteSpace: "normal" }}>
+                    <Typography variant="pi" textColor="neutral500" style={{ fontStyle: "italic" }}>
                       {item.transliteration}
                     </Typography>
                   </Box>
                 )}
-                <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                <Box paddingTop={1} style={{ whiteSpace: "normal" }}>
                   <Typography variant="pi" textColor="neutral600">
                     {item.translations.es}
                   </Typography>
                 </Box>
               </Td>
               <Td>
-                <Typography variant="pi">{item.topicTags.join(', ')}</Typography>
+                <Typography variant="pi">{item.topicTags.join(", ")}</Typography>
               </Td>
               <Td>
                 <Button
@@ -242,7 +199,7 @@ export const ScriptureCockpitTab: React.FC<{
                   variant="secondary"
                   onClick={() => onPinInspiration({ pinnedAyahId: item.id })}
                 >
-                  {t('page.ui.pin_ayah_btn', 'Pin as Ayah of the Day')}
+                  {t("page.ui.pin_ayah_btn", "Pin as Ayah of the Day")}
                 </Button>
               </Td>
             </Tr>
@@ -251,18 +208,12 @@ export const ScriptureCockpitTab: React.FC<{
       </Table>
     </Box>
 
-    <Box
-      marginBottom={6}
-      background="neutral0"
-      padding={5}
-      hasRadius
-      shadow="filterShadow"
-    >
+    <Box marginBottom={6} background="neutral0" padding={5} hasRadius shadow="filterShadow">
       <Box marginBottom={4} style={{ marginBottom: 16 }}>
         <Typography variant="delta" tag="h2">
           {t(
-            'page.ui.hadiths_duas_section_title',
-            'Prophetic Hadiths ({hadithCount}) & Hisnul Muslim Duas ({duaCount})',
+            "page.ui.hadiths_duas_section_title",
+            "Prophetic Hadiths ({hadithCount}) & Hisnul Muslim Duas ({duaCount})",
             { hadithCount: hadiths.length, duaCount: duas.length }
           )}
         </Typography>
@@ -272,55 +223,47 @@ export const ScriptureCockpitTab: React.FC<{
           <Tr>
             <Th>
               <Typography variant="sigma">
-                {t('page.ui.dua_supplication', 'Dua / Supplication')}
+                {t("page.ui.dua_supplication", "Dua / Supplication")}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {t('page.ui.arabic_meaning', 'Arabic & Meaning')}
+                {t("page.ui.arabic_meaning", "Arabic & Meaning")}
               </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.repetitions', 'Repetitions')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.repetitions", "Repetitions")}</Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">
-                {t('page.ui.action', 'Action')}
-              </Typography>
+              <Typography variant="sigma">{t("page.ui.action", "Action")}</Typography>
             </Th>
           </Tr>
         </Thead>
         <Tbody>
           {duas.map((dua) => (
             <Tr key={dua.id}>
-              <Td style={{ whiteSpace: 'normal', maxWidth: 240 }}>
-                <Box style={{ whiteSpace: 'normal' }}>
+              <Td style={{ whiteSpace: "normal", maxWidth: 240 }}>
+                <Box style={{ whiteSpace: "normal" }}>
                   <Typography fontWeight="bold">{dua.titles.es}</Typography>
                 </Box>
-                <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                <Box paddingTop={1} style={{ whiteSpace: "normal" }}>
                   <Typography variant="pi" textColor="neutral600">
                     {dua.categoryLabels.es}
                   </Typography>
                 </Box>
               </Td>
-              <Td style={{ whiteSpace: 'normal', maxWidth: 680 }}>
-                <Box style={{ whiteSpace: 'normal', lineHeight: 1.7 }}>
+              <Td style={{ whiteSpace: "normal", maxWidth: 680 }}>
+                <Box style={{ whiteSpace: "normal", lineHeight: 1.7 }}>
                   <Typography>{dua.arabicText}</Typography>
                 </Box>
                 {dua.transliteration && (
-                  <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
-                    <Typography
-                      variant="pi"
-                      textColor="neutral500"
-                      style={{ fontStyle: 'italic' }}
-                    >
+                  <Box paddingTop={1} style={{ whiteSpace: "normal" }}>
+                    <Typography variant="pi" textColor="neutral500" style={{ fontStyle: "italic" }}>
                       {dua.transliteration}
                     </Typography>
                   </Box>
                 )}
-                <Box paddingTop={1} style={{ whiteSpace: 'normal' }}>
+                <Box paddingTop={1} style={{ whiteSpace: "normal" }}>
                   <Typography variant="pi" textColor="neutral600">
                     {dua.translations.es}
                   </Typography>
@@ -335,7 +278,7 @@ export const ScriptureCockpitTab: React.FC<{
                   variant="secondary"
                   onClick={() => onPinInspiration({ pinnedDuaId: dua.id })}
                 >
-                  {t('page.ui.pin_dua_btn', 'Pin as Dua of the Day')}
+                  {t("page.ui.pin_dua_btn", "Pin as Dua of the Day")}
                 </Button>
               </Td>
             </Tr>

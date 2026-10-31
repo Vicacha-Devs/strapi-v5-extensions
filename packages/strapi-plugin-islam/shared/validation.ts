@@ -5,7 +5,7 @@ import {
   ALLOWED_HIJRI_SHIFTS,
   ALLOWED_LOCALES,
   ALLOWED_METHOD_IDS,
-} from './constants';
+} from "./constants";
 import type {
   AsrSchoolId,
   CalendarMethodId,
@@ -14,7 +14,7 @@ import type {
   QuranScriptType,
   SupportedCurrency,
   SupportedLocale,
-} from './types';
+} from "./types";
 
 export function sanitizeCoordinates(
   rawLat: unknown,
@@ -22,11 +22,10 @@ export function sanitizeCoordinates(
   fallbackLat = 4.6685,
   fallbackLon = -74.0758
 ): { lat: number; lon: number } {
-  const latNum = typeof rawLat === 'number' ? rawLat : Number(rawLat);
-  const lonNum = typeof rawLon === 'number' ? rawLon : Number(rawLon);
+  const latNum = typeof rawLat === "number" ? rawLat : Number(rawLat);
+  const lonNum = typeof rawLon === "number" ? rawLon : Number(rawLon);
 
-  const validLat =
-    Number.isFinite(latNum) && latNum >= -90 && latNum <= 90 ? latNum : fallbackLat;
+  const validLat = Number.isFinite(latNum) && latNum >= -90 && latNum <= 90 ? latNum : fallbackLat;
   const validLon =
     Number.isFinite(lonNum) && lonNum >= -180 && lonNum <= 180 ? lonNum : fallbackLon;
 
@@ -38,72 +37,65 @@ export function sanitizeCoordinates(
 
 export function sanitizeLocale(
   rawLocale: unknown,
-  fallback: SupportedLocale = 'es'
+  fallback: SupportedLocale = "es"
 ): SupportedLocale {
-  if (typeof rawLocale !== 'string') return fallback;
+  if (typeof rawLocale !== "string") return fallback;
   const clean = rawLocale.trim().toLowerCase().slice(0, 2) as SupportedLocale;
   return (ALLOWED_LOCALES as readonly string[]).includes(clean) ? clean : fallback;
 }
 
 export function sanitizeCurrency(
   rawCurrency: unknown,
-  fallback: SupportedCurrency = 'COP'
+  fallback: SupportedCurrency = "COP"
 ): SupportedCurrency {
-  if (typeof rawCurrency !== 'string') return fallback;
+  if (typeof rawCurrency !== "string") return fallback;
   const clean = rawCurrency.trim().toUpperCase() as SupportedCurrency;
   return (ALLOWED_CURRENCIES as readonly string[]).includes(clean) ? clean : fallback;
 }
 
 export function sanitizeNisabStandard(
   rawStandard: unknown,
-  fallback: NisabStandardId = 'common'
+  fallback: NisabStandardId = "common"
 ): NisabStandardId {
-  if (rawStandard === 'classical' || rawStandard === 'common') {
+  if (rawStandard === "classical" || rawStandard === "common") {
     return rawStandard;
   }
   return fallback;
 }
 
-export function sanitizeMethodId(rawMethod: unknown, fallback = '3'): string {
-  const str = String(rawMethod ?? '').trim();
+export function sanitizeMethodId(rawMethod: unknown, fallback = "3"): string {
+  const str = String(rawMethod ?? "").trim();
   return ALLOWED_METHOD_IDS.includes(str) ? str : fallback;
 }
 
-export function sanitizeAsrSchool(
-  rawSchool: unknown,
-  fallback: AsrSchoolId = '1'
-): AsrSchoolId {
-  const str = String(rawSchool ?? '').trim() as AsrSchoolId;
+export function sanitizeAsrSchool(rawSchool: unknown, fallback: AsrSchoolId = "1"): AsrSchoolId {
+  const str = String(rawSchool ?? "").trim() as AsrSchoolId;
   return (ALLOWED_ASR_SCHOOLS as readonly string[]).includes(str) ? str : fallback;
 }
 
 export function sanitizeCalendarMethod(
   rawCal: unknown,
-  fallback: CalendarMethodId = 'MATHEMATICAL'
+  fallback: CalendarMethodId = "MATHEMATICAL"
 ): CalendarMethodId {
-  const str = String(rawCal ?? '').trim().toUpperCase() as CalendarMethodId;
+  const str = String(rawCal ?? "")
+    .trim()
+    .toUpperCase() as CalendarMethodId;
   return (ALLOWED_CALENDAR_METHODS as readonly string[]).includes(str) ? str : fallback;
 }
 
-export function sanitizeHijriShift(
-  rawShift: unknown,
-  fallback: HijriShiftId = '0'
-): HijriShiftId {
-  const str = String(rawShift ?? '').trim() as HijriShiftId;
+export function sanitizeHijriShift(rawShift: unknown, fallback: HijriShiftId = "0"): HijriShiftId {
+  const str = String(rawShift ?? "").trim() as HijriShiftId;
   return (ALLOWED_HIJRI_SHIFTS as readonly string[]).includes(str) ? str : fallback;
 }
 
-export function sanitizeNonNegativeNumber(
-  rawVal: unknown,
-  maxAllowed = 1_000_000_000_000
-): number {
-  const num = typeof rawVal === 'number' ? rawVal : Number(rawVal);
+export function sanitizeNonNegativeNumber(rawVal: unknown, maxAllowed = 1_000_000_000_000): number {
+  const num = typeof rawVal === "number" ? rawVal : Number(rawVal);
   if (!Number.isFinite(num) || num < 0) return 0;
   return Math.min(num, maxAllowed);
 }
 
 export function sanitizeIsoDateYmd(rawDate: unknown, fallbackDate = new Date()): string {
-  if (typeof rawDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(rawDate.trim())) {
+  if (typeof rawDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rawDate.trim())) {
     const parsed = new Date(`${rawDate.trim()}T12:00:00Z`);
     if (!Number.isNaN(parsed.getTime())) {
       return rawDate.trim();
@@ -113,8 +105,8 @@ export function sanitizeIsoDateYmd(rawDate: unknown, fallbackDate = new Date()):
 }
 
 export function sanitizeIsoYearMonth(rawYm: unknown, fallbackDate = new Date()): string {
-  if (typeof rawYm === 'string' && /^\d{4}-\d{2}$/.test(rawYm.trim())) {
-    const [y, m] = rawYm.trim().split('-').map(Number);
+  if (typeof rawYm === "string" && /^\d{4}-\d{2}$/.test(rawYm.trim())) {
+    const [y, m] = rawYm.trim().split("-").map(Number);
     if (y >= 1900 && y <= 2200 && m >= 1 && m <= 12) {
       return rawYm.trim();
     }
@@ -123,32 +115,32 @@ export function sanitizeIsoYearMonth(rawYm: unknown, fallbackDate = new Date()):
 }
 
 export function sanitizePlainText(rawText: unknown, maxLength = 500): string {
-  if (typeof rawText !== 'string') return '';
+  if (typeof rawText !== "string") return "";
   return rawText
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
     .trim()
     .slice(0, maxLength);
 }
 
 export function sanitizeIcsText(rawText: string): string {
   return rawText
-    .replace(/[\r\n]+/g, ' ')
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,')
+    .replace(/[\r\n]+/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
     .trim();
 }
 
 export function sanitizeSurahNumber(rawSurah: unknown, fallback = 1): number {
-  const num = typeof rawSurah === 'number' ? rawSurah : Number(rawSurah);
+  const num = typeof rawSurah === "number" ? rawSurah : Number(rawSurah);
   if (!Number.isFinite(num)) return fallback;
   const intVal = Math.trunc(num);
   if (intVal < 1 || intVal > 114) return fallback;
   return intVal;
 }
 
-export function sanitizeVerseKey(rawKey: unknown, fallback = '1:1'): string {
-  if (typeof rawKey !== 'string') return fallback;
+export function sanitizeVerseKey(rawKey: unknown, fallback = "1:1"): string {
+  if (typeof rawKey !== "string") return fallback;
   const trimmed = rawKey.trim();
   const match = /^(\d{1,3}):(\d{1,3})$/.exec(trimmed);
   if (!match) return fallback;
@@ -160,32 +152,26 @@ export function sanitizeVerseKey(rawKey: unknown, fallback = '1:1'): string {
   return `${surah}:${ayah}`;
 }
 
-export function sanitizePositiveInt(
-  rawVal: unknown,
-  fallback: number,
-  min = 1,
-  max = 300
-): number {
-  const num = typeof rawVal === 'number' ? rawVal : Number(rawVal);
+export function sanitizePositiveInt(rawVal: unknown, fallback: number, min = 1, max = 300): number {
+  const num = typeof rawVal === "number" ? rawVal : Number(rawVal);
   if (!Number.isFinite(num)) return fallback;
   const intVal = Math.trunc(num);
   return Math.max(min, Math.min(max, intVal));
 }
 
 const ALLOWED_QURAN_SCRIPTS: readonly QuranScriptType[] = [
-  'uthmani',
-  'uthmani_tajweed',
-  'uthmani_simple',
-  'imlaei',
-  'indopak_nastaleeq',
+  "uthmani",
+  "uthmani_tajweed",
+  "uthmani_simple",
+  "imlaei",
+  "indopak_nastaleeq",
 ];
 
 export function sanitizeQuranScript(
   rawScript: unknown,
-  fallback: QuranScriptType = 'uthmani'
+  fallback: QuranScriptType = "uthmani"
 ): QuranScriptType {
-  if (typeof rawScript !== 'string') return fallback;
+  if (typeof rawScript !== "string") return fallback;
   const clean = rawScript.trim().toLowerCase() as QuranScriptType;
   return ALLOWED_QURAN_SCRIPTS.includes(clean) ? clean : fallback;
 }
-

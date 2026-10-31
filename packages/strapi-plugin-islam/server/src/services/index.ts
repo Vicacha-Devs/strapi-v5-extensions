@@ -1,5 +1,5 @@
-import settings from './settings';
-import islamService from './islamService';
+import islamService from "./islamService";
+import settings from "./settings";
 
 export default {
   settings,

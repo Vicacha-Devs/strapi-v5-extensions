@@ -1,10 +1,10 @@
-import type { NisabStandardId, SupportedCurrency } from './types';
+import type { NisabStandardId, SupportedCurrency } from "./types";
 
 export interface NisabThresholdResult {
   fetchedAt: string;
   standard: NisabStandardId;
   currency: SupportedCurrency;
-  weightUnit: 'gram' | 'troy_oz';
+  weightUnit: "gram" | "troy_oz";
   zakatRate: number;
   zakatRatePercent: number;
   gold: {
@@ -20,13 +20,13 @@ export interface NisabThresholdResult {
     unitPrice: number;
     nisabAmount: number;
   };
-  source: 'configured_or_live' | 'external_api';
+  source: "configured_or_live" | "external_api";
 }
 
 export interface ZakatAlMalCalculationInput {
   currency?: SupportedCurrency;
   standard?: NisabStandardId;
-  benchmark?: 'gold' | 'silver';
+  benchmark?: "gold" | "silver";
   cashAndBank?: number;
   goldGrams24K?: number;
   goldGrams22K?: number;
@@ -39,13 +39,13 @@ export interface ZakatAlMalCalculationInput {
   rentalNetSavings?: number;
   shortTermLiabilities?: number;
   agriculturalProduceValue?: number;
-  agriculturalIrrigation?: 'rain_fed_10' | 'irrigated_5' | 'mixed_7_5' | 'none';
+  agriculturalIrrigation?: "rain_fed_10" | "irrigated_5" | "mixed_7_5" | "none";
 }
 
 export interface ZakatAlMalCalculationResult {
   currency: SupportedCurrency;
   standard: NisabStandardId;
-  benchmark: 'gold' | 'silver';
+  benchmark: "gold" | "silver";
   nisabThresholdAmount: number;
   nisabDetails: NisabThresholdResult;
   breakdown: {

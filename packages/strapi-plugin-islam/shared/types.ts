@@ -1,17 +1,17 @@
-export type SupportedLocale = 'es' | 'en' | 'ar' | 'tr';
-export type SupportedCurrency = 'COP' | 'USD' | 'EUR' | 'TRY';
-export type AsrSchoolId = '1' | '2';
-export type CalendarMethodId = 'MATHEMATICAL' | 'UAQ' | 'HJCoSA' | 'DIYANET';
-export type HijriShiftId = '-2' | '-1' | '0' | '1' | '2';
-export type NisabStandardId = 'common' | 'classical';
-export type PrayerNameId = 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha' | 'jumuah';
-export type DailyFivePrayerId = 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha';
+export type SupportedLocale = "es" | "en" | "ar" | "tr";
+export type SupportedCurrency = "COP" | "USD" | "EUR" | "TRY";
+export type AsrSchoolId = "1" | "2";
+export type CalendarMethodId = "MATHEMATICAL" | "UAQ" | "HJCoSA" | "DIYANET";
+export type HijriShiftId = "-2" | "-1" | "0" | "1" | "2";
+export type NisabStandardId = "common" | "classical";
+export type PrayerNameId = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha" | "jumuah";
+export type DailyFivePrayerId = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
 
 export type LocalizedStringMap = Record<SupportedLocale, string> & Record<string, string>;
 
 export interface IqamahRule {
   prayerName: PrayerNameId;
-  mode: 'offset_minutes' | 'fixed_time';
+  mode: "offset_minutes" | "fixed_time";
   offsetMinutes: number;
   fixedTime?: string;
   notes?: string;
@@ -89,13 +89,13 @@ export interface DailyInspirationPins {
   pinnedAsmaNumber?: number | null;
 }
 
-export type QuranFoundationEnvironment = 'prelive' | 'production';
+export type QuranFoundationEnvironment = "prelive" | "production";
 export type QuranScriptType =
-  | 'uthmani'
-  | 'uthmani_tajweed'
-  | 'uthmani_simple'
-  | 'imlaei'
-  | 'indopak_nastaleeq';
+  | "uthmani"
+  | "uthmani_tajweed"
+  | "uthmani_simple"
+  | "imlaei"
+  | "indopak_nastaleeq";
 
 export interface QuranFoundationConfig {
   enabled: boolean;
@@ -162,7 +162,7 @@ export interface IslamPluginSettings {
   school: AsrSchoolId;
   calender: CalendarMethodId;
   shifting: HijriShiftId;
-  highLatitudeRule: 'AngleBased' | 'MiddleOfTheNight' | 'OneSeventh';
+  highLatitudeRule: "AngleBased" | "MiddleOfTheNight" | "OneSeventh";
   minuteAdjustments: {
     fajr: number;
     sunrise: number;
@@ -206,7 +206,7 @@ export interface ProhibitedTimesWindow {
   zawal: { start: string; end: string };
   sunset: { start: string; end: string };
   isCurrentlyProhibited: boolean;
-  activeProhibitedReason: 'sunrise' | 'zawal' | 'sunset' | null;
+  activeProhibitedReason: "sunrise" | "zawal" | "sunset" | null;
 }
 
 export interface QiblaCompassResult {
@@ -222,7 +222,7 @@ export interface QiblaCompassResult {
   };
   direction: {
     degrees: number;
-    from: 'True North';
+    from: "True North";
     clockwise: true;
     cardinal: string;
   };
@@ -266,7 +266,7 @@ export interface DailyPrayerTimetable {
     schoolName: string;
     calendarMethod: CalendarMethodId;
     shifting: HijriShiftId;
-    source: 'astronomical_engine' | 'external_api';
+    source: "astronomical_engine" | "external_api";
   };
   times: {
     imsak: string;
@@ -309,9 +309,9 @@ export interface IslamicObservanceItem {
   hijriFormatted: string;
   estimatedGregorianDate: string;
   daysUntil: number;
-  category: 'eid' | 'ramadan' | 'fasting' | 'sacred_night' | 'hajj' | 'commemoration';
+  category: "eid" | "ramadan" | "fasting" | "sacred_night" | "hajj" | "commemoration";
   isPublicHolidayInIslam: boolean;
-  fastingRecommendedOrObligatory: 'obligatory' | 'sunnah' | 'forbidden' | 'none';
+  fastingRecommendedOrObligatory: "obligatory" | "sunnah" | "forbidden" | "none";
   titles: LocalizedStringMap;
   descriptions: LocalizedStringMap;
 }
@@ -321,7 +321,7 @@ export interface SurahMetadata {
   nameAr: string;
   transliteration: string;
   names: LocalizedStringMap;
-  revelationType: 'Meccan' | 'Medinan';
+  revelationType: "Meccan" | "Medinan";
   ayahCount: number;
   juzStart: number;
 }
@@ -343,10 +343,10 @@ export interface CuratedAyahItem {
 
 export interface CuratedHadithItem {
   id: string;
-  collectionSlug: 'bukhari' | 'muslim' | 'nawawi40' | 'riyad_assalihin' | 'tirmidhi';
+  collectionSlug: "bukhari" | "muslim" | "nawawi40" | "riyad_assalihin" | "tirmidhi";
   collectionNames: LocalizedStringMap;
   hadithNumber: string;
-  grading: 'Sahih' | 'Hasan';
+  grading: "Sahih" | "Hasan";
   narrator: LocalizedStringMap;
   arabicText: string;
   transliteration: string;
@@ -358,14 +358,14 @@ export interface CuratedHadithItem {
 export interface CuratedDuaItem {
   id: string;
   category:
-    | 'morning_evening'
-    | 'post_salah'
-    | 'ramadan_iftar'
-    | 'forgiveness'
-    | 'protection_distress'
-    | 'parents_family'
-    | 'travel_daily'
-    | 'adhan';
+    | "morning_evening"
+    | "post_salah"
+    | "ramadan_iftar"
+    | "forgiveness"
+    | "protection_distress"
+    | "parents_family"
+    | "travel_daily"
+    | "adhan";
   categoryLabels: LocalizedStringMap;
   titles: LocalizedStringMap;
   arabicText: string;
@@ -409,4 +409,4 @@ export interface DailyInspirationBundle {
   };
 }
 
-export * from './fiqhTypes';
+export * from "./fiqhTypes";

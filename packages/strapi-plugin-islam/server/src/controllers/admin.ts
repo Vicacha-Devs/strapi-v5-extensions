@@ -1,12 +1,9 @@
-import type { Core } from '@strapi/strapi';
-import {
-  PLUGIN_ID,
-  sanitizePlainText,
-  type IslamPluginSettings,
-} from '../../../shared';
-import type { ConfirmHilalSightingInput } from '../services/hilalAndScriptureHelpers';
-import type createIslamService from '../services/islamService';
-import type createSettingsService from '../services/settings';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID, sanitizePlainText, type IslamPluginSettings } from "../../../shared";
+import type { ConfirmHilalSightingInput } from "../services/hilalAndScriptureHelpers";
+import type createIslamService from "../services/islamService";
+import type createSettingsService from "../services/settings";
 
 type IslamServiceInstance = ReturnType<typeof createIslamService>;
 type SettingsServiceInstance = ReturnType<typeof createSettingsService>;
@@ -22,30 +19,30 @@ export interface KoaAdminContext {
   set?: (header: string, value: string) => void;
 }
 
-const ALLOWED_OCCASIONS: ReadonlySet<ConfirmHilalSightingInput['occasion']> = new Set([
-  'ramadan',
-  'eid_al_fitr',
-  'dhul_hijjah_eid_al_adha',
-  'monthly_hilal',
+const ALLOWED_OCCASIONS: ReadonlySet<ConfirmHilalSightingInput["occasion"]> = new Set([
+  "ramadan",
+  "eid_al_fitr",
+  "dhul_hijjah_eid_al_adha",
+  "monthly_hilal",
 ]);
 
 function extractBodyRecord(ctx: KoaAdminContext): Record<string, unknown> {
   const rawBody = ctx.request?.body;
-  return rawBody && typeof rawBody === 'object' ? rawBody : {};
+  return rawBody && typeof rawBody === "object" ? rawBody : {};
 }
 
-function resolveOccasion(raw: unknown): ConfirmHilalSightingInput['occasion'] {
+function resolveOccasion(raw: unknown): ConfirmHilalSightingInput["occasion"] {
   if (
-    typeof raw === 'string' &&
-    ALLOWED_OCCASIONS.has(raw as ConfirmHilalSightingInput['occasion'])
+    typeof raw === "string" &&
+    ALLOWED_OCCASIONS.has(raw as ConfirmHilalSightingInput["occasion"])
   ) {
-    return raw as ConfirmHilalSightingInput['occasion'];
+    return raw as ConfirmHilalSightingInput["occasion"];
   }
-  return 'ramadan';
+  return "ramadan";
 }
 
 function resolveNotesRecord(raw: unknown): Record<string, string> {
-  if (!raw || typeof raw !== 'object') return {};
+  if (!raw || typeof raw !== "object") return {};
   return raw as Record<string, string>;
 }
 
@@ -69,13 +66,13 @@ function resolveOptionalPinText(raw: unknown): string | null {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsService = () =>
-    strapi.plugin(PLUGIN_ID).service<SettingsServiceInstance>('settings');
+    strapi.plugin(PLUGIN_ID).service<SettingsServiceInstance>("settings");
   const getIslamService = () =>
-    strapi.plugin(PLUGIN_ID).service<IslamServiceInstance>('islamService');
+    strapi.plugin(PLUGIN_ID).service<IslamServiceInstance>("islamService");
 
   return {
     async getOverview(ctx: KoaAdminContext) {
-      const locale = typeof ctx.query?.locale === 'string' ? ctx.query.locale : undefined;
+      const locale = typeof ctx.query?.locale === "string" ? ctx.query.locale : undefined;
       const data = await getIslamService().getAdminOverview(locale);
       ctx.body = { data };
     },

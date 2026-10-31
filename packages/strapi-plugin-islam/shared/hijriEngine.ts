@@ -1,14 +1,11 @@
-import { HIJRI_MONTHS, LUNAR_HAWL_DAYS } from './constants';
-import {
-  MAJOR_OBSERVANCE_DEFINITIONS,
-  type ObservanceDefinition,
-} from './observanceDefinitions';
+import { HIJRI_MONTHS, LUNAR_HAWL_DAYS } from "./constants";
+import { MAJOR_OBSERVANCE_DEFINITIONS, type ObservanceDefinition } from "./observanceDefinitions";
 import type {
   HijriDateDetails,
   IslamicObservanceItem,
   LocalizedStringMap,
   SupportedLocale,
-} from './types';
+} from "./types";
 
 const ISLAMIC_EPOCH_JD = 1948439.5;
 
@@ -21,13 +18,7 @@ function gregorianToJulianDay(year: number, month: number, day: number): number 
   }
   const a = Math.floor(y / 100);
   const b = 2 - a + Math.floor(a / 4);
-  return (
-    Math.floor(365.25 * (y + 4716)) +
-    Math.floor(30.6001 * (m + 1)) +
-    day +
-    b -
-    1524.5
-  );
+  return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524.5;
 }
 
 function julianDayToGregorian(jd: number): { year: number; month: number; day: number } {
@@ -58,9 +49,7 @@ export function hijriToJulianDay(year: number, month: number, day: number): numb
 
 export function julianDayToHijri(jd: number): { year: number; month: number; day: number } {
   const normalizedJd = Math.floor(jd) + 0.5;
-  const year = Math.floor(
-    (30 * (normalizedJd - ISLAMIC_EPOCH_JD) + 10646) / 10631
-  );
+  const year = Math.floor((30 * (normalizedJd - ISLAMIC_EPOCH_JD) + 10646) / 10631);
   const month = Math.min(
     12,
     Math.ceil((normalizedJd - (29 + hijriToJulianDay(year, 1, 1))) / 29.5) + 1
@@ -75,7 +64,7 @@ export function julianDayToHijri(jd: number): { year: number; month: number; day
 export function getHolidaysForHijriDate(
   month: number,
   day: number,
-  locale: SupportedLocale = 'es'
+  locale: SupportedLocale = "es"
 ): string[] {
   const results: string[] = [];
   for (const obs of MAJOR_OBSERVANCE_DEFINITIONS) {
@@ -95,31 +84,22 @@ export function getHolidaysForHijriDate(
   return results;
 }
 
-function isValidHijriTriplet(
-  year: number,
-  month: number,
-  day: number
-): boolean {
+function isValidHijriTriplet(year: number, month: number, day: number): boolean {
   return year > 1300 && month >= 1 && month <= 12 && day >= 1 && day <= 30;
 }
 
-function tryFormatIntlHijri(
-  shifted: Date
-): { year: number; month: number; day: number } | null {
+function tryFormatIntlHijri(shifted: Date): { year: number; month: number; day: number } | null {
   try {
-    const formatter = new Intl.DateTimeFormat(
-      'en-u-ca-islamic-umalqura-nu-latn',
-      {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        timeZone: 'UTC',
-      }
-    );
+    const formatter = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura-nu-latn", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      timeZone: "UTC",
+    });
     const parts = formatter.formatToParts(shifted);
-    const year = Number(parts.find((p) => p.type === 'year')?.value);
-    const month = Number(parts.find((p) => p.type === 'month')?.value);
-    const day = Number(parts.find((p) => p.type === 'day')?.value);
+    const year = Number(parts.find((p) => p.type === "year")?.value);
+    const month = Number(parts.find((p) => p.type === "month")?.value);
+    const day = Number(parts.find((p) => p.type === "day")?.value);
     if (isValidHijriTriplet(year, month, day)) {
       return { year, month, day };
     }
@@ -147,31 +127,28 @@ function resolveHijriYearMonthDay(shifted: Date): {
 }
 
 function clampShiftingDays(shiftingDays: number): number {
-  return Number.isFinite(shiftingDays)
-    ? Math.max(-2, Math.min(2, Math.trunc(shiftingDays)))
-    : 0;
+  return Number.isFinite(shiftingDays) ? Math.max(-2, Math.min(2, Math.trunc(shiftingDays))) : 0;
 }
 
 export function gregorianToHijri(
   isoDateOrDate: string | Date,
   shiftingDays = 0,
-  locale: SupportedLocale = 'es'
+  locale: SupportedLocale = "es"
 ): HijriDateDetails {
   const baseDate =
-    typeof isoDateOrDate === 'string'
+    typeof isoDateOrDate === "string"
       ? new Date(`${isoDateOrDate.slice(0, 10)}T12:00:00Z`)
       : new Date(isoDateOrDate.getTime());
 
   const safeShift = clampShiftingDays(shiftingDays);
   const shifted = new Date(baseDate.getTime() + safeShift * 86_400_000);
-  const { year: hYear, month: hMonth, day: hDay } =
-    resolveHijriYearMonthDay(shifted);
+  const { year: hYear, month: hMonth, day: hDay } = resolveHijriYearMonthDay(shifted);
 
   const monthMeta = HIJRI_MONTHS[hMonth - 1] ?? HIJRI_MONTHS[0];
   const monthNameLocalized = monthMeta[locale] ?? monthMeta.en;
-  const dateStr = `${String(hDay).padStart(2, '0')}-${String(hMonth).padStart(2, '0')}-${hYear}`;
+  const dateStr = `${String(hDay).padStart(2, "0")}-${String(hMonth).padStart(2, "0")}-${hYear}`;
   const formatted =
-    locale === 'ar'
+    locale === "ar"
       ? `${hDay} ${monthMeta.ar} ${hYear} هـ`
       : `${hDay} ${monthNameLocalized} ${hYear} AH`;
 
@@ -208,12 +185,8 @@ export function hijriToGregorian(
 
   for (let delta = -3; delta <= 3; delta++) {
     const probe = new Date(candidate.getTime() + delta * 86_400_000);
-    const check = gregorianToHijri(probe, safeShift, 'en');
-    if (
-      check.year === hijriYear &&
-      check.monthNumber === hijriMonth &&
-      check.day === hijriDay
-    ) {
+    const check = gregorianToHijri(probe, safeShift, "en");
+    if (check.year === hijriYear && check.monthNumber === hijriMonth && check.day === hijriDay) {
       return probe.toISOString().slice(0, 10);
     }
   }
@@ -221,7 +194,10 @@ export function hijriToGregorian(
   return candidate.toISOString().slice(0, 10);
 }
 
-export function calculateHawlMaturity(nisabReachedGregorianDate: string, shiftingDays = 0): {
+export function calculateHawlMaturity(
+  nisabReachedGregorianDate: string,
+  shiftingDays = 0
+): {
   startDateGregorian: string;
   startHijri: HijriDateDetails;
   hawlMaturityDateGregorian: string;
@@ -238,9 +214,9 @@ export function calculateHawlMaturity(nisabReachedGregorianDate: string, shiftin
 
   return {
     startDateGregorian: safeStart.toISOString().slice(0, 10),
-    startHijri: gregorianToHijri(safeStart, shiftingDays, 'en'),
+    startHijri: gregorianToHijri(safeStart, shiftingDays, "en"),
     hawlMaturityDateGregorian: maturity.toISOString().slice(0, 10),
-    maturityHijri: gregorianToHijri(maturity, shiftingDays, 'en'),
+    maturityHijri: gregorianToHijri(maturity, shiftingDays, "en"),
     lunarDays: LUNAR_HAWL_DAYS,
     daysRemaining: Math.max(0, diffDays),
     isMatured: diffDays <= 0,
@@ -249,16 +225,11 @@ export function calculateHawlMaturity(nisabReachedGregorianDate: string, shiftin
 
 export { MAJOR_OBSERVANCE_DEFINITIONS, type ObservanceDefinition };
 
-function resolveTargetHijriYear(
-  def: ObservanceDefinition,
-  refHijri: HijriDateDetails
-): number {
+function resolveTargetHijriYear(def: ObservanceDefinition, refHijri: HijriDateDetails): number {
   const isBeforeMonth = def.hijriMonth < refHijri.monthNumber;
   const isSameMonthBeforeDay =
     def.hijriMonth === refHijri.monthNumber && def.hijriDay < refHijri.day;
-  return isBeforeMonth || isSameMonthBeforeDay
-    ? refHijri.year + 1
-    : refHijri.year;
+  return isBeforeMonth || isSameMonthBeforeDay ? refHijri.year + 1 : refHijri.year;
 }
 
 function applyObservanceDateOverride(
@@ -272,9 +243,9 @@ function applyObservanceDateOverride(
 ): string {
   if (!overrides) return estimatedGregorian;
   const overrideMap: Record<string, string | undefined> = {
-    'start-of-ramadan': overrides.ramadanStartGregorian,
-    'eid-al-fitr': overrides.eidAlFitrDateGregorian,
-    'eid-al-adha': overrides.eidAlAdhaDateGregorian,
+    "start-of-ramadan": overrides.ramadanStartGregorian,
+    "eid-al-fitr": overrides.eidAlFitrDateGregorian,
+    "eid-al-adha": overrides.eidAlAdhaDateGregorian,
   };
   return overrideMap[slug] || estimatedGregorian;
 }
@@ -299,16 +270,9 @@ function buildObservanceItem(params: {
     def.hijriDay,
     shiftingDays
   );
-  const estimatedGregorian = applyObservanceDateOverride(
-    def.slug,
-    rawEstimated,
-    overrides
-  );
+  const estimatedGregorian = applyObservanceDateOverride(def.slug, rawEstimated, overrides);
   const estDateObj = new Date(`${estimatedGregorian}T12:00:00Z`);
-  const daysUntil = Math.max(
-    0,
-    Math.round((estDateObj.getTime() - ref.getTime()) / 86_400_000)
-  );
+  const daysUntil = Math.max(0, Math.round((estDateObj.getTime() - ref.getTime()) / 86_400_000));
   const monthMeta = HIJRI_MONTHS[def.hijriMonth - 1] ?? HIJRI_MONTHS[0];
   const monthLabel = monthMeta[locale] ?? monthMeta.en;
 
@@ -332,7 +296,7 @@ function buildObservanceItem(params: {
 export function computeUpcomingObservances(
   referenceDate: string | Date = new Date(),
   shiftingDays = 0,
-  locale: SupportedLocale = 'es',
+  locale: SupportedLocale = "es",
   overrides?: {
     ramadanStartGregorian?: string;
     eidAlFitrDateGregorian?: string;
@@ -340,7 +304,7 @@ export function computeUpcomingObservances(
   }
 ): IslamicObservanceItem[] {
   const ref =
-    typeof referenceDate === 'string'
+    typeof referenceDate === "string"
       ? new Date(`${referenceDate.slice(0, 10)}T12:00:00Z`)
       : new Date(referenceDate.getTime());
   const refHijri = gregorianToHijri(ref, shiftingDays, locale);

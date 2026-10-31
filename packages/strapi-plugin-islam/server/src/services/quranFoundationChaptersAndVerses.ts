@@ -12,29 +12,25 @@ import {
   type QuranFoundationConfig,
   type SupportedLocale,
   type SurahMetadata,
-} from '../../../shared';
-import {
-  fetchQuranFoundationV4Json,
-  getCached,
-  setCached,
-} from './upstreamCacheAndHttp';
+} from "../../../shared";
+import { fetchQuranFoundationV4Json, getCached, setCached } from "./upstreamCacheAndHttp";
 
 const VERSE_FIELDS =
-  'text_uthmani,text_uthmani_tajweed,text_uthmani_simple,text_imlaei,text_indopak_nastaleeq,chapter_id,verse_number,verse_key,juz_number,hizb_number,rub_el_hizb_number,page_number,sajdah_number';
+  "text_uthmani,text_uthmani_tajweed,text_uthmani_simple,text_imlaei,text_indopak_nastaleeq,chapter_id,verse_number,verse_key,juz_number,hizb_number,rub_el_hizb_number,page_number,sajdah_number";
 
-const WORD_FIELDS = 'text_uthmani,text_indopak,verse_key,location,audio_url';
+const WORD_FIELDS = "text_uthmani,text_indopak,verse_key,location,audio_url";
 
 export function buildTranslationPolicy(qf: QuranFoundationConfig) {
   return {
     disableBrowserAutoTranslate: Boolean(qf?.disableBrowserAutoTranslate ?? true),
-    htmlAttributes: { translate: 'no', className: 'notranslate' },
+    htmlAttributes: { translate: "no", className: "notranslate" },
   };
 }
 
 export function mapSurahToV4Chapter(s: SurahMetadata, locale: SupportedLocale) {
   return {
     id: s.number,
-    revelation_place: s.revelationType === 'Meccan' ? 'makkah' : 'madinah',
+    revelation_place: s.revelationType === "Meccan" ? "makkah" : "madinah",
     name_simple: s.transliteration,
     name_arabic: s.nameAr,
     verses_count: s.ayahCount,
@@ -58,13 +54,13 @@ export function mapCuratedAyahToV4Verse(
     text_uthmani: a.arabicUthmani,
     translations: [
       {
-        resource_id: locale === 'es' ? 83 : 20,
+        resource_id: locale === "es" ? 83 : 20,
         language_name: locale,
         text: a.translations[locale] || a.translations.es,
       },
       {
         resource_id: 57,
-        language_name: 'transliteration',
+        language_name: "transliteration",
         text: a.transliteration,
       },
     ],
@@ -72,13 +68,10 @@ export function mapCuratedAyahToV4Verse(
   };
 }
 
-export function parseBoolParam(
-  raw: boolean | string | undefined,
-  fallback: boolean
-): boolean {
+export function parseBoolParam(raw: boolean | string | undefined, fallback: boolean): boolean {
   if (raw === undefined) return fallback;
   const s = String(raw);
-  return s === 'true' || s === '1';
+  return s === "true" || s === "1";
 }
 
 function resolveTranslationsCsv(
@@ -86,11 +79,11 @@ function resolveTranslationsCsv(
   qf: QuranFoundationConfig,
   locale: SupportedLocale
 ): string {
-  const cleaned = sanitizePlainText(rawTranslations, 80).replace(/[^0-9,]/g, '');
+  const cleaned = sanitizePlainText(rawTranslations, 80).replace(/[^0-9,]/g, "");
   if (cleaned) return cleaned;
   const baseIds = qf.defaultTranslationIdsByLocale?.[locale] || [83];
   const ids = qf.includeTransliterationByDefault ? [...baseIds, 57] : baseIds;
-  return Array.from(new Set(ids)).join(',');
+  return Array.from(new Set(ids)).join(",");
 }
 
 function resolveTafsirsCsv(
@@ -99,10 +92,10 @@ function resolveTafsirsCsv(
   locale: SupportedLocale,
   useDefaultWhenEmpty: boolean
 ): string {
-  const cleaned = sanitizePlainText(rawTafsirs, 80).replace(/[^0-9,]/g, '');
+  const cleaned = sanitizePlainText(rawTafsirs, 80).replace(/[^0-9,]/g, "");
   if (cleaned || !useDefaultWhenEmpty) return cleaned;
   const defaultTafsirIds = qf.defaultTafsirIdsByLocale?.[locale] || [169];
-  return defaultTafsirIds.join(',');
+  return defaultTafsirIds.join(",");
 }
 
 export function findLocalSurah(chapterNumber: number): SurahMetadata {
@@ -119,7 +112,7 @@ export async function fetchQuranChaptersOperation(
   const cached = getCached<Record<string, unknown>>(cacheKey);
   if (cached) return cached;
 
-  const upstream = await fetchQuranFoundationV4Json(qf, 'chapters', { language: locale });
+  const upstream = await fetchQuranFoundationV4Json(qf, "chapters", { language: locale });
   const rawChapters = upstream?.data?.chapters;
   const chapters = Array.isArray(rawChapters)
     ? rawChapters
@@ -127,7 +120,7 @@ export async function fetchQuranChaptersOperation(
 
   const result = {
     locale,
-    source: upstream?.source || 'curated_corpus',
+    source: upstream?.source || "curated_corpus",
     chaptersCount: chapters.length,
     chapters,
     surahDirectory: SURAH_DIRECTORY,
@@ -168,7 +161,7 @@ export async function fetchQuranChapterInfoOperation(
   const result = {
     chapterNumber,
     locale,
-    source: chapterRes?.source || infoRes?.source || 'curated_corpus',
+    source: chapterRes?.source || infoRes?.source || "curated_corpus",
     surah: localSurah,
     chapter: chapterRes?.data?.chapter || mapSurahToV4Chapter(localSurah, locale),
     chapterInfo: infoRes?.data?.chapter_info || null,
@@ -232,13 +225,13 @@ export async function fetchQuranChapterVersesOperation(
     `verses/by_chapter/${opts.chapterNumber}`,
     {
       language: opts.locale,
-      words: opts.includeWords ? 'true' : 'false',
+      words: opts.includeWords ? "true" : "false",
       translations: opts.translationsParam,
       audio: opts.reciterId,
       tafsirs: opts.tafsirsParam || undefined,
       fields: VERSE_FIELDS,
       word_fields: opts.includeWords ? WORD_FIELDS : undefined,
-      translation_fields: 'resource_name,language_name',
+      translation_fields: "resource_name,language_name",
       page: opts.page,
       per_page: opts.perPage,
     },
@@ -268,7 +261,7 @@ export async function fetchQuranChapterVersesOperation(
     script: opts.script,
     reciterId: opts.reciterId,
     translationsRequested: opts.translationsParam,
-    source: upstream?.source || 'curated_corpus',
+    source: upstream?.source || "curated_corpus",
     verses,
     pagination,
     translationPolicy: buildTranslationPolicy(qf),
@@ -302,8 +295,8 @@ export async function fetchQuranVerseByKeyOperation(
   params: VerseByKeyQueryParams
 ) {
   const qf = settings.quranFoundation;
-  const verseKey = sanitizeVerseKey(params?.verseKey, '1:1');
-  const [surahNum] = verseKey.split(':').map(Number);
+  const verseKey = sanitizeVerseKey(params?.verseKey, "1:1");
+  const [surahNum] = verseKey.split(":").map(Number);
   const locale = sanitizeLocale(params?.locale, settings.defaultLocale);
   const includeWords = parseBoolParam(params?.words, true);
   const reciterId = sanitizePositiveInt(params?.reciterId, qf.defaultReciterId || 7, 1, 500);
@@ -319,30 +312,28 @@ export async function fetchQuranVerseByKeyOperation(
     `verses/by_key/${verseKey}`,
     {
       language: locale,
-      words: includeWords ? 'true' : 'false',
+      words: includeWords ? "true" : "false",
       translations: translationsParam,
       audio: reciterId,
       tafsirs: tafsirsParam,
       fields: VERSE_FIELDS,
       word_fields: includeWords ? WORD_FIELDS : undefined,
-      translation_fields: 'resource_name,language_name',
+      translation_fields: "resource_name,language_name",
     },
     { targetSurah: surahNum }
   );
 
   const localSurah = findLocalSurah(surahNum);
   const curatedMatch = findCuratedAyahForVerseKey(verseKey, surahNum);
-  const verse =
-    upstream?.data?.verse || mapCuratedAyahToV4Verse(curatedMatch, locale, verseKey);
+  const verse = upstream?.data?.verse || mapCuratedAyahToV4Verse(curatedMatch, locale, verseKey);
 
   const result = {
     verseKey,
     surah: localSurah,
     locale,
-    source: upstream?.source || 'curated_corpus',
+    source: upstream?.source || "curated_corpus",
     verse,
-    curatedReflection:
-      curatedMatch.referenceKey === verseKey ? curatedMatch.reflections : null,
+    curatedReflection: curatedMatch.referenceKey === verseKey ? curatedMatch.reflections : null,
     translationPolicy: buildTranslationPolicy(qf),
   };
 
