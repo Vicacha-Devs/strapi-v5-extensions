@@ -1,17 +1,18 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Flex, Status, Typography } from '@strapi/design-system';
-import { WarningCircle } from '@strapi/icons';
-import isEqual from 'lodash/isEqual';
+import { Box, Flex, Status, Typography } from "@strapi/design-system";
+import { WarningCircle } from "@strapi/icons";
+import isEqual from "lodash/isEqual";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
 import type {
   EmptyAltOccurrence,
   SeoChecksState,
   SeoCheckStatus,
-} from '../../../../../../../shared';
-import { getTrad } from '../../../../../utils/getTrad';
-import { qualityVerdict } from '../../../utils/checks';
-import { SeoCheckerContext } from '../../Summary';
-import { SEOAccordion } from '../SEOAccordion';
+} from "../../../../../../../shared";
+import { getTrad } from "../../../../../utils/getTrad";
+import { qualityVerdict } from "../../../utils/checks";
+import { SeoCheckerContext } from "../../Summary";
+import { SEOAccordion } from "../SEOAccordion";
 
 interface AlternativeTextCheckProps {
   intersections: number | null;
@@ -31,8 +32,8 @@ export const AlternativeTextCheck = ({
 
   let status: SeoCheckStatus = {
     message: formatMessage({
-      id: getTrad('SEOChecks.alternativeTextCheck.default'),
-      defaultMessage: 'All your images contain an alt attribute! Congrats!',
+      id: getTrad("SEOChecks.alternativeTextCheck.default"),
+      defaultMessage: "All your images contain an alt attribute! Congrats!",
     }),
     qualityVerdict: qualityVerdict.good,
   };
@@ -43,35 +44,35 @@ export const AlternativeTextCheck = ({
     if (intersections === 0) {
       status = {
         message: formatMessage({
-          id: getTrad('SEOChecks.alternativeTextCheck.intersection-zero'),
+          id: getTrad("SEOChecks.alternativeTextCheck.intersection-zero"),
           defaultMessage:
-            'The name and the alternative text of your images are all the same. Strapi automatically generate the alt attribute from the name by default if the field was empty during the media upload. Having alt attribute clearly describing images is a very good practice.',
+            "The name and the alternative text of your images are all the same. Strapi automatically generate the alt attribute from the name by default if the field was empty during the media upload. Having alt attribute clearly describing images is a very good practice.",
         }),
         qualityVerdict: qualityVerdict.bad,
       };
-    } else if (altTexts.includes('')) {
+    } else if (altTexts.includes("")) {
       const count = Math.abs(intersections ?? 0);
       status = {
         message: `${count} ${formatMessage({
-          id: getTrad('SEOChecks.alternativeTextCheck.intersection-negative'),
-          defaultMessage: 'Some images from a media field are missing an alt attribute.',
+          id: getTrad("SEOChecks.alternativeTextCheck.intersection-negative"),
+          defaultMessage: "Some images from a media field are missing an alt attribute.",
         })}`,
         qualityVerdict: qualityVerdict.improvements,
       };
     } else if (missingRichTextAlt >= 1) {
       status = {
         message: formatMessage({
-          id: getTrad('SEOChecks.alternativeTextCheck.richtext-missing-one'),
+          id: getTrad("SEOChecks.alternativeTextCheck.richtext-missing-one"),
           defaultMessage:
-            'At least one image in any 1st level richtext editor is missing an alt attribute.',
+            "At least one image in any 1st level richtext editor is missing an alt attribute.",
         }),
         qualityVerdict: qualityVerdict.improvements,
       };
     }
     if (!isEqual(status, checks.alternativeText) && dispatch) {
       dispatch({
-        type: 'UPDATE_PONCTUAL',
-        value: { ...status, entity: 'alternativeText' },
+        type: "UPDATE_PONCTUAL",
+        value: { ...status, entity: "alternativeText" },
       });
     }
   }, []);
@@ -79,14 +80,14 @@ export const AlternativeTextCheck = ({
   return (
     <SEOAccordion
       title={formatMessage({
-        id: getTrad('SEOModal.summary-title.alt-attributes'),
-        defaultMessage: 'Alternative Text',
+        id: getTrad("SEOModal.summary-title.alt-attributes"),
+        defaultMessage: "Alternative Text",
       })}
       status={checks.alternativeText}
       label={formatMessage({
-        id: getTrad('SEOChecks.alternativeTextCheck.label'),
+        id: getTrad("SEOChecks.alternativeTextCheck.label"),
         defaultMessage:
-          'This will check if you have any missing alternative text for your images (media fields) and in your 1st level richtext editors.',
+          "This will check if you have any missing alternative text for your images (media fields) and in your 1st level richtext editors.",
       })}
       component={
         <Box padding={2} background="neutral100">
@@ -94,11 +95,11 @@ export const AlternativeTextCheck = ({
             <WarningCircle aria-hidden={true} fill="warning600" />
             <Typography paddingLeft={1}>
               <Typography fontWeight="bold">
-                {altTexts.filter((item) => item === '').length}{' '}
+                {altTexts.filter((item) => item === "").length}{" "}
               </Typography>
               {formatMessage({
-                id: getTrad('SEOChecks.alternativeTextCheck.missing-image'),
-                defaultMessage: 'missing on first level image fields or inside a component.',
+                id: getTrad("SEOChecks.alternativeTextCheck.missing-image"),
+                defaultMessage: "missing on first level image fields or inside a component.",
               })}
             </Typography>
           </Flex>
@@ -111,8 +112,8 @@ export const AlternativeTextCheck = ({
                   <Typography paddingLeft={1}>
                     <Typography fontWeight="bold">{alt.occurences} </Typography>
                     {formatMessage({
-                      id: getTrad('SEOChecks.alternativeTextCheck.missing-text'),
-                      defaultMessage: 'missing alt in the following richtext field:',
+                      id: getTrad("SEOChecks.alternativeTextCheck.missing-text"),
+                      defaultMessage: "missing alt in the following richtext field:",
                     })}
                     <Typography fontWeight="bold"> {alt.field}</Typography>
                   </Typography>
@@ -125,20 +126,20 @@ export const AlternativeTextCheck = ({
               <Typography>
                 <Typography fontWeight="bold">
                   {formatMessage({
-                    id: getTrad('SEOChecks.alternativeTextCheck.tip-label'),
-                    defaultMessage: 'Tip:',
-                  })}{' '}
+                    id: getTrad("SEOChecks.alternativeTextCheck.tip-label"),
+                    defaultMessage: "Tip:",
+                  })}{" "}
                 </Typography>
                 {formatMessage({
-                  id: getTrad('SEOChecks.alternativeTextCheck.tip-before'),
+                  id: getTrad("SEOChecks.alternativeTextCheck.tip-before"),
                   defaultMessage:
-                    'Implement a rule in your front-end code that uses the name of your images if the',
+                    "Implement a rule in your front-end code that uses the name of your images if the",
                 })}
                 <Typography fontWeight="bold"> alternativeText </Typography>
                 {formatMessage({
-                  id: getTrad('SEOChecks.alternativeTextCheck.tip-after'),
+                  id: getTrad("SEOChecks.alternativeTextCheck.tip-after"),
                   defaultMessage:
-                    'field is empty to further reduce the risk of an empty alt attribute on your website.',
+                    "field is empty to further reduce the risk of an empty alt attribute on your website.",
                 })}
               </Typography>
             </Status>

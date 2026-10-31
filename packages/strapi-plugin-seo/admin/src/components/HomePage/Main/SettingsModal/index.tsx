@@ -1,11 +1,12 @@
-import * as React from 'react';
-import { useIntl } from 'react-intl';
-import { Box, Button, Grid, Modal, Switch, Typography } from '@strapi/design-system';
-import { Cog, Information } from '@strapi/icons';
-import { ContentBox, useNotification } from '@strapi/strapi/admin';
-import type { ContentTypeSeoItem, SeoSettingsMap } from '../../../../../../shared';
-import { useSettingsApi } from '../../../../hooks/useSettingsApi';
-import { getTrad } from '../../../../utils/getTrad';
+import { Box, Button, Grid, Modal, Switch, Typography } from "@strapi/design-system";
+import { Cog, Information } from "@strapi/icons";
+import { ContentBox, useNotification } from "@strapi/strapi/admin";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type { ContentTypeSeoItem, SeoSettingsMap } from "../../../../../../shared";
+import { useSettingsApi } from "../../../../hooks/useSettingsApi";
+import { getTrad } from "../../../../utils/getTrad";
 
 interface SettingsModalProps {
   item: ContentTypeSeoItem;
@@ -92,11 +93,11 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
     });
 
     toggleNotification({
-      type: 'success',
+      type: "success",
       message: formatMessage(
         {
-          id: getTrad('notification.success.settings'),
-          defaultMessage: 'Settings saved for {collectionName} content-type.',
+          id: getTrad("notification.success.settings"),
+          defaultMessage: "Settings saved for {collectionName} content-type.",
         },
         { collectionName }
       ),
@@ -108,8 +109,8 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
       <Modal.Trigger>
         <Button variant="tertiary" startIcon={<Cog />} onClick={() => setupModalSettings()}>
           {formatMessage({
-            id: getTrad('SEOPage.info.settings'),
-            defaultMessage: 'Settings',
+            id: getTrad("SEOPage.info.settings"),
+            defaultMessage: "Settings",
           })}
         </Button>
       </Modal.Trigger>
@@ -117,8 +118,8 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
         <Modal.Header>
           <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
             {formatMessage({
-              id: getTrad('SEOPage.info.settings'),
-              defaultMessage: 'Settings',
+              id: getTrad("SEOPage.info.settings"),
+              defaultMessage: "Settings",
             })}
           </Typography>
         </Modal.Header>
@@ -133,12 +134,12 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
             <Box paddingBottom={4}>
               <ContentBox
                 title={formatMessage({
-                  id: getTrad('Information'),
-                  defaultMessage: 'Information',
+                  id: getTrad("Information"),
+                  defaultMessage: "Information",
                 })}
                 subtitle={formatMessage({
-                  id: getTrad('SEOPage.info.settings.information'),
-                  defaultMessage: 'Disable SEO checks for this specific content-type.',
+                  id: getTrad("SEOPage.info.settings.information"),
+                  defaultMessage: "Disable SEO checks for this specific content-type.",
                 })}
                 icon={<Information />}
                 iconBackground="primary100"
@@ -149,62 +150,62 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
                 {
                   state: metaTitle,
                   stateSetter: setMetaTitle,
-                  id: 'SEOPage.info.settings.meta-title-check',
-                  defaultMessage: 'Meta Title',
+                  id: "SEOPage.info.settings.meta-title-check",
+                  defaultMessage: "Meta Title",
                 },
                 {
                   state: metaDescription,
                   stateSetter: setMetaDescription,
-                  id: 'SEOPage.info.settings.meta-description-check',
-                  defaultMessage: 'Meta Description',
+                  id: "SEOPage.info.settings.meta-description-check",
+                  defaultMessage: "Meta Description",
                 },
                 {
                   state: metaRobots,
                   stateSetter: setMetaRobots,
-                  id: 'SEOPage.info.settings.meta-robots-check',
-                  defaultMessage: 'Meta Robots',
+                  id: "SEOPage.info.settings.meta-robots-check",
+                  defaultMessage: "Meta Robots",
                 },
                 {
                   state: openGraph,
                   stateSetter: setOpenGraph,
-                  id: 'SEOPage.info.settings.open-graph-check',
-                  defaultMessage: 'Open Graph',
+                  id: "SEOPage.info.settings.open-graph-check",
+                  defaultMessage: "Open Graph",
                 },
                 {
                   state: wordCount,
                   stateSetter: setWordCount,
-                  id: 'SEOPage.info.settings.word-count-check',
-                  defaultMessage: 'Word Count',
+                  id: "SEOPage.info.settings.word-count-check",
+                  defaultMessage: "Word Count",
                 },
                 {
                   state: canonicalUrl,
                   stateSetter: setCanonicalUrl,
-                  id: 'SEOPage.info.settings.canonical-url-check',
-                  defaultMessage: 'Canonical URL',
+                  id: "SEOPage.info.settings.canonical-url-check",
+                  defaultMessage: "Canonical URL",
                 },
                 {
                   state: keywordDensity,
                   stateSetter: setKeywordDensity,
-                  id: 'SEOPage.info.settings.keyword-density-check',
-                  defaultMessage: 'Keyword Density',
+                  id: "SEOPage.info.settings.keyword-density-check",
+                  defaultMessage: "Keyword Density",
                 },
                 {
                   state: structuredData,
                   stateSetter: setStructuredData,
-                  id: 'SEOPage.info.settings.structured-data-check',
-                  defaultMessage: 'Structured Data',
+                  id: "SEOPage.info.settings.structured-data-check",
+                  defaultMessage: "Structured Data",
                 },
                 {
                   state: alternativeText,
                   stateSetter: setAlternativeText,
-                  id: 'SEOPage.info.settings.alternative-text-check',
-                  defaultMessage: 'Alt Text',
+                  id: "SEOPage.info.settings.alternative-text-check",
+                  defaultMessage: "Alt Text",
                 },
                 {
                   state: lastUpdatedAt,
                   stateSetter: setLastUpdatedAt,
-                  id: 'SEOPage.info.settings.last-updated-at-check',
-                  defaultMessage: 'Last Updated At',
+                  id: "SEOPage.info.settings.last-updated-at-check",
+                  defaultMessage: "Last Updated At",
                 },
               ].map(({ state, stateSetter, id, defaultMessage }) => {
                 return (
@@ -237,15 +238,15 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
             <Modal.Close>
               <Button variant="tertiary">
                 {formatMessage({
-                  id: getTrad('SEOPage.info.settings.cancel.button'),
-                  defaultMessage: 'Cancel',
+                  id: getTrad("SEOPage.info.settings.cancel.button"),
+                  defaultMessage: "Cancel",
                 })}
               </Button>
             </Modal.Close>
             <Button type="submit">
               {formatMessage({
-                id: getTrad('SEOPage.info.settings.save.button'),
-                defaultMessage: 'Save',
+                id: getTrad("SEOPage.info.settings.save.button"),
+                defaultMessage: "Save",
               })}
             </Button>
           </Modal.Footer>

@@ -1,3 +1,3 @@
-import pluginPkg from '../../package.json';
+import pluginPkg from "../../package.json";
 
-export const pluginId: string = pluginPkg.strapi?.name || 'seo';
+export const pluginId: string = pluginPkg.strapi?.name || "seo";

@@ -1,12 +1,5 @@
-declare module 'react' {
-  export type ReactNode =
-    | string
-    | number
-    | boolean
-    | null
-    | undefined
-    | ReactElement
-    | ReactNode[];
+declare module "react" {
+  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
 
   export interface ReactElement<P = unknown> {
     type: unknown;
@@ -48,10 +41,7 @@ declare module 'react' {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(
-    effect: () => void | (() => void),
-    deps?: readonly unknown[]
-  ): void;
+  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
   export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
@@ -81,8 +71,8 @@ declare module 'react' {
   export as namespace React;
 }
 
-declare module 'react/jsx-runtime' {
-  import type { ReactElement } from 'react';
+declare module "react/jsx-runtime" {
+  import type { ReactElement } from "react";
   export const Fragment: unknown;
   export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
   export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
@@ -98,7 +88,7 @@ declare module 'react/jsx-runtime' {
   }
 }
 
-declare module 'react-intl' {
+declare module "react-intl" {
   export interface MessageDescriptor {
     id: string;
     defaultMessage?: string;
@@ -113,8 +103,8 @@ declare module 'react-intl' {
   };
 }
 
-declare module 'react-router-dom' {
-  import type { FC, ReactNode } from 'react';
+declare module "react-router-dom" {
+  import type { FC, ReactNode } from "react";
   export const Routes: FC<{ children?: ReactNode }>;
   export const Route: FC<{
     index?: boolean;
@@ -125,13 +115,14 @@ declare module 'react-router-dom' {
   export function useNavigate(): (to: string) => void;
 }
 
-declare module '@strapi/strapi/admin' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/strapi/admin" {
+  import type { FC, ReactNode } from "react";
+
   import type {
     ComponentSchemasMap,
     ContentManagerFormValues,
     ContentTypeSchemaInfo,
-  } from '../shared';
+  } from "../shared";
 
   export interface FetchResponse<T = unknown> {
     data: T;
@@ -148,7 +139,7 @@ declare module '@strapi/strapi/admin' {
 
   export function useNotification(): {
     toggleNotification(config: {
-      type?: 'success' | 'warning' | 'danger' | 'info';
+      type?: "success" | "warning" | "danger" | "info";
       message: string;
     }): void;
   };
@@ -210,8 +201,8 @@ declare module '@strapi/strapi/admin' {
   }
 }
 
-declare module '@strapi/design-system' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/design-system" {
+  import type { FC, ReactNode } from "react";
   export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Alert: FC<DesignComponentProps>;
@@ -268,8 +259,8 @@ declare module '@strapi/design-system' {
   };
 }
 
-declare module '@strapi/icons' {
-  import type { FC } from 'react';
+declare module "@strapi/icons" {
+  import type { FC } from "react";
   export const ArrowLeft: FC<Record<string, unknown>>;
   export const ArrowRight: FC<Record<string, unknown>>;
   export const CheckCircle: FC<Record<string, unknown>>;
@@ -283,39 +274,43 @@ declare module '@strapi/icons' {
   export const WarningCircle: FC<Record<string, unknown>>;
 }
 
-declare module 'lodash/get' {
-  export default function get<T = unknown>(object: unknown, path: string | string[], defaultValue?: T): T;
+declare module "lodash/get" {
+  export default function get<T = unknown>(
+    object: unknown,
+    path: string | string[],
+    defaultValue?: T
+  ): T;
 }
 
-declare module 'lodash/isEmpty' {
+declare module "lodash/isEmpty" {
   export default function isEmpty(value: unknown): boolean;
 }
 
-declare module 'lodash/isEqual' {
+declare module "lodash/isEqual" {
   export default function isEqual(value: unknown, other: unknown): boolean;
 }
 
-declare module 'lodash/isNull' {
+declare module "lodash/isNull" {
   export default function isNull(value: unknown): value is null;
 }
 
-declare module 'lodash/isNumber' {
+declare module "lodash/isNumber" {
   export default function isNumber(value: unknown): value is number;
 }
 
-declare module 'lodash/isArray' {
+declare module "lodash/isArray" {
   export default function isArray(value: unknown): value is unknown[];
 }
 
-declare module 'lodash/isObject' {
+declare module "lodash/isObject" {
   export default function isObject(value: unknown): value is Record<string, unknown>;
 }
 
-declare module 'lodash/pull' {
+declare module "lodash/pull" {
   export default function pull<T>(array: T[], ...values: T[]): T[];
 }
 
-declare module 'showdown' {
+declare module "showdown" {
   export class Converter {
     makeHtml(markdown: string): string;
   }
@@ -325,7 +320,7 @@ declare module 'showdown' {
   export default showdownDefault;
 }
 
-declare module 'date-fns' {
+declare module "date-fns" {
   export function formatDistance(
     date: Date | number,
     baseDate: Date | number,
@@ -333,11 +328,11 @@ declare module 'date-fns' {
   ): string;
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }
 
-declare module 'styled-components' {
+declare module "styled-components" {
   export function useTheme(): Record<string, unknown>;
 }

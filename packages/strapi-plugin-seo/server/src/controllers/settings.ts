@@ -1,5 +1,6 @@
-import type { Core } from '@strapi/strapi';
-import type { SeoSettingsMap } from '../../../shared';
+import type { Core } from "@strapi/strapi";
+
+import type { SeoSettingsMap } from "../../../shared";
 
 interface SettingsControllerContext {
   request: {
@@ -14,7 +15,7 @@ interface SettingsService {
 }
 
 export const settingsController = ({ strapi }: { strapi: Core.Strapi }) => {
-  const settingsService = strapi.plugin('seo').service<SettingsService>('settings');
+  const settingsService = strapi.plugin("seo").service<SettingsService>("settings");
 
   const getSettings = async (
     ctx: SettingsControllerContext

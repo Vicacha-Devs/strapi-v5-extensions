@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
 
 const register = (_context: { strapi: Core.Strapi }) => {};
 
