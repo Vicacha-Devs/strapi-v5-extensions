@@ -20,14 +20,39 @@ interface IssueCertificateModalProps {
   onSubmit: (payload: CertificateIssueInput) => Promise<void>;
 }
 
+function trimOrUndefined(value: string): string | undefined {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function buildWitnessEntry(
+  name: string,
+  docId: string,
+  email: string,
+  role: string
+): NonNullable<CertificateIssueInput['witnesses']>[number] | null {
+  const fullName = trimOrUndefined(name);
+  if (!fullName) return null;
+  return {
+    fullName,
+    documentIdRaw: trimOrUndefined(docId),
+    email: trimOrUndefined(email),
+    routingOrder: 1,
+    role,
+  };
+}
+
 export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
   templates,
   onClose,
   onSubmit,
 }) => {
   const { formatMessage } = useIntl();
-  const t = (id: string, defaultMessage: string) =>
-    formatMessage({ id: `${"certificates"}.${id}`, defaultMessage });
+  const t = (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => formatMessage({ id: `${"certificates"}.${id}`, defaultMessage }, values);
   const [templateSlug, setTemplateSlug] = useState<string>(
     templates[0]?.slug || ''
   );
@@ -49,44 +74,41 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
   const [sendViaESign, setSendViaESign] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const selectedTemplate = templates.find((t) => t.slug === templateSlug);
+  const selectedTemplate = templates.find((tpl) => tpl.slug === templateSlug);
 
   const handleCreate = async () => {
-    if (!recipientFullName.trim() || !templateSlug) return;
+    const cleanName = trimOrUndefined(recipientFullName);
+    if (!cleanName || !templateSlug) return;
     setSubmitting(true);
     try {
-      const witnesses: NonNullable<CertificateIssueInput['witnesses']> = [];
-      if (witness1Name.trim()) {
-        witnesses.push({
-          fullName: witness1Name.trim(),
-          documentIdRaw: witness1Id.trim() || undefined,
-          email: witness1Email.trim() || undefined,
-          routingOrder: 1,
-          role: 'Official Witness 1',
-        });
-      }
-      if (witness2Name.trim()) {
-        witnesses.push({
-          fullName: witness2Name.trim(),
-          documentIdRaw: witness2Id.trim() || undefined,
-          email: witness2Email.trim() || undefined,
-          routingOrder: 1,
-          role: 'Official Witness 2',
-        });
-      }
+      const w1 = buildWitnessEntry(
+        witness1Name,
+        witness1Id,
+        witness1Email,
+        'Official Witness 1'
+      );
+      const w2 = buildWitnessEntry(
+        witness2Name,
+        witness2Id,
+        witness2Email,
+        'Official Witness 2'
+      );
+      const witnesses = [w1, w2].filter(
+        (w): w is NonNullable<typeof w> => w !== null
+      );
 
       await onSubmit({
         templateSlug,
-        recipientFullName: recipientFullName.trim(),
-        recipientChosenName: recipientChosenName.trim() || undefined,
-        recipientEmail: recipientEmail.trim() || undefined,
-        recipientPhone: recipientPhone.trim() || undefined,
-        recipientNationality: recipientNationality.trim() || undefined,
-        nationalIdRaw: nationalIdRaw.trim() || undefined,
+        recipientFullName: cleanName,
+        recipientChosenName: trimOrUndefined(recipientChosenName),
+        recipientEmail: trimOrUndefined(recipientEmail),
+        recipientPhone: trimOrUndefined(recipientPhone),
+        recipientNationality: trimOrUndefined(recipientNationality),
+        nationalIdRaw: trimOrUndefined(nationalIdRaw),
         witnesses,
-        linkedBookingCode: linkedBookingCode.trim() || undefined,
-        notes: notes.trim() || undefined,
-        autoApprove: sendViaESign ? false : autoApprove,
+        linkedBookingCode: trimOrUndefined(linkedBookingCode),
+        notes: trimOrUndefined(notes),
+        autoApprove: !sendViaESign && autoApprove,
         sendViaESign,
       });
     } finally {
@@ -105,10 +127,13 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
     >
       <Flex justifyContent="space-between" alignItems="center" marginBottom={4}>
         <Typography variant="beta" fontWeight="bold">
-          Issue Official Signed Certificate
+          {t(
+            'modal.title_issue_official_signed_certificate',
+            'Issue Official Signed Certificate'
+          )}
         </Typography>
         <Button variant="tertiary" onClick={onClose}>
-          Close
+          {t('modal.close', 'Close')}
         </Button>
       </Flex>
 
@@ -214,10 +239,17 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
         style={{ border: '1px solid rgba(128, 128, 128, 0.18)' }}
       >
         <Typography variant="omega" fontWeight="bold">
-          Official Witnesses Attestation
+          {t(
+            'modal.official_witnesses_attestation',
+            'Official Witnesses Attestation'
+          )}{' '}
           {selectedTemplate?.requiresWitnesses
-            ? ` (Minimum ${selectedTemplate.minWitnesses} required)`
-            : ' (Optional)'}
+            ? t(
+                'modal.minimum_witnesses_required',
+                '(Minimum {count} required)',
+                { count: selectedTemplate.minWitnesses }
+              )
+            : t('modal.optional_suffix', '(Optional)')}
         </Typography>
         <Flex gap={4} wrap="wrap" marginTop={3}>
           <Box style={{ flex: 1, minWidth: 180 }}>
@@ -331,14 +363,16 @@ export const IssueCertificateModal: React.FC<IssueCertificateModalProps> = ({
 
         <Flex justifyContent="flex-end" gap={3}>
           <Button variant="tertiary" onClick={onClose}>
-            Cancel
+            {t('modal.cancel', 'Cancel')}
           </Button>
           <Button
             onClick={handleCreate}
             loading={submitting}
             disabled={!recipientFullName.trim() || !templateSlug}
           >
-            {sendViaESign ? 'Create & Send via DocuSign' : 'Sign & Issue Certificate'}
+            {sendViaESign
+              ? t('modal.create_and_send_docusign', 'Create & Send via DocuSign')
+              : t('modal.sign_and_issue_certificate', 'Sign & Issue Certificate')}
           </Button>
         </Flex>
       </Flex>

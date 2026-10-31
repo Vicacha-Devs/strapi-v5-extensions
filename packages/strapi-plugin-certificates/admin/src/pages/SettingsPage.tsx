@@ -244,9 +244,16 @@ export const SettingsPage: React.FC = () => {
                       })
                     }
                   >
-                    Allow public certificate applications (
+                    {t(
+                      'checkbox.allow_public_certificate_applications',
+                      'Allow public certificate applications'
+                    )}{' '}
+                    (
                     <code style={INLINE_CODE_STYLE}>
-                      POST /api/certificates/apply
+                      {t(
+                        'settings.ui.endpoint_apply',
+                        'POST /api/certificates/apply'
+                      )}
                     </code>
                     )
                   </Checkbox>
@@ -269,12 +276,19 @@ export const SettingsPage: React.FC = () => {
               </Typography>
               <Box marginTop={1}>
                 <Typography variant="pi" textColor="neutral600">
-                  Secrets (
-                  <code style={INLINE_CODE_STYLE}>DOCUSIGN_ACCESS_TOKEN</code> &amp;{' '}
-                  <code style={INLINE_CODE_STYLE}>DOCUSIGN_WEBHOOK_SECRET</code>)
-                  are loaded from environment variables. Connect webhook endpoint:{' '}
+                  {t('settings.ui.secrets_prefix', 'Secrets')} (
+                  <code style={INLINE_CODE_STYLE}>DOCUSIGN_ACCESS_TOKEN</code>{' '}
+                  {t('settings.ui.and_conjunction', '&')}{' '}
+                  <code style={INLINE_CODE_STYLE}>DOCUSIGN_WEBHOOK_SECRET</code>){' '}
+                  {t(
+                    'settings.ui.secrets_loaded_from_env',
+                    'are loaded from environment variables. Connect webhook endpoint:'
+                  )}{' '}
                   <code style={INLINE_CODE_STYLE}>
-                    POST /api/certificates/webhooks/docusign
+                    {t(
+                      'settings.ui.endpoint_docusign_webhook',
+                      'POST /api/certificates/webhooks/docusign'
+                    )}
                   </code>
                 </Typography>
               </Box>
@@ -365,7 +379,10 @@ export const SettingsPage: React.FC = () => {
                   </Typography>
                   <Box marginTop={1}>
                     <Typography variant="pi" textColor="neutral600">
-                      Active Key Fingerprint:{' '}
+                      {t(
+                        'settings.ui.active_key_fingerprint',
+                        'Active Key Fingerprint:'
+                      )}{' '}
                       <code style={INLINE_CODE_STYLE}>
                         {settings.publicKeyFingerprint}
                       </code>
@@ -384,11 +401,20 @@ export const SettingsPage: React.FC = () => {
               <Box marginTop={4}>
                 <Field.Root>
                   <Field.Label>
-                    Public Key PEM (Published at{' '}
+                    {t(
+                      'field.public_key_pem_published_at',
+                      'Public Key PEM (Published at'
+                    )}{' '}
                     <code style={INLINE_CODE_STYLE}>
-                      GET /api/certificates/public-key
+                      {t(
+                        'settings.ui.endpoint_public_key',
+                        'GET /api/certificates/public-key'
+                      )}
                     </code>{' '}
-                    for offline embassy/consular verification)
+                    {t(
+                      'field.for_offline_embassy_verification',
+                      'for offline embassy/consular verification)'
+                    )}
                   </Field.Label>
                   <Textarea
                     placeholder={t('placeholder.begin_public_key', '-----BEGIN PUBLIC KEY-----')}

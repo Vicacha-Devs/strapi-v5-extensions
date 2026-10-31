@@ -63,39 +63,61 @@ function sanitizeCalendarSystems(raw: unknown): CalendarSystemConfig[] {
     }));
 }
 
+function pickFirstString(...candidates: Array<string | undefined>): string {
+  for (const candidate of candidates) {
+    if (candidate !== undefined && candidate !== '') {
+      return String(candidate).trim();
+    }
+  }
+  return '';
+}
+
+function normalizeEsignProvider(
+  providerRaw: string,
+  enabled: boolean
+): DocuSignProviderConfig['provider'] {
+  if (providerRaw === 'docusign' || providerRaw === 'webhook') {
+    return providerRaw;
+  }
+  return enabled ? 'docusign' : 'none';
+}
+
+function toRecordObject(raw: unknown): Partial<DocuSignProviderConfig> {
+  return raw && typeof raw === 'object' ? (raw as Partial<DocuSignProviderConfig>) : {};
+}
+
 function sanitizeESignConfig(
   raw: unknown,
   fallback: DocuSignProviderConfig
 ): DocuSignProviderConfig {
-  const obj =
-    raw && typeof raw === 'object' ? (raw as Partial<DocuSignProviderConfig>) : {};
+  const obj = toRecordObject(raw);
   const envAccountId = process.env.DOCUSIGN_ACCOUNT_ID?.trim();
   const envBaseUrl = process.env.DOCUSIGN_BASE_URL?.trim();
   const envIntegrationKey = process.env.DOCUSIGN_INTEGRATION_KEY?.trim();
 
-  const providerRaw = String(obj.provider ?? fallback.provider ?? 'none');
-  const provider =
-    providerRaw === 'docusign' || providerRaw === 'webhook'
-      ? providerRaw
-      : 'none';
+  const enabled = Boolean(obj.enabled ?? fallback.enabled ?? Boolean(envAccountId));
+  const providerRaw = pickFirstString(obj.provider, fallback.provider, 'none');
 
   return {
-    enabled: Boolean(obj.enabled ?? fallback.enabled ?? Boolean(envAccountId)),
-    provider: obj.enabled && provider === 'none' ? 'docusign' : provider,
-    baseUrl: String(
-      obj.baseUrl || envBaseUrl || fallback.baseUrl || DEFAULT_ESIGN_CONFIG.baseUrl
-    )
-      .trim()
-      .replace(/\/+$/, ''),
-    accountId: String(obj.accountId ?? envAccountId ?? fallback.accountId ?? '').trim(),
-    integrationKey: String(
-      obj.integrationKey ?? envIntegrationKey ?? fallback.integrationKey ?? ''
-    ).trim(),
-    emailSubjectPrefix: String(
-      obj.emailSubjectPrefix ||
-        fallback.emailSubjectPrefix ||
-        DEFAULT_ESIGN_CONFIG.emailSubjectPrefix
-    ).trim(),
+    enabled,
+    provider: normalizeEsignProvider(providerRaw, Boolean(obj.enabled)),
+    baseUrl: pickFirstString(
+      obj.baseUrl,
+      envBaseUrl,
+      fallback.baseUrl,
+      DEFAULT_ESIGN_CONFIG.baseUrl
+    ).replace(/\/+$/, ''),
+    accountId: pickFirstString(obj.accountId, envAccountId, fallback.accountId),
+    integrationKey: pickFirstString(
+      obj.integrationKey,
+      envIntegrationKey,
+      fallback.integrationKey
+    ),
+    emailSubjectPrefix: pickFirstString(
+      obj.emailSubjectPrefix,
+      fallback.emailSubjectPrefix,
+      DEFAULT_ESIGN_CONFIG.emailSubjectPrefix
+    ),
   };
 }
 

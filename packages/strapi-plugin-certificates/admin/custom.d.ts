@@ -8,8 +8,8 @@ declare module 'react' {
     | ReactElement
     | ReactNode[];
 
-  export interface ReactElement<P = any> {
-    type: any;
+  export interface ReactElement<P = unknown> {
+    type: unknown;
     props: P;
     key: string | number | null;
   }
@@ -47,18 +47,18 @@ declare module 'react' {
     deps?: readonly unknown[]
   ): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
-  export function useCallback<T extends (...args: any[]) => any>(
+  export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
     deps: readonly unknown[]
   ): T;
   export function useRef<T>(initialValue: T | null): RefObject<T>;
-  export function createElement(...args: any[]): ReactElement;
+  export function createElement(...args: unknown[]): ReactElement;
   export const Fragment: unknown;
 
   export namespace JSX {
     interface Element extends ReactElement {}
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 
@@ -68,13 +68,13 @@ declare module 'react' {
 declare module 'react/jsx-runtime' {
   import type { ReactElement } from 'react';
   export const Fragment: unknown;
-  export function jsx(type: any, props: any, key?: any): ReactElement;
-  export function jsxs(type: any, props: any, key?: any): ReactElement;
+  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 }
@@ -96,7 +96,7 @@ declare module 'react-intl' {
 
 declare module '@strapi/strapi/admin' {
   import type { FC, ReactNode } from 'react';
-  export type AdminLayoutProps = Record<string, any> & { children?: ReactNode };
+  export type AdminLayoutProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Layouts: {
     Root: FC<AdminLayoutProps>;
@@ -104,15 +104,15 @@ declare module '@strapi/strapi/admin' {
     Content: FC<AdminLayoutProps>;
   };
 
-  export interface FetchResponse<T = any> {
+  export interface FetchResponse<T = Record<string, unknown>> {
     data: T;
   }
 
   export interface FetchClient {
-    get<T = any>(url: string): Promise<FetchResponse<T>>;
-    post<T = any>(url: string, body?: unknown): Promise<FetchResponse<T>>;
-    put<T = any>(url: string, body?: unknown): Promise<FetchResponse<T>>;
-    del<T = any>(url: string): Promise<FetchResponse<T>>;
+    get<T = Record<string, unknown>>(url: string): Promise<FetchResponse<T>>;
+    post<T = Record<string, unknown>>(url: string, body?: unknown): Promise<FetchResponse<T>>;
+    put<T = Record<string, unknown>>(url: string, body?: unknown): Promise<FetchResponse<T>>;
+    del<T = Record<string, unknown>>(url: string): Promise<FetchResponse<T>>;
   }
 
   export function useFetchClient(): FetchClient;
@@ -152,14 +152,20 @@ declare module 'react-router-dom' {
 }
 
 declare module '@strapi/design-system' {
-  export const Tabs: {
-    Root: any;
-    List: any;
-    Trigger: any;
-    Content: any;
-  };
   import type { FC, ReactNode } from 'react';
-  export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
+  export type DesignComponentProps = Record<string, unknown> & {
+    children?: ReactNode;
+    onChange?: (arg: never) => void;
+    onValueChange?: (val: number | undefined) => void;
+    onCheckedChange?: (checked: boolean) => void;
+    onClick?: (e: never) => void;
+  };
+  export const Tabs: {
+    Root: FC<DesignComponentProps>;
+    List: FC<DesignComponentProps>;
+    Trigger: FC<DesignComponentProps>;
+    Content: FC<DesignComponentProps>;
+  };
 
   export const Badge: FC<DesignComponentProps>;
   export const Box: FC<DesignComponentProps>;
@@ -254,7 +260,9 @@ declare module 'node:crypto' {
   ): boolean;
 }
 
-
 declare module 'styled-components' {
-  export function useTheme(): Record<string, any>;
+  export function useTheme(): {
+    colors?: Record<string, string | undefined>;
+    [key: string]: unknown;
+  };
 }

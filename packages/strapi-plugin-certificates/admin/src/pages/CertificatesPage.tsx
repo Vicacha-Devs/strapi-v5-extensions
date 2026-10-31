@@ -23,8 +23,11 @@ import { IssueCertificateModal } from '../components/IssueCertificateModal';
 
 export const CertificatesPage: React.FC = () => {
   const { formatMessage } = useIntl();
-  const t = (id: string, defaultMessage: string) =>
-    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
+  const t = (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
   const { get, post, put } = useFetchClient();
   const { toggleNotification } = useNotification();
 
@@ -319,7 +322,15 @@ export const CertificatesPage: React.FC = () => {
                           <Badge>{rec.status.toUpperCase()}</Badge>
                           {rec.esignEnvelopeId && (
                             <Badge>
-                              DOCUSIGN: {(rec.esignEnvelopeStatus || 'sent').toUpperCase()}
+                              {t(
+                                'page.ui.docusign_badge',
+                                'DOCUSIGN: {status}',
+                                {
+                                  status: (
+                                    rec.esignEnvelopeStatus || 'sent'
+                                  ).toUpperCase(),
+                                }
+                              )}
                             </Badge>
                           )}
                           <Typography variant="pi" textColor="neutral600">
@@ -336,12 +347,21 @@ export const CertificatesPage: React.FC = () => {
                         </Box>
                         <Box marginTop={1}>
                           <Typography variant="pi" textColor="neutral600">
-                            Issued: {rec.issuedAt.slice(0, 10)}
+                            {t('page.ui.issued_date', 'Issued: {date}', {
+                              date: rec.issuedAt.slice(0, 10),
+                            })}
                             {secondaryText ? ` • ${secondaryText}` : ''}
                             {rec.nationalIdMasked
-                              ? ` • ID: ${rec.nationalIdMasked}`
+                              ? ` • ${t('page.ui.id_masked', 'ID: {id}', {
+                                  id: rec.nationalIdMasked,
+                                })}`
                               : ''}
-                            {` • Witnesses: ${(rec.witnesses || []).length}`}
+                            {' • '}
+                            {t(
+                              'page.ui.witnesses_count',
+                              'Witnesses: {count}',
+                              { count: (rec.witnesses || []).length }
+                            )}
                           </Typography>
                         </Box>
                       </Box>

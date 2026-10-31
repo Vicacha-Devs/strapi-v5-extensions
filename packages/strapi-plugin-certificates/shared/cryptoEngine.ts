@@ -110,26 +110,32 @@ export function maskRecipientName(fullName: string): string {
   return `${first} ${initials}`;
 }
 
+function cleanStr(val?: string): string {
+  return String(val ?? '').trim();
+}
+
 export function serializeCanonicalPayload(
   payload: CanonicalCertificatePayload
 ): string {
+  const signatories = payload.signatories ?? [];
+  const witnesses = payload.witnesses ?? [];
   const ordered = {
     version: '1.0',
-    serialNumber: String(payload.serialNumber || '').trim(),
-    templateSlug: String(payload.templateSlug || '').trim(),
-    organizationName: String(payload.organizationName || '').trim(),
-    recipientFullName: String(payload.recipientFullName || '').trim(),
-    recipientChosenName: String(payload.recipientChosenName || '').trim(),
-    nationalIdHash: String(payload.nationalIdHash || '').trim(),
-    issuedAt: String(payload.issuedAt || '').trim(),
-    expiresAt: String(payload.expiresAt || '').trim(),
-    signatories: (payload.signatories || []).map((s) => ({
-      name: String(s.name || '').trim(),
-      title: String(s.title || '').trim(),
+    serialNumber: cleanStr(payload.serialNumber),
+    templateSlug: cleanStr(payload.templateSlug),
+    organizationName: cleanStr(payload.organizationName),
+    recipientFullName: cleanStr(payload.recipientFullName),
+    recipientChosenName: cleanStr(payload.recipientChosenName),
+    nationalIdHash: cleanStr(payload.nationalIdHash),
+    issuedAt: cleanStr(payload.issuedAt),
+    expiresAt: cleanStr(payload.expiresAt),
+    signatories: signatories.map((s) => ({
+      name: cleanStr(s.name),
+      title: cleanStr(s.title),
     })),
-    witnesses: (payload.witnesses || []).map((w) => ({
-      fullName: String(w.fullName || '').trim(),
-      role: String(w.role || '').trim(),
+    witnesses: witnesses.map((w) => ({
+      fullName: cleanStr(w.fullName),
+      role: cleanStr(w.role),
     })),
   };
   return JSON.stringify(ordered);

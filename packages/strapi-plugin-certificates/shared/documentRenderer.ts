@@ -74,6 +74,98 @@ export function renderVerificationMatrixSvg(seedText: string, accentColor = '#14
   ].join('');
 }
 
+function buildTemplateVariables(
+  certificate: CertificateRecord,
+  template: CertificateTemplate,
+  issuedDateFormatted: string,
+  secondaryFormattedList: string
+): Record<string, string> {
+  return {
+    recipientFullName: certificate.recipientFullName,
+    recipientChosenName:
+      certificate.recipientChosenName || certificate.recipientFullName,
+    chosenName: certificate.recipientChosenName || '',
+    nationalIdMasked: certificate.nationalIdMasked || 'N/A',
+    recipientNationality: certificate.recipientNationality || '',
+    issuedDateFormatted,
+    secondaryDateFormatted: secondaryFormattedList || issuedDateFormatted,
+    serialNumber: certificate.serialNumber,
+    organizationName: template.organizationName,
+    ...(certificate.customData || {}),
+  };
+}
+
+function renderSignatoriesHtml(
+  signatories: CertificateRecord['signatories']
+): string {
+  return (signatories || [])
+    .map(
+      (sig, idx) => `
+      <div class="sig-block">
+        <div class="sig-line"><span class="esign-anchor">/sig_${idx + 1}/</span></div>
+        <div class="sig-name">${escapeHtml(sig.name)}</div>
+        <div class="sig-title">${escapeHtml(sig.title)}</div>
+        ${sig.role ? `<div class="sig-role">${escapeHtml(sig.role)}</div>` : ''}
+      </div>`
+    )
+    .join('');
+}
+
+function renderWitnessesHtml(witnesses: CertificateRecord['witnesses']): string {
+  const list = witnesses || [];
+  if (list.length === 0) return '';
+  const cards = list
+    .map(
+      (w, idx) => `
+            <div class="witness-card">
+              <div class="sig-line"><span class="esign-anchor">/wit_${idx + 1}/</span></div>
+              <div class="witness-name">${escapeHtml(w.fullName)}</div>
+              <div class="witness-meta">
+                ${w.role ? `<span>${escapeHtml(w.role)}</span>` : ''}
+                ${w.documentIdMasked ? `<span>ID: ${escapeHtml(w.documentIdMasked)}</span>` : ''}
+              </div>
+            </div>`
+    )
+    .join('');
+  return `
+      <div class="witness-section">
+        <div class="witness-heading">Official Witnesses</div>
+        <div class="witness-grid">${cards}
+        </div>
+      </div>`;
+}
+
+function renderOptionalHtmlFragments(
+  certificate: CertificateRecord,
+  template: CertificateTemplate,
+  secondaryFormattedList: string
+) {
+  return {
+    statusBanner:
+      certificate.status !== 'issued'
+        ? `<div class="watermark-alert">STATUS: ${escapeHtml(certificate.status.toUpperCase())}</div>`
+        : '',
+    headerHtml: template.headerText
+      ? `<div class="header-Invocation">${escapeHtml(template.headerText)}</div>`
+      : '',
+    subheaderHtml: template.organizationSubheader
+      ? `<div class="org-subheader">${escapeHtml(template.organizationSubheader)}</div>`
+      : '',
+    chosenNameHtml: certificate.recipientChosenName
+      ? `<div class="recipient-chosen">Chosen Name / Title: ${escapeHtml(certificate.recipientChosenName)}</div>`
+      : '',
+    secondaryDateHtml: secondaryFormattedList
+      ? `<span><strong>Secondary Calendar:</strong> ${escapeHtml(secondaryFormattedList)}</span>`
+      : '',
+    nationalIdHtml: certificate.nationalIdMasked
+      ? `<span><strong>Document ID:</strong> ${escapeHtml(certificate.nationalIdMasked)}</span>`
+      : '',
+    esignLineHtml: certificate.esignEnvelopeId
+      ? `<div>E-Sign Envelope (${escapeHtml(certificate.esignProvider || 'docusign')}): ${escapeHtml(certificate.esignEnvelopeId)} [${escapeHtml(certificate.esignEnvelopeStatus || 'sent')}]</div>`
+      : '',
+  };
+}
+
 export function renderPrintableCertificateHtml(params: {
   certificate: CertificateRecord;
   template: CertificateTemplate;
@@ -86,64 +178,24 @@ export function renderPrintableCertificateHtml(params: {
     .map((d) => `${d.label}: ${d.formatted}`)
     .join(' • ');
 
-  const variables: Record<string, string> = {
-    recipientFullName: certificate.recipientFullName,
-    recipientChosenName: certificate.recipientChosenName || certificate.recipientFullName,
-    chosenName: certificate.recipientChosenName || '',
-    nationalIdMasked: certificate.nationalIdMasked || 'N/A',
-    recipientNationality: certificate.recipientNationality || '',
+  const variables = buildTemplateVariables(
+    certificate,
+    template,
     issuedDateFormatted,
-    secondaryDateFormatted: secondaryFormattedList || issuedDateFormatted,
-    serialNumber: certificate.serialNumber,
-    organizationName: template.organizationName,
-    ...(certificate.customData || {}),
-  };
-
+    secondaryFormattedList
+  );
   const renderedBody = interpolateBodyTemplate(template.bodyTemplate, variables);
   const matrixSvg = renderVerificationMatrixSvg(
     `${certificate.serialNumber}:${certificate.cryptographicSignature}`,
     accent
   );
-
-  const signatoriesHtml = (certificate.signatories || [])
-    .map(
-      (sig, idx) => `
-      <div class="sig-block">
-        <div class="sig-line"><span class="esign-anchor">/sig_${idx + 1}/</span></div>
-        <div class="sig-name">${escapeHtml(sig.name)}</div>
-        <div class="sig-title">${escapeHtml(sig.title)}</div>
-        ${sig.role ? `<div class="sig-role">${escapeHtml(sig.role)}</div>` : ''}
-      </div>`
-    )
-    .join('');
-
-  const witnessesHtml =
-    (certificate.witnesses || []).length > 0
-      ? `
-      <div class="witness-section">
-        <div class="witness-heading">Official Witnesses</div>
-        <div class="witness-grid">
-          ${certificate.witnesses
-            .map(
-              (w, idx) => `
-            <div class="witness-card">
-              <div class="sig-line"><span class="esign-anchor">/wit_${idx + 1}/</span></div>
-              <div class="witness-name">${escapeHtml(w.fullName)}</div>
-              <div class="witness-meta">
-                ${w.role ? `<span>${escapeHtml(w.role)}</span>` : ''}
-                ${w.documentIdMasked ? `<span>ID: ${escapeHtml(w.documentIdMasked)}</span>` : ''}
-              </div>
-            </div>`
-            )
-            .join('')}
-        </div>
-      </div>`
-      : '';
-
-  const statusBanner =
-    certificate.status !== 'issued'
-      ? `<div class="watermark-alert">STATUS: ${escapeHtml(certificate.status.toUpperCase())}</div>`
-      : '';
+  const signatoriesHtml = renderSignatoriesHtml(certificate.signatories);
+  const witnessesHtml = renderWitnessesHtml(certificate.witnesses);
+  const fragments = renderOptionalHtmlFragments(
+    certificate,
+    template,
+    secondaryFormattedList
+  );
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -329,35 +381,23 @@ export function renderPrintableCertificateHtml(params: {
 <body>
   <div class="certificate-frame">
     <div class="certificate-inner">
-      ${statusBanner}
-      ${template.headerText ? `<div class="header-Invocation">${escapeHtml(template.headerText)}</div>` : ''}
+      ${fragments.statusBanner}
+      ${fragments.headerHtml}
       <div class="org-name">${escapeHtml(template.organizationName)}</div>
-      ${template.organizationSubheader ? `<div class="org-subheader">${escapeHtml(template.organizationSubheader)}</div>` : ''}
+      ${fragments.subheaderHtml}
       <div class="title-wrap">
         <div class="cert-title">${escapeHtml(template.titleText)}</div>
       </div>
       <div class="recipient-banner">
         <div class="recipient-name">${escapeHtml(certificate.recipientFullName)}</div>
-        ${
-          certificate.recipientChosenName
-            ? `<div class="recipient-chosen">Chosen Name / Title: ${escapeHtml(certificate.recipientChosenName)}</div>`
-            : ''
-        }
+        ${fragments.chosenNameHtml}
       </div>
       <div class="cert-body">${renderedBody}</div>
       <div class="dates-bar">
         <span><strong>Serial No:</strong> ${escapeHtml(certificate.serialNumber)}</span>
         <span><strong>Issued Date:</strong> ${escapeHtml(issuedDateFormatted)}</span>
-        ${
-          secondaryFormattedList
-            ? `<span><strong>Secondary Calendar:</strong> ${escapeHtml(secondaryFormattedList)}</span>`
-            : ''
-        }
-        ${
-          certificate.nationalIdMasked
-            ? `<span><strong>Document ID:</strong> ${escapeHtml(certificate.nationalIdMasked)}</span>`
-            : ''
-        }
+        ${fragments.secondaryDateHtml}
+        ${fragments.nationalIdHtml}
       </div>
       <div class="sig-row">${signatoriesHtml}</div>
       ${witnessesHtml}
@@ -367,11 +407,7 @@ export function renderPrintableCertificateHtml(params: {
           <div>Serial: ${escapeHtml(certificate.serialNumber)} | Key Fingerprint: ${escapeHtml(certificate.publicKeyFingerprint)}</div>
           <div>Payload SHA-256: ${escapeHtml(certificate.canonicalPayloadHash.slice(0, 32))}...</div>
           <div>Signature (Ed25519): ${escapeHtml(certificate.cryptographicSignature.slice(0, 40))}...</div>
-          ${
-            certificate.esignEnvelopeId
-              ? `<div>E-Sign Envelope (${escapeHtml(certificate.esignProvider || 'docusign')}): ${escapeHtml(certificate.esignEnvelopeId)} [${escapeHtml(certificate.esignEnvelopeStatus || 'sent')}]</div>`
-              : ''
-          }
+          ${fragments.esignLineHtml}
           <div>Verify Online: ${escapeHtml(verificationUrl)}</div>
         </div>
         <div>${matrixSvg}</div>
