@@ -42,6 +42,8 @@ export const DEFAULT_BROADCAST_SETTINGS: BroadcastSettings = {
   dryRun: true,
   enableInboxSubscriberBridge: true,
   enableEventHubAutomations: true,
+  enableEmailDesignerBridge: true,
+  defaultEmailTemplateRef: '',
   siteBaseUrl: 'https://mezquitabogota.org',
   organizationName: 'Mezquita Central Abu Bakr As-Siddiq — Bogotá',
   emailFromAddress: 'no-reply@mezquitabogota.org',
@@ -49,6 +51,7 @@ export const DEFAULT_BROADCAST_SETTINGS: BroadcastSettings = {
   telegramEnabled: true,
   telegramBotToken: '',
   telegramDefaultChatId: '@MezquitaCentralBogota',
+  telegramTopicChatMap: {},
   telegramTopicThreadMap: {},
   whatsappEnabled: true,
   whatsappDriver: 'meta-cloud',
@@ -58,6 +61,7 @@ export const DEFAULT_BROADCAST_SETTINGS: BroadcastSettings = {
   whatsappGatewaySession: 'default',
   whatsappGatewayApiKey: '',
   whatsappDefaultRecipients: [],
+  whatsappTopicGroupMap: {},
   allowLocalhostGateways: false,
   publicChannelLinks: [
     {

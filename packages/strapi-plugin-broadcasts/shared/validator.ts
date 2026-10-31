@@ -19,6 +19,23 @@ export interface ValidationOutcome {
   errors: string[];
 }
 
+function checkGatewayProtocol(
+  protocol: string,
+  hostname: string,
+  allowLocalhost?: boolean
+): string | null {
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+  if (protocol === 'http:') {
+    return !isLocalhost || !allowLocalhost
+      ? 'HTTPS protocol is required for external gateway URLs'
+      : null;
+  }
+  if (protocol !== 'https:') {
+    return 'Only HTTPS (or explicitly allowed localhost HTTP) protocol is permitted';
+  }
+  return null;
+}
+
 export function validateGatewayUrl(
   rawUrl: string,
   options: { allowLocalhost?: boolean } = {}
@@ -38,17 +55,17 @@ export function validateGatewayUrl(
 
   const hostname = parsed.hostname.toLowerCase();
   if (BLOCKED_PRIVATE_HOSTS.has(hostname) || hostname.startsWith('169.254.')) {
-    errors.push('Cloud metadata and link-local hosts are forbidden (SSRF protection)');
+    errors.push(
+      'Cloud metadata and link-local hosts are forbidden (SSRF protection)'
+    );
   }
 
-  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
-  if (parsed.protocol === 'http:') {
-    if (!isLocalhost || !options.allowLocalhost) {
-      errors.push('HTTPS protocol is required for external gateway URLs');
-    }
-  } else if (parsed.protocol !== 'https:') {
-    errors.push('Only HTTPS (or explicitly allowed localhost HTTP) protocol is permitted');
-  }
+  const protoErr = checkGatewayProtocol(
+    parsed.protocol,
+    hostname,
+    options.allowLocalhost
+  );
+  if (protoErr) errors.push(protoErr);
 
   return {
     valid: errors.length === 0,
@@ -68,10 +85,43 @@ export function normalizeChannels(rawChannels: unknown): BroadcastChannel[] {
   return filtered.length > 0 ? Array.from(new Set(filtered)) : ['email'];
 }
 
-export function isSupportedWhatsAppDriver(driver: unknown): driver is WhatsAppDriver {
+export function isSupportedWhatsAppDriver(
+  driver: unknown
+): driver is WhatsAppDriver {
   return (SUPPORTED_WHATSAPP_DRIVERS as readonly string[]).includes(
     String(driver || '').trim()
   );
+}
+
+function validateCampaignChannelsList(
+  rawChannels: unknown,
+  errors: string[]
+): void {
+  const channels = Array.isArray(rawChannels) ? rawChannels : [];
+  if (channels.length === 0) {
+    errors.push('At least one broadcast channel is required');
+    return;
+  }
+  for (const ch of channels) {
+    if (!(SUPPORTED_CHANNELS as readonly string[]).includes(String(ch))) {
+      errors.push(`Unsupported broadcast channel: ${String(ch)}`);
+    }
+  }
+}
+
+function validateOptionalCtaUrl(
+  ctaUrl: string | undefined,
+  errors: string[]
+): void {
+  if (!ctaUrl) return;
+  try {
+    const parsed = new URL(ctaUrl);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      errors.push('ctaUrl must use http or https protocol');
+    }
+  } catch {
+    errors.push('ctaUrl must be a valid URL');
+  }
 }
 
 export function validateCampaignInput(
@@ -96,32 +146,24 @@ export function validateCampaignInput(
     errors.push('Campaign bodyText must be at least 5 characters');
   }
 
-  const channels = Array.isArray(input.channels) ? input.channels : [];
-  if (channels.length === 0) {
-    errors.push('At least one broadcast channel is required');
-  } else {
-    for (const ch of channels) {
-      if (!(SUPPORTED_CHANNELS as readonly string[]).includes(String(ch))) {
-        errors.push(`Unsupported broadcast channel: ${String(ch)}`);
-      }
-    }
-  }
-
-  if (input.ctaUrl) {
-    try {
-      const parsed = new URL(input.ctaUrl);
-      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-        errors.push('ctaUrl must use http or https protocol');
-      }
-    } catch {
-      errors.push('ctaUrl must be a valid URL');
-    }
-  }
+  validateCampaignChannelsList(input.channels, errors);
+  validateOptionalCtaUrl(input.ctaUrl, errors);
 
   return {
     valid: errors.length === 0,
     errors,
   };
+}
+
+function requireNonEmptyFields(
+  fields: Array<[string | undefined, string]>,
+  errors: string[]
+): void {
+  for (const [val, errMessage] of fields) {
+    if (!String(val || '').trim()) {
+      errors.push(errMessage);
+    }
+  }
 }
 
 export function validateAutomationRuleInput(
@@ -130,9 +172,6 @@ export function validateAutomationRuleInput(
   const errors: string[] = [];
   const slug = String(input.slug || '').trim();
   const name = String(input.name || '').trim();
-  const eventName = String(input.eventName || '').trim();
-  const subjectTemplate = String(input.subjectTemplate || '').trim();
-  const bodyTextTemplate = String(input.bodyTextTemplate || '').trim();
 
   if (!slug || !SLUG_REGEX.test(slug)) {
     errors.push('Automation rule slug must be lowercase kebab-case');
@@ -140,15 +179,15 @@ export function validateAutomationRuleInput(
   if (name.length < 3) {
     errors.push('Automation rule name must be at least 3 characters');
   }
-  if (!eventName) {
-    errors.push('eventName is required');
-  }
-  if (!subjectTemplate) {
-    errors.push('subjectTemplate is required');
-  }
-  if (!bodyTextTemplate) {
-    errors.push('bodyTextTemplate is required');
-  }
+
+  requireNonEmptyFields(
+    [
+      [input.eventName, 'eventName is required'],
+      [input.subjectTemplate, 'subjectTemplate is required'],
+      [input.bodyTextTemplate, 'bodyTextTemplate is required'],
+    ],
+    errors
+  );
 
   return {
     valid: errors.length === 0,

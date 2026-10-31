@@ -8,6 +8,7 @@ import {
   type CampaignRecord,
   type ChannelDispatchResult,
   type DeliveryLogRecord,
+  type EmailDesignerTemplateSummary,
   type SubscriberRecipient,
 } from '../../../shared';
 
@@ -52,6 +53,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     ctx.body = { data: STARTER_CAMPAIGN_TEMPLATES };
   },
 
+  async listEmailTemplates(ctx: ControllerCtx) {
+    const svc = strapi.plugin(PLUGIN_ID).service<{
+      listEmailDesignerTemplates(): Promise<EmailDesignerTemplateSummary[]>;
+    }>('transportService');
+    const data = await svc.listEmailDesignerTemplates();
+    ctx.body = { data };
+  },
+
   async listCampaigns(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
       listCampaigns(params?: {
@@ -77,6 +86,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         (ctx.request.body || {}) as Partial<CampaignRecord>
       );
       ctx.status = 201;
+      ctx.body = { data };
+    } catch (err) {
+      ctx.status = 400;
+      ctx.body = { error: (err as Error).message };
+    }
+  },
+
+  async updateCampaign(ctx: ControllerCtx) {
+    const documentId = ctx.params?.documentId || '';
+    const svc = strapi.plugin(PLUGIN_ID).service<{
+      updateCampaign(
+        documentIdOrSlug: string,
+        input: Partial<CampaignRecord>
+      ): Promise<CampaignRecord>;
+    }>('campaignService');
+
+    try {
+      const data = await svc.updateCampaign(
+        documentId,
+        (ctx.request.body || {}) as Partial<CampaignRecord>
+      );
       ctx.body = { data };
     } catch (err) {
       ctx.status = 400;
@@ -151,6 +181,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         (ctx.request.body || {}) as Partial<AutomationRuleRecord>
       );
       ctx.status = 201;
+      ctx.body = { data };
+    } catch (err) {
+      ctx.status = 400;
+      ctx.body = { error: (err as Error).message };
+    }
+  },
+
+  async updateAutomationRule(ctx: ControllerCtx) {
+    const documentId = ctx.params?.documentId || '';
+    const svc = strapi.plugin(PLUGIN_ID).service<{
+      updateRule(
+        documentIdOrSlug: string,
+        input: Partial<AutomationRuleRecord>
+      ): Promise<AutomationRuleRecord>;
+    }>('automationService');
+
+    try {
+      const data = await svc.updateRule(
+        documentId,
+        (ctx.request.body || {}) as Partial<AutomationRuleRecord>
+      );
       ctx.body = { data };
     } catch (err) {
       ctx.status = 400;

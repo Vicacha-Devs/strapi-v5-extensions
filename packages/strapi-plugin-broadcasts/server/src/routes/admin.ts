@@ -21,6 +21,12 @@ export default {
     },
     {
       method: 'GET',
+      path: '/email-templates',
+      handler: 'broadcastController.listEmailTemplates',
+      config: { policies: [] },
+    },
+    {
+      method: 'GET',
       path: '/campaigns',
       handler: 'broadcastController.listCampaigns',
       config: { policies: [] },
@@ -29,6 +35,12 @@ export default {
       method: 'POST',
       path: '/campaigns',
       handler: 'broadcastController.createCampaign',
+      config: { policies: [] },
+    },
+    {
+      method: 'PUT',
+      path: '/campaigns/:documentId',
+      handler: 'broadcastController.updateCampaign',
       config: { policies: [] },
     },
     {
@@ -53,6 +65,12 @@ export default {
       method: 'POST',
       path: '/automation-rules',
       handler: 'broadcastController.createAutomationRule',
+      config: { policies: [] },
+    },
+    {
+      method: 'PUT',
+      path: '/automation-rules/:documentId',
+      handler: 'broadcastController.updateAutomationRule',
       config: { policies: [] },
     },
     {
