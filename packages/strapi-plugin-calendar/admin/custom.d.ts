@@ -1,11 +1,11 @@
-declare module '*.png';
-declare module '*.svg';
-declare module '*.json' {
+declare module "*.png";
+declare module "*.svg";
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }
 
-declare module 'react' {
+declare module "react" {
   export type ReactNode = unknown;
 
   export interface ReactElement<P = unknown> {
@@ -72,13 +72,14 @@ declare module 'react' {
   export as namespace React;
 }
 
-declare module 'react/jsx-runtime' {
+declare module "react/jsx-runtime" {
+  import type { ReactElement } from "react";
   export const Fragment: unknown;
-  export function jsx(type: unknown, props: unknown, key?: unknown): import('react').ReactElement;
-  export function jsxs(type: unknown, props: unknown, key?: unknown): import('react').ReactElement;
+  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
 
   export namespace JSX {
-    interface Element extends import('react').ReactElement {}
+    interface Element extends ReactElement {}
     interface IntrinsicAttributes {
       key?: string | number | null;
       ref?: unknown;
@@ -90,7 +91,7 @@ declare module 'react/jsx-runtime' {
   }
 }
 
-declare module 'react-intl' {
+declare module "react-intl" {
   export interface MessageDescriptor {
     id: string;
     defaultMessage?: string;
@@ -105,7 +106,7 @@ declare module 'react-intl' {
   export function useIntl(): IntlShape;
 }
 
-declare module '@strapi/strapi/admin' {
+declare module "@strapi/strapi/admin" {
   export type DefaultFetchPayload = { data?: unknown; [key: string]: unknown };
   export interface FetchResponse<T = DefaultFetchPayload> {
     data: T;
@@ -121,16 +122,16 @@ declare module '@strapi/strapi/admin' {
     toggleNotification: (opts: { type?: string; message: string }) => void;
   };
   export const Layouts: {
-    Root: import('react').FC<Record<string, unknown>>;
-    Header: import('react').FC<Record<string, unknown>>;
-    Content: import('react').FC<Record<string, unknown>>;
-    Action: import('react').FC<Record<string, unknown>>;
+    Root: import("react").FC<Record<string, unknown>>;
+    Header: import("react").FC<Record<string, unknown>>;
+    Content: import("react").FC<Record<string, unknown>>;
+    Action: import("react").FC<Record<string, unknown>>;
   };
   export const Page: {
-    Main: import('react').FC<Record<string, unknown>>;
-    Title: import('react').FC<Record<string, unknown>>;
-    Loading: import('react').FC<Record<string, unknown>>;
-    Error: import('react').FC<Record<string, unknown>>;
+    Main: import("react").FC<Record<string, unknown>>;
+    Title: import("react").FC<Record<string, unknown>>;
+    Loading: import("react").FC<Record<string, unknown>>;
+    Error: import("react").FC<Record<string, unknown>>;
   };
   export interface StrapiAdminApp {
     customFields: {
@@ -143,9 +144,7 @@ declare module '@strapi/strapi/admin' {
       links: Array<Record<string, unknown>>
     ): void;
     registerPlugin(config: Record<string, unknown>): void;
-    getPlugin(
-      name: string
-    ):
+    getPlugin(name: string):
       | {
           apis?: {
             addEditViewSidePanel?: (panels: Array<unknown>) => void;
@@ -155,17 +154,19 @@ declare module '@strapi/strapi/admin' {
   }
 }
 
-declare module '@strapi/design-system' {
+declare module "@strapi/design-system" {
   export type DesignComponentProps = {
     [key: string]: unknown;
-    children?: import('react').ReactNode;
-    onChange?: ((val: never) => void) | ((e: import('react').ChangeEvent<HTMLInputElement>) => void);
+    children?: import("react").ReactNode;
+    onChange?:
+      | ((val: never) => void)
+      | ((e: import("react").ChangeEvent<HTMLInputElement>) => void);
     onCheckedChange?: (checked: boolean) => void;
     onValueChange?: ((val: never) => void) | ((val: string) => void);
     onClear?: () => void;
-    onClick?: (e?: import('react').MouseEvent<HTMLElement>) => void;
+    onClick?: (e?: import("react").MouseEvent<HTMLElement>) => void;
   };
-  type DesignComponent = import('react').FC<DesignComponentProps>;
+  type DesignComponent = import("react").FC<DesignComponentProps>;
   export const DesignSystemProvider: DesignComponent;
   export const Main: DesignComponent;
   export const Box: DesignComponent;
@@ -232,7 +233,7 @@ declare module '@strapi/design-system' {
   };
 }
 
-declare module 'styled-components' {
+declare module "styled-components" {
   export function useTheme(): {
     colors?: Record<string, string | undefined>;
     spaces?: Record<string, string | undefined>;
@@ -241,10 +242,10 @@ declare module 'styled-components' {
   };
 }
 
-declare module '@strapi/design-system/*';
+declare module "@strapi/design-system/*";
 
-declare module '@strapi/icons' {
-  type IconComponent = import('react').FC<Record<string, unknown>>;
+declare module "@strapi/icons" {
+  type IconComponent = import("react").FC<Record<string, unknown>>;
   export const Calendar: IconComponent;
   export const Check: IconComponent;
   export const CheckCircle: IconComponent;
@@ -267,7 +268,7 @@ declare module '@strapi/icons' {
   export const WarningCircle: IconComponent;
 }
 
-declare module '@fullcalendar/core' {
+declare module "@fullcalendar/core" {
   export interface CalendarApi {
     changeView(viewName: string): void;
     prev(): void;
@@ -346,7 +347,7 @@ declare module '@fullcalendar/core' {
 
   export interface LocaleInput {
     code: string;
-    direction?: 'ltr' | 'rtl';
+    direction?: "ltr" | "rtl";
     week?: {
       dow?: number;
       doy?: number;
@@ -359,24 +360,24 @@ declare module '@fullcalendar/core' {
   }
 }
 
-declare module '@fullcalendar/core/locales-all' {
-  const allLocales: Array<import('@fullcalendar/core').LocaleInput>;
+declare module "@fullcalendar/core/locales-all" {
+  const allLocales: Array<import("@fullcalendar/core").LocaleInput>;
   export default allLocales;
 }
 
-declare module '@fullcalendar/react' {
+declare module "@fullcalendar/react" {
   export interface FullCalendarProps {
     ref?: unknown;
     plugins?: unknown[];
     initialView?: string;
     views?: Record<string, Record<string, unknown>>;
     headerToolbar?: boolean | Record<string, unknown>;
-    locales?: Array<import('@fullcalendar/core').LocaleInput>;
-    locale?: string | import('@fullcalendar/core').LocaleInput;
-    direction?: 'ltr' | 'rtl';
+    locales?: Array<import("@fullcalendar/core").LocaleInput>;
+    locale?: string | import("@fullcalendar/core").LocaleInput;
+    direction?: "ltr" | "rtl";
     firstDay?: number;
     weekNumbers?: boolean;
-    weekNumberCalculation?: 'local' | 'ISO' | ((date: Date) => number);
+    weekNumberCalculation?: "local" | "ISO" | ((date: Date) => number);
     weekText?: string;
     allDayText?: string;
     moreLinkText?: string | ((num: number) => string);
@@ -396,45 +397,47 @@ declare module '@fullcalendar/react' {
     dayMaxEvents?: boolean | number;
     height?: string | number;
     events?: Array<Record<string, unknown>>;
-    datesSet?: (arg: import('@fullcalendar/core').DatesSetArg) => void;
-    dateClick?: (arg: import('@fullcalendar/core').DateClickArg) => void;
-    select?: (arg: import('@fullcalendar/core').DateSelectArg) => void;
-    eventClick?: (arg: import('@fullcalendar/core').EventClickArg) => void;
-    eventDrop?: (arg: import('@fullcalendar/core').EventDropArg) => void;
-    eventResize?: (arg: import('@fullcalendar/core').EventDropArg) => void;
-    dayCellContent?: (arg: import('@fullcalendar/core').DayCellContentArg) => import('react').ReactNode;
-    eventContent?: (arg: import('@fullcalendar/core').EventContentArg) => import('react').ReactNode;
+    datesSet?: (arg: import("@fullcalendar/core").DatesSetArg) => void;
+    dateClick?: (arg: import("@fullcalendar/core").DateClickArg) => void;
+    select?: (arg: import("@fullcalendar/core").DateSelectArg) => void;
+    eventClick?: (arg: import("@fullcalendar/core").EventClickArg) => void;
+    eventDrop?: (arg: import("@fullcalendar/core").EventDropArg) => void;
+    eventResize?: (arg: import("@fullcalendar/core").EventDropArg) => void;
+    dayCellContent?: (
+      arg: import("@fullcalendar/core").DayCellContentArg
+    ) => import("react").ReactNode;
+    eventContent?: (arg: import("@fullcalendar/core").EventContentArg) => import("react").ReactNode;
   }
 
   export default class FullCalendar {
     props: FullCalendarProps;
     constructor(props: FullCalendarProps);
-    getApi(): import('@fullcalendar/core').CalendarApi;
-    render(): import('react').ReactNode;
+    getApi(): import("@fullcalendar/core").CalendarApi;
+    render(): import("react").ReactNode;
   }
 }
 
-declare module '@fullcalendar/daygrid' {
+declare module "@fullcalendar/daygrid" {
   const plugin: unknown;
   export default plugin;
 }
 
-declare module '@fullcalendar/timegrid' {
+declare module "@fullcalendar/timegrid" {
   const plugin: unknown;
   export default plugin;
 }
 
-declare module '@fullcalendar/list' {
+declare module "@fullcalendar/list" {
   const plugin: unknown;
   export default plugin;
 }
 
-declare module '@fullcalendar/multimonth' {
+declare module "@fullcalendar/multimonth" {
   const plugin: unknown;
   export default plugin;
 }
 
-declare module '@fullcalendar/interaction' {
+declare module "@fullcalendar/interaction" {
   export interface DateClickArg {
     date: Date;
     dateStr: string;

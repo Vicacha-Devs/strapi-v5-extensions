@@ -1,17 +1,18 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   formatDateInCalendarSystem,
   registerCalendarSystemFormatter,
   resolveOccurrenceAlternateDates,
   unregisterCalendarSystemFormatter,
-} from '../../../shared/calendarSystems';
-import { buildCalendarLinks } from '../../../shared/icalGenerator';
-import { PLUGIN_ID } from '../../../shared/pluginId';
+} from "../../../shared/calendarSystems";
+import { buildCalendarLinks } from "../../../shared/icalGenerator";
+import { PLUGIN_ID } from "../../../shared/pluginId";
 import {
   expandRuleSlots,
   parseRRuleFieldValue,
   type ExpandedSlot,
-} from '../../../shared/rruleEngine';
+} from "../../../shared/rruleEngine";
 import type {
   CalendarItemStatus,
   CalendarPluginSettings,
@@ -21,25 +22,25 @@ import type {
   ExpandedCalendarOccurrence,
   RRuleFieldValue,
   TimeSlotWindow,
-} from '../../../shared/types';
+} from "../../../shared/types";
 import {
   getCalendarService,
   type OccurrenceQueryParams,
   type OccurrenceService,
   type QuickCreateEntryParams,
   type RescheduleOccurrenceParams,
-} from '../types';
+} from "../types";
 import {
   buildQuickCreatePayload,
   matchesSourceFilter,
   resolveTargetSource,
   type ContentTypeSchemaShape,
-} from './quickCreateHelpers';
+} from "./quickCreateHelpers";
 
 const DEFAULT_TIME_SLOTS: Record<string, TimeSlotWindow> = {
-  morning: { start: '09:00:00', end: '11:00:00' },
-  afternoon: { start: '14:00:00', end: '16:00:00' },
-  evening: { start: '18:00:00', end: '20:00:00' },
+  morning: { start: "09:00:00", end: "11:00:00" },
+  afternoon: { start: "14:00:00", end: "16:00:00" },
+  evening: { start: "18:00:00", end: "20:00:00" },
 };
 
 function resolveDateOnlyWithSlot(
@@ -47,8 +48,8 @@ function resolveDateOnlyWithSlot(
   rawSlot: unknown,
   source: CalendarSourceMapping
 ): { startDate: string; endDate: string | null; allDay: boolean } {
-  if (typeof rawSlot === 'string' && rawSlot) {
-    const slotMap = { ...DEFAULT_TIME_SLOTS, ...(source.timeSlotMap ?? {}) };
+  if (typeof rawSlot === "string" && rawSlot) {
+    const slotMap = { ...DEFAULT_TIME_SLOTS, ...source.timeSlotMap };
     const mapped = slotMap[rawSlot];
     if (mapped) {
       return {
@@ -78,36 +79,38 @@ function resolveStartEndFromDocument(
   source: CalendarSourceMapping
 ): { startDate: string; endDate: string | null; allDay: boolean } | null {
   const rawStart = doc[source.fields.startDate];
-  if (!rawStart || typeof rawStart !== 'string') return null;
+  if (!rawStart || typeof rawStart !== "string") return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(rawStart)) {
     const rawSlot = source.fields.timeSlot ? doc[source.fields.timeSlot] : null;
     return resolveDateOnlyWithSlot(rawStart, rawSlot, source);
   }
   const rawEnd = source.fields.endDate ? doc[source.fields.endDate] : null;
-  const allDay =
-    typeof doc.allDay === 'boolean' ? doc.allDay : Boolean(source.defaultAllDay);
+  const allDay = typeof doc.allDay === "boolean" ? doc.allDay : Boolean(source.defaultAllDay);
   return {
     startDate: rawStart,
-    endDate: typeof rawEnd === 'string' && rawEnd ? rawEnd : null,
+    endDate: typeof rawEnd === "string" && rawEnd ? rawEnd : null,
     allDay,
   };
 }
 
 const STATUS_MAP: Record<string, CalendarItemStatus> = {
-  cancelled: 'cancelled',
-  canceled: 'cancelled',
-  rejected: 'cancelled',
-  postponed: 'postponed',
-  pending: 'postponed',
-  rescheduled: 'rescheduled',
+  cancelled: "cancelled",
+  canceled: "cancelled",
+  rejected: "cancelled",
+  postponed: "postponed",
+  pending: "postponed",
+  rescheduled: "rescheduled",
 };
 
 function mapStatus(rawStatus: unknown): CalendarItemStatus {
-  if (typeof rawStatus !== 'string') return 'scheduled';
-  return STATUS_MAP[rawStatus.toLowerCase()] ?? 'scheduled';
+  if (typeof rawStatus !== "string") return "scheduled";
+  return STATUS_MAP[rawStatus.toLowerCase()] ?? "scheduled";
 }
 
-function resolveQueryWindow(params: OccurrenceQueryParams): { windowStart: string; windowEnd: string } {
+function resolveQueryWindow(params: OccurrenceQueryParams): {
+  windowStart: string;
+  windowEnd: string;
+} {
   const now = new Date();
   const defaultFrom = new Date(Date.UTC(now.getUTCFullYear(), 0, 1, 0, 0, 0)).toISOString();
   const defaultTo = new Date(Date.UTC(now.getUTCFullYear(), 11, 31, 23, 59, 59)).toISOString();
@@ -127,11 +130,11 @@ function buildDocQueryOpts(
   if (params.documentId) {
     opts.filters = { documentId: { $eq: params.documentId } };
   }
-  if (includeLocale && params.locale && params.locale !== 'auto') {
+  if (includeLocale && params.locale && params.locale !== "auto") {
     opts.locale = params.locale;
   }
   if (!params.includeDrafts) {
-    opts.status = 'published';
+    opts.status = "published";
   }
   return opts;
 }
@@ -144,7 +147,9 @@ async function fetchDocumentsForSource(
   const fallbackOpts = buildDocQueryOpts(params, false);
   try {
     const primaryDocs = await strapi.documents(uid).findMany(buildDocQueryOpts(params, true));
-    return primaryDocs.length > 0 ? primaryDocs : await strapi.documents(uid).findMany(fallbackOpts);
+    return primaryDocs.length > 0
+      ? primaryDocs
+      : await strapi.documents(uid).findMany(fallbackOpts);
   } catch {
     try {
       return await strapi.documents(uid).findMany(fallbackOpts);
@@ -174,19 +179,15 @@ function resolveDocColor(
   const catColor = categoryVal ? source.categoryColors?.[categoryVal] : undefined;
   if (catColor) return catColor;
   const docColorVal = source.fields.color ? doc[source.fields.color] : doc.color;
-  if (typeof docColorVal === 'string' && docColorVal.startsWith('#')) {
+  if (typeof docColorVal === "string" && docColorVal.startsWith("#")) {
     return docColorVal;
   }
   return source.color;
 }
 
-function readOptionalField(doc: Record<string, unknown>, fieldName?: string): string {
-  return fieldName ? String(doc[fieldName] ?? '') : '';
-}
-
-function emptyToUndefined(value: string | undefined): string | undefined {
-  return value ? value : undefined;
-}
+const optStr = (v?: string) => (v ? v : undefined);
+const readField = (doc: Record<string, unknown>, key?: string) =>
+  key ? String(doc[key] ?? "") : "";
 
 interface DocExpansionMeta {
   doc: Record<string, unknown>;
@@ -207,7 +208,10 @@ interface DocExpansionMeta {
   locale: string;
 }
 
-function buildOccurrenceItem(slot: ExpandedSlot, meta: DocExpansionMeta): ExpandedCalendarOccurrence {
+function buildOccurrenceItem(
+  slot: ExpandedSlot,
+  meta: DocExpansionMeta
+): ExpandedCalendarOccurrence {
   const effectiveTitle = slot.override?.title || meta.baseTitle;
   const effectiveLocation = slot.override?.location || meta.baseLocation;
   const allDay = Boolean(meta.recurrence.allDay);
@@ -245,13 +249,13 @@ function buildOccurrenceItem(slot: ExpandedSlot, meta: DocExpansionMeta): Expand
     timezone: meta.recurrence.timezone,
     title: effectiveTitle,
     slug: meta.slug,
-    summary: emptyToUndefined(meta.summary),
-    location: emptyToUndefined(effectiveLocation),
+    summary: optStr(meta.summary),
+    location: optStr(effectiveLocation),
     category: meta.categoryVal,
     status: meta.statusVal,
     color: meta.color,
     isRecurring: slot.isRecurring,
-    rrule: emptyToUndefined(meta.recurrence.rrule),
+    rrule: optStr(meta.recurrence.rrule),
     rscale: slot.rscale,
     isOverridden: slot.isOverridden,
     calendarLinks,
@@ -261,7 +265,7 @@ function buildOccurrenceItem(slot: ExpandedSlot, meta: DocExpansionMeta): Expand
 }
 
 function matchesCategoryParam(categoryVal: string, filterCategory?: string): boolean {
-  if (!filterCategory || filterCategory === 'all') return true;
+  if (!filterCategory || filterCategory === "all") return true;
   return categoryVal.toLowerCase() === filterCategory.toLowerCase();
 }
 
@@ -272,7 +276,7 @@ function resolveDocRecurrence(
   allDay: boolean
 ): RRuleFieldValue {
   const rawRecurrence = source.fields.rrule ? doc[source.fields.rrule] : null;
-  const tz = typeof doc.timezone === 'string' && doc.timezone ? doc.timezone : defaultTimezone;
+  const tz = typeof doc.timezone === "string" && doc.timezone ? doc.timezone : defaultTimezone;
   const recurrence = parseRRuleFieldValue(rawRecurrence, tz);
   if (allDay) recurrence.allDay = true;
   return recurrence;
@@ -288,25 +292,25 @@ function buildDocExpansionMeta(
   settings: CalendarPluginSettings,
   locale?: string
 ): DocExpansionMeta {
-  const rawSlug = readOptionalField(doc, source.fields.slug);
-  const docLocale = typeof doc.locale === 'string' ? emptyToUndefined(doc.locale) : undefined;
+  const rawSlug = readField(doc, source.fields.slug);
+  const docLocale = typeof doc.locale === "string" ? optStr(doc.locale) : undefined;
   return {
     doc,
     docId,
     docLocale,
     source,
     recurrence,
-    baseTitle: String(doc[source.fields.title] ?? doc.title ?? 'Untitled'),
-    baseLocation: readOptionalField(doc, source.fields.location),
-    summary: readOptionalField(doc, source.fields.summary),
-    slug: emptyToUndefined(rawSlug),
-    categoryVal: emptyToUndefined(categoryVal),
+    baseTitle: String(doc[source.fields.title] ?? doc.title ?? "Untitled"),
+    baseLocation: readField(doc, source.fields.location),
+    summary: readField(doc, source.fields.summary),
+    slug: optStr(rawSlug),
+    categoryVal: optStr(categoryVal),
     statusVal: mapStatus(source.fields.status ? doc[source.fields.status] : doc.status),
     color: resolveDocColor(doc, source, categoryVal),
     baseDateKey,
     customFields: extractCustomFields(doc, source.fields.customFields),
     secondaryCalendars: settings.secondaryCalendars ?? [],
-    locale: locale || 'en',
+    locale: locale || "en",
   };
 }
 
@@ -318,11 +322,11 @@ function expandDocumentOccurrences(
   windowStart: string,
   windowEnd: string
 ): ExpandedCalendarOccurrence[] {
-  const docId = String(doc.documentId ?? doc.id ?? '');
+  const docId = String(doc.documentId ?? doc.id ?? "");
   if (!docId) return [];
   const startEnd = resolveStartEndFromDocument(doc, source);
   if (!startEnd) return [];
-  const categoryVal = readOptionalField(doc, source.fields.category);
+  const categoryVal = readField(doc, source.fields.category);
   if (!matchesCategoryParam(categoryVal, params.category)) return [];
 
   const recurrence = resolveDocRecurrence(doc, source, settings.defaultTimezone, startEnd.allDay);
@@ -353,7 +357,7 @@ function buildDirectUpdatePayload(
   source: CalendarSourceMapping
 ): Record<string, unknown> {
   if (params.cancelOccurrence && source.fields.status) {
-    return { [source.fields.status]: 'cancelled' };
+    return { [source.fields.status]: "cancelled" };
   }
   const payload: Record<string, unknown> = {
     [source.fields.startDate]: params.newStartDate,
@@ -369,9 +373,9 @@ function buildRecurrenceOverridePayload(
   rruleField: string,
   params: RescheduleOccurrenceParams
 ): Record<string, unknown> {
-  const nextOverrides = { ...(recurrence.overrides ?? {}) };
+  const nextOverrides = { ...recurrence.overrides };
   nextOverrides[params.occurrenceDate] = {
-    ...(nextOverrides[params.occurrenceDate] ?? {}),
+    ...nextOverrides[params.occurrenceDate],
     originalDate: params.occurrenceDate,
     cancelled: Boolean(params.cancelOccurrence),
     startDate: params.newStartDate || undefined,
@@ -386,8 +390,7 @@ function buildRecurrenceOverridePayload(
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
-  const getSettingsService = () =>
-    getCalendarService(strapi, PLUGIN_ID, 'settings');
+  const getSettingsService = () => getCalendarService(strapi, PLUGIN_ID, "settings");
 
   return {
     registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void {
@@ -401,7 +404,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
     formatDateInCalendarSystem(
       isoOrDateKey: string,
       system: CalendarSystemConfig,
-      locale = 'en',
+      locale = "en",
       options?: { compact?: boolean }
     ): string {
       return formatDateInCalendarSystem(isoOrDateKey, system, locale, options);
@@ -430,14 +433,16 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
       return allOccurrences;
     },
 
-    async rescheduleOccurrence(params: RescheduleOccurrenceParams): Promise<Record<string, unknown>> {
+    async rescheduleOccurrence(
+      params: RescheduleOccurrenceParams
+    ): Promise<Record<string, unknown>> {
       const settings = await getSettingsService().getSettings();
       const source =
         (settings.sources ?? []).find(
           (s: CalendarSourceMapping) => s.id === params.sourceId || s.uid === params.uid
         ) ?? settings.sources[0];
 
-      if (!source) throw new Error('Target calendar source is not configured.');
+      if (!source) throw new Error("Target calendar source is not configured.");
 
       const existing = await strapi.documents(source.uid).findOne({
         documentId: params.documentId,
@@ -465,7 +470,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
     async quickCreateEntry(params: QuickCreateEntryParams): Promise<Record<string, unknown>> {
       const settings = await getSettingsService().getSettings();
       const source = resolveTargetSource(settings.sources ?? [], params.sourceId);
-      if (!source) throw new Error('No calendar collection source is configured.');
+      if (!source) throw new Error("No calendar collection source is configured.");
 
       const contentTypes = (strapi.contentTypes ?? {}) as Record<
         string,
@@ -480,7 +485,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
 
       if (shouldPublish) {
         try {
-          return await strapi.documents(source.uid).create({ data, status: 'published' });
+          return await strapi.documents(source.uid).create({ data, status: "published" });
         } catch {
           return await strapi.documents(source.uid).create({ data });
         }

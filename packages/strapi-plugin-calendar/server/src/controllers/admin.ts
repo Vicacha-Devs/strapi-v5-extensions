@@ -1,25 +1,26 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../../shared/pluginId';
-import type { CalendarPluginSettings } from '../../../shared/types';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../../shared/pluginId";
+import type { CalendarPluginSettings } from "../../../shared/types";
 import {
   formatErrorMessage,
   getCalendarService,
   type QuickCreateEntryParams,
   type StrapiRouteContext,
-} from '../types';
+} from "../types";
 
 function readOptString(val: unknown): string | undefined {
-  return typeof val === 'string' && val ? val : undefined;
+  return typeof val === "string" && val ? val : undefined;
 }
 
 function parseQuickCreateBody(body: Record<string, unknown>): QuickCreateEntryParams {
   const statusRaw = body.bookingStatus;
   const bookingStatus =
-    statusRaw === 'pending' || statusRaw === 'confirmed' ? statusRaw : undefined;
+    statusRaw === "pending" || statusRaw === "confirmed" ? statusRaw : undefined;
   return {
     sourceId: readOptString(body.sourceId),
-    title: String(body.title ?? ''),
-    startDate: String(body.startDate ?? ''),
+    title: String(body.title ?? ""),
+    startDate: String(body.startDate ?? ""),
     endDate: readOptString(body.endDate),
     location: readOptString(body.location),
     category: readOptString(body.category),
@@ -34,10 +35,8 @@ function parseQuickCreateBody(body: Record<string, unknown>): QuickCreateEntryPa
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getSettingsService = () =>
-    getCalendarService(strapi, PLUGIN_ID, 'settings');
-  const getOccurrenceService = () =>
-    getCalendarService(strapi, PLUGIN_ID, 'occurrence');
+  const getSettingsService = () => getCalendarService(strapi, PLUGIN_ID, "settings");
+  const getOccurrenceService = () => getCalendarService(strapi, PLUGIN_ID, "occurrence");
 
   return {
     async getCalendar(ctx: StrapiRouteContext) {
@@ -49,7 +48,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           locale: readOptString(query.locale),
           category: readOptString(query.category),
           sourceId: readOptString(query.sourceId),
-          includeDrafts: query.includeDrafts !== 'false',
+          includeDrafts: query.includeDrafts !== "false",
         });
 
         const settings = await getSettingsService().getSettings();
@@ -63,7 +62,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, 'Failed to load calendar data.'),
+            message: formatErrorMessage(err, "Failed to load calendar data."),
           },
         };
       }
@@ -75,9 +74,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const updated = await getOccurrenceService().rescheduleOccurrence({
           sourceId: readOptString(body.sourceId),
           uid: readOptString(body.uid),
-          documentId: String(body.documentId ?? ''),
-          occurrenceDate: String(body.occurrenceDate ?? ''),
-          newStartDate: String(body.newStartDate ?? ''),
+          documentId: String(body.documentId ?? ""),
+          occurrenceDate: String(body.occurrenceDate ?? ""),
+          newStartDate: String(body.newStartDate ?? ""),
           newEndDate: readOptString(body.newEndDate),
           applyToSeries: Boolean(body.applyToSeries),
           cancelOccurrence: Boolean(body.cancelOccurrence),
@@ -87,7 +86,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, 'Failed to reschedule occurrence.'),
+            message: formatErrorMessage(err, "Failed to reschedule occurrence."),
           },
         };
       }
@@ -96,16 +95,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async quickCreate(ctx: StrapiRouteContext) {
       try {
         const body = (ctx.request?.body ?? {}) as Record<string, unknown>;
-        const created = await getOccurrenceService().quickCreateEntry(
-          parseQuickCreateBody(body)
-        );
+        const created = await getOccurrenceService().quickCreateEntry(parseQuickCreateBody(body));
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, 'Failed to create calendar entry.'),
+            message: formatErrorMessage(err, "Failed to create calendar entry."),
           },
         };
       }
@@ -119,7 +116,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, 'Failed to fetch settings.'),
+            message: formatErrorMessage(err, "Failed to fetch settings."),
           },
         };
       }
@@ -134,7 +131,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, 'Failed to update settings.'),
+            message: formatErrorMessage(err, "Failed to update settings."),
           },
         };
       }
@@ -148,7 +145,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, 'Failed to reset settings.'),
+            message: formatErrorMessage(err, "Failed to reset settings."),
           },
         };
       }
@@ -162,7 +159,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, 'Failed to discover content types.'),
+            message: formatErrorMessage(err, "Failed to discover content types."),
           },
         };
       }

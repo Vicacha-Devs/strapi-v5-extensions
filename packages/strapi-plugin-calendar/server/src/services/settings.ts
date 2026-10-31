@@ -1,5 +1,6 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../../shared/pluginId';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../../shared/pluginId";
 import {
   CALENDAR_COLOR_PALETTES,
   CALENDAR_THEME_PRESETS,
@@ -8,61 +9,61 @@ import {
   type CalendarSystemConfig,
   type DiscoveredContentType,
   type RecurrencePreset as RecurrencePresetItem,
-} from '../../../shared/types';
-import { DEFAULT_CALENDAR_SETTINGS } from '../config';
-import { getCalendarService, type SettingsService } from '../types';
+} from "../../../shared/types";
+import { DEFAULT_CALENDAR_SETTINGS } from "../config";
+import { getCalendarService, type SettingsService } from "../types";
 
-const STORE_KEY = 'settings';
+const STORE_KEY = "settings";
 
 const BUILTIN_EVENTS_SOURCE: CalendarSourceMapping = {
-  id: 'events',
-  label: 'Events',
-  uid: 'plugin::events.event',
-  color: '#4945FF',
+  id: "events",
+  label: "Events",
+  uid: "plugin::events.event",
+  color: "#4945FF",
   enabled: true,
   fields: {
-    title: 'title',
-    startDate: 'startDate',
-    endDate: 'endDate',
-    rrule: 'recurrence',
-    location: 'location',
-    category: 'category',
-    status: 'eventStatus',
-    summary: 'summary',
-    slug: 'slug',
-    color: 'color',
+    title: "title",
+    startDate: "startDate",
+    endDate: "endDate",
+    rrule: "recurrence",
+    location: "location",
+    category: "category",
+    status: "eventStatus",
+    summary: "summary",
+    slug: "slug",
+    color: "color",
   },
 };
 
 const BUILTIN_BOOKINGS_SOURCE: CalendarSourceMapping = {
-  id: 'bookings',
-  label: 'Bookings & Reservations',
-  uid: 'plugin::bookings.booking',
-  color: '#0D9488',
+  id: "bookings",
+  label: "Bookings & Reservations",
+  uid: "plugin::bookings.booking",
+  color: "#0D9488",
   enabled: true,
   fields: {
-    title: 'title',
-    startDate: 'startDate',
-    endDate: 'endDate',
-    status: 'status',
-    location: 'assignedHost',
-    summary: 'notes',
-    category: 'status',
+    title: "title",
+    startDate: "startDate",
+    endDate: "endDate",
+    status: "status",
+    location: "assignedHost",
+    summary: "notes",
+    category: "status",
   },
 };
 
 const INTERNAL_PLUGIN_PREFIXES = [
-  'plugin::upload',
-  'plugin::i18n',
-  'plugin::users-permissions',
-  'plugin::content-releases',
-  'plugin::review-workflows',
-  'plugin::navigation',
-  'plugin::email-designer-5',
-  'plugin::strapi-cache',
-  'plugin::typesense',
-  'plugin::preview-button',
-  'plugin::seo',
+  "plugin::upload",
+  "plugin::i18n",
+  "plugin::users-permissions",
+  "plugin::content-releases",
+  "plugin::review-workflows",
+  "plugin::navigation",
+  "plugin::email-designer-5",
+  "plugin::strapi-cache",
+  "plugin::typesense",
+  "plugin::preview-button",
+  "plugin::seo",
 ];
 
 function appendAutoDetectedPluginSources(
@@ -88,7 +89,7 @@ function mergeUserConfigSources(
       mergedSources[idx] = {
         ...mergedSources[idx],
         ...src,
-        fields: { ...mergedSources[idx].fields, ...(src.fields ?? {}) },
+        fields: { ...mergedSources[idx].fields, ...src.fields },
       };
     } else {
       mergedSources.push(src);
@@ -157,7 +158,7 @@ function mergeCalendarLists(
 }
 
 function pickNonEmptyStr(val: unknown, fallback: string, maxLen?: number): string {
-  if (typeof val === 'string' && val.trim()) {
+  if (typeof val === "string" && val.trim()) {
     const trimmed = val.trim();
     return maxLen ? trimmed.slice(0, maxLen) : trimmed;
   }
@@ -165,11 +166,11 @@ function pickNonEmptyStr(val: unknown, fallback: string, maxLen?: number): strin
 }
 
 function pickBool(val: unknown, fallback: boolean): boolean {
-  return typeof val === 'boolean' ? val : fallback;
+  return typeof val === "boolean" ? val : fallback;
 }
 
 function pickEnum<T extends string>(val: unknown, allowed: readonly T[], fallback: T): T {
-  return typeof val === 'string' && (allowed as readonly string[]).includes(val)
+  return typeof val === "string" && (allowed as readonly string[]).includes(val)
     ? (val as T)
     : fallback;
 }
@@ -183,11 +184,11 @@ function pickRecordKey<T extends string>(
   record: Record<string, unknown>,
   fallback: T
 ): T {
-  return typeof val === 'string' && val in record ? (val as T) : fallback;
+  return typeof val === "string" && val in record ? (val as T) : fallback;
 }
 
 function pickPrimaryHex(val: unknown, fallback: string): string {
-  return typeof val === 'string' && val.startsWith('#') ? val.trim() : fallback;
+  return typeof val === "string" && val.startsWith("#") ? val.trim() : fallback;
 }
 
 function resolveThemePatch(
@@ -195,24 +196,24 @@ function resolveThemePatch(
   patch: Partial<CalendarPluginSettings>
 ): Pick<
   CalendarPluginSettings,
-  'theme' | 'colorScheme' | 'themePalette' | 'secondaryCalendarLanguage' | 'primaryColor'
+  "theme" | "colorScheme" | "themePalette" | "secondaryCalendarLanguage" | "primaryColor"
 > {
   return {
-    theme: pickRecordKey(patch.theme, CALENDAR_THEME_PRESETS, current.theme ?? 'breeze'),
+    theme: pickRecordKey(patch.theme, CALENDAR_THEME_PRESETS, current.theme ?? "breeze"),
     colorScheme: pickEnum(
       patch.colorScheme,
-      ['auto', 'light', 'dark'] as const,
-      current.colorScheme ?? 'auto'
+      ["auto", "light", "dark"] as const,
+      current.colorScheme ?? "auto"
     ),
     themePalette: pickRecordKey(
       patch.themePalette,
       CALENDAR_COLOR_PALETTES,
-      current.themePalette ?? 'default'
+      current.themePalette ?? "default"
     ),
     secondaryCalendarLanguage: pickEnum(
       patch.secondaryCalendarLanguage,
-      ['local', 'ar', 'off'] as const,
-      current.secondaryCalendarLanguage ?? 'local'
+      ["local", "ar", "off"] as const,
+      current.secondaryCalendarLanguage ?? "local"
     ),
     primaryColor: pickPrimaryHex(patch.primaryColor, current.primaryColor),
   };
@@ -223,16 +224,16 @@ function resolveViewBooleansPatch(
   patch: Partial<CalendarPluginSettings>
 ): Pick<
   CalendarPluginSettings,
-  | 'weekNumbers'
-  | 'timeFormat24h'
-  | 'showWeekends'
-  | 'showTodayButton'
-  | 'showCreateButton'
-  | 'monthView'
-  | 'weekView'
-  | 'dayView'
-  | 'agendaView'
-  | 'yearView'
+  | "weekNumbers"
+  | "timeFormat24h"
+  | "showWeekends"
+  | "showTodayButton"
+  | "showCreateButton"
+  | "monthView"
+  | "weekView"
+  | "dayView"
+  | "agendaView"
+  | "yearView"
 > {
   return {
     weekNumbers: pickBool(patch.weekNumbers, current.weekNumbers ?? false),
@@ -253,7 +254,7 @@ function buildUpdatedSettings(
   patch: Partial<CalendarPluginSettings>
 ): CalendarPluginSettings {
   const firstDay =
-    typeof patch.firstDayOfWeek === 'number' &&
+    typeof patch.firstDayOfWeek === "number" &&
     patch.firstDayOfWeek >= 0 &&
     patch.firstDayOfWeek <= 6
       ? Math.floor(patch.firstDayOfWeek)
@@ -264,19 +265,18 @@ function buildUpdatedSettings(
     ...resolveThemePatch(current, patch),
     ...resolveViewBooleansPatch(current, patch),
     defaultTimezone: pickNonEmptyStr(patch.defaultTimezone, current.defaultTimezone),
-    defaultLocale: pickNonEmptyStr(patch.defaultLocale, current.defaultLocale ?? 'auto'),
+    defaultLocale: pickNonEmptyStr(patch.defaultLocale, current.defaultLocale ?? "auto"),
     direction: pickEnum(
       patch.direction,
-      ['auto', 'ltr', 'rtl'] as const,
-      current.direction ?? 'auto'
+      ["auto", "ltr", "rtl"] as const,
+      current.direction ?? "auto"
     ),
-    defaultView:
-      typeof patch.defaultView === 'string' ? patch.defaultView : current.defaultView,
+    defaultView: typeof patch.defaultView === "string" ? patch.defaultView : current.defaultView,
     firstDayOfWeek: firstDay,
     weekNumberCalculation: pickEnum(
       patch.weekNumberCalculation,
-      ['local', 'ISO'] as const,
-      current.weekNumberCalculation ?? 'ISO'
+      ["local", "ISO"] as const,
+      current.weekNumberCalculation ?? "ISO"
     ),
     startHour: pickNonEmptyStr(patch.startHour, current.startHour),
     endHour: pickNonEmptyStr(patch.endHour, current.endHour),
@@ -284,14 +284,8 @@ function buildUpdatedSettings(
     feedTitle: pickNonEmptyStr(patch.feedTitle, current.feedTitle, 140),
     businessHours: pickArray(patch.businessHours, current.businessHours),
     sources: pickArray(patch.sources, current.sources),
-    secondaryCalendars: pickArray(
-      patch.secondaryCalendars,
-      current.secondaryCalendars ?? []
-    ),
-    recurrencePresets: pickArray(
-      patch.recurrencePresets,
-      current.recurrencePresets ?? []
-    ),
+    secondaryCalendars: pickArray(patch.secondaryCalendars, current.secondaryCalendars ?? []),
+    recurrencePresets: pickArray(patch.recurrencePresets, current.recurrencePresets ?? []),
   };
 }
 
@@ -302,40 +296,40 @@ interface RawSchemaShape {
 }
 
 function isDiscoverableSchema(uid: string, schema: unknown): schema is RawSchemaShape {
-  if (!schema || typeof schema !== 'object') return false;
-  if (!uid.startsWith('api::') && !uid.startsWith('plugin::')) return false;
+  if (!schema || typeof schema !== "object") return false;
+  if (!uid.startsWith("api::") && !uid.startsWith("plugin::")) return false;
   if (INTERNAL_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix))) return false;
   const typed = schema as RawSchemaShape;
-  return !typed.kind || typed.kind === 'collectionType';
+  return !typed.kind || typed.kind === "collectionType";
 }
 
 function extractSchemaFields(
   attributes: Record<string, { type?: string; customField?: string }>
 ): Array<{ name: string; type: string }> {
   const fields = Object.entries(attributes)
-    .filter(([, def]) => def && typeof def.type === 'string')
+    .filter(([, def]) => def && typeof def.type === "string")
     .map(([name, def]) => ({
       name,
       type: String(def.customField || def.type),
     }));
-  if (!fields.some((f) => f.name === 'publishedAt')) {
-    fields.push({ name: 'publishedAt', type: 'datetime' });
+  if (!fields.some((f) => f.name === "publishedAt")) {
+    fields.push({ name: "publishedAt", type: "datetime" });
   }
-  if (!fields.some((f) => f.name === 'createdAt')) {
-    fields.push({ name: 'createdAt', type: 'datetime' });
+  if (!fields.some((f) => f.name === "createdAt")) {
+    fields.push({ name: "createdAt", type: "datetime" });
   }
   return fields;
 }
 
 function scoreContentTypeUid(uid: string): number {
-  if (uid === 'plugin::events.event') return 0;
-  if (uid === 'plugin::bookings.booking') return 1;
-  return uid.startsWith('api::') ? 2 : 3;
+  if (uid === "plugin::events.event") return 0;
+  if (uid === "plugin::bookings.booking") return 1;
+  return uid.startsWith("api::") ? 2 : 3;
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
-  const getStore = () => strapi.store({ type: 'plugin', name: PLUGIN_ID });
-  const getRegistryService = () => getCalendarService(strapi, PLUGIN_ID, 'registry');
+  const getStore = () => strapi.store({ type: "plugin", name: PLUGIN_ID });
+  const getRegistryService = () => getCalendarService(strapi, PLUGIN_ID, "registry");
 
   const getConfigDefaults = (): CalendarPluginSettings => {
     const userConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
@@ -379,14 +373,8 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     ...defaults,
     ...stored,
     sources: mergeSourceLists(defaults.sources, stored.sources),
-    secondaryCalendars: mergeCalendarLists(
-      defaults.secondaryCalendars,
-      stored.secondaryCalendars
-    ),
-    recurrencePresets: mergePresetLists(
-      defaults.recurrencePresets,
-      stored.recurrencePresets
-    ),
+    secondaryCalendars: mergeCalendarLists(defaults.secondaryCalendars, stored.secondaryCalendars),
+    recurrencePresets: mergePresetLists(defaults.recurrencePresets, stored.recurrencePresets),
   });
 
   const service: SettingsService = {
@@ -410,9 +398,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
       return stored ? mergeStoredWithDefaults(defaults, stored) : defaults;
     },
 
-    async updateSettings(
-      patch: Partial<CalendarPluginSettings>
-    ): Promise<CalendarPluginSettings> {
+    async updateSettings(patch: Partial<CalendarPluginSettings>): Promise<CalendarPluginSettings> {
       const current = await service.getSettings();
       const next = buildUpdatedSettings(current, patch);
       const store = getStore();
@@ -438,7 +424,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
         discovered.push({
           uid,
           displayName: String(schema.info?.displayName || uid),
-          kind: String(schema.kind || 'collectionType'),
+          kind: String(schema.kind || "collectionType"),
           fields,
         });
       }

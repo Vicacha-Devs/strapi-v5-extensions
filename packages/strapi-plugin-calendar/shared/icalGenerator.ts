@@ -1,12 +1,12 @@
-import type { CalendarLinkSet, ExpandedCalendarOccurrence } from './types';
+import type { CalendarLinkSet, ExpandedCalendarOccurrence } from "./types";
 
 function escapeIcsText(value?: string): string {
-  if (!value) return '';
+  if (!value) return "";
   return String(value)
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,')
-    .replace(/\r?\n/g, '\\n');
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r?\n/g, "\\n");
 }
 
 export function foldIcsLine(line: string): string {
@@ -22,15 +22,15 @@ export function foldIcsLine(line: string): string {
     chunks.push(offset === 0 ? part : ` ${part}`);
     offset += sliceLen;
   }
-  return chunks.join('\r\n');
+  return chunks.join("\r\n");
 }
 
 export function toIcsTimestamp(iso: string, allDay = false): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {
-    return '19700101T000000Z';
+    return "19700101T000000Z";
   }
-  const pad = (n: number) => String(n).padStart(2, '0');
+  const pad = (n: number) => String(n).padStart(2, "0");
   const y = date.getUTCFullYear();
   const m = pad(date.getUTCMonth() + 1);
   const d = pad(date.getUTCDate());
@@ -57,35 +57,35 @@ export function buildCalendarLinks(params: {
   const endStamp = toIcsTimestamp(params.endDate, params.allDay);
 
   const googleParams = new URLSearchParams({
-    action: 'TEMPLATE',
+    action: "TEMPLATE",
     text: params.title,
     dates: `${startStamp}/${endStamp}`,
   });
-  if (params.summary) googleParams.set('details', params.summary);
-  if (params.location) googleParams.set('location', params.location);
+  if (params.summary) googleParams.set("details", params.summary);
+  if (params.location) googleParams.set("location", params.location);
 
   const outlookParams = new URLSearchParams({
-    path: '/calendar/action/compose',
-    rru: 'addevent',
+    path: "/calendar/action/compose",
+    rru: "addevent",
     subject: params.title,
     startdt: params.startDate,
     enddt: params.endDate,
   });
-  if (params.summary) outlookParams.set('body', params.summary);
-  if (params.location) outlookParams.set('location', params.location);
+  if (params.summary) outlookParams.set("body", params.summary);
+  if (params.location) outlookParams.set("location", params.location);
 
   const yahooParams = new URLSearchParams({
-    v: '60',
+    v: "60",
     title: params.title,
     st: startStamp,
     et: endStamp,
   });
-  if (params.summary) yahooParams.set('desc', params.summary);
-  if (params.location) yahooParams.set('in_loc', params.location);
+  if (params.summary) yahooParams.set("desc", params.summary);
+  if (params.location) yahooParams.set("in_loc", params.location);
 
   const querySuffix = params.occurrenceDate
     ? `?occurrenceDate=${encodeURIComponent(params.occurrenceDate)}`
-    : '';
+    : "";
 
   return {
     google: `https://calendar.google.com/calendar/render?${googleParams.toString()}`,
@@ -102,17 +102,17 @@ export function generateIcsCalendar(params: {
 }): string {
   const nowStamp = toIcsTimestamp(new Date().toISOString());
   const lines: string[] = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Vicacha Devs//Strapi Plugin Calendar//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Vicacha Devs//Strapi Plugin Calendar//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
     `X-WR-CALNAME:${escapeIcsText(params.calendarTitle)}`,
     `X-WR-TIMEZONE:${escapeIcsText(params.timezone)}`,
   ];
 
   for (const occ of params.occurrences) {
-    lines.push('BEGIN:VEVENT');
+    lines.push("BEGIN:VEVENT");
     lines.push(`UID:${escapeIcsText(occ.occurrenceId)}@strapi-plugin-calendar`);
     lines.push(`DTSTAMP:${nowStamp}`);
     if (occ.allDay) {
@@ -134,21 +134,19 @@ export function generateIcsCalendar(params: {
     }
     if (occ.alternateDates) {
       for (const alt of Object.values(occ.alternateDates)) {
-        lines.push(
-          `X-ALT-DATE-${alt.calendarId.toUpperCase()}:${escapeIcsText(alt.formatted)}`
-        );
+        lines.push(`X-ALT-DATE-${alt.calendarId.toUpperCase()}:${escapeIcsText(alt.formatted)}`);
       }
     }
     const icsStatus =
-      occ.status === 'cancelled'
-        ? 'CANCELLED'
-        : occ.status === 'postponed'
-        ? 'TENTATIVE'
-        : 'CONFIRMED';
+      occ.status === "cancelled"
+        ? "CANCELLED"
+        : occ.status === "postponed"
+          ? "TENTATIVE"
+          : "CONFIRMED";
     lines.push(`STATUS:${icsStatus}`);
-    lines.push('END:VEVENT');
+    lines.push("END:VEVENT");
   }
 
-  lines.push('END:VCALENDAR');
-  return `${lines.map(foldIcsLine).join('\r\n')}\r\n`;
+  lines.push("END:VCALENDAR");
+  return `${lines.map(foldIcsLine).join("\r\n")}\r\n`;
 }

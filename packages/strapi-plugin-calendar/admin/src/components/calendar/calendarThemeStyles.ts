@@ -1,11 +1,11 @@
-import type { CalendarThemeDefinition } from '../../../../shared/types';
+import type { CalendarThemeDefinition } from "../../../../shared/types";
 
 function buildEventStyleCss(
   scope: string,
   activeTheme: CalendarThemeDefinition,
   evtRadius: string
 ): string {
-  if (activeTheme.eventStyle === 'tinted') {
+  if (activeTheme.eventStyle === "tinted") {
     return `
       ${scope} .fc-daygrid-event,
       ${scope} .fc-timegrid-event {
@@ -25,7 +25,7 @@ function buildEventStyleCss(
       }
     `;
   }
-  if (activeTheme.eventStyle === 'accent-bar') {
+  if (activeTheme.eventStyle === "accent-bar") {
     return `
       ${scope} .fc-daygrid-event,
       ${scope} .fc-timegrid-event {
@@ -55,11 +55,8 @@ function buildEventStyleCss(
   `;
 }
 
-function buildTodayCellCss(
-  scope: string,
-  activeTheme: CalendarThemeDefinition
-): string {
-  if (activeTheme.todayHeaderAccent === 'top-bar') {
+function buildTodayCellCss(scope: string, activeTheme: CalendarThemeDefinition): string {
+  if (activeTheme.todayHeaderAccent === "top-bar") {
     return `
       ${scope} .fc-daygrid-day.fc-day-today {
         background: ${activeTheme.todayBg} !important;
@@ -70,7 +67,7 @@ function buildTodayCellCss(
       }
     `;
   }
-  if (activeTheme.id === 'monarch' || activeTheme.id === 'pulse') {
+  if (activeTheme.id === "monarch" || activeTheme.id === "pulse") {
     return `
       ${scope} .fc-daygrid-day.fc-day-today {
         background: ${activeTheme.todayBg} !important;
@@ -86,7 +83,7 @@ function buildTodayCellCss(
 }
 
 function buildInteractiveCursorCss(scope: string, allowCreate: boolean): string {
-  if (!allowCreate) return '';
+  if (!allowCreate) return "";
   return `
     ${scope} .fc-daygrid-day,
     ${scope} .fc-timegrid-slot-lane {
@@ -104,26 +101,25 @@ function buildInteractiveCursorCss(scope: string, allowCreate: boolean): string 
 
 function resolveThemeDefaults(activeTheme: CalendarThemeDefinition) {
   return {
-    radius: activeTheme.containerRadius ?? '10px',
-    shadow: activeTheme.containerShadow ?? 'none',
-    evtRadius: activeTheme.eventRadius ?? '6px',
-    fontFamily:
-      activeTheme.fontFamily ?? "'Inter Variable', Inter, system-ui, sans-serif",
+    radius: activeTheme.containerRadius ?? "10px",
+    shadow: activeTheme.containerShadow ?? "none",
+    evtRadius: activeTheme.eventRadius ?? "6px",
+    fontFamily: activeTheme.fontFamily ?? "'Inter Variable', Inter, system-ui, sans-serif",
   };
 }
 
 function resolveThemeVariantTokens(activeTheme: CalendarThemeDefinition) {
-  const isForma = activeTheme.id === 'forma';
+  const isForma = activeTheme.id === "forma";
   return {
-    nowColor: activeTheme.id === 'pulse' ? '#EF4444' : activeTheme.primaryColor,
-    headerPad: activeTheme.id === 'monarch' ? '12px 4px' : '10px 4px',
-    headerWeight: activeTheme.id === 'pulse' ? 600 : 700,
-    headerTransform: isForma ? 'none' : 'uppercase',
-    headerTracking: isForma ? '0' : '0.04em',
+    nowColor: activeTheme.id === "pulse" ? "#EF4444" : activeTheme.primaryColor,
+    headerPad: activeTheme.id === "monarch" ? "12px 4px" : "10px 4px",
+    headerWeight: activeTheme.id === "pulse" ? 600 : 700,
+    headerTransform: isForma ? "none" : "uppercase",
+    headerTracking: isForma ? "0" : "0.04em",
     listDayBorder: isForma
       ? `border-inline-start: 4px solid ${activeTheme.primaryColor} !important;`
-      : '',
-    weekNumRadius: isForma ? '2px' : '5px',
+      : "",
+    weekNumRadius: isForma ? "2px" : "5px",
   };
 }
 

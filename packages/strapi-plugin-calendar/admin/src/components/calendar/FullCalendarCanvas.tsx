@@ -1,5 +1,3 @@
-import React, { useCallback, useMemo } from 'react';
-import FullCalendar from '@fullcalendar/react';
 import type {
   DateSelectArg,
   DatesSetArg,
@@ -8,22 +6,25 @@ import type {
   EventContentArg,
   EventDropArg,
   LocaleInput,
-} from '@fullcalendar/core';
-import allLocales from '@fullcalendar/core/locales-all';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import multiMonthPlugin from '@fullcalendar/multimonth';
-import interactionPlugin, { type DateClickArg } from '@fullcalendar/interaction';
-import { Box } from '@strapi/design-system';
-import { useTheme } from 'styled-components';
+} from "@fullcalendar/core";
+import allLocales from "@fullcalendar/core/locales-all";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin, { type DateClickArg } from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
+import multiMonthPlugin from "@fullcalendar/multimonth";
+import FullCalendar from "@fullcalendar/react";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import { Box } from "@strapi/design-system";
+import React, { useCallback, useMemo } from "react";
+import { useTheme } from "styled-components";
+
 import {
   buildFullCalendarTimeFormat,
   getLocalizedCalendarBundle,
   resolveCalendarDirection,
   resolveLocaleFirstDay,
   SUPPORTED_CALENDAR_LOCALES,
-} from '../../../../shared/localization';
+} from "../../../../shared/localization";
 import {
   detectEffectiveColorScheme,
   resolveCalendarTheme,
@@ -35,14 +36,14 @@ import {
   type CalendarThemePreset,
   type ExpandedCalendarOccurrence,
   type SecondaryCalendarLanguageMode,
-} from '../../../../shared/types';
-import { buildCalendarThemeCss } from './calendarThemeStyles';
+} from "../../../../shared/types";
+import { buildCalendarThemeCss } from "./calendarThemeStyles";
 import {
   buildDayHeaderStyle,
   buildDayNumberBadgeStyle,
   computeSecondaryBadges,
   DayCellMetaBadges,
-} from './FullCalendarDayCell';
+} from "./FullCalendarDayCell";
 
 /**
  * Defined outside the component per FullCalendar React documentation
@@ -58,9 +59,9 @@ const FULLCALENDAR_PLUGINS = [
 
 const VIEW_SPECIFIC_OPTIONS: Record<string, Record<string, unknown>> = {
   dayGridMonth: { dayMaxEventRows: 3 },
-  listMonth: { type: 'list', duration: { years: 1 } },
+  listMonth: { type: "list", duration: { years: 1 } },
   multiMonthYear: {
-    type: 'multiMonth',
+    type: "multiMonth",
     duration: { years: 1 },
     multiMonthMaxColumns: 3,
     multiMonthMinWidth: 300,
@@ -68,13 +69,13 @@ const VIEW_SPECIFIC_OPTIONS: Record<string, Record<string, unknown>> = {
     weekNumbers: false,
   },
   multiMonthYearStacked: {
-    type: 'multiMonth',
+    type: "multiMonth",
     duration: { years: 1 },
     multiMonthMaxColumns: 1,
     dayMaxEventRows: 3,
   },
   dayGridYear: {
-    type: 'dayGrid',
+    type: "dayGrid",
     duration: { years: 1 },
     dayMaxEventRows: 3,
   },
@@ -100,27 +101,24 @@ const ALL_CALENDAR_LOCALES: LocaleInput[] = (() => {
  * per https://fullcalendar.io/docs/react#content-injection
  */
 function renderEventContent(eventArg: EventContentArg) {
-  const occ = eventArg.event.extendedProps
-    ?.occurrence as ExpandedCalendarOccurrence | undefined;
-  const isCompactYear = eventArg.view?.type === 'multiMonthYear';
-  const tooltip = [eventArg.timeText, eventArg.event.title]
-    .filter(Boolean)
-    .join(' • ');
+  const occ = eventArg.event.extendedProps?.occurrence as ExpandedCalendarOccurrence | undefined;
+  const isCompactYear = eventArg.view?.type === "multiMonthYear";
+  const tooltip = [eventArg.timeText, eventArg.event.title].filter(Boolean).join(" • ");
   return (
     <div
       className="vicacha-fc-event-inner"
       title={tooltip}
       style={{
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-        padding: isCompactYear ? '1px 4px' : '2px 6px',
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        padding: isCompactYear ? "1px 4px" : "2px 6px",
         fontSize: isCompactYear ? 11 : 12,
         fontWeight: 600,
         lineHeight: 1.3,
       }}
     >
-      {occ?.isRecurring ? '↻ ' : ''}
+      {occ?.isRecurring ? "↻ " : ""}
       {!isCompactYear && eventArg.timeText ? (
         <b className="vicacha-fc-event-time">{eventArg.timeText} </b>
       ) : null}
@@ -132,31 +130,29 @@ function renderEventContent(eventArg: EventContentArg) {
 function resolveVisualKeys(
   props: Pick<
     FullCalendarCanvasProps,
-    'theme' | 'colorScheme' | 'themePalette' | 'secondaryCalendarLanguage' | 'settings'
+    "theme" | "colorScheme" | "themePalette" | "secondaryCalendarLanguage" | "settings"
   >
 ) {
   const { settings } = props;
   return {
-    activeThemeKey: (props.theme ?? settings?.theme ?? 'breeze') as CalendarThemePreset,
+    activeThemeKey: (props.theme ?? settings?.theme ?? "breeze") as CalendarThemePreset,
     configuredColorScheme: (props.colorScheme ??
       settings?.colorScheme ??
-      'auto') as CalendarColorScheme,
+      "auto") as CalendarColorScheme,
     activePaletteKey: (props.themePalette ??
       settings?.themePalette ??
-      'default') as CalendarColorPaletteId,
+      "default") as CalendarColorPaletteId,
     effectiveSecondaryLang: (props.secondaryCalendarLanguage ??
       settings?.secondaryCalendarLanguage ??
-      'local') as SecondaryCalendarLanguageMode,
+      "local") as SecondaryCalendarLanguageMode,
     allowCreate: settings?.showCreateButton !== false,
   };
 }
 
-function buildCalendarGridConfig(
-  settings: CalendarPluginSettings | null
-): {
+function buildCalendarGridConfig(settings: CalendarPluginSettings | null): {
   initialView: string;
   weekNumbers: boolean;
-  weekNumberCalculation: 'local' | 'ISO';
+  weekNumberCalculation: "local" | "ISO";
   weekends: boolean;
   slotMinTime: string;
   slotMaxTime: string;
@@ -164,13 +160,13 @@ function buildCalendarGridConfig(
   businessHours: boolean | unknown[];
 } {
   return {
-    initialView: settings?.defaultView || 'dayGridMonth',
+    initialView: settings?.defaultView || "dayGridMonth",
     weekNumbers: settings?.weekNumbers ?? false,
-    weekNumberCalculation: settings?.weekNumberCalculation ?? 'ISO',
+    weekNumberCalculation: settings?.weekNumberCalculation ?? "ISO",
     weekends: settings?.showWeekends ?? true,
-    slotMinTime: settings?.startHour || '07:00:00',
-    slotMaxTime: settings?.endHour || '21:00:00',
-    slotDuration: settings?.slotDuration || '00:30:00',
+    slotMinTime: settings?.startHour || "07:00:00",
+    slotMaxTime: settings?.endHour || "21:00:00",
+    slotDuration: settings?.slotDuration || "00:30:00",
     businessHours: settings?.businessHours || true,
   };
 }
@@ -221,19 +217,10 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
     allowCreate,
   } = resolveVisualKeys(props);
 
-  const activeColorScheme = detectEffectiveColorScheme(
-    configuredColorScheme,
-    strapiNeutral0
-  );
+  const activeColorScheme = detectEffectiveColorScheme(configuredColorScheme, strapiNeutral0);
 
   const activeTheme = useMemo(
-    () =>
-      resolveCalendarTheme(
-        activeThemeKey,
-        activeColorScheme,
-        activePaletteKey,
-        strapiNeutral0
-      ),
+    () => resolveCalendarTheme(activeThemeKey, activeColorScheme, activePaletteKey, strapiNeutral0),
     [activeThemeKey, activeColorScheme, activePaletteKey, strapiNeutral0]
   );
 
@@ -267,7 +254,7 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
 
   const handleDateClick = useCallback(
     (clickInfo: DateClickArg) => {
-      if (allowCreate) onSelectSlot(clickInfo.dateStr, '');
+      if (allowCreate) onSelectSlot(clickInfo.dateStr, "");
     },
     [allowCreate, onSelectSlot]
   );
@@ -281,8 +268,9 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
 
   const handleEventClick = useCallback(
     (clickInfo: EventClickArg) => {
-      const occ = clickInfo.event.extendedProps
-        ?.occurrence as ExpandedCalendarOccurrence | undefined;
+      const occ = clickInfo.event.extendedProps?.occurrence as
+        | ExpandedCalendarOccurrence
+        | undefined;
       if (occ) onSelectOccurrence(occ);
     },
     [onSelectOccurrence]
@@ -290,14 +278,9 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
 
   const handleEventDropOrResize = useCallback(
     (arg: EventDropArg) => {
-      const occ = arg.event.extendedProps
-        ?.occurrence as ExpandedCalendarOccurrence | undefined;
+      const occ = arg.event.extendedProps?.occurrence as ExpandedCalendarOccurrence | undefined;
       if (occ && arg.event.start) {
-        onDropOrResizeOccurrence(
-          occ,
-          arg.event.start.toISOString(),
-          arg.event.end?.toISOString()
-        );
+        onDropOrResizeOccurrence(occ, arg.event.start.toISOString(), arg.event.end?.toISOString());
       }
     },
     [onDropOrResizeOccurrence]
@@ -313,13 +296,13 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
         activeSecondaryCalendars
       );
       const cleanDayNumber =
-        cellArg.dayNumberText.replace(/[^\d٠-٩]/g, '') || cellArg.dayNumberText;
-      const isCompactYear = cellArg.view?.type === 'multiMonthYear';
-      const secondarySummary = secondaryBadges.join(' · ');
+        cellArg.dayNumberText.replace(/[^\d٠-٩]/g, "") || cellArg.dayNumberText;
+      const isCompactYear = cellArg.view?.type === "multiMonthYear";
+      const secondarySummary = secondaryBadges.join(" · ");
       const tooltipParts = [
         dateKey,
         secondarySummary,
-        allowCreate ? 'Click to create Event or Booking' : '',
+        allowCreate ? "Click to create Event or Booking" : "",
       ].filter(Boolean);
 
       return (
@@ -328,10 +311,10 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
           onClick={(e: React.MouseEvent<HTMLDivElement>) => {
             if (allowCreate) {
               e.stopPropagation();
-              onSelectSlot(dateKey, '');
+              onSelectSlot(dateKey, "");
             }
           }}
-          title={tooltipParts.join(' • ')}
+          title={tooltipParts.join(" • ")}
           style={buildDayHeaderStyle(
             activeTheme,
             isCompactYear,
@@ -340,11 +323,7 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
           )}
         >
           <span
-            style={buildDayNumberBadgeStyle(
-              activeTheme,
-              isCompactYear,
-              Boolean(cellArg.isToday)
-            )}
+            style={buildDayNumberBadgeStyle(activeTheme, isCompactYear, Boolean(cellArg.isToday))}
           >
             {cleanDayNumber}
           </span>

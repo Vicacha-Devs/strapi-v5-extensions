@@ -1,18 +1,14 @@
-export type RRuleFrequency = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
-export type RRuleWeekday = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
-export type CalendarItemStatus =
-  | 'scheduled'
-  | 'cancelled'
-  | 'postponed'
-  | 'rescheduled';
+export type RRuleFrequency = "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
+export type RRuleWeekday = "MO" | "TU" | "WE" | "TH" | "FR" | "SA" | "SU";
+export type CalendarItemStatus = "scheduled" | "cancelled" | "postponed" | "rescheduled";
 export type CalendarViewMode =
-  | 'dayGridMonth'
-  | 'timeGridWeek'
-  | 'timeGridDay'
-  | 'listMonth'
-  | 'multiMonthYear'
-  | 'multiMonthYearStacked'
-  | 'dayGridYear';
+  | "dayGridMonth"
+  | "timeGridWeek"
+  | "timeGridDay"
+  | "listMonth"
+  | "multiMonthYear"
+  | "multiMonthYearStacked"
+  | "dayGridYear";
 
 export interface OccurrenceOverride {
   /** Original occurrence ISO date (YYYY-MM-DD) */
@@ -173,33 +169,33 @@ export interface DiscoveredContentType {
   fields: DiscoveredContentTypeField[];
 }
 
-export type CalendarDirection = 'ltr' | 'rtl';
-export type CalendarDirectionSetting = 'auto' | 'ltr' | 'rtl';
-export type WeekNumberCalculationMode = 'local' | 'ISO';
+export type CalendarDirection = "ltr" | "rtl";
+export type CalendarDirectionSetting = "auto" | "ltr" | "rtl";
+export type WeekNumberCalculationMode = "local" | "ISO";
 export type CalendarThemePreset =
-  | 'breeze'
-  | 'monarch'
-  | 'forma'
-  | 'pulse'
-  | 'classic'
-  | 'shadcn'
-  | 'mui'
-  | 'emerald'
-  | 'sand'
-  | 'midnight';
-export type CalendarColorScheme = 'auto' | 'light' | 'dark';
+  | "breeze"
+  | "monarch"
+  | "forma"
+  | "pulse"
+  | "classic"
+  | "shadcn"
+  | "mui"
+  | "emerald"
+  | "sand"
+  | "midnight";
+export type CalendarColorScheme = "auto" | "light" | "dark";
 export type CalendarColorPaletteId =
-  | 'default'
-  | 'purple'
-  | 'blue'
-  | 'indigo'
-  | 'emerald'
-  | 'rose'
-  | 'amber';
-export type SecondaryCalendarLanguageMode = 'local' | 'ar' | 'off';
+  | "default"
+  | "purple"
+  | "blue"
+  | "indigo"
+  | "emerald"
+  | "rose"
+  | "amber";
+export type SecondaryCalendarLanguageMode = "local" | "ar" | "off";
 
-export * from './themePalettes';
-export * from './themePresets';
+export * from "./themePalettes";
+export * from "./themePresets";
 
 export interface FullCalendarLocaleDefinition {
   /** BCP 47 locale code (e.g. "en", "es", "fr", "ar") */

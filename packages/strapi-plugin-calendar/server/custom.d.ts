@@ -1,4 +1,4 @@
-declare module '@strapi/strapi' {
+declare module "@strapi/strapi" {
   export namespace Core {
     export interface PluginStore {
       get(params: { key: string }): Promise<unknown>;
@@ -25,7 +25,7 @@ declare module '@strapi/strapi' {
     export interface DocumentQueryOptions {
       limit?: number;
       locale?: string;
-      status?: 'draft' | 'published';
+      status?: "draft" | "published";
       filters?: Record<string, unknown>;
     }
 
@@ -37,7 +37,7 @@ declare module '@strapi/strapi' {
       }): Promise<Record<string, unknown> | null>;
       create(params: {
         data: Record<string, unknown>;
-        status?: 'draft' | 'published';
+        status?: "draft" | "published";
       }): Promise<Record<string, unknown>>;
       update(params: {
         documentId: string;
@@ -85,7 +85,7 @@ declare module '@strapi/strapi' {
   }
 }
 
-declare module 'vitest' {
+declare module "vitest" {
   export function describe(name: string, fn: () => void | Promise<void>): void;
   export function it(name: string, fn: () => void | Promise<void>): void;
   export interface Assertion<T = unknown> {
@@ -99,7 +99,7 @@ declare module 'vitest' {
   export function expect<T = unknown>(actual: T): Assertion<T>;
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }

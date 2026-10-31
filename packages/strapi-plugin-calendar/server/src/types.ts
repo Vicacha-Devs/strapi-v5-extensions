@@ -1,4 +1,5 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import type {
   CalendarPluginSettings,
   CalendarSourceMapping,
@@ -6,7 +7,7 @@ import type {
   CalendarSystemFormatterFn,
   DiscoveredContentType,
   ExpandedCalendarOccurrence,
-} from '../../shared/types';
+} from "../../shared/types";
 
 export interface StrapiRouteContext<
   TBody = Record<string, unknown>,
@@ -29,10 +30,7 @@ export interface RegistryService {
   getRegisteredSources(): CalendarSourceMapping[];
   registerSecondaryCalendar(calendar: CalendarSystemConfig): void;
   getRegisteredSecondaryCalendars(): CalendarSystemConfig[];
-  registerCalendarFormatter(
-    calendarId: string,
-    formatter: CalendarSystemFormatterFn
-  ): void;
+  registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void;
   unregisterCalendarFormatter(calendarId: string): void;
 }
 
@@ -78,14 +76,11 @@ export interface QuickCreateEntryParams {
   customerEmail?: string;
   customerPhone?: string;
   partySize?: number;
-  bookingStatus?: 'confirmed' | 'pending';
+  bookingStatus?: "confirmed" | "pending";
 }
 
 export interface OccurrenceService {
-  registerCalendarFormatter(
-    calendarId: string,
-    formatter: CalendarSystemFormatterFn
-  ): void;
+  registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void;
   unregisterCalendarFormatter(calendarId: string): void;
   formatDateInCalendarSystem(
     isoOrDateKey: string,
@@ -94,9 +89,7 @@ export interface OccurrenceService {
     options?: { compact?: boolean }
   ): string;
   getOccurrences(params: OccurrenceQueryParams): Promise<ExpandedCalendarOccurrence[]>;
-  rescheduleOccurrence(
-    params: RescheduleOccurrenceParams
-  ): Promise<Record<string, unknown>>;
+  rescheduleOccurrence(params: RescheduleOccurrenceParams): Promise<Record<string, unknown>>;
   quickCreateEntry(params: QuickCreateEntryParams): Promise<Record<string, unknown>>;
 }
 

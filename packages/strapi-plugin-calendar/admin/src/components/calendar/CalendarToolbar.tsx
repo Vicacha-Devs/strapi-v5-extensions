@@ -1,25 +1,23 @@
-import React from 'react';
 import {
   Badge,
   Box,
   Button,
-  Field,
   Flex,
   SingleSelect,
   SingleSelectOption,
   Typography,
-} from '@strapi/design-system';
-import {
-  getLocalizedCalendarBundle,
-} from '../../../../shared/localization';
-import { PLUGIN_ID } from '../../../../shared/pluginId';
+} from "@strapi/design-system";
+import React from "react";
+
+import { getLocalizedCalendarBundle } from "../../../../shared/localization";
+import { PLUGIN_ID } from "../../../../shared/pluginId";
 import type {
   CalendarDirection,
   CalendarPluginSettings,
   CalendarViewMode,
   SecondaryCalendarLanguageMode,
-} from '../../../../shared/types';
-import { formatCategoryLabel } from './calendarPageHelpers';
+} from "../../../../shared/types";
+import { formatCategoryLabel } from "./calendarPageHelpers";
 
 export interface CalendarToolbarProps {
   t: (id: string, defaultMessage: string) => string;
@@ -43,7 +41,7 @@ export interface CalendarToolbarProps {
   viewMode: CalendarViewMode;
   enabledViews: Array<{ mode: CalendarViewMode; label: string }>;
   onViewChange: (mode: CalendarViewMode) => void;
-  onNavigate: (action: 'prev' | 'today' | 'next') => void;
+  onNavigate: (action: "prev" | "today" | "next") => void;
   onOpenQuickCreate: (targetSourceId?: string) => void;
 }
 
@@ -60,7 +58,7 @@ const QuickCreateButtons: React.FC<{
         {enabledSources.map((src, idx) => (
           <Button
             key={src.id}
-            variant={idx === 0 ? 'default' : 'secondary'}
+            variant={idx === 0 ? "default" : "secondary"}
             size="S"
             onClick={() => onOpenQuickCreate(src.id)}
           >
@@ -71,12 +69,8 @@ const QuickCreateButtons: React.FC<{
     );
   }
   return (
-    <Button
-      variant="default"
-      size="S"
-      onClick={() => onOpenQuickCreate(enabledSources[0]?.id)}
-    >
-      + {t('calendar.quickCreate', 'New Entry')}
+    <Button variant="default" size="S" onClick={() => onOpenQuickCreate(enabledSources[0]?.id)}>
+      + {t("calendar.quickCreate", "New Entry")}
     </Button>
   );
 };
@@ -104,13 +98,9 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   onOpenQuickCreate,
 }) => {
   const localeBundle = getLocalizedCalendarBundle(effectiveLocale);
-  const isRtl = effectiveDirection === 'rtl';
-  const enabledSources = (settings?.sources ?? []).filter(
-    (src) => src.enabled !== false
-  );
-  const showSecondaryBadge = Boolean(
-    secondaryHeaderLabel && secondaryLangMode !== 'off'
-  );
+  const isRtl = effectiveDirection === "rtl";
+  const enabledSources = (settings?.sources ?? []).filter((src) => src.enabled !== false);
+  const showSecondaryBadge = Boolean(secondaryHeaderLabel && secondaryLangMode !== "off");
 
   return (
     <Flex direction="column" alignItems="stretch" gap={4}>
@@ -118,7 +108,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
       <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
         <Box>
           <Typography variant="alpha" fontWeight="bold">
-            {t('calendar.title', 'Calendar & Scheduler')}
+            {t("calendar.title", "Calendar & Scheduler")}
           </Typography>
           <Box paddingTop={1}>
             <Flex gap={2} alignItems="center" wrap="wrap">
@@ -126,7 +116,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
                 variant="delta"
                 fontWeight="bold"
                 textColor="neutral800"
-                style={{ textTransform: 'uppercase', letterSpacing: '0.03em' }}
+                style={{ textTransform: "uppercase", letterSpacing: "0.03em" }}
               >
                 {monthLabel.toUpperCase()}
               </Typography>
@@ -140,7 +130,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
               </Badge>
               {loading && (
                 <Typography variant="pi" textColor="neutral500">
-                  {t('calendar.loading', 'Syncing...')}
+                  {t("calendar.loading", "Syncing...")}
                 </Typography>
               )}
             </Flex>
@@ -162,15 +152,10 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {t('calendar.downloadIcsFeed', 'iCal Feed (.ics)')}
+            {t("calendar.downloadIcsFeed", "iCal Feed (.ics)")}
           </Button>
-          <Button
-            variant="tertiary"
-            size="S"
-            tag="a"
-            href={`/admin/settings/${PLUGIN_ID}`}
-          >
-            {t('calendar.settings', 'Settings')}
+          <Button variant="tertiary" size="S" tag="a" href={`/admin/settings/${PLUGIN_ID}`}>
+            {t("calendar.settings", "Settings")}
           </Button>
         </Flex>
       </Flex>
@@ -179,26 +164,26 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
       <Box padding={3} background="neutral0" hasRadius shadow="filterShadow">
         <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
           <Flex gap={2} alignItems="center" wrap="wrap">
-            <Button variant="tertiary" size="S" onClick={() => onNavigate('prev')}>
-              {isRtl ? '→' : '←'} {localeBundle.buttonText.prev}
+            <Button variant="tertiary" size="S" onClick={() => onNavigate("prev")}>
+              {isRtl ? "→" : "←"} {localeBundle.buttonText.prev}
             </Button>
             {settings?.showTodayButton !== false && (
-              <Button variant="secondary" size="S" onClick={() => onNavigate('today')}>
+              <Button variant="secondary" size="S" onClick={() => onNavigate("today")}>
                 {localeBundle.buttonText.today}
               </Button>
             )}
-            <Button variant="tertiary" size="S" onClick={() => onNavigate('next')}>
-              {localeBundle.buttonText.next} {isRtl ? '←' : '→'}
+            <Button variant="tertiary" size="S" onClick={() => onNavigate("next")}>
+              {localeBundle.buttonText.next} {isRtl ? "←" : "→"}
             </Button>
           </Flex>
 
           <Flex gap={2} wrap="wrap" alignItems="center">
             <Button
               size="S"
-              variant={sourceFilter === 'all' ? 'default' : 'tertiary'}
-              onClick={() => onSourceFilterChange('all')}
+              variant={sourceFilter === "all" ? "default" : "tertiary"}
+              onClick={() => onSourceFilterChange("all")}
             >
-              {t('calendar.allSources', 'All Sources')} ({totalOccurrences})
+              {t("calendar.allSources", "All Sources")} ({totalOccurrences})
             </Button>
             {(settings?.sources ?? []).map((src) => {
               const srcCount = sourceCounts?.[src.id] ?? 0;
@@ -206,15 +191,15 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
                 <Button
                   key={src.id}
                   size="S"
-                  variant={sourceFilter === src.id ? 'default' : 'tertiary'}
+                  variant={sourceFilter === src.id ? "default" : "tertiary"}
                   onClick={() => onSourceFilterChange(src.id)}
                 >
                   <span
                     style={{
-                      display: 'inline-block',
+                      display: "inline-block",
                       width: 8,
                       height: 8,
-                      borderRadius: '50%',
+                      borderRadius: "50%",
                       background: src.color,
                       marginRight: 6,
                     }}
@@ -226,15 +211,13 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             <Box style={{ minWidth: 175, maxWidth: 220 }}>
               <SingleSelect
                 size="S"
-                aria-label={t('calendar.toolbar.category', 'Category Filter')}
-                placeholder={t('placeholder.all_categories', 'All Categories')}
+                aria-label={t("calendar.toolbar.category", "Category Filter")}
+                placeholder={t("placeholder.all_categories", "All Categories")}
                 value={categoryFilter}
-                onChange={(val: string | number) =>
-                  onCategoryFilterChange(String(val))
-                }
+                onChange={(val: string | number) => onCategoryFilterChange(String(val))}
               >
                 <SingleSelectOption value="all">
-                  {t('calendar.allCategories', 'All Categories')}
+                  {t("calendar.allCategories", "All Categories")}
                 </SingleSelectOption>
                 {availableCategories.map((cat) => (
                   <SingleSelectOption key={cat} value={cat}>
@@ -250,7 +233,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
               <Button
                 key={v.mode}
                 size="S"
-                variant={viewMode === v.mode ? 'default' : 'tertiary'}
+                variant={viewMode === v.mode ? "default" : "tertiary"}
                 onClick={() => onViewChange(v.mode)}
               >
                 {v.label}

@@ -1,13 +1,14 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   registerCalendarSystemFormatter,
   unregisterCalendarSystemFormatter,
-} from '../../../shared/calendarSystems';
+} from "../../../shared/calendarSystems";
 import type {
   CalendarSourceMapping,
   CalendarSystemConfig,
   CalendarSystemFormatterFn,
-} from '../../../shared/types';
+} from "../../../shared/types";
 
 /**
  * Runtime registry allowing companion plugins (e.g. `@vicacha-devs/strapi-plugin-events`
@@ -21,7 +22,7 @@ export default ({ strapi: _strapi }: { strapi: Core.Strapi }) => {
   return {
     registerSource(source: CalendarSourceMapping): void {
       if (!source || !source.id || !source.uid) {
-        throw new Error('Calendar source registration requires id and uid.');
+        throw new Error("Calendar source registration requires id and uid.");
       }
       registeredSources.set(source.id, source);
     },
@@ -36,7 +37,7 @@ export default ({ strapi: _strapi }: { strapi: Core.Strapi }) => {
 
     registerSecondaryCalendar(calendar: CalendarSystemConfig): void {
       if (!calendar || !calendar.id || !calendar.intlCalendar) {
-        throw new Error('Secondary calendar registration requires id and intlCalendar.');
+        throw new Error("Secondary calendar registration requires id and intlCalendar.");
       }
       registeredCalendars.set(calendar.id, calendar);
     },
@@ -45,10 +46,7 @@ export default ({ strapi: _strapi }: { strapi: Core.Strapi }) => {
       return Array.from(registeredCalendars.values());
     },
 
-    registerCalendarFormatter(
-      calendarId: string,
-      formatter: CalendarSystemFormatterFn
-    ): void {
+    registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void {
       registerCalendarSystemFormatter(calendarId, formatter);
     },
 

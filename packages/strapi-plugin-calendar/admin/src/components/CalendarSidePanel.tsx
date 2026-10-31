@@ -1,14 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useIntl } from 'react-intl';
-import { useFetchClient } from '@strapi/strapi/admin';
-import { Box, Button, Flex, Typography } from '@strapi/design-system';
-import { formatDateInCalendarSystem } from '../../../shared/calendarSystems';
-import { PLUGIN_ID } from '../../../shared/pluginId';
-import type { CalendarPluginSettings } from '../../../shared/types';
+import { Box, Button, Flex, Typography } from "@strapi/design-system";
+import { useFetchClient } from "@strapi/strapi/admin";
+import React, { useEffect, useMemo, useState } from "react";
+import { useIntl } from "react-intl";
+
+import { formatDateInCalendarSystem } from "../../../shared/calendarSystems";
+import { PLUGIN_ID } from "../../../shared/pluginId";
+import type { CalendarPluginSettings } from "../../../shared/types";
 import {
   formatPluginMessageWithUrlLocale,
   resolveActiveContentLocale,
-} from './calendar/calendarPageHelpers';
+} from "./calendar/calendarPageHelpers";
 
 export interface SidePanelProps {
   activeTab?: string;
@@ -20,11 +21,11 @@ export interface SidePanelProps {
 }
 
 function resolveSidePanelStartDate(docRecord: Record<string, unknown>): string {
-  for (const key of ['startDate', 'preferredDate', 'date']) {
+  for (const key of ["startDate", "preferredDate", "date"]) {
     const val = docRecord[key];
-    if (typeof val === 'string' && val) return val;
+    if (typeof val === "string" && val) return val;
   }
-  return '';
+  return "";
 }
 
 export const CalendarSidePanel = (props: SidePanelProps) => {
@@ -32,11 +33,10 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
   const { get } = useFetchClient();
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
 
-  const model = props.model ?? '';
+  const model = props.model ?? "";
   const docRecord = props.document ?? {};
   const documentId =
-    props.documentId ??
-    (typeof docRecord.documentId === 'string' ? docRecord.documentId : '');
+    props.documentId ?? (typeof docRecord.documentId === "string" ? docRecord.documentId : "");
   const rawStartDate = resolveSidePanelStartDate(docRecord);
   const activeLocale = resolveActiveContentLocale(locale);
 
@@ -71,7 +71,7 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
       .filter((sys) => sys.enabled)
       .map((sys) => {
         const rawFieldVal = sys.overrideField ? docRecord[sys.overrideField] : undefined;
-        const overrideVal = typeof rawFieldVal === 'string' ? rawFieldVal.trim() : '';
+        const overrideVal = typeof rawFieldVal === "string" ? rawFieldVal.trim() : "";
         const formatted =
           overrideVal ||
           formatDateInCalendarSystem(rawStartDate, sys, activeLocale, {
@@ -97,14 +97,14 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
   const icsUrl = `/api/calendar/${encodeURIComponent(documentId)}/invite.ics`;
 
   return {
-    title: t('sidePanel.title', 'Calendar & Schedule'),
+    title: t("sidePanel.title", "Calendar & Schedule"),
     content: (
       <Box paddingTop={2} paddingBottom={2}>
         <Flex direction="column" alignItems="stretch" gap={3}>
           {computedAlternateDates.length > 0 && (
             <Box padding={3} background="neutral100" hasRadius>
               <Typography variant="sigma" textColor="neutral600">
-                {t('sidePanel.secondaryCalendars', 'Alternative Calendar Dates')}
+                {t("sidePanel.secondaryCalendars", "Alternative Calendar Dates")}
               </Typography>
               <Flex direction="column" alignItems="stretch" gap={1} paddingTop={2}>
                 {computedAlternateDates.map((alt) => (
@@ -130,7 +130,7 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {t('sidePanel.downloadIcs', 'Download .ics Invite')}
+              {t("sidePanel.downloadIcs", "Download .ics Invite")}
             </Button>
             <Button
               variant="tertiary"
@@ -138,7 +138,7 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
               tag="a"
               href={`/admin/plugins/${PLUGIN_ID}?documentId=${encodeURIComponent(documentId)}`}
             >
-              {t('sidePanel.openCalendar', 'Open in Calendar View')}
+              {t("sidePanel.openCalendar", "Open in Calendar View")}
             </Button>
           </Flex>
         </Flex>

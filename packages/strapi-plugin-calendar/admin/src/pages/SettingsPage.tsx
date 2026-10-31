@@ -1,22 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { useIntl } from 'react-intl';
-import { Layouts, useFetchClient } from '@strapi/strapi/admin';
-import { Box, Button, Flex, Tabs, Typography } from '@strapi/design-system';
-import { PLUGIN_ID } from '../../../shared/pluginId';
+import { Box, Button, Flex, Tabs, Typography } from "@strapi/design-system";
+import { Layouts, useFetchClient } from "@strapi/strapi/admin";
+import React, { useEffect, useState } from "react";
+import { useIntl } from "react-intl";
+
+import { PLUGIN_ID } from "../../../shared/pluginId";
 import type {
   CalendarPluginSettings,
   CalendarSourceMapping,
   CalendarSystemConfig,
   DiscoveredContentType,
-} from '../../../shared/types';
-import { CalendarViewsSection } from '../components/settings/CalendarViewsSection';
-import { CollectionSourcesSection } from '../components/settings/CollectionSourcesSection';
+} from "../../../shared/types";
+import { CalendarViewsSection } from "../components/settings/CalendarViewsSection";
+import { CollectionSourcesSection } from "../components/settings/CollectionSourcesSection";
 import {
   CompanionSuiteSettingsSection,
   type BookingsCompanionSettings,
   type EventsCompanionSettings,
-} from '../components/settings/CompanionSuiteSettingsSection';
-import { SecondaryCalendarsSection } from '../components/settings/SecondaryCalendarsSection';
+} from "../components/settings/CompanionSuiteSettingsSection";
+import { SecondaryCalendarsSection } from "../components/settings/SecondaryCalendarsSection";
 
 interface SettingsApiResponse {
   data?: CalendarPluginSettings;
@@ -39,10 +40,8 @@ export const SettingsPage: React.FC = () => {
 
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
   const [contentTypes, setContentTypes] = useState<DiscoveredContentType[]>([]);
-  const [eventsSettings, setEventsSettings] =
-    useState<EventsCompanionSettings | null>(null);
-  const [bookingsSettings, setBookingsSettings] =
-    useState<BookingsCompanionSettings | null>(null);
+  const [eventsSettings, setEventsSettings] = useState<EventsCompanionSettings | null>(null);
+  const [bookingsSettings, setBookingsSettings] = useState<BookingsCompanionSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
 
@@ -50,12 +49,8 @@ export const SettingsPage: React.FC = () => {
     Promise.all([
       get<SettingsApiResponse>(`/${PLUGIN_ID}/settings`),
       get<ContentTypesApiResponse>(`/${PLUGIN_ID}/content-types`),
-      get<CompanionApiResponse<EventsCompanionSettings>>('/events/settings').catch(
-        () => null
-      ),
-      get<CompanionApiResponse<BookingsCompanionSettings>>(
-        '/bookings/settings'
-      ).catch(() => null),
+      get<CompanionApiResponse<EventsCompanionSettings>>("/events/settings").catch(() => null),
+      get<CompanionApiResponse<BookingsCompanionSettings>>("/bookings/settings").catch(() => null),
     ])
       .then(([settingsRes, ctRes, eventsRes, bookingsRes]) => {
         if (settingsRes?.data?.data) {
@@ -85,13 +80,13 @@ export const SettingsPage: React.FC = () => {
         put<SettingsApiResponse>(`/${PLUGIN_ID}/settings`, settings),
         eventsSettings
           ? put<CompanionApiResponse<EventsCompanionSettings>>(
-              '/events/settings',
+              "/events/settings",
               eventsSettings
             ).catch(() => null)
           : Promise.resolve(null),
         bookingsSettings
           ? put<CompanionApiResponse<BookingsCompanionSettings>>(
-              '/bookings/settings',
+              "/bookings/settings",
               bookingsSettings
             ).catch(() => null)
           : Promise.resolve(null),
@@ -106,13 +101,10 @@ export const SettingsPage: React.FC = () => {
         setBookingsSettings(bookingsRes.data.data);
       }
       setSavedBanner(
-        t(
-          'settings.saved',
-          'Calendar, Events, and Bookings settings saved successfully.'
-        )
+        t("settings.saved", "Calendar, Events, and Bookings settings saved successfully.")
       );
     } catch {
-      setSavedBanner(t('settings.error', 'Could not save settings.'));
+      setSavedBanner(t("settings.error", "Could not save settings."));
     } finally {
       setSaving(false);
     }
@@ -125,9 +117,9 @@ export const SettingsPage: React.FC = () => {
       if (res?.data?.data) {
         setSettings(res.data.data);
       }
-      setSavedBanner(t('settings.resetSuccess', 'Settings reset to defaults.'));
+      setSavedBanner(t("settings.resetSuccess", "Settings reset to defaults."));
     } catch {
-      setSavedBanner(t('settings.error', 'Could not reset settings.'));
+      setSavedBanner(t("settings.error", "Could not reset settings."));
     } finally {
       setSaving(false);
     }
@@ -136,12 +128,8 @@ export const SettingsPage: React.FC = () => {
   const handleAddOrUpdateSource = (nextSource: CalendarSourceMapping) => {
     if (!settings) return;
     const existing = settings.sources ?? [];
-    const updated = existing.some(
-      (s) => s.id === nextSource.id || s.uid === nextSource.uid
-    )
-      ? existing.map((s) =>
-          s.id === nextSource.id || s.uid === nextSource.uid ? nextSource : s
-        )
+    const updated = existing.some((s) => s.id === nextSource.id || s.uid === nextSource.uid)
+      ? existing.map((s) => (s.id === nextSource.id || s.uid === nextSource.uid ? nextSource : s))
       : [...existing, nextSource];
 
     setSettings({
@@ -154,9 +142,7 @@ export const SettingsPage: React.FC = () => {
     if (!settings) return;
     setSettings({
       ...settings,
-      sources: settings.sources.map((src) =>
-        src.id === sourceId ? { ...src, enabled } : src
-      ),
+      sources: settings.sources.map((src) => (src.id === sourceId ? { ...src, enabled } : src)),
     });
   };
 
@@ -195,9 +181,7 @@ export const SettingsPage: React.FC = () => {
     if (!settings) return;
     setSettings({
       ...settings,
-      secondaryCalendars: (settings.secondaryCalendars ?? []).filter(
-        (cal) => cal.id !== calId
-      ),
+      secondaryCalendars: (settings.secondaryCalendars ?? []).filter((cal) => cal.id !== calId),
     });
   };
 
@@ -207,7 +191,7 @@ export const SettingsPage: React.FC = () => {
         <Layouts.Content>
           <Box padding={6}>
             <Typography variant="omega">
-              {t('settings.loading', 'Loading Calendar settings...')}
+              {t("settings.loading", "Loading Calendar settings...")}
             </Typography>
           </Box>
         </Layouts.Content>
@@ -218,18 +202,18 @@ export const SettingsPage: React.FC = () => {
   return (
     <Layouts.Root>
       <Layouts.Header
-        title={t('settings.title', 'Calendar, Events & Bookings Settings')}
+        title={t("settings.title", "Calendar, Events & Bookings Settings")}
         subtitle={t(
-          'settings.subtitle',
-          'Configure visual themes, primary local language, Arabic/Hijri calendar overlay, collection sources, RSVP event rules, and booking slot policies.'
+          "settings.subtitle",
+          "Configure visual themes, primary local language, Arabic/Hijri calendar overlay, collection sources, RSVP event rules, and booking slot policies."
         )}
         primaryAction={
           <Flex gap={2}>
             <Button variant="tertiary" onClick={handleResetSettings}>
-              {t('settings.reset', 'Reset Defaults')}
+              {t("settings.reset", "Reset Defaults")}
             </Button>
             <Button variant="default" loading={saving} onClick={handleSave}>
-              {t('common.save', 'Save Settings')}
+              {t("common.save", "Save Settings")}
             </Button>
           </Flex>
         }
@@ -246,24 +230,25 @@ export const SettingsPage: React.FC = () => {
           )}
 
           <Tabs.Root defaultValue="theme">
-            <Tabs.List aria-label={t('settings.title', 'Calendar, Events & Bookings Settings')}>
+            <Tabs.List aria-label={t("settings.title", "Calendar, Events & Bookings Settings")}>
               <Tabs.Trigger value="theme">
-                {t('settings.tab.theme', 'Theme & Appearance')}
+                {t("settings.tab.theme", "Theme & Appearance")}
               </Tabs.Trigger>
               <Tabs.Trigger value="general">
-                {t('settings.tab.general', 'General & Views')}
+                {t("settings.tab.general", "General & Views")}
               </Tabs.Trigger>
               <Tabs.Trigger value="sources">
-                {t('settings.tab.sources', 'Collection Sources')} ({settings.sources?.length ?? 0})
+                {t("settings.tab.sources", "Collection Sources")} ({settings.sources?.length ?? 0})
               </Tabs.Trigger>
               <Tabs.Trigger value="secondary">
-                {t('settings.tab.secondaryCalendars', 'Secondary Calendars')} ({settings.secondaryCalendars?.length ?? 0})
+                {t("settings.tab.secondaryCalendars", "Secondary Calendars")} (
+                {settings.secondaryCalendars?.length ?? 0})
               </Tabs.Trigger>
               <Tabs.Trigger value="events">
-                {t('settings.tab.events', 'Events & RSVPs')}
+                {t("settings.tab.events", "Events & RSVPs")}
               </Tabs.Trigger>
               <Tabs.Trigger value="bookings">
-                {t('settings.tab.bookings', 'Bookings & Availability')}
+                {t("settings.tab.bookings", "Bookings & Availability")}
               </Tabs.Trigger>
             </Tabs.List>
 

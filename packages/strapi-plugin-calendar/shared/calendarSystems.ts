@@ -3,7 +3,7 @@ import type {
   CalendarSourceMapping,
   CalendarSystemConfig,
   CalendarSystemFormatterFn,
-} from './types';
+} from "./types";
 
 /**
  * Standard Unicode CLDR / @internationalized/date calendar identifiers.
@@ -14,35 +14,35 @@ export const SUPPORTED_INTL_CALENDARS: ReadonlyArray<{
   intlCalendar: string;
   defaultLabel: string;
 }> = [
-  { id: 'gregory', intlCalendar: 'gregory', defaultLabel: 'Gregorian' },
-  { id: 'iso8601', intlCalendar: 'iso8601', defaultLabel: 'ISO 8601' },
+  { id: "gregory", intlCalendar: "gregory", defaultLabel: "Gregorian" },
+  { id: "iso8601", intlCalendar: "iso8601", defaultLabel: "ISO 8601" },
   {
-    id: 'islamic-umalqura',
-    intlCalendar: 'islamic-umalqura',
-    defaultLabel: 'Hijri (Umm al-Qura)',
+    id: "islamic-umalqura",
+    intlCalendar: "islamic-umalqura",
+    defaultLabel: "Hijri (Umm al-Qura)",
   },
   {
-    id: 'islamic-civil',
-    intlCalendar: 'islamic-civil',
-    defaultLabel: 'Hijri (Civil)',
+    id: "islamic-civil",
+    intlCalendar: "islamic-civil",
+    defaultLabel: "Hijri (Civil)",
   },
   {
-    id: 'islamic-tbla',
-    intlCalendar: 'islamic-tbla',
-    defaultLabel: 'Hijri (Tabular)',
+    id: "islamic-tbla",
+    intlCalendar: "islamic-tbla",
+    defaultLabel: "Hijri (Tabular)",
   },
-  { id: 'hebrew', intlCalendar: 'hebrew', defaultLabel: 'Hebrew' },
+  { id: "hebrew", intlCalendar: "hebrew", defaultLabel: "Hebrew" },
   {
-    id: 'persian',
-    intlCalendar: 'persian',
-    defaultLabel: 'Persian (Solar Hijri)',
+    id: "persian",
+    intlCalendar: "persian",
+    defaultLabel: "Persian (Solar Hijri)",
   },
-  { id: 'buddhist', intlCalendar: 'buddhist', defaultLabel: 'Buddhist' },
-  { id: 'japanese', intlCalendar: 'japanese', defaultLabel: 'Japanese' },
-  { id: 'chinese', intlCalendar: 'chinese', defaultLabel: 'Chinese Lunar' },
-  { id: 'indian', intlCalendar: 'indian', defaultLabel: 'Indian National' },
-  { id: 'coptic', intlCalendar: 'coptic', defaultLabel: 'Coptic' },
-  { id: 'ethiopic', intlCalendar: 'ethiopic', defaultLabel: 'Ethiopic' },
+  { id: "buddhist", intlCalendar: "buddhist", defaultLabel: "Buddhist" },
+  { id: "japanese", intlCalendar: "japanese", defaultLabel: "Japanese" },
+  { id: "chinese", intlCalendar: "chinese", defaultLabel: "Chinese Lunar" },
+  { id: "indian", intlCalendar: "indian", defaultLabel: "Indian National" },
+  { id: "coptic", intlCalendar: "coptic", defaultLabel: "Coptic" },
+  { id: "ethiopic", intlCalendar: "ethiopic", defaultLabel: "Ethiopic" },
 ];
 
 const customFormatters = new Map<string, CalendarSystemFormatterFn>();
@@ -51,8 +51,8 @@ export function registerCalendarSystemFormatter(
   calendarId: string,
   formatter: CalendarSystemFormatterFn
 ): void {
-  if (!calendarId || typeof formatter !== 'function') {
-    throw new Error('Both calendarId and formatter function are required.');
+  if (!calendarId || typeof formatter !== "function") {
+    throw new Error("Both calendarId and formatter function are required.");
   }
   customFormatters.set(calendarId, formatter);
 }
@@ -61,10 +61,7 @@ export function unregisterCalendarSystemFormatter(calendarId: string): void {
   customFormatters.delete(calendarId);
 }
 
-export function getRegisteredCalendarFormatters(): ReadonlyMap<
-  string,
-  CalendarSystemFormatterFn
-> {
+export function getRegisteredCalendarFormatters(): ReadonlyMap<string, CalendarSystemFormatterFn> {
   return customFormatters;
 }
 
@@ -77,15 +74,15 @@ export function applyDayOffset(date: Date, dayOffset?: number): Date {
 }
 
 function parseDigits(raw: string): number {
-  const n = Number.parseInt(raw.replace(/[^0-9]/g, ''), 10);
+  const n = Number.parseInt(raw.replace(/[^0-9]/g, ""), 10);
   return Number.isFinite(n) ? n : 0;
 }
 
-const INTL_PART_FIELD_MAP: Record<string, 'year' | 'month' | 'day'> = {
-  year: 'year',
-  relatedYear: 'year',
-  month: 'month',
-  day: 'day',
+const INTL_PART_FIELD_MAP: Record<string, "year" | "month" | "day"> = {
+  year: "year",
+  relatedYear: "year",
+  month: "month",
+  day: "day",
 };
 
 function parseIntlPartsToYmd(
@@ -114,14 +111,14 @@ export function extractCalendarParts(
     return null;
   }
   const effectiveDate = applyDayOffset(date, dayOffset);
-  const calendarTag = (intlCalendar || 'gregory').trim().toLowerCase();
+  const calendarTag = (intlCalendar || "gregory").trim().toLowerCase();
 
   try {
     const formatter = new Intl.DateTimeFormat(`en-u-ca-${calendarTag}-nu-latn`, {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      timeZone: 'UTC',
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      timeZone: "UTC",
     });
     const parsed = parseIntlPartsToYmd(formatter.formatToParts(effectiveDate));
     if (parsed) return parsed;
@@ -136,14 +133,17 @@ export function extractCalendarParts(
   };
 }
 
-function resolveCalendarLocaleTag(systemLocale: string | undefined, fallbackLocale: string): string {
+function resolveCalendarLocaleTag(
+  systemLocale: string | undefined,
+  fallbackLocale: string
+): string {
   const rawLocale =
-    systemLocale && systemLocale !== 'auto'
+    systemLocale && systemLocale !== "auto"
       ? systemLocale
-      : fallbackLocale && fallbackLocale !== 'auto'
+      : fallbackLocale && fallbackLocale !== "auto"
         ? fallbackLocale
-        : 'en';
-  return rawLocale.split('-u-')[0];
+        : "en";
+  return rawLocale.split("-u-")[0];
 }
 
 function tryFormatWithCustomFormatter(
@@ -152,8 +152,7 @@ function tryFormatWithCustomFormatter(
   effectiveLocale: string,
   compact: boolean
 ): string | null {
-  const customFn =
-    customFormatters.get(system.id) ?? customFormatters.get(system.intlCalendar);
+  const customFn = customFormatters.get(system.id) ?? customFormatters.get(system.intlCalendar);
   if (!customFn) return null;
   try {
     return customFn(effectiveDate, {
@@ -176,17 +175,17 @@ function formatWithIntlFallback(
     const formatter = new Intl.DateTimeFormat(
       intlLocale,
       compact
-        ? { day: 'numeric', month: 'short', timeZone: 'UTC' }
-        : { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }
+        ? { day: "numeric", month: "short", timeZone: "UTC" }
+        : { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }
     );
     return formatter.format(effectiveDate);
   } catch {
     try {
-      const fallback = new Intl.DateTimeFormat('en-u-ca-gregory', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        timeZone: 'UTC',
+      const fallback = new Intl.DateTimeFormat("en-u-ca-gregory", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC",
       });
       return fallback.format(effectiveDate);
     } catch {
@@ -201,14 +200,14 @@ function formatWithIntlFallback(
 export function formatDateInCalendarSystem(
   isoOrDateKey: string,
   system: CalendarSystemConfig,
-  locale = 'en',
+  locale = "en",
   options?: { compact?: boolean }
 ): string {
   const rawDate = /^\d{4}-\d{2}-\d{2}$/.test(isoOrDateKey)
     ? new Date(`${isoOrDateKey}T12:00:00.000Z`)
     : new Date(isoOrDateKey);
   if (Number.isNaN(rawDate.getTime())) {
-    return '';
+    return "";
   }
 
   const effectiveDate = applyDayOffset(rawDate, system.dayOffset);
@@ -225,7 +224,7 @@ export function formatDateInCalendarSystem(
     return customResult;
   }
 
-  const calendarTag = (system.intlCalendar || 'gregory').trim();
+  const calendarTag = (system.intlCalendar || "gregory").trim();
   return formatWithIntlFallback(
     effectiveDate,
     isoOrDateKey,
@@ -235,11 +234,15 @@ export function formatDateInCalendarSystem(
 }
 
 function readTrimmedString(val: unknown): string {
-  return typeof val === 'string' ? val.trim() : '';
+  return typeof val === "string" ? val.trim() : "";
 }
 
 function extractDocAltDatesMap(doc: Record<string, unknown>): Record<string, unknown> | null {
-  if (doc.alternateDates && typeof doc.alternateDates === 'object' && !Array.isArray(doc.alternateDates)) {
+  if (
+    doc.alternateDates &&
+    typeof doc.alternateDates === "object" &&
+    !Array.isArray(doc.alternateDates)
+  ) {
     return doc.alternateDates as Record<string, unknown>;
   }
   return null;
@@ -252,8 +255,8 @@ function resolveSystemOverrideText(
   docAltDatesMap: Record<string, unknown> | null
 ): string {
   const fieldName = sourceAltFields[sys.id] || sys.overrideField;
-  const rawFieldOverride = fieldName ? readTrimmedString(doc[fieldName]) : '';
-  const rawJsonOverride = docAltDatesMap ? readTrimmedString(docAltDatesMap[sys.id]) : '';
+  const rawFieldOverride = fieldName ? readTrimmedString(doc[fieldName]) : "";
+  const rawJsonOverride = docAltDatesMap ? readTrimmedString(docAltDatesMap[sys.id]) : "";
   return rawFieldOverride || rawJsonOverride;
 }
 
@@ -396,7 +399,7 @@ export function resolveOccurrenceAlternateDates(params: {
     doc,
     sourceAltFields,
     docAltDatesMap,
-    locale: params.locale ?? 'en',
+    locale: params.locale ?? "en",
   });
 
   if (isBaseOccurrence) {

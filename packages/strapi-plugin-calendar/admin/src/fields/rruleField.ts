@@ -1,23 +1,23 @@
-import { PLUGIN_ID } from '../../../shared/pluginId';
-import { PluginIcon } from '../components/PluginIcon';
+import { PLUGIN_ID } from "../../../shared/pluginId";
+import { PluginIcon } from "../components/PluginIcon";
 
 export const rruleCustomField = {
-  name: 'rrule',
+  name: "rrule",
   pluginId: PLUGIN_ID,
-  type: 'json',
+  type: "json",
   intlLabel: {
     id: `${PLUGIN_ID}.customField.rrule.label`,
-    defaultMessage: 'Recurrence Schedule (RRULE / RSCALE)',
+    defaultMessage: "Recurrence Schedule (RRULE / RSCALE)",
   },
   intlDescription: {
     id: `${PLUGIN_ID}.customField.rrule.description`,
     defaultMessage:
-      'Configure RFC 5545 & RFC 7529 recurring schedules, non-Gregorian calendar recurrence, excluded dates, and per-occurrence overrides.',
+      "Configure RFC 5545 & RFC 7529 recurring schedules, non-Gregorian calendar recurrence, excluded dates, and per-occurrence overrides.",
   },
   icon: PluginIcon,
   components: {
     Input: async () =>
-      import('../components/RRuleInput').then((module) => ({
+      import("../components/RRuleInput").then((module) => ({
         default: module.RRuleInput,
       })),
   },

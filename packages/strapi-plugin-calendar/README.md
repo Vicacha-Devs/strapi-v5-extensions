@@ -23,16 +23,16 @@ Enterprise, **100% generic Multi-Collection Calendar, Scheduler, Non-Gregorian `
    - Includes a custom field (`plugin::calendar.rrule`) with a visual builder and preset selector.
    - Supports standard Gregorian recurrence (`FREQ=WEEKLY;BYDAY=FR`) **and** non-Gregorian `RSCALE` recurrence (`RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1` for annual 1st of Ramadan, or `RSCALE=HEBREW` / `RSCALE=PERSIAN`).
 5. **Unified RFC 5545 iCalendar (`.ics`) Feed**:
-   - Public `/api/calendar/feed.ics` and Admin `/calendar/export.ics` endpoints with `?sourceId=`, `?category=`, `?start=`, and `?end=` filters for Google Calendar, Apple Calendar, and Outlook subscriptions.
-6. **10 Admin Locales Included**:
-   - `en`, `es`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `tr`, `ar`.
+   - Public `/api/calendar/feed.ics` and single-event `/api/calendar/:documentId/invite.ics` endpoints with `?sourceId=`, `?category=`, `?from=`, and `?to=` filters for Google Calendar, Apple Calendar, and Outlook subscriptions.
+6. **13 Admin Locales Included**:
+   - `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL), `zh`.
 
 ---
 
 ## 📦 Installation
 
 ```bash
-npm install @vicacha-devs/strapi-plugin-calendar
+pnpm add @vicacha-devs/strapi-plugin-calendar
 ```
 
 ---
@@ -44,48 +44,52 @@ export default () => ({
   calendar: {
     enabled: true,
     config: {
-      defaultView: 'dayGridMonth',
+      defaultView: "dayGridMonth",
+      defaultTimezone: "UTC",
       firstDay: 1, // Monday
-      slotDuration: '00:30:00',
-      slotMinTime: '06:00:00',
-      slotMaxTime: '22:00:00',
-      enableDragAndDrop: true,
-      enableResize: true,
-      enableSlotCreation: true,
+      slotDuration: "00:30:00",
+      slotMinTime: "06:00:00",
+      slotMaxTime: "22:00:00",
       sources: [
         {
-          id: 'events',
-          label: 'Community Events',
-          contentTypeUid: 'api::event.event',
-          titleField: 'title',
-          startField: 'startDate',
-          endField: 'endDate',
-          allDayField: 'allDay',
-          rruleField: 'rrule',
-          categoryField: 'category',
-          primaryColor: '#4945ff',
+          id: "events",
+          label: "Community Events",
+          uid: "plugin::events.event",
+          color: "#4945FF",
           enabled: true,
+          fields: {
+            title: "title",
+            startDate: "startDate",
+            endDate: "endDate",
+            rrule: "recurrence",
+            location: "location",
+            category: "category",
+            status: "eventStatus",
+            summary: "summary",
+            slug: "slug",
+          },
         },
         {
-          id: 'bookings',
-          label: 'Facility Bookings',
-          contentTypeUid: 'api::booking.booking',
-          titleField: 'bookingTitle',
-          startField: 'checkIn',
-          endField: 'checkOut',
-          categoryField: 'status',
-          primaryColor: '#059669',
+          id: "bookings",
+          label: "Facility Bookings",
+          uid: "plugin::bookings.booking",
+          color: "#059669",
           enabled: true,
+          fields: {
+            title: "customerName",
+            startDate: "startDate",
+            endDate: "endDate",
+            status: "status",
+          },
         },
       ],
       secondaryCalendars: [
         {
-          id: 'hijri',
-          label: 'Hijri (Umm al-Qura)',
-          calendar: 'islamic-umalqura',
-          locale: 'en-US',
+          id: "hijri",
+          label: "Hijri (Umm al-Qura)",
+          intlCalendar: "islamic-umalqura",
           dayOffset: 0,
-          overrideField: 'hijriDate',
+          overrideField: "hijriDate",
           showInDayCell: true,
           showInSidePanel: true,
           enabled: true,
@@ -93,10 +97,10 @@ export default () => ({
       ],
       recurrencePresets: [
         {
-          id: 'ramadan-start',
-          label: 'Every 1st of Ramadan (Hijri Yearly)',
-          rrule: 'RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1',
-          description: 'Recurs annually on 1 Ramadan in the Islamic Umm al-Qura calendar',
+          id: "ramadan-start",
+          label: "Every 1st of Ramadan (Hijri Yearly)",
+          rrule: "RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1",
+          description: "Recurs annually on 1 Ramadan in the Islamic Umm al-Qura calendar",
         },
       ],
     },
@@ -111,21 +115,23 @@ export default () => ({
 Other plugins (such as `@vicacha-devs/strapi-plugin-events` or `@vicacha-devs/strapi-plugin-bookings`) can register their collections automatically during `bootstrap`:
 
 ```ts
-const calendarRegistry = strapi.plugin('calendar')?.service('registry');
+const calendarRegistry = strapi.plugin("calendar")?.service("registry");
 
-calendarRegistry?.registerSource({
-  id: 'events-plugin',
-  label: 'Events',
-  contentTypeUid: 'plugin::events.event',
-  titleField: 'title',
-  startField: 'startDate',
-  endField: 'endDate',
-  allDayField: 'allDay',
-  rruleField: 'rrule',
-  colorField: 'color',
-  categoryField: 'category',
-  primaryColor: '#4945ff',
+await calendarRegistry?.registerSource({
+  id: "events-plugin",
+  label: "Events",
+  uid: "plugin::events.event",
+  color: "#4945FF",
   enabled: true,
+  fields: {
+    title: "title",
+    startDate: "startDate",
+    endDate: "endDate",
+    rrule: "recurrence",
+    location: "location",
+    category: "category",
+    status: "eventStatus",
+  },
 });
 ```
 
@@ -134,17 +140,17 @@ calendarRegistry?.registerSource({
 ## 🌐 REST API Endpoints
 
 ### Content API (`/api/calendar/*`)
-- `GET /api/calendar/occurrences?start=2026-05-01T00:00:00Z&end=2026-05-31T23:59:59Z&sourceId=events`
+- `GET /api/calendar/occurrences?from=2026-05-01T00:00:00Z&to=2026-05-31T23:59:59Z&sourceId=events`
 - `GET /api/calendar/feed.ics?sourceId=events&category=Religious`
+- `GET /api/calendar/:documentId/invite.ics`
 
 ### Admin API (`/calendar/*`)
-- `GET /calendar/occurrences` — Fetch occurrences across all enabled sources
-- `POST /calendar/occurrences/reschedule` — Drag-and-drop / resize reschedule handler
-- `POST /calendar/occurrences/quick-create` — Slot selection quick-create handler
+- `GET /calendar/calendar` — Fetch occurrences across all enabled sources
+- `POST /calendar/calendar/reschedule` — Drag-and-drop / resize reschedule handler
+- `POST /calendar/calendar/quick-create` — Slot selection quick-create handler
 - `GET /calendar/content-types` — Discover collections & fields for the No-Code Mapper
 - `GET /calendar/settings` / `PUT /calendar/settings` — Read or update plugin settings
 - `POST /calendar/clear-settings` — Reset settings to `config/plugins.ts` defaults
-- `GET /calendar/export.ics` — Download `.ics` calendar file
 
 ---
 
