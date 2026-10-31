@@ -1,46 +1,81 @@
 {
   "name": "@vicacha-devs/strapi-v5-extensions",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
-  "version": "0.0.0",
-  "author": "Vicacha Devs",
   "description": "Enterprise Strapi v5 Extensions & Plugins Monorepo (@vicacha-devs/strapi-plugin-calendar, @vicacha-devs/strapi-plugin-events, and companion plugins)",
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
+  },
   "license": "MIT",
+  "author": "Vicacha Devs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vicacha-devs/strapi-v5-extensions.git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
     "directory": "."
   },
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
+  "type": "module",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "start": "turbo run start",
+    "build": "turbo run build --filter=./packages/*",
+    "check": "turbo run test:ts --filter=./packages/*",
+    "clean": "turbo run clean",
+    "dashboard:build": "pnpm --filter @vicacha-devs/dashboard build",
     "dashboard:dev": "pnpm --filter @vicacha-devs/dashboard develop",
     "dashboard:start": "pnpm --filter @vicacha-devs/dashboard start",
+    "dev": "turbo run dev",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint && eslint .",
+    "lint:eslint": "eslint .",
+    "lint:fix": "oxlint --fix && eslint . --fix",
+    "lint:oxc": "oxlint",
+    "prepare": "husky || true",
+    "publint": "node ./scripts/publint-all.ts",
+    "release": "node ./scripts/release.ts",
+    "release:dry": "node ./scripts/release.ts --dry-run --no-ci",
+    "start": "turbo run start",
     "test": "turbo run test",
     "test:ts": "turbo run test:ts",
-    "verify": "turbo run verify",
-    "lint": "turbo run lint",
-    "clean": "turbo run clean",
-    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,yaml,yml}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,json,md,yaml,yml}\"",
-    "changeset": "changeset",
-    "version-packages": "changeset version",
-    "release": "turbo run build test && changeset publish"
+    "verify": "pnpm format:check && pnpm lint && pnpm build && pnpm check && pnpm verify:sdk && pnpm publint && pnpm test",
+    "verify:sdk": "turbo run verify"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.10",
-    "prettier": "^3.8.1",
-    "turbo": "^2.4.4",
-    "typescript": "^5.9.3"
+    "@commitlint/cli": "21.2.0",
+    "@commitlint/config-conventional": "21.2.0",
+    "@commitlint/types": "21.2.0",
+    "@eslint/js": "10.0.1",
+    "@eslint/json": "2.0.1",
+    "@semantic-release/changelog": "7.0.0",
+    "@semantic-release/git": "11.0.1",
+    "@stylistic/eslint-plugin": "6.0.0-beta.4",
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/parser": "8.62.1",
+    "@vitest/eslint-plugin": "1.6.21",
+    "conventional-changelog-conventionalcommits": "10.4.1",
+    "eslint": "10.6.0",
+    "eslint-import-resolver-typescript": "4.4.5",
+    "eslint-plugin-import-x": "4.17.1",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-sonarjs": "4.1.0",
+    "globals": "17.7.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.0.8",
+    "oxfmt": "0.75.0",
+    "oxlint": "1.90.0",
+    "publint": "0.3.25",
+    "semantic-release": "25.0.9",
+    "turbo": "2.4.4",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.62.1",
+    "vitest": "4.1.9"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "pnpm": ">=9.0.0"
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
   },
-  "packageManager": "pnpm@9.15.4"
+  "packageManager": "pnpm@10.33.3"
 }
