@@ -8,23 +8,106 @@ import {
   type MediaLibraryFolderSummary,
 } from '../../../shared';
 
+type UploadQueryFn = (uid: string) => {
+  findMany: (
+    opts?: Record<string, unknown>
+  ) => Promise<Record<string, unknown>[]>;
+};
+
+function getUploadQuery(
+  strapi: Core.Strapi,
+  uid: string
+): ReturnType<UploadQueryFn> | undefined {
+  return (
+    strapi as unknown as {
+      db?: { query?: UploadQueryFn };
+    }
+  ).db?.query?.(uid);
+}
+
+function resolveSafeFolderPath(folderPath?: string): string | undefined {
+  if (!folderPath) return undefined;
+  const check = validateMediaFolderPath(folderPath);
+  if (!check.valid) {
+    throw new Error(check.errors.join('; '));
+  }
+  return check.data;
+}
+
+function buildFolderWhereFilter(
+  safeFolderPath: string | undefined,
+  folderId: number | null | undefined
+): Record<string, unknown> {
+  if (safeFolderPath) return { folderPath: safeFolderPath };
+  if (typeof folderId === 'number' && folderId > 0) return { folder: folderId };
+  return {};
+}
+
+function filterNormalizedAssets(
+  rawFiles: Record<string, unknown>[] | undefined,
+  enableCloudinaryOptimization: boolean,
+  mimePrefix?: string
+): MediaLibraryAsset[] {
+  const lowerPrefix = mimePrefix?.toLowerCase();
+  return (rawFiles || [])
+    .map((raw) => normalizeUploadFile(raw, enableCloudinaryOptimization))
+    .filter((asset): asset is MediaLibraryAsset => {
+      if (!asset) return false;
+      return !lowerPrefix || asset.mime.toLowerCase().startsWith(lowerPrefix);
+    });
+}
+
+function extractFolderCoordinates(existing: Record<string, unknown>): {
+  folderPath?: string;
+  folderId: number | null;
+} {
+  const folderPath =
+    typeof existing.mediaFolderPath === 'string' &&
+    existing.mediaFolderPath.trim()
+      ? existing.mediaFolderPath.trim()
+      : undefined;
+  const folderId =
+    typeof existing.mediaFolderId === 'number' && existing.mediaFolderId > 0
+      ? existing.mediaFolderId
+      : null;
+
+  if (!folderPath && !folderId) {
+    throw new Error(
+      'Album does not have a mediaFolderPath or mediaFolderId configured'
+    );
+  }
+  return { folderPath, folderId };
+}
+
+function buildSyncedAlbumUpdateData(
+  syncedPhotos: MediaLibraryAsset[],
+  existingCoverPhoto: unknown
+): Record<string, unknown> {
+  const photoIds = syncedPhotos
+    .map((item) => item.id)
+    .filter((id): id is number | string => id !== undefined);
+
+  const updateData: Record<string, unknown> = {
+    photoCount: syncedPhotos.length,
+  };
+
+  if (photoIds.length > 0) {
+    updateData.photos = photoIds;
+    if (!existingCoverPhoto && photoIds[0] !== undefined) {
+      updateData.coverPhoto = photoIds[0];
+    }
+  }
+  return updateData;
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Lists folders from Strapi v5's native Media Library (`plugin::upload.folder`).
    */
   async listMediaFolders(): Promise<MediaLibraryFolderSummary[]> {
     try {
-      const folderQuery = (strapi as unknown as {
-        db?: {
-          query?: (uid: string) => {
-            findMany: (opts?: Record<string, unknown>) => Promise<Record<string, unknown>[]>;
-          };
-        };
-      }).db?.query?.('plugin::upload.folder');
-
-      if (!folderQuery) {
-        return [];
-      }
+      const folderQuery = getUploadQuery(strapi, 'plugin::upload.folder');
+      if (!folderQuery) return [];
 
       const rawFolders = await folderQuery.findMany({
         orderBy: { name: 'asc' },
@@ -61,36 +144,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       }>;
     };
     const settings = await settingsService.getSettings();
-
-    let safeFolderPath: string | undefined;
-    if (params.folderPath) {
-      const check = validateMediaFolderPath(params.folderPath);
-      if (!check.valid) {
-        throw new Error(check.errors.join('; '));
-      }
-      safeFolderPath = check.data;
-    }
+    const safeFolderPath = resolveSafeFolderPath(params.folderPath);
 
     try {
-      const fileQuery = (strapi as unknown as {
-        db?: {
-          query?: (uid: string) => {
-            findMany: (opts?: Record<string, unknown>) => Promise<Record<string, unknown>[]>;
-          };
-        };
-      }).db?.query?.('plugin::upload.file');
+      const fileQuery = getUploadQuery(strapi, 'plugin::upload.file');
+      if (!fileQuery) return [];
 
-      if (!fileQuery) {
-        return [];
-      }
-
-      const where: Record<string, unknown> = {};
-      if (safeFolderPath) {
-        where.folderPath = safeFolderPath;
-      } else if (typeof params.folderId === 'number' && params.folderId > 0) {
-        where.folder = params.folderId;
-      }
-
+      const where = buildFolderWhereFilter(safeFolderPath, params.folderId);
       const maxLimit = Math.min(
         params.limit || settings.maxPhotosPerAlbum || 120,
         500
@@ -102,22 +162,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         limit: maxLimit,
       });
 
-      const mimePrefix = params.mimePrefix?.toLowerCase();
-
-      return (rawFiles || [])
-        .map((raw) =>
-          normalizeUploadFile(raw, settings.enableCloudinaryOptimization)
-        )
-        .filter((asset): asset is MediaLibraryAsset => {
-          if (!asset) return false;
-          if (mimePrefix && !asset.mime.toLowerCase().startsWith(mimePrefix)) {
-            return false;
-          }
-          return true;
-        });
+      return filterNormalizedAssets(
+        rawFiles,
+        settings.enableCloudinaryOptimization,
+        params.mimePrefix
+      );
     } catch {
       return [];
     }
+  },
+
+  /**
+   * Lists recent assets from Strapi v5's native Media Library (`plugin::upload.file`).
+   */
+  async listMediaFiles(params?: {
+    mimePrefix?: string;
+    limit?: number;
+  }): Promise<MediaLibraryAsset[]> {
+    return this.listFilesInFolder({
+      mimePrefix: params?.mimePrefix,
+      limit: params?.limit || 200,
+    });
   },
 
   /**
@@ -148,41 +213,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       throw new Error(`Gallery album "${albumDocumentId}" not found`);
     }
 
-    const folderPath =
-      typeof existing.mediaFolderPath === 'string' && existing.mediaFolderPath.trim()
-        ? existing.mediaFolderPath.trim()
-        : undefined;
-    const folderId =
-      typeof existing.mediaFolderId === 'number' && existing.mediaFolderId > 0
-        ? existing.mediaFolderId
-        : null;
-
-    if (!folderPath && !folderId) {
-      throw new Error(
-        'Album does not have a mediaFolderPath or mediaFolderId configured'
-      );
-    }
-
+    const { folderPath, folderId } = extractFolderCoordinates(existing);
     const syncedPhotos = await this.listFilesInFolder({
       folderPath,
       folderId,
       mimePrefix: 'image/',
     });
 
-    const photoIds = syncedPhotos
-      .map((item) => item.id)
-      .filter((id): id is number | string => id !== undefined);
-
-    const updateData: Record<string, unknown> = {
-      photoCount: syncedPhotos.length,
-    };
-
-    if (photoIds.length > 0) {
-      updateData.photos = photoIds;
-      if (!existing.coverPhoto && photoIds[0] !== undefined) {
-        updateData.coverPhoto = photoIds[0];
-      }
-    }
+    const updateData = buildSyncedAlbumUpdateData(
+      syncedPhotos,
+      existing.coverPhoto
+    );
 
     await docService.update({
       documentId: albumDocumentId,

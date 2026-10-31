@@ -7,7 +7,7 @@ import controllers from './controllers';
 import routes from './routes';
 import services from './services';
 
-export default {
+const plugin: Record<string, unknown> = {
   register,
   bootstrap,
   destroy,
@@ -17,3 +17,5 @@ export default {
   services,
   contentTypes,
 };
+
+export default plugin;

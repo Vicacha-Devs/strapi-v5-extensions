@@ -1,187 +1,32 @@
 import type { Core } from '@strapi/strapi';
 import {
-  buildAttachmentHeaders,
   CONTENT_TYPE_UIDS,
-  formatSecondaryCalendarDate,
-  isAllowedDownloadAsset,
-  normalizeUploadFile,
   PLUGIN_ID,
-  sanitizeFilename,
   validateGalleryAlbumInput,
   validateGlossaryTermInput,
   validatePublicationInput,
   type DownloadTicketResult,
-  type GalleryAlbumCategory,
   type GalleryAlbumRecord,
-  type GlossaryCategory,
   type GlossaryTermRecord,
-  type MediaLibraryAsset,
-  type PublicationCategory,
   type PublicationRecord,
   type ResourcesPluginSettings,
-  type SecondaryCalendarId,
 } from '../../../shared';
+import {
+  assertPublicationDownloadable,
+  buildDownloadTicket,
+  buildGalleryAlbumUpdateData,
+  findExistingDocumentOrThrow,
+  mergeRecordPayload,
+  normalizeGalleryAlbumRow,
+  normalizeGlossaryTermRow,
+  normalizePublicationRow,
+  resolvePublicationDownloadUrl,
+} from './catalogNormalizers';
 import {
   DEFAULT_SEED_GALLERY_ALBUMS,
   DEFAULT_SEED_GLOSSARY_TERMS,
   DEFAULT_SEED_PUBLICATIONS,
 } from './seedData';
-
-function normalizePublicationRow(
-  row: Record<string, unknown>,
-  settings: ResourcesPluginSettings
-): PublicationRecord {
-  const locale =
-    typeof row.locale === 'string' && row.locale ? row.locale : settings.defaultLocale;
-  const publishedAtDate =
-    typeof row.publishedAtDate === 'string' ? row.publishedAtDate : undefined;
-  const secondaryDateOverride =
-    typeof row.secondaryDateOverride === 'string' && row.secondaryDateOverride.trim()
-      ? row.secondaryDateOverride.trim()
-      : undefined;
-
-  return {
-    documentId:
-      typeof row.documentId === 'string' ? row.documentId : String(row.id ?? ''),
-    title: typeof row.title === 'string' ? row.title : '',
-    slug: typeof row.slug === 'string' ? row.slug : '',
-    summary: typeof row.summary === 'string' ? row.summary : '',
-    category: (row.category as PublicationCategory) || 'guide',
-    authorName:
-      typeof row.authorName === 'string' ? row.authorName : undefined,
-    isbnOrReference:
-      typeof row.isbnOrReference === 'string' ? row.isbnOrReference : undefined,
-    pageCount: typeof row.pageCount === 'number' ? row.pageCount : undefined,
-    languageCode:
-      typeof row.languageCode === 'string' ? row.languageCode : locale,
-    publishedAtDate,
-    secondaryDateOverride,
-    secondaryDateFormatted:
-      secondaryDateOverride ||
-      formatSecondaryCalendarDate(
-        publishedAtDate,
-        settings.secondaryCalendar as SecondaryCalendarId,
-        locale
-      ),
-    mediaFolderPath:
-      typeof row.mediaFolderPath === 'string' ? row.mediaFolderPath : undefined,
-    downloadCount:
-      typeof row.downloadCount === 'number' ? row.downloadCount : 0,
-    featured: Boolean(row.featured),
-    allowPublicDownload: row.allowPublicDownload !== false,
-    externalDownloadUrl:
-      typeof row.externalDownloadUrl === 'string'
-        ? row.externalDownloadUrl
-        : undefined,
-    file: normalizeUploadFile(row.file, settings.enableCloudinaryOptimization),
-    coverImage: normalizeUploadFile(
-      row.coverImage,
-      settings.enableCloudinaryOptimization
-    ),
-    locale,
-  };
-}
-
-function normalizeGalleryAlbumRow(
-  row: Record<string, unknown>,
-  settings: ResourcesPluginSettings
-): GalleryAlbumRecord {
-  const locale =
-    typeof row.locale === 'string' && row.locale ? row.locale : settings.defaultLocale;
-  const eventDate =
-    typeof row.eventDate === 'string' ? row.eventDate : undefined;
-  const secondaryDateOverride =
-    typeof row.secondaryDateOverride === 'string' && row.secondaryDateOverride.trim()
-      ? row.secondaryDateOverride.trim()
-      : undefined;
-
-  const rawPhotos = Array.isArray(row.photos) ? row.photos : [];
-  const photos = rawPhotos
-    .map((item) =>
-      normalizeUploadFile(item, settings.enableCloudinaryOptimization)
-    )
-    .filter((item): item is MediaLibraryAsset => item !== null);
-
-  const coverPhoto =
-    normalizeUploadFile(
-      row.coverPhoto,
-      settings.enableCloudinaryOptimization
-    ) ||
-    photos[0] ||
-    null;
-
-  const storedPhotoCount =
-    typeof row.photoCount === 'number' && row.photoCount >= 0
-      ? row.photoCount
-      : 0;
-
-  return {
-    documentId:
-      typeof row.documentId === 'string' ? row.documentId : String(row.id ?? ''),
-    title: typeof row.title === 'string' ? row.title : '',
-    slug: typeof row.slug === 'string' ? row.slug : '',
-    description: typeof row.description === 'string' ? row.description : '',
-    category: (row.category as GalleryAlbumCategory) || 'community',
-    eventDate,
-    secondaryDateOverride,
-    secondaryDateFormatted:
-      secondaryDateOverride ||
-      formatSecondaryCalendarDate(
-        eventDate,
-        settings.secondaryCalendar as SecondaryCalendarId,
-        locale
-      ),
-    mediaFolderId:
-      typeof row.mediaFolderId === 'number' ? row.mediaFolderId : null,
-    mediaFolderPath:
-      typeof row.mediaFolderPath === 'string' ? row.mediaFolderPath : undefined,
-    photographerCredit:
-      typeof row.photographerCredit === 'string'
-        ? row.photographerCredit
-        : undefined,
-    framingNotes:
-      typeof row.framingNotes === 'string' ? row.framingNotes : undefined,
-    featured: Boolean(row.featured),
-    sortOrder: typeof row.sortOrder === 'number' ? row.sortOrder : 0,
-    photoCount: photos.length > 0 ? photos.length : storedPhotoCount,
-    coverPhoto,
-    photos,
-    locale,
-  };
-}
-
-function normalizeGlossaryTermRow(
-  row: Record<string, unknown>,
-  settings: ResourcesPluginSettings
-): GlossaryTermRecord {
-  const locale =
-    typeof row.locale === 'string' && row.locale ? row.locale : settings.defaultLocale;
-  return {
-    documentId:
-      typeof row.documentId === 'string' ? row.documentId : String(row.id ?? ''),
-    term: typeof row.term === 'string' ? row.term : '',
-    slug: typeof row.slug === 'string' ? row.slug : '',
-    nativeScript:
-      typeof row.nativeScript === 'string' ? row.nativeScript : undefined,
-    transliteration:
-      typeof row.transliteration === 'string' ? row.transliteration : undefined,
-    definition: typeof row.definition === 'string' ? row.definition : '',
-    category: (row.category as GlossaryCategory) || 'general',
-    letterGroup:
-      typeof row.letterGroup === 'string' && row.letterGroup
-        ? row.letterGroup
-        : 'A',
-    relatedTerms: Array.isArray(row.relatedTerms)
-      ? row.relatedTerms.filter((t): t is string => typeof t === 'string')
-      : [],
-    featured: Boolean(row.featured),
-    pronunciationAudio: normalizeUploadFile(
-      row.pronunciationAudio,
-      settings.enableCloudinaryOptimization
-    ),
-    locale,
-  };
-}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettings = async (): Promise<ResourcesPluginSettings> => {
@@ -207,7 +52,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         .documents(CONTENT_TYPE_UIDS.publication)
         .findMany({
           ...(params?.locale ? { locale: params.locale } : {}),
-          filters,
+          filters: filters as never,
           populate: ['file', 'coverImage'],
           sort: { featured: 'desc', publishedAtDate: 'desc' },
         })) as Record<string, unknown>[];
@@ -257,6 +102,56 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return normalizePublicationRow(created, settings);
     },
 
+    async updatePublication(
+      documentId: string,
+      payload: unknown,
+      locale?: string
+    ): Promise<PublicationRecord> {
+      if (!documentId) {
+        throw new Error('Publication documentId is required');
+      }
+      const docs = strapi.documents(CONTENT_TYPE_UIDS.publication);
+      const existing = (await docs.findOne({
+        documentId,
+        ...(locale ? { locale } : {}),
+        populate: ['file', 'coverImage'],
+      })) as Record<string, unknown> | null;
+      if (!existing) {
+        throw new Error(`Publication "${documentId}" not found`);
+      }
+
+      const merged = {
+        ...existing,
+        ...(payload && typeof payload === 'object' ? payload : {}),
+      };
+      const validation = validatePublicationInput(merged);
+      if (!validation.valid || !validation.data) {
+        throw new Error(validation.errors.join('; '));
+      }
+
+      const settings = await getSettings();
+      const updated = (await docs.update({
+        documentId,
+        ...(locale ? { locale } : {}),
+        data: validation.data as never,
+        populate: ['file', 'coverImage'],
+      })) as Record<string, unknown>;
+      return normalizePublicationRow(updated || merged, settings);
+    },
+
+    async deletePublication(documentId: string): Promise<{ deleted: boolean }> {
+      if (!documentId) {
+        throw new Error('Publication documentId is required');
+      }
+      const docs = strapi.documents(CONTENT_TYPE_UIDS.publication) as unknown as {
+        delete?: (opts: { documentId: string }) => Promise<unknown>;
+      };
+      if (typeof docs.delete === 'function') {
+        await docs.delete({ documentId });
+      }
+      return { deleted: true };
+    },
+
     async recordPublicationDownload(
       slug: string,
       locale?: string
@@ -276,30 +171,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const record = normalizePublicationRow(row, settings);
-      if (!record.allowPublicDownload) {
-        throw new Error(`Public download is disabled for "${slug}"`);
-      }
+      assertPublicationDownloadable(record, slug, settings);
 
-      if (record.file) {
-        const allowed = isAllowedDownloadAsset(
-          record.file.ext,
-          record.file.mime,
-          settings.allowedDownloadExtensions,
-          settings.allowedDownloadMimeTypes
-        );
-        if (!allowed) {
-          throw new Error(
-            `Asset type (${record.file.ext} / ${record.file.mime}) is not in the download allow-list`
-          );
-        }
-      }
-
-      const downloadUrl =
-        record.file?.url || record.externalDownloadUrl || '';
-      if (!downloadUrl) {
-        throw new Error(`Publication "${slug}" has no downloadable file attached`);
-      }
-
+      const downloadUrl = resolvePublicationDownloadUrl(record, slug);
       const nextCount = (record.downloadCount || 0) + 1;
       if (record.documentId) {
         await strapi.documents(CONTENT_TYPE_UIDS.publication).update({
@@ -309,22 +183,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
       }
 
-      const fileName = sanitizeFilename(
-        record.file?.name || `${record.slug}.pdf`,
-        record.file?.ext || '.pdf'
-      );
-      const mime = record.file?.mime || 'application/pdf';
-
-      return {
-        slug: record.slug,
-        title: record.title,
-        fileName,
-        downloadUrl,
-        mime,
-        formattedSize: record.file?.formattedSize || 'PDF',
-        downloadCount: nextCount,
-        headers: buildAttachmentHeaders(fileName, mime),
-      };
+      return buildDownloadTicket(record, downloadUrl, nextCount);
     },
 
     async listGalleryAlbums(params?: {
@@ -341,7 +200,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         .documents(CONTENT_TYPE_UIDS.galleryAlbum)
         .findMany({
           ...(params?.locale ? { locale: params.locale } : {}),
-          filters,
+          filters: filters as never,
           populate: ['coverPhoto', 'photos'],
           sort: { sortOrder: 'asc', eventDate: 'desc' },
         })) as Record<string, unknown>[];
@@ -366,17 +225,67 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new Error(validation.errors.join('; '));
       }
       const settings = await getSettings();
+      const photoIds = validation.data.photos || [];
       const created = (await strapi
         .documents(CONTENT_TYPE_UIDS.galleryAlbum)
         .create({
           ...(locale ? { locale } : {}),
           data: {
             ...validation.data,
-            photoCount: 0,
+            ...(photoIds.length > 0 && !validation.data.coverPhoto
+              ? { coverPhoto: photoIds[0] }
+              : {}),
+            photoCount: photoIds.length,
           } as never,
           populate: ['coverPhoto', 'photos'],
         })) as Record<string, unknown>;
       return normalizeGalleryAlbumRow(created, settings);
+    },
+
+    async updateGalleryAlbum(
+      documentId: string,
+      payload: unknown,
+      locale?: string
+    ): Promise<GalleryAlbumRecord> {
+      if (!documentId) {
+        throw new Error('Gallery album documentId is required');
+      }
+      const docs = strapi.documents(CONTENT_TYPE_UIDS.galleryAlbum);
+      const existing = await findExistingDocumentOrThrow(
+        docs,
+        documentId,
+        locale,
+        ['coverPhoto', 'photos'],
+        'Gallery album'
+      );
+
+      const merged = mergeRecordPayload(existing, payload);
+      const validation = validateGalleryAlbumInput(merged);
+      if (!validation.valid || !validation.data) {
+        throw new Error(validation.errors.join('; '));
+      }
+
+      const settings = await getSettings();
+      const updated = (await docs.update({
+        documentId,
+        ...(locale ? { locale } : {}),
+        data: buildGalleryAlbumUpdateData(validation.data, existing) as never,
+        populate: ['coverPhoto', 'photos'],
+      })) as Record<string, unknown>;
+      return normalizeGalleryAlbumRow(updated || merged, settings);
+    },
+
+    async deleteGalleryAlbum(documentId: string): Promise<{ deleted: boolean }> {
+      if (!documentId) {
+        throw new Error('Gallery album documentId is required');
+      }
+      const docs = strapi.documents(CONTENT_TYPE_UIDS.galleryAlbum) as unknown as {
+        delete?: (opts: { documentId: string }) => Promise<unknown>;
+      };
+      if (typeof docs.delete === 'function') {
+        await docs.delete({ documentId });
+      }
+      return { deleted: true };
     },
 
     async listGlossaryTerms(params?: {
@@ -396,7 +305,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         .documents(CONTENT_TYPE_UIDS.glossaryTerm)
         .findMany({
           ...(params?.locale ? { locale: params.locale } : {}),
-          filters,
+          filters: filters as never,
           populate: ['pronunciationAudio'],
           sort: { letterGroup: 'asc', term: 'asc' },
         })) as Record<string, unknown>[];
@@ -434,6 +343,56 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           populate: ['pronunciationAudio'],
         })) as Record<string, unknown>;
       return normalizeGlossaryTermRow(created, settings);
+    },
+
+    async updateGlossaryTerm(
+      documentId: string,
+      payload: unknown,
+      locale?: string
+    ): Promise<GlossaryTermRecord> {
+      if (!documentId) {
+        throw new Error('Glossary term documentId is required');
+      }
+      const docs = strapi.documents(CONTENT_TYPE_UIDS.glossaryTerm);
+      const existing = (await docs.findOne({
+        documentId,
+        ...(locale ? { locale } : {}),
+        populate: ['pronunciationAudio'],
+      })) as Record<string, unknown> | null;
+      if (!existing) {
+        throw new Error(`Glossary term "${documentId}" not found`);
+      }
+
+      const merged = {
+        ...existing,
+        ...(payload && typeof payload === 'object' ? payload : {}),
+      };
+      const validation = validateGlossaryTermInput(merged);
+      if (!validation.valid || !validation.data) {
+        throw new Error(validation.errors.join('; '));
+      }
+
+      const settings = await getSettings();
+      const updated = (await docs.update({
+        documentId,
+        ...(locale ? { locale } : {}),
+        data: validation.data as never,
+        populate: ['pronunciationAudio'],
+      })) as Record<string, unknown>;
+      return normalizeGlossaryTermRow(updated || merged, settings);
+    },
+
+    async deleteGlossaryTerm(documentId: string): Promise<{ deleted: boolean }> {
+      if (!documentId) {
+        throw new Error('Glossary term documentId is required');
+      }
+      const docs = strapi.documents(CONTENT_TYPE_UIDS.glossaryTerm) as unknown as {
+        delete?: (opts: { documentId: string }) => Promise<unknown>;
+      };
+      if (typeof docs.delete === 'function') {
+        await docs.delete({ documentId });
+      }
+      return { deleted: true };
     },
 
     async seedDefaultResources(): Promise<void> {

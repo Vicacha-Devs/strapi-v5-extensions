@@ -18,6 +18,18 @@ export default [
     config: { policies: [] },
   },
   {
+    method: 'PUT',
+    path: '/publications/:documentId',
+    handler: 'resourcesController.updatePublication',
+    config: { policies: [] },
+  },
+  {
+    method: 'DELETE',
+    path: '/publications/:documentId',
+    handler: 'resourcesController.deletePublication',
+    config: { policies: [] },
+  },
+  {
     method: 'GET',
     path: '/galleries',
     handler: 'resourcesController.listGalleries',
@@ -27,6 +39,18 @@ export default [
     method: 'POST',
     path: '/galleries',
     handler: 'resourcesController.createGalleryAlbum',
+    config: { policies: [] },
+  },
+  {
+    method: 'PUT',
+    path: '/galleries/:documentId',
+    handler: 'resourcesController.updateGalleryAlbum',
+    config: { policies: [] },
+  },
+  {
+    method: 'DELETE',
+    path: '/galleries/:documentId',
+    handler: 'resourcesController.deleteGalleryAlbum',
     config: { policies: [] },
   },
   {
@@ -48,9 +72,27 @@ export default [
     config: { policies: [] },
   },
   {
+    method: 'PUT',
+    path: '/glossary/:documentId',
+    handler: 'resourcesController.updateGlossaryTerm',
+    config: { policies: [] },
+  },
+  {
+    method: 'DELETE',
+    path: '/glossary/:documentId',
+    handler: 'resourcesController.deleteGlossaryTerm',
+    config: { policies: [] },
+  },
+  {
     method: 'GET',
     path: '/media-folders',
     handler: 'resourcesController.listMediaFolders',
+    config: { policies: [] },
+  },
+  {
+    method: 'GET',
+    path: '/media-files',
+    handler: 'resourcesController.listMediaFiles',
     config: { policies: [] },
   },
   {

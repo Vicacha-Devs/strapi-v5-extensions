@@ -78,7 +78,9 @@ declare module '@strapi/strapi' {
         documentId: string;
         locale?: string;
         data: Record<string, unknown>;
+        populate?: string[];
       }): Promise<Record<string, unknown> | null>;
+      delete?(params: { documentId: string }): Promise<unknown>;
     }
 
     export interface DbQueryInstance {
@@ -95,7 +97,7 @@ declare module '@strapi/strapi' {
     }
 
     export interface PluginInstance {
-      service<T = any>(name: string): T;
+      service<T = Record<string, never>>(name: string): T;
     }
 
     export interface Strapi {

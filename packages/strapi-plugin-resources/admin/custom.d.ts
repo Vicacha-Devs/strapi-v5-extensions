@@ -8,8 +8,8 @@ declare module 'react' {
     | ReactElement
     | ReactNode[];
 
-  export interface ReactElement<P = any> {
-    type: any;
+  export interface ReactElement<P = unknown> {
+    type: unknown;
     props: P;
     key: string | number | null;
   }
@@ -19,8 +19,8 @@ declare module 'react' {
   }
 
   export interface ChangeEvent<T = Element> {
-    target: T & { value: string; checked?: boolean };
-    currentTarget: T & { value: string; checked?: boolean };
+    target: T & { value: string; checked?: boolean; files?: FileList | null };
+    currentTarget: T & { value: string; checked?: boolean; files?: FileList | null };
   }
 
   export interface RefObject<T> {
@@ -40,14 +40,22 @@ declare module 'react' {
     effect: () => void | (() => void),
     deps?: readonly unknown[]
   ): void;
+  export function useMemo<T>(
+    factory: () => T,
+    deps?: readonly unknown[]
+  ): T;
+  export function useCallback<T extends (...args: never[]) => unknown>(
+    callback: T,
+    deps?: readonly unknown[]
+  ): T;
   export function useRef<T>(initialValue: T): RefObject<T>;
-  export function createElement(...args: any[]): ReactElement;
+  export function createElement(...args: unknown[]): ReactElement;
   export const Fragment: unknown;
 
   export namespace JSX {
     interface Element extends ReactElement {}
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 
@@ -57,13 +65,13 @@ declare module 'react' {
 declare module 'react/jsx-runtime' {
   import type { ReactElement } from 'react';
   export const Fragment: unknown;
-  export function jsx(type: any, props: any, key?: any): ReactElement;
-  export function jsxs(type: any, props: any, key?: any): ReactElement;
+  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
     interface IntrinsicElements {
-      [elemName: string]: Record<string, any>;
+      [elemName: string]: Record<string, unknown>;
     }
   }
 }
@@ -81,14 +89,21 @@ declare module '@strapi/icons' {
 }
 
 declare module '@strapi/design-system' {
-  export const Tabs: {
-    Root: any;
-    List: any;
-    Trigger: any;
-    Content: any;
-  };
   import type { FC, ReactNode } from 'react';
-  export type DesignComponentProps = Record<string, any> & { children?: ReactNode };
+  export type DesignComponentProps = {
+    children?: ReactNode;
+    onClick?: (...args: never[]) => unknown;
+    onChange?: (...args: never[]) => unknown;
+    onValueChange?: (...args: never[]) => unknown;
+    [key: string]: unknown;
+  };
+
+  export const Tabs: {
+    Root: FC<DesignComponentProps>;
+    List: FC<DesignComponentProps>;
+    Trigger: FC<DesignComponentProps>;
+    Content: FC<DesignComponentProps>;
+  };
 
   export const Main: FC<DesignComponentProps>;
   export const Box: FC<DesignComponentProps>;
@@ -117,15 +132,37 @@ declare module '@strapi/design-system' {
 }
 
 declare module '@strapi/strapi/admin' {
+  import type {
+    GalleryAlbumRecord,
+    GlossaryTermRecord,
+    MediaLibraryAsset,
+    PublicationRecord,
+    ResourcesPluginSettings,
+  } from '../shared';
+
+  export type FetchInnerData = ResourcesPluginSettings & {
+    publications?: PublicationRecord[];
+    galleries?: GalleryAlbumRecord[];
+    glossary?: GlossaryTermRecord[];
+    mediaFiles?: MediaLibraryAsset[];
+    [key: string]: unknown;
+  };
+
+  export interface FetchClientResponse {
+    data?: FetchInnerData;
+    [key: string]: unknown;
+  }
+
   export const useFetchClient: () => {
-    get: (url: string) => Promise<{ data: any }>;
-    post: (url: string, data?: any) => Promise<{ data: any }>;
-    put: (url: string, data?: any) => Promise<{ data: any }>;
+    get: (url: string) => Promise<{ data: FetchClientResponse }>;
+    post: (url: string, data?: unknown) => Promise<{ data: FetchClientResponse }>;
+    put: (url: string, data?: unknown) => Promise<{ data: FetchClientResponse }>;
+    del: (url: string) => Promise<{ data: FetchClientResponse }>;
   };
 }
 
 declare module 'styled-components' {
-  export function useTheme(): Record<string, any>;
+  export function useTheme(): Record<string, unknown>;
 }
 
 declare module 'react-intl' {
