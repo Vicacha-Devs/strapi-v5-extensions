@@ -309,8 +309,18 @@
   "bookings.modal.startDate": "Fecha y Hora de Inicio (ISO)",
   "settings.section": "Reservas y Disponibilidad",
   "bookings.settings.section": "Reservas y Disponibilidad",
-  "settings.link": "Configuración de Franjas y Horarios",
-  "bookings.settings.link": "Configuración de Franjas y Horarios",
+  "settings.link": "Reservas y Disponibilidad",
+  "bookings.settings.link": "Reservas y Disponibilidad",
   "settings.approvalsHeading": "Flujo de Aprobación y Notificaciones por Correo",
-  "bookings.settings.approvalsHeading": "Flujo de Aprobación y Notificaciones por Correo"
+  "bookings.settings.approvalsHeading": "Flujo de Aprobación y Notificaciones por Correo",
+  "actions.openUnifiedCalendar": "Abrir en Calendario",
+  "bookings.actions.openUnifiedCalendar": "Abrir en Calendario",
+  "modal.langEs": "Español (ES)",
+  "bookings.modal.langEs": "Español (ES)",
+  "modal.langEn": "English (EN)",
+  "bookings.modal.langEn": "English (EN)",
+  "modal.langAr": "العربية — Arabic (AR)",
+  "bookings.modal.langAr": "العربية — Arabic (AR)",
+  "modal.langTr": "Türkçe — Turkish (TR)",
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
 }

@@ -25,6 +25,11 @@ export interface QuickCreateBookingModalProps {
   onSubmit: (payload: CreateReservationInput) => Promise<void>;
 }
 
+function optionalTrimmed(value: string): string | undefined {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export const QuickCreateBookingModal: React.FC<
   QuickCreateBookingModalProps
 > = ({ t, isOpen, initialStartIso, resources, onClose, onSubmit }) => {
@@ -66,23 +71,25 @@ export const QuickCreateBookingModal: React.FC<
   }
 
   const handleCreate = async () => {
-    if (!customerName.trim() || !customerEmail.trim() || !bookingDate) {
+    const trimmedName = optionalTrimmed(customerName);
+    const trimmedEmail = optionalTrimmed(customerEmail);
+    if (!trimmedName || !trimmedEmail || !bookingDate) {
       return;
     }
     setSaving(true);
     try {
       const startIso = `${bookingDate}T${bookingTime || '09:00'}:00.000Z`;
       await onSubmit({
-        resourceDocumentId: resourceDocumentId || undefined,
-        customerName: customerName.trim(),
-        customerEmail: customerEmail.trim(),
-        customerPhone: customerPhone.trim() || undefined,
-        organization: organization.trim() || undefined,
+        resourceDocumentId: optionalTrimmed(resourceDocumentId),
+        customerName: trimmedName,
+        customerEmail: trimmedEmail,
+        customerPhone: optionalTrimmed(customerPhone),
+        organization: optionalTrimmed(organization),
         startDate: startIso,
         partySize: Math.max(1, partySize),
-        preferredLanguage: preferredLanguage.trim() || undefined,
-        assignedHost: assignedHost.trim() || undefined,
-        notes: notes.trim() || undefined,
+        preferredLanguage: optionalTrimmed(preferredLanguage),
+        assignedHost: optionalTrimmed(assignedHost),
+        notes: optionalTrimmed(notes),
       });
       setCustomerName('');
       setCustomerEmail('');
@@ -302,16 +309,16 @@ export const QuickCreateBookingModal: React.FC<
                 }
               >
                 <SingleSelectOption value="es">
-                  Español (ES)
+                  {t('modal.langEs', 'Español (ES)')}
                 </SingleSelectOption>
                 <SingleSelectOption value="en">
-                  English (EN)
+                  {t('modal.langEn', 'English (EN)')}
                 </SingleSelectOption>
                 <SingleSelectOption value="ar">
-                  العربية — Arabic (AR)
+                  {t('modal.langAr', 'العربية — Arabic (AR)')}
                 </SingleSelectOption>
                 <SingleSelectOption value="tr">
-                  Türkçe — Turkish (TR)
+                  {t('modal.langTr', 'Türkçe — Turkish (TR)')}
                 </SingleSelectOption>
               </SingleSelect>
             </Field.Root>

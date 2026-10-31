@@ -44,67 +44,199 @@ function slugifyName(value: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export function normalizeResourceRecord(
-  raw: Record<string, unknown>
-): BookingResource {
-  const weeklySchedule =
-    raw.weeklySchedule &&
-    typeof raw.weeklySchedule === 'object' &&
-    'days' in (raw.weeklySchedule as Record<string, unknown>)
-      ? (raw.weeklySchedule as WeeklyScheduleConfig)
-      : DEFAULT_WEEKLY_SCHEDULE;
+import type { BookingsPluginSettings } from '../../../shared/types';
 
-  const seasonalSchedules = Array.isArray(raw.seasonalSchedules)
-    ? (raw.seasonalSchedules as SeasonalScheduleOverride[])
-    : [];
+function asArray<T>(val: unknown): T[] {
+  return Array.isArray(val) ? (val as T[]) : [];
+}
 
-  const holidayRules = Array.isArray(raw.holidayRules)
-    ? (raw.holidayRules as HolidayScheduleRule[])
-    : [];
+function asOptionalString(val: unknown): string | undefined {
+  return val ? String(val) : undefined;
+}
 
-  const blackoutDates = Array.isArray(raw.blackoutDates)
-    ? (raw.blackoutDates as BlackoutPeriod[])
-    : [];
+function clampNumber(val: unknown, fallback: number, min: number): number {
+  return Math.max(min, Number(val ?? fallback));
+}
 
-  const supportedLanguages = Array.isArray(raw.supportedLanguages)
-    ? raw.supportedLanguages.map((l) => String(l))
-    : [];
+function resolveWeeklySchedule(val: unknown): WeeklyScheduleConfig {
+  if (val && typeof val === 'object' && 'days' in (val as Record<string, unknown>)) {
+    return val as WeeklyScheduleConfig;
+  }
+  return DEFAULT_WEEKLY_SCHEDULE;
+}
 
-  const assignedHosts = Array.isArray(raw.assignedHosts)
-    ? (raw.assignedHosts as AssignableHost[])
-    : [];
-
+function normalizeResourceLimits(raw: Record<string, unknown>) {
   return {
-    documentId: String(raw.documentId ?? raw.id ?? ''),
-    name: String(raw.name ?? 'Unnamed Resource'),
-    slug: String(raw.slug ?? slugifyName(String(raw.name ?? 'resource'))),
-    resourceType: (raw.resourceType as BookingResourceType) ?? 'service',
-    description: raw.description ? String(raw.description) : undefined,
-    color: String(raw.color ?? '#0d9488'),
-    timezone: String(raw.timezone ?? 'UTC'),
-    slotDurationMinutes: Math.max(5, Number(raw.slotDurationMinutes ?? 60)),
-    bufferBeforeMinutes: Math.max(0, Number(raw.bufferBeforeMinutes ?? 0)),
-    bufferAfterMinutes: Math.max(0, Number(raw.bufferAfterMinutes ?? 0)),
-    capacityPerSlot: Math.max(1, Number(raw.capacityPerSlot ?? 1)),
-    maxPartySize: Math.max(1, Number(raw.maxPartySize ?? 50)),
-    minLeadTimeHours: Math.max(0, Number(raw.minLeadTimeHours ?? 2)),
-    maxAdvanceDays: Math.max(1, Number(raw.maxAdvanceDays ?? 90)),
+    slotDurationMinutes: clampNumber(raw.slotDurationMinutes, 60, 5),
+    bufferBeforeMinutes: clampNumber(raw.bufferBeforeMinutes, 0, 0),
+    bufferAfterMinutes: clampNumber(raw.bufferAfterMinutes, 0, 0),
+    capacityPerSlot: clampNumber(raw.capacityPerSlot, 1, 1),
+    maxPartySize: clampNumber(raw.maxPartySize, 50, 1),
+    minLeadTimeHours: clampNumber(raw.minLeadTimeHours, 2, 0),
+    maxAdvanceDays: clampNumber(raw.maxAdvanceDays, 90, 1),
     requiresApproval: Boolean(raw.requiresApproval ?? false),
-    weeklySchedule,
-    seasonalSchedules,
-    holidayRules,
-    blackoutDates,
-    recurrenceRule: raw.recurrenceRule ? String(raw.recurrenceRule) : undefined,
+  };
+}
+
+function normalizeResourceDetails(raw: Record<string, unknown>) {
+  const supportedLanguages = asArray<unknown>(raw.supportedLanguages).map((l) => String(l));
+  const metadata =
+    raw.metadata && typeof raw.metadata === 'object'
+      ? (raw.metadata as Record<string, unknown>)
+      : undefined;
+  return {
+    description: asOptionalString(raw.description),
+    recurrenceRule: asOptionalString(raw.recurrenceRule),
     supportedLanguages,
-    assignedHosts,
-    location: raw.location ? String(raw.location) : undefined,
+    assignedHosts: asArray<AssignableHost>(raw.assignedHosts),
+    location: asOptionalString(raw.location),
     price: raw.price !== undefined ? Number(raw.price) : undefined,
     currency: raw.currency ? String(raw.currency) : 'USD',
     isActive: raw.isActive !== undefined ? Boolean(raw.isActive) : true,
-    metadata:
-      raw.metadata && typeof raw.metadata === 'object'
-        ? (raw.metadata as Record<string, unknown>)
-        : undefined,
+    metadata,
+  };
+}
+
+export function normalizeResourceRecord(
+  raw: Record<string, unknown>
+): BookingResource {
+  const name = String(raw.name ?? 'Unnamed Resource');
+  return {
+    documentId: String(raw.documentId ?? raw.id ?? ''),
+    name,
+    slug: String(raw.slug ?? slugifyName(String(raw.name ?? 'resource'))),
+    resourceType: (raw.resourceType as BookingResourceType) ?? 'service',
+    color: String(raw.color ?? '#0d9488'),
+    timezone: String(raw.timezone ?? 'UTC'),
+    ...normalizeResourceLimits(raw),
+    weeklySchedule: resolveWeeklySchedule(raw.weeklySchedule),
+    seasonalSchedules: asArray<SeasonalScheduleOverride>(raw.seasonalSchedules),
+    holidayRules: asArray<HolidayScheduleRule>(raw.holidayRules),
+    blackoutDates: asArray<BlackoutPeriod>(raw.blackoutDates),
+    ...normalizeResourceDetails(raw),
+  };
+}
+
+function buildResourceScheduleData(
+  payload: Partial<BookingResource>,
+  settings: BookingsPluginSettings
+): Record<string, unknown> {
+  return {
+    timezone: payload.timezone ?? settings.defaultTimezone,
+    slotDurationMinutes:
+      payload.slotDurationMinutes ?? settings.defaultSlotDurationMinutes,
+    bufferBeforeMinutes:
+      payload.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes,
+    bufferAfterMinutes:
+      payload.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes,
+    capacityPerSlot:
+      payload.capacityPerSlot ?? settings.defaultCapacityPerSlot,
+    maxPartySize: payload.maxPartySize ?? 50,
+    minLeadTimeHours:
+      payload.minLeadTimeHours ?? settings.defaultMinLeadTimeHours,
+    maxAdvanceDays:
+      payload.maxAdvanceDays ?? settings.defaultMaxAdvanceDays,
+    requiresApproval:
+      payload.requiresApproval ?? settings.defaultRequiresApproval,
+  };
+}
+
+function buildResourceMetaData(
+  payload: Partial<BookingResource> & { name: string }
+): Record<string, unknown> {
+  return {
+    name: payload.name.trim(),
+    slug: payload.slug || slugifyName(payload.name),
+    resourceType: payload.resourceType ?? 'service',
+    description: payload.description ?? '',
+    color: payload.color ?? '#0d9488',
+    weeklySchedule: payload.weeklySchedule ?? DEFAULT_WEEKLY_SCHEDULE,
+    seasonalSchedules: payload.seasonalSchedules ?? [],
+    holidayRules: payload.holidayRules ?? [],
+    blackoutDates: payload.blackoutDates ?? [],
+  };
+}
+
+function buildResourceExtrasData(
+  payload: Partial<BookingResource>
+): Record<string, unknown> {
+  return {
+    recurrenceRule: payload.recurrenceRule ?? undefined,
+    supportedLanguages: payload.supportedLanguages ?? [],
+    assignedHosts: payload.assignedHosts ?? [],
+    location: payload.location ?? undefined,
+    price: payload.price ?? 0,
+    currency: payload.currency ?? 'USD',
+    isActive: payload.isActive ?? true,
+    metadata: payload.metadata ?? undefined,
+  };
+}
+
+function resolveOccurrenceTitle(booking: BookingRecord): string {
+  if (booking.title) return booking.title;
+  const suffix = booking.partySize > 1 ? ` (${booking.partySize})` : '';
+  return `${booking.customerName}${suffix}`;
+}
+
+function resolveOccurrenceStatus(status: BookingStatus): 'cancelled' | 'scheduled' {
+  return status === 'cancelled' || status === 'no_show' ? 'cancelled' : 'scheduled';
+}
+
+function mapBookingToOccurrence(
+  booking: BookingRecord,
+  settings: BookingsPluginSettings
+): CalendarOccurrence {
+  const secondaryDates =
+    settings.secondaryCalendars.length > 0
+      ? formatSecondaryCalendars(
+          new Date(booking.startDate),
+          settings.secondaryCalendars
+        )
+      : undefined;
+  const uid = booking.sourceCollection || 'plugin::bookings.booking';
+  const datePart = booking.startDate.slice(0, 10);
+
+  return {
+    occurrenceId: `${uid}:${booking.documentId}:${datePart}`,
+    documentId: booking.documentId,
+    uid,
+    sourceId: booking.resourceDocumentId || 'bookings',
+    sourceLabel: booking.resourceName || 'Bookings',
+    occurrenceDate: datePart,
+    startDate: booking.startDate,
+    endDate: booking.endDate,
+    allDay: false,
+    timezone: booking.timezone || settings.defaultTimezone || 'UTC',
+    title: resolveOccurrenceTitle(booking),
+    color: STATUS_COLORS[booking.status] || booking.resourceColor || '#0d9488',
+    category: booking.status,
+    status: resolveOccurrenceStatus(booking.status),
+    location: booking.assignedHost
+      ? `Host: ${booking.assignedHost}`
+      : booking.organization,
+    summary: booking.notes,
+    isRecurring: false,
+    calendarLinks: {
+      google: '',
+      outlook: '',
+      yahoo: '',
+      icsPath: `/api/bookings/feed.ics`,
+    },
+    alternateDates: secondaryDates,
+    customFields: {
+      bookingCode: booking.bookingCode,
+      customerName: booking.customerName,
+      customerEmail: booking.customerEmail,
+      customerPhone: booking.customerPhone,
+      organization: booking.organization,
+      partySize: booking.partySize,
+      status: booking.status,
+      preferredLanguage: booking.preferredLanguage,
+      assignedHost: booking.assignedHost,
+      slotLabel: booking.slotLabel,
+      resourceDocumentId: booking.resourceDocumentId,
+      resourceName: booking.resourceName,
+    },
   };
 }
 
@@ -136,41 +268,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
       .service('settings') as SettingsService;
     const settings = await settingsService.getSettings();
 
-    const slug = payload.slug || slugifyName(payload.name);
     const data: Record<string, unknown> = {
-      name: payload.name.trim(),
-      slug,
-      resourceType: payload.resourceType ?? 'service',
-      description: payload.description ?? '',
-      color: payload.color ?? '#0d9488',
-      timezone: payload.timezone ?? settings.defaultTimezone,
-      slotDurationMinutes:
-        payload.slotDurationMinutes ?? settings.defaultSlotDurationMinutes,
-      bufferBeforeMinutes:
-        payload.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes,
-      bufferAfterMinutes:
-        payload.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes,
-      capacityPerSlot:
-        payload.capacityPerSlot ?? settings.defaultCapacityPerSlot,
-      maxPartySize: payload.maxPartySize ?? 50,
-      minLeadTimeHours:
-        payload.minLeadTimeHours ?? settings.defaultMinLeadTimeHours,
-      maxAdvanceDays:
-        payload.maxAdvanceDays ?? settings.defaultMaxAdvanceDays,
-      requiresApproval:
-        payload.requiresApproval ?? settings.defaultRequiresApproval,
-      weeklySchedule: payload.weeklySchedule ?? DEFAULT_WEEKLY_SCHEDULE,
-      seasonalSchedules: payload.seasonalSchedules ?? [],
-      holidayRules: payload.holidayRules ?? [],
-      blackoutDates: payload.blackoutDates ?? [],
-      recurrenceRule: payload.recurrenceRule ?? undefined,
-      supportedLanguages: payload.supportedLanguages ?? [],
-      assignedHosts: payload.assignedHosts ?? [],
-      location: payload.location ?? undefined,
-      price: payload.price ?? 0,
-      currency: payload.currency ?? 'USD',
-      isActive: payload.isActive ?? true,
-      metadata: payload.metadata ?? undefined,
+      ...buildResourceMetaData(payload),
+      ...buildResourceScheduleData(payload, settings),
+      ...buildResourceExtrasData(payload),
     };
 
     if (payload.documentId) {
@@ -266,63 +367,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
       reservationService.listBookings(query),
     ]);
 
-    const occurrences: CalendarOccurrence[] = bookings.map((booking) => {
-      const secondaryDates =
-        settings.secondaryCalendars.length > 0
-          ? formatSecondaryCalendars(
-              new Date(booking.startDate),
-              settings.secondaryCalendars
-            )
-          : undefined;
-
-      const color =
-        STATUS_COLORS[booking.status] || booking.resourceColor || '#0d9488';
-
-      return {
-        occurrenceId: `${booking.sourceCollection || 'plugin::bookings.booking'}:${booking.documentId}:${booking.startDate.slice(0, 10)}`,
-        documentId: booking.documentId,
-        uid: booking.sourceCollection || 'plugin::bookings.booking',
-        sourceId: booking.resourceDocumentId || 'bookings',
-        sourceLabel: booking.resourceName || 'Bookings',
-        occurrenceDate: booking.startDate.slice(0, 10),
-        startDate: booking.startDate,
-        endDate: booking.endDate,
-        allDay: false,
-        timezone: booking.timezone || settings.defaultTimezone || 'UTC',
-        title:
-          booking.title ||
-          `${booking.customerName}${booking.partySize > 1 ? ` (${booking.partySize})` : ''}`,
-        color,
-        category: booking.status,
-        status: booking.status === 'cancelled' || booking.status === 'no_show' ? 'cancelled' : 'scheduled',
-        location: booking.assignedHost
-          ? `Host: ${booking.assignedHost}`
-          : booking.organization,
-        summary: booking.notes,
-        isRecurring: false,
-        calendarLinks: {
-          google: '',
-          outlook: '',
-          yahoo: '',
-          icsPath: `/api/bookings/feed.ics`,
-        },
-        alternateDates: secondaryDates,
-        customFields: {
-          bookingCode: booking.bookingCode,
-          customerName: booking.customerName,
-          customerEmail: booking.customerEmail,
-          customerPhone: booking.customerPhone,
-          organization: booking.organization,
-          partySize: booking.partySize,
-          status: booking.status,
-          preferredLanguage: booking.preferredLanguage,
-          assignedHost: booking.assignedHost,
-          slotLabel: booking.slotLabel,
-          resourceDocumentId: booking.resourceDocumentId,
-          resourceName: booking.resourceName,
-        },
-      };
-    });
+    const occurrences: CalendarOccurrence[] = bookings.map((booking) =>
+      mapBookingToOccurrence(booking, settings)
+    );
 
     const stats: BookingStats = {
       totalBookings: bookings.length,

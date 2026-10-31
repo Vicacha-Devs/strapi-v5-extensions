@@ -73,7 +73,13 @@ export const CalendarPage: React.FC = () => {
       if (search.trim()) {
         params.set('search', search.trim());
       }
-      const res = await get(`/${PLUGIN_ID}/calendar?${params.toString()}`);
+      const res = await get<{
+        data?: {
+          bookings?: BookingRecord[];
+          resources?: BookingResource[];
+          stats?: BookingStats;
+        };
+      }>(`/${PLUGIN_ID}/calendar?${params.toString()}`);
       const payload = res.data?.data;
       if (payload) {
         setBookings(payload.bookings ?? []);

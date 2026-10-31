@@ -35,6 +35,69 @@ const BOOKING_STATUSES: BookingStatus[] = [
   'no_show',
 ];
 
+const BookingDetailsSection: React.FC<{
+  t: (id: string, defaultMessage: string) => string;
+  booking: BookingRecord;
+}> = ({ t, booking }) => (
+  <>
+    <Flex gap={2} wrap="wrap">
+      {booking.resourceName && (
+        <Badge backgroundColor="primary100" textColor="primary700">
+          {booking.resourceName}
+        </Badge>
+      )}
+      <Badge>
+        {t('panel.partySize', 'Party Size')}: {booking.partySize}
+      </Badge>
+      {booking.preferredLanguage && (
+        <Badge>
+          {t('panel.language', 'Lang')}: {booking.preferredLanguage.toUpperCase()}
+        </Badge>
+      )}
+    </Flex>
+
+    <Divider />
+
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <Typography variant="sigma" textColor="neutral600">
+        {t('panel.schedule', 'Schedule')}
+      </Typography>
+      <Typography variant="omega">
+        {booking.startDate.slice(0, 16).replace('T', ' ')} →{' '}
+        {booking.endDate.slice(0, 16).replace('T', ' ')} ({booking.timezone})
+      </Typography>
+      {booking.slotLabel && (
+        <Typography variant="pi" textColor="neutral600">
+          {t('panel.slotLabel', 'Slot')}: {booking.slotLabel}
+        </Typography>
+      )}
+    </Flex>
+
+    <Flex direction="column" alignItems="stretch" gap={2}>
+      <Typography variant="sigma" textColor="neutral600">
+        {t('panel.customer', 'Customer Details')}
+      </Typography>
+      <Typography variant="omega" fontWeight="bold">
+        {booking.customerName}
+      </Typography>
+      {booking.organization && (
+        <Typography variant="pi" textColor="neutral600">
+          {booking.organization}
+        </Typography>
+      )}
+      <Typography variant="pi">{booking.customerEmail}</Typography>
+      {booking.customerPhone && (
+        <Typography variant="pi">{booking.customerPhone}</Typography>
+      )}
+      {booking.notes && (
+        <Box padding={2} background="neutral100" hasRadius>
+          <Typography variant="pi">{booking.notes}</Typography>
+        </Box>
+      )}
+    </Flex>
+  </>
+);
+
 export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
   t,
   booking,
@@ -99,61 +162,7 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
           {booking.title || booking.customerName}
         </Typography>
 
-        <Flex gap={2} wrap="wrap">
-          {booking.resourceName && (
-            <Badge backgroundColor="primary100" textColor="primary700">
-              {booking.resourceName}
-            </Badge>
-          )}
-          <Badge>
-            {t('panel.partySize', 'Party Size')}: {booking.partySize}
-          </Badge>
-          {booking.preferredLanguage && (
-            <Badge>
-              {t('panel.language', 'Lang')}: {booking.preferredLanguage.toUpperCase()}
-            </Badge>
-          )}
-        </Flex>
-
-        <Divider />
-
-        <Flex direction="column" alignItems="stretch" gap={2}>
-          <Typography variant="sigma" textColor="neutral600">
-            {t('panel.schedule', 'Schedule')}
-          </Typography>
-          <Typography variant="omega">
-            {booking.startDate.slice(0, 16).replace('T', ' ')} →{' '}
-            {booking.endDate.slice(0, 16).replace('T', ' ')} ({booking.timezone})
-          </Typography>
-          {booking.slotLabel && (
-            <Typography variant="pi" textColor="neutral600">
-              {t('panel.slotLabel', 'Slot')}: {booking.slotLabel}
-            </Typography>
-          )}
-        </Flex>
-
-        <Flex direction="column" alignItems="stretch" gap={2}>
-          <Typography variant="sigma" textColor="neutral600">
-            {t('panel.customer', 'Customer Details')}
-          </Typography>
-          <Typography variant="omega" fontWeight="bold">
-            {booking.customerName}
-          </Typography>
-          {booking.organization && (
-            <Typography variant="pi" textColor="neutral600">
-              {booking.organization}
-            </Typography>
-          )}
-          <Typography variant="pi">{booking.customerEmail}</Typography>
-          {booking.customerPhone && (
-            <Typography variant="pi">{booking.customerPhone}</Typography>
-          )}
-          {booking.notes && (
-            <Box padding={2} background="neutral100" hasRadius>
-              <Typography variant="pi">{booking.notes}</Typography>
-            </Box>
-          )}
-        </Flex>
+        <BookingDetailsSection t={t} booking={booking} />
 
         <Divider />
 

@@ -1,3 +1,5 @@
+import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
+import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
 import { PLUGIN_ID } from './pluginId';
 import { Initializer } from './components/Initializer';
 import { PluginIcon } from './components/PluginIcon';
@@ -18,6 +20,7 @@ const LOCALES = ['en', 'es', 'ar', 'fr', 'de', 'pt', 'tr', 'id', 'ur', 'zh'];
 
 interface StrapiAdminApp {
   addMenuLink(link: Record<string, unknown>): void;
+  addSettingsLink?(sectionId: string, link: Record<string, unknown>): void;
   createSettingSection(
     section: Record<string, unknown>,
     links: Array<Record<string, unknown>>
@@ -41,30 +44,35 @@ export default {
       permissions: [],
     });
 
-    app.createSettingSection(
-      {
-        id: PLUGIN_ID,
-        intlLabel: {
-          id: `${PLUGIN_ID}.settings.section`,
-          defaultMessage: 'Bookings & Availability',
-        },
+    const calendarSuiteSection = {
+      id: 'calendar',
+      intlLabel: {
+        id: 'calendar.settings.section',
+        defaultMessage: 'Calendar, Events & Bookings',
       },
-      [
-        {
-          intlLabel: {
-            id: `${PLUGIN_ID}.settings.link`,
-            defaultMessage: 'Slot & Schedule Configuration',
-          },
-          id: `${PLUGIN_ID}-settings`,
-          to: `${PLUGIN_ID}`,
-          Component: () =>
-            import('./pages/SettingsPage').then((mod) => ({
-              default: mod.SettingsPage,
-            })),
-          permissions: [],
-        },
-      ]
-    );
+    };
+    const bookingsSettingsLink = {
+      intlLabel: {
+        id: `${PLUGIN_ID}.settings.link`,
+        defaultMessage: 'Bookings & Availability',
+      },
+      id: `${PLUGIN_ID}-settings`,
+      to: `${PLUGIN_ID}`,
+      Component: () =>
+        import('./pages/SettingsPage').then((mod) => ({
+          default: mod.SettingsPage,
+        })),
+      permissions: [],
+    };
+    try {
+      if (typeof app.addSettingsLink === 'function') {
+        app.addSettingsLink(calendarSuiteSection.id, bookingsSettingsLink);
+      } else {
+        app.createSettingSection(calendarSuiteSection, [bookingsSettingsLink]);
+      }
+    } catch {
+      app.createSettingSection(calendarSuiteSection, [bookingsSettingsLink]);
+    }
 
     app.registerPlugin({
       id: PLUGIN_ID,
@@ -82,7 +90,7 @@ export default {
       allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          const prefixed: Record<string, string> = {};
+          const prefixed: Record<string, string> = { ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en ?? {}), ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en ?? {}) };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
             const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;

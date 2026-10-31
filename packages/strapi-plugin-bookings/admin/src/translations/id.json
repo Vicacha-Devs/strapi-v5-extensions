@@ -309,8 +309,18 @@
   "bookings.modal.startDate": "Tanggal & Waktu Mulai (ISO)",
   "settings.section": "Reservasi & Ketersediaan",
   "bookings.settings.section": "Reservasi & Ketersediaan",
-  "settings.link": "Konfigurasi Slot & Jadwal",
-  "bookings.settings.link": "Konfigurasi Slot & Jadwal",
+  "settings.link": "Bookings & Availability",
+  "bookings.settings.link": "Bookings & Availability",
   "settings.approvalsHeading": "Alur Persetujuan & Notifikasi Email",
-  "bookings.settings.approvalsHeading": "Alur Persetujuan & Notifikasi Email"
+  "bookings.settings.approvalsHeading": "Alur Persetujuan & Notifikasi Email",
+  "actions.openUnifiedCalendar": "Buka di Kalender",
+  "bookings.actions.openUnifiedCalendar": "Buka di Kalender",
+  "modal.langEs": "Español (ES)",
+  "bookings.modal.langEs": "Español (ES)",
+  "modal.langEn": "English (EN)",
+  "bookings.modal.langEn": "English (EN)",
+  "modal.langAr": "العربية — Arabic (AR)",
+  "bookings.modal.langAr": "العربية — Arabic (AR)",
+  "modal.langTr": "Türkçe — Turkish (TR)",
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
 }
