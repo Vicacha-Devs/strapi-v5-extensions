@@ -2,6 +2,7 @@ import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import type {
+  ContentManagerFormValues,
   EmptyAltCount,
   KeywordDensityMap,
   OpenGraphData,
@@ -15,7 +16,9 @@ export const qualityVerdict: Record<SeoQualityVerdict, SeoQualityVerdict> = {
   bad: 'bad',
 };
 
-export const getMetaTitleCheckPreview = (modifiedData: Record<string, any>): SeoCheckStatus => {
+export const getMetaTitleCheckPreview = (
+  modifiedData: ContentManagerFormValues
+): SeoCheckStatus => {
   const metaTitle = get<string | null>(modifiedData, 'seo.metaTitle', null);
 
   let status: SeoCheckStatus = {
@@ -37,7 +40,9 @@ export const getMetaTitleCheckPreview = (modifiedData: Record<string, any>): Seo
   return status;
 };
 
-export const getMetaDescriptionPreview = (modifiedData: Record<string, any>): SeoCheckStatus => {
+export const getMetaDescriptionPreview = (
+  modifiedData: ContentManagerFormValues
+): SeoCheckStatus => {
   const metaDescription = get<string | null>(modifiedData, 'seo.metaDescription', null);
 
   let status: SeoCheckStatus = {
@@ -140,7 +145,7 @@ export const getKeywordDensityPreview = (keywordsDensity: KeywordDensityMap): Se
   return status;
 };
 
-export const canonicalUrlPreview = (modifiedData: Record<string, any>): SeoCheckStatus => {
+export const canonicalUrlPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
   const canonicalUrl = get<string | null>(modifiedData, 'seo.canonicalURL', null);
   let status: SeoCheckStatus = {
     message: '',
@@ -155,7 +160,7 @@ export const canonicalUrlPreview = (modifiedData: Record<string, any>): SeoCheck
   return status;
 };
 
-export const lastUpdatedAtPreview = (modifiedData: Record<string, any>): SeoCheckStatus => {
+export const lastUpdatedAtPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
   const updatedAt = get<string | null>(modifiedData, 'updatedAt', null);
 
   let status: SeoCheckStatus = {
@@ -169,7 +174,9 @@ export const lastUpdatedAtPreview = (modifiedData: Record<string, any>): SeoChec
       qualityVerdict: qualityVerdict.bad,
     };
   } else {
-    const oneYearAgo = Date.parse(new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString());
+    const oneYearAgo = Date.parse(
+      new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString()
+    );
     if (Date.parse(updatedAt) >= oneYearAgo) {
       status = {
         message: '',
@@ -180,7 +187,7 @@ export const lastUpdatedAtPreview = (modifiedData: Record<string, any>): SeoChec
   return status;
 };
 
-export const metaRobotPreview = (modifiedData: Record<string, any>): SeoCheckStatus => {
+export const metaRobotPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
   const metaRobots = get<string | null>(modifiedData, 'seo.metaRobots', null);
   if (isNull(metaRobots) || isEmpty(metaRobots)) {
     return {
@@ -194,7 +201,7 @@ export const metaRobotPreview = (modifiedData: Record<string, any>): SeoCheckSta
   };
 };
 
-export const openGraphPreview = (modifiedData: Record<string, any>): SeoCheckStatus => {
+export const openGraphPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
   const openGraph = get<OpenGraphData | null>(modifiedData, 'seo.openGraph', null);
 
   let status: SeoCheckStatus = {
@@ -216,7 +223,7 @@ export const openGraphPreview = (modifiedData: Record<string, any>): SeoCheckSta
   return status;
 };
 
-export const structuredDataPreview = (modifiedData: Record<string, any>): SeoCheckStatus => {
+export const structuredDataPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
   const structuredData = get<unknown>(modifiedData, 'seo.structuredData', null);
   let status: SeoCheckStatus = {
     message: '',

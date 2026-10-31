@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useIntl } from 'react-intl';
 import { Box, Divider, EmptyStateLayout, Flex, Modal, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
+import type { ContentManagerFormValues, SeoComponentValues } from '../../../../../../../shared';
 import { getTrad } from '../../../../../utils/getTrad';
 import { Illo } from '../../../../HomePage/Main/EmptyComponentLayout/illo';
 import { KeywordCheck } from './KeywordCheck';
@@ -9,13 +10,13 @@ import { MetaChecks } from './MetaChecks';
 import { Serp } from './Serp';
 
 interface BrowserPreviewProps {
-  modifiedData: Record<string, any>;
+  modifiedData: ContentManagerFormValues;
 }
 
 export const BrowserPreview = ({ modifiedData }: BrowserPreviewProps) => {
   const { formatMessage } = useIntl();
 
-  const seo = get<Record<string, any> | null>(modifiedData, 'seo', null);
+  const seo = get<SeoComponentValues | null>(modifiedData, 'seo', null);
   const metaTitle = get<string | null>(seo, 'metaTitle', null);
   const metaDescription = get<string | null>(seo, 'metaDescription', null);
   const keywords = get<string | null>(seo, 'keywords', null);

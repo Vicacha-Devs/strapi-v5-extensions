@@ -94,20 +94,54 @@ export const MetaRobotCheck = ({ metaRobots, checks }: MetaRobotCheckProps) => {
 
               <Typography paddingLeft={1}>
                 {tags.find((x) => x.trim() === tag.name)
-                  ? `${tag.name} is activated: ${tag.message.replace('will', 'will not')}`
-                  : `${tag.name} is disabled: ${tag.message}`}
+                  ? formatMessage(
+                      {
+                        id: getTrad('SEOChecks.metaRobotsCheck.activated'),
+                        defaultMessage: '{tag} is activated: {message}',
+                      },
+                      {
+                        tag: tag.name,
+                        message: tag.message.replace('will', 'will not'),
+                      }
+                    )
+                  : formatMessage(
+                      {
+                        id: getTrad('SEOChecks.metaRobotsCheck.disabled'),
+                        defaultMessage: '{tag} is disabled: {message}',
+                      },
+                      {
+                        tag: tag.name,
+                        message: tag.message,
+                      }
+                    )}
               </Typography>
             </Flex>
           ))}
           <Flex spacing={2} paddingTop={4} paddingLeft={2} paddingRight={2} paddingBottom={4}>
             <Status variant="secondary" showBullet={false}>
               <Typography>
-                <Typography fontWeight="bold">Notice: </Typography>
-                In order to not index your entry and no follow, your MetaRobots field should contain
-                the following:
-                <Typography fontWeight="bold"> noindex, nofollow </Typography>. The rest should be
-                handled by your front-end code logic. &quot;If the field contains noindex, then you
-                need to create the corresponding meta tag etc...&quot;
+                <Typography fontWeight="bold">
+                  {formatMessage({
+                    id: getTrad('SEOChecks.metaRobotsCheck.notice-label'),
+                    defaultMessage: 'Notice:',
+                  })}{' '}
+                </Typography>
+                {formatMessage({
+                  id: getTrad('SEOChecks.metaRobotsCheck.notice-before'),
+                  defaultMessage:
+                    'In order to not index your entry and no follow, your MetaRobots field should contain the following:',
+                })}{' '}
+                <Typography fontWeight="bold">
+                  {formatMessage({
+                    id: getTrad('SEOChecks.metaRobotsCheck.notice-value'),
+                    defaultMessage: 'noindex, nofollow',
+                  })}
+                </Typography>
+                {formatMessage({
+                  id: getTrad('SEOChecks.metaRobotsCheck.notice-after'),
+                  defaultMessage:
+                    '. The rest should be handled by your front-end code logic. "If the field contains noindex, then you need to create the corresponding meta tag etc..."',
+                })}
               </Typography>
             </Status>
           </Flex>

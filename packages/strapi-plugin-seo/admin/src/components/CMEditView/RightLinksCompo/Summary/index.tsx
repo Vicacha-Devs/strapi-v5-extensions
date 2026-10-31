@@ -7,8 +7,12 @@ import {
   unstable_useDocument as useDocument,
 } from '@strapi/strapi/admin';
 import {
+  type ComponentSchemasMap,
+  type ContentManagerFormValues,
+  type ContentTypeSchemaInfo,
   DEFAULT_SEO_CHECKS,
   type SeoCheckerAction,
+  type SeoChecksConfig,
   type SeoChecksState,
 } from '../../../../../../shared';
 import { useSettingsApi } from '../../../../hooks/useSettingsApi';
@@ -38,6 +42,33 @@ const initialState: SeoChecksState = {
 
 export const SeoCheckerContext = React.createContext<React.Dispatch<SeoCheckerAction> | null>(null);
 
+const buildMetaChecksPreview = (
+  seoChecks: SeoChecksConfig,
+  currentModifiedData: ContentManagerFormValues
+): SeoChecksState => ({
+  ...(seoChecks.metaTitle && {
+    metaTitle: getMetaTitleCheckPreview(currentModifiedData),
+  }),
+  ...(seoChecks.metaDescription && {
+    metaDescription: getMetaDescriptionPreview(currentModifiedData),
+  }),
+  ...(seoChecks.metaRobots && {
+    metaRobots: metaRobotPreview(currentModifiedData),
+  }),
+  ...(seoChecks.openGraph && {
+    openGraph: openGraphPreview(currentModifiedData),
+  }),
+  ...(seoChecks.canonicalUrl && {
+    canonicalUrl: canonicalUrlPreview(currentModifiedData),
+  }),
+  ...(seoChecks.structuredData && {
+    structuredData: structuredDataPreview(currentModifiedData),
+  }),
+  ...(seoChecks.lastUpdatedAt && {
+    lastUpdatedAt: lastUpdatedAtPreview(currentModifiedData),
+  }),
+});
+
 export const Summary = () => {
   const { formatMessage } = useIntl();
   const { getSettings } = useSettingsApi();
@@ -58,12 +89,13 @@ export const Summary = () => {
   });
 
   const getAllChecks = async (
-    currentModifiedData: Record<string, any>,
-    currentComponents: Record<string, any>,
-    currentContentType: Record<string, any>
+    currentModifiedData: ContentManagerFormValues,
+    currentComponents: ComponentSchemasMap,
+    currentContentType: ContentTypeSchemaInfo
   ): Promise<SeoChecksState> => {
     const { data: defaultSettings } = await getSettings();
-    const seoChecks = defaultSettings?.[currentContentType?.uid]?.seoChecks ?? DEFAULT_SEO_CHECKS;
+    const uid = currentContentType?.uid ?? '';
+    const seoChecks = defaultSettings?.[uid]?.seoChecks ?? DEFAULT_SEO_CHECKS;
 
     const { wordCount, keywordsDensity, emptyAltCount } = getRichTextData(
       currentModifiedData,
@@ -71,40 +103,18 @@ export const Summary = () => {
       currentContentType
     );
 
-    const result: SeoChecksState = {
-      ...(seoChecks?.metaTitle && {
-        metaTitle: getMetaTitleCheckPreview(currentModifiedData),
-      }),
-      ...(seoChecks?.wordCount && {
+    return {
+      ...buildMetaChecksPreview(seoChecks, currentModifiedData),
+      ...(seoChecks.wordCount && {
         wordCount: getWordCountPreview(wordCount),
       }),
-      ...(seoChecks?.metaRobots && {
-        metaRobots: metaRobotPreview(currentModifiedData),
-      }),
-      ...(seoChecks?.openGraph && {
-        openGraph: openGraphPreview(currentModifiedData),
-      }),
-      ...(seoChecks?.canonicalUrl && {
-        canonicalUrl: canonicalUrlPreview(currentModifiedData),
-      }),
-      ...(seoChecks?.lastUpdatedAt && {
-        lastUpdatedAt: lastUpdatedAtPreview(currentModifiedData),
-      }),
-      ...(seoChecks?.structuredData && {
-        structuredData: structuredDataPreview(currentModifiedData),
-      }),
-      ...(seoChecks?.metaDescription && {
-        metaDescription: getMetaDescriptionPreview(currentModifiedData),
-      }),
-      ...(seoChecks?.alternativeText && {
+      ...(seoChecks.alternativeText && {
         alternativeText: getAlternativeTextPreview(emptyAltCount),
       }),
-      ...(seoChecks?.keywordDensity && {
+      ...(seoChecks.keywordDensity && {
         keywordsDensity: getKeywordDensityPreview(keywordsDensity),
       }),
     };
-
-    return result;
   };
 
   React.useEffect(() => {

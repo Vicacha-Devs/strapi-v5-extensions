@@ -40,12 +40,29 @@ export interface ContentTypeSeoSettings {
 
 export type SeoSettingsMap = Record<string, ContentTypeSeoSettings>;
 
+export interface SchemaAttribute {
+  type?: string;
+  component?: string;
+  customField?: string;
+  [key: string]: unknown;
+}
+
+export interface ContentTypeSchemaInfo {
+  uid?: string;
+  kind?: string;
+  globalId?: string;
+  attributes?: Record<string, SchemaAttribute>;
+  [key: string]: unknown;
+}
+
+export type ComponentSchemasMap = Record<string, ContentTypeSchemaInfo>;
+
 export interface ContentTypeSeoItem {
   seo: boolean;
   uid: string;
   kind: string;
   globalId: string;
-  attributes: Record<string, any>;
+  attributes: Record<string, unknown>;
 }
 
 export interface ContentTypesResponse {
@@ -79,6 +96,29 @@ export interface SeoComponentValues {
   metaViewport?: string | null;
   canonicalURL?: string | null;
   structuredData?: Record<string, unknown> | string | null;
+}
+
+export interface ContentManagerFormValues {
+  seo?: SeoComponentValues | null;
+  updatedAt?: string | null;
+  [key: string]: unknown;
+}
+
+export interface RichTextBlockNode {
+  type?: string;
+  text?: string;
+  image?: {
+    alternativeText?: string | null;
+    [key: string]: unknown;
+  };
+  attrs?: {
+    alt?: string | null;
+    alternativeText?: string | null;
+    [key: string]: unknown;
+  };
+  children?: RichTextBlockNode[];
+  content?: RichTextBlockNode[];
+  [key: string]: unknown;
 }
 
 export interface SeoChecksState {

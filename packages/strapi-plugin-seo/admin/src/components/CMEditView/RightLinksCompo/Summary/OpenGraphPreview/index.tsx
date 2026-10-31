@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useIntl } from 'react-intl';
 import { Badge, Box, EmptyStateLayout, Flex, Modal, Typography } from '@strapi/design-system';
-import type { OpenGraphData } from '../../../../../../../shared';
+import type { ContentManagerFormValues, OpenGraphData } from '../../../../../../../shared';
 import { getTrad } from '../../../../../utils/getTrad';
 import { Illo } from '../../../../HomePage/Main/EmptyComponentLayout/illo';
 import { FacebookOGPreview } from './Facebook';
@@ -9,12 +9,12 @@ import { LinkedInOGPreview } from './LinkedIn';
 import { TwitterOGPreview } from './X';
 
 interface OpenGraphPreviewProps {
-  modifiedData: Record<string, any>;
+  modifiedData: ContentManagerFormValues;
 }
 
 export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
   const { formatMessage } = useIntl();
-  const openGraph: OpenGraphData | undefined = modifiedData?.seo?.openGraph;
+  const openGraph: OpenGraphData | null | undefined = modifiedData?.seo?.openGraph;
 
   return (
     <Modal.Content labelledBy="title">
@@ -32,7 +32,10 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
             <Flex alignItems="left" direction="column" gap={2}>
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
-                  Facebook
+                  {formatMessage({
+                    id: getTrad('Social-network.platform.facebook'),
+                    defaultMessage: 'Facebook',
+                  })}
                 </Badge>
               </Flex>
             </Flex>
@@ -44,7 +47,10 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
             <Flex alignItems="left" direction="column" gap={2}>
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
-                  X (Twitter)
+                  {formatMessage({
+                    id: getTrad('Social-network.platform.twitter'),
+                    defaultMessage: 'X (Twitter)',
+                  })}
                 </Badge>
               </Flex>
             </Flex>
@@ -56,7 +62,10 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
             <Flex alignItems="left" direction="column" gap={2}>
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
-                  LinkedIn
+                  {formatMessage({
+                    id: getTrad('Social-network.platform.linkedin'),
+                    defaultMessage: 'LinkedIn',
+                  })}
                 </Badge>
               </Flex>
             </Flex>

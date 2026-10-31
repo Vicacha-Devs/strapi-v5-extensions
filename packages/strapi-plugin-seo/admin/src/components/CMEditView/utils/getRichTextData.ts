@@ -4,17 +4,21 @@ import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import showdown from 'showdown';
 import type {
+  ComponentSchemasMap,
+  ContentManagerFormValues,
+  ContentTypeSchemaInfo,
   EmptyAltCount,
   EmptyAltOccurrence,
   KeywordDensityMap,
   RichTextAnalysisResult,
+  RichTextBlockNode,
 } from '../../../../../shared';
 import { getRegularImageAltTexts } from './getRegularImageAltTexts';
-import { getRichTextAndBlocksFields } from './getRichTextAndBlocksFields';
+import { type FieldDescriptor, getRichTextAndBlocksFields } from './getRichTextAndBlocksFields';
 
 const converter = new showdown.Converter();
 
-const extractTextFromBlocks = (blocks: Array<Record<string, any>>): string => {
+const extractTextFromBlocks = (blocks: RichTextBlockNode[]): string => {
   let textContent = '';
 
   blocks.forEach((block) => {
@@ -30,24 +34,26 @@ const extractTextFromBlocks = (blocks: Array<Record<string, any>>): string => {
   return textContent.trim();
 };
 
-const countMissingBlockImageAlts = (nodes: Array<Record<string, any>>): number => {
+const isImageElementMissingAlt = (element: RichTextBlockNode): boolean => {
+  if (element.type !== 'image' || !element.image) return false;
+  return !element.image.alternativeText;
+};
+
+const isMediaAttrElementMissingAlt = (element: RichTextBlockNode): boolean => {
+  if (element.type === 'image' && element.image) return false;
+  const isMediaType = element.type === 'image' || element.type === 'mediaLibraryImage';
+  if (!isMediaType || !element.attrs) return false;
+  return !element.attrs.alt && !element.attrs.alternativeText;
+};
+
+const countMissingBlockImageAlts = (nodes: RichTextBlockNode[]): number => {
   let missingCount = 0;
 
   nodes.forEach((element) => {
     if (!element || typeof element !== 'object') return;
 
-    if (element.type === 'image' && element.image) {
-      if (!element.image.alternativeText) {
-        missingCount += 1;
-      }
-    } else if (
-      (element.type === 'image' || element.type === 'mediaLibraryImage') &&
-      element.attrs &&
-      typeof element.attrs === 'object'
-    ) {
-      if (!element.attrs.alt && !element.attrs.alternativeText) {
-        missingCount += 1;
-      }
+    if (isImageElementMissingAlt(element) || isMediaAttrElementMissingAlt(element)) {
+      missingCount += 1;
     }
 
     if (Array.isArray(element.children)) {
@@ -61,33 +67,44 @@ const countMissingBlockImageAlts = (nodes: Array<Record<string, any>>): number =
   return missingCount;
 };
 
-const tryParseRichTextNodes = (rawValue: unknown): Array<Record<string, any>> | null => {
-  if (Array.isArray(rawValue)) {
-    return rawValue as Array<Record<string, any>>;
+const extractNodesFromParsedObject = (value: unknown): RichTextBlockNode[] | null => {
+  if (Array.isArray(value)) {
+    return value as RichTextBlockNode[];
   }
-  if (rawValue && typeof rawValue === 'object') {
-    const obj = rawValue as Record<string, any>;
+  if (value && typeof value === 'object') {
+    const obj = value as { content?: unknown };
     if (Array.isArray(obj.content)) {
-      return obj.content;
-    }
-  }
-  if (typeof rawValue === 'string') {
-    const trimmed = rawValue.trim();
-    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
-      try {
-        const parsed = JSON.parse(trimmed);
-        if (Array.isArray(parsed)) {
-          return parsed;
-        }
-        if (parsed && typeof parsed === 'object' && Array.isArray(parsed.content)) {
-          return parsed.content;
-        }
-      } catch {
-        return null;
-      }
+      return obj.content as RichTextBlockNode[];
     }
   }
   return null;
+};
+
+const tryParseJsonStringNodes = (rawString: string): RichTextBlockNode[] | null => {
+  const trimmed = rawString.trim();
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+    return null;
+  }
+  try {
+    return extractNodesFromParsedObject(JSON.parse(trimmed));
+  } catch {
+    return null;
+  }
+};
+
+const tryParseRichTextNodes = (rawValue: unknown): RichTextBlockNode[] | null => {
+  if (typeof rawValue === 'string') {
+    return tryParseJsonStringNodes(rawValue);
+  }
+  return extractNodesFromParsedObject(rawValue);
+};
+
+const formatAltFieldName = (field: string, name: string | null): string => {
+  if (!name) return field;
+  if (name.includes('.')) {
+    return `[dynamic-zone].${name.split('.').pop()}.${field}`;
+  }
+  return `${name}.${field}`;
 };
 
 const getEmptyAltCount = (
@@ -101,7 +118,7 @@ const getEmptyAltCount = (
   let blockOccurences = 0;
 
   if (isBlock && Array.isArray(richtext)) {
-    blockOccurences = countMissingBlockImageAlts(richtext);
+    blockOccurences = countMissingBlockImageAlts(richtext as RichTextBlockNode[]);
   } else if (typeof richtext === 'string' && richtext) {
     markdownOccurrences = richtext.split('\n').filter((entry) => entry.includes('![](')).length;
 
@@ -109,23 +126,14 @@ const getEmptyAltCount = (
     htmlOccurrences = htmlImages.filter((image) => !image.includes('alt=')).length;
   }
 
-  if (name) {
-    if (name.includes('.')) {
-      return {
-        field: `[dynamic-zone].${name.split('.').pop()}.${field}`,
-        occurences: markdownOccurrences + htmlOccurrences + blockOccurences,
-      };
-    }
-    return {
-      field: `${name}.${field}`,
-      occurences: markdownOccurrences + htmlOccurrences + blockOccurences,
-    };
-  }
-  return { field, occurences: markdownOccurrences + htmlOccurrences + blockOccurences };
+  return {
+    field: formatAltFieldName(field, name),
+    occurences: markdownOccurrences + htmlOccurrences + blockOccurences,
+  };
 };
 
 const increaseCounter = (
-  base: Record<string, any>,
+  base: Record<string, unknown>,
   field: string,
   isBlock = false,
   name: string | null = null
@@ -201,10 +209,86 @@ const adjustIntersections = (data: RichTextAnalysisResult): RichTextAnalysisResu
   return data;
 };
 
+interface AnalysisAccumulator {
+  wordCount: number;
+  keywords: string[];
+  keywordsDensity: KeywordDensityMap;
+  targetAlts: EmptyAltOccurrence[];
+}
+
+const recordIncrease = (
+  acc: AnalysisAccumulator,
+  base: Record<string, unknown>,
+  field: string,
+  isBlock: boolean,
+  name: string | null = null
+) => {
+  const { words, length, emptyAlts } = increaseCounter(base, field, isBlock, name);
+  acc.wordCount += length;
+  acc.targetAlts.push(emptyAlts);
+  acc.keywordsDensity = buildKeywordDensityObject(acc.keywords, words, acc.keywordsDensity);
+};
+
+const processComponentFieldItem = (
+  acc: AnalysisAccumulator,
+  item: unknown,
+  fallbackBase: Record<string, unknown>,
+  field: string,
+  isBlock: boolean,
+  name: string
+) => {
+  if (isArray(item)) {
+    item.forEach((entry) => {
+      if (entry && typeof entry === 'object') {
+        recordIncrease(acc, entry as Record<string, unknown>, field, isBlock, name);
+      }
+    });
+  } else {
+    recordIncrease(acc, fallbackBase, field, isBlock, name);
+  }
+};
+
+const processSingleFieldDescriptor = (
+  acc: AnalysisAccumulator,
+  modifiedData: ContentManagerFormValues,
+  data: FieldDescriptor,
+  isBlock: boolean
+) => {
+  if (isNull(data.field)) {
+    recordIncrease(acc, modifiedData, data.name, isBlock);
+    return;
+  }
+
+  if (!data.inDz) {
+    const compKey = data.name.split('.').pop() || '';
+    const item = get<unknown>(modifiedData, compKey, '');
+    if (item && typeof item === 'object') {
+      processComponentFieldItem(
+        acc,
+        item,
+        item as Record<string, unknown>,
+        data.field,
+        isBlock,
+        data.name
+      );
+    }
+    return;
+  }
+
+  const dzComponents = get<Array<Record<string, unknown>>>(modifiedData, data.inDz, []);
+  if (isEmpty(dzComponents)) return;
+
+  const matchingComponents = dzComponents.filter((x) => x.__component === data.name);
+  matchingComponents.forEach((component) => {
+    const item = get<unknown>(component, data.field!, []);
+    processComponentFieldItem(acc, item, component, data.field!, isBlock, data.name);
+  });
+};
+
 export const getRichTextData = (
-  modifiedData: Record<string, any>,
-  components: Record<string, any>,
-  contentType: Record<string, any>
+  modifiedData: ContentManagerFormValues,
+  components: ComponentSchemasMap,
+  contentType: ContentTypeSchemaInfo
 ): RichTextAnalysisResult => {
   const { richTextFields, blockFields } = getRichTextAndBlocksFields(
     contentType,
@@ -221,154 +305,35 @@ export const getRichTextData = (
     altTexts,
   };
 
-  let wordCount = 0;
-  let keywords: string[] = [];
-  let keywordsDensity: KeywordDensityMap = {};
-
   const seoKeywords = modifiedData?.seo?.keywords ?? '';
-  if (typeof seoKeywords === 'string' && seoKeywords) {
-    keywords = seoKeywords.toLowerCase().split(',');
-  }
+  const keywords =
+    typeof seoKeywords === 'string' && seoKeywords ? seoKeywords.toLowerCase().split(',') : [];
+
+  const richTextAcc: AnalysisAccumulator = {
+    wordCount: 0,
+    keywords,
+    keywordsDensity: {},
+    targetAlts: emptyAltCount.richTextAlts,
+  };
 
   richTextFields.forEach((data) => {
-    if (isNull(data.field)) {
-      const { words, length, emptyAlts } = increaseCounter(modifiedData, data.name);
-      wordCount += length;
-      emptyAltCount.richTextAlts.push(emptyAlts);
-      keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-    } else if (!data.inDz) {
-      const item = get<any>(modifiedData, data.name.split('.').pop() || '', '');
-      if (item) {
-        if (isArray(item)) {
-          item.forEach((entry) => {
-            const { words, length, emptyAlts } = increaseCounter(
-              entry,
-              data.field!,
-              false,
-              data.name
-            );
-            wordCount += length;
-            emptyAltCount.richTextAlts.push(emptyAlts);
-            keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-          });
-        } else {
-          const { words, length, emptyAlts } = increaseCounter(
-            item,
-            data.field!,
-            false,
-            data.name
-          );
-          wordCount += length;
-          emptyAltCount.richTextAlts.push(emptyAlts);
-          keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-        }
-      }
-    } else {
-      const dzComponents = get<Array<Record<string, any>>>(modifiedData, data.inDz, []);
-      if (!isEmpty(dzComponents)) {
-        const richTextComponents = dzComponents.filter((x) => x.__component === data.name);
-
-        richTextComponents.forEach((component) => {
-          const item = get<any>(component, data.field!, []);
-          if (isArray(item)) {
-            item.forEach((entry) => {
-              const { words, length, emptyAlts } = increaseCounter(
-                entry,
-                data.field!,
-                false,
-                data.name
-              );
-              wordCount += length;
-              emptyAltCount.richTextAlts.push(emptyAlts);
-              keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-            });
-          } else {
-            const { words, length, emptyAlts } = increaseCounter(
-              component,
-              data.field!,
-              false,
-              data.name
-            );
-            wordCount += length;
-            emptyAltCount.richTextAlts.push(emptyAlts);
-            keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-          }
-        });
-      }
-    }
+    processSingleFieldDescriptor(richTextAcc, modifiedData, data, false);
   });
 
-  blockFields.forEach((data) => {
-    if (isNull(data.field)) {
-      const { words, length, emptyAlts } = increaseCounter(modifiedData, data.name, true);
-      wordCount += length;
-      emptyAltCount.blockTextAlts.push(emptyAlts);
-      keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-    } else if (!data.inDz) {
-      const item = get<any>(modifiedData, data.name.split('.').pop() || '', '');
-      if (item) {
-        if (isArray(item)) {
-          item.forEach((entry) => {
-            const { words, length, emptyAlts } = increaseCounter(
-              entry,
-              data.field!,
-              true,
-              data.name
-            );
-            wordCount += length;
-            emptyAltCount.blockTextAlts.push(emptyAlts);
-            keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-          });
-        } else {
-          const { words, length, emptyAlts } = increaseCounter(
-            item,
-            data.field!,
-            true,
-            data.name
-          );
-          wordCount += length;
-          emptyAltCount.blockTextAlts.push(emptyAlts);
-          keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-        }
-      }
-    } else {
-      const dzComponents = get<Array<Record<string, any>>>(modifiedData, data.inDz, []);
-      if (!isEmpty(dzComponents)) {
-        const blockComponents = dzComponents.filter((x) => x.__component === data.name);
+  const blockAcc: AnalysisAccumulator = {
+    wordCount: richTextAcc.wordCount,
+    keywords,
+    keywordsDensity: richTextAcc.keywordsDensity,
+    targetAlts: emptyAltCount.blockTextAlts,
+  };
 
-        blockComponents.forEach((component) => {
-          const item = get<any>(component, data.field!, []);
-          if (isArray(item)) {
-            item.forEach((entry) => {
-              const { words, length, emptyAlts } = increaseCounter(
-                entry,
-                data.field!,
-                true,
-                data.name
-              );
-              wordCount += length;
-              emptyAltCount.blockTextAlts.push(emptyAlts);
-              keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-            });
-          } else {
-            const { words, length, emptyAlts } = increaseCounter(
-              component,
-              data.field!,
-              true,
-              data.name
-            );
-            wordCount += length;
-            emptyAltCount.blockTextAlts.push(emptyAlts);
-            keywordsDensity = buildKeywordDensityObject(keywords, words, keywordsDensity);
-          }
-        });
-      }
-    }
+  blockFields.forEach((data) => {
+    processSingleFieldDescriptor(blockAcc, modifiedData, data, true);
   });
 
   return adjustIntersections({
-    wordCount,
-    keywordsDensity,
+    wordCount: blockAcc.wordCount,
+    keywordsDensity: blockAcc.keywordsDensity,
     emptyAltCount,
   });
 };

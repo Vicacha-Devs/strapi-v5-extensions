@@ -63,8 +63,8 @@ export const HomePage = React.memo(() => {
         try {
           lockAppWithAutoreload();
           await createSeoComponent();
-        } catch (error) {
-          console.log(error);
+        } catch {
+          // Ignore component creation error during auto-reload
         } finally {
           unlockAppWithAutoreload();
           setShouldEffect(true);

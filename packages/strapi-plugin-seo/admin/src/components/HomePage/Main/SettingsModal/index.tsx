@@ -149,61 +149,61 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
                 {
                   state: metaTitle,
                   stateSetter: setMetaTitle,
-                  id: 'meta-title-check',
+                  id: 'SEOPage.info.settings.meta-title-check',
                   defaultMessage: 'Meta Title',
                 },
                 {
                   state: metaDescription,
                   stateSetter: setMetaDescription,
-                  id: 'meta-description-check',
+                  id: 'SEOPage.info.settings.meta-description-check',
                   defaultMessage: 'Meta Description',
                 },
                 {
                   state: metaRobots,
                   stateSetter: setMetaRobots,
-                  id: 'meta-robots-check',
+                  id: 'SEOPage.info.settings.meta-robots-check',
                   defaultMessage: 'Meta Robots',
                 },
                 {
                   state: openGraph,
                   stateSetter: setOpenGraph,
-                  id: 'open-graph-check',
+                  id: 'SEOPage.info.settings.open-graph-check',
                   defaultMessage: 'Open Graph',
                 },
                 {
                   state: wordCount,
                   stateSetter: setWordCount,
-                  id: 'word-count-check',
+                  id: 'SEOPage.info.settings.word-count-check',
                   defaultMessage: 'Word Count',
                 },
                 {
                   state: canonicalUrl,
                   stateSetter: setCanonicalUrl,
-                  id: 'canonical-url-check',
+                  id: 'SEOPage.info.settings.canonical-url-check',
                   defaultMessage: 'Canonical URL',
                 },
                 {
                   state: keywordDensity,
                   stateSetter: setKeywordDensity,
-                  id: 'keyword-density-check',
+                  id: 'SEOPage.info.settings.keyword-density-check',
                   defaultMessage: 'Keyword Density',
                 },
                 {
                   state: structuredData,
                   stateSetter: setStructuredData,
-                  id: 'structured-data-check',
+                  id: 'SEOPage.info.settings.structured-data-check',
                   defaultMessage: 'Structured Data',
                 },
                 {
                   state: alternativeText,
                   stateSetter: setAlternativeText,
-                  id: 'alternative-text-check',
+                  id: 'SEOPage.info.settings.alternative-text-check',
                   defaultMessage: 'Alt Text',
                 },
                 {
                   state: lastUpdatedAt,
                   stateSetter: setLastUpdatedAt,
-                  id: 'last-updated-at-check',
+                  id: 'SEOPage.info.settings.last-updated-at-check',
                   defaultMessage: 'Last Updated At',
                 },
               ].map(({ state, stateSetter, id, defaultMessage }) => {
@@ -224,7 +224,7 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
                     />
                     <Typography variant="delta">
                       {formatMessage({
-                        id: getTrad(`SEOPage.info.settings.${id}`),
+                        id: getTrad(id),
                         defaultMessage,
                       })}
                     </Typography>
