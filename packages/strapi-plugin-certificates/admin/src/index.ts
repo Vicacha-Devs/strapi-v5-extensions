@@ -1,3 +1,5 @@
+import { CM_LABEL_TRANSLATIONS } from './translations/cmLabels';
+import { CM_PLACEHOLDER_TRANSLATIONS } from './translations/cmPlaceholders';
 import { CheckCircle } from '@strapi/icons';
 import type { StrapiApp } from '@strapi/strapi/admin';
 import { PLUGIN_ID } from '../../shared/pluginId';
@@ -55,7 +57,7 @@ export default {
       allLocales.map(async (locale) => {
         try {
           const { default: data } = await import(`./translations/${locale}.json`);
-          const prefixed: Record<string, string> = {};
+          const prefixed: Record<string, string> = { ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en ?? {}), ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en ?? {}) };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
             const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;

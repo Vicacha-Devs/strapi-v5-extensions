@@ -1,33 +1,16 @@
 import type { Core } from '@strapi/strapi';
 import {
-  PLUGIN_ID,
-  exportCertificatesToCsv,
-  formatSecondaryCalendars,
-  generateSerialNumber,
-  generateVerificationToken,
-  hashNationalId,
-  maskNationalId,
-  signCanonicalPayload,
-  type CertificateIssueInput,
-  type CertificateRecord,
-  type CertificateSignatory,
-  type CertificateStats,
-  type CertificateStatus,
-  type CertificateTemplate,
-  type CertificateVerificationResult,
-  type CertificateWitness,
-  type CertificatesPluginSettings,
-  type Ed25519KeyPairMaterial,
+  PLUGIN_ID, exportCertificatesToCsv, formatSecondaryCalendars, generateSerialNumber,
+  generateVerificationToken, hashNationalId, maskNationalId, signCanonicalPayload,
+  type CertificateIssueInput, type CertificateRecord, type CertificateSignatory,
+  type CertificateStats, type CertificateStatus, type CertificateTemplate,
+  type CertificateVerificationResult, type CertificateWitness,
+  type CertificatesPluginSettings, type Ed25519KeyPairMaterial,
 } from '../../../shared';
 import {
-  buildCanonicalPayload,
-  evaluateCertificateVerification,
-  filterAndComputeCertificateStats,
-  normalizeCertificateRecord,
-  normalizeSignatories,
-  normalizeTemplateRecord,
-  normalizeWitnesses,
-  renderPrintableFromRecord,
+  buildCanonicalPayload, evaluateCertificateVerification, filterAndComputeCertificateStats,
+  normalizeCertificateRecord, normalizeSignatories, normalizeTemplateRecord,
+  normalizeWitnesses, renderPrintableFromRecord,
 } from './issuanceHelpers';
 
 const TEMPLATE_UID = 'plugin::certificates.template';
@@ -38,6 +21,149 @@ interface SettingsServiceContract {
   getSigningKeyPair(): Promise<Ed25519KeyPairMaterial>;
 }
 
+function trimStr(val: unknown, fallback = ''): string {
+  const s = val ? String(val).trim() : '';
+  return s || fallback;
+}
+
+function trimOptStr(val: unknown): string | undefined {
+  const s = val ? String(val).trim() : '';
+  return s || undefined;
+}
+
+function pickNonEmptyArray<T>(primary: T[] | undefined, fallback: T[]): T[] {
+  return Array.isArray(primary) && primary.length > 0 ? primary : fallback;
+}
+
+function slugifyName(name: string, explicitSlug?: string): string {
+  if (explicitSlug && explicitSlug.trim()) return explicitSlug.trim();
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+const DEFAULT_BODY_TEMPLATE =
+  'This is to certify that {{recipientFullName}} has been officially attested by {{organizationName}} on {{issuedDateFormatted}}.';
+
+function buildTemplateCreateData(
+  name: string,
+  data: Partial<CertificateTemplate>,
+  settings: CertificatesPluginSettings
+) {
+  return {
+    name,
+    slug: slugifyName(name, data.slug),
+    description: trimStr(data.description),
+    serialPrefix: trimStr(data.serialPrefix, 'CERT').toUpperCase().slice(0, 8),
+    defaultValidityDays: typeof data.defaultValidityDays === 'number' ? data.defaultValidityDays : null,
+    requiresWitnesses: Boolean(data.requiresWitnesses),
+    minWitnesses: typeof data.minWitnesses === 'number' ? data.minWitnesses : 0,
+    requiresApproval: data.requiresApproval !== false,
+    organizationName: trimStr(data.organizationName, settings.organizationName),
+    organizationSubheader: data.organizationSubheader ?? settings.organizationSubheader,
+    headerText: trimStr(data.headerText),
+    titleText: trimStr(data.titleText, name),
+    bodyTemplate: trimStr(data.bodyTemplate, DEFAULT_BODY_TEMPLATE),
+    footerText: trimStr(data.footerText),
+    defaultSignatories: normalizeSignatories(data.defaultSignatories),
+    customFieldsSchema: Array.isArray(data.customFieldsSchema) ? data.customFieldsSchema : [],
+    secondaryCalendars: Array.isArray(data.secondaryCalendars) ? data.secondaryCalendars : settings.secondaryCalendars,
+    accentColor: trimStr(data.accentColor, '#14532d'),
+    active: data.active !== false,
+  };
+}
+
+function assertWitnessCount(
+  template: CertificateTemplate | null,
+  witnesses: CertificateWitness[],
+  enforceNow: boolean
+): void {
+  if (enforceNow && template?.requiresWitnesses && witnesses.length < template.minWitnesses) {
+    throw new Error(
+      `Template "${template.name}" requires at least ${template.minWitnesses} official witness(es) before issuance`
+    );
+  }
+}
+
+function resolveIssueDatesAndIdentity(input: CertificateIssueInput, template: CertificateTemplate) {
+  const issuedDateObj = input.issuedAt ? new Date(input.issuedAt) : new Date();
+  if (Number.isNaN(issuedDateObj.getTime())) {
+    throw new Error('Invalid issuedAt date');
+  }
+  const issuedAt = issuedDateObj.toISOString();
+  const validityDays = template.defaultValidityDays;
+  const computedExpiry =
+    typeof validityDays === 'number' && validityDays > 0
+      ? new Date(issuedDateObj.getTime() + validityDays * 86_400_000).toISOString()
+      : null;
+  const expiresAt: string | null = input.expiresAt ?? computedExpiry;
+  const serialNumber = generateSerialNumber(template.serialPrefix, issuedDateObj.getUTCFullYear());
+  const rawNationalId = trimOptStr(input.nationalIdRaw);
+  return {
+    issuedDateObj,
+    issuedAt,
+    expiresAt,
+    serialNumber,
+    verificationToken: generateVerificationToken(),
+    nationalIdMasked: rawNationalId ? maskNationalId(rawNationalId) : '',
+    nationalIdHash: rawNationalId ? hashNationalId(rawNationalId, serialNumber) : '',
+  };
+}
+
+function buildIssueRecordPayload(params: {
+  input: CertificateIssueInput;
+  template: CertificateTemplate;
+  recipientFullName: string;
+  status: CertificateStatus;
+  signatories: CertificateSignatory[];
+  witnesses: CertificateWitness[];
+  datesAndId: ReturnType<typeof resolveIssueDatesAndIdentity>;
+  secondaryDates: CertificateRecord['secondaryDates'];
+  signed: { payloadHash: string; signature: string };
+  fingerprint: string;
+}) {
+  const { input, template, recipientFullName, status, signatories, witnesses, datesAndId, secondaryDates, signed, fingerprint } = params;
+  return {
+    serialNumber: datesAndId.serialNumber,
+    templateDocumentId: template.documentId,
+    templateSlug: template.slug,
+    templateName: template.name,
+    status,
+    recipientFullName,
+    recipientChosenName: trimStr(input.recipientChosenName),
+    recipientEmail: trimOptStr(input.recipientEmail),
+    recipientPhone: trimStr(input.recipientPhone),
+    recipientNationality: trimStr(input.recipientNationality),
+    nationalIdMasked: datesAndId.nationalIdMasked,
+    nationalIdHash: datesAndId.nationalIdHash,
+    issuedAt: datesAndId.issuedAt,
+    expiresAt: datesAndId.expiresAt,
+    signatories,
+    witnesses,
+    customData: input.customData ?? {},
+    secondaryDates,
+    canonicalPayloadHash: signed.payloadHash,
+    cryptographicSignature: signed.signature,
+    publicKeyFingerprint: fingerprint,
+    verificationToken: datesAndId.verificationToken,
+    linkedBookingCode: trimStr(input.linkedBookingCode),
+    notes: trimStr(input.notes),
+  };
+}
+
+interface ApproveCertificateOptions {
+  signatories?: CertificateSignatory[];
+  witnesses?: Array<{ fullName: string; documentIdRaw?: string; documentIdMasked?: string; role?: string }>;
+  recipientChosenName?: string;
+  notes?: string;
+}
+
+function resolveApprovalFields(existing: CertificateRecord, options?: ApproveCertificateOptions) {
+  const witnesses = options?.witnesses !== undefined ? normalizeWitnesses(options.witnesses) : existing.witnesses;
+  const signatories = options?.signatories !== undefined ? normalizeSignatories(options.signatories) : existing.signatories;
+  const recipientChosenName = options?.recipientChosenName !== undefined ? trimStr(options.recipientChosenName) : existing.recipientChosenName;
+  const notes = options?.notes !== undefined ? options.notes : existing.notes;
+  return { witnesses, signatories, recipientChosenName, notes };
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsService = () =>
     strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>('settings');
@@ -45,10 +171,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async listTemplates(activeOnly = false): Promise<CertificateTemplate[]> {
       const filters = activeOnly ? { active: true } : undefined;
-      const docs = await strapi.documents(TEMPLATE_UID).findMany({
-        filters,
-        limit: 100,
-      });
+      const docs = await strapi.documents(TEMPLATE_UID).findMany({ filters, limit: 100 });
       return docs.map(normalizeTemplateRecord);
     },
 
@@ -78,53 +201,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       data: Partial<CertificateTemplate>
     ): Promise<CertificateTemplate> {
       const settings = await getSettingsService().getSettings();
-      const name = String(data.name || '').trim();
+      const name = trimStr(data.name);
       if (!name) {
         throw new Error('Template name is required');
       }
-      const slug = String(
-        data.slug ||
-          name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '')
-      );
       const created = await strapi.documents(TEMPLATE_UID).create({
-        data: {
-          name,
-          slug,
-          description: data.description || '',
-          serialPrefix: String(data.serialPrefix || 'CERT')
-            .toUpperCase()
-            .slice(0, 8),
-          defaultValidityDays:
-            typeof data.defaultValidityDays === 'number'
-              ? data.defaultValidityDays
-              : null,
-          requiresWitnesses: Boolean(data.requiresWitnesses),
-          minWitnesses:
-            typeof data.minWitnesses === 'number' ? data.minWitnesses : 0,
-          requiresApproval: data.requiresApproval !== false,
-          organizationName:
-            data.organizationName || settings.organizationName,
-          organizationSubheader:
-            data.organizationSubheader ?? settings.organizationSubheader,
-          headerText: data.headerText || '',
-          titleText: data.titleText || name,
-          bodyTemplate:
-            data.bodyTemplate ||
-            'This is to certify that {{recipientFullName}} has been officially attested by {{organizationName}} on {{issuedDateFormatted}}.',
-          footerText: data.footerText || '',
-          defaultSignatories: normalizeSignatories(data.defaultSignatories),
-          customFieldsSchema: Array.isArray(data.customFieldsSchema)
-            ? data.customFieldsSchema
-            : [],
-          secondaryCalendars: Array.isArray(data.secondaryCalendars)
-            ? data.secondaryCalendars
-            : settings.secondaryCalendars,
-          accentColor: data.accentColor || '#14532d',
-          active: data.active !== false,
-        },
+        data: buildTemplateCreateData(name, data, settings),
       });
       return normalizeTemplateRecord(created);
     },
@@ -148,7 +230,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async issueCertificate(
       input: CertificateIssueInput
     ): Promise<CertificateRecord> {
-      const recipientFullName = String(input.recipientFullName || '').trim();
+      const recipientFullName = trimStr(input.recipientFullName);
       if (!recipientFullName) {
         throw new Error('recipientFullName is required');
       }
@@ -157,129 +239,65 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         templateDocumentId: input.templateDocumentId,
         templateSlug: input.templateSlug,
       });
-      if (!template || !template.active) {
+      if (!template?.active) {
         throw new Error('Active certificate template not found');
       }
 
       const settings = await getSettingsService().getSettings();
       const keyPair = await getSettingsService().getSigningKeyPair();
+      const isIssued = input.autoApprove === true || !template.requiresApproval;
+      const status: CertificateStatus = isIssued ? 'issued' : 'pending_approval';
 
-      const status: CertificateStatus =
-        input.autoApprove === true || !template.requiresApproval
-          ? 'issued'
-          : 'pending_approval';
+      const witnesses = normalizeWitnesses(input.witnesses);
+      assertWitnessCount(template, witnesses, isIssued);
 
-      const witnesses: CertificateWitness[] = normalizeWitnesses(input.witnesses);
-      if (
-        status === 'issued' &&
-        template.requiresWitnesses &&
-        witnesses.length < template.minWitnesses
-      ) {
-        throw new Error(
-          `Template "${template.name}" requires at least ${template.minWitnesses} official witness(es) before issuance`
-        );
-      }
-
-      const signatories: CertificateSignatory[] =
-        input.signatories && input.signatories.length > 0
-          ? normalizeSignatories(input.signatories)
-          : template.defaultSignatories;
-
-      const issuedDateObj = input.issuedAt ? new Date(input.issuedAt) : new Date();
-      if (Number.isNaN(issuedDateObj.getTime())) {
-        throw new Error('Invalid issuedAt date');
-      }
-      const issuedAt = issuedDateObj.toISOString();
-
-      let expiresAt: string | null = input.expiresAt ?? null;
-      if (
-        !expiresAt &&
-        typeof template.defaultValidityDays === 'number' &&
-        template.defaultValidityDays > 0
-      ) {
-        const expDate = new Date(
-          issuedDateObj.getTime() + template.defaultValidityDays * 86_400_000
-        );
-        expiresAt = expDate.toISOString();
-      }
-
-      const serialNumber = generateSerialNumber(
-        template.serialPrefix,
-        issuedDateObj.getUTCFullYear()
+      const signatories = pickNonEmptyArray(
+        normalizeSignatories(input.signatories),
+        template.defaultSignatories
       );
-      const verificationToken = generateVerificationToken();
-      const nationalIdMasked = input.nationalIdRaw
-        ? maskNationalId(input.nationalIdRaw)
-        : '';
-      const nationalIdHash = input.nationalIdRaw
-        ? hashNationalId(input.nationalIdRaw, serialNumber)
-        : '';
-
-      const activeCalendars =
-        template.secondaryCalendars && template.secondaryCalendars.length > 0
-          ? template.secondaryCalendars
-          : settings.secondaryCalendars;
+      const datesAndId = resolveIssueDatesAndIdentity(input, template);
+      const activeCalendars = pickNonEmptyArray(
+        template.secondaryCalendars,
+        settings.secondaryCalendars
+      );
       const secondaryDates = formatSecondaryCalendars(
-        issuedDateObj,
+        datesAndId.issuedDateObj,
         activeCalendars,
-        input.locale || settings.defaultLocale || 'en'
+        trimStr(input.locale, trimStr(settings.defaultLocale, 'en'))
       );
 
       const canonicalPayload = buildCanonicalPayload({
-        serialNumber,
+        serialNumber: datesAndId.serialNumber,
         templateSlug: template.slug,
-        organizationName: template.organizationName || settings.organizationName,
+        organizationName: trimStr(template.organizationName, settings.organizationName),
         recipientFullName,
         recipientChosenName: input.recipientChosenName,
-        nationalIdHash,
-        issuedAt,
-        expiresAt,
+        nationalIdHash: datesAndId.nationalIdHash,
+        issuedAt: datesAndId.issuedAt,
+        expiresAt: datesAndId.expiresAt,
         signatories,
         witnesses,
       });
 
       const signed = signCanonicalPayload(canonicalPayload, keyPair.privateKeyPem);
-
       const created = await strapi.documents(CERTIFICATE_UID).create({
-        data: {
-          serialNumber,
-          templateDocumentId: template.documentId,
-          templateSlug: template.slug,
-          templateName: template.name,
-          status,
+        data: buildIssueRecordPayload({
+          input,
+          template,
           recipientFullName,
-          recipientChosenName: input.recipientChosenName
-            ? String(input.recipientChosenName).trim()
-            : '',
-          recipientEmail: input.recipientEmail
-            ? String(input.recipientEmail).trim()
-            : undefined,
-          recipientPhone: input.recipientPhone
-            ? String(input.recipientPhone).trim()
-            : '',
-          recipientNationality: input.recipientNationality
-            ? String(input.recipientNationality).trim()
-            : '',
-          nationalIdMasked,
-          nationalIdHash,
-          issuedAt,
-          expiresAt,
+          status,
           signatories,
           witnesses,
-          customData: input.customData || {},
+          datesAndId,
           secondaryDates,
-          canonicalPayloadHash: signed.payloadHash,
-          cryptographicSignature: signed.signature,
-          publicKeyFingerprint: keyPair.fingerprint,
-          verificationToken,
-          linkedBookingCode: input.linkedBookingCode || '',
-          notes: input.notes || '',
-        },
+          signed,
+          fingerprint: keyPair.fingerprint,
+        }),
       });
 
       const record = normalizeCertificateRecord(created, true);
       strapi.eventHub?.emit(
-        status === 'issued' ? 'certificates.issued' : 'certificates.requested',
+        isIssued ? 'certificates.issued' : 'certificates.requested',
         {
           serialNumber: record.serialNumber,
           templateSlug: record.templateSlug,
@@ -291,21 +309,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async approveCertificate(
       documentId: string,
-      options?: {
-        signatories?: CertificateSignatory[];
-        witnesses?: Array<{
-          fullName: string;
-          documentIdRaw?: string;
-          documentIdMasked?: string;
-          role?: string;
-        }>;
-        recipientChosenName?: string;
-        notes?: string;
-      }
+      options?: ApproveCertificateOptions
     ): Promise<CertificateRecord> {
-      const existingDoc = await strapi.documents(CERTIFICATE_UID).findOne({
-        documentId,
-      });
+      const existingDoc = await strapi
+        .documents(CERTIFICATE_UID)
+        .findOne({ documentId });
       if (!existingDoc) {
         throw new Error('Certificate record not found');
       }
@@ -315,28 +323,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         templateSlug: existing.templateSlug,
       });
 
-      const witnesses =
-        options?.witnesses !== undefined
-          ? normalizeWitnesses(options.witnesses)
-          : existing.witnesses;
-      const signatories =
-        options?.signatories !== undefined
-          ? normalizeSignatories(options.signatories)
-          : existing.signatories;
-
-      if (
-        template?.requiresWitnesses &&
-        witnesses.length < template.minWitnesses
-      ) {
-        throw new Error(
-          `At least ${template.minWitnesses} official witness(es) required before approving "${template.name}"`
-        );
-      }
-
-      const recipientChosenName =
-        options?.recipientChosenName !== undefined
-          ? String(options.recipientChosenName).trim()
-          : existing.recipientChosenName;
+      const { witnesses, signatories, recipientChosenName, notes } =
+        resolveApprovalFields(existing, options);
+      assertWitnessCount(template, witnesses, true);
 
       const keyPair = await getSettingsService().getSigningKeyPair();
       const settings = await getSettingsService().getSettings();
@@ -345,8 +334,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const canonicalPayload = buildCanonicalPayload({
         serialNumber: existing.serialNumber,
         templateSlug: existing.templateSlug,
-        organizationName:
-          template?.organizationName || settings.organizationName,
+        organizationName: trimStr(
+          template?.organizationName,
+          settings.organizationName
+        ),
         recipientFullName: existing.recipientFullName,
         recipientChosenName,
         nationalIdHash: existing.nationalIdHash,
@@ -357,19 +348,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       const signed = signCanonicalPayload(canonicalPayload, keyPair.privateKeyPem);
-
       const updated = await strapi.documents(CERTIFICATE_UID).update({
         documentId,
         data: {
           status: 'issued',
           issuedAt,
-          recipientChosenName: recipientChosenName || '',
+          recipientChosenName: trimStr(recipientChosenName),
           signatories,
           witnesses,
           canonicalPayloadHash: signed.payloadHash,
           cryptographicSignature: signed.signature,
           publicKeyFingerprint: keyPair.fingerprint,
-          notes: options?.notes !== undefined ? options.notes : existing.notes,
+          notes,
         },
       });
 

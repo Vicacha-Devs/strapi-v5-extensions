@@ -84,48 +84,64 @@ export function normalizeWitnesses(raw: unknown): CertificateWitness[] {
     .filter((w) => Boolean(w.fullName));
 }
 
+function asStr(val: unknown, fallback = ''): string {
+  return val ? String(val) : fallback;
+}
+
+function asOptStr(val: unknown): string | undefined {
+  return val ? String(val) : undefined;
+}
+
+function asNullStr(val: unknown): string | null {
+  return val ? String(val) : null;
+}
+
+function asArr<T>(val: unknown, fallback: T[] = []): T[] {
+  return Array.isArray(val) ? (val as T[]) : fallback;
+}
+
+function asObj<T>(val: unknown): T {
+  return val && typeof val === 'object' ? (val as T) : ({} as T);
+}
+
+function asEsignProvider(val: unknown): ESignProviderType {
+  const raw = asStr(val, 'none');
+  return raw === 'docusign' || raw === 'webhook' ? raw : 'none';
+}
+
+function asNonNegativeInt(val: unknown, fallback = 0): number {
+  return typeof val === 'number' && Number.isFinite(val)
+    ? Math.max(0, Math.trunc(val))
+    : fallback;
+}
+
 export function normalizeTemplateRecord(
   doc: Record<string, unknown>
 ): CertificateTemplate {
-  const esignProviderRaw = String(doc.esignProvider || 'none');
-  const esignProvider: ESignProviderType =
-    esignProviderRaw === 'docusign' || esignProviderRaw === 'webhook'
-      ? esignProviderRaw
-      : 'none';
-
   return {
     id: doc.id as number | string | undefined,
-    documentId: String(doc.documentId || doc.id || ''),
-    name: String(doc.name || ''),
-    slug: String(doc.slug || ''),
-    description: doc.description ? String(doc.description) : undefined,
-    serialPrefix: String(doc.serialPrefix || 'CERT'),
+    documentId: asStr(doc.documentId, asStr(doc.id)),
+    name: asStr(doc.name),
+    slug: asStr(doc.slug),
+    description: asOptStr(doc.description),
+    serialPrefix: asStr(doc.serialPrefix, 'CERT'),
     defaultValidityDays:
       typeof doc.defaultValidityDays === 'number' ? doc.defaultValidityDays : null,
     requiresWitnesses: Boolean(doc.requiresWitnesses),
-    minWitnesses:
-      typeof doc.minWitnesses === 'number' && Number.isFinite(doc.minWitnesses)
-        ? Math.max(0, Math.trunc(doc.minWitnesses))
-        : 0,
+    minWitnesses: asNonNegativeInt(doc.minWitnesses, 0),
     requiresApproval: doc.requiresApproval !== false,
     esignEnabled: Boolean(doc.esignEnabled),
-    esignProvider,
-    organizationName: String(doc.organizationName || ''),
-    organizationSubheader: doc.organizationSubheader
-      ? String(doc.organizationSubheader)
-      : undefined,
-    headerText: doc.headerText ? String(doc.headerText) : undefined,
-    titleText: String(doc.titleText || ''),
-    bodyTemplate: String(doc.bodyTemplate || ''),
-    footerText: doc.footerText ? String(doc.footerText) : undefined,
+    esignProvider: asEsignProvider(doc.esignProvider),
+    organizationName: asStr(doc.organizationName),
+    organizationSubheader: asOptStr(doc.organizationSubheader),
+    headerText: asOptStr(doc.headerText),
+    titleText: asStr(doc.titleText),
+    bodyTemplate: asStr(doc.bodyTemplate),
+    footerText: asOptStr(doc.footerText),
     defaultSignatories: normalizeSignatories(doc.defaultSignatories),
-    customFieldsSchema: Array.isArray(doc.customFieldsSchema)
-      ? (doc.customFieldsSchema as CertificateTemplate['customFieldsSchema'])
-      : [],
-    secondaryCalendars: Array.isArray(doc.secondaryCalendars)
-      ? (doc.secondaryCalendars as CertificateTemplate['secondaryCalendars'])
-      : [],
-    accentColor: doc.accentColor ? String(doc.accentColor) : '#14532d',
+    customFieldsSchema: asArr(doc.customFieldsSchema),
+    secondaryCalendars: asArr(doc.secondaryCalendars),
+    accentColor: asStr(doc.accentColor, '#14532d'),
     active: doc.active !== false,
   };
 }
@@ -134,74 +150,45 @@ export function normalizeCertificateRecord(
   doc: Record<string, unknown>,
   includePrivate = false
 ): CertificateRecord {
-  const statusRaw = String(doc.status || 'pending_approval') as CertificateStatus;
-  const esignProviderRaw = String(doc.esignProvider || 'none');
-  const esignProvider: ESignProviderType =
-    esignProviderRaw === 'docusign' || esignProviderRaw === 'webhook'
-      ? esignProviderRaw
-      : 'none';
-  const esignEnvelopeStatus = (doc.esignEnvelopeStatus
-    ? String(doc.esignEnvelopeStatus)
-    : 'not_sent') as ESignEnvelopeStatus;
-
   const record: CertificateRecord = {
     id: doc.id as number | string | undefined,
-    documentId: String(doc.documentId || doc.id || ''),
-    serialNumber: String(doc.serialNumber || ''),
-    templateDocumentId: String(doc.templateDocumentId || ''),
-    templateSlug: String(doc.templateSlug || ''),
-    templateName: String(doc.templateName || ''),
-    status: statusRaw,
-    recipientFullName: String(doc.recipientFullName || ''),
-    recipientChosenName: doc.recipientChosenName
-      ? String(doc.recipientChosenName)
-      : undefined,
-    recipientEmail: doc.recipientEmail ? String(doc.recipientEmail) : undefined,
-    recipientPhone: doc.recipientPhone ? String(doc.recipientPhone) : undefined,
-    recipientNationality: doc.recipientNationality
-      ? String(doc.recipientNationality)
-      : undefined,
-    nationalIdMasked: doc.nationalIdMasked
-      ? String(doc.nationalIdMasked)
-      : undefined,
-    issuedAt: String(doc.issuedAt || ''),
-    expiresAt: doc.expiresAt ? String(doc.expiresAt) : null,
-    revokedAt: doc.revokedAt ? String(doc.revokedAt) : null,
-    revocationReason: doc.revocationReason ? String(doc.revocationReason) : null,
+    documentId: asStr(doc.documentId, asStr(doc.id)),
+    serialNumber: asStr(doc.serialNumber),
+    templateDocumentId: asStr(doc.templateDocumentId),
+    templateSlug: asStr(doc.templateSlug),
+    templateName: asStr(doc.templateName),
+    status: asStr(doc.status, 'pending_approval') as CertificateStatus,
+    recipientFullName: asStr(doc.recipientFullName),
+    recipientChosenName: asOptStr(doc.recipientChosenName),
+    recipientEmail: asOptStr(doc.recipientEmail),
+    recipientPhone: asOptStr(doc.recipientPhone),
+    recipientNationality: asOptStr(doc.recipientNationality),
+    nationalIdMasked: asOptStr(doc.nationalIdMasked),
+    issuedAt: asStr(doc.issuedAt),
+    expiresAt: asNullStr(doc.expiresAt),
+    revokedAt: asNullStr(doc.revokedAt),
+    revocationReason: asNullStr(doc.revocationReason),
     signatories: normalizeSignatories(doc.signatories),
     witnesses: normalizeWitnesses(doc.witnesses),
-    customData:
-      doc.customData && typeof doc.customData === 'object'
-        ? (doc.customData as Record<string, string>)
-        : {},
-    secondaryDates:
-      doc.secondaryDates && typeof doc.secondaryDates === 'object'
-        ? (doc.secondaryDates as CertificateRecord['secondaryDates'])
-        : {},
-    canonicalPayloadHash: String(doc.canonicalPayloadHash || ''),
-    cryptographicSignature: String(doc.cryptographicSignature || ''),
-    publicKeyFingerprint: String(doc.publicKeyFingerprint || ''),
-    esignProvider,
-    esignEnvelopeId: doc.esignEnvelopeId
-      ? String(doc.esignEnvelopeId)
-      : undefined,
-    esignEnvelopeStatus,
-    esignCompletedAt: doc.esignCompletedAt
-      ? String(doc.esignCompletedAt)
-      : null,
-    linkedBookingCode: doc.linkedBookingCode
-      ? String(doc.linkedBookingCode)
-      : undefined,
-    notes: doc.notes ? String(doc.notes) : undefined,
+    customData: asObj<Record<string, string>>(doc.customData),
+    secondaryDates: asObj<CertificateRecord['secondaryDates']>(doc.secondaryDates),
+    canonicalPayloadHash: asStr(doc.canonicalPayloadHash),
+    cryptographicSignature: asStr(doc.cryptographicSignature),
+    publicKeyFingerprint: asStr(doc.publicKeyFingerprint),
+    esignProvider: asEsignProvider(doc.esignProvider),
+    esignEnvelopeId: asOptStr(doc.esignEnvelopeId),
+    esignEnvelopeStatus: asStr(
+      doc.esignEnvelopeStatus,
+      'not_sent'
+    ) as ESignEnvelopeStatus,
+    esignCompletedAt: asNullStr(doc.esignCompletedAt),
+    linkedBookingCode: asOptStr(doc.linkedBookingCode),
+    notes: asOptStr(doc.notes),
   };
 
   if (includePrivate) {
-    record.nationalIdHash = doc.nationalIdHash
-      ? String(doc.nationalIdHash)
-      : undefined;
-    record.verificationToken = doc.verificationToken
-      ? String(doc.verificationToken)
-      : undefined;
+    record.nationalIdHash = asOptStr(doc.nationalIdHash);
+    record.verificationToken = asOptStr(doc.verificationToken);
   }
 
   return record;
