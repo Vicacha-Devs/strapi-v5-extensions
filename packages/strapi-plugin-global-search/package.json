@@ -1,0 +1,101 @@
+{
+  "name": "strapi-global-search",
+  "version": "2.0.3",
+  "description": "Spotlight-style global search across every collection type and single type in the Strapi v5 admin panel. Zero configuration.",
+  "keywords": [
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5",
+    "search",
+    "global-search",
+    "spotlight",
+    "command-palette",
+    "admin"
+  ],
+  "strapi": {
+    "name": "global-search",
+    "kind": "plugin",
+    "displayName": "Global Search",
+    "description": "Search every content type from one place, with a Cmd+K palette.",
+    "icon": "search"
+  },
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.mjs"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "main": "./dist/server/index.js",
+  "types": "./dist/server/index.d.ts",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "test:ts": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "test": "tsx tests/services.test.ts"
+  },
+  "files": [
+    "dist",
+    "admin",
+    "server",
+    "strapi-admin.ts",
+    "strapi-server.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "@strapi/design-system": "^2.0.0",
+    "@strapi/icons": "^2.0.0",
+    "@strapi/strapi": "^5.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  },
+  "author": {
+    "name": "Sagar Maurya",
+    "email": "sagar68742@gmail.com",
+    "url": "https://github.com/sagarmauryaa"
+  },
+  "maintainers": [
+    {
+      "name": "Sagar Maurya",
+      "email": "sagar68742@gmail.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sagarmauryaa/strapi-global-search.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sagarmauryaa/strapi-global-search/issues"
+  },
+  "homepage": "https://github.com/sagarmauryaa/strapi-global-search#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "engines": {
+    "node": ">=20.0.0 <=26.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "MIT"
+}
