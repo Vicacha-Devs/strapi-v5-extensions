@@ -3,54 +3,68 @@
   "version": "1.1.0",
   "description": "XML Sitemap and Sitemap Index generator for Strapi v5 with multilingual i18n, custom URLs, image thumbnails, and excluded path rules.",
   "keywords": [
-    "strapi",
-    "strapi-v5",
-    "strapi-plugin",
+    "seo",
     "sitemap",
     "sitemap-index",
-    "seo",
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5",
     "xml"
   ],
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions/tree/main/packages/strapi-plugin-sitemap#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
+  },
+  "license": "MIT",
+  "author": "Vicacha Devs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vicacha-devs/strapi-v5-extensions.git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
     "directory": "packages/strapi-plugin-sitemap"
-  },
-  "type": "module",
-  "exports": {
-    "./package.json": "./package.json",
-    "./strapi-admin": {
-      "source": "./admin/src/index.ts",
-      "types": "./dist/admin/index.d.ts",
-      "import": "./dist/admin/index.js",
-      "require": "./dist/admin/index.cjs",
-      "default": "./dist/admin/index.js"
-    },
-    "./strapi-server": {
-      "source": "./server/src/index.ts",
-      "types": "./dist/server/index.d.ts",
-      "import": "./dist/server/index.js",
-      "require": "./dist/server/index.cjs",
-      "default": "./dist/server/index.js"
-    }
   },
   "files": [
     "dist"
   ],
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.mjs"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
-    "build": "strapi-plugin build",
+    "build": "strapi-plugin build && node ../../scripts/ensure-esm-dist.ts",
+    "test": "vitest run",
+    "test:ts": "npm run test:ts:front && npm run test:ts:back",
+    "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
+    "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
     "verify": "strapi-plugin verify",
     "watch": "strapi-plugin watch",
-    "watch:link": "strapi-plugin watch:link",
-    "test:ts": "npm run test:ts:front && npm run test:ts:back",
-    "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
-    "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
-    "test": "vitest run"
+    "watch:link": "strapi-plugin watch:link"
   },
   "dependencies": {
     "@strapi/design-system": "^2.0.0",
     "@strapi/icons": "^2.0.0",
-    "react-intl": "^6.6.8"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-intl": "^6.6.8",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "6.1.1",
@@ -59,21 +73,16 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vicacha-devs/typescript-config": "workspace:*",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.2",
-    "styled-components": "^6.1.13",
     "typescript": "5.9.3",
     "vitest": "^3.0.9"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^5.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.0.0",
-    "styled-components": "^6.0.0"
+    "@strapi/strapi": "^5.0.0"
   },
-  "license": "MIT",
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  },
   "strapi": {
     "name": "sitemap",
     "displayName": "Sitemap",
