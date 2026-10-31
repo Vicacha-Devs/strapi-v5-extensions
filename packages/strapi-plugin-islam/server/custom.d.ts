@@ -140,3 +140,11 @@ declare module '*.json' {
   const value: Record<string, unknown>;
   export default value;
 }
+
+declare module '@vicacha-devs/strapi-plugin-calendar/shared' {
+  export const SUPPORTED_INTL_CALENDARS: ReadonlyArray<{
+    id: string;
+    intlCalendar: string;
+    defaultLabel: string;
+  }>;
+}
