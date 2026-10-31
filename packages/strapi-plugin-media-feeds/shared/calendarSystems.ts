@@ -7,6 +7,73 @@ import {
 
 export type { AlternateDateValue, CalendarSystemConfig };
 
+function readOverrideDateString(
+  sys: CalendarSystemConfig,
+  rawDoc?: Record<string, unknown>,
+  alternateDateFields?: Record<string, string>
+): string {
+  const overrideFieldName =
+    alternateDateFields?.[sys.id] || sys.overrideField;
+  if (
+    !overrideFieldName ||
+    !rawDoc ||
+    typeof rawDoc[overrideFieldName] !== 'string'
+  ) {
+    return '';
+  }
+  return String(rawDoc[overrideFieldName]).trim();
+}
+
+function computeSingleCalendarEntry(
+  sys: CalendarSystemConfig,
+  safeDate: Date,
+  dateStr: string,
+  rawOverride: string,
+  locale: string
+): AlternateDateValue | null {
+  const parts = extractCalendarParts(
+    safeDate,
+    sys.intlCalendar,
+    sys.dayOffset ?? 0
+  );
+  const label = sys.label || sys.id;
+
+  if (rawOverride) {
+    return {
+      calendarId: sys.id,
+      label,
+      formatted: rawOverride,
+      compact: rawOverride,
+      intlCalendar: sys.intlCalendar,
+      year: parts?.year,
+      month: parts?.month,
+      day: parts?.day,
+      isOverridden: true,
+    };
+  }
+
+  const formatted = formatDateInCalendarSystem(dateStr, sys, locale, {
+    compact: false,
+  });
+  if (!formatted) return null;
+
+  const compact = formatDateInCalendarSystem(dateStr, sys, locale, {
+    compact: true,
+  });
+
+  return {
+    calendarId: sys.id,
+    label,
+    formatted,
+    compact: compact || formatted,
+    intlCalendar: sys.intlCalendar,
+    year: parts?.year,
+    month: parts?.month,
+    day: parts?.day,
+    isOverridden: false,
+  };
+}
+
 export function computeSecondaryDates(
   isoOrDateKey: string,
   systems: CalendarSystemConfig[] = [],
@@ -21,53 +88,20 @@ export function computeSecondaryDates(
 
   for (const sys of systems) {
     if (!sys || !sys.enabled || !sys.id) continue;
-    const overrideFieldName =
-      alternateDateFields?.[sys.id] || sys.overrideField;
-    const rawOverride =
-      overrideFieldName && rawDoc && typeof rawDoc[overrideFieldName] === 'string'
-        ? String(rawDoc[overrideFieldName]).trim()
-        : '';
-
-    const parts = extractCalendarParts(
-      safeDate,
-      sys.intlCalendar,
-      sys.dayOffset ?? 0
+    const rawOverride = readOverrideDateString(
+      sys,
+      rawDoc,
+      alternateDateFields
     );
-
-    if (rawOverride) {
-      result[sys.id] = {
-        calendarId: sys.id,
-        label: sys.label || sys.id,
-        formatted: rawOverride,
-        compact: rawOverride,
-        intlCalendar: sys.intlCalendar,
-        year: parts?.year,
-        month: parts?.month,
-        day: parts?.day,
-        isOverridden: true,
-      };
-      continue;
-    }
-
-    const formatted = formatDateInCalendarSystem(dateStr, sys, locale, {
-      compact: false,
-    });
-    const compact = formatDateInCalendarSystem(dateStr, sys, locale, {
-      compact: true,
-    });
-
-    if (formatted) {
-      result[sys.id] = {
-        calendarId: sys.id,
-        label: sys.label || sys.id,
-        formatted,
-        compact: compact || formatted,
-        intlCalendar: sys.intlCalendar,
-        year: parts?.year,
-        month: parts?.month,
-        day: parts?.day,
-        isOverridden: false,
-      };
+    const entry = computeSingleCalendarEntry(
+      sys,
+      safeDate,
+      dateStr,
+      rawOverride,
+      locale
+    );
+    if (entry) {
+      result[sys.id] = entry;
     }
   }
 
