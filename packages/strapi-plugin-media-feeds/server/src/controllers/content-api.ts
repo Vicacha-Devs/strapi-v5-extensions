@@ -1,11 +1,12 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from "@strapi/strapi";
+
 import {
   PLUGIN_ID,
   type LiveBroadcastState,
   type MediaFeedItem,
   type MediaSeriesItem,
-} from '../../../shared';
-import type { QueryMediaFeedOptions } from '../services/feedService';
+} from "../../../shared";
+import type { QueryMediaFeedOptions } from "../services/feedService";
 
 interface StrapiContext {
   query?: Record<string, string | undefined>;
@@ -18,26 +19,18 @@ interface StrapiContext {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   getFeedService() {
-    return strapi.plugin(PLUGIN_ID).service('feedService') as {
+    return strapi.plugin(PLUGIN_ID).service("feedService") as {
       getEpisodes(options?: QueryMediaFeedOptions): Promise<MediaFeedItem[]>;
       getSeriesList(locale?: string): Promise<MediaSeriesItem[]>;
       getLiveStatus(locale?: string): Promise<LiveBroadcastState>;
-      generateRssFeed(options?: {
-        locale?: string;
-        seriesSlug?: string;
-      }): Promise<string>;
+      generateRssFeed(options?: { locale?: string; seriesSlug?: string }): Promise<string>;
     };
   },
 
   async listEpisodes(ctx: StrapiContext) {
     const q = ctx.query ?? {};
     const limit = q.limit ? Number(q.limit) : undefined;
-    const featured =
-      q.featured === 'true'
-        ? true
-        : q.featured === 'false'
-          ? false
-          : undefined;
+    const featured = q.featured === "true" ? true : q.featured === "false" ? false : undefined;
 
     const data = await this.getFeedService().getEpisodes({
       locale: q.locale,
@@ -54,7 +47,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       data,
       meta: {
         count: data.length,
-        locale: q.locale ?? 'default',
+        locale: q.locale ?? "default",
       },
     };
   },
@@ -82,7 +75,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       locale: q.locale,
       seriesSlug: q.series,
     });
-    ctx.set('Content-Type', 'application/rss+xml; charset=utf-8');
+    ctx.set("Content-Type", "application/rss+xml; charset=utf-8");
     ctx.body = xml;
   },
 });

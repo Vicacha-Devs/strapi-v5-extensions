@@ -3,7 +3,7 @@ import {
   formatDateInCalendarSystem,
   type AlternateDateValue,
   type CalendarSystemConfig,
-} from '@vicacha-devs/strapi-plugin-calendar/shared';
+} from "@vicacha-devs/strapi-plugin-calendar/shared";
 
 export type { AlternateDateValue, CalendarSystemConfig };
 
@@ -12,14 +12,9 @@ function readOverrideDateString(
   rawDoc?: Record<string, unknown>,
   alternateDateFields?: Record<string, string>
 ): string {
-  const overrideFieldName =
-    alternateDateFields?.[sys.id] || sys.overrideField;
-  if (
-    !overrideFieldName ||
-    !rawDoc ||
-    typeof rawDoc[overrideFieldName] !== 'string'
-  ) {
-    return '';
+  const overrideFieldName = alternateDateFields?.[sys.id] || sys.overrideField;
+  if (!overrideFieldName || !rawDoc || typeof rawDoc[overrideFieldName] !== "string") {
+    return "";
   }
   return String(rawDoc[overrideFieldName]).trim();
 }
@@ -31,11 +26,7 @@ function computeSingleCalendarEntry(
   rawOverride: string,
   locale: string
 ): AlternateDateValue | null {
-  const parts = extractCalendarParts(
-    safeDate,
-    sys.intlCalendar,
-    sys.dayOffset ?? 0
-  );
+  const parts = extractCalendarParts(safeDate, sys.intlCalendar, sys.dayOffset ?? 0);
   const label = sys.label || sys.id;
 
   if (rawOverride) {
@@ -79,7 +70,7 @@ export function computeSecondaryDates(
   systems: CalendarSystemConfig[] = [],
   rawDoc?: Record<string, unknown>,
   alternateDateFields?: Record<string, string>,
-  locale = 'en'
+  locale = "en"
 ): Record<string, AlternateDateValue> {
   const result: Record<string, AlternateDateValue> = {};
   const parsedDate = new Date(isoOrDateKey);
@@ -88,18 +79,8 @@ export function computeSecondaryDates(
 
   for (const sys of systems) {
     if (!sys || !sys.enabled || !sys.id) continue;
-    const rawOverride = readOverrideDateString(
-      sys,
-      rawDoc,
-      alternateDateFields
-    );
-    const entry = computeSingleCalendarEntry(
-      sys,
-      safeDate,
-      dateStr,
-      rawOverride,
-      locale
-    );
+    const rawOverride = readOverrideDateString(sys, rawDoc, alternateDateFields);
+    const entry = computeSingleCalendarEntry(sys, safeDate, dateStr, rawOverride, locale);
     if (entry) {
       result[sys.id] = entry;
     }

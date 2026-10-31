@@ -1,4 +1,4 @@
-import type { MediaFeedType, YouTubeSyncSourceConfig } from './types';
+import type { MediaFeedType, YouTubeSyncSourceConfig } from "./types";
 
 export interface ParsedYouTubeFeedVideo {
   videoId: string;
@@ -17,27 +17,27 @@ export interface ParsedYouTubeFeedVideo {
 
 function unescapeXmlEntities(input: string): string {
   return input
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, '&');
+    .replace(/&amp;/g, "&");
 }
 
 function slugifyTitle(title: string, videoId: string): string {
   const base = title
     .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
     .slice(0, 60);
   return base ? `${base}-${videoId.toLowerCase()}` : `yt-${videoId.toLowerCase()}`;
 }
 
 export function buildYouTubeAtomFeedUrl(
-  source: Pick<YouTubeSyncSourceConfig, 'channelId' | 'playlistId'>
+  source: Pick<YouTubeSyncSourceConfig, "channelId" | "playlistId">
 ): string | null {
   if (source.playlistId?.trim()) {
     return `https://www.youtube.com/feeds/videos.xml?playlist_id=${encodeURIComponent(
@@ -59,10 +59,10 @@ function matchXmlTag(entry: string, regex: RegExp): string | null {
 
 function resolveAtomDefaults(sourceConfig?: Partial<YouTubeSyncSourceConfig>) {
   return {
-    defaultSpeaker: sourceConfig?.defaultSpeaker || 'Official Channel',
-    type: (sourceConfig?.defaultType || 'video') as MediaFeedType,
+    defaultSpeaker: sourceConfig?.defaultSpeaker || "Official Channel",
+    type: (sourceConfig?.defaultType || "video") as MediaFeedType,
     seriesSlug: sourceConfig?.defaultSeriesSlug || null,
-    spokenLanguages: sourceConfig?.defaultSpokenLanguages ?? ['es'],
+    spokenLanguages: sourceConfig?.defaultSpokenLanguages ?? ["es"],
   };
 }
 
@@ -74,22 +74,15 @@ function parseSingleYouTubeAtomEntry(
   if (!videoId) return null;
 
   const defaults = resolveAtomDefaults(sourceConfig);
-  const rawTitle =
-    matchXmlTag(entry, /<title>([\s\S]*?)<\/title>/i) ?? `Video ${videoId}`;
+  const rawTitle = matchXmlTag(entry, /<title>([\s\S]*?)<\/title>/i) ?? `Video ${videoId}`;
   const title = unescapeXmlEntities(rawTitle);
   const rawDesc =
-    matchXmlTag(
-      entry,
-      /<media:description>([\s\S]*?)<\/media:description>/i
-    ) ?? title;
+    matchXmlTag(entry, /<media:description>([\s\S]*?)<\/media:description>/i) ?? title;
   const publishedAt =
-    matchXmlTag(entry, /<published>([^<]+)<\/published>/i) ??
-    new Date().toISOString();
+    matchXmlTag(entry, /<published>([^<]+)<\/published>/i) ?? new Date().toISOString();
   const rawAuthor =
-    matchXmlTag(
-      entry,
-      /<author>[\s\S]*?<name>([\s\S]*?)<\/name>[\s\S]*?<\/author>/i
-    ) ?? defaults.defaultSpeaker;
+    matchXmlTag(entry, /<author>[\s\S]*?<name>([\s\S]*?)<\/name>[\s\S]*?<\/author>/i) ??
+    defaults.defaultSpeaker;
   const thumbnailUrl =
     matchXmlTag(entry, /<media:thumbnail[^>]+url="([^"]+)"/i) ??
     `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
@@ -114,7 +107,7 @@ export function parseYouTubeAtomFeedXml(
   xml: string,
   sourceConfig?: Partial<YouTubeSyncSourceConfig>
 ): ParsedYouTubeFeedVideo[] {
-  if (!xml || typeof xml !== 'string') return [];
+  if (!xml || typeof xml !== "string") return [];
 
   const entries = xml.match(/<entry>[\s\S]*?<\/entry>/gi) ?? [];
   return entries

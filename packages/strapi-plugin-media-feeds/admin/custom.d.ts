@@ -1,12 +1,5 @@
-declare module 'react' {
-  export type ReactNode =
-    | string
-    | number
-    | boolean
-    | null
-    | undefined
-    | ReactElement
-    | ReactNode[];
+declare module "react" {
+  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
 
   export interface ReactElement<P = unknown> {
     type: unknown;
@@ -42,10 +35,7 @@ declare module 'react' {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(
-    effect: () => void | (() => void),
-    deps?: readonly unknown[]
-  ): void;
+  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
   export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
@@ -68,8 +58,8 @@ declare module 'react' {
   export as namespace React;
 }
 
-declare module 'react/jsx-runtime' {
-  import type { ReactElement } from 'react';
+declare module "react/jsx-runtime" {
+  import type { ReactElement } from "react";
   export const Fragment: unknown;
   export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
   export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
@@ -85,7 +75,7 @@ declare module 'react/jsx-runtime' {
   }
 }
 
-declare module 'react-intl' {
+declare module "react-intl" {
   export interface MessageDescriptor {
     id: string;
     defaultMessage?: string;
@@ -100,8 +90,8 @@ declare module 'react-intl' {
   };
 }
 
-declare module '@strapi/strapi/admin' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/strapi/admin" {
+  import type { FC, ReactNode } from "react";
   export type AdminLayoutProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Layouts: {
@@ -125,7 +115,7 @@ declare module '@strapi/strapi/admin' {
 
   export function useNotification(): {
     toggleNotification(config: {
-      type?: 'success' | 'warning' | 'danger' | 'info';
+      type?: "success" | "warning" | "danger" | "info";
       message: string;
     }): void;
   };
@@ -146,8 +136,8 @@ declare module '@strapi/strapi/admin' {
   export type StrapiApp = StrapiAdminApp;
 }
 
-declare module 'react-router-dom' {
-  import type { FC, ReactNode } from 'react';
+declare module "react-router-dom" {
+  import type { FC, ReactNode } from "react";
   export const Routes: FC<{ children?: ReactNode }>;
   export const Route: FC<{
     index?: boolean;
@@ -157,8 +147,8 @@ declare module 'react-router-dom' {
   export function useNavigate(): (to: string) => void;
 }
 
-declare module '@strapi/design-system' {
-  import type { FC, ReactNode } from 'react';
+declare module "@strapi/design-system" {
+  import type { FC, ReactNode } from "react";
   export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
 
   export const Tabs: {
@@ -195,21 +185,21 @@ declare module '@strapi/design-system' {
   };
 }
 
-declare module '@strapi/design-system/*';
+declare module "@strapi/design-system/*";
 
-declare module '@strapi/icons' {
-  import type { FC } from 'react';
+declare module "@strapi/icons" {
+  import type { FC } from "react";
   export const Play: FC<Record<string, unknown>>;
   export const Microphone: FC<Record<string, unknown>>;
   export const Television: FC<Record<string, unknown>>;
 }
 
-declare module '*.json' {
+declare module "*.json" {
   const value: Record<string, string>;
   export default value;
 }
 
-declare module 'styled-components' {
+declare module "styled-components" {
   export function useTheme(): {
     colors: Record<string, string>;
     spaces: Record<string, string>;

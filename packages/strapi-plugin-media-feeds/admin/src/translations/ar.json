@@ -122,5 +122,9 @@
   "settings.ui.save_settings": "حفظ الإعدادات",
   "settings.ui.subtitle_configure_multi_language_locales_apple_spotify_r": "تهيئة اللغات المتعددة، وبيانات RSS 2.0 لـ Apple وSpotify، وإعدادات البث المباشر الافتراضية",
   "settings.ui.summary_shown_in_apple_podcasts_spotify_and_rss_": "الملخص shown in Apple Podcasts, Spotify, and RSS reader directories.",
-  "settings.ui.title_media_feeds_podcast_settings": "إعدادات الخلاصات الإعلامية والبودكاست"
+  "settings.ui.title_media_feeds_podcast_settings": "إعدادات الخلاصات الإعلامية والبودكاست",
+  "field.supported_locales": "Supported Locales",
+  "placeholder.select_supported_locales": "Select supported locales...",
+  "settings.tab.localization": "تعدد اللغات والترجمة",
+  "settings.tab.podcast": "خلاصة بودكاست RSS 2.0"
 }

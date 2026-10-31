@@ -1,11 +1,8 @@
-import type { Core } from '@strapi/strapi';
-import {
-  MEDIA_SERIES_UID,
-  PLUGIN_ID,
-  type MediaFeedsSettings,
-} from '../../shared';
+import type { Core } from "@strapi/strapi";
 
-type DefaultSeriesEntry = NonNullable<MediaFeedsSettings['defaultSeries']>[number];
+import { MEDIA_SERIES_UID, PLUGIN_ID, type MediaFeedsSettings } from "../../shared";
+
+type DefaultSeriesEntry = NonNullable<MediaFeedsSettings["defaultSeries"]>[number];
 
 function buildSeriesData(
   series: DefaultSeriesEntry,
@@ -18,7 +15,7 @@ function buildSeriesData(
     author: series.author ?? settings.podcastFeed.author,
     coverImageUrl: series.coverImageUrl ?? null,
     category: series.category ?? settings.podcastFeed.category,
-    defaultType: series.defaultType ?? 'podcast',
+    defaultType: series.defaultType ?? "podcast",
     spokenLanguages: series.spokenLanguages ?? settings.supportedLocales,
     rssEnabled: series.rssEnabled !== false,
     youtubePlaylistId: series.youtubePlaylistId ?? null,
@@ -42,9 +39,7 @@ async function seedDefaultSeriesIfNeeded(
       locale: settings.defaultLocale,
       limit: 100,
     });
-    const existingSlugs = new Set(
-      existing.map((s) => (typeof s.slug === 'string' ? s.slug : ''))
-    );
+    const existingSlugs = new Set(existing.map((s) => (typeof s.slug === "string" ? s.slug : "")));
 
     for (const series of defaultSeries) {
       if (!series.slug || !series.title || existingSlugs.has(series.slug)) {
@@ -52,7 +47,7 @@ async function seedDefaultSeriesIfNeeded(
       }
       await strapi.documents(MEDIA_SERIES_UID).create({
         locale: settings.defaultLocale,
-        status: 'published',
+        status: "published",
         data: buildSeriesData(series, settings),
       });
     }
@@ -63,7 +58,7 @@ async function seedDefaultSeriesIfNeeded(
 }
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  const settingsService = strapi.plugin(PLUGIN_ID).service('settings') as {
+  const settingsService = strapi.plugin(PLUGIN_ID).service("settings") as {
     ensureDefaultSettings(): Promise<MediaFeedsSettings>;
   };
 
@@ -75,21 +70,21 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   if (actionProvider?.registerMany) {
     await actionProvider.registerMany([
       {
-        section: 'plugins',
-        displayName: 'Read media feeds & episodes',
-        uid: 'read',
+        section: "plugins",
+        displayName: "Read media feeds & episodes",
+        uid: "read",
         pluginName: PLUGIN_ID,
       },
       {
-        section: 'plugins',
-        displayName: 'Sync external YouTube & podcast sources',
-        uid: 'sync',
+        section: "plugins",
+        displayName: "Sync external YouTube & podcast sources",
+        uid: "sync",
         pluginName: PLUGIN_ID,
       },
       {
-        section: 'plugins',
-        displayName: 'Configure media feeds settings',
-        uid: 'settings.update',
+        section: "plugins",
+        displayName: "Configure media feeds settings",
+        uid: "settings.update",
         pluginName: PLUGIN_ID,
       },
     ]);
