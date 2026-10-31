@@ -74,8 +74,7 @@
   "dependencies": {
     "@strapi/design-system": "2.2.0",
     "@strapi/icons": "2.2.0",
-    "react-intl": "8.1.3",
-    "strapi-plugin-form-builder-cms": "1.1.0-rc.1"
+    "react-intl": "8.1.3"
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "6.1.1",
@@ -102,6 +101,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",
+    "strapi-plugin-form-builder-cms": "^1.1.0-rc.1",
     "styled-components": "^6.0.0"
   },
   "peerDependenciesMeta": {
@@ -112,6 +112,9 @@
       "optional": true
     },
     "@vicacha-devs/strapi-plugin-certificates": {
+      "optional": true
+    },
+    "strapi-plugin-form-builder-cms": {
       "optional": true
     }
   },
