@@ -1,0 +1,413 @@
+openapi: 3.0.3
+info:
+  title: Media Feeds & Podcast RSS (@vicacha-devs/strapi-plugin-media-feeds)
+  version: 1.0.0
+  description: Generic Strapi v5 Multi-Language Media Hub, YouTube & OEmbed Enricher, Apple/Spotify Podcast RSS
+    2.0 Generator & Live Broadcast Status Plugin powered by @vicacha-devs/strapi-plugin-calendar
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /media-feeds/overview:
+    get:
+      operationId: getMediaFeedsOverview
+      summary: Get Overview
+      description: Strapi v5 Admin API endpoint handled by `admin.getOverview`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MediaEpisodeFeedItem"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /media-feeds/settings:
+    get:
+      operationId: getMediaFeedsSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putMediaFeedsSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /media-feeds/enrich-url:
+    post:
+      operationId: postMediaFeedsEnrichUrl
+      summary: Enrich Url
+      description: Strapi v5 Admin API endpoint handled by `admin.enrichUrl`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MediaEpisodeFeedItem"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaEpisodeFeedItem"
+  /media-feeds/sync-youtube:
+    post:
+      operationId: postMediaFeedsSyncYoutube
+      summary: Sync You Tube
+      description: Strapi v5 Admin API endpoint handled by `admin.syncYouTube`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MediaEpisodeFeedItem"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /api/media-feeds/episodes:
+    get:
+      operationId: getApiMediaFeedsEpisodes
+      summary: List Episodes
+      description: Strapi v5 Content API endpoint handled by `content-api.listEpisodes`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MediaEpisodeFeedItem"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/media-feeds/series:
+    get:
+      operationId: getApiMediaFeedsSeries
+      summary: List Series
+      description: Strapi v5 Content API endpoint handled by `content-api.listSeries`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MediaEpisodeFeedItem"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/media-feeds/live:
+    get:
+      operationId: getApiMediaFeedsLive
+      summary: Get Live Status
+      description: Strapi v5 Content API endpoint handled by `content-api.getLiveStatus`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/media-feeds/rss.xml:
+    get:
+      operationId: getApiMediaFeedsRssXml
+      summary: Get Rss Xml
+      description: Strapi v5 Content API endpoint handled by `content-api.getRssXml`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: UTF-8 XML feed / Sitemap document
+        "400":
+          description: Bad Request — validation or parameter error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    MediaEpisodeFeedItem:
+      type: object
+      description: Generic multi-language video, podcast, audio lecture, YouTube item, or live broadcast
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          default: video
+        provider:
+          type: string
+          enum:
+            - youtube
+            - spotify
+            - apple_podcasts
+            - vimeo
+            - soundcloud
+            - direct
+            - upload
+          default: youtube
+        externalId:
+          type: string
+        sourceUrl:
+          type: string
+        embedUrl:
+          type: string
+        speaker:
+          type: string
+        speakerSlug:
+          type: string
+        seriesSlug:
+          type: string
+        duration:
+          type: string
+        publishedAtLabel:
+          type: string
+        imageUrl:
+          type: string
+        imageAlt:
+          type: string
+        thumbnail:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        audioFile:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        transcriptFile:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        spokenLanguages:
+          type: object
+          additionalProperties: true
+        languageTracks:
+          type: object
+          additionalProperties: true
+        chapters:
+          type: object
+          additionalProperties: true
+        featured:
+          type: boolean
+          default: false
+        isLive:
+          type: boolean
+          default: false
+      required:
+        - title
+        - slug
+        - description
+        - type
+    MediaSeriesPodcastShow:
+      type: object
+      description: Generic multi-language podcast show, video playlist, or lecture series
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        author:
+          type: string
+        coverImageUrl:
+          type: string
+        category:
+          type: string
+          default: Education
+        defaultType:
+          type: string
+          default: podcast
+        spokenLanguages:
+          type: object
+          additionalProperties: true
+        rssEnabled:
+          type: boolean
+          default: true
+        youtubePlaylistId:
+          type: string
+        spotifyShowUrl:
+          type: string
+        applePodcastsUrl:
+          type: string
+        active:
+          type: boolean
+          default: true
+      required:
+        - title
+        - slug
+        - description

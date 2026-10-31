@@ -1,0 +1,489 @@
+openapi: 3.0.3
+info:
+  title: XML Sitemap & Hreflang (@vicacha-devs/strapi-plugin-sitemap)
+  version: 1.1.0
+  description: XML Sitemap and Sitemap Index generator for Strapi v5 with multilingual i18n, custom URLs, image
+    thumbnails, and excluded path rules.
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /api/sitemap/sitemap.xml:
+    get:
+      operationId: getApiSitemapSitemapXml
+      summary: Get Sitemap
+      description: Strapi v5 Content API endpoint handled by `controller.getSitemap`. Protected by Strapi Users &
+        Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: UTF-8 XML feed / Sitemap document
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/sitemap/sitemap-{slug}.xml:
+    get:
+      operationId: getApiSitemapSitemapBySlugXml
+      summary: Get Sitemap By Slug
+      description: Strapi v5 Content API endpoint handled by `controller.getSitemapBySlug`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Target slug identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: UTF-8 XML feed / Sitemap document
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /sitemap/admin:
+    get:
+      operationId: getSitemapAdmin
+      summary: Admin GET
+      description: Strapi v5 Admin API endpoint handled by `controller.adminGET`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postSitemapAdmin
+      summary: Admin POST
+      description: Strapi v5 Admin API endpoint handled by `controller.adminPOST`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+    put:
+      operationId: putSitemapAdmin
+      summary: Admin PUT
+      description: Strapi v5 Admin API endpoint handled by `controller.adminPUT`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+    delete:
+      operationId: deleteSitemapAdmin
+      summary: Admin DELETE
+      description: Strapi v5 Admin API endpoint handled by `controller.adminDELETE`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /sitemap/admin-get-content-types:
+    get:
+      operationId: getSitemapAdminGetContentTypes
+      summary: Admin GETContent Types
+      description: Strapi v5 Admin API endpoint handled by `controller.adminGETContentTypes`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /sitemap/admin-get-locales:
+    get:
+      operationId: getSitemapAdminGetLocales
+      summary: Admin GETLocales
+      description: Strapi v5 Admin API endpoint handled by `controller.adminGETLocales`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /sitemap/admin-allowed-fields:
+    get:
+      operationId: getSitemapAdminAllowedFields
+      summary: Admin Allowed Fields
+      description: Strapi v5 Admin API endpoint handled by `controller.adminAllowedFields`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /sitemap/admin-get-options:
+    get:
+      operationId: getSitemapAdminGetOptions
+      summary: Admin Get Options
+      description: Strapi v5 Admin API endpoint handled by `controller.adminGetOptions`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /sitemap/admin-put-options:
+    put:
+      operationId: putSitemapAdminPutOptions
+      summary: Admin Put Options
+      description: Strapi v5 Admin API endpoint handled by `controller.adminPutOptions`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /sitemap/admin-custom-urls:
+    get:
+      operationId: getSitemapAdminCustomUrls
+      summary: Admin Get Custom URLs
+      description: Strapi v5 Admin API endpoint handled by `controller.adminGetCustomURLs`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postSitemapAdminCustomUrls
+      summary: Admin Post Custom URLs
+      description: Strapi v5 Admin API endpoint handled by `controller.adminPostCustomURLs`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+    put:
+      operationId: putSitemapAdminCustomUrls
+      summary: Admin Put Custom URLs
+      description: Strapi v5 Admin API endpoint handled by `controller.adminPutCustomURLs`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+    delete:
+      operationId: deleteSitemapAdminCustomUrls
+      summary: Admin Delete Custom URLs
+      description: Strapi v5 Admin API endpoint handled by `controller.adminDeleteCustomURLs`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication

@@ -1,0 +1,1012 @@
+openapi: 3.0.3
+info:
+  title: Resources, Galleries & Glossary (@vicacha-devs/strapi-plugin-resources)
+  version: 1.0.0
+  description: Generic Strapi v5 Digital Library Publications, Media Library Folder-Synced Photo Galleries &
+    Multilingual A-Z Glossary Plugin powered by @strapi/upload and @vicacha-devs/strapi-plugin-calendar
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /resources/hub:
+    get:
+      operationId: getResourcesHub
+      summary: Get Hub Overview
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.getHubOverview`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /resources/publications:
+    get:
+      operationId: getResourcesPublications
+      summary: List Publications
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.listPublications`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourcePublication"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postResourcesPublications
+      summary: Create Publication
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.createPublication`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourcePublication"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourcePublication"
+  /resources/publications/{documentId}:
+    put:
+      operationId: putResourcesPublicationsByDocumentId
+      summary: Update Publication
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.updatePublication`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourcePublication"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourcePublication"
+    delete:
+      operationId: deleteResourcesPublicationsByDocumentId
+      summary: Delete Publication
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.deletePublication`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourcePublication"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /resources/galleries:
+    get:
+      operationId: getResourcesGalleries
+      summary: List Galleries
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.listGalleries`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postResourcesGalleries
+      summary: Create Gallery Album
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.createGalleryAlbum`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGalleryAlbum"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourceGalleryAlbum"
+  /resources/galleries/{documentId}:
+    put:
+      operationId: putResourcesGalleriesByDocumentId
+      summary: Update Gallery Album
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.updateGalleryAlbum`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGalleryAlbum"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourceGalleryAlbum"
+    delete:
+      operationId: deleteResourcesGalleriesByDocumentId
+      summary: Delete Gallery Album
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.deleteGalleryAlbum`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGalleryAlbum"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /resources/galleries/{documentId}/sync-media-folder:
+    post:
+      operationId: postResourcesGalleriesByDocumentIdSyncMediaFolder
+      summary: Sync Album Media Folder
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.syncAlbumMediaFolder`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGalleryAlbum"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /resources/glossary:
+    get:
+      operationId: getResourcesGlossary
+      summary: List Glossary
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.listGlossary`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGlossaryTerm"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postResourcesGlossary
+      summary: Create Glossary Term
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.createGlossaryTerm`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGlossaryTerm"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourceGlossaryTerm"
+  /resources/glossary/{documentId}:
+    put:
+      operationId: putResourcesGlossaryByDocumentId
+      summary: Update Glossary Term
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.updateGlossaryTerm`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGlossaryTerm"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourceGlossaryTerm"
+    delete:
+      operationId: deleteResourcesGlossaryByDocumentId
+      summary: Delete Glossary Term
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.deleteGlossaryTerm`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGlossaryTerm"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /resources/media-folders:
+    get:
+      operationId: getResourcesMediaFolders
+      summary: List Media Folders
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.listMediaFolders`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /resources/media-files:
+    get:
+      operationId: getResourcesMediaFiles
+      summary: List Media Files
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.listMediaFiles`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /resources/settings:
+    get:
+      operationId: getResourcesSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putResourcesSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /api/resources/hub:
+    get:
+      operationId: getApiResourcesHub
+      summary: Get Hub Overview
+      description: Strapi v5 Content API endpoint handled by `resourcesController.getHubOverview`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/resources/publications:
+    get:
+      operationId: getApiResourcesPublications
+      summary: List Publications
+      description: Strapi v5 Content API endpoint handled by `resourcesController.listPublications`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourcePublication"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/resources/publications/{slug}:
+    get:
+      operationId: getApiResourcesPublicationsBySlug
+      summary: Get Publication By Slug
+      description: Strapi v5 Content API endpoint handled by `resourcesController.getPublicationBySlug`.
+      tags:
+        - Content API
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Target slug identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourcePublication"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/resources/publications/{slug}/download:
+    post:
+      operationId: postApiResourcesPublicationsBySlugDownload
+      summary: Download Publication
+      description: Strapi v5 Content API endpoint handled by `resourcesController.downloadPublication`.
+      tags:
+        - Content API
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Target slug identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourcePublication"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResourcePublication"
+  /api/resources/galleries:
+    get:
+      operationId: getApiResourcesGalleries
+      summary: List Galleries
+      description: Strapi v5 Content API endpoint handled by `resourcesController.listGalleries`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/resources/galleries/{slug}:
+    get:
+      operationId: getApiResourcesGalleriesBySlug
+      summary: Get Gallery By Slug
+      description: Strapi v5 Content API endpoint handled by `resourcesController.getGalleryBySlug`.
+      tags:
+        - Content API
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Target slug identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGalleryAlbum"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/resources/glossary:
+    get:
+      operationId: getApiResourcesGlossary
+      summary: List Glossary
+      description: Strapi v5 Content API endpoint handled by `resourcesController.listGlossary`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ResourceGlossaryTerm"
+        "400":
+          description: Bad Request — validation or parameter error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    ResourceGalleryAlbum:
+      type: object
+      description: Curated photo and video albums synced with Strapi v5 Media Library folders and Cloudinary optimization
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum:
+            - architecture
+            - community
+            - events
+            - ramadan_eid
+            - heritage
+            - press
+          default: community
+        coverPhoto:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        photos:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        mediaFolderId:
+          type: integer
+        mediaFolderPath:
+          type: string
+          maxLength: 160
+        eventDate:
+          type: string
+          format: date
+        secondaryDateOverride:
+          type: string
+          maxLength: 80
+        photographerCredit:
+          type: string
+          maxLength: 140
+        framingNotes:
+          type: string
+          maxLength: 500
+        featured:
+          type: boolean
+          default: false
+        sortOrder:
+          type: integer
+          default: 0
+      required:
+        - title
+        - slug
+        - category
+    ResourceGlossaryTerm:
+      type: object
+      description: Multilingual A-Z glossary terms with native script, transliteration, and Strapi Media Library
+        audio pronunciation
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        term:
+          type: string
+          maxLength: 120
+        slug:
+          type: string
+        nativeScript:
+          type: string
+          maxLength: 200
+        transliteration:
+          type: string
+          maxLength: 200
+        definition:
+          type: string
+        category:
+          type: string
+          enum:
+            - beliefs
+            - worship
+            - ethics
+            - history
+            - community
+            - general
+          default: general
+        letterGroup:
+          type: string
+          maxLength: 4
+          default: A
+        pronunciationAudio:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        relatedTerms:
+          type: object
+          additionalProperties: true
+        featured:
+          type: boolean
+          default: false
+      required:
+        - term
+        - slug
+        - definition
+        - category
+    ResourcePublication:
+      type: object
+      description: Localized digital library books, guides, pamphlets, and press kit assets backed by the Strapi v5
+        Media Library
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+        summary:
+          type: string
+        category:
+          type: string
+          enum:
+            - guide
+            - book
+            - pamphlet
+            - press_kit
+            - academic
+            - general
+          default: guide
+        file:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        coverImage:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        authorName:
+          type: string
+          maxLength: 140
+        authorSlug:
+          type: string
+          maxLength: 140
+        isbnOrReference:
+          type: string
+          maxLength: 80
+        pageCount:
+          type: integer
+          minimum: 1
+        languageCode:
+          type: string
+          maxLength: 10
+          default: es
+        publishedAtDate:
+          type: string
+          format: date
+        secondaryDateOverride:
+          type: string
+          maxLength: 80
+        mediaFolderPath:
+          type: string
+          maxLength: 160
+        externalDownloadUrl:
+          type: string
+          maxLength: 500
+        downloadCount:
+          type: integer
+          minimum: 0
+          default: 0
+        featured:
+          type: boolean
+          default: false
+        allowPublicDownload:
+          type: boolean
+          default: true
+      required:
+        - title
+        - slug
+        - category

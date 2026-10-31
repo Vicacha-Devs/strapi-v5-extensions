@@ -1,0 +1,694 @@
+openapi: 3.0.3
+info:
+  title: Omnichannel Broadcasts (@vicacha-devs/strapi-plugin-broadcasts)
+  version: 0.1.0
+  description: Omnichannel community broadcasts (Email newsletters, Telegram Bot & Channel/Forum topics,
+    WhatsApp Cloud API / OpenWA / Evolution, EventHub automation rules, and double opt-in subscriber
+    segmentation) for Strapi v5 with multi-language and multi-calendar support.
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /api/broadcasts/public/channels:
+    get:
+      operationId: getApiBroadcastsPublicChannels
+      summary: List Public Channels
+      description: Strapi v5 Content API endpoint handled by `broadcastController.listPublicChannels`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/broadcasts/public/archive:
+    get:
+      operationId: getApiBroadcastsPublicArchive
+      summary: List Public Archive
+      description: Strapi v5 Content API endpoint handled by `broadcastController.listPublicArchive`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /broadcasts/settings:
+    get:
+      operationId: getBroadcastsSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putBroadcastsSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /broadcasts/templates:
+    get:
+      operationId: getBroadcastsTemplates
+      summary: List Starter Templates
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.listStarterTemplates`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /broadcasts/email-templates:
+    get:
+      operationId: getBroadcastsEmailTemplates
+      summary: List Email Templates
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.listEmailTemplates`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /broadcasts/campaigns:
+    get:
+      operationId: getBroadcastsCampaigns
+      summary: List Campaigns
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.listCampaigns`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastCampaign"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postBroadcastsCampaigns
+      summary: Create Campaign
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.createCampaign`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastCampaign"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastCampaign"
+  /broadcasts/campaigns/{documentId}:
+    put:
+      operationId: putBroadcastsCampaignsByDocumentId
+      summary: Update Campaign
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.updateCampaign`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastCampaign"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastCampaign"
+  /broadcasts/campaigns/from-template:
+    post:
+      operationId: postBroadcastsCampaignsFromTemplate
+      summary: Create From Template
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.createFromTemplate`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastCampaign"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastCampaign"
+  /broadcasts/campaigns/{documentId}/send:
+    post:
+      operationId: postBroadcastsCampaignsByDocumentIdSend
+      summary: Send Campaign
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.sendCampaign`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastCampaign"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastCampaign"
+  /broadcasts/automation-rules:
+    get:
+      operationId: getBroadcastsAutomationRules
+      summary: List Automation Rules
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.listAutomationRules`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastAutomationRule"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postBroadcastsAutomationRules
+      summary: Create Automation Rule
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.createAutomationRule`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastAutomationRule"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastAutomationRule"
+  /broadcasts/automation-rules/{documentId}:
+    put:
+      operationId: putBroadcastsAutomationRulesByDocumentId
+      summary: Update Automation Rule
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.updateAutomationRule`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastAutomationRule"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastAutomationRule"
+  /broadcasts/delivery-logs:
+    get:
+      operationId: getBroadcastsDeliveryLogs
+      summary: List Delivery Logs
+      description: Strapi v5 Admin API endpoint handled by `broadcastController.listDeliveryLogs`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/BroadcastDeliveryLog"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    BroadcastAutomationRule:
+      type: object
+      description: EventHub-driven automated multi-channel broadcast rule
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        name:
+          type: string
+        slug:
+          type: string
+        eventName:
+          type: string
+        targetContentType:
+          type: string
+        topic:
+          type: string
+          default: announcements
+        channels:
+          type: object
+          additionalProperties: true
+        active:
+          type: boolean
+          default: true
+        priority:
+          type: string
+          enum:
+            - low
+            - normal
+            - high
+            - urgent
+          default: normal
+        subjectTemplate:
+          type: string
+        bodyTextTemplate:
+          type: string
+        bodyHtmlTemplate:
+          type: string
+        ctaLabelTemplate:
+          type: string
+        ctaUrlTemplate:
+          type: string
+        translations:
+          type: object
+          additionalProperties: true
+        lastTriggeredAt:
+          type: string
+          format: date-time
+        triggerCount:
+          type: integer
+          minimum: 0
+          default: 0
+      required:
+        - name
+        - slug
+        - eventName
+        - topic
+        - channels
+        - subjectTemplate
+        - bodyTextTemplate
+    BroadcastCampaign:
+      type: object
+      description: Omnichannel Email, Telegram & WhatsApp broadcast campaign
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        title:
+          type: string
+        slug:
+          type: string
+        topic:
+          type: string
+          default: announcements
+        channels:
+          type: object
+          additionalProperties: true
+        priority:
+          type: string
+          enum:
+            - low
+            - normal
+            - high
+            - urgent
+          default: normal
+        status:
+          type: string
+          enum:
+            - draft
+            - scheduled
+            - sending
+            - sent
+            - failed
+            - cancelled
+          default: draft
+        scheduledAt:
+          type: string
+          format: date-time
+        sentAt:
+          type: string
+          format: date-time
+        subject:
+          type: string
+        bodyText:
+          type: string
+        bodyHtml:
+          type: string
+        ctaLabel:
+          type: string
+        ctaUrl:
+          type: string
+        mediaUrl:
+          type: string
+        emailTemplateRef:
+          type: string
+        whatsappTemplateName:
+          type: string
+        whatsappGroupIds:
+          type: object
+          additionalProperties: true
+        telegramChatId:
+          type: string
+        telegramThreadId:
+          type: integer
+        translations:
+          type: object
+          additionalProperties: true
+        secondaryDate:
+          type: object
+          additionalProperties: true
+        secondaryDateLabel:
+          type: string
+        stats:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - title
+        - slug
+        - topic
+        - channels
+        - priority
+        - status
+        - subject
+        - bodyText
+    BroadcastDeliveryLog:
+      type: object
+      description: Idempotent, PII-masked multi-channel delivery audit log
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        idempotencyKey:
+          type: string
+        campaignSlug:
+          type: string
+        channel:
+          type: string
+          enum:
+            - email
+            - telegram
+            - whatsapp
+        driver:
+          type: string
+        recipientMasked:
+          type: string
+        locale:
+          type: string
+          default: es
+        status:
+          type: string
+          enum:
+            - sent
+            - simulated
+            - skipped_duplicate
+            - failed
+        externalMessageId:
+          type: string
+        errorMessage:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        secondaryDateLabel:
+          type: string
+      required:
+        - idempotencyKey
+        - campaignSlug
+        - channel
+        - driver
+        - recipientMasked
+        - locale
+        - status
+        - sentAt

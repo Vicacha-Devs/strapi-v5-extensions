@@ -1,0 +1,172 @@
+openapi: 3.0.3
+info:
+  title: SEO & SERP Analyzer (@vicacha-devs/strapi-plugin-seo)
+  version: 2.0.12
+  description: Make your Strapi content SEO friendly.
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /seo/component:
+    get:
+      operationId: getSeoComponent
+      summary: Find Seo Component
+      description: Strapi v5 Admin API endpoint handled by `seo.findSeoComponent`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postSeoComponent
+      summary: Create Seo Component
+      description: Strapi v5 Admin API endpoint handled by `seo.createSeoComponent`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /seo/content-types:
+    get:
+      operationId: getSeoContentTypes
+      summary: Find Content Types
+      description: Strapi v5 Admin API endpoint handled by `seo.findContentTypes`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /seo/settings:
+    get:
+      operationId: getSeoSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `settings.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postSeoSettings
+      summary: Set Settings
+      description: Strapi v5 Admin API endpoint handled by `settings.setSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication

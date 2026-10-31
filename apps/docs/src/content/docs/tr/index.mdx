@@ -1,0 +1,59 @@
+---
+title: "Vicacha Strapi v5 Eklentileri"
+description: "Takvim, etkinlikler, rezervasyonlar, dijital sertifikalar, bağışlar, çok kanallı yayınlar, medya akışları, küresel arama ve SEO için 14 kurumsal Strapi v5 eklentisi."
+template: splash
+hero:
+  tagline: "Ed25519 kriptografik imzalama, 13 dil desteği (RTL dahil), etkileşimli OpenAPI referansları ve sıfır yapılandırmalı eklentiler arası köprülerle 14 modüler Strapi v5 eklentisi."
+  image:
+    file: ../../../../public/screenshots/dashboard-overview.png
+  actions:
+    - text: "Başlangıç Kılavuzu"
+      link: /tr/guides/getting-started/
+      icon: right-arrow
+    - text: "Monorepo Mimarisi"
+      link: /tr/guides/architecture/
+      variant: minimal
+      icon: external
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+## Temel Mimari Sütunlar
+
+<CardGrid stagger>
+  <Card title="14 Üretime Hazır Strapi v5 Eklentisi" icon="puzzle">
+    Strapi v5 Document Service API (`strapi.documents(uid)`), Design System v2 ve
+    `@strapi/sdk-plugin` çift paket mimarisi üzerine inşa edilmiştir.
+  </Card>
+  <Card title="Sıfır Yapılandırmalı Eklenti Köprüleri" icon="random">
+    `events` ve `bookings` otomatik olarak `calendar` içine kaydolur; `donations` `certificates`
+    üzerinden imzalı makbuz üretir; `islam` Hicri takvim ve `inbox` uyarılarını eşitler.
+  </Card>
+  <Card title="Kriptografik Güvenlik ve Webhook Koruması" icon="approve-check-circle">
+    Ed25519 dijital imzalar, sabit zamanlı HMAC-SHA256 webhook doğrulaması, SSRF/Path Traversal
+    koruması ve tuzlanmış PII maskeleme.
+  </Card>
+  <Card title="13 Dilde Yönetim Arayüzü ve RTL Desteği" icon="translate">
+    `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL) ve `zh`
+    dillerinde tam çeviri eşitliği ve Hicri/İbranice/Farsça ikincil takvimler.
+  </Card>
+</CardGrid>
+
+## Tüm Eklenti Matrisi (14 Paket)
+
+| Eklenti                                                           | Strapi Eklenti Kimliği | NPM Paketi                                  |
+| :---------------------------------------------------------------- | :--------------------- | :------------------------------------------ |
+| [Rezervasyonlar ve Randevular](/tr/strapi-plugin-bookings/)       | `bookings`             | `@vicacha-devs/strapi-plugin-bookings`      |
+| [Çok Kanallı Yayınlar](/tr/strapi-plugin-broadcasts/)             | `broadcasts`           | `@vicacha-devs/strapi-plugin-broadcasts`    |
+| [Takvim ve Planlama](/tr/strapi-plugin-calendar/)                 | `calendar`             | `@vicacha-devs/strapi-plugin-calendar`      |
+| [Dijital Sertifikalar (Ed25519)](/tr/strapi-plugin-certificates/) | `certificates`         | `@vicacha-devs/strapi-plugin-certificates`  |
+| [Bağışlar ve Kampanyalar](/tr/strapi-plugin-donations/)           | `donations`            | `@vicacha-devs/strapi-plugin-donations`     |
+| [Etkinlikler, LCV ve Giriş](/tr/strapi-plugin-events/)            | `events`               | `@vicacha-devs/strapi-plugin-events`        |
+| [Küresel Komut Araması](/tr/strapi-plugin-global-search/)         | `global-search`        | `@vicacha-devs/strapi-plugin-global-search` |
+| [Gelen Kutusu, Formlar ve Uyarılar](/tr/strapi-plugin-inbox/)     | `inbox`                | `@vicacha-devs/strapi-plugin-inbox`         |
+| [İslam Paketi (Namaz, Kıble, Hicri)](/tr/strapi-plugin-islam/)    | `islam`                | `@vicacha-devs/strapi-plugin-islam`         |
+| [Medya Akışları ve Podcast RSS](/tr/strapi-plugin-media-feeds/)   | `media-feeds`          | `@vicacha-devs/strapi-plugin-media-feeds`   |
+| [Editöryal Notlar ve Sabitlemeler](/tr/strapi-plugin-notes/)      | `notes`                | `@vicacha-devs/strapi-plugin-notes`         |
+| [Kaynaklar, Galeriler ve Sözlük](/tr/strapi-plugin-resources/)    | `resources`            | `@vicacha-devs/strapi-plugin-resources`     |
+| [SEO ve SERP Analizörü](/tr/strapi-plugin-seo/)                   | `seo`                  | `@vicacha-devs/strapi-plugin-seo`           |
+| [XML Site Haritası ve Hreflang](/tr/strapi-plugin-sitemap/)       | `sitemap`              | `@vicacha-devs/strapi-plugin-sitemap`       |

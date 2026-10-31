@@ -1,0 +1,746 @@
+openapi: 3.0.3
+info:
+  title: Bookings & Reservations (@vicacha-devs/strapi-plugin-bookings)
+  version: 1.0.0
+  description: Generic Strapi v5 Bookings, Appointments, Resource Scheduling & Time-Slot Availability Engine
+    powered by @vicacha-devs/strapi-plugin-calendar
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /bookings/settings:
+    get:
+      operationId: getBookingsSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putBookingsSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /bookings/schemas:
+    get:
+      operationId: getBookingsSchemas
+      summary: Discover Schemas
+      description: Strapi v5 Admin API endpoint handled by `admin.discoverSchemas`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /bookings/resources:
+    get:
+      operationId: getBookingsResources
+      summary: List Resources
+      description: Strapi v5 Admin API endpoint handled by `admin.listResources`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postBookingsResources
+      summary: Save Resource
+      description: Strapi v5 Admin API endpoint handled by `admin.saveResource`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Booking"
+  /bookings/calendar:
+    get:
+      operationId: getBookingsCalendar
+      summary: Get Calendar
+      description: Strapi v5 Admin API endpoint handled by `admin.getCalendar`.
+      tags:
+        - Admin API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: false
+          description: End of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: sourceId
+          in: query
+          required: false
+          description: Filter by registered calendar collection source ID
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: Filter by category name
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: BCP-47 content/display locale (e.g. en, es, ar, tr)
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /bookings/bookings:
+    post:
+      operationId: postBookingsBookings
+      summary: Create Booking
+      description: Strapi v5 Admin API endpoint handled by `admin.createBooking`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Booking"
+  /bookings/bookings/{documentId}/status:
+    put:
+      operationId: putBookingsBookingsByDocumentIdStatus
+      summary: Update Booking Status
+      description: Strapi v5 Admin API endpoint handled by `admin.updateBookingStatus`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Booking"
+  /bookings/bookings/reschedule:
+    post:
+      operationId: postBookingsBookingsReschedule
+      summary: Reschedule Booking
+      description: Strapi v5 Admin API endpoint handled by `admin.rescheduleBooking`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Booking"
+  /bookings/export.csv:
+    get:
+      operationId: getBookingsExportCsv
+      summary: Export Csv
+      description: Strapi v5 Admin API endpoint handled by `admin.exportCsv`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/csv:
+              schema:
+                type: string
+                description: Formula-injection-safe CSV export
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /bookings/export.ics:
+    get:
+      operationId: getBookingsExportIcs
+      summary: Export ICal
+      description: Strapi v5 Admin API endpoint handled by `admin.exportICal`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/calendar:
+              schema:
+                type: string
+                description: RFC 5545 iCalendar (.ics) stream
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/bookings/resources:
+    get:
+      operationId: getApiBookingsResources
+      summary: List Public Resources
+      description: Strapi v5 Content API endpoint handled by `content-api.listPublicResources`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/bookings/available-slots:
+    get:
+      operationId: getApiBookingsAvailableSlots
+      summary: Get Available Slots
+      description: Strapi v5 Content API endpoint handled by `content-api.getAvailableSlots`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/bookings/reserve:
+    post:
+      operationId: postApiBookingsReserve
+      summary: Create Reservation
+      description: Strapi v5 Content API endpoint handled by `content-api.createReservation`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Booking"
+  /api/bookings/reschedule:
+    post:
+      operationId: postApiBookingsReschedule
+      summary: Reschedule Reservation
+      description: Strapi v5 Content API endpoint handled by `content-api.rescheduleReservation`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Booking"
+  /api/bookings/cancel:
+    post:
+      operationId: postApiBookingsCancel
+      summary: Cancel Reservation
+      description: Strapi v5 Content API endpoint handled by `content-api.cancelReservation`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /api/bookings/feed.ics:
+    get:
+      operationId: getApiBookingsFeedIcs
+      summary: Get ICal Feed
+      description: Strapi v5 Content API endpoint handled by `content-api.getICalFeed`.
+      tags:
+        - Content API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: false
+          description: End of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: sourceId
+          in: query
+          required: false
+          description: Filter by registered calendar collection source ID
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: Filter by category name
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: BCP-47 content/display locale (e.g. en, es, ar, tr)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/calendar:
+              schema:
+                type: string
+                description: RFC 5545 iCalendar (.ics) stream
+        "400":
+          description: Bad Request — validation or parameter error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    Booking:
+      type: object
+      description: Reservation, appointment, or resource slot booking
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        bookingCode:
+          type: string
+          maxLength: 48
+        title:
+          type: string
+          maxLength: 200
+        resource:
+          type: string
+          description: Relation (manyToOne) to plugin::bookings.resource documentId
+        customerName:
+          type: string
+          maxLength: 120
+        customerEmail:
+          type: string
+          format: email
+        customerPhone:
+          type: string
+          maxLength: 40
+        organization:
+          type: string
+          maxLength: 160
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        slotLabel:
+          type: string
+          maxLength: 80
+        timezone:
+          type: string
+          maxLength: 64
+          default: UTC
+        partySize:
+          type: integer
+          minimum: 1
+          default: 1
+        status:
+          type: string
+          enum:
+            - pending
+            - confirmed
+            - completed
+            - cancelled
+            - no_show
+          default: pending
+        preferredLanguage:
+          type: string
+          maxLength: 16
+        assignedHost:
+          type: string
+          maxLength: 120
+        notes:
+          type: string
+          maxLength: 2000
+        sourceCollection:
+          type: string
+          default: plugin::bookings.booking
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - bookingCode
+        - customerName
+        - customerEmail
+        - startDate
+        - endDate
+        - partySize
+        - status
+    BookingResource:
+      type: object
+      description: Bookable service, appointment type, room, staff member, or equipment schedule
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        name:
+          type: string
+          maxLength: 160
+        slug:
+          type: string
+        resourceType:
+          type: string
+          enum:
+            - service
+            - appointment
+            - room
+            - staff
+            - equipment
+            - other
+          default: service
+        description:
+          type: string
+        color:
+          type: string
+          maxLength: 32
+          default: "#0d9488"
+        timezone:
+          type: string
+          maxLength: 64
+          default: UTC
+        slotDurationMinutes:
+          type: integer
+          minimum: 5
+          default: 60
+        bufferBeforeMinutes:
+          type: integer
+          minimum: 0
+          default: 0
+        bufferAfterMinutes:
+          type: integer
+          minimum: 0
+          default: 0
+        capacityPerSlot:
+          type: integer
+          minimum: 1
+          default: 1
+        maxPartySize:
+          type: integer
+          minimum: 1
+          default: 50
+        minLeadTimeHours:
+          type: integer
+          minimum: 0
+          default: 2
+        maxAdvanceDays:
+          type: integer
+          minimum: 1
+          default: 90
+        requiresApproval:
+          type: boolean
+          default: false
+        weeklySchedule:
+          type: object
+          additionalProperties: true
+        seasonalSchedules:
+          type: object
+          additionalProperties: true
+        holidayRules:
+          type: object
+          additionalProperties: true
+        blackoutDates:
+          type: object
+          additionalProperties: true
+        recurrenceRule:
+          type: string
+        supportedLanguages:
+          type: object
+          additionalProperties: true
+        assignedHosts:
+          type: object
+          additionalProperties: true
+        location:
+          type: string
+          maxLength: 240
+        price:
+          type: number
+        currency:
+          type: string
+          maxLength: 10
+          default: USD
+        isActive:
+          type: boolean
+          default: true
+        metadata:
+          type: object
+          additionalProperties: true
+        bookings:
+          type: string
+          description: Relation (oneToMany) to plugin::bookings.booking documentId
+      required:
+        - name
+        - slug
+        - resourceType
+        - slotDurationMinutes
+        - capacityPerSlot

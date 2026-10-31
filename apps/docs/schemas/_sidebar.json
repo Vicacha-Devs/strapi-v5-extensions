@@ -1,0 +1,1026 @@
+{
+  "strapi-plugin-bookings": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-bookings/api/operations/getbookingssettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-bookings/api/operations/putbookingssettings/"
+        },
+        {
+          "label": "Discover Schemas",
+          "link": "/strapi-plugin-bookings/api/operations/getbookingsschemas/"
+        },
+        {
+          "label": "List Resources",
+          "link": "/strapi-plugin-bookings/api/operations/getbookingsresources/"
+        },
+        {
+          "label": "Save Resource",
+          "link": "/strapi-plugin-bookings/api/operations/postbookingsresources/"
+        },
+        {
+          "label": "Get Calendar",
+          "link": "/strapi-plugin-bookings/api/operations/getbookingscalendar/"
+        },
+        {
+          "label": "Create Booking",
+          "link": "/strapi-plugin-bookings/api/operations/postbookingsbookings/"
+        },
+        {
+          "label": "Update Booking Status",
+          "link": "/strapi-plugin-bookings/api/operations/putbookingsbookingsbydocumentidstatus/"
+        },
+        {
+          "label": "Reschedule Booking",
+          "link": "/strapi-plugin-bookings/api/operations/postbookingsbookingsreschedule/"
+        },
+        {
+          "label": "Export Csv",
+          "link": "/strapi-plugin-bookings/api/operations/getbookingsexportcsv/"
+        },
+        {
+          "label": "Export ICal",
+          "link": "/strapi-plugin-bookings/api/operations/getbookingsexportics/"
+        }
+      ]
+    },
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "List Public Resources",
+          "link": "/strapi-plugin-bookings/api/operations/getapibookingsresources/"
+        },
+        {
+          "label": "Get Available Slots",
+          "link": "/strapi-plugin-bookings/api/operations/getapibookingsavailableslots/"
+        },
+        {
+          "label": "Create Reservation",
+          "link": "/strapi-plugin-bookings/api/operations/postapibookingsreserve/"
+        },
+        {
+          "label": "Reschedule Reservation",
+          "link": "/strapi-plugin-bookings/api/operations/postapibookingsreschedule/"
+        },
+        {
+          "label": "Cancel Reservation",
+          "link": "/strapi-plugin-bookings/api/operations/postapibookingscancel/"
+        },
+        {
+          "label": "Get ICal Feed",
+          "link": "/strapi-plugin-bookings/api/operations/getapibookingsfeedics/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-broadcasts": [
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "List Public Channels",
+          "link": "/strapi-plugin-broadcasts/api/operations/getapibroadcastspublicchannels/"
+        },
+        {
+          "label": "List Public Archive",
+          "link": "/strapi-plugin-broadcasts/api/operations/getapibroadcastspublicarchive/"
+        }
+      ]
+    },
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-broadcasts/api/operations/getbroadcastssettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-broadcasts/api/operations/putbroadcastssettings/"
+        },
+        {
+          "label": "List Starter Templates",
+          "link": "/strapi-plugin-broadcasts/api/operations/getbroadcaststemplates/"
+        },
+        {
+          "label": "List Email Templates",
+          "link": "/strapi-plugin-broadcasts/api/operations/getbroadcastsemailtemplates/"
+        },
+        {
+          "label": "List Campaigns",
+          "link": "/strapi-plugin-broadcasts/api/operations/getbroadcastscampaigns/"
+        },
+        {
+          "label": "Create Campaign",
+          "link": "/strapi-plugin-broadcasts/api/operations/postbroadcastscampaigns/"
+        },
+        {
+          "label": "Update Campaign",
+          "link": "/strapi-plugin-broadcasts/api/operations/putbroadcastscampaignsbydocumentid/"
+        },
+        {
+          "label": "Create From Template",
+          "link": "/strapi-plugin-broadcasts/api/operations/postbroadcastscampaignsfromtemplate/"
+        },
+        {
+          "label": "Send Campaign",
+          "link": "/strapi-plugin-broadcasts/api/operations/postbroadcastscampaignsbydocumentidsend/"
+        },
+        {
+          "label": "List Automation Rules",
+          "link": "/strapi-plugin-broadcasts/api/operations/getbroadcastsautomationrules/"
+        },
+        {
+          "label": "Create Automation Rule",
+          "link": "/strapi-plugin-broadcasts/api/operations/postbroadcastsautomationrules/"
+        },
+        {
+          "label": "Update Automation Rule",
+          "link": "/strapi-plugin-broadcasts/api/operations/putbroadcastsautomationrulesbydocumentid/"
+        },
+        {
+          "label": "List Delivery Logs",
+          "link": "/strapi-plugin-broadcasts/api/operations/getbroadcastsdeliverylogs/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-calendar": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Calendar",
+          "link": "/strapi-plugin-calendar/api/operations/getcalendarcalendar/"
+        },
+        {
+          "label": "Reschedule",
+          "link": "/strapi-plugin-calendar/api/operations/postcalendarcalendarreschedule/"
+        },
+        {
+          "label": "Quick Create",
+          "link": "/strapi-plugin-calendar/api/operations/postcalendarcalendarquickcreate/"
+        },
+        {
+          "label": "Get Content Types",
+          "link": "/strapi-plugin-calendar/api/operations/getcalendarcontenttypes/"
+        },
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-calendar/api/operations/getcalendarsettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-calendar/api/operations/putcalendarsettings/"
+        },
+        {
+          "label": "Clear Settings",
+          "link": "/strapi-plugin-calendar/api/operations/postcalendarclearsettings/"
+        }
+      ]
+    },
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Occurrences",
+          "link": "/strapi-plugin-calendar/api/operations/getapicalendaroccurrences/"
+        },
+        {
+          "label": "Download Feed Ics",
+          "link": "/strapi-plugin-calendar/api/operations/getapicalendarfeedics/"
+        },
+        {
+          "label": "Download Event Ics",
+          "link": "/strapi-plugin-calendar/api/operations/getapicalendarbydocumentidinviteics/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-certificates": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-certificates/api/operations/getcertificatessettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-certificates/api/operations/putcertificatessettings/"
+        },
+        {
+          "label": "Rotate Keys",
+          "link": "/strapi-plugin-certificates/api/operations/postcertificatessettingsrotatekeys/"
+        },
+        {
+          "label": "List Templates",
+          "link": "/strapi-plugin-certificates/api/operations/getcertificatestemplates/"
+        },
+        {
+          "label": "Create Template",
+          "link": "/strapi-plugin-certificates/api/operations/postcertificatestemplates/"
+        },
+        {
+          "label": "Seed Templates",
+          "link": "/strapi-plugin-certificates/api/operations/postcertificatestemplatesseed/"
+        },
+        {
+          "label": "List Certificates",
+          "link": "/strapi-plugin-certificates/api/operations/getcertificatescertificates/"
+        },
+        {
+          "label": "Issue Certificate",
+          "link": "/strapi-plugin-certificates/api/operations/postcertificatescertificatesissue/"
+        },
+        {
+          "label": "Send Docu Sign Envelope",
+          "link": "/strapi-plugin-certificates/api/operations/postcertificatescertificatesbydocumentidsenddocusign/"
+        },
+        {
+          "label": "Approve Certificate",
+          "link": "/strapi-plugin-certificates/api/operations/putcertificatescertificatesbydocumentidapprove/"
+        },
+        {
+          "label": "Revoke Certificate",
+          "link": "/strapi-plugin-certificates/api/operations/putcertificatescertificatesbydocumentidrevoke/"
+        },
+        {
+          "label": "Print Certificate",
+          "link": "/strapi-plugin-certificates/api/operations/getcertificatescertificatesbydocumentidprint/"
+        },
+        {
+          "label": "Export Csv",
+          "link": "/strapi-plugin-certificates/api/operations/getcertificatescertificatesexportcsv/"
+        }
+      ]
+    },
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "List Public Templates",
+          "link": "/strapi-plugin-certificates/api/operations/getapicertificatestemplates/"
+        },
+        {
+          "label": "Get Public Key",
+          "link": "/strapi-plugin-certificates/api/operations/getapicertificatespublickey/"
+        },
+        {
+          "label": "Apply Certificate",
+          "link": "/strapi-plugin-certificates/api/operations/postapicertificatesapply/"
+        },
+        {
+          "label": "Verify By Serial",
+          "link": "/strapi-plugin-certificates/api/operations/getapicertificatesverifybyserial/"
+        },
+        {
+          "label": "Download Printable Html",
+          "link": "/strapi-plugin-certificates/api/operations/getapicertificatesverifybyserialprint/"
+        },
+        {
+          "label": "Docusign Webhook",
+          "link": "/strapi-plugin-certificates/api/operations/postapicertificateswebhooksdocusign/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-donations": [
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "List Campaigns",
+          "link": "/strapi-plugin-donations/api/operations/getapidonationscampaigns/"
+        },
+        {
+          "label": "List Utility Invoices",
+          "link": "/strapi-plugin-donations/api/operations/getapidonationsinvoices/"
+        },
+        {
+          "label": "List Utility Invoices",
+          "link": "/strapi-plugin-donations/api/operations/getapidonationsutilityinvoices/"
+        },
+        {
+          "label": "Get Campaign By Slug",
+          "link": "/strapi-plugin-donations/api/operations/getapidonationscampaignsbyslug/"
+        },
+        {
+          "label": "Get Calculator And Directory",
+          "link": "/strapi-plugin-donations/api/operations/getapidonationscalculator/"
+        },
+        {
+          "label": "Calculate Assessment",
+          "link": "/strapi-plugin-donations/api/operations/postapidonationscalculate/"
+        },
+        {
+          "label": "Submit Pledge",
+          "link": "/strapi-plugin-donations/api/operations/postapidonationspledges/"
+        },
+        {
+          "label": "Handle Webhook",
+          "link": "/strapi-plugin-donations/api/operations/postapidonationswebhook/"
+        }
+      ]
+    },
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-donations/api/operations/getdonationssettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-donations/api/operations/putdonationssettings/"
+        },
+        {
+          "label": "Get Overview",
+          "link": "/strapi-plugin-donations/api/operations/getdonationsoverview/"
+        },
+        {
+          "label": "Create Campaign",
+          "link": "/strapi-plugin-donations/api/operations/postdonationscampaigns/"
+        },
+        {
+          "label": "Update Campaign",
+          "link": "/strapi-plugin-donations/api/operations/putdonationscampaignsbyidentifier/"
+        },
+        {
+          "label": "Add Evidence",
+          "link": "/strapi-plugin-donations/api/operations/postdonationscampaignsbyidentifierevidences/"
+        },
+        {
+          "label": "Remove Evidence",
+          "link": "/strapi-plugin-donations/api/operations/deletedonationscampaignsbyidentifierevidencesbyevidenceid/"
+        },
+        {
+          "label": "Verify Pledge",
+          "link": "/strapi-plugin-donations/api/operations/postdonationspledgesbyreferencecodeverify/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-events": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-events/api/operations/geteventssettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-events/api/operations/puteventssettings/"
+        },
+        {
+          "label": "Get Calendar",
+          "link": "/strapi-plugin-events/api/operations/geteventscalendar/"
+        },
+        {
+          "label": "Reschedule",
+          "link": "/strapi-plugin-events/api/operations/posteventscalendarreschedule/"
+        },
+        {
+          "label": "Quick Create",
+          "link": "/strapi-plugin-events/api/operations/posteventscalendarquickcreate/"
+        },
+        {
+          "label": "Get Event Stats",
+          "link": "/strapi-plugin-events/api/operations/geteventsstatsbydocumentid/"
+        },
+        {
+          "label": "List Registrations",
+          "link": "/strapi-plugin-events/api/operations/geteventsregistrations/"
+        },
+        {
+          "label": "Export Registrations Csv",
+          "link": "/strapi-plugin-events/api/operations/geteventsregistrationsexportcsv/"
+        },
+        {
+          "label": "Update Registration Status",
+          "link": "/strapi-plugin-events/api/operations/posteventsregistrationsbydocumentidstatus/"
+        },
+        {
+          "label": "Check In",
+          "link": "/strapi-plugin-events/api/operations/posteventsregistrationsbydocumentidcheckin/"
+        }
+      ]
+    },
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "List Occurrences",
+          "link": "/strapi-plugin-events/api/operations/getapieventsoccurrences/"
+        },
+        {
+          "label": "List Spotlights",
+          "link": "/strapi-plugin-events/api/operations/getapieventsspotlights/"
+        },
+        {
+          "label": "Download Feed Ics",
+          "link": "/strapi-plugin-events/api/operations/getapieventsfeedics/"
+        },
+        {
+          "label": "Download Event Invite Ics",
+          "link": "/strapi-plugin-events/api/operations/getapieventsbydocumentidinviteics/"
+        },
+        {
+          "label": "Get Event Stats",
+          "link": "/strapi-plugin-events/api/operations/getapieventsbydocumentidstats/"
+        },
+        {
+          "label": "Register Attendee",
+          "link": "/strapi-plugin-events/api/operations/postapieventsbydocumentidregister/"
+        },
+        {
+          "label": "Cancel Registration",
+          "link": "/strapi-plugin-events/api/operations/postapieventsregistrationsbytokencancel/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-global-search": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-global-search/api/operations/getglobalsearchsearch/"
+        },
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-global-search/api/operations/getglobalsearchschema/"
+        },
+        {
+          "label": "Find All",
+          "link": "/strapi-plugin-global-search/api/operations/getglobalsearchschemaall/"
+        },
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-global-search/api/operations/getglobalsearchsettings/"
+        },
+        {
+          "label": "Update",
+          "link": "/strapi-plugin-global-search/api/operations/putglobalsearchsettings/"
+        },
+        {
+          "label": "Reset",
+          "link": "/strapi-plugin-global-search/api/operations/postglobalsearchsettingsreset/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-inbox": [
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "List Forms",
+          "link": "/strapi-plugin-inbox/api/operations/getapiinboxforms/"
+        },
+        {
+          "label": "Get Form By Slug",
+          "link": "/strapi-plugin-inbox/api/operations/getapiinboxformsbyslug/"
+        },
+        {
+          "label": "Submit Form",
+          "link": "/strapi-plugin-inbox/api/operations/postapiinboxformsbyslugsubmit/"
+        },
+        {
+          "label": "Subscribe",
+          "link": "/strapi-plugin-inbox/api/operations/postapiinboxsubscribers/"
+        },
+        {
+          "label": "Confirm Subscription",
+          "link": "/strapi-plugin-inbox/api/operations/getapiinboxsubscribersconfirmbytoken/"
+        },
+        {
+          "label": "Unsubscribe",
+          "link": "/strapi-plugin-inbox/api/operations/getapiinboxsubscribersunsubscribebytoken/"
+        },
+        {
+          "label": "Get Active Alerts",
+          "link": "/strapi-plugin-inbox/api/operations/getapiinboxalerts/"
+        }
+      ]
+    },
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-inbox/api/operations/getinboxsettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-inbox/api/operations/putinboxsettings/"
+        },
+        {
+          "label": "List Templates",
+          "link": "/strapi-plugin-inbox/api/operations/getinboxtemplates/"
+        },
+        {
+          "label": "List Form Builder Forms",
+          "link": "/strapi-plugin-inbox/api/operations/getinboxformbuilderforms/"
+        },
+        {
+          "label": "Sync Form Builder",
+          "link": "/strapi-plugin-inbox/api/operations/postinboxformssyncbuilder/"
+        },
+        {
+          "label": "List Forms",
+          "link": "/strapi-plugin-inbox/api/operations/getinboxforms/"
+        },
+        {
+          "label": "Save Form",
+          "link": "/strapi-plugin-inbox/api/operations/postinboxforms/"
+        },
+        {
+          "label": "Create From Template",
+          "link": "/strapi-plugin-inbox/api/operations/postinboxformsfromtemplate/"
+        },
+        {
+          "label": "List Submissions",
+          "link": "/strapi-plugin-inbox/api/operations/getinboxsubmissions/"
+        },
+        {
+          "label": "Update Casework",
+          "link": "/strapi-plugin-inbox/api/operations/putinboxsubmissionsbydocumentidcasework/"
+        },
+        {
+          "label": "Schedule Booking",
+          "link": "/strapi-plugin-inbox/api/operations/postinboxsubmissionsbydocumentidschedulebooking/"
+        },
+        {
+          "label": "Issue Certificate",
+          "link": "/strapi-plugin-inbox/api/operations/postinboxsubmissionsbydocumentidissuecertificate/"
+        },
+        {
+          "label": "Export Csv",
+          "link": "/strapi-plugin-inbox/api/operations/getinboxsubmissionsexportcsv/"
+        },
+        {
+          "label": "Test Captcha",
+          "link": "/strapi-plugin-inbox/api/operations/postinboxcaptchatest/"
+        },
+        {
+          "label": "List Subscribers",
+          "link": "/strapi-plugin-inbox/api/operations/getinboxsubscribers/"
+        },
+        {
+          "label": "Get Active Alerts",
+          "link": "/strapi-plugin-inbox/api/operations/getinboxalerts/"
+        },
+        {
+          "label": "Upsert Alert Banner",
+          "link": "/strapi-plugin-inbox/api/operations/postinboxalerts/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-islam": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Overview",
+          "link": "/strapi-plugin-islam/api/operations/getislamoverview/"
+        },
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-islam/api/operations/getislamsettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-islam/api/operations/putislamsettings/"
+        },
+        {
+          "label": "Confirm Hilal",
+          "link": "/strapi-plugin-islam/api/operations/postislamhilalconfirm/"
+        },
+        {
+          "label": "Update Daily Pins",
+          "link": "/strapi-plugin-islam/api/operations/postislamscripturepins/"
+        }
+      ]
+    },
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Prayer Times",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamprayertimes/"
+        },
+        {
+          "label": "Get Monthly Prayer Times",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamprayertimesmonthly/"
+        },
+        {
+          "label": "Get Prayer Calendar Ics",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamprayertimescalendarics/"
+        },
+        {
+          "label": "Get Qibla",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamqibla/"
+        },
+        {
+          "label": "Get Hijri And Observances",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamhijri/"
+        },
+        {
+          "label": "Convert Date",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamhijriconvert/"
+        },
+        {
+          "label": "Get Scripture Hub",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamscripture/"
+        },
+        {
+          "label": "Get Daily Inspiration",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamscripturedaily/"
+        },
+        {
+          "label": "Get Daily Inspiration",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamdailyinspiration/"
+        },
+        {
+          "label": "Get Quran Chapters",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamquranchapters/"
+        },
+        {
+          "label": "Get Quran Chapter Verses",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamquranchaptersbychapternumber/"
+        },
+        {
+          "label": "Get Quran Chapter Info",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamquranchaptersbychapternumberinfo/"
+        },
+        {
+          "label": "Get Quran Chapter Audio",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamquranchaptersbychapternumberaudio/"
+        },
+        {
+          "label": "Get Quran Verse By Key",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamquranversesbyversekey/"
+        },
+        {
+          "label": "Get Quran Ayah Hadiths",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamquranversesbyversekeyhadiths/"
+        },
+        {
+          "label": "Get Quran Resources",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamquranresources/"
+        },
+        {
+          "label": "Get Nisab",
+          "link": "/strapi-plugin-islam/api/operations/getapiislamnisab/"
+        },
+        {
+          "label": "Calculate Zakat",
+          "link": "/strapi-plugin-islam/api/operations/postapiislamzakatcalculate/"
+        },
+        {
+          "label": "Calculate Fitrana Fidyah",
+          "link": "/strapi-plugin-islam/api/operations/postapiislamfitranafidyahcalculate/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-media-feeds": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Overview",
+          "link": "/strapi-plugin-media-feeds/api/operations/getmediafeedsoverview/"
+        },
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-media-feeds/api/operations/getmediafeedssettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-media-feeds/api/operations/putmediafeedssettings/"
+        },
+        {
+          "label": "Enrich Url",
+          "link": "/strapi-plugin-media-feeds/api/operations/postmediafeedsenrichurl/"
+        },
+        {
+          "label": "Sync You Tube",
+          "link": "/strapi-plugin-media-feeds/api/operations/postmediafeedssyncyoutube/"
+        }
+      ]
+    },
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "List Episodes",
+          "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedsepisodes/"
+        },
+        {
+          "label": "List Series",
+          "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedsseries/"
+        },
+        {
+          "label": "Get Live Status",
+          "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedslive/"
+        },
+        {
+          "label": "Get Rss Xml",
+          "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedsrssxml/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-notes": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-notes/api/operations/getnotesnotes/"
+        },
+        {
+          "label": "Create",
+          "link": "/strapi-plugin-notes/api/operations/postnotesnotes/"
+        },
+        {
+          "label": "Stats",
+          "link": "/strapi-plugin-notes/api/operations/getnotesnotesstats/"
+        },
+        {
+          "label": "Find One",
+          "link": "/strapi-plugin-notes/api/operations/getnotesnotesbyid/"
+        },
+        {
+          "label": "Update",
+          "link": "/strapi-plugin-notes/api/operations/putnotesnotesbyid/"
+        },
+        {
+          "label": "Delete",
+          "link": "/strapi-plugin-notes/api/operations/deletenotesnotesbyid/"
+        }
+      ]
+    },
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-notes/api/operations/getapinotesnotes/"
+        },
+        {
+          "label": "Find One",
+          "link": "/strapi-plugin-notes/api/operations/getapinotesnotesbyid/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-resources": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Hub Overview",
+          "link": "/strapi-plugin-resources/api/operations/getresourceshub/"
+        },
+        {
+          "label": "List Publications",
+          "link": "/strapi-plugin-resources/api/operations/getresourcespublications/"
+        },
+        {
+          "label": "Create Publication",
+          "link": "/strapi-plugin-resources/api/operations/postresourcespublications/"
+        },
+        {
+          "label": "Update Publication",
+          "link": "/strapi-plugin-resources/api/operations/putresourcespublicationsbydocumentid/"
+        },
+        {
+          "label": "Delete Publication",
+          "link": "/strapi-plugin-resources/api/operations/deleteresourcespublicationsbydocumentid/"
+        },
+        {
+          "label": "List Galleries",
+          "link": "/strapi-plugin-resources/api/operations/getresourcesgalleries/"
+        },
+        {
+          "label": "Create Gallery Album",
+          "link": "/strapi-plugin-resources/api/operations/postresourcesgalleries/"
+        },
+        {
+          "label": "Update Gallery Album",
+          "link": "/strapi-plugin-resources/api/operations/putresourcesgalleriesbydocumentid/"
+        },
+        {
+          "label": "Delete Gallery Album",
+          "link": "/strapi-plugin-resources/api/operations/deleteresourcesgalleriesbydocumentid/"
+        },
+        {
+          "label": "Sync Album Media Folder",
+          "link": "/strapi-plugin-resources/api/operations/postresourcesgalleriesbydocumentidsyncmediafolder/"
+        },
+        {
+          "label": "List Glossary",
+          "link": "/strapi-plugin-resources/api/operations/getresourcesglossary/"
+        },
+        {
+          "label": "Create Glossary Term",
+          "link": "/strapi-plugin-resources/api/operations/postresourcesglossary/"
+        },
+        {
+          "label": "Update Glossary Term",
+          "link": "/strapi-plugin-resources/api/operations/putresourcesglossarybydocumentid/"
+        },
+        {
+          "label": "Delete Glossary Term",
+          "link": "/strapi-plugin-resources/api/operations/deleteresourcesglossarybydocumentid/"
+        },
+        {
+          "label": "List Media Folders",
+          "link": "/strapi-plugin-resources/api/operations/getresourcesmediafolders/"
+        },
+        {
+          "label": "List Media Files",
+          "link": "/strapi-plugin-resources/api/operations/getresourcesmediafiles/"
+        },
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-resources/api/operations/getresourcessettings/"
+        },
+        {
+          "label": "Update Settings",
+          "link": "/strapi-plugin-resources/api/operations/putresourcessettings/"
+        }
+      ]
+    },
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Hub Overview",
+          "link": "/strapi-plugin-resources/api/operations/getapiresourceshub/"
+        },
+        {
+          "label": "List Publications",
+          "link": "/strapi-plugin-resources/api/operations/getapiresourcespublications/"
+        },
+        {
+          "label": "Get Publication By Slug",
+          "link": "/strapi-plugin-resources/api/operations/getapiresourcespublicationsbyslug/"
+        },
+        {
+          "label": "Download Publication",
+          "link": "/strapi-plugin-resources/api/operations/postapiresourcespublicationsbyslugdownload/"
+        },
+        {
+          "label": "List Galleries",
+          "link": "/strapi-plugin-resources/api/operations/getapiresourcesgalleries/"
+        },
+        {
+          "label": "Get Gallery By Slug",
+          "link": "/strapi-plugin-resources/api/operations/getapiresourcesgalleriesbyslug/"
+        },
+        {
+          "label": "List Glossary",
+          "link": "/strapi-plugin-resources/api/operations/getapiresourcesglossary/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-seo": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Find Seo Component",
+          "link": "/strapi-plugin-seo/api/operations/getseocomponent/"
+        },
+        {
+          "label": "Create Seo Component",
+          "link": "/strapi-plugin-seo/api/operations/postseocomponent/"
+        },
+        {
+          "label": "Find Content Types",
+          "link": "/strapi-plugin-seo/api/operations/getseocontenttypes/"
+        },
+        {
+          "label": "Get Settings",
+          "link": "/strapi-plugin-seo/api/operations/getseosettings/"
+        },
+        {
+          "label": "Set Settings",
+          "link": "/strapi-plugin-seo/api/operations/postseosettings/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-sitemap": [
+    {
+      "label": "Content API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Get Sitemap",
+          "link": "/strapi-plugin-sitemap/api/operations/getapisitemapsitemapxml/"
+        },
+        {
+          "label": "Get Sitemap By Slug",
+          "link": "/strapi-plugin-sitemap/api/operations/getapisitemapsitemapbyslugxml/"
+        }
+      ]
+    },
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Admin GET",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmin/"
+        },
+        {
+          "label": "Admin POST",
+          "link": "/strapi-plugin-sitemap/api/operations/postsitemapadmin/"
+        },
+        {
+          "label": "Admin PUT",
+          "link": "/strapi-plugin-sitemap/api/operations/putsitemapadmin/"
+        },
+        {
+          "label": "Admin DELETE",
+          "link": "/strapi-plugin-sitemap/api/operations/deletesitemapadmin/"
+        },
+        {
+          "label": "Admin GETContent Types",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmingetcontenttypes/"
+        },
+        {
+          "label": "Admin GETLocales",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmingetlocales/"
+        },
+        {
+          "label": "Admin Allowed Fields",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadminallowedfields/"
+        },
+        {
+          "label": "Admin Get Options",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmingetoptions/"
+        },
+        {
+          "label": "Admin Put Options",
+          "link": "/strapi-plugin-sitemap/api/operations/putsitemapadminputoptions/"
+        },
+        {
+          "label": "Admin Get Custom URLs",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmincustomurls/"
+        },
+        {
+          "label": "Admin Post Custom URLs",
+          "link": "/strapi-plugin-sitemap/api/operations/postsitemapadmincustomurls/"
+        },
+        {
+          "label": "Admin Put Custom URLs",
+          "link": "/strapi-plugin-sitemap/api/operations/putsitemapadmincustomurls/"
+        },
+        {
+          "label": "Admin Delete Custom URLs",
+          "link": "/strapi-plugin-sitemap/api/operations/deletesitemapadmincustomurls/"
+        }
+      ]
+    }
+  ]
+}
