@@ -1,15 +1,12 @@
-import React, { useMemo } from 'react';
-import { useIntl } from 'react-intl';
-import {
-  Field,
-  SingleSelect,
-  SingleSelectOption,
-} from '@strapi/design-system';
+import { Field, SingleSelect, SingleSelectOption } from "@strapi/design-system";
+import React, { useMemo } from "react";
+import { useIntl } from "react-intl";
+
 import {
   ISO_3166_COUNTRIES,
   formatCountryOptionLabel,
   getOrderedCurrencyOptions,
-} from '../../../shared';
+} from "../../../shared";
 
 export interface CurrencySelectFieldProps {
   name?: string;
@@ -23,7 +20,7 @@ export interface CurrencySelectFieldProps {
 }
 
 export const CurrencySelectField: React.FC<CurrencySelectFieldProps> = ({
-  name = 'currency',
+  name = "currency",
   label,
   hint,
   value,
@@ -33,14 +30,14 @@ export const CurrencySelectField: React.FC<CurrencySelectFieldProps> = ({
   disabled = false,
 }) => {
   const { locale } = useIntl();
-  const normalizedValue = (value || 'COP').trim().toUpperCase();
+  const normalizedValue = (value || "COP").trim().toUpperCase();
   const options = useMemo(
-    () => getOrderedCurrencyOptions(supportedCurrencies, locale || 'en', normalizedValue),
+    () => getOrderedCurrencyOptions(supportedCurrencies, locale || "en", normalizedValue),
     [supportedCurrencies, locale, normalizedValue]
   );
 
   return (
-    <Field.Root name={name} required={required}>
+    <Field.Root name={name} required={required} hint={hint}>
       {label ? <Field.Label>{label}</Field.Label> : null}
       <SingleSelect
         name={name}
@@ -54,7 +51,7 @@ export const CurrencySelectField: React.FC<CurrencySelectFieldProps> = ({
           </SingleSelectOption>
         ))}
       </SingleSelect>
-      {hint ? <Field.Hint>{hint}</Field.Hint> : null}
+      {hint ? <Field.Hint /> : null}
     </Field.Root>
   );
 };
@@ -85,19 +82,17 @@ export const CurrencyCustomFieldInput: React.FC<StrapiCustomFieldInputProps> = (
   error,
 }) => {
   const { formatMessage, locale } = useIntl();
-  const effectiveLabel =
-    label ||
-    (intlLabel ? formatMessage(intlLabel) : 'Currency (ISO 4217)');
-  const effectiveHint =
-    hint || (description ? formatMessage(description) : undefined);
-  const currentCode = typeof value === 'string' && value.trim() ? value.trim().toUpperCase() : 'COP';
+  const effectiveLabel = label || (intlLabel ? formatMessage(intlLabel) : "Currency (ISO 4217)");
+  const effectiveHint = hint || (description ? formatMessage(description) : undefined);
+  const currentCode =
+    typeof value === "string" && value.trim() ? value.trim().toUpperCase() : "COP";
   const options = useMemo(
-    () => getOrderedCurrencyOptions(['COP', 'USD', 'EUR', 'TRY'], locale || 'en', currentCode),
+    () => getOrderedCurrencyOptions(["COP", "USD", "EUR", "TRY"], locale || "en", currentCode),
     [locale, currentCode]
   );
 
   return (
-    <Field.Root name={name} required={required} error={error}>
+    <Field.Root name={name} required={required} error={error} hint={effectiveHint}>
       <Field.Label>{effectiveLabel}</Field.Label>
       <SingleSelect
         name={name}
@@ -108,7 +103,7 @@ export const CurrencyCustomFieldInput: React.FC<StrapiCustomFieldInputProps> = (
             target: {
               name,
               value: String(val).toUpperCase(),
-              type: 'string',
+              type: "string",
             },
           })
         }
@@ -119,7 +114,7 @@ export const CurrencyCustomFieldInput: React.FC<StrapiCustomFieldInputProps> = (
           </SingleSelectOption>
         ))}
       </SingleSelect>
-      {effectiveHint ? <Field.Hint>{effectiveHint}</Field.Hint> : null}
+      {effectiveHint ? <Field.Hint /> : null}
       <Field.Error />
     </Field.Root>
   );
@@ -139,14 +134,12 @@ export const CountryCustomFieldInput: React.FC<StrapiCustomFieldInputProps> = ({
 }) => {
   const { formatMessage, locale } = useIntl();
   const effectiveLabel =
-    label ||
-    (intlLabel ? formatMessage(intlLabel) : 'Country / Region (ISO 3166-1)');
-  const effectiveHint =
-    hint || (description ? formatMessage(description) : undefined);
-  const currentCode = typeof value === 'string' && value.trim() ? value.trim().toUpperCase() : 'CO';
+    label || (intlLabel ? formatMessage(intlLabel) : "Country / Region (ISO 3166-1)");
+  const effectiveHint = hint || (description ? formatMessage(description) : undefined);
+  const currentCode = typeof value === "string" && value.trim() ? value.trim().toUpperCase() : "CO";
 
   return (
-    <Field.Root name={name} required={required} error={error}>
+    <Field.Root name={name} required={required} error={error} hint={effectiveHint}>
       <Field.Label>{effectiveLabel}</Field.Label>
       <SingleSelect
         name={name}
@@ -157,18 +150,18 @@ export const CountryCustomFieldInput: React.FC<StrapiCustomFieldInputProps> = ({
             target: {
               name,
               value: String(val).toUpperCase(),
-              type: 'string',
+              type: "string",
             },
           })
         }
       >
         {ISO_3166_COUNTRIES.map((country) => (
           <SingleSelectOption key={country.code} value={country.code}>
-            {formatCountryOptionLabel(country.code, locale || 'en')}
+            {formatCountryOptionLabel(country.code, locale || "en")}
           </SingleSelectOption>
         ))}
       </SingleSelect>
-      {effectiveHint ? <Field.Hint>{effectiveHint}</Field.Hint> : null}
+      {effectiveHint ? <Field.Hint /> : null}
       <Field.Error />
     </Field.Root>
   );

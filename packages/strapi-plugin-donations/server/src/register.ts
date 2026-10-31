@@ -1,5 +1,6 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../shared';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../shared";
 
 interface MutableSchema {
   attributes?: Record<string, Record<string, unknown>>;
@@ -13,7 +14,7 @@ function mergeTargetAttrs(
 ): void {
   if (!target) return;
   target[attrName] = {
-    ...(target[attrName] ?? {}),
+    ...target[attrName],
     ...attrDef,
   };
 }
@@ -24,7 +25,7 @@ function applyExtensionToSchema(
 ): void {
   if (!schema) return;
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
-    if (!attrName || !attrDef || typeof attrDef !== 'object') continue;
+    if (!attrName || !attrDef || typeof attrDef !== "object") continue;
     mergeTargetAttrs(schema.attributes, attrName, attrDef);
     mergeTargetAttrs(schema.__schema__?.attributes, attrName, attrDef);
   }
@@ -32,9 +33,9 @@ function applyExtensionToSchema(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.customFields?.register?.({
-    name: 'currency',
+    name: "currency",
     plugin: PLUGIN_ID,
-    type: 'string',
+    type: "string",
     inputSize: {
       default: 4,
       isResizable: true,
@@ -42,9 +43,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   });
 
   strapi.customFields?.register?.({
-    name: 'country',
+    name: "country",
     plugin: PLUGIN_ID,
-    type: 'string',
+    type: "string",
     inputSize: {
       default: 4,
       isResizable: true,
@@ -56,8 +57,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   for (const [targetKey, extraAttributes] of Object.entries(config.schemaExtensions ?? {})) {
-    if (!extraAttributes || typeof extraAttributes !== 'object') continue;
-    const resolvedUid = targetKey.startsWith('plugin::')
+    if (!extraAttributes || typeof extraAttributes !== "object") continue;
+    const resolvedUid = targetKey.startsWith("plugin::")
       ? targetKey
       : `plugin::${PLUGIN_ID}.${targetKey}`;
 
@@ -65,5 +66,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     applyExtensionToSchema(schema, extraAttributes);
   }
 
-  strapi.log.debug('[vicacha:donations] Registered generic donations, campaigns & utility bills plugin.');
+  strapi.log.debug(
+    "[vicacha:donations] Registered generic donations, campaigns & utility bills plugin."
+  );
 };

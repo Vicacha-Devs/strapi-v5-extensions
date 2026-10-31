@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Badge,
   Box,
@@ -8,20 +7,22 @@ import {
   Flex,
   Textarea,
   Typography,
-} from '@strapi/design-system';
+} from "@strapi/design-system";
+import React from "react";
+
 import {
   extractRichTextPlainText,
   type CampaignEvidenceItem,
   type CampaignEvidenceType,
   type DonationCampaignItem,
-} from '../../../../shared';
-import { AddEvidenceFormSection } from './AddEvidenceFormSection';
+} from "../../../../shared";
+import { AddEvidenceFormSection } from "./AddEvidenceFormSection";
 import {
   openInContentManager,
   type EvidenceFormState,
   type InputChangeEvent,
   type TranslateFn,
-} from './donationsHelpers';
+} from "./donationsHelpers";
 
 function formatEvidenceMetaLine(ev: CampaignEvidenceItem): string {
   const parts = [ev.date];
@@ -35,7 +36,7 @@ function formatEvidenceMetaLine(ev: CampaignEvidenceItem): string {
   if (ev.verifiedBy) {
     parts.push(ev.verifiedBy);
   }
-  return parts.join(' • ');
+  return parts.join(" • ");
 }
 
 const EvidenceItemCard: React.FC<{
@@ -53,16 +54,12 @@ const EvidenceItemCard: React.FC<{
       padding={4}
       background="neutral100"
       hasRadius
-      style={{ border: '1px solid rgba(128, 128, 128, 0.25)' }}
+      style={{ border: "1px solid rgba(128, 128, 128, 0.25)" }}
     >
       <Flex justifyContent="space-between" alignItems="flex-start" gap={2}>
         <Badge>{badgeLabel}</Badge>
-        <Button
-          size="S"
-          variant="danger-light"
-          onClick={() => onRemoveEvidence(ev.id)}
-        >
-          {t('common.remove', 'Remove')}
+        <Button size="S" variant="danger-light" onClick={() => onRemoveEvidence(ev.id)}>
+          {t("common.remove", "Remove")}
         </Button>
       </Flex>
 
@@ -75,9 +72,7 @@ const EvidenceItemCard: React.FC<{
 
       {ev.body ? (
         <Box paddingTop={2}>
-          <Typography variant="omega">
-            {extractRichTextPlainText(ev.body)}
-          </Typography>
+          <Typography variant="omega">{extractRichTextPlainText(ev.body)}</Typography>
         </Box>
       ) : null}
 
@@ -87,12 +82,9 @@ const EvidenceItemCard: React.FC<{
             href={ev.documentUrl}
             target="_blank"
             rel="noreferrer"
-            style={{ color: '#4f46e5', fontWeight: 600, fontSize: 13 }}
+            style={{ color: "#4f46e5", fontWeight: 600, fontSize: 13 }}
           >
-            {t(
-              'evidence.view_document',
-              'View Official Receipt / Bill Document →'
-            )}
+            {t("evidence.view_document", "View Official Receipt / Bill Document →")}
           </a>
         </Box>
       ) : null}
@@ -101,8 +93,8 @@ const EvidenceItemCard: React.FC<{
         <Box
           paddingTop={3}
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(90px, 1fr))",
             gap: 8,
           }}
         >
@@ -113,20 +105,20 @@ const EvidenceItemCard: React.FC<{
               target="_blank"
               rel="noreferrer"
               style={{
-                display: 'block',
+                display: "block",
                 borderRadius: 6,
-                overflow: 'hidden',
-                border: '1px solid rgba(128,128,128,0.25)',
+                overflow: "hidden",
+                border: "1px solid rgba(128,128,128,0.25)",
               }}
             >
               <img
                 src={url}
                 alt={`${ev.title} ${idx + 1}`}
                 style={{
-                  width: '100%',
+                  width: "100%",
                   height: 68,
-                  objectFit: 'cover',
-                  display: 'block',
+                  objectFit: "cover",
+                  display: "block",
                 }}
               />
             </a>
@@ -156,9 +148,7 @@ export interface CampaignEvidenceInspectorProps {
   t: TranslateFn;
 }
 
-export const CampaignEvidenceInspector: React.FC<
-  CampaignEvidenceInspectorProps
-> = ({
+export const CampaignEvidenceInspector: React.FC<CampaignEvidenceInspectorProps> = ({
   selectedCampaign,
   editingDescriptionText,
   editingBodyText,
@@ -185,7 +175,7 @@ export const CampaignEvidenceInspector: React.FC<
       background="neutral0"
       hasRadius
       shadow="filterShadow"
-      style={{ border: '2px solid #4f46e5' }}
+      style={{ border: "2px solid #4f46e5" }}
     >
       <Flex
         justifyContent="space-between"
@@ -202,17 +192,14 @@ export const CampaignEvidenceInspector: React.FC<
           </Flex>
           <Box paddingTop={2}>
             <Typography variant="beta" as="h2">
-              {selectedCampaign.title} —{' '}
-              {t(
-                'inspector.header_suffix',
-                'Impact Evidences & Rich Text Story'
-              )}
+              {selectedCampaign.title} —{" "}
+              {t("inspector.header_suffix", "Impact Evidences & Rich Text Story")}
             </Typography>
           </Box>
           <Typography variant="pi" textColor="neutral600">
             {t(
-              'inspector.summary',
-              'Raised {raised} of {goal} {currency} • {count} published impact evidences',
+              "inspector.summary",
+              "Raised {raised} of {goal} {currency} • {count} published impact evidences",
               {
                 raised: selectedCampaign.raisedAmount.toLocaleString(),
                 goal: selectedCampaign.goalAmount.toLocaleString(),
@@ -229,13 +216,13 @@ export const CampaignEvidenceInspector: React.FC<
               onClick={() => openInContentManager(selectedCampaign.documentId)}
             >
               {t(
-                'inspector.open_in_cm_richtext',
-                'Open in Content Manager (Tiptap / RichText Editor)'
+                "inspector.open_in_cm_richtext",
+                "Open in Content Manager (Tiptap / RichText Editor)"
               )}
             </Button>
           ) : null}
           <Button variant="tertiary" onClick={onClose}>
-            {t('common.close', 'Close')}
+            {t("common.close", "Close")}
           </Button>
         </Flex>
       </Flex>
@@ -245,48 +232,37 @@ export const CampaignEvidenceInspector: React.FC<
       <Box paddingTop={5} paddingBottom={5}>
         <Box marginBottom={2} style={{ marginBottom: 8 }}>
           <Typography variant="delta" tag="h3">
-            {t(
-              'inspector.section1.title',
-              'Campaign Rich Text Body & Effectiveness Narrative'
-            )}
+            {t("inspector.section1.title", "Campaign Rich Text Body & Effectiveness Narrative")}
           </Typography>
         </Box>
         <Typography variant="pi" textColor="neutral600">
           {t(
-            'inspector.section1.subtitle',
-            'Compatible with standard Strapi Rich Text (Markdown), @notum-cz/strapi-plugin-tiptap-editor, CKEditor, or HTML. Edit directly below or open in Content Manager for full media embeds.'
+            "inspector.section1.subtitle",
+            "Compatible with standard Strapi Rich Text (Markdown), @notum-cz/strapi-plugin-tiptap-editor, CKEditor, or HTML. Edit directly below or open in Content Manager for full media embeds."
           )}
         </Typography>
 
-        <Box
-          paddingTop={3}
-          style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 16 }}
-        >
+        <Box paddingTop={3} style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 16 }}>
           <Field.Root name="editDescription">
             <Field.Label>
-              {t('inspector.field.description', 'Summary Description (description)')}
+              {t("inspector.field.description", "Summary Description (description)")}
             </Field.Label>
             <Textarea
               name="editDescription"
               value={editingDescriptionText}
-              onChange={(e: InputChangeEvent) =>
-                onChangeDescription(e.target.value)
-              }
+              onChange={(e: InputChangeEvent) => onChangeDescription(e.target.value)}
             />
           </Field.Root>
 
           <Field.Root name="editBody">
             <Field.Label>
-              {t(
-                'inspector.field.body',
-                'Full Rich Text Story & Impact Report (body)'
-              )}
+              {t("inspector.field.body", "Full Rich Text Story & Impact Report (body)")}
             </Field.Label>
             <Textarea
               name="editBody"
               placeholder={t(
-                'inspector.placeholder.body',
-                'Write Markdown, HTML, or rich text narrative of how donations were used...'
+                "inspector.placeholder.body",
+                "Write Markdown, HTML, or rich text narrative of how donations were used..."
               )}
               value={editingBodyText}
               onChange={(e: InputChangeEvent) => onChangeBody(e.target.value)}
@@ -296,7 +272,7 @@ export const CampaignEvidenceInspector: React.FC<
 
         <Flex justifyContent="flex-end" paddingTop={3}>
           <Button size="S" onClick={onSaveRichText} loading={savingBody}>
-            {t('inspector.save_richtext', 'Save Rich Text Body')}
+            {t("inspector.save_richtext", "Save Rich Text Body")}
           </Button>
         </Flex>
       </Box>
@@ -307,8 +283,8 @@ export const CampaignEvidenceInspector: React.FC<
         <Box marginBottom={3} style={{ marginBottom: 12 }}>
           <Typography variant="delta" tag="h3">
             {t(
-              'inspector.section2.title',
-              'Published Impact Evidences & Transparency Proofs ({count})',
+              "inspector.section2.title",
+              "Published Impact Evidences & Transparency Proofs ({count})",
               { count: evidences.length }
             )}
           </Typography>
@@ -318,16 +294,16 @@ export const CampaignEvidenceInspector: React.FC<
           <Box padding={4} background="neutral100" hasRadius>
             <Typography textColor="neutral600">
               {t(
-                'inspector.section2.empty',
-                'No impact evidences uploaded yet for this campaign. Use the form below to attach a paid utility bill receipt, photos of donated computers/equipment, or Kurban/Ramadan gift distribution photos.'
+                "inspector.section2.empty",
+                "No impact evidences uploaded yet for this campaign. Use the form below to attach a paid utility bill receipt, photos of donated computers/equipment, or Kurban/Ramadan gift distribution photos."
               )}
             </Typography>
           </Box>
         ) : (
           <Box
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
               gap: 16,
             }}
           >

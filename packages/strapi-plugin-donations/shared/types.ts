@@ -1,25 +1,25 @@
-import type { SecondaryCalendarDate } from './calendarSystems';
+import type { SecondaryCalendarDate } from "./calendarSystems";
 
-export type CampaignKind = 'major_campaign' | 'utility_invoice' | 'micro_need';
+export type CampaignKind = "major_campaign" | "utility_invoice" | "micro_need";
 
-export type InvoiceStatus = 'open' | 'partially_funded' | 'paid' | 'overdue';
+export type InvoiceStatus = "open" | "partially_funded" | "paid" | "overdue";
 
-export type PledgeStatus = 'pending' | 'verified' | 'rejected' | 'certificate_issued';
+export type PledgeStatus = "pending" | "verified" | "rejected" | "certificate_issued";
 
 export type PaymentChannel =
-  | 'bank_transfer'
-  | 'digital_wallet'
-  | 'card_gateway'
-  | 'qr_code'
-  | 'cash'
-  | 'other';
+  | "bank_transfer"
+  | "digital_wallet"
+  | "card_gateway"
+  | "qr_code"
+  | "cash"
+  | "other";
 
 export type CampaignEvidenceType =
-  | 'paid_receipt'
-  | 'photo_gallery'
-  | 'delivery_report'
-  | 'audit_document'
-  | 'beneficiary_update';
+  | "paid_receipt"
+  | "photo_gallery"
+  | "delivery_report"
+  | "audit_document"
+  | "beneficiary_update";
 
 export interface CampaignEvidenceItem {
   id: string;
@@ -119,7 +119,7 @@ export interface DonationPledgeItem {
 export interface AssessmentBenchmarkConfig {
   key: string;
   labels: Record<string, string>;
-  unitType: 'gram_weight' | 'fixed_currency';
+  unitType: "gram_weight" | "fixed_currency";
   thresholdUnits: number;
   unitPricesByCurrency: Record<string, number>;
 }
@@ -127,7 +127,7 @@ export interface AssessmentBenchmarkConfig {
 export interface AssessmentAssetFieldConfig {
   key: string;
   labels: Record<string, string>;
-  kind: 'asset' | 'deductible_liability';
+  kind: "asset" | "deductible_liability";
 }
 
 export interface AssessmentProfileConfig {

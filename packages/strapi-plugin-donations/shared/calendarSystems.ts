@@ -6,7 +6,7 @@ export interface SecondaryCalendarDate {
 export function computeSecondaryDates(
   isoDateString: string | null | undefined,
   calendars: string[] = [],
-  locale = 'en'
+  locale = "en"
 ): SecondaryCalendarDate[] {
   if (!isoDateString || !Array.isArray(calendars) || calendars.length === 0) {
     return [];
@@ -19,9 +19,9 @@ export function computeSecondaryDates(
   return calendars.map((calendar) => {
     try {
       const formatter = new Intl.DateTimeFormat(`${locale}-u-ca-${calendar}`, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
+        year: "numeric",
+        month: "short",
+        day: "numeric",
       });
       return {
         calendar,

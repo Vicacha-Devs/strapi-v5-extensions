@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Badge,
   Box,
@@ -11,20 +10,20 @@ import {
   Thead,
   Tr,
   Typography,
-} from '@strapi/design-system';
-import type { DonationPledgeItem } from '../../../../shared';
-import type { TranslateFn } from './donationsHelpers';
+} from "@strapi/design-system";
+import React from "react";
+
+import type { DonationPledgeItem } from "../../../../shared";
+import type { TranslateFn } from "./donationsHelpers";
 
 const PledgeTableRow: React.FC<{
   pledge: DonationPledgeItem;
   processingRef: string | null;
-  onDecision: (referenceCode: string, decision: 'verified' | 'rejected') => void;
+  onDecision: (referenceCode: string, decision: "verified" | "rejected") => void;
   t: TranslateFn;
 }> = ({ pledge, processingRef, onDecision, t }) => {
   const isProcessing = processingRef === pledge.referenceCode;
-  const certLabel =
-    pledge.certificateSerialNumber ||
-    t('pledge.cert.not_issued', 'Not issued');
+  const certLabel = pledge.certificateSerialNumber || t("pledge.cert.not_issued", "Not issued");
 
   return (
     <Tr>
@@ -45,7 +44,7 @@ const PledgeTableRow: React.FC<{
       <Td>
         <Typography>{pledge.campaignSlug || pledge.categoryKey}</Typography>
         {pledge.coversRemainingBalance ? (
-          <Badge>{t('pledge.badge.full_balance', 'Full Balance Payoff')}</Badge>
+          <Badge>{t("pledge.badge.full_balance", "Full Balance Payoff")}</Badge>
         ) : null}
       </Td>
       <Td>
@@ -55,22 +54,22 @@ const PledgeTableRow: React.FC<{
         <Typography variant="pi">{certLabel}</Typography>
       </Td>
       <Td>
-        {pledge.status === 'pending' ? (
+        {pledge.status === "pending" ? (
           <Flex gap={2}>
             <Button
               size="S"
               loading={isProcessing}
-              onClick={() => onDecision(pledge.referenceCode, 'verified')}
+              onClick={() => onDecision(pledge.referenceCode, "verified")}
             >
-              {t('pledge.action.verify_issue', 'Verify & Issue Cert')}
+              {t("pledge.action.verify_issue", "Verify & Issue Cert")}
             </Button>
             <Button
               size="S"
               variant="danger-light"
               loading={isProcessing}
-              onClick={() => onDecision(pledge.referenceCode, 'rejected')}
+              onClick={() => onDecision(pledge.referenceCode, "rejected")}
             >
-              {t('pledge.action.reject', 'Reject')}
+              {t("pledge.action.reject", "Reject")}
             </Button>
           </Flex>
         ) : null}
@@ -82,7 +81,7 @@ const PledgeTableRow: React.FC<{
 export interface PledgesTableSectionProps {
   pledges: DonationPledgeItem[];
   processingRef: string | null;
-  onDecision: (referenceCode: string, decision: 'verified' | 'rejected') => void;
+  onDecision: (referenceCode: string, decision: "verified" | "rejected") => void;
   t: TranslateFn;
 }
 
@@ -96,8 +95,8 @@ export const PledgesTableSection: React.FC<PledgesTableSectionProps> = ({
     <Box marginBottom={4} style={{ marginBottom: 16 }}>
       <Typography variant="delta" tag="h2">
         {t(
-          'table.pledges.title',
-          'Recent Donor Pledges, Bill Contributions & Tax Certificates ({count})',
+          "table.pledges.title",
+          "Recent Donor Pledges, Bill Contributions & Tax Certificates ({count})",
           { count: pledges.length }
         )}
       </Typography>
@@ -106,37 +105,25 @@ export const PledgesTableSection: React.FC<PledgesTableSectionProps> = ({
       <Thead>
         <Tr>
           <Th>
-            <Typography variant="sigma">{t('pledge.col.ref', 'Ref')}</Typography>
+            <Typography variant="sigma">{t("pledge.col.ref", "Ref")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('pledge.col.donor', 'Donor')}
-            </Typography>
+            <Typography variant="sigma">{t("pledge.col.donor", "Donor")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('pledge.col.amount', 'Amount')}
-            </Typography>
+            <Typography variant="sigma">{t("pledge.col.amount", "Amount")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('pledge.col.target', 'Target / Category')}
-            </Typography>
+            <Typography variant="sigma">{t("pledge.col.target", "Target / Category")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('pledge.col.status', 'Status')}
-            </Typography>
+            <Typography variant="sigma">{t("pledge.col.status", "Status")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('pledge.col.certificate', 'Certificate')}
-            </Typography>
+            <Typography variant="sigma">{t("pledge.col.certificate", "Certificate")}</Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">
-              {t('pledge.col.actions', 'Actions')}
-            </Typography>
+            <Typography variant="sigma">{t("pledge.col.actions", "Actions")}</Typography>
           </Th>
         </Tr>
       </Thead>

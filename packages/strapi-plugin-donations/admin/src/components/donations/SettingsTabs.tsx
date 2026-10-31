@@ -1,36 +1,47 @@
-import React from 'react';
 import {
   Badge,
   Box,
   Checkbox,
   Field,
   Flex,
+  MultiSelect,
+  MultiSelectOption,
   SingleSelect,
   SingleSelectOption,
   TextInput,
   Typography,
-} from '@strapi/design-system';
+} from "@strapi/design-system";
+import React from "react";
+
 import {
   ISO_4217_CURRENCIES,
   formatCurrencyOptionLabel,
   type DonationsSettings,
-} from '../../../../shared';
-import { CurrencySelectField } from '../CurrencyCountryInput';
-import type { InputChangeEvent, TranslateFn } from './donationsHelpers';
+} from "../../../../shared";
+import { CurrencySelectField } from "../CurrencyCountryInput";
+import type { InputChangeEvent, TranslateFn } from "./donationsHelpers";
+
+const LOCALE_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "es", label: "es — Español (Spanish)" },
+  { value: "en", label: "en — English" },
+  { value: "ar", label: "ar — العربية (Arabic)" },
+  { value: "tr", label: "tr — Türkçe (Turkish)" },
+  { value: "fr", label: "fr — Français (French)" },
+  { value: "de", label: "de — Deutsch (German)" },
+  { value: "pt", label: "pt — Português (Portuguese)" },
+  { value: "it", label: "it — Italiano (Italian)" },
+  { value: "ru", label: "ru — Русский (Russian)" },
+  { value: "id", label: "id — Bahasa Indonesia" },
+  { value: "ur", label: "ur — اردو (Urdu)" },
+  { value: "zh", label: "zh — 中文 (Chinese)" },
+];
 
 const subCardStyle: React.CSSProperties = {
-  border: '1px solid rgba(128, 128, 128, 0.22)',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
+  border: "1px solid rgba(128, 128, 128, 0.22)",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
 };
-
-function parseCsvList(raw: string): string[] {
-  return raw
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
 
 function isPluginAvailable(settings: DonationsSettings, uid: string): boolean {
   if (!Array.isArray(settings.availableRichTextCustomFields)) return true;
@@ -39,19 +50,8 @@ function isPluginAvailable(settings: DonationsSettings, uid: string): boolean {
 
 function resolveSelectedRichTextValue(settings: DonationsSettings): string {
   const current = settings.richTextCustomField;
-  if (!current) return '__default__';
-  return isPluginAvailable(settings, current) ? current : '__default__';
-}
-
-function toggleCurrencyInList(
-  currentList: string[] | undefined,
-  code: string
-): string[] {
-  const current = currentList || [];
-  const next = current.includes(code)
-    ? current.filter((c) => c !== code)
-    : [...current, code];
-  return next.length > 0 ? next : [code];
+  if (!current) return "__default__";
+  return isPluginAvailable(settings, current) ? current : "__default__";
 }
 
 const RichTextPluginSelector: React.FC<{
@@ -59,59 +59,54 @@ const RichTextPluginSelector: React.FC<{
   setSettings: (next: DonationsSettings) => void;
   t: TranslateFn;
 }> = ({ settings, setSettings, t }) => {
-  const showTiptap = isPluginAvailable(settings, 'plugin::tiptap-editor.RichText');
-  const showCkeditor = isPluginAvailable(settings, 'plugin::ckeditor5.CKEditor');
+  const showTiptap = isPluginAvailable(settings, "plugin::tiptap-editor.RichText");
+  const showCkeditor = isPluginAvailable(settings, "plugin::ckeditor5.CKEditor");
 
   return (
-    <Field.Root name="richTextCustomField">
+    <Field.Root
+      name="richTextCustomField"
+      hint={t(
+        "hint.richtext_plugin_adapter",
+        "Shows Rich Text custom field plugins installed in this Strapi instance."
+      )}
+    >
       <Field.Label>
         {t(
-          'field.richtext_plugin_adapter',
-          'Rich Text Editor Plugin (Campaign Description & Body)'
+          "field.richtext_plugin_adapter",
+          "Rich Text Editor Plugin (Campaign Description & Body)"
         )}
       </Field.Label>
       <SingleSelect
         placeholder={t(
-          'settings.richtext.default_option',
-          'Default Strapi Rich Text (Standard Markdown)'
+          "settings.richtext.default_option",
+          "Default Strapi Rich Text (Standard Markdown)"
         )}
         value={resolveSelectedRichTextValue(settings)}
         onChange={(val: string | number) =>
           setSettings({
             ...settings,
-            richTextCustomField: String(val) === '__default__' ? '' : String(val),
+            richTextCustomField: String(val) === "__default__" ? "" : String(val),
           })
         }
       >
         <SingleSelectOption value="__default__">
-          {t(
-            'settings.richtext.default_option',
-            'Default Strapi Rich Text (Standard Markdown)'
-          )}
+          {t("settings.richtext.default_option", "Default Strapi Rich Text (Standard Markdown)")}
         </SingleSelectOption>
         {showTiptap && (
           <SingleSelectOption value="plugin::tiptap-editor.RichText">
             {t(
-              'settings.richtext.tiptap_option',
-              'Tiptap Rich Text Editor (plugin::tiptap-editor.RichText)'
+              "settings.richtext.tiptap_option",
+              "Tiptap Rich Text Editor (plugin::tiptap-editor.RichText)"
             )}
           </SingleSelectOption>
         )}
         {showCkeditor && (
           <SingleSelectOption value="plugin::ckeditor5.CKEditor">
-            {t(
-              'settings.richtext.ckeditor_option',
-              'CKEditor 5 (plugin::ckeditor5.CKEditor)'
-            )}
+            {t("settings.richtext.ckeditor_option", "CKEditor 5 (plugin::ckeditor5.CKEditor)")}
           </SingleSelectOption>
         )}
       </SingleSelect>
-      <Field.Hint>
-        {t(
-          'hint.richtext_plugin_adapter',
-          'Shows Rich Text custom field plugins installed in this Strapi instance.'
-        )}
-      </Field.Hint>
+      <Field.Hint />
     </Field.Root>
   );
 };
@@ -121,24 +116,8 @@ export const SettingsCurrencyTab: React.FC<{
   setSettings: (next: DonationsSettings) => void;
   t: TranslateFn;
 }> = ({ settings, setSettings, t }) => {
-  const supportedCurrencies = settings.supportedCurrencies || [];
-  const supportedLocales = settings.supportedLocales || [];
-
-  const handleToggleCurrency = (val: string | number) => {
-    const code = String(val).trim().toUpperCase();
-    if (!code) return;
-    setSettings({
-      ...settings,
-      supportedCurrencies: toggleCurrencyInList(supportedCurrencies, code),
-    });
-  };
-
-  const handleRemoveCurrencyBadge = (code: string) => {
-    const next = supportedCurrencies.filter((c) => c !== code);
-    if (next.length > 0) {
-      setSettings({ ...settings, supportedCurrencies: next });
-    }
-  };
+  const supportedCurrencies = settings.supportedCurrencies || ["COP", "USD", "EUR"];
+  const supportedLocales = settings.supportedLocales || ["es", "en", "ar", "tr"];
 
   return (
     <Box
@@ -149,148 +128,135 @@ export const SettingsCurrencyTab: React.FC<{
       style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
     >
       <Typography variant="beta" as="h2">
-        {t('settings.section1.title', 'Currency, Multi-Language & Rich Text')}
+        {t("settings.section1.title", "Currency, Multi-Language & Rich Text")}
       </Typography>
       <Typography variant="pi" textColor="neutral600">
         {t(
-          'settings.section1.subtitle',
-          'Configure base accounting currency, accepted donor currencies, supported languages, and Rich Text editor plugin.'
+          "settings.section1.subtitle",
+          "Configure base accounting currency, accepted donor currencies, supported languages, and Rich Text editor plugin."
         )}
       </Typography>
 
       <Box
         paddingTop={4}
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+          display: "grid",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: 20,
         }}
       >
-        <Field.Root name="defaultLocale">
-          <Field.Label>{t('field.default_locale', 'Default Locale')}</Field.Label>
+        <Field.Root
+          name="defaultLocale"
+          hint={t(
+            "hint.default_locale",
+            "Default language for campaign descriptions and donor receipts."
+          )}
+        >
+          <Field.Label>{t("field.default_locale", "Default Locale")}</Field.Label>
           <SingleSelect
-            placeholder={t(
-              'placeholder.select_default_locale',
-              'Select default locale'
-            )}
-            value={settings.defaultLocale || 'es'}
+            placeholder={t("placeholder.select_default_locale", "Select default locale")}
+            value={settings.defaultLocale || "es"}
             onChange={(val: string | number) =>
               setSettings({ ...settings, defaultLocale: String(val) })
             }
           >
-            <SingleSelectOption value="es">
-              {t('settings.ui.es_espa_ol', 'es — Español')}
-            </SingleSelectOption>
-            <SingleSelectOption value="en">
-              {t('settings.ui.en_english', 'en — English')}
-            </SingleSelectOption>
-            <SingleSelectOption value="ar">
-              {t('settings.ui.ar', 'ar — العربية')}
-            </SingleSelectOption>
-            <SingleSelectOption value="tr">
-              {t('settings.ui.tr_t_rk_e', 'tr — Türkçe')}
-            </SingleSelectOption>
+            {LOCALE_OPTIONS.map((opt) => (
+              <SingleSelectOption key={opt.value} value={opt.value}>
+                {opt.label}
+              </SingleSelectOption>
+            ))}
           </SingleSelect>
-          <Field.Hint>
-            {t(
-              'hint.default_locale',
-              'Default language for campaign descriptions and donor receipts.'
-            )}
-          </Field.Hint>
+          <Field.Hint />
         </Field.Root>
 
-        <Field.Root name="supportedLocales">
-          <Field.Label>
-            {t(
-              'field.supported_locales_comma_separated',
-              'Supported Locales (comma-separated)'
-            )}
-          </Field.Label>
-          <TextInput
+        <Field.Root
+          name="supportedLocales"
+          hint={t(
+            "hint.supported_locales",
+            "ISO language codes enabled for localized donation campaigns."
+          )}
+        >
+          <Field.Label>{t("field.supported_locales", "Supported Locales")}</Field.Label>
+          <MultiSelect
             name="supportedLocales"
-            placeholder={t('placeholder.e_g_es_en_ar_tr', 'e.g., es, en, ar, tr')}
-            value={supportedLocales.join(', ')}
-            onChange={(e: InputChangeEvent) =>
+            withTags
+            placeholder={t("placeholder.select_supported_locales", "Select supported locales...")}
+            value={supportedLocales}
+            onChange={(nextValues: string[]) =>
               setSettings({
                 ...settings,
-                supportedLocales: parseCsvList(e.target.value),
+                supportedLocales: nextValues.length > 0 ? nextValues : ["es"],
               })
             }
-          />
-          <Field.Hint>
-            {t(
-              'hint.supported_locales',
-              'ISO language codes enabled for localized donation campaigns.'
-            )}
-          </Field.Hint>
+            onClear={() =>
+              setSettings({
+                ...settings,
+                supportedLocales: ["es"],
+              })
+            }
+          >
+            {LOCALE_OPTIONS.map((opt) => (
+              <MultiSelectOption key={opt.value} value={opt.value}>
+                {opt.label}
+              </MultiSelectOption>
+            ))}
+          </MultiSelect>
+          <Field.Hint />
         </Field.Root>
 
         <CurrencySelectField
           name="baseCurrency"
           label={t(
-            'field.base_accounting_currency_iso_4217',
-            'Base Accounting Currency (ISO 4217)'
+            "field.base_accounting_currency_iso_4217",
+            "Base Accounting Currency (ISO 4217)"
           )}
           hint={t(
-            'hint.base_currency',
-            'Primary ledger currency for campaign goals and utility bills.'
+            "hint.base_currency",
+            "Primary ledger currency for campaign goals and utility bills."
           )}
-          value={settings.baseCurrency || 'COP'}
+          value={settings.baseCurrency || "COP"}
           supportedCurrencies={settings.supportedCurrencies}
-          onChange={(nextCode) =>
-            setSettings({ ...settings, baseCurrency: nextCode })
-          }
+          onChange={(nextCode) => setSettings({ ...settings, baseCurrency: nextCode })}
         />
 
-        <Field.Root name="supportedCurrencies">
+        <Field.Root
+          name="supportedCurrencies"
+          hint={t(
+            "hint.supported_currencies",
+            "Currencies accepted in pledge forms and assessment calculators."
+          )}
+        >
           <Field.Label>
-            {t(
-              'field.supported_donor_currencies_comma_separated',
-              'Supported Donor Currencies (ISO 4217)'
-            )}
+            {t("field.supported_donor_currencies", "Supported Donor Currencies (ISO 4217)")}
           </Field.Label>
-          <SingleSelect
-            placeholder={t(
-              'placeholder.add_currency_iso',
-              '+ Add / Toggle ISO 4217 Currency...'
-            )}
-            value=""
-            onChange={handleToggleCurrency}
+          <MultiSelect
+            name="supportedCurrencies"
+            withTags
+            placeholder={t("placeholder.add_currency_iso", "Select ISO 4217 currencies...")}
+            value={supportedCurrencies}
+            onChange={(nextValues: string[]) =>
+              setSettings({
+                ...settings,
+                supportedCurrencies: nextValues.length > 0 ? nextValues : ["COP"],
+              })
+            }
+            onClear={() =>
+              setSettings({
+                ...settings,
+                supportedCurrencies: [settings.baseCurrency || "COP"],
+              })
+            }
           >
-            {ISO_4217_CURRENCIES.map((item) => {
-              const isSelected = supportedCurrencies.includes(item.code);
-              const label = formatCurrencyOptionLabel(item.code);
-              return (
-                <SingleSelectOption key={item.code} value={item.code}>
-                  {isSelected ? `✓ ${label}` : label}
-                </SingleSelectOption>
-              );
-            })}
-          </SingleSelect>
-          <Flex gap={1} paddingTop={2} wrap="wrap">
-            {supportedCurrencies.map((code) => (
-              <Badge
-                key={code}
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleRemoveCurrencyBadge(code)}
-              >
-                {code} ×
-              </Badge>
+            {ISO_4217_CURRENCIES.map((item) => (
+              <MultiSelectOption key={item.code} value={item.code}>
+                {formatCurrencyOptionLabel(item.code)}
+              </MultiSelectOption>
             ))}
-          </Flex>
-          <Field.Hint>
-            {t(
-              'hint.supported_currencies',
-              'Currencies accepted in pledge forms and assessment calculators.'
-            )}
-          </Field.Hint>
+          </MultiSelect>
+          <Field.Hint />
         </Field.Root>
 
-        <RichTextPluginSelector
-          settings={settings}
-          setSettings={setSettings}
-          t={t}
-        />
+        <RichTextPluginSelector settings={settings} setSettings={setSettings} t={t} />
       </Box>
     </Box>
   );
@@ -302,11 +268,11 @@ export const SettingsCertificatesTab: React.FC<{
   t: TranslateFn;
 }> = ({ settings, setSettings, t }) => {
   const bridgeBadgeLabel = settings.enableCertificatesBridge
-    ? t('common.enabled', 'Enabled')
-    : t('common.disabled', 'Disabled');
+    ? t("common.enabled", "Enabled")
+    : t("common.disabled", "Disabled");
   const autoBadgeLabel = settings.autoIssueCertificateOnVerify
-    ? t('common.auto', 'Auto')
-    : t('common.manual', 'Manual');
+    ? t("common.auto", "Auto")
+    : t("common.manual", "Manual");
 
   return (
     <Box
@@ -318,32 +284,35 @@ export const SettingsCertificatesTab: React.FC<{
     >
       <Typography variant="beta" as="h2">
         {t(
-          'settings.section2.title',
-          'Cryptographic Tax Certificate Bridge & Verification Automation'
+          "settings.section2.title",
+          "Cryptographic Tax Certificate Bridge & Verification Automation"
         )}
       </Typography>
       <Typography variant="pi" textColor="neutral600">
         {t(
-          'settings.section2.subtitle',
-          'Connect verified donor pledges with @vicacha-devs/strapi-plugin-certificates for Ed25519-signed tax deduction certificates.'
+          "settings.section2.subtitle",
+          "Connect verified donor pledges with @vicacha-devs/strapi-plugin-certificates for Ed25519-signed tax deduction certificates."
         )}
       </Typography>
 
       <Box paddingTop={4} style={{ maxWidth: 420 }}>
-        <Field.Root name="taxCertificateTemplateSlug">
+        <Field.Root
+          name="taxCertificateTemplateSlug"
+          hint={t(
+            "hint.tax_certificate_template_slug",
+            "Template slug in @vicacha-devs/strapi-plugin-certificates used when issuing fiscal donation receipts."
+          )}
+        >
           <Field.Label>
-            {t(
-              'field.tax_certificate_template_slug',
-              'Tax Certificate Template Slug'
-            )}
+            {t("field.tax_certificate_template_slug", "Tax Certificate Template Slug")}
           </Field.Label>
           <TextInput
             name="taxCertificateTemplateSlug"
             placeholder={t(
-              'placeholder.e_g_certificado_donacion_fiscal',
-              'e.g., tax-donation-certificate'
+              "placeholder.e_g_certificado_donacion_fiscal",
+              "e.g., tax-donation-certificate"
             )}
-            value={settings.taxCertificateTemplateSlug || ''}
+            value={settings.taxCertificateTemplateSlug || ""}
             onChange={(e: InputChangeEvent) =>
               setSettings({
                 ...settings,
@@ -351,20 +320,15 @@ export const SettingsCertificatesTab: React.FC<{
               })
             }
           />
-          <Field.Hint>
-            {t(
-              'hint.tax_certificate_template_slug',
-              'Template slug in @vicacha-devs/strapi-plugin-certificates used when issuing fiscal donation receipts.'
-            )}
-          </Field.Hint>
+          <Field.Hint />
         </Field.Root>
       </Box>
 
       <Box
         paddingTop={4}
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
           gap: 16,
         }}
       >
@@ -372,14 +336,14 @@ export const SettingsCertificatesTab: React.FC<{
           <Box>
             <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
               <Typography fontWeight="bold">
-                {t('settings.bridge.card_title', 'Certificates Authority Bridge')}
+                {t("settings.bridge.card_title", "Certificates Authority Bridge")}
               </Typography>
               <Badge>{bridgeBadgeLabel}</Badge>
             </Flex>
             <Typography variant="pi" textColor="neutral600">
               {t(
-                'settings.bridge.card_desc',
-                'Allows issuing Ed25519-signed fiscal donation certificates via @vicacha-devs/strapi-plugin-certificates.'
+                "settings.bridge.card_desc",
+                "Allows issuing Ed25519-signed fiscal donation certificates via @vicacha-devs/strapi-plugin-certificates."
               )}
             </Typography>
           </Box>
@@ -394,8 +358,8 @@ export const SettingsCertificatesTab: React.FC<{
               }
             >
               {t(
-                'checkbox.enable_cryptographic_tax_certificate_bridge',
-                'Enable Cryptographic Tax Certificate Bridge'
+                "checkbox.enable_cryptographic_tax_certificate_bridge",
+                "Enable Cryptographic Tax Certificate Bridge"
               )}
             </Checkbox>
           </Box>
@@ -405,17 +369,14 @@ export const SettingsCertificatesTab: React.FC<{
           <Box>
             <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
               <Typography fontWeight="bold">
-                {t(
-                  'settings.auto_issue.card_title',
-                  'Auto-Issue on Pledge Verification'
-                )}
+                {t("settings.auto_issue.card_title", "Auto-Issue on Pledge Verification")}
               </Typography>
               <Badge>{autoBadgeLabel}</Badge>
             </Flex>
             <Typography variant="pi" textColor="neutral600">
               {t(
-                'settings.auto_issue.card_desc',
-                'Automatically generates and attaches a verifiable tax certificate serial number as soon as staff marks a pledge as verified.'
+                "settings.auto_issue.card_desc",
+                "Automatically generates and attaches a verifiable tax certificate serial number as soon as staff marks a pledge as verified."
               )}
             </Typography>
           </Box>
@@ -430,8 +391,8 @@ export const SettingsCertificatesTab: React.FC<{
               }
             >
               {t(
-                'checkbox.auto_issue_tax_certificate_when_pledge_is_verifi',
-                'Auto-Issue Tax Certificate When Pledge is Verified'
+                "checkbox.auto_issue_tax_certificate_when_pledge_is_verifi",
+                "Auto-Issue Tax Certificate When Pledge is Verified"
               )}
             </Checkbox>
           </Box>

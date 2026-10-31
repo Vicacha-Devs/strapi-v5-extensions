@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-import { useIntl } from 'react-intl';
 import {
   Badge,
   Box,
@@ -10,11 +8,11 @@ import {
   Flex,
   TextInput,
   Typography,
-} from '@strapi/design-system';
-import {
-  PLUGIN_ID,
-  type DonationCategoryConfig,
-} from '../../../shared';
+} from "@strapi/design-system";
+import React, { useState } from "react";
+import { useIntl } from "react-intl";
+
+import { PLUGIN_ID, type DonationCategoryConfig } from "../../../shared";
 
 export interface DonationCategoriesManagerProps {
   categories: DonationCategoryConfig[];
@@ -24,15 +22,15 @@ export interface DonationCategoriesManagerProps {
 }
 
 const cardBorderStyle: React.CSSProperties = {
-  border: '1px solid rgba(128, 128, 128, 0.22)',
+  border: "1px solid rgba(128, 128, 128, 0.22)",
 };
 
 function sanitizeCategoryKey(raw: string): string {
   return raw
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, '_')
-    .replace(/^_+|_+$/g, '');
+    .replace(/[^a-z0-9_-]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 }
 
 export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps> = ({
@@ -45,29 +43,27 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
   const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
     formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
 
-  const [newKey, setNewKey] = useState('');
-  const [newPrimaryLabel, setNewPrimaryLabel] = useState('');
-  const [newSecondaryLabel, setNewSecondaryLabel] = useState('');
-  const [newDescription, setNewDescription] = useState('');
+  const [newKey, setNewKey] = useState("");
+  const [newPrimaryLabel, setNewPrimaryLabel] = useState("");
+  const [newSecondaryLabel, setNewSecondaryLabel] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [newTaxDeductible, setNewTaxDeductible] = useState(true);
   const [newRequiresCalculator, setNewRequiresCalculator] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const primaryLoc = defaultLocale || 'es';
-  const secondaryLoc = primaryLoc === 'en' ? 'es' : 'en';
+  const primaryLoc = defaultLocale || "es";
+  const secondaryLoc = primaryLoc === "en" ? "es" : "en";
 
   const handleAddCategory = () => {
     const cleanKey = sanitizeCategoryKey(newKey || newPrimaryLabel);
     if (!cleanKey) {
       setErrorMsg(
-        t('settings.categories.error_key_required', 'Please provide a valid Category Key.')
+        t("settings.categories.error_key_required", "Please provide a valid Category Key.")
       );
       return;
     }
     if (!newPrimaryLabel.trim()) {
-      setErrorMsg(
-        t('settings.categories.error_label_required', 'Please provide a display label.')
-      );
+      setErrorMsg(t("settings.categories.error_label_required", "Please provide a display label."));
       return;
     }
 
@@ -102,13 +98,13 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
       onChange([...categories, nextItem]);
     }
 
-    setNewKey('');
-    setNewPrimaryLabel('');
-    setNewSecondaryLabel('');
-    setNewDescription('');
+    setNewKey("");
+    setNewPrimaryLabel("");
+    setNewSecondaryLabel("");
+    setNewDescription("");
     setNewTaxDeductible(true);
     setNewRequiresCalculator(false);
-    setErrorMsg('');
+    setErrorMsg("");
   };
 
   const handleRemoveCategory = (keyToRemove: string) => {
@@ -117,14 +113,10 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
 
   const handleToggleFlag = (
     key: string,
-    field: 'taxDeductible' | 'requiresAssessmentCalculator',
+    field: "taxDeductible" | "requiresAssessmentCalculator",
     checked: boolean
   ) => {
-    onChange(
-      categories.map((cat) =>
-        cat.key === key ? { ...cat, [field]: checked } : cat
-      )
-    );
+    onChange(categories.map((cat) => (cat.key === key ? { ...cat, [field]: checked } : cat)));
   };
 
   return (
@@ -138,77 +130,72 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
       <Flex justifyContent="space-between" alignItems="flex-start" wrap="wrap" gap={3}>
         <Box>
           <Typography variant="beta" as="h2">
-            {t('settings.categories.title', 'Donation Categories Manager')}
+            {t("settings.categories.title", "Donation Categories Manager")}
           </Typography>
           <Box paddingTop={1}>
             <Typography variant="pi" textColor="neutral600">
               {t(
-                'settings.categories.subtitle',
-                'Define category keys (e.g., sadaqah, zakat, utility_bills, waqf, iftar, general_fund) available in the Campaign Composer and donor pledge forms.'
+                "settings.categories.subtitle",
+                "Define category keys (e.g., sadaqah, zakat, utility_bills, waqf, iftar, general_fund) available in the Campaign Composer and donor pledge forms."
               )}
             </Typography>
           </Box>
         </Box>
         <Badge>
-          {t('settings.categories.count_badge', '{count} Categories Configured', {
+          {t("settings.categories.count_badge", "{count} Categories Configured", {
             count: categories.length,
           })}
         </Badge>
       </Flex>
 
       {/* Add / Update Category Form */}
-      <Box
-        marginTop={4}
-        padding={4}
-        background="neutral100"
-        hasRadius
-        style={cardBorderStyle}
-      >
+      <Box marginTop={4} padding={4} background="neutral100" hasRadius style={cardBorderStyle}>
         <Typography variant="delta" as="h3">
-          {t('settings.categories.add_heading', 'Add or Update Category Key')}
+          {t("settings.categories.add_heading", "Add or Update Category Key")}
         </Typography>
         <Box
           paddingTop={3}
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
             gap: 16,
           }}
         >
-          <Field.Root name="newCategoryKey" required>
-            <Field.Label>
-              {t('settings.categories.field_key', 'Category Key (slug)')}
-            </Field.Label>
+          <Field.Root
+            name="newCategoryKey"
+            required
+            hint={t(
+              "settings.categories.hint_key",
+              "Lowercase identifier stored on campaigns & pledges."
+            )}
+          >
+            <Field.Label>{t("settings.categories.field_key", "Category Key (slug)")}</Field.Label>
             <TextInput
               name="newCategoryKey"
               placeholder={t(
-                'settings.categories.placeholder_key',
-                'e.g., general_fund, orphan_support'
+                "settings.categories.placeholder_key",
+                "e.g., general_fund, orphan_support"
               )}
               value={newKey}
               onChange={(e: { target: { value: string } }) => {
                 setNewKey(e.target.value);
-                setErrorMsg('');
+                setErrorMsg("");
               }}
             />
-            <Field.Hint>
-              {t('settings.categories.hint_key', 'Lowercase identifier stored on campaigns & pledges.')}
-            </Field.Hint>
+            <Field.Hint />
           </Field.Root>
 
           <Field.Root name="newCategoryPrimaryLabel" required>
             <Field.Label>
-              {t(
-                'settings.categories.field_primary_label',
-                'Display Label ({locale})',
-                { locale: primaryLoc.toUpperCase() }
-              )}
+              {t("settings.categories.field_primary_label", "Display Label ({locale})", {
+                locale: primaryLoc.toUpperCase(),
+              })}
             </Field.Label>
             <TextInput
               name="newCategoryPrimaryLabel"
               placeholder={t(
-                'settings.categories.placeholder_primary_label',
-                'e.g., Fondo General de la Mezquita'
+                "settings.categories.placeholder_primary_label",
+                "e.g., Fondo General de la Mezquita"
               )}
               value={newPrimaryLabel}
               onChange={(e: { target: { value: string } }) => {
@@ -216,46 +203,40 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
                 if (!newKey) {
                   setNewKey(sanitizeCategoryKey(e.target.value));
                 }
-                setErrorMsg('');
+                setErrorMsg("");
               }}
             />
           </Field.Root>
 
           <Field.Root name="newCategorySecondaryLabel">
             <Field.Label>
-              {t(
-                'settings.categories.field_secondary_label',
-                'Translated Label ({locale})',
-                { locale: secondaryLoc.toUpperCase() }
-              )}
+              {t("settings.categories.field_secondary_label", "Translated Label ({locale})", {
+                locale: secondaryLoc.toUpperCase(),
+              })}
             </Field.Label>
             <TextInput
               name="newCategorySecondaryLabel"
               placeholder={t(
-                'settings.categories.placeholder_secondary_label',
-                'e.g., General Mosque Fund'
+                "settings.categories.placeholder_secondary_label",
+                "e.g., General Mosque Fund"
               )}
               value={newSecondaryLabel}
-              onChange={(e: { target: { value: string } }) =>
-                setNewSecondaryLabel(e.target.value)
-              }
+              onChange={(e: { target: { value: string } }) => setNewSecondaryLabel(e.target.value)}
             />
           </Field.Root>
 
           <Field.Root name="newCategoryDescription">
             <Field.Label>
-              {t('settings.categories.field_description', 'Short Description (optional)')}
+              {t("settings.categories.field_description", "Short Description (optional)")}
             </Field.Label>
             <TextInput
               name="newCategoryDescription"
               placeholder={t(
-                'settings.categories.placeholder_description',
-                'e.g., Supports daily operations and community welfare.'
+                "settings.categories.placeholder_description",
+                "e.g., Supports daily operations and community welfare."
               )}
               value={newDescription}
-              onChange={(e: { target: { value: string } }) =>
-                setNewDescription(e.target.value)
-              }
+              onChange={(e: { target: { value: string } }) => setNewDescription(e.target.value)}
             />
           </Field.Root>
         </Box>
@@ -266,20 +247,20 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
               checked={newTaxDeductible}
               onCheckedChange={(val: boolean) => setNewTaxDeductible(Boolean(val))}
             >
-              {t('settings.categories.tax_deductible', 'Eligible for Tax Certificate')}
+              {t("settings.categories.tax_deductible", "Eligible for Tax Certificate")}
             </Checkbox>
             <Checkbox
               checked={newRequiresCalculator}
               onCheckedChange={(val: boolean) => setNewRequiresCalculator(Boolean(val))}
             >
               {t(
-                'settings.categories.requires_calculator',
-                'Requires Net-Wealth Assessment Calculator (Zakat)'
+                "settings.categories.requires_calculator",
+                "Requires Net-Wealth Assessment Calculator (Zakat)"
               )}
             </Checkbox>
           </Flex>
           <Button variant="secondary" onClick={handleAddCategory}>
-            {t('settings.categories.add_button', '+ Add / Update Category')}
+            {t("settings.categories.add_button", "+ Add / Update Category")}
           </Button>
         </Flex>
 
@@ -301,21 +282,15 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
         {categories.length === 0 ? (
           <Box padding={4} background="neutral100" hasRadius>
             <Typography textColor="neutral600">
-              {t('settings.categories.empty', 'No categories configured yet. Add one above.')}
+              {t("settings.categories.empty", "No categories configured yet. Add one above.")}
             </Typography>
           </Box>
         ) : (
           categories.map((cat) => {
             const labelPrimary =
-              cat.labels?.[primaryLoc] ||
-              cat.labels?.en ||
-              cat.labels?.es ||
-              cat.key;
+              cat.labels?.[primaryLoc] || cat.labels?.en || cat.labels?.es || cat.key;
             const descPrimary =
-              cat.descriptions?.[primaryLoc] ||
-              cat.descriptions?.en ||
-              cat.descriptions?.es ||
-              '';
+              cat.descriptions?.[primaryLoc] || cat.descriptions?.en || cat.descriptions?.es || "";
 
             return (
               <Box
@@ -334,12 +309,12 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
                       <Badge>{cat.key}</Badge>
                       {cat.taxDeductible && (
                         <Badge backgroundColor="success100" textColor="success700">
-                          {t('settings.categories.badge_tax', 'Tax Deductible')}
+                          {t("settings.categories.badge_tax", "Tax Deductible")}
                         </Badge>
                       )}
                       {cat.requiresAssessmentCalculator && (
                         <Badge backgroundColor="primary100" textColor="primary700">
-                          {t('settings.categories.badge_calc', 'Assessment Calculator')}
+                          {t("settings.categories.badge_calc", "Assessment Calculator")}
                         </Badge>
                       )}
                     </Flex>
@@ -352,24 +327,20 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
                       <Checkbox
                         checked={Boolean(cat.taxDeductible)}
                         onCheckedChange={(val: boolean) =>
-                          handleToggleFlag(cat.key, 'taxDeductible', Boolean(val))
+                          handleToggleFlag(cat.key, "taxDeductible", Boolean(val))
                         }
                       >
-                        {t('settings.categories.tax_deductible', 'Eligible for Tax Certificate')}
+                        {t("settings.categories.tax_deductible", "Eligible for Tax Certificate")}
                       </Checkbox>
                       <Checkbox
                         checked={Boolean(cat.requiresAssessmentCalculator)}
                         onCheckedChange={(val: boolean) =>
-                          handleToggleFlag(
-                            cat.key,
-                            'requiresAssessmentCalculator',
-                            Boolean(val)
-                          )
+                          handleToggleFlag(cat.key, "requiresAssessmentCalculator", Boolean(val))
                         }
                       >
                         {t(
-                          'settings.categories.requires_calculator',
-                          'Requires Net-Wealth Assessment Calculator (Zakat)'
+                          "settings.categories.requires_calculator",
+                          "Requires Net-Wealth Assessment Calculator (Zakat)"
                         )}
                       </Checkbox>
                     </Flex>
@@ -380,7 +351,7 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
                     size="S"
                     onClick={() => handleRemoveCategory(cat.key)}
                   >
-                    {t('settings.categories.remove_button', 'Remove')}
+                    {t("settings.categories.remove_button", "Remove")}
                   </Button>
                 </Flex>
               </Box>
