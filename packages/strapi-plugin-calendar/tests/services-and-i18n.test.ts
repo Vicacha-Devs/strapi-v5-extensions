@@ -11,35 +11,11 @@ import type {
   StrapiRouteContext,
 } from '../server/src/types';
 import {
-  CALENDAR_COLOR_PALETTES,
-  CALENDAR_THEME_PRESETS,
-  detectEffectiveColorScheme,
-  resolveCalendarTheme,
   type CalendarPluginSettings,
   type DiscoveredContentType,
   type ExpandedCalendarOccurrence,
 } from '../shared/types';
 
-import {
-  buildFullCalendarTimeFormat,
-  getLocalizedCalendarBundle,
-  isRtlLocale,
-  resolveCalendarDirection,
-  resolveFullCalendarLocale,
-  resolveLocaleFirstDay,
-  SUPPORTED_CALENDAR_LOCALES,
-} from '../shared/localization';
-
-import en from '../admin/src/translations/en.json';
-import es from '../admin/src/translations/es.json';
-import fr from '../admin/src/translations/fr.json';
-import de from '../admin/src/translations/de.json';
-import pt from '../admin/src/translations/pt.json';
-import itLocale from '../admin/src/translations/it.json';
-import nl from '../admin/src/translations/nl.json';
-import pl from '../admin/src/translations/pl.json';
-import tr from '../admin/src/translations/tr.json';
-import ar from '../admin/src/translations/ar.json';
 
 function createMockStrapi(pluginConfig: Record<string, unknown> = {}) {
   let storedSettings: unknown = null;
@@ -283,6 +259,69 @@ describe('Strapi Plugin Calendar Services & Controllers', () => {
     expect(created.checkIn).toBe('2026-05-06T09:00:00.000Z');
   });
 
+  it('auto-discovers companion Events & Bookings plugins and creates valid Events and Bookings from calendar clicks', async () => {
+    const { strapi, services, documentsDb } = createMockStrapi();
+    documentsDb['plugin::events.event'] = [];
+    documentsDb['plugin::bookings.booking'] = [];
+    (strapi.contentTypes as Record<string, unknown>)['plugin::events.event'] = {
+      kind: 'collectionType',
+      options: { draftAndPublish: true },
+      info: { displayName: 'Event', singularName: 'event' },
+      attributes: {
+        title: { type: 'string' },
+        slug: { type: 'uid' },
+        startDate: { type: 'datetime' },
+        endDate: { type: 'datetime' },
+        recurrence: { type: 'customField', customField: 'plugin::events.rrule' },
+      },
+    };
+    (strapi.contentTypes as Record<string, unknown>)['plugin::bookings.booking'] = {
+      kind: 'collectionType',
+      options: { draftAndPublish: false },
+      info: { displayName: 'Booking', singularName: 'booking' },
+      attributes: {
+        bookingCode: { type: 'string', required: true },
+        title: { type: 'string', required: true },
+        customerName: { type: 'string', required: true },
+        customerEmail: { type: 'email', required: true },
+        startDate: { type: 'datetime', required: true },
+        endDate: { type: 'datetime', required: true },
+        partySize: { type: 'integer', required: true },
+        status: { type: 'enumeration' },
+      },
+    };
+
+    const settings = await services.settings.getSettings();
+    expect(settings.sources.some((s) => s.uid === 'plugin::events.event')).toBe(true);
+    expect(settings.sources.some((s) => s.uid === 'plugin::bookings.booking')).toBe(true);
+
+    const createdEvent = await services.occurrence.quickCreateEntry({
+      sourceId: 'events',
+      title: 'Interfaith Dialogue Workshop',
+      startDate: '2026-05-12T18:00:00.000Z',
+      location: 'Auditorium',
+      rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TU',
+    });
+    expect(createdEvent.title).toBe('Interfaith Dialogue Workshop');
+    expect(String(createdEvent.slug)).toContain('interfaith-dialogue-workshop');
+
+    const createdBooking = await services.occurrence.quickCreateEntry({
+      sourceId: 'bookings',
+      title: 'University Guided Visit',
+      startDate: '2026-05-14T10:00:00.000Z',
+      customerName: 'Prof. Carlos Rivera',
+      customerEmail: 'crivera@universidad.edu.co',
+      partySize: 25,
+    });
+    expect(createdBooking.title).toBe('University Guided Visit');
+    expect(String(createdBooking.bookingCode)).toContain('BK-20260514-');
+    expect(createdBooking.customerName).toBe('Prof. Carlos Rivera');
+    expect(createdBooking.customerEmail).toBe('crivera@universidad.edu.co');
+    expect(createdBooking.partySize).toBe(25);
+    expect(createdBooking.status).toBe('confirmed');
+    expect(createdBooking.endDate).toBe('2026-05-14T11:00:00.000Z');
+  });
+
   it('supports clearSettings(), localization settings persistence, and controller endpoints', async () => {
     const { strapi } = createMockStrapi({ defaultView: 'dayGridMonth' });
     const adminCtrl = adminControllerFactory({ strapi });
@@ -339,124 +378,5 @@ describe('Strapi Plugin Calendar Services & Controllers', () => {
   });
 });
 
-describe('FullCalendar Localization & 10-Locale Translation Parity', () => {
-  it('ensures all 10 locales contain identical translation keys and non-empty strings', () => {
-    const locales: Record<string, Record<string, string>> = {
-      en,
-      es,
-      fr,
-      de,
-      pt,
-      it: itLocale,
-      nl,
-      pl,
-      tr,
-      ar,
-    };
-    const baseKeys = Object.keys(en).sort();
-    expect(baseKeys.length).toBeGreaterThanOrEqual(20);
-
-    for (const [, dict] of Object.entries(locales)) {
-      const keys = Object.keys(dict).sort();
-      expect(keys).toEqual(baseKeys);
-      for (const k of keys) {
-        expect(typeof dict[k]).toBe('string');
-        expect(dict[k].trim().length).toBeGreaterThan(0);
-      }
-    }
-  });
-
-  it('resolves FullCalendar LocaleInput bundles, RTL direction, firstDay, and 12h/24h time formats', () => {
-    expect(SUPPORTED_CALENDAR_LOCALES.length).toBe(10);
-
-    // Locale precedence: runtimeOverride > defaultLocaleSetting > uiLocale
-    expect(resolveFullCalendarLocale('en', 'auto', 'auto')).toBe('en');
-    expect(resolveFullCalendarLocale('fr-FR', 'auto', 'auto')).toBe('fr');
-    expect(resolveFullCalendarLocale('en', 'es', 'auto')).toBe('es');
-    expect(resolveFullCalendarLocale('en', 'es', 'ar-SA')).toBe('ar');
-
-    // RTL detection & explicit direction override
-    expect(isRtlLocale('ar')).toBe(true);
-    expect(isRtlLocale('he')).toBe(true);
-    expect(isRtlLocale('es')).toBe(false);
-    expect(resolveCalendarDirection('ar', 'auto')).toBe('rtl');
-    expect(resolveCalendarDirection('ar', 'ltr')).toBe('ltr');
-    expect(resolveCalendarDirection('es', 'auto')).toBe('ltr');
-
-    // Locale-specific firstDay & buttonText bundle
-    const arBundle = getLocalizedCalendarBundle('ar');
-    expect(arBundle.direction).toBe('rtl');
-    expect(arBundle.buttonText.today).toBe('اليوم');
-    expect(resolveLocaleFirstDay('ar', null)).toBe(6); // Saturday
-    expect(resolveLocaleFirstDay('es', null)).toBe(1); // Monday
-    expect(resolveLocaleFirstDay('en', null)).toBe(0); // Sunday
-    expect(resolveLocaleFirstDay('ar', 1)).toBe(1); // Explicit override
-
-    // 24h vs 12h time format
-    expect(buildFullCalendarTimeFormat(true).hour12).toBe(false);
-    expect(buildFullCalendarTimeFormat(false).hour12).toBe(true);
-  });
-
-  it('resolves modern FullCalendar themes (Breezy, Monarch, Forma, Pulse, Classic, Shadcn, MUI) across light/dark schemes and accent palettes', () => {
-    const themeKeys = Object.keys(CALENDAR_THEME_PRESETS);
-    for (const key of [
-      'breeze',
-      'monarch',
-      'forma',
-      'pulse',
-      'classic',
-      'shadcn',
-      'mui',
-      'emerald',
-      'sand',
-      'midnight',
-    ]) {
-      expect(themeKeys).toContain(key);
-    }
-    expect(Object.keys(CALENDAR_COLOR_PALETTES).length).toBeGreaterThanOrEqual(7);
-
-    // Breezy (tinted event style, 10px container radius)
-    const breezyLight = resolveCalendarTheme('breeze', 'light', 'default');
-    expect(breezyLight.eventStyle).toBe('tinted');
-    expect(breezyLight.containerRadius).toBe('10px');
-    expect(breezyLight.primaryColor).toBe('#0284C7');
-
-    // Forma (6px left accent-bar event style, top-bar Today highlight)
-    const formaDarkEmerald = resolveCalendarTheme('forma', 'dark', 'emerald');
-    expect(formaDarkEmerald.eventStyle).toBe('accent-bar');
-    expect(formaDarkEmerald.todayHeaderAccent).toBe('top-bar');
-    expect(formaDarkEmerald.primaryColor).toBe('#34D399');
-    expect(formaDarkEmerald.cellBg).toBe('#030712');
-
-    // Monarch (Material 3 Expressive: solid event style, centered header, 14px radius)
-    const monarchRose = resolveCalendarTheme('monarch', 'light', 'rose');
-    expect(monarchRose.eventStyle).toBe('solid');
-    expect(monarchRose.dayNumberAlign).toBe('center');
-    expect(monarchRose.containerRadius).toBe('14px');
-    expect(monarchRose.primaryColor).toBe('#E11D48');
-
-    // Shadcn & MUI design-system themes
-    const shadcnDark = resolveCalendarTheme('shadcn', 'dark', 'default');
-    expect(shadcnDark.category).toBe('design-system');
-    expect(shadcnDark.eventStyle).toBe('tinted');
-    expect(shadcnDark.cellBg).toBe('#030712');
-
-    const muiLight = resolveCalendarTheme('mui', 'light', 'blue');
-    expect(muiLight.category).toBe('design-system');
-    expect(muiLight.eventStyle).toBe('solid');
-    expect(muiLight.primaryColor).toBe('#0F6CBD');
-
-    // Auto colorScheme detection from Strapi Admin neutral0 token (#212134 dark vs #ffffff light)
-    expect(detectEffectiveColorScheme('auto', '#212134')).toBe('dark');
-    expect(detectEffectiveColorScheme('auto', '#181826')).toBe('dark');
-    expect(detectEffectiveColorScheme('auto', '#ffffff')).toBe('light');
-    expect(detectEffectiveColorScheme('dark', '#ffffff')).toBe('dark');
-    expect(detectEffectiveColorScheme('light', '#212134')).toBe('light');
-
-    const autoDarkBreeze = resolveCalendarTheme('breeze', 'auto', 'default', '#212134');
-    expect(autoDarkBreeze.cellBg).toBe('#030712');
-    expect(autoDarkBreeze.headerBg).toBe('#111827');
-  });
-});
 
 

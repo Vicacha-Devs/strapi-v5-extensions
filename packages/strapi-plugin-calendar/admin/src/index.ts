@@ -30,30 +30,35 @@ export default {
         })),
     });
 
-    app.createSettingSection(
-      {
-        id: PLUGIN_ID,
-        intlLabel: {
-          id: `${PLUGIN_ID}.settings.section`,
-          defaultMessage: 'Calendar & Scheduler',
-        },
+    const calendarSettingsSection = {
+      id: PLUGIN_ID,
+      intlLabel: {
+        id: `${PLUGIN_ID}.settings.section`,
+        defaultMessage: 'Calendar, Events & Bookings',
       },
-      [
-        {
-          intlLabel: {
-            id: `${PLUGIN_ID}.settings.general`,
-            defaultMessage: 'Sources & Calendar Settings',
-          },
-          id: `${PLUGIN_ID}-settings`,
-          to: `${PLUGIN_ID}`,
-          Component: () =>
-            import('./pages/SettingsPage').then((mod) => ({
-              default: mod.SettingsPage,
-            })),
-          permissions: [],
-        },
-      ]
-    );
+    };
+    const calendarSettingsLink = {
+      intlLabel: {
+        id: `${PLUGIN_ID}.settings.general`,
+        defaultMessage: 'Calendar & Scheduler',
+      },
+      id: `${PLUGIN_ID}-settings`,
+      to: `${PLUGIN_ID}`,
+      Component: () =>
+        import('./pages/SettingsPage').then((mod) => ({
+          default: mod.SettingsPage,
+        })),
+      permissions: [],
+    };
+    try {
+      if (typeof app.addSettingsLink === 'function') {
+        app.addSettingsLink(calendarSettingsSection.id, calendarSettingsLink);
+      } else {
+        app.createSettingSection(calendarSettingsSection, [calendarSettingsLink]);
+      }
+    } catch {
+      app.createSettingSection(calendarSettingsSection, [calendarSettingsLink]);
+    }
 
     app.registerPlugin({
       id: PLUGIN_ID,

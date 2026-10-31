@@ -7,122 +7,104 @@ import type {
   RRuleWeekday,
 } from './types';
 
-const VALID_FREQUENCIES: RRuleFrequency[] = [
-  'NONE',
-  'DAILY',
-  'WEEKLY',
-  'MONTHLY',
-  'YEARLY',
-];
-const VALID_WEEKDAYS: RRuleWeekday[] = [
-  'MO',
-  'TU',
-  'WE',
-  'TH',
-  'FR',
-  'SA',
-  'SU',
-];
-
+const VALID_FREQUENCIES: RRuleFrequency[] = ['NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'];
+const VALID_WEEKDAYS: RRuleWeekday[] = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 const JS_DAY_TO_RRULE_DAY: Record<number, RRuleWeekday> = {
-  0: 'SU',
-  1: 'MO',
-  2: 'TU',
-  3: 'WE',
-  4: 'TH',
-  5: 'FR',
-  6: 'SA',
+  0: 'SU', 1: 'MO', 2: 'TU', 3: 'WE', 4: 'TH', 5: 'FR', 6: 'SA',
+};
+const DAY_LABELS: Record<RRuleWeekday, string> = {
+  MO: 'Mon', TU: 'Tue', WE: 'Wed', TH: 'Thu', FR: 'Fri', SA: 'Sat', SU: 'Sun',
+};
+const SINGULAR_FREQ_LABELS: Record<RRuleFrequency, string> = {
+  NONE: '', DAILY: 'Every day', WEEKLY: 'Every week', MONTHLY: 'Every month', YEARLY: 'Every year',
+};
+const PLURAL_FREQ_UNITS: Record<RRuleFrequency, string> = {
+  NONE: 'days', DAILY: 'days', WEEKLY: 'weeks', MONTHLY: 'months', YEARLY: 'years',
+};
+
+function parseBoundedInt(val: string, min: number, max: number): number | undefined {
+  const n = Number.parseInt(val, 10);
+  return Number.isFinite(n) && n >= min && n <= max ? n : undefined;
+}
+
+function parseUntilDate(val: string): string | undefined {
+  if (/^\d{8}(?:T\d{6}Z?)?$/.test(val)) {
+    return `${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6, 8)}`;
+  }
+  return /^\d{4}-\d{2}-\d{2}/.test(val) ? val.slice(0, 10) : undefined;
+}
+
+function parseByDayList(val: string): RRuleWeekday[] {
+  return val
+    .split(',')
+    .map((d) => d.trim().slice(-2) as RRuleWeekday)
+    .filter((d) => VALID_WEEKDAYS.includes(d));
+}
+
+type RRulePartAssigner = (parsed: ParsedRRule, val: string) => void;
+
+const RRULE_PART_ASSIGNERS: Record<string, RRulePartAssigner> = {
+  RSCALE: (parsed, val) => {
+    if (val) parsed.rscale = val.toLowerCase();
+  },
+  FREQ: (parsed, val) => {
+    if (VALID_FREQUENCIES.includes(val as RRuleFrequency)) {
+      parsed.freq = val as RRuleFrequency;
+    }
+  },
+  INTERVAL: (parsed, val) => {
+    const n = parseBoundedInt(val, 1, 365);
+    if (n !== undefined) parsed.interval = n;
+  },
+  BYDAY: (parsed, val) => {
+    parsed.byDay = parseByDayList(val);
+  },
+  BYMONTH: (parsed, val) => {
+    const m = parseBoundedInt(val, 1, 13);
+    if (m !== undefined) parsed.byMonth = m;
+  },
+  BYMONTHDAY: (parsed, val) => {
+    const md = parseBoundedInt(val, 1, 31);
+    if (md !== undefined) parsed.byMonthDay = md;
+  },
+  COUNT: (parsed, val) => {
+    const c = parseBoundedInt(val, 1, 1000);
+    if (c !== undefined) parsed.count = c;
+  },
+  UNTIL: (parsed, val) => {
+    const u = parseUntilDate(val);
+    if (u !== undefined) parsed.until = u;
+  },
 };
 
 export function parseRRule(rawRule?: string | null): ParsedRRule {
-  const defaultParsed: ParsedRRule = {
-    freq: 'NONE',
-    interval: 1,
-    byDay: [],
-  };
-  if (!rawRule || typeof rawRule !== 'string') {
-    return defaultParsed;
-  }
+  const defaultParsed: ParsedRRule = { freq: 'NONE', interval: 1, byDay: [] };
+  if (!rawRule || typeof rawRule !== 'string') return defaultParsed;
   const cleaned = rawRule.trim().replace(/^RRULE:/i, '');
-  if (!cleaned) {
-    return defaultParsed;
-  }
-  const parts = cleaned.split(';');
+  if (!cleaned) return defaultParsed;
   const parsed: ParsedRRule = { ...defaultParsed };
-  for (const part of parts) {
+  for (const part of cleaned.split(';')) {
     const [rawKey, rawVal] = part.split('=');
     if (!rawKey || !rawVal) continue;
-    const key = rawKey.trim().toUpperCase();
-    const val = rawVal.trim().toUpperCase();
-    if (key === 'RSCALE' && val) {
-      parsed.rscale = val.toLowerCase();
-    } else if (
-      key === 'FREQ' &&
-      VALID_FREQUENCIES.includes(val as RRuleFrequency)
-    ) {
-      parsed.freq = val as RRuleFrequency;
-    } else if (key === 'INTERVAL') {
-      const n = Number.parseInt(val, 10);
-      if (Number.isFinite(n) && n >= 1 && n <= 365) {
-        parsed.interval = n;
-      }
-    } else if (key === 'BYDAY') {
-      parsed.byDay = val
-        .split(',')
-        .map((d) => d.trim().slice(-2) as RRuleWeekday)
-        .filter((d) => VALID_WEEKDAYS.includes(d));
-    } else if (key === 'BYMONTH') {
-      const m = Number.parseInt(val, 10);
-      if (Number.isFinite(m) && m >= 1 && m <= 13) {
-        parsed.byMonth = m;
-      }
-    } else if (key === 'BYMONTHDAY') {
-      const md = Number.parseInt(val, 10);
-      if (Number.isFinite(md) && md >= 1 && md <= 31) {
-        parsed.byMonthDay = md;
-      }
-    } else if (key === 'COUNT') {
-      const c = Number.parseInt(val, 10);
-      if (Number.isFinite(c) && c >= 1 && c <= 1000) {
-        parsed.count = c;
-      }
-    } else if (key === 'UNTIL') {
-      if (/^\d{8}T\d{6}Z?$/.test(val)) {
-        parsed.until = `${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6, 8)}`;
-      } else if (/^\d{8}$/.test(val)) {
-        parsed.until = `${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6, 8)}`;
-      } else if (/^\d{4}-\d{2}-\d{2}/.test(val)) {
-        parsed.until = val.slice(0, 10);
-      }
-    }
+    const assigner = RRULE_PART_ASSIGNERS[rawKey.trim().toUpperCase()];
+    if (assigner) assigner(parsed, rawVal.trim().toUpperCase());
   }
   return parsed;
 }
 
-export function buildRRule(parsed: ParsedRRule): string {
-  if (!parsed || parsed.freq === 'NONE') {
-    return '';
-  }
-  const segments: string[] = [];
-  if (
-    parsed.rscale &&
-    parsed.rscale !== 'gregory' &&
-    parsed.rscale !== 'iso8601'
-  ) {
-    segments.push(`RSCALE=${parsed.rscale.toUpperCase()}`);
+function appendRscaleAndFreq(segments: string[], parsed: ParsedRRule): void {
+  const rscale = parsed.rscale;
+  if (rscale && rscale !== 'gregory' && rscale !== 'iso8601') {
+    segments.push(`RSCALE=${rscale.toUpperCase()}`);
   }
   segments.push(`FREQ=${parsed.freq}`);
-  const interval = Math.max(1, Math.floor(parsed.interval || 1));
-  segments.push(`INTERVAL=${interval}`);
-  if (
-    parsed.freq === 'WEEKLY' &&
-    Array.isArray(parsed.byDay) &&
-    parsed.byDay.length > 0
-  ) {
+  segments.push(`INTERVAL=${Math.max(1, Math.floor(parsed.interval || 1))}`);
+}
+
+function appendRuleModifiers(segments: string[], parsed: ParsedRRule): void {
+  if (parsed.freq === 'WEEKLY' && Array.isArray(parsed.byDay)) {
     const validDays = parsed.byDay.filter((d) => VALID_WEEKDAYS.includes(d));
-    if (validDays.length > 0) {
-      segments.push(`BYDAY=${validDays.join(',')}`);
-    }
+    if (validDays.length > 0) segments.push(`BYDAY=${validDays.join(',')}`);
   }
   if (
     parsed.freq === 'YEARLY' &&
@@ -132,8 +114,12 @@ export function buildRRule(parsed: ParsedRRule): string {
   ) {
     segments.push(`BYMONTH=${Math.floor(parsed.byMonth)}`);
   }
+}
+
+function appendMonthDayAndBounds(segments: string[], parsed: ParsedRRule): void {
+  const isMonthOrYear = parsed.freq === 'MONTHLY' || parsed.freq === 'YEARLY';
   if (
-    (parsed.freq === 'MONTHLY' || parsed.freq === 'YEARLY') &&
+    isMonthOrYear &&
     typeof parsed.byMonthDay === 'number' &&
     parsed.byMonthDay >= 1 &&
     parsed.byMonthDay <= 31
@@ -143,134 +129,99 @@ export function buildRRule(parsed: ParsedRRule): string {
   if (typeof parsed.count === 'number' && parsed.count >= 1) {
     segments.push(`COUNT=${Math.floor(parsed.count)}`);
   } else if (parsed.until && /^\d{4}-\d{2}-\d{2}$/.test(parsed.until)) {
-    const compact = parsed.until.replace(/-/g, '');
-    segments.push(`UNTIL=${compact}T235959Z`);
+    segments.push(`UNTIL=${parsed.until.replace(/-/g, '')}T235959Z`);
   }
+}
+
+export function buildRRule(parsed: ParsedRRule): string {
+  if (!parsed || parsed.freq === 'NONE') return '';
+  const segments: string[] = [];
+  appendRscaleAndFreq(segments, parsed);
+  appendRuleModifiers(segments, parsed);
+  appendMonthDayAndBounds(segments, parsed);
   return segments.join(';');
+}
+
+function formatRRuleIntervalText(parsed: ParsedRRule): string {
+  if (parsed.interval === 1) {
+    return SINGULAR_FREQ_LABELS[parsed.freq] || 'Every year';
+  }
+  return `Every ${parsed.interval} ${PLURAL_FREQ_UNITS[parsed.freq] || 'years'}`;
+}
+
+function formatRRuleSuffix(parsed: ParsedRRule): string {
+  if (parsed.freq === 'WEEKLY' && parsed.byDay.length > 0) {
+    return ` on ${parsed.byDay.map((d) => DAY_LABELS[d]).join(', ')}`;
+  }
+  if (parsed.freq === 'YEARLY' && parsed.byMonth && parsed.byMonthDay) {
+    return ` on month ${parsed.byMonth}, day ${parsed.byMonthDay}`;
+  }
+  if (parsed.freq === 'MONTHLY' && parsed.byMonthDay) {
+    return ` on day ${parsed.byMonthDay}`;
+  }
+  return '';
+}
+
+function formatRRuleLimit(parsed: ParsedRRule): string {
+  if (parsed.count) return `, ${parsed.count} times`;
+  if (parsed.until) return `, until ${parsed.until}`;
+  return '';
 }
 
 export function describeRRule(rawRule?: string | null): string {
   const parsed = parseRRule(rawRule);
-  if (parsed.freq === 'NONE') {
-    return 'Does not repeat (Single occurrence)';
-  }
+  if (parsed.freq === 'NONE') return 'Does not repeat (Single occurrence)';
   const rscalePrefix =
     parsed.rscale && parsed.rscale !== 'gregory'
       ? `[${parsed.rscale.toUpperCase()}] `
       : '';
-  const intervalText =
-    parsed.interval === 1
-      ? parsed.freq === 'DAILY'
-        ? 'Every day'
-        : parsed.freq === 'WEEKLY'
-        ? 'Every week'
-        : parsed.freq === 'MONTHLY'
-        ? 'Every month'
-        : 'Every year'
-      : `Every ${parsed.interval} ${
-          parsed.freq === 'DAILY'
-            ? 'days'
-            : parsed.freq === 'WEEKLY'
-            ? 'weeks'
-            : parsed.freq === 'MONTHLY'
-            ? 'months'
-            : 'years'
-        }`;
-  const dayMap: Record<RRuleWeekday, string> = {
-    MO: 'Mon',
-    TU: 'Tue',
-    WE: 'Wed',
-    TH: 'Thu',
-    FR: 'Fri',
-    SA: 'Sat',
-    SU: 'Sun',
-  };
-  let suffix = '';
-  if (parsed.freq === 'WEEKLY' && parsed.byDay.length > 0) {
-    suffix = ` on ${parsed.byDay.map((d) => dayMap[d]).join(', ')}`;
-  } else if (parsed.freq === 'YEARLY' && parsed.byMonth && parsed.byMonthDay) {
-    suffix = ` on month ${parsed.byMonth}, day ${parsed.byMonthDay}`;
-  } else if (parsed.freq === 'MONTHLY' && parsed.byMonthDay) {
-    suffix = ` on day ${parsed.byMonthDay}`;
-  }
-  let limit = '';
-  if (parsed.count) {
-    limit = `, ${parsed.count} times`;
-  } else if (parsed.until) {
-    limit = `, until ${parsed.until}`;
-  }
-  return `${rscalePrefix}${intervalText}${suffix}${limit}`;
+  return `${rscalePrefix}${formatRRuleIntervalText(parsed)}${formatRRuleSuffix(parsed)}${formatRRuleLimit(parsed)}`;
 }
 
-export function parseRRuleFieldValue(
-  raw: unknown,
-  defaultTimezone = 'UTC'
+function normalizeRRuleObject(
+  obj: Record<string, unknown>,
+  defaultTimezone: string
 ): RRuleFieldValue {
+  const rruleStr = typeof obj.rrule === 'string' ? obj.rrule : '';
+  const parsed = parseRRule(rruleStr);
+  const timezone =
+    typeof obj.timezone === 'string' && obj.timezone ? obj.timezone : defaultTimezone;
+  const rscale = typeof obj.rscale === 'string' ? obj.rscale : parsed.rscale;
+  const exdates = Array.isArray(obj.exdates)
+    ? obj.exdates.filter((d): d is string => typeof d === 'string')
+    : [];
+  const overrides =
+    obj.overrides && typeof obj.overrides === 'object'
+      ? (obj.overrides as Record<string, OccurrenceOverride>)
+      : {};
+  return { rrule: rruleStr, timezone, rscale, allDay: Boolean(obj.allDay), exdates, overrides };
+}
+
+export function parseRRuleFieldValue(raw: unknown, defaultTimezone = 'UTC'): RRuleFieldValue {
   const fallback: RRuleFieldValue = {
-    rrule: '',
-    timezone: defaultTimezone,
-    allDay: false,
-    exdates: [],
-    overrides: {},
+    rrule: '', timezone: defaultTimezone, allDay: false, exdates: [], overrides: {},
   };
   if (!raw) return fallback;
   if (typeof raw === 'string') {
     const trimmed = raw.trim();
     if (trimmed.startsWith('{')) {
       try {
-        const obj = JSON.parse(trimmed) as Record<string, unknown>;
-        const parsed = parseRRule(
-          typeof obj.rrule === 'string' ? obj.rrule : ''
-        );
-        return {
-          rrule: typeof obj.rrule === 'string' ? obj.rrule : '',
-          timezone:
-            typeof obj.timezone === 'string' && obj.timezone
-              ? obj.timezone
-              : defaultTimezone,
-          rscale: typeof obj.rscale === 'string' ? obj.rscale : parsed.rscale,
-          allDay: Boolean(obj.allDay),
-          exdates: Array.isArray(obj.exdates)
-            ? obj.exdates.filter((d): d is string => typeof d === 'string')
-            : [],
-          overrides:
-            obj.overrides && typeof obj.overrides === 'object'
-              ? (obj.overrides as Record<string, OccurrenceOverride>)
-              : {},
-        };
+        return normalizeRRuleObject(JSON.parse(trimmed) as Record<string, unknown>, defaultTimezone);
       } catch {
         return fallback;
       }
     }
     const parsed = parseRRule(trimmed);
-    return {
-      ...fallback,
-      rrule: trimmed,
-      rscale: parsed.rscale,
-    };
+    return { ...fallback, rrule: trimmed, rscale: parsed.rscale };
   }
   if (typeof raw === 'object') {
-    const obj = raw as Record<string, unknown>;
-    const rruleStr = typeof obj.rrule === 'string' ? obj.rrule : '';
-    const parsed = parseRRule(rruleStr);
-    return {
-      rrule: rruleStr,
-      timezone:
-        typeof obj.timezone === 'string' && obj.timezone
-          ? obj.timezone
-          : defaultTimezone,
-      rscale: typeof obj.rscale === 'string' ? obj.rscale : parsed.rscale,
-      allDay: Boolean(obj.allDay),
-      exdates: Array.isArray(obj.exdates)
-        ? obj.exdates.filter((d): d is string => typeof d === 'string')
-        : [],
-      overrides:
-        obj.overrides && typeof obj.overrides === 'object'
-          ? (obj.overrides as Record<string, OccurrenceOverride>)
-          : {},
-    };
+    return normalizeRRuleObject(raw as Record<string, unknown>, defaultTimezone);
   }
   return fallback;
+}
+
+function toDateKeyUTC(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 export interface ExpandedSlot {
@@ -283,14 +234,195 @@ export interface ExpandedSlot {
   override?: OccurrenceOverride;
 }
 
-function toDateKeyUTC(date: Date): string {
-  return date.toISOString().slice(0, 10);
+interface SlotContext {
+  startObj: Date;
+  durationMs: number;
+  winStartMs: number;
+  winEndMs: number;
+  untilMs: number;
+  maxCount: number;
+  maxOccurrences: number;
+  parsed: ParsedRRule;
+  exdatesSet: Set<string>;
+  overridesMap: Record<string, OccurrenceOverride>;
+  effectiveRScale?: string;
+  isNonGregorianRScale: boolean;
+  targetMonth: number;
+  targetDayOfMonth: number;
+  targetWeekdays: RRuleWeekday[];
+  anchorMidnightMs: number;
+  timeOffsetMs: number;
 }
 
-/**
- * Expands either a single occurrence or an RFC 5545 / RFC 7529 (RSCALE) recurring series
- * within [windowStart, windowEnd], applying exdates and per-occurrence overrides.
- */
+function buildEffectiveSlot(
+  candidateDate: Date,
+  dateKey: string,
+  ctx: Pick<
+    SlotContext,
+    'exdatesSet' | 'overridesMap' | 'durationMs' | 'winStartMs' | 'winEndMs' | 'effectiveRScale'
+  >,
+  isRecurring: boolean
+): ExpandedSlot | null {
+  if (ctx.exdatesSet.has(dateKey)) return null;
+  const override = ctx.overridesMap[dateKey];
+  if (override?.cancelled) return null;
+  const effStart = override?.startDate ? new Date(override.startDate) : candidateDate;
+  const effEnd = override?.endDate
+    ? new Date(override.endDate)
+    : new Date(effStart.getTime() + ctx.durationMs);
+  if (effEnd.getTime() < ctx.winStartMs || effStart.getTime() > ctx.winEndMs) return null;
+  return {
+    occurrenceDate: dateKey,
+    startDate: effStart.toISOString(),
+    endDate: effEnd.toISOString(),
+    isRecurring,
+    isOverridden: Boolean(override),
+    ...(isRecurring ? { rscale: ctx.effectiveRScale } : {}),
+    override,
+  };
+}
+
+function matchesNonGregorianFrequency(candidateDate: Date, ctx: SlotContext): boolean {
+  const calParts = extractCalendarParts(candidateDate, ctx.effectiveRScale!);
+  if (!calParts) return false;
+  if (ctx.parsed.freq === 'MONTHLY') return calParts.day === ctx.targetDayOfMonth;
+  return calParts.month === ctx.targetMonth && calParts.day === ctx.targetDayOfMonth;
+}
+
+function matchesGregorianFrequency(
+  candidateDate: Date,
+  dayOffset: number,
+  ctx: SlotContext
+): boolean {
+  const { freq, interval } = ctx.parsed;
+  if (freq === 'DAILY') return dayOffset % interval === 0;
+  if (freq === 'WEEKLY') {
+    const rruleDay = JS_DAY_TO_RRULE_DAY[candidateDate.getUTCDay()];
+    return Math.floor(dayOffset / 7) % interval === 0 && ctx.targetWeekdays.includes(rruleDay);
+  }
+  if (freq === 'MONTHLY') {
+    const monthsDiff =
+      (candidateDate.getUTCFullYear() - ctx.startObj.getUTCFullYear()) * 12 +
+      (candidateDate.getUTCMonth() - ctx.startObj.getUTCMonth());
+    return (
+      monthsDiff >= 0 &&
+      monthsDiff % interval === 0 &&
+      candidateDate.getUTCDate() === ctx.targetDayOfMonth
+    );
+  }
+  const yearsDiff = candidateDate.getUTCFullYear() - ctx.startObj.getUTCFullYear();
+  return (
+    yearsDiff >= 0 &&
+    yearsDiff % interval === 0 &&
+    candidateDate.getUTCMonth() + 1 === ctx.targetMonth &&
+    candidateDate.getUTCDate() === ctx.targetDayOfMonth
+  );
+}
+
+function matchesCandidateRule(
+  candidateDate: Date,
+  dayOffset: number,
+  ctx: SlotContext
+): boolean {
+  const isMonthOrYear = ctx.parsed.freq === 'MONTHLY' || ctx.parsed.freq === 'YEARLY';
+  if (ctx.isNonGregorianRScale && ctx.effectiveRScale && isMonthOrYear) {
+    return matchesNonGregorianFrequency(candidateDate, ctx);
+  }
+  return matchesGregorianFrequency(candidateDate, dayOffset, ctx);
+}
+
+function resolveEndDate(startObj: Date, baseEndDate?: string | null): Date {
+  if (baseEndDate) {
+    const parsedEnd = new Date(baseEndDate);
+    if (!Number.isNaN(parsedEnd.getTime())) return parsedEnd;
+  }
+  return new Date(startObj.getTime() + 60 * 60 * 1000);
+}
+
+function resolveCalendarTargets(
+  startObj: Date,
+  parsed: ParsedRRule,
+  effectiveRScale?: string
+): {
+  isNonGregorianRScale: boolean;
+  targetMonth: number;
+  targetDayOfMonth: number;
+  targetWeekdays: RRuleWeekday[];
+} {
+  const isNonGregorianRScale =
+    Boolean(effectiveRScale) && effectiveRScale !== 'gregory' && effectiveRScale !== 'iso8601';
+  const baseParts =
+    isNonGregorianRScale && effectiveRScale
+      ? extractCalendarParts(startObj, effectiveRScale)
+      : null;
+  const targetMonth = parsed.byMonth ?? (baseParts ? baseParts.month : startObj.getUTCMonth() + 1);
+  const targetDayOfMonth =
+    parsed.byMonthDay ?? (baseParts ? baseParts.day : startObj.getUTCDate());
+  const targetWeekdays =
+    parsed.byDay.length > 0 ? parsed.byDay : [JS_DAY_TO_RRULE_DAY[startObj.getUTCDay()]];
+  return { isNonGregorianRScale, targetMonth, targetDayOfMonth, targetWeekdays };
+}
+
+function createSlotContext(params: {
+  startObj: Date;
+  baseEndDate?: string | null;
+  recurrence?: RRuleFieldValue | null;
+  windowStart: string;
+  windowEnd: string;
+  maxOccurrences: number;
+}): SlotContext {
+  const { startObj, baseEndDate, recurrence, windowStart, windowEnd } = params;
+  const endObj = resolveEndDate(startObj, baseEndDate);
+  const parsed = parseRRule(recurrence?.rrule);
+  const effectiveRScale = recurrence?.rscale || parsed.rscale;
+  const targets = resolveCalendarTargets(startObj, parsed, effectiveRScale);
+  const untilMs = parsed.until
+    ? new Date(`${parsed.until}T23:59:59.999Z`).getTime()
+    : Number.POSITIVE_INFINITY;
+
+  return {
+    startObj,
+    durationMs: Math.max(0, endObj.getTime() - startObj.getTime()),
+    winStartMs: new Date(windowStart).getTime(),
+    winEndMs: new Date(windowEnd).getTime(),
+    untilMs,
+    maxCount: parsed.count ?? params.maxOccurrences,
+    maxOccurrences: params.maxOccurrences,
+    parsed,
+    exdatesSet: new Set(recurrence?.exdates ?? []),
+    overridesMap: recurrence?.overrides ?? {},
+    effectiveRScale,
+    ...targets,
+    anchorMidnightMs: Date.UTC(
+      startObj.getUTCFullYear(),
+      startObj.getUTCMonth(),
+      startObj.getUTCDate()
+    ),
+    timeOffsetMs:
+      startObj.getUTCHours() * 3600000 +
+      startObj.getUTCMinutes() * 60000 +
+      startObj.getUTCSeconds() * 1000,
+  };
+}
+
+function scanRecurringSlots(ctx: SlotContext): ExpandedSlot[] {
+  const results: ExpandedSlot[] = [];
+  let generatedCount = 0;
+  for (let dayOffset = 0; dayOffset <= 1460; dayOffset++) {
+    if (generatedCount >= ctx.maxCount || results.length >= ctx.maxOccurrences) break;
+    const candidateDate = new Date(
+      ctx.anchorMidnightMs + dayOffset * 86400000 + ctx.timeOffsetMs
+    );
+    const candidateMs = candidateDate.getTime();
+    if (candidateMs > ctx.untilMs || candidateMs > ctx.winEndMs) break;
+    if (!matchesCandidateRule(candidateDate, dayOffset, ctx)) continue;
+    generatedCount++;
+    const slot = buildEffectiveSlot(candidateDate, toDateKeyUTC(candidateDate), ctx, true);
+    if (slot) results.push(slot);
+  }
+  return results;
+}
+
 export function expandRuleSlots(params: {
   baseStartDate: string;
   baseEndDate?: string | null;
@@ -299,180 +431,16 @@ export function expandRuleSlots(params: {
   windowEnd: string;
   maxOccurrences?: number;
 }): ExpandedSlot[] {
-  const {
-    baseStartDate,
-    baseEndDate,
-    recurrence,
-    windowStart,
-    windowEnd,
-    maxOccurrences = 366,
-  } = params;
-  const startObj = new Date(baseStartDate);
-  if (Number.isNaN(startObj.getTime())) {
-    return [];
+  const startObj = new Date(params.baseStartDate);
+  if (Number.isNaN(startObj.getTime())) return [];
+  const ctx = createSlotContext({
+    ...params,
+    startObj,
+    maxOccurrences: params.maxOccurrences ?? 366,
+  });
+  if (ctx.parsed.freq === 'NONE') {
+    const slot = buildEffectiveSlot(startObj, toDateKeyUTC(startObj), ctx, false);
+    return slot ? [slot] : [];
   }
-  const endObj =
-    baseEndDate && !Number.isNaN(new Date(baseEndDate).getTime())
-      ? new Date(baseEndDate)
-      : new Date(startObj.getTime() + 60 * 60 * 1000);
-  const durationMs = Math.max(0, endObj.getTime() - startObj.getTime());
-  const winStartMs = new Date(windowStart).getTime();
-  const winEndMs = new Date(windowEnd).getTime();
-  const parsed = parseRRule(recurrence?.rrule);
-  const exdatesSet = new Set(recurrence?.exdates ?? []);
-  const overridesMap = recurrence?.overrides ?? {};
-  const effectiveRScale = recurrence?.rscale || parsed.rscale;
-
-  if (parsed.freq === 'NONE') {
-    const dateKey = toDateKeyUTC(startObj);
-    if (exdatesSet.has(dateKey)) {
-      return [];
-    }
-    const override = overridesMap[dateKey];
-    if (override?.cancelled) {
-      return [];
-    }
-    const effStart = override?.startDate
-      ? new Date(override.startDate)
-      : startObj;
-    const effEnd = override?.endDate
-      ? new Date(override.endDate)
-      : new Date(effStart.getTime() + durationMs);
-    if (effEnd.getTime() < winStartMs || effStart.getTime() > winEndMs) {
-      return [];
-    }
-    return [
-      {
-        occurrenceDate: dateKey,
-        startDate: effStart.toISOString(),
-        endDate: effEnd.toISOString(),
-        isRecurring: false,
-        isOverridden: Boolean(override),
-        override,
-      },
-    ];
-  }
-
-  const results: ExpandedSlot[] = [];
-  const untilMs = parsed.until
-    ? new Date(`${parsed.until}T23:59:59.999Z`).getTime()
-    : Number.POSITIVE_INFINITY;
-  const maxCount = parsed.count ?? maxOccurrences;
-  const baseHours = startObj.getUTCHours();
-  const baseMinutes = startObj.getUTCMinutes();
-  const baseSeconds = startObj.getUTCSeconds();
-  const isNonGregorianRScale =
-    Boolean(effectiveRScale) &&
-    effectiveRScale !== 'gregory' &&
-    effectiveRScale !== 'iso8601';
-  const baseCalendarParts =
-    isNonGregorianRScale && effectiveRScale
-      ? extractCalendarParts(startObj, effectiveRScale)
-      : {
-          year: startObj.getUTCFullYear(),
-          month: startObj.getUTCMonth() + 1,
-          day: startObj.getUTCDate(),
-        };
-  const targetMonth =
-    parsed.byMonth ?? baseCalendarParts?.month ?? startObj.getUTCMonth() + 1;
-  const targetDayOfMonth =
-    parsed.byMonthDay ?? baseCalendarParts?.day ?? startObj.getUTCDate();
-  const targetWeekdays =
-    parsed.byDay.length > 0
-      ? parsed.byDay
-      : [JS_DAY_TO_RRULE_DAY[startObj.getUTCDay()]];
-  const anchorMidnightMs = Date.UTC(
-    startObj.getUTCFullYear(),
-    startObj.getUTCMonth(),
-    startObj.getUTCDate()
-  );
-
-  let generatedCount = 0;
-  const maxDaysToScan = 1460;
-  for (let dayOffset = 0; dayOffset <= maxDaysToScan; dayOffset++) {
-    if (generatedCount >= maxCount || results.length >= maxOccurrences) {
-      break;
-    }
-    const candidateDate = new Date(
-      anchorMidnightMs +
-        dayOffset * 86400000 +
-        baseHours * 3600000 +
-        baseMinutes * 60000 +
-        baseSeconds * 1000
-    );
-    const candidateMs = candidateDate.getTime();
-    if (candidateMs > untilMs || candidateMs > winEndMs) {
-      break;
-    }
-    let matchesRule = false;
-    if (
-      isNonGregorianRScale &&
-      effectiveRScale &&
-      (parsed.freq === 'MONTHLY' || parsed.freq === 'YEARLY')
-    ) {
-      const calParts = extractCalendarParts(candidateDate, effectiveRScale);
-      if (calParts) {
-        if (parsed.freq === 'MONTHLY') {
-          matchesRule = calParts.day === targetDayOfMonth;
-        } else if (parsed.freq === 'YEARLY') {
-          matchesRule =
-            calParts.month === targetMonth && calParts.day === targetDayOfMonth;
-        }
-      }
-    } else if (parsed.freq === 'DAILY') {
-      matchesRule = dayOffset % parsed.interval === 0;
-    } else if (parsed.freq === 'WEEKLY') {
-      const weekIndex = Math.floor(dayOffset / 7);
-      const rruleDay = JS_DAY_TO_RRULE_DAY[candidateDate.getUTCDay()];
-      matchesRule =
-        weekIndex % parsed.interval === 0 && targetWeekdays.includes(rruleDay);
-    } else if (parsed.freq === 'MONTHLY') {
-      const monthsDiff =
-        (candidateDate.getUTCFullYear() - startObj.getUTCFullYear()) * 12 +
-        (candidateDate.getUTCMonth() - startObj.getUTCMonth());
-      matchesRule =
-        monthsDiff >= 0 &&
-        monthsDiff % parsed.interval === 0 &&
-        candidateDate.getUTCDate() === targetDayOfMonth;
-    } else if (parsed.freq === 'YEARLY') {
-      const yearsDiff =
-        candidateDate.getUTCFullYear() - startObj.getUTCFullYear();
-      matchesRule =
-        yearsDiff >= 0 &&
-        yearsDiff % parsed.interval === 0 &&
-        candidateDate.getUTCMonth() + 1 === targetMonth &&
-        candidateDate.getUTCDate() === targetDayOfMonth;
-    }
-    if (!matchesRule) {
-      continue;
-    }
-    generatedCount++;
-    const dateKey = toDateKeyUTC(candidateDate);
-    if (exdatesSet.has(dateKey)) {
-      continue;
-    }
-    const override = overridesMap[dateKey];
-    if (override?.cancelled) {
-      continue;
-    }
-    const effStart = override?.startDate
-      ? new Date(override.startDate)
-      : candidateDate;
-    const effEnd = override?.endDate
-      ? new Date(override.endDate)
-      : new Date(effStart.getTime() + durationMs);
-    if (effEnd.getTime() < winStartMs || effStart.getTime() > winEndMs) {
-      continue;
-    }
-    results.push({
-      occurrenceDate: dateKey,
-      startDate: effStart.toISOString(),
-      endDate: effEnd.toISOString(),
-      isRecurring: true,
-      isOverridden: Boolean(override),
-      rscale: effectiveRScale,
-      override,
-    });
-  }
-  return results;
+  return scanRecurringSlots(ctx);
 }

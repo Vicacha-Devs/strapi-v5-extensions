@@ -5,6 +5,10 @@ import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { formatDateInCalendarSystem } from '../../../shared/calendarSystems';
 import { PLUGIN_ID } from '../../../shared/pluginId';
 import type { CalendarPluginSettings } from '../../../shared/types';
+import {
+  formatPluginMessageWithUrlLocale,
+  resolveActiveContentLocale,
+} from './calendar/calendarPageHelpers';
 
 export interface SidePanelProps {
   activeTab?: string;
@@ -13,6 +17,14 @@ export interface SidePanelProps {
   documentId?: string;
   meta?: Record<string, unknown>;
   model?: string;
+}
+
+function resolveSidePanelStartDate(docRecord: Record<string, unknown>): string {
+  for (const key of ['startDate', 'preferredDate', 'date']) {
+    const val = docRecord[key];
+    if (typeof val === 'string' && val) return val;
+  }
+  return '';
 }
 
 export const CalendarSidePanel = (props: SidePanelProps) => {
@@ -25,15 +37,8 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
   const documentId =
     props.documentId ??
     (typeof docRecord.documentId === 'string' ? docRecord.documentId : '');
-
-  const rawStartDate =
-    typeof docRecord.startDate === 'string'
-      ? docRecord.startDate
-      : typeof docRecord.preferredDate === 'string'
-        ? docRecord.preferredDate
-        : typeof docRecord.date === 'string'
-          ? docRecord.date
-          : '';
+  const rawStartDate = resolveSidePanelStartDate(docRecord);
+  const activeLocale = resolveActiveContentLocale(locale);
 
   const hasScheduleFields = Boolean(rawStartDate || docRecord.recurrence);
 
@@ -69,7 +74,7 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
         const overrideVal = typeof rawFieldVal === 'string' ? rawFieldVal.trim() : '';
         const formatted =
           overrideVal ||
-          formatDateInCalendarSystem(rawStartDate, sys, locale || 'en', {
+          formatDateInCalendarSystem(rawStartDate, sys, activeLocale, {
             compact: false,
           });
         return {
@@ -80,14 +85,14 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
         };
       })
       .filter((item) => Boolean(item.formatted));
-  }, [rawStartDate, settings?.secondaryCalendars, docRecord, locale]);
+  }, [rawStartDate, settings?.secondaryCalendars, docRecord, activeLocale]);
 
   if (!hasScheduleFields || !documentId) {
     return null;
   }
 
   const t = (id: string, defaultMessage: string) =>
-    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
+    formatPluginMessageWithUrlLocale(PLUGIN_ID, id, defaultMessage, formatMessage);
 
   const icsUrl = `/api/calendar/${encodeURIComponent(documentId)}/invite.ics`;
 

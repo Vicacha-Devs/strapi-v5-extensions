@@ -74,6 +74,11 @@ export interface QuickCreateEntryParams {
   category?: string;
   summary?: string;
   rrule?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  partySize?: number;
+  bookingStatus?: 'confirmed' | 'pending';
 }
 
 export interface OccurrenceService {

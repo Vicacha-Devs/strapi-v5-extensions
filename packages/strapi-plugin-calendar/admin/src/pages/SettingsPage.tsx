@@ -11,6 +11,11 @@ import type {
 } from '../../../shared/types';
 import { CalendarViewsSection } from '../components/settings/CalendarViewsSection';
 import { CollectionSourcesSection } from '../components/settings/CollectionSourcesSection';
+import {
+  CompanionSuiteSettingsSection,
+  type BookingsCompanionSettings,
+  type EventsCompanionSettings,
+} from '../components/settings/CompanionSuiteSettingsSection';
 import { SecondaryCalendarsSection } from '../components/settings/SecondaryCalendarsSection';
 
 interface SettingsApiResponse {
@@ -19,6 +24,10 @@ interface SettingsApiResponse {
 
 interface ContentTypesApiResponse {
   data?: DiscoveredContentType[];
+}
+
+interface CompanionApiResponse<T> {
+  data?: T;
 }
 
 export const SettingsPage: React.FC = () => {
@@ -30,6 +39,10 @@ export const SettingsPage: React.FC = () => {
 
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
   const [contentTypes, setContentTypes] = useState<DiscoveredContentType[]>([]);
+  const [eventsSettings, setEventsSettings] =
+    useState<EventsCompanionSettings | null>(null);
+  const [bookingsSettings, setBookingsSettings] =
+    useState<BookingsCompanionSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
 
@@ -37,13 +50,25 @@ export const SettingsPage: React.FC = () => {
     Promise.all([
       get<SettingsApiResponse>(`/${PLUGIN_ID}/settings`),
       get<ContentTypesApiResponse>(`/${PLUGIN_ID}/content-types`),
+      get<CompanionApiResponse<EventsCompanionSettings>>('/events/settings').catch(
+        () => null
+      ),
+      get<CompanionApiResponse<BookingsCompanionSettings>>(
+        '/bookings/settings'
+      ).catch(() => null),
     ])
-      .then(([settingsRes, ctRes]) => {
+      .then(([settingsRes, ctRes, eventsRes, bookingsRes]) => {
         if (settingsRes?.data?.data) {
           setSettings(settingsRes.data.data);
         }
         if (Array.isArray(ctRes?.data?.data)) {
           setContentTypes(ctRes.data.data);
+        }
+        if (eventsRes?.data?.data) {
+          setEventsSettings(eventsRes.data.data);
+        }
+        if (bookingsRes?.data?.data) {
+          setBookingsSettings(bookingsRes.data.data);
         }
       })
       .catch(() => {
@@ -56,11 +81,36 @@ export const SettingsPage: React.FC = () => {
     setSaving(true);
     setSavedBanner(null);
     try {
-      const res = await put<SettingsApiResponse>(`/${PLUGIN_ID}/settings`, settings);
+      const [res, eventsRes, bookingsRes] = await Promise.all([
+        put<SettingsApiResponse>(`/${PLUGIN_ID}/settings`, settings),
+        eventsSettings
+          ? put<CompanionApiResponse<EventsCompanionSettings>>(
+              '/events/settings',
+              eventsSettings
+            ).catch(() => null)
+          : Promise.resolve(null),
+        bookingsSettings
+          ? put<CompanionApiResponse<BookingsCompanionSettings>>(
+              '/bookings/settings',
+              bookingsSettings
+            ).catch(() => null)
+          : Promise.resolve(null),
+      ]);
       if (res?.data?.data) {
         setSettings(res.data.data);
       }
-      setSavedBanner(t('settings.saved', 'Calendar settings saved successfully.'));
+      if (eventsRes?.data?.data) {
+        setEventsSettings(eventsRes.data.data);
+      }
+      if (bookingsRes?.data?.data) {
+        setBookingsSettings(bookingsRes.data.data);
+      }
+      setSavedBanner(
+        t(
+          'settings.saved',
+          'Calendar, Events, and Bookings settings saved successfully.'
+        )
+      );
     } catch {
       setSavedBanner(t('settings.error', 'Could not save settings.'));
     } finally {
@@ -168,10 +218,10 @@ export const SettingsPage: React.FC = () => {
   return (
     <Layouts.Root>
       <Layouts.Header
-        title={t('settings.title', 'Calendar & Scheduler Settings')}
+        title={t('settings.title', 'Calendar, Events & Bookings Settings')}
         subtitle={t(
           'settings.subtitle',
-          'Select visual theme (Breeze default), primary local language, optional Arabic/Hijri calendar overlay, and mapped collection sources.'
+          'Configure visual themes, primary local language, Arabic/Hijri calendar overlay, collection sources, RSVP event rules, and booking slot policies.'
         )}
         primaryAction={
           <Flex gap={2}>
@@ -196,7 +246,7 @@ export const SettingsPage: React.FC = () => {
           )}
 
           <Tabs.Root defaultValue="theme">
-            <Tabs.List aria-label={t('settings.title', 'Calendar & Scheduler Settings')}>
+            <Tabs.List aria-label={t('settings.title', 'Calendar, Events & Bookings Settings')}>
               <Tabs.Trigger value="theme">
                 {t('settings.tab.theme', 'Theme & Appearance')}
               </Tabs.Trigger>
@@ -208,6 +258,12 @@ export const SettingsPage: React.FC = () => {
               </Tabs.Trigger>
               <Tabs.Trigger value="secondary">
                 {t('settings.tab.secondaryCalendars', 'Secondary Calendars')} ({settings.secondaryCalendars?.length ?? 0})
+              </Tabs.Trigger>
+              <Tabs.Trigger value="events">
+                {t('settings.tab.events', 'Events & RSVPs')}
+              </Tabs.Trigger>
+              <Tabs.Trigger value="bookings">
+                {t('settings.tab.bookings', 'Bookings & Availability')}
               </Tabs.Trigger>
             </Tabs.List>
 
@@ -249,6 +305,36 @@ export const SettingsPage: React.FC = () => {
                 onRemoveCalendar={removeCalendarSystem}
               />
             </Tabs.Content>
+
+            <Tabs.Content value="events">
+              <CompanionSuiteSettingsSection
+                mode="events"
+                t={t}
+                eventsSettings={eventsSettings}
+                bookingsSettings={bookingsSettings}
+                onPatchEvents={(patch) =>
+                  eventsSettings && setEventsSettings({ ...eventsSettings, ...patch })
+                }
+                onPatchBookings={(patch) =>
+                  bookingsSettings && setBookingsSettings({ ...bookingsSettings, ...patch })
+                }
+              />
+            </Tabs.Content>
+
+            <Tabs.Content value="bookings">
+              <CompanionSuiteSettingsSection
+                mode="bookings"
+                t={t}
+                eventsSettings={eventsSettings}
+                bookingsSettings={bookingsSettings}
+                onPatchEvents={(patch) =>
+                  eventsSettings && setEventsSettings({ ...eventsSettings, ...patch })
+                }
+                onPatchBookings={(patch) =>
+                  bookingsSettings && setBookingsSettings({ ...bookingsSettings, ...patch })
+                }
+              />
+            </Tabs.Content>
           </Tabs.Root>
         </Flex>
       </Layouts.Content>
@@ -257,4 +343,3 @@ export const SettingsPage: React.FC = () => {
 };
 
 export default SettingsPage;
-

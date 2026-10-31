@@ -5,83 +5,363 @@ import {
   CALENDAR_THEME_PRESETS,
   type CalendarPluginSettings,
   type CalendarSourceMapping,
+  type CalendarSystemConfig,
   type DiscoveredContentType,
+  type RecurrencePreset as RecurrencePresetItem,
 } from '../../../shared/types';
 import { DEFAULT_CALENDAR_SETTINGS } from '../config';
 import { getCalendarService, type SettingsService } from '../types';
 
 const STORE_KEY = 'settings';
 
-export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
-  const getStore = () =>
-    strapi.store({
-      type: 'plugin',
-      name: PLUGIN_ID,
-    });
+const BUILTIN_EVENTS_SOURCE: CalendarSourceMapping = {
+  id: 'events',
+  label: 'Events',
+  uid: 'plugin::events.event',
+  color: '#4945FF',
+  enabled: true,
+  fields: {
+    title: 'title',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    rrule: 'recurrence',
+    location: 'location',
+    category: 'category',
+    status: 'eventStatus',
+    summary: 'summary',
+    slug: 'slug',
+    color: 'color',
+  },
+};
 
-  const getRegistryService = () =>
-    getCalendarService(strapi, PLUGIN_ID, 'registry');
+const BUILTIN_BOOKINGS_SOURCE: CalendarSourceMapping = {
+  id: 'bookings',
+  label: 'Bookings & Reservations',
+  uid: 'plugin::bookings.booking',
+  color: '#0D9488',
+  enabled: true,
+  fields: {
+    title: 'title',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    status: 'status',
+    location: 'assignedHost',
+    summary: 'notes',
+    category: 'status',
+  },
+};
+
+const INTERNAL_PLUGIN_PREFIXES = [
+  'plugin::upload',
+  'plugin::i18n',
+  'plugin::users-permissions',
+  'plugin::content-releases',
+  'plugin::review-workflows',
+  'plugin::navigation',
+  'plugin::email-designer-5',
+  'plugin::strapi-cache',
+  'plugin::typesense',
+  'plugin::preview-button',
+  'plugin::seo',
+];
+
+function appendAutoDetectedPluginSources(
+  mergedSources: CalendarSourceMapping[],
+  contentTypes: Record<string, unknown>
+): void {
+  for (const builtin of [BUILTIN_EVENTS_SOURCE, BUILTIN_BOOKINGS_SOURCE]) {
+    if (contentTypes[builtin.uid] && !mergedSources.some((s) => s.uid === builtin.uid)) {
+      mergedSources.push({ ...builtin, fields: { ...builtin.fields } });
+    }
+  }
+}
+
+function mergeUserConfigSources(
+  mergedSources: CalendarSourceMapping[],
+  userSources?: CalendarSourceMapping[]
+): void {
+  if (!Array.isArray(userSources)) return;
+  for (const src of userSources) {
+    if (!src?.id || !src.uid) continue;
+    const idx = mergedSources.findIndex((s) => s.id === src.id || s.uid === src.uid);
+    if (idx >= 0) {
+      mergedSources[idx] = {
+        ...mergedSources[idx],
+        ...src,
+        fields: { ...mergedSources[idx].fields, ...(src.fields ?? {}) },
+      };
+    } else {
+      mergedSources.push(src);
+    }
+  }
+}
+
+function mergeUserSecondaryCalendars(
+  mergedCalendars: CalendarSystemConfig[],
+  userCalendars?: CalendarSystemConfig[]
+): void {
+  if (!Array.isArray(userCalendars)) return;
+  for (const cal of userCalendars) {
+    if (!cal?.id || !cal.intlCalendar) continue;
+    const idx = mergedCalendars.findIndex((c) => c.id === cal.id);
+    if (idx >= 0) {
+      mergedCalendars[idx] = { ...mergedCalendars[idx], ...cal };
+    } else {
+      mergedCalendars.push(cal);
+    }
+  }
+}
+
+function mergePresetLists(
+  defaults: RecurrencePresetItem[] | undefined,
+  stored: RecurrencePresetItem[] | undefined
+): RecurrencePresetItem[] {
+  const result = [...(defaults ?? [])];
+  if (!Array.isArray(stored)) return result;
+  for (const item of stored) {
+    if (!item?.id || !item.rrule) continue;
+    const idx = result.findIndex((p) => p.id === item.id || p.rrule === item.rrule);
+    if (idx >= 0) {
+      result[idx] = { ...result[idx], ...item };
+    } else {
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function mergeSourceLists(
+  defaults: CalendarSourceMapping[],
+  stored?: CalendarSourceMapping[]
+): CalendarSourceMapping[] {
+  const result = Array.isArray(stored) ? [...stored] : [];
+  for (const defSource of defaults ?? []) {
+    if (!result.some((s) => s.id === defSource.id || s.uid === defSource.uid)) {
+      result.push(defSource);
+    }
+  }
+  return result;
+}
+
+function mergeCalendarLists(
+  defaults: CalendarSystemConfig[] | undefined,
+  stored?: CalendarSystemConfig[]
+): CalendarSystemConfig[] {
+  const result = Array.isArray(stored) ? [...stored] : [];
+  for (const defCal of defaults ?? []) {
+    if (!result.some((c) => c.id === defCal.id)) {
+      result.push(defCal);
+    }
+  }
+  return result;
+}
+
+function pickNonEmptyStr(val: unknown, fallback: string, maxLen?: number): string {
+  if (typeof val === 'string' && val.trim()) {
+    const trimmed = val.trim();
+    return maxLen ? trimmed.slice(0, maxLen) : trimmed;
+  }
+  return fallback;
+}
+
+function pickBool(val: unknown, fallback: boolean): boolean {
+  return typeof val === 'boolean' ? val : fallback;
+}
+
+function pickEnum<T extends string>(val: unknown, allowed: readonly T[], fallback: T): T {
+  return typeof val === 'string' && (allowed as readonly string[]).includes(val)
+    ? (val as T)
+    : fallback;
+}
+
+function pickArray<T>(val: unknown, fallback: T[]): T[] {
+  return Array.isArray(val) ? (val as T[]) : fallback;
+}
+
+function pickRecordKey<T extends string>(
+  val: unknown,
+  record: Record<string, unknown>,
+  fallback: T
+): T {
+  return typeof val === 'string' && val in record ? (val as T) : fallback;
+}
+
+function pickPrimaryHex(val: unknown, fallback: string): string {
+  return typeof val === 'string' && val.startsWith('#') ? val.trim() : fallback;
+}
+
+function resolveThemePatch(
+  current: CalendarPluginSettings,
+  patch: Partial<CalendarPluginSettings>
+): Pick<
+  CalendarPluginSettings,
+  'theme' | 'colorScheme' | 'themePalette' | 'secondaryCalendarLanguage' | 'primaryColor'
+> {
+  return {
+    theme: pickRecordKey(patch.theme, CALENDAR_THEME_PRESETS, current.theme ?? 'breeze'),
+    colorScheme: pickEnum(
+      patch.colorScheme,
+      ['auto', 'light', 'dark'] as const,
+      current.colorScheme ?? 'auto'
+    ),
+    themePalette: pickRecordKey(
+      patch.themePalette,
+      CALENDAR_COLOR_PALETTES,
+      current.themePalette ?? 'default'
+    ),
+    secondaryCalendarLanguage: pickEnum(
+      patch.secondaryCalendarLanguage,
+      ['local', 'ar', 'off'] as const,
+      current.secondaryCalendarLanguage ?? 'local'
+    ),
+    primaryColor: pickPrimaryHex(patch.primaryColor, current.primaryColor),
+  };
+}
+
+function resolveViewBooleansPatch(
+  current: CalendarPluginSettings,
+  patch: Partial<CalendarPluginSettings>
+): Pick<
+  CalendarPluginSettings,
+  | 'weekNumbers'
+  | 'timeFormat24h'
+  | 'showWeekends'
+  | 'showTodayButton'
+  | 'showCreateButton'
+  | 'monthView'
+  | 'weekView'
+  | 'dayView'
+  | 'agendaView'
+  | 'yearView'
+> {
+  return {
+    weekNumbers: pickBool(patch.weekNumbers, current.weekNumbers ?? false),
+    timeFormat24h: pickBool(patch.timeFormat24h, current.timeFormat24h ?? true),
+    showWeekends: pickBool(patch.showWeekends, current.showWeekends),
+    showTodayButton: pickBool(patch.showTodayButton, current.showTodayButton),
+    showCreateButton: pickBool(patch.showCreateButton, current.showCreateButton),
+    monthView: pickBool(patch.monthView, current.monthView),
+    weekView: pickBool(patch.weekView, current.weekView),
+    dayView: pickBool(patch.dayView, current.dayView),
+    agendaView: pickBool(patch.agendaView, current.agendaView),
+    yearView: pickBool(patch.yearView, current.yearView),
+  };
+}
+
+function buildUpdatedSettings(
+  current: CalendarPluginSettings,
+  patch: Partial<CalendarPluginSettings>
+): CalendarPluginSettings {
+  const firstDay =
+    typeof patch.firstDayOfWeek === 'number' &&
+    patch.firstDayOfWeek >= 0 &&
+    patch.firstDayOfWeek <= 6
+      ? Math.floor(patch.firstDayOfWeek)
+      : current.firstDayOfWeek;
+
+  return {
+    ...current,
+    ...resolveThemePatch(current, patch),
+    ...resolveViewBooleansPatch(current, patch),
+    defaultTimezone: pickNonEmptyStr(patch.defaultTimezone, current.defaultTimezone),
+    defaultLocale: pickNonEmptyStr(patch.defaultLocale, current.defaultLocale ?? 'auto'),
+    direction: pickEnum(
+      patch.direction,
+      ['auto', 'ltr', 'rtl'] as const,
+      current.direction ?? 'auto'
+    ),
+    defaultView:
+      typeof patch.defaultView === 'string' ? patch.defaultView : current.defaultView,
+    firstDayOfWeek: firstDay,
+    weekNumberCalculation: pickEnum(
+      patch.weekNumberCalculation,
+      ['local', 'ISO'] as const,
+      current.weekNumberCalculation ?? 'ISO'
+    ),
+    startHour: pickNonEmptyStr(patch.startHour, current.startHour),
+    endHour: pickNonEmptyStr(patch.endHour, current.endHour),
+    slotDuration: pickNonEmptyStr(patch.slotDuration, current.slotDuration),
+    feedTitle: pickNonEmptyStr(patch.feedTitle, current.feedTitle, 140),
+    businessHours: pickArray(patch.businessHours, current.businessHours),
+    sources: pickArray(patch.sources, current.sources),
+    secondaryCalendars: pickArray(
+      patch.secondaryCalendars,
+      current.secondaryCalendars ?? []
+    ),
+    recurrencePresets: pickArray(
+      patch.recurrencePresets,
+      current.recurrencePresets ?? []
+    ),
+  };
+}
+
+interface RawSchemaShape {
+  kind?: string;
+  info?: { displayName?: string };
+  attributes?: Record<string, { type?: string; customField?: string }>;
+}
+
+function isDiscoverableSchema(uid: string, schema: unknown): schema is RawSchemaShape {
+  if (!schema || typeof schema !== 'object') return false;
+  if (!uid.startsWith('api::') && !uid.startsWith('plugin::')) return false;
+  if (INTERNAL_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix))) return false;
+  const typed = schema as RawSchemaShape;
+  return !typed.kind || typed.kind === 'collectionType';
+}
+
+function extractSchemaFields(
+  attributes: Record<string, { type?: string; customField?: string }>
+): Array<{ name: string; type: string }> {
+  const fields = Object.entries(attributes)
+    .filter(([, def]) => def && typeof def.type === 'string')
+    .map(([name, def]) => ({
+      name,
+      type: String(def.customField || def.type),
+    }));
+  if (!fields.some((f) => f.name === 'publishedAt')) {
+    fields.push({ name: 'publishedAt', type: 'datetime' });
+  }
+  if (!fields.some((f) => f.name === 'createdAt')) {
+    fields.push({ name: 'createdAt', type: 'datetime' });
+  }
+  return fields;
+}
+
+function scoreContentTypeUid(uid: string): number {
+  if (uid === 'plugin::events.event') return 0;
+  if (uid === 'plugin::bookings.booking') return 1;
+  return uid.startsWith('api::') ? 2 : 3;
+}
+
+export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
+  const getStore = () => strapi.store({ type: 'plugin', name: PLUGIN_ID });
+  const getRegistryService = () => getCalendarService(strapi, PLUGIN_ID, 'registry');
 
   const getConfigDefaults = (): CalendarPluginSettings => {
     const userConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
       {}) as Partial<CalendarPluginSettings>;
+    const registry = getRegistryService();
 
     const mergedSources: CalendarSourceMapping[] = [
       ...DEFAULT_CALENDAR_SETTINGS.sources,
-      ...(getRegistryService()?.getRegisteredSources?.() ?? []),
+      ...(registry?.getRegisteredSources?.() ?? []),
     ];
+    appendAutoDetectedPluginSources(
+      mergedSources,
+      (strapi.contentTypes ?? {}) as Record<string, unknown>
+    );
+    mergeUserConfigSources(mergedSources, userConfig.sources);
 
-    if (Array.isArray(userConfig.sources)) {
-      for (const src of userConfig.sources) {
-        if (!src || !src.id || !src.uid) continue;
-        const existingIdx = mergedSources.findIndex(
-          (s) => s.id === src.id || s.uid === src.uid
-        );
-        if (existingIdx >= 0) {
-          mergedSources[existingIdx] = {
-            ...mergedSources[existingIdx],
-            ...src,
-            fields: {
-              ...mergedSources[existingIdx].fields,
-              ...(src.fields ?? {}),
-            },
-          };
-        } else {
-          mergedSources.push(src);
-        }
-      }
-    }
-
-    const mergedCalendars = [
+    const mergedCalendars: CalendarSystemConfig[] = [
       ...(DEFAULT_CALENDAR_SETTINGS.secondaryCalendars ?? []),
-      ...(getRegistryService()?.getRegisteredSecondaryCalendars?.() ?? []),
+      ...(registry?.getRegisteredSecondaryCalendars?.() ?? []),
     ];
-    if (Array.isArray(userConfig.secondaryCalendars)) {
-      for (const cal of userConfig.secondaryCalendars) {
-        if (!cal || !cal.id || !cal.intlCalendar) continue;
-        const idx = mergedCalendars.findIndex((c) => c.id === cal.id);
-        if (idx >= 0) {
-          mergedCalendars[idx] = { ...mergedCalendars[idx], ...cal };
-        } else {
-          mergedCalendars.push(cal);
-        }
-      }
-    }
+    mergeUserSecondaryCalendars(mergedCalendars, userConfig.secondaryCalendars);
 
-    const mergedPresets = [...(DEFAULT_CALENDAR_SETTINGS.recurrencePresets ?? [])];
-    if (Array.isArray(userConfig.recurrencePresets)) {
-      for (const preset of userConfig.recurrencePresets) {
-        if (!preset || !preset.id || !preset.rrule) continue;
-        const idx = mergedPresets.findIndex(
-          (p) => p.id === preset.id || p.rrule === preset.rrule
-        );
-        if (idx >= 0) {
-          mergedPresets[idx] = { ...mergedPresets[idx], ...preset };
-        } else {
-          mergedPresets.push(preset);
-        }
-      }
-    }
+    const mergedPresets = mergePresetLists(
+      DEFAULT_CALENDAR_SETTINGS.recurrencePresets,
+      userConfig.recurrencePresets
+    );
 
     return {
       ...DEFAULT_CALENDAR_SETTINGS,
@@ -92,52 +372,22 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     };
   };
 
-  const mergePresetLists = (
-    defaults: CalendarPluginSettings['recurrencePresets'],
-    stored: CalendarPluginSettings['recurrencePresets']
-  ) => {
-    const result = [...(defaults ?? [])];
-    if (Array.isArray(stored)) {
-      for (const item of stored) {
-        if (!item || !item.id || !item.rrule) continue;
-        const idx = result.findIndex(
-          (p) => p.id === item.id || p.rrule === item.rrule
-        );
-        if (idx >= 0) {
-          result[idx] = { ...result[idx], ...item };
-        } else {
-          result.push(item);
-        }
-      }
-    }
-    return result;
-  };
-
-  const mergeSourceLists = (
-    defaults: CalendarSourceMapping[],
-    stored?: CalendarSourceMapping[]
-  ): CalendarSourceMapping[] => {
-    const result = Array.isArray(stored) ? [...stored] : [];
-    for (const defSource of defaults ?? []) {
-      if (!result.some((s) => s.id === defSource.id || s.uid === defSource.uid)) {
-        result.push(defSource);
-      }
-    }
-    return result;
-  };
-
-  const mergeCalendarLists = (
-    defaults: CalendarPluginSettings['secondaryCalendars'],
-    stored?: CalendarPluginSettings['secondaryCalendars']
-  ): NonNullable<CalendarPluginSettings['secondaryCalendars']> => {
-    const result = Array.isArray(stored) ? [...stored] : [];
-    for (const defCal of defaults ?? []) {
-      if (!result.some((c) => c.id === defCal.id)) {
-        result.push(defCal);
-      }
-    }
-    return result;
-  };
+  const mergeStoredWithDefaults = (
+    defaults: CalendarPluginSettings,
+    stored: Partial<CalendarPluginSettings>
+  ): CalendarPluginSettings => ({
+    ...defaults,
+    ...stored,
+    sources: mergeSourceLists(defaults.sources, stored.sources),
+    secondaryCalendars: mergeCalendarLists(
+      defaults.secondaryCalendars,
+      stored.secondaryCalendars
+    ),
+    recurrencePresets: mergePresetLists(
+      defaults.recurrencePresets,
+      stored.recurrencePresets
+    ),
+  });
 
   const service: SettingsService = {
     async ensureInitialized(): Promise<CalendarPluginSettings> {
@@ -146,25 +396,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
         key: STORE_KEY,
       })) as Partial<CalendarPluginSettings> | null;
       const defaults = getConfigDefaults();
-
-      if (!existing) {
-        await store.set({ key: STORE_KEY, value: defaults });
-        return defaults;
-      }
-
-      const merged: CalendarPluginSettings = {
-        ...defaults,
-        ...existing,
-        sources: mergeSourceLists(defaults.sources, existing.sources),
-        secondaryCalendars: mergeCalendarLists(
-          defaults.secondaryCalendars,
-          existing.secondaryCalendars
-        ),
-        recurrencePresets: mergePresetLists(
-          defaults.recurrencePresets,
-          existing.recurrencePresets
-        ),
-      };
+      const merged = existing ? mergeStoredWithDefaults(defaults, existing) : defaults;
       await store.set({ key: STORE_KEY, value: merged });
       return merged;
     },
@@ -175,137 +407,14 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
         key: STORE_KEY,
       })) as Partial<CalendarPluginSettings> | null;
       const defaults = getConfigDefaults();
-      if (!stored) {
-        return defaults;
-      }
-      return {
-        ...defaults,
-        ...stored,
-        sources: mergeSourceLists(defaults.sources, stored.sources),
-        secondaryCalendars: mergeCalendarLists(
-          defaults.secondaryCalendars,
-          stored.secondaryCalendars
-        ),
-        recurrencePresets: mergePresetLists(
-          defaults.recurrencePresets,
-          stored.recurrencePresets
-        ),
-      };
+      return stored ? mergeStoredWithDefaults(defaults, stored) : defaults;
     },
 
     async updateSettings(
       patch: Partial<CalendarPluginSettings>
     ): Promise<CalendarPluginSettings> {
       const current = await service.getSettings();
-      const next: CalendarPluginSettings = {
-        ...current,
-        theme:
-          patch.theme && patch.theme in CALENDAR_THEME_PRESETS
-            ? patch.theme
-            : current.theme ?? 'breeze',
-        colorScheme:
-          patch.colorScheme === 'auto' ||
-          patch.colorScheme === 'light' ||
-          patch.colorScheme === 'dark'
-            ? patch.colorScheme
-            : current.colorScheme ?? 'auto',
-        themePalette:
-          patch.themePalette && patch.themePalette in CALENDAR_COLOR_PALETTES
-            ? patch.themePalette
-            : current.themePalette ?? 'default',
-        secondaryCalendarLanguage:
-          patch.secondaryCalendarLanguage === 'local' ||
-          patch.secondaryCalendarLanguage === 'ar' ||
-          patch.secondaryCalendarLanguage === 'off'
-            ? patch.secondaryCalendarLanguage
-            : current.secondaryCalendarLanguage ?? 'local',
-        defaultTimezone:
-          typeof patch.defaultTimezone === 'string' && patch.defaultTimezone.trim()
-            ? patch.defaultTimezone.trim()
-            : current.defaultTimezone,
-        defaultLocale:
-          typeof patch.defaultLocale === 'string' && patch.defaultLocale.trim()
-            ? patch.defaultLocale.trim()
-            : current.defaultLocale ?? 'auto',
-        direction:
-          patch.direction === 'auto' ||
-          patch.direction === 'ltr' ||
-          patch.direction === 'rtl'
-            ? patch.direction
-            : current.direction ?? 'auto',
-        defaultView:
-          typeof patch.defaultView === 'string'
-            ? patch.defaultView
-            : current.defaultView,
-        firstDayOfWeek:
-          typeof patch.firstDayOfWeek === 'number' &&
-          patch.firstDayOfWeek >= 0 &&
-          patch.firstDayOfWeek <= 6
-            ? Math.floor(patch.firstDayOfWeek)
-            : current.firstDayOfWeek,
-        weekNumbers:
-          typeof patch.weekNumbers === 'boolean'
-            ? patch.weekNumbers
-            : current.weekNumbers ?? false,
-        weekNumberCalculation:
-          patch.weekNumberCalculation === 'local' ||
-          patch.weekNumberCalculation === 'ISO'
-            ? patch.weekNumberCalculation
-            : current.weekNumberCalculation ?? 'ISO',
-        timeFormat24h:
-          typeof patch.timeFormat24h === 'boolean'
-            ? patch.timeFormat24h
-            : current.timeFormat24h ?? true,
-        startHour:
-          typeof patch.startHour === 'string' && patch.startHour.trim()
-            ? patch.startHour.trim()
-            : current.startHour,
-        endHour:
-          typeof patch.endHour === 'string' && patch.endHour.trim()
-            ? patch.endHour.trim()
-            : current.endHour,
-        slotDuration:
-          typeof patch.slotDuration === 'string' && patch.slotDuration.trim()
-            ? patch.slotDuration.trim()
-            : current.slotDuration,
-        primaryColor:
-          typeof patch.primaryColor === 'string' && patch.primaryColor.startsWith('#')
-            ? patch.primaryColor.trim()
-            : current.primaryColor,
-        showWeekends:
-          typeof patch.showWeekends === 'boolean' ? patch.showWeekends : current.showWeekends,
-        showTodayButton:
-          typeof patch.showTodayButton === 'boolean'
-            ? patch.showTodayButton
-            : current.showTodayButton,
-        showCreateButton:
-          typeof patch.showCreateButton === 'boolean'
-            ? patch.showCreateButton
-            : current.showCreateButton,
-        monthView:
-          typeof patch.monthView === 'boolean' ? patch.monthView : current.monthView,
-        weekView:
-          typeof patch.weekView === 'boolean' ? patch.weekView : current.weekView,
-        dayView: typeof patch.dayView === 'boolean' ? patch.dayView : current.dayView,
-        agendaView:
-          typeof patch.agendaView === 'boolean' ? patch.agendaView : current.agendaView,
-        yearView: typeof patch.yearView === 'boolean' ? patch.yearView : current.yearView,
-        businessHours: Array.isArray(patch.businessHours)
-          ? patch.businessHours
-          : current.businessHours,
-        feedTitle:
-          typeof patch.feedTitle === 'string' && patch.feedTitle.trim()
-            ? patch.feedTitle.trim().slice(0, 140)
-            : current.feedTitle,
-        sources: Array.isArray(patch.sources) ? patch.sources : current.sources,
-        secondaryCalendars: Array.isArray(patch.secondaryCalendars)
-          ? patch.secondaryCalendars
-          : current.secondaryCalendars ?? [],
-        recurrencePresets: Array.isArray(patch.recurrencePresets)
-          ? patch.recurrencePresets
-          : current.recurrencePresets ?? [],
-      };
-
+      const next = buildUpdatedSettings(current, patch);
       const store = getStore();
       await store.set({ key: STORE_KEY, value: next });
       return next;
@@ -321,45 +430,11 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     discoverContentTypes(): DiscoveredContentType[] {
       const contentTypes = strapi.contentTypes ?? {};
       const discovered: DiscoveredContentType[] = [];
-      const INTERNAL_PLUGIN_PREFIXES = [
-        'plugin::upload',
-        'plugin::i18n',
-        'plugin::users-permissions',
-        'plugin::content-releases',
-        'plugin::review-workflows',
-        'plugin::navigation',
-        'plugin::email-designer-5',
-        'plugin::strapi-cache',
-        'plugin::typesense',
-        'plugin::preview-button',
-        'plugin::seo',
-      ];
 
       for (const [uid, schema] of Object.entries(contentTypes)) {
-        if (!schema || typeof schema !== 'object') continue;
-        if (!uid.startsWith('api::') && !uid.startsWith('plugin::')) continue;
-        if (INTERNAL_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix))) {
-          continue;
-        }
-        if (schema.kind && schema.kind !== 'collectionType') continue;
-
-        const attributes = schema.attributes ?? {};
-        const fields = Object.entries(attributes)
-          .filter(([, def]) => def && typeof def.type === 'string')
-          .map(([name, def]) => ({
-            name,
-            type: String(def.customField || def.type),
-          }));
-
-        if (!fields.some((f) => f.name === 'publishedAt')) {
-          fields.push({ name: 'publishedAt', type: 'datetime' });
-        }
-        if (!fields.some((f) => f.name === 'createdAt')) {
-          fields.push({ name: 'createdAt', type: 'datetime' });
-        }
-
+        if (!isDiscoverableSchema(uid, schema)) continue;
+        const fields = extractSchemaFields(schema.attributes ?? {});
         if (fields.length === 0) continue;
-
         discovered.push({
           uid,
           displayName: String(schema.info?.displayName || uid),
@@ -368,18 +443,11 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
         });
       }
 
-      discovered.sort((a, b) => {
-        const score = (u: string) =>
-          u === 'plugin::events.event'
-            ? 0
-            : u === 'plugin::bookings.booking'
-              ? 1
-              : u.startsWith('api::')
-                ? 2
-                : 3;
-        return score(a.uid) - score(b.uid) || a.displayName.localeCompare(b.displayName);
-      });
-
+      discovered.sort(
+        (a, b) =>
+          scoreContentTypeUid(a.uid) - scoreContentTypeUid(b.uid) ||
+          a.displayName.localeCompare(b.displayName)
+      );
       return discovered;
     },
   };

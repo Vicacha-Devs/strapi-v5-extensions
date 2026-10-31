@@ -3,39 +3,31 @@ import { useIntl } from 'react-intl';
 import { useFetchClient } from '@strapi/strapi/admin';
 import type FullCalendar from '@fullcalendar/react';
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
-import {
-  formatDateInCalendarSystem,
-  SUPPORTED_INTL_CALENDARS,
-} from '../../../shared/calendarSystems';
-import {
-  getLocalizedCalendarBundle,
-  resolveCalendarDirection,
-  resolveFullCalendarLocale,
-} from '../../../shared/localization';
+import { resolveCalendarDirection, resolveFullCalendarLocale } from '../../../shared/localization';
 import { PLUGIN_ID } from '../../../shared/pluginId';
 import type {
-  CalendarPluginSettings,
-  CalendarSystemConfig,
-  CalendarViewMode,
-  ExpandedCalendarOccurrence,
-  SecondaryCalendarLanguageMode,
+  CalendarPluginSettings, CalendarViewMode, ExpandedCalendarOccurrence, SecondaryCalendarLanguageMode,
 } from '../../../shared/types';
+import {
+  buildEnabledCalendarViews, buildInitialDateWindow, buildQuickCreateRequestPayload, buildSecondaryHeaderLabel,
+  collectAvailableCategories, computeSourceCounts, expandDateWindowToYear, FALLBACK_RECURRENCE_PRESETS,
+  filterVisibleOccurrences, mapOccurrencesToFullCalendarEvents, matchLoadedSourceId, normalizeSelectedEndSlot,
+  resolveActiveSecondaryCalendars,
+} from '../components/calendar/calendarPageHelpers';
 import { CalendarToolbar } from '../components/calendar/CalendarToolbar';
 import { FullCalendarCanvas } from '../components/calendar/FullCalendarCanvas';
 import { OccurrenceDetailDrawer } from '../components/calendar/OccurrenceDetailDrawer';
 import { QuickCreatePanel } from '../components/calendar/QuickCreatePanel';
 
 interface CalendarApiResponse {
-  data?: {
-    occurrences?: ExpandedCalendarOccurrence[];
-    settings?: CalendarPluginSettings;
-  };
+  data?: { occurrences?: ExpandedCalendarOccurrence[]; settings?: CalendarPluginSettings };
 }
 
 export const CalendarPage: React.FC = () => {
   const { formatMessage, locale } = useIntl();
   const { get, post } = useFetchClient();
   const calendarRef = useRef<FullCalendar | null>(null);
+  const quickCreateRef = useRef<HTMLDivElement | null>(null);
 
   const t = useCallback(
     (id: string, defaultMessage: string) =>
@@ -45,50 +37,40 @@ export const CalendarPage: React.FC = () => {
 
   const [viewMode, setViewMode] = useState<CalendarViewMode>('dayGridMonth');
   const [anchorDate, setAnchorDate] = useState<Date>(() => new Date());
-  const [dateWindow, setDateWindow] = useState<{ from: string; to: string }>(() => {
-    const now = new Date();
-    const y = now.getUTCFullYear();
-    const m = now.getUTCMonth();
-    return {
-      from: new Date(Date.UTC(y, m - 1, 1)).toISOString(),
-      to: new Date(Date.UTC(y, m + 2, 0, 23, 59, 59)).toISOString(),
-    };
-  });
-
-  const [sourceFilter, setSourceFilter] = useState<string>(() => {
-    if (typeof window === 'undefined') return 'all';
-    return new URLSearchParams(window.location.search).get('source') || 'all';
-  });
+  const [dateWindow, setDateWindow] = useState<{ from: string; to: string }>(buildInitialDateWindow);
+  const [sourceFilter, setSourceFilter] = useState<string>(() =>
+    typeof window === 'undefined' ? 'all' : new URLSearchParams(window.location.search).get('source') || 'all'
+  );
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [localeOverride, setLocaleOverride] = useState<string>('auto');
-  const [secondaryLangMode, setSecondaryLangMode] =
-    useState<SecondaryCalendarLanguageMode>('local');
+  const [secondaryLangMode, setSecondaryLangMode] = useState<SecondaryCalendarLanguageMode>('local');
 
   const [occurrences, setOccurrences] = useState<ExpandedCalendarOccurrence[]>([]);
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
 
-  const [selectedOccurrence, setSelectedOccurrence] =
-    useState<ExpandedCalendarOccurrence | null>(null);
+  const [selectedOccurrence, setSelectedOccurrence] = useState<ExpandedCalendarOccurrence | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState<string>('');
   const [applyToSeries, setApplyToSeries] = useState<boolean>(false);
 
   const [showQuickCreate, setShowQuickCreate] = useState<boolean>(false);
+  const [quickSourceId, setQuickSourceId] = useState<string>('');
   const [quickTitle, setQuickTitle] = useState<string>('');
   const [quickStart, setQuickStart] = useState<string>('');
   const [quickEnd, setQuickEnd] = useState<string>('');
   const [quickLocation, setQuickLocation] = useState<string>('');
   const [quickCategory] = useState<string>('general');
   const [quickRRule, setQuickRRule] = useState<string>('');
+  const [quickCustomerName, setQuickCustomerName] = useState<string>('');
+  const [quickCustomerEmail, setQuickCustomerEmail] = useState<string>('');
+  const [quickPartySize, setQuickPartySize] = useState<number>(1);
 
   const effectiveLocale = useMemo(
     () =>
       resolveFullCalendarLocale(
         locale,
-        settings?.defaultLocale && settings.defaultLocale !== 'auto'
-          ? settings.defaultLocale
-          : 'es',
+        settings?.defaultLocale && settings.defaultLocale !== 'auto' ? settings.defaultLocale : 'es',
         localeOverride
       ),
     [locale, settings?.defaultLocale, localeOverride]
@@ -107,40 +89,28 @@ export const CalendarPage: React.FC = () => {
         to: dateWindow.to,
         locale: effectiveLocale,
       });
-      if (sourceFilter !== 'all') {
-        params.set('sourceId', sourceFilter);
-      }
-      if (categoryFilter !== 'all') {
-        params.set('category', categoryFilter);
-      }
+      if (categoryFilter !== 'all') params.set('category', categoryFilter);
 
-      const res = await get<CalendarApiResponse>(
-        `/${PLUGIN_ID}/calendar?${params.toString()}`
-      );
+      const res = await get<CalendarApiResponse>(`/${PLUGIN_ID}/calendar?${params.toString()}`);
       const payload = res?.data?.data;
       if (payload) {
-        setOccurrences(Array.isArray(payload.occurrences) ? payload.occurrences : []);
+        const loadedOccs = Array.isArray(payload.occurrences) ? payload.occurrences : [];
+        setOccurrences(loadedOccs);
+        if (typeof window !== 'undefined') {
+          const targetDocId = new URLSearchParams(window.location.search).get('documentId');
+          if (targetDocId) {
+            const match = loadedOccs.find((o) => o.documentId === targetDocId);
+            if (match) {
+              setSelectedOccurrence((prev) => prev ?? match);
+              setRescheduleDate((prev) => prev || match.occurrenceDate);
+              calendarRef.current?.getApi()?.gotoDate(match.startDate);
+            }
+          }
+        }
         if (payload.settings) {
           setSettings(payload.settings);
           if (payload.settings.secondaryCalendarLanguage) {
             setSecondaryLangMode(payload.settings.secondaryCalendarLanguage);
-          }
-          const loadedSources = payload.settings.sources ?? [];
-          if (
-            sourceFilter !== 'all' &&
-            !loadedSources.some((s) => s.id === sourceFilter)
-          ) {
-            const matched = loadedSources.find(
-              (s) =>
-                s.uid === sourceFilter ||
-                (sourceFilter === 'events' &&
-                  (s.id.includes('event') || s.uid.includes('event'))) ||
-                (sourceFilter === 'bookings' &&
-                  (s.id.includes('booking') || s.uid.includes('booking')))
-            );
-            if (matched) {
-              setSourceFilter(matched.id);
-            }
           }
         }
         const loadErrorMsg = t('calendar.error.load', 'Could not load calendar occurrences.');
@@ -151,93 +121,74 @@ export const CalendarPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [
-    dateWindow.from,
-    dateWindow.to,
-    effectiveLocale,
-    sourceFilter,
-    categoryFilter,
-    get,
-    t,
-  ]);
+  }, [dateWindow.from, dateWindow.to, effectiveLocale, categoryFilter, get, t]);
 
   useEffect(() => {
     fetchCalendarData();
   }, [fetchCalendarData]);
 
-  const availableCategories = useMemo(() => {
-    const cats = new Set<string>();
-    for (const occ of occurrences) {
-      if (occ.category) cats.add(occ.category);
-    }
-    return Array.from(cats);
-  }, [occurrences]);
+  useEffect(() => {
+    const loadedSources = settings?.sources ?? [];
+    if (loadedSources.length === 0) return;
 
-  const activeSecondaryCalendars = useMemo<CalendarSystemConfig[]>(() => {
-    if (secondaryLangMode === 'off') {
-      return [];
+    if (sourceFilter !== 'all') {
+      const matchedId = matchLoadedSourceId(loadedSources, sourceFilter);
+      if (matchedId && matchedId !== sourceFilter) setSourceFilter(matchedId);
+      setQuickSourceId(matchedId ?? sourceFilter);
+      return;
     }
-    const configured = (settings?.secondaryCalendars ?? []).filter((c) => c.enabled);
-    if (configured.length > 0) {
-      return configured;
-    }
-    const hijriMatch = SUPPORTED_INTL_CALENDARS.find(
-      (c) => c.id === 'islamic-umalqura'
-    );
-    return hijriMatch
-      ? [
-          {
-            id: 'hijri',
-            label: hijriMatch.defaultLabel,
-            intlCalendar: hijriMatch.intlCalendar,
-            enabled: true,
-          },
-        ]
-      : [];
-  }, [secondaryLangMode, settings?.secondaryCalendars]);
+
+    setQuickSourceId((prev) => {
+      if (prev && loadedSources.some((s) => s.id === prev)) return prev;
+      const firstEnabled = loadedSources.find((s) => s.enabled !== false) ?? loadedSources[0];
+      return firstEnabled ? firstEnabled.id : prev;
+    });
+  }, [settings?.sources, sourceFilter]);
+
+  const sourceCounts = useMemo(
+    () => computeSourceCounts(occurrences, settings?.sources),
+    [occurrences, settings?.sources]
+  );
+  const visibleOccurrences = useMemo(
+    () => filterVisibleOccurrences(occurrences, sourceFilter),
+    [occurrences, sourceFilter]
+  );
+
+  const availableCategories = useMemo(
+    () =>
+      collectAvailableCategories(
+        settings?.sources,
+        sourceFilter,
+        visibleOccurrences
+      ),
+    [visibleOccurrences, settings?.sources, sourceFilter]
+  );
+
+  const activeSecondaryCalendars = useMemo(
+    () =>
+      resolveActiveSecondaryCalendars(
+        secondaryLangMode,
+        settings?.secondaryCalendars
+      ),
+    [secondaryLangMode, settings?.secondaryCalendars]
+  );
 
   const recurrencePresets = useMemo(
     () =>
       settings?.recurrencePresets && settings.recurrencePresets.length > 0
         ? settings.recurrencePresets
-        : [
-            { id: 'daily', label: 'Daily', rrule: 'FREQ=DAILY;INTERVAL=1' },
-            { id: 'weekly-mon', label: 'Weekly on Mondays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO' },
-            { id: 'weekly-tue', label: 'Weekly on Tuesdays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TU' },
-            { id: 'weekly-wed', label: 'Weekly on Wednesdays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=WE' },
-            { id: 'weekly-thu', label: 'Weekly on Thursdays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=TH' },
-            { id: 'weekly-fri', label: 'Weekly on Fridays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=FR' },
-            { id: 'weekly-sat', label: 'Weekly on Saturdays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SA' },
-            { id: 'weekly-sun', label: 'Weekly on Sundays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SU' },
-            { id: 'monthly', label: 'Monthly', rrule: 'FREQ=MONTHLY;INTERVAL=1' },
-            { id: 'yearly', label: 'Yearly', rrule: 'FREQ=YEARLY;INTERVAL=1' },
-          ],
+        : FALLBACK_RECURRENCE_PRESETS,
     [settings?.recurrencePresets]
   );
 
   const fullCalendarEvents = useMemo(
-    () =>
-      occurrences.map((occ) => ({
-        id: occ.occurrenceId,
-        title: occ.title,
-        start: occ.startDate,
-        end: occ.endDate,
-        allDay: occ.allDay,
-        backgroundColor: occ.color || settings?.primaryColor || '#0284C7',
-        borderColor: occ.color || settings?.primaryColor || '#0284C7',
-        extendedProps: {
-          occurrence: occ,
-        },
-      })),
-    [occurrences, settings?.primaryColor]
+    () => mapOccurrencesToFullCalendarEvents(visibleOccurrences, settings?.primaryColor),
+    [visibleOccurrences, settings?.primaryColor]
   );
 
   const changeFullCalendarView = useCallback((nextView: CalendarViewMode) => {
     setViewMode(nextView);
-    const api = calendarRef.current?.getApi();
-    if (api) {
-      api.changeView(nextView);
-    }
+    calendarRef.current?.getApi()?.changeView(nextView);
   }, []);
 
   const navigateCalendar = useCallback((action: 'prev' | 'today' | 'next') => {
@@ -252,16 +203,38 @@ export const CalendarPage: React.FC = () => {
   const handleDatesSet = useCallback(
     (currentStart: Date, fromIso: string, toIso: string) => {
       setAnchorDate(currentStart);
-      setDateWindow({ from: fromIso, to: toIso });
+      const nextWin = expandDateWindowToYear(currentStart, fromIso, toIso);
+      setDateWindow((prev) =>
+        prev.from === nextWin.from && prev.to === nextWin.to ? prev : nextWin
+      );
     },
     []
   );
 
-  const handleSelectSlot = useCallback((startStr: string, endStr: string) => {
-    setQuickStart(startStr);
-    setQuickEnd(endStr);
-    setShowQuickCreate(true);
+  const scrollQuickCreateIntoView = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.setTimeout(() => {
+        quickCreateRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 40);
+    }
   }, []);
+
+  const handleSelectSlot = useCallback(
+    (startStr: string, endStr: string) => {
+      setQuickStart(startStr);
+      setQuickEnd(normalizeSelectedEndSlot(startStr, endStr));
+      if (sourceFilter !== 'all') {
+        setQuickSourceId(sourceFilter);
+      } else if (!quickSourceId && settings?.sources?.length) {
+        const firstEnabled =
+          settings.sources.find((s) => s.enabled !== false) ?? settings.sources[0];
+        if (firstEnabled) setQuickSourceId(firstEnabled.id);
+      }
+      setShowQuickCreate(true);
+      scrollQuickCreateIntoView();
+    },
+    [quickSourceId, scrollQuickCreateIntoView, settings?.sources, sourceFilter]
+  );
 
   const handleSelectOccurrence = useCallback((occ: ExpandedCalendarOccurrence) => {
     setSelectedOccurrence(occ);
@@ -301,28 +274,28 @@ export const CalendarPage: React.FC = () => {
   const handleQuickCreateSubmit = async () => {
     if (!quickTitle.trim() || !quickStart) return;
     try {
-      const startIso = quickStart.includes('T')
-        ? new Date(quickStart).toISOString()
-        : `${quickStart}T10:00:00.000Z`;
-      const endIso =
-        quickEnd && !Number.isNaN(new Date(quickEnd).getTime())
-          ? new Date(quickEnd).toISOString()
-          : new Date(new Date(startIso).getTime() + 3600000).toISOString();
-
-      await post(`/${PLUGIN_ID}/calendar/quick-create`, {
-        sourceId: sourceFilter !== 'all' ? sourceFilter : undefined,
-        title: quickTitle.trim(),
-        startDate: startIso,
-        endDate: endIso,
-        location: quickLocation.trim() || undefined,
-        category: quickCategory,
-        rrule: quickRRule || undefined,
+      const payload = buildQuickCreateRequestPayload({
+        quickSourceId,
+        sourceFilter,
+        quickTitle,
+        quickStart,
+        quickEnd,
+        quickLocation,
+        quickCategory,
+        quickRRule,
+        quickCustomerName,
+        quickCustomerEmail,
+        quickPartySize,
       });
+      await post(`/${PLUGIN_ID}/calendar/quick-create`, payload);
 
       setShowQuickCreate(false);
       setQuickTitle('');
       setQuickLocation('');
       setQuickRRule('');
+      setQuickCustomerName('');
+      setQuickCustomerEmail('');
+      setQuickPartySize(1);
       setBannerMessage(t('calendar.created', 'Calendar entry created and published.'));
       await fetchCalendarData();
     } catch {
@@ -336,12 +309,19 @@ export const CalendarPage: React.FC = () => {
       const newStartIso = rescheduleDate
         ? `${rescheduleDate}${selectedOccurrence.startDate.slice(10)}`
         : selectedOccurrence.startDate;
+      const startDiffMs =
+        new Date(newStartIso).getTime() - new Date(selectedOccurrence.startDate).getTime();
+      const newEndIso =
+        !Number.isNaN(startDiffMs) && selectedOccurrence.endDate
+          ? new Date(new Date(selectedOccurrence.endDate).getTime() + startDiffMs).toISOString()
+          : undefined;
       await post(`/${PLUGIN_ID}/calendar/reschedule`, {
         sourceId: selectedOccurrence.sourceId,
         uid: selectedOccurrence.uid,
         documentId: selectedOccurrence.documentId,
         occurrenceDate: selectedOccurrence.occurrenceDate,
         newStartDate: newStartIso,
+        newEndDate: newEndIso,
         applyToSeries,
         cancelOccurrence,
       });
@@ -366,37 +346,21 @@ export const CalendarPage: React.FC = () => {
       }).format(anchorDate),
     [anchorDate, effectiveLocale]
   );
-
-  const secondaryHeaderLabel = useMemo(() => {
-    if (activeSecondaryCalendars.length === 0 || secondaryLangMode === 'off') return '';
-    const anchorIso = anchorDate.toISOString().slice(0, 10);
-    const targetLoc = secondaryLangMode === 'ar' ? 'ar-SA' : effectiveLocale;
-    return activeSecondaryCalendars
-      .map((sys) => {
-        const formatted = formatDateInCalendarSystem(
-          anchorIso,
-          { ...sys, locale: targetLoc },
-          targetLoc,
-          { compact: false }
-        );
-        return formatted ? `${sys.label}: ${formatted}` : '';
-      })
-      .filter(Boolean)
-      .join(' • ');
-  }, [activeSecondaryCalendars, anchorDate, effectiveLocale, secondaryLangMode]);
-
+  const secondaryHeaderLabel = useMemo(
+    () =>
+      buildSecondaryHeaderLabel(
+        activeSecondaryCalendars,
+        anchorDate,
+        effectiveLocale,
+        secondaryLangMode
+      ),
+    [activeSecondaryCalendars, anchorDate, effectiveLocale, secondaryLangMode]
+  );
   const todayKey = new Date().toISOString().slice(0, 10);
-
-  const enabledViews = useMemo(() => {
-    const b = getLocalizedCalendarBundle(effectiveLocale).buttonText;
-    const list: Array<{ mode: CalendarViewMode; label: string }> = [];
-    if (settings?.monthView !== false) list.push({ mode: 'dayGridMonth', label: b.month });
-    if (settings?.weekView !== false) list.push({ mode: 'timeGridWeek', label: b.week });
-    if (settings?.dayView !== false) list.push({ mode: 'timeGridDay', label: b.day });
-    if (settings?.agendaView !== false) list.push({ mode: 'listMonth', label: b.list });
-    if (settings?.yearView !== false) list.push({ mode: 'multiMonthYear', label: b.year });
-    return list;
-  }, [settings, effectiveLocale]);
+  const enabledViews = useMemo(
+    () => buildEnabledCalendarViews(settings, effectiveLocale),
+    [settings, effectiveLocale]
+  );
 
   return (
     <Box padding={6} background="neutral100">
@@ -414,6 +378,7 @@ export const CalendarPage: React.FC = () => {
           loading={loading}
           settings={settings}
           totalOccurrences={occurrences.length}
+          sourceCounts={sourceCounts}
           sourceFilter={sourceFilter}
           onSourceFilterChange={setSourceFilter}
           categoryFilter={categoryFilter}
@@ -423,10 +388,13 @@ export const CalendarPage: React.FC = () => {
           enabledViews={enabledViews}
           onViewChange={changeFullCalendarView}
           onNavigate={navigateCalendar}
-          onOpenQuickCreate={() => {
-            setQuickStart(todayKey);
+          onOpenQuickCreate={(targetSourceId?: string) => {
+            if (targetSourceId) setQuickSourceId(targetSourceId);
+            else if (sourceFilter !== 'all') setQuickSourceId(sourceFilter);
+            setQuickStart((prev) => prev || todayKey);
             setQuickEnd('');
             setShowQuickCreate(true);
+            scrollQuickCreateIntoView();
           }}
         />
 
@@ -442,20 +410,33 @@ export const CalendarPage: React.FC = () => {
         )}
 
         {showQuickCreate && (
-          <QuickCreatePanel
-            t={t}
-            quickTitle={quickTitle}
-            onQuickTitleChange={setQuickTitle}
-            quickStart={quickStart}
-            onQuickStartChange={setQuickStart}
-            quickLocation={quickLocation}
-            onQuickLocationChange={setQuickLocation}
-            quickRRule={quickRRule}
-            onQuickRRuleChange={setQuickRRule}
-            recurrencePresets={recurrencePresets}
-            onCancel={() => setShowQuickCreate(false)}
-            onSubmit={handleQuickCreateSubmit}
-          />
+          <div ref={quickCreateRef}>
+            <QuickCreatePanel
+              t={t}
+              sources={settings?.sources ?? []}
+              selectedSourceId={quickSourceId}
+              onSelectedSourceIdChange={setQuickSourceId}
+              quickTitle={quickTitle}
+              onQuickTitleChange={setQuickTitle}
+              quickStart={quickStart}
+              onQuickStartChange={setQuickStart}
+              quickEnd={quickEnd}
+              onQuickEndChange={setQuickEnd}
+              quickLocation={quickLocation}
+              onQuickLocationChange={setQuickLocation}
+              quickRRule={quickRRule}
+              onQuickRRuleChange={setQuickRRule}
+              quickCustomerName={quickCustomerName}
+              onQuickCustomerNameChange={setQuickCustomerName}
+              quickCustomerEmail={quickCustomerEmail}
+              onQuickCustomerEmailChange={setQuickCustomerEmail}
+              quickPartySize={quickPartySize}
+              onQuickPartySizeChange={setQuickPartySize}
+              recurrencePresets={recurrencePresets}
+              onCancel={() => setShowQuickCreate(false)}
+              onSubmit={handleQuickCreateSubmit}
+            />
+          </div>
         )}
 
         {selectedOccurrence && (

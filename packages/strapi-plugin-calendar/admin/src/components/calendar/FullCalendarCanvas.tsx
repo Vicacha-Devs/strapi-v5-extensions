@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import type {
-  DateClickArg,
   DateSelectArg,
   DatesSetArg,
   DayCellContentArg,
@@ -15,10 +14,9 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import multiMonthPlugin from '@fullcalendar/multimonth';
-import interactionPlugin from '@fullcalendar/interaction';
+import interactionPlugin, { type DateClickArg } from '@fullcalendar/interaction';
 import { Box } from '@strapi/design-system';
 import { useTheme } from 'styled-components';
-import { formatDateInCalendarSystem } from '../../../../shared/calendarSystems';
 import {
   buildFullCalendarTimeFormat,
   getLocalizedCalendarBundle,
@@ -38,6 +36,13 @@ import {
   type ExpandedCalendarOccurrence,
   type SecondaryCalendarLanguageMode,
 } from '../../../../shared/types';
+import { buildCalendarThemeCss } from './calendarThemeStyles';
+import {
+  buildDayHeaderStyle,
+  buildDayNumberBadgeStyle,
+  computeSecondaryBadges,
+  DayCellMetaBadges,
+} from './FullCalendarDayCell';
 
 /**
  * Defined outside the component per FullCalendar React documentation
@@ -52,22 +57,26 @@ const FULLCALENDAR_PLUGINS = [
 ];
 
 const VIEW_SPECIFIC_OPTIONS: Record<string, Record<string, unknown>> = {
-  dayGridMonth: {
-    dayMaxEventRows: 4,
-  },
+  dayGridMonth: { dayMaxEventRows: 3 },
+  listMonth: { type: 'list', duration: { years: 1 } },
   multiMonthYear: {
     type: 'multiMonth',
     duration: { years: 1 },
     multiMonthMaxColumns: 3,
+    multiMonthMinWidth: 300,
+    dayMaxEventRows: 2,
+    weekNumbers: false,
   },
   multiMonthYearStacked: {
     type: 'multiMonth',
     duration: { years: 1 },
     multiMonthMaxColumns: 1,
+    dayMaxEventRows: 3,
   },
   dayGridYear: {
     type: 'dayGrid',
     duration: { years: 1 },
+    dayMaxEventRows: 3,
   },
 };
 
@@ -93,26 +102,77 @@ const ALL_CALENDAR_LOCALES: LocaleInput[] = (() => {
 function renderEventContent(eventArg: EventContentArg) {
   const occ = eventArg.event.extendedProps
     ?.occurrence as ExpandedCalendarOccurrence | undefined;
+  const isCompactYear = eventArg.view?.type === 'multiMonthYear';
+  const tooltip = [eventArg.timeText, eventArg.event.title]
+    .filter(Boolean)
+    .join(' • ');
   return (
     <div
       className="vicacha-fc-event-inner"
+      title={tooltip}
       style={{
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
-        padding: '2px 6px',
-        fontSize: 12,
+        padding: isCompactYear ? '1px 4px' : '2px 6px',
+        fontSize: isCompactYear ? 11 : 12,
         fontWeight: 600,
-        lineHeight: 1.35,
+        lineHeight: 1.3,
       }}
     >
       {occ?.isRecurring ? '↻ ' : ''}
-      {eventArg.timeText ? (
+      {!isCompactYear && eventArg.timeText ? (
         <b className="vicacha-fc-event-time">{eventArg.timeText} </b>
       ) : null}
       <span className="vicacha-fc-event-title">{eventArg.event.title}</span>
     </div>
   );
+}
+
+function resolveVisualKeys(
+  props: Pick<
+    FullCalendarCanvasProps,
+    'theme' | 'colorScheme' | 'themePalette' | 'secondaryCalendarLanguage' | 'settings'
+  >
+) {
+  const { settings } = props;
+  return {
+    activeThemeKey: (props.theme ?? settings?.theme ?? 'breeze') as CalendarThemePreset,
+    configuredColorScheme: (props.colorScheme ??
+      settings?.colorScheme ??
+      'auto') as CalendarColorScheme,
+    activePaletteKey: (props.themePalette ??
+      settings?.themePalette ??
+      'default') as CalendarColorPaletteId,
+    effectiveSecondaryLang: (props.secondaryCalendarLanguage ??
+      settings?.secondaryCalendarLanguage ??
+      'local') as SecondaryCalendarLanguageMode,
+    allowCreate: settings?.showCreateButton !== false,
+  };
+}
+
+function buildCalendarGridConfig(
+  settings: CalendarPluginSettings | null
+): {
+  initialView: string;
+  weekNumbers: boolean;
+  weekNumberCalculation: 'local' | 'ISO';
+  weekends: boolean;
+  slotMinTime: string;
+  slotMaxTime: string;
+  slotDuration: string;
+  businessHours: boolean | unknown[];
+} {
+  return {
+    initialView: settings?.defaultView || 'dayGridMonth',
+    weekNumbers: settings?.weekNumbers ?? false,
+    weekNumberCalculation: settings?.weekNumberCalculation ?? 'ISO',
+    weekends: settings?.showWeekends ?? true,
+    slotMinTime: settings?.startHour || '07:00:00',
+    slotMaxTime: settings?.endHour || '21:00:00',
+    slotDuration: settings?.slotDuration || '00:30:00',
+    businessHours: settings?.businessHours || true,
+  };
 }
 
 export interface FullCalendarCanvasProps {
@@ -136,40 +196,35 @@ export interface FullCalendarCanvasProps {
   ) => void;
 }
 
-export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = ({
-  calendarRef,
-  locale,
-  direction,
-  theme,
-  colorScheme,
-  themePalette,
-  secondaryCalendarLanguage,
-  settings,
-  events,
-  activeSecondaryCalendars,
-  onDatesSet,
-  onSelectSlot,
-  onSelectOccurrence,
-  onDropOrResizeOccurrence,
-}) => {
+export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => {
+  const {
+    calendarRef,
+    locale,
+    direction,
+    settings,
+    events,
+    activeSecondaryCalendars,
+    onDatesSet,
+    onSelectSlot,
+    onSelectOccurrence,
+    onDropOrResizeOccurrence,
+  } = props;
   const styledTheme = useTheme() as { colors?: { neutral0?: string } } | undefined;
   const strapiNeutral0 = styledTheme?.colors?.neutral0;
 
-  const localeBundle = useMemo(
-    () => getLocalizedCalendarBundle(locale),
-    [locale]
-  );
+  const localeBundle = useMemo(() => getLocalizedCalendarBundle(locale), [locale]);
+  const {
+    activeThemeKey,
+    configuredColorScheme,
+    activePaletteKey,
+    effectiveSecondaryLang,
+    allowCreate,
+  } = resolveVisualKeys(props);
 
-  const activeThemeKey: CalendarThemePreset =
-    theme ?? settings?.theme ?? 'breeze';
-  const configuredColorScheme: CalendarColorScheme =
-    colorScheme ?? settings?.colorScheme ?? 'auto';
   const activeColorScheme = detectEffectiveColorScheme(
     configuredColorScheme,
     strapiNeutral0
   );
-  const activePaletteKey: CalendarColorPaletteId =
-    themePalette ?? settings?.themePalette ?? 'default';
 
   const activeTheme = useMemo(
     () =>
@@ -181,9 +236,6 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = ({
       ),
     [activeThemeKey, activeColorScheme, activePaletteKey, strapiNeutral0]
   );
-
-  const effectiveSecondaryLang: SecondaryCalendarLanguageMode =
-    secondaryCalendarLanguage ?? settings?.secondaryCalendarLanguage ?? 'local';
 
   const effectiveDirection = useMemo<CalendarDirection>(
     () => direction ?? resolveCalendarDirection(locale, settings?.direction),
@@ -200,6 +252,8 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = ({
     [settings?.timeFormat24h]
   );
 
+  const gridConfig = useMemo(() => buildCalendarGridConfig(settings), [settings]);
+
   const handleDatesSet = useCallback(
     (dateInfo: DatesSetArg) => {
       onDatesSet(
@@ -213,27 +267,23 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = ({
 
   const handleDateClick = useCallback(
     (clickInfo: DateClickArg) => {
-      if (settings?.showCreateButton !== false) {
-        onSelectSlot(clickInfo.dateStr, '');
-      }
+      if (allowCreate) onSelectSlot(clickInfo.dateStr, '');
     },
-    [onSelectSlot, settings?.showCreateButton]
+    [allowCreate, onSelectSlot]
   );
 
   const handleSelect = useCallback(
     (selectInfo: DateSelectArg) => {
-      onSelectSlot(selectInfo.startStr, selectInfo.endStr);
+      if (allowCreate) onSelectSlot(selectInfo.startStr, selectInfo.endStr);
     },
-    [onSelectSlot]
+    [allowCreate, onSelectSlot]
   );
 
   const handleEventClick = useCallback(
     (clickInfo: EventClickArg) => {
       const occ = clickInfo.event.extendedProps
         ?.occurrence as ExpandedCalendarOccurrence | undefined;
-      if (occ) {
-        onSelectOccurrence(occ);
-      }
+      if (occ) onSelectOccurrence(occ);
     },
     [onSelectOccurrence]
   );
@@ -256,95 +306,55 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = ({
   const renderDayCellContent = useCallback(
     (cellArg: DayCellContentArg) => {
       const dateKey = cellArg.date.toISOString().slice(0, 10);
-      const targetSecondaryLocale =
-        effectiveSecondaryLang === 'ar' ? 'ar-SA' : localeBundle.code;
-
-      const secondaryBadges =
-        effectiveSecondaryLang === 'off'
-          ? []
-          : activeSecondaryCalendars
-              .map((sys) =>
-                formatDateInCalendarSystem(
-                  dateKey,
-                  {
-                    ...sys,
-                    locale:
-                      effectiveSecondaryLang === 'ar'
-                        ? 'ar-SA'
-                        : sys.locale || targetSecondaryLocale,
-                  },
-                  targetSecondaryLocale,
-                  {
-                    compact: true,
-                  }
-                )
-              )
-              .filter(Boolean);
-
+      const secondaryBadges = computeSecondaryBadges(
+        dateKey,
+        effectiveSecondaryLang,
+        localeBundle.code,
+        activeSecondaryCalendars
+      );
       const cleanDayNumber =
-        cellArg.dayNumberText.replace(/[^\d٠-٩]/g, '') ||
-        cellArg.dayNumberText;
-
-      const isEndAligned = activeTheme.dayNumberAlign === 'end';
-      const isCenterAligned = activeTheme.dayNumberAlign === 'center';
+        cellArg.dayNumberText.replace(/[^\d٠-٩]/g, '') || cellArg.dayNumberText;
+      const isCompactYear = cellArg.view?.type === 'multiMonthYear';
+      const secondarySummary = secondaryBadges.join(' · ');
+      const tooltipParts = [
+        dateKey,
+        secondarySummary,
+        allowCreate ? 'Click to create Event or Booking' : '',
+      ].filter(Boolean);
 
       return (
         <div
-          style={{
-            display: 'flex',
-            flexDirection: isEndAligned ? 'row-reverse' : 'row',
-            justifyContent:
-              isCenterAligned && secondaryBadges.length === 0
-                ? 'center'
-                : 'space-between',
-            alignItems: 'center',
-            width: '100%',
-            gap: 6,
-            padding: '2px 4px',
+          className="vicacha-fc-day-header"
+          onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+            if (allowCreate) {
+              e.stopPropagation();
+              onSelectSlot(dateKey, '');
+            }
           }}
+          title={tooltipParts.join(' • ')}
+          style={buildDayHeaderStyle(
+            activeTheme,
+            isCompactYear,
+            secondaryBadges.length > 0,
+            allowCreate
+          )}
         >
           <span
-            style={{
-              fontWeight: 700,
-              fontSize: activeTheme.id === 'monarch' ? 13.5 : 13,
-              lineHeight: 1.2,
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: 26,
-              height: 26,
-              borderRadius:
-                activeTheme.id === 'forma' && !cellArg.isToday
-                  ? '3px'
-                  : '999px',
-              padding: '0 6px',
-              background: cellArg.isToday
-                ? activeTheme.todayNumberBg
-                : 'transparent',
-              color: cellArg.isToday
-                ? activeTheme.todayNumberText
-                : activeTheme.cellText,
-            }}
+            style={buildDayNumberBadgeStyle(
+              activeTheme,
+              isCompactYear,
+              Boolean(cellArg.isToday)
+            )}
           >
             {cleanDayNumber}
           </span>
-          {secondaryBadges.length > 0 && (
-            <span
-              dir={effectiveSecondaryLang === 'ar' ? 'rtl' : 'auto'}
-              style={{
-                fontSize: 11,
-                background: activeTheme.badgeBg,
-                color: activeTheme.badgeText,
-                border: `1px solid ${activeTheme.badgeBorder}`,
-                borderRadius: activeTheme.id === 'forma' ? '4px' : '999px',
-                padding: '1px 8px',
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-                lineHeight: 1.35,
-              }}
-            >
-              {secondaryBadges.join(' · ')}
-            </span>
+          {!isCompactYear && (
+            <DayCellMetaBadges
+              secondarySummary={secondarySummary}
+              effectiveSecondaryLang={effectiveSecondaryLang}
+              activeTheme={activeTheme}
+              allowCreate={allowCreate}
+            />
           )}
         </div>
       );
@@ -352,209 +362,17 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = ({
     [
       activeSecondaryCalendars,
       activeTheme,
+      allowCreate,
       effectiveSecondaryLang,
       localeBundle.code,
+      onSelectSlot,
     ]
   );
 
-  const themeCss = useMemo(() => {
-    const scope = `.vicacha-fc-container.vicacha-fc-theme-${activeTheme.id}`;
-    const radius = activeTheme.containerRadius ?? '10px';
-    const shadow = activeTheme.containerShadow ?? 'none';
-    const evtRadius = activeTheme.eventRadius ?? '6px';
-    const fontFamily =
-      activeTheme.fontFamily ?? "'Inter Variable', Inter, system-ui, sans-serif";
-
-    let eventRules = '';
-    if (activeTheme.eventStyle === 'tinted') {
-      // FullCalendar Breezy / Shadcn soft-tinted event style
-      eventRules = `
-        ${scope} .fc-daygrid-event,
-        ${scope} .fc-timegrid-event {
-          border-radius: ${evtRadius} !important;
-          border-width: 1px !important;
-          border-style: solid !important;
-          background: color-mix(in oklab, var(--fc-event-bg-color, ${activeTheme.primaryColor}) 20%, ${activeTheme.cellBg}) !important;
-          border-color: color-mix(in oklab, var(--fc-event-bg-color, ${activeTheme.primaryColor}) 45%, ${activeTheme.borderColor}) !important;
-          color: color-mix(in oklab, var(--fc-event-bg-color, ${activeTheme.primaryColor}) 72%, ${activeTheme.cellText}) !important;
-          box-shadow: none !important;
-        }
-        ${scope} .fc-daygrid-event .fc-event-main,
-        ${scope} .fc-timegrid-event .fc-event-main,
-        ${scope} .fc-daygrid-event .vicacha-fc-event-inner,
-        ${scope} .fc-timegrid-event .vicacha-fc-event-inner {
-          color: color-mix(in oklab, var(--fc-event-bg-color, ${activeTheme.primaryColor}) 75%, ${activeTheme.cellText}) !important;
-        }
-      `;
-    } else if (activeTheme.eventStyle === 'accent-bar') {
-      // FullCalendar Forma 6px left-accent bar style
-      eventRules = `
-        ${scope} .fc-daygrid-event,
-        ${scope} .fc-timegrid-event {
-          border-radius: ${evtRadius} !important;
-          border-top: 1px solid color-mix(in oklab, var(--fc-event-bg-color, ${activeTheme.primaryColor}) 32%, transparent) !important;
-          border-bottom: 1px solid color-mix(in oklab, var(--fc-event-bg-color, ${activeTheme.primaryColor}) 32%, transparent) !important;
-          border-inline-end: 1px solid color-mix(in oklab, var(--fc-event-bg-color, ${activeTheme.primaryColor}) 32%, transparent) !important;
-          border-inline-start: 6px solid var(--fc-event-bg-color, ${activeTheme.primaryColor}) !important;
-          background: color-mix(in oklab, var(--fc-event-bg-color, ${activeTheme.primaryColor}) 24%, ${activeTheme.cellBg}) !important;
-          color: ${activeTheme.cellText} !important;
-          box-shadow: none !important;
-        }
-        ${scope} .fc-daygrid-event .fc-event-main,
-        ${scope} .fc-timegrid-event .fc-event-main,
-        ${scope} .fc-daygrid-event .vicacha-fc-event-inner,
-        ${scope} .fc-timegrid-event .vicacha-fc-event-inner {
-          color: ${activeTheme.cellText} !important;
-        }
-      `;
-    } else {
-      // FullCalendar Monarch / Pulse / Classic / MUI solid high-contrast event style
-      eventRules = `
-        ${scope} .fc-daygrid-event,
-        ${scope} .fc-timegrid-event {
-          border-radius: ${evtRadius} !important;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
-        }
-      `;
-    }
-
-    const todayCellRule =
-      activeTheme.todayHeaderAccent === 'top-bar'
-        ? `
-          ${scope} .fc-daygrid-day.fc-day-today {
-            background: ${activeTheme.todayBg} !important;
-            box-shadow: inset 0 4px 0 0 ${activeTheme.todayBorder} !important;
-          }
-          ${scope} .fc-col-header-cell.fc-day-today {
-            box-shadow: inset 0 4px 0 0 ${activeTheme.todayBorder} !important;
-          }
-        `
-        : activeTheme.id === 'monarch' || activeTheme.id === 'pulse'
-          ? `
-            ${scope} .fc-daygrid-day.fc-day-today {
-              background: ${activeTheme.todayBg} !important;
-            }
-          `
-          : `
-            ${scope} .fc-daygrid-day.fc-day-today {
-              background: ${activeTheme.todayBg} !important;
-              box-shadow: inset 0 0 0 2px ${activeTheme.todayBorder} !important;
-            }
-          `;
-
-    return `
-    ${scope} {
-      --fc-border-color: ${activeTheme.borderColor};
-      --fc-page-bg-color: ${activeTheme.cellBg};
-      --fc-neutral-bg-color: ${activeTheme.cellAltBg};
-      --fc-today-bg-color: ${activeTheme.todayBg};
-      --fc-highlight-color: ${activeTheme.cellHoverBg};
-      --fc-now-indicator-color: ${activeTheme.id === 'pulse' ? '#EF4444' : activeTheme.primaryColor};
-      font-family: ${fontFamily};
-      background: ${activeTheme.cellBg};
-      color: ${activeTheme.cellText};
-      border-radius: ${radius};
-      border: 1px solid ${activeTheme.borderColor};
-      box-shadow: ${shadow};
-      overflow: hidden;
-    }
-    ${scope} .fc-theme-standard th,
-    ${scope} .fc-col-header-cell {
-      background: ${activeTheme.headerBg} !important;
-      color: ${activeTheme.headerText} !important;
-      border-color: ${activeTheme.borderColor} !important;
-      padding: ${activeTheme.id === 'monarch' ? '12px 4px' : '10px 4px'} !important;
-    }
-    ${scope} .fc-col-header-cell-cushion {
-      color: ${activeTheme.headerText} !important;
-      font-weight: ${activeTheme.id === 'pulse' ? 600 : 700} !important;
-      font-size: 12px !important;
-      text-transform: ${activeTheme.id === 'forma' ? 'none' : 'uppercase'} !important;
-      letter-spacing: ${activeTheme.id === 'forma' ? '0' : '0.04em'} !important;
-      text-decoration: none !important;
-    }
-    ${scope} .fc-daygrid-day {
-      background: ${activeTheme.cellBg} !important;
-      color: ${activeTheme.cellText} !important;
-      border-color: ${activeTheme.borderColor} !important;
-      transition: background-color 0.15s ease;
-    }
-    ${scope} .fc-daygrid-day:hover {
-      background: ${activeTheme.cellHoverBg} !important;
-    }
-    ${scope} .fc-daygrid-day.fc-day-other {
-      background: ${activeTheme.cellAltBg} !important;
-      opacity: 0.72;
-    }
-    ${todayCellRule}
-    ${eventRules}
-    ${scope} .fc-daygrid-day-top {
-      flex-direction: row !important;
-      width: 100% !important;
-      padding: 4px 4px 2px !important;
-    }
-    ${scope} .fc-daygrid-day-number {
-      width: 100% !important;
-      padding: 0 !important;
-      color: ${activeTheme.cellText} !important;
-      text-decoration: none !important;
-    }
-    ${scope} .fc-daygrid-day-frame {
-      min-height: 98px !important;
-      padding: 2px !important;
-    }
-    ${scope} .fc-timegrid-slot,
-    ${scope} .fc-timegrid-axis,
-    ${scope} .fc-scrollgrid {
-      border-color: ${activeTheme.borderColor} !important;
-      color: ${activeTheme.cellText} !important;
-      background: ${activeTheme.cellBg} !important;
-    }
-    ${scope} .fc-timegrid-slot-minor {
-      border-top-style: dotted !important;
-    }
-    ${scope} .fc-timegrid-slot-label-cushion,
-    ${scope} .fc-list-day-text,
-    ${scope} .fc-list-day-side-text {
-      color: ${activeTheme.headerText} !important;
-      font-weight: 600 !important;
-      text-decoration: none !important;
-    }
-    ${scope} .fc-list-day-cushion {
-      background: ${activeTheme.headerBg} !important;
-      ${activeTheme.id === 'forma' ? `border-inline-start: 4px solid ${activeTheme.primaryColor} !important;` : ''}
-    }
-    ${scope} .fc-list-event td {
-      background: ${activeTheme.cellBg} !important;
-      color: ${activeTheme.cellText} !important;
-      border-color: ${activeTheme.borderColor} !important;
-    }
-    ${scope} .fc-list-empty {
-      background: ${activeTheme.cellAltBg} !important;
-      color: ${activeTheme.cellMutedText} !important;
-    }
-    ${scope} .fc-multimonth-month {
-      background: ${activeTheme.cellBg} !important;
-      color: ${activeTheme.cellText} !important;
-    }
-    ${scope} .fc-multimonth-title {
-      color: ${activeTheme.headerText} !important;
-      font-weight: 700 !important;
-      padding: 10px 8px !important;
-      text-transform: uppercase !important;
-      letter-spacing: 0.05em !important;
-    }
-    ${scope} .fc-daygrid-week-number {
-      background: ${activeTheme.badgeBg} !important;
-      color: ${activeTheme.badgeText} !important;
-      border-radius: ${activeTheme.id === 'forma' ? '2px' : '6px'} !important;
-      font-size: 11px !important;
-      font-weight: 600 !important;
-      padding: 2px 6px !important;
-      margin: 2px !important;
-    }
-  `;
-  }, [activeTheme]);
+  const themeCss = useMemo(
+    () => buildCalendarThemeCss(activeTheme, allowCreate),
+    [activeTheme, allowCreate]
+  );
 
   return (
     <Box
@@ -573,14 +391,14 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = ({
           ref={calendarRef}
           plugins={FULLCALENDAR_PLUGINS}
           views={VIEW_SPECIFIC_OPTIONS}
-          initialView={settings?.defaultView || 'dayGridMonth'}
+          initialView={gridConfig.initialView}
           headerToolbar={false}
           locales={ALL_CALENDAR_LOCALES}
           locale={localeBundle.code}
           direction={effectiveDirection}
           firstDay={effectiveFirstDay}
-          weekNumbers={settings?.weekNumbers ?? false}
-          weekNumberCalculation={settings?.weekNumberCalculation ?? 'ISO'}
+          weekNumbers={gridConfig.weekNumbers}
+          weekNumberCalculation={gridConfig.weekNumberCalculation}
           weekText={localeBundle.weekText}
           allDayText={localeBundle.allDayText}
           moreLinkText={localeBundle.moreLinkText}
@@ -588,14 +406,14 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = ({
           buttonText={localeBundle.buttonText}
           eventTimeFormat={timeFormat}
           slotLabelFormat={timeFormat}
-          weekends={settings?.showWeekends ?? true}
-          slotMinTime={settings?.startHour || '07:00:00'}
-          slotMaxTime={settings?.endHour || '21:00:00'}
-          slotDuration={settings?.slotDuration || '00:30:00'}
-          businessHours={settings?.businessHours || true}
+          weekends={gridConfig.weekends}
+          slotMinTime={gridConfig.slotMinTime}
+          slotMaxTime={gridConfig.slotMaxTime}
+          slotDuration={gridConfig.slotDuration}
+          businessHours={gridConfig.businessHours}
           nowIndicator={true}
           editable={true}
-          selectable={settings?.showCreateButton !== false}
+          selectable={allowCreate}
           selectMirror={true}
           dayMaxEvents={true}
           height="auto"

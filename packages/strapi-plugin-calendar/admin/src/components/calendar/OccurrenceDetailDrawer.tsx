@@ -4,13 +4,18 @@ import {
   Box,
   Button,
   Checkbox,
+  DatePicker,
   Field,
   Flex,
-  TextInput,
   Typography,
 } from '@strapi/design-system';
 import { describeRRule } from '../../../../shared/rruleEngine';
 import type { ExpandedCalendarOccurrence } from '../../../../shared/types';
+import {
+  formatCategoryLabel,
+  formatLocalYmd,
+  parseDateTimePickerValue,
+} from './calendarPageHelpers';
 
 export interface OccurrenceDetailDrawerProps {
   t: (id: string, defaultMessage: string) => string;
@@ -51,7 +56,7 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
             </Badge>
             {occurrence.category && (
               <Badge backgroundColor="primary100" textColor="primary700">
-                {occurrence.category}
+                {formatCategoryLabel(occurrence.category)}
               </Badge>
             )}
             {occurrence.isRecurring && (
@@ -98,25 +103,31 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
             )}
         </Box>
 
-        <Flex direction="column" gap={2} style={{ minWidth: 260 }}>
-          <Flex gap={2} alignItems="flex-end">
-            <Box style={{ flex: 1 }}>
+        <Flex
+          direction="column"
+          alignItems="flex-end"
+          gap={2}
+          style={{ flex: '1 1 320px', minWidth: 260 }}
+        >
+          <Flex gap={2} alignItems="flex-end" wrap="wrap" justifyContent="flex-end">
+            <Box style={{ minWidth: 180, maxWidth: 220 }}>
               <Field.Root>
                 <Field.Label>
                   {t('calendar.rescheduleTo', 'Reschedule Date')}
                 </Field.Label>
-                <TextInput
-                  type="date"
-                  placeholder={t('placeholder.yyyy_mm_dd', 'YYYY-MM-DD')}
-                  value={rescheduleDate}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    onRescheduleDateChange(e.target.value)
+                <DatePicker
+                  size="S"
+                  value={parseDateTimePickerValue(rescheduleDate)}
+                  clearLabel={t('common.clear', 'Clear')}
+                  onChange={(date: Date | undefined) =>
+                    onRescheduleDateChange(date ? formatLocalYmd(date) : '')
                   }
+                  onClear={() => onRescheduleDateChange('')}
                 />
               </Field.Root>
             </Box>
             <Button size="S" variant="secondary" onClick={onSaveReschedule}>
-              {t('common.save', 'Save')}
+              {t('calendar.rescheduleAction', 'Reschedule')}
             </Button>
           </Flex>
 
@@ -131,12 +142,16 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
             </Checkbox>
           )}
 
-          <Flex gap={2} wrap="wrap" paddingTop={1}>
+          <Flex gap={2} wrap="wrap" justifyContent="flex-end" paddingTop={1}>
             <Button
               size="S"
               variant="tertiary"
               tag="a"
-              href={`/admin/content-manager/collection-types/${occurrence.uid}/${occurrence.documentId}`}
+              href={`/admin/content-manager/collection-types/${occurrence.uid}/${occurrence.documentId}${
+                occurrence.locale
+                  ? `?plugins[i18n][locale]=${encodeURIComponent(occurrence.locale)}`
+                  : ''
+              }`}
             >
               {t('calendar.editInContentManager', 'Open in Content Manager')}
             </Button>
@@ -148,7 +163,7 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
               target="_blank"
               rel="noopener noreferrer"
             >
-              .ICS
+              {t('calendar.downloadIcs', '.ICS')}
             </Button>
             <Button size="S" variant="danger-light" onClick={onCancelOccurrence}>
               {t('calendar.cancelInstance', 'Cancel Occurrence')}

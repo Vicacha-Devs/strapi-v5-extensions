@@ -73,29 +73,49 @@ export function applyDayOffset(date: Date, dayOffset?: number): Date {
     return date;
   }
   const offsetDays = Math.trunc(dayOffset);
-  return new Date(date.getTime() + offsetDays * 86400000);
+  return new Date(date.getTime() + offsetDays * 86_400_000);
+}
+
+function parseDigits(raw: string): number {
+  const n = Number.parseInt(raw.replace(/[^0-9]/g, ''), 10);
+  return Number.isFinite(n) ? n : 0;
+}
+
+const INTL_PART_FIELD_MAP: Record<string, 'year' | 'month' | 'day'> = {
+  year: 'year',
+  relatedYear: 'year',
+  month: 'month',
+  day: 'day',
+};
+
+function parseIntlPartsToYmd(
+  parts: Intl.DateTimeFormatPart[]
+): { year: number; month: number; day: number } | null {
+  const ymd = { year: 0, month: 0, day: 0 };
+  for (const part of parts) {
+    const key = INTL_PART_FIELD_MAP[String(part.type)];
+    if (!key) continue;
+    const val = parseDigits(part.value);
+    if (val > 0) ymd[key] = val;
+  }
+  return ymd.month >= 1 && ymd.day >= 1 ? ymd : null;
 }
 
 /**
  * Extracts numeric { year, month, day } parts for any Date in any Unicode CLDR calendar
  * (e.g. "islamic-umalqura", "hebrew", "persian", "gregory").
- * Used both for structured AlternateDateValue metadata and for RFC 7529 RSCALE
- * non-Gregorian recurrence matching!
  */
 export function extractCalendarParts(
   date: Date,
   intlCalendar: string,
   dayOffset = 0
-): {
-  year: number;
-  month: number;
-  day: number;
-} | null {
+): { year: number; month: number; day: number } | null {
   if (Number.isNaN(date.getTime())) {
     return null;
   }
   const effectiveDate = applyDayOffset(date, dayOffset);
   const calendarTag = (intlCalendar || 'gregory').trim().toLowerCase();
+
   try {
     const formatter = new Intl.DateTimeFormat(`en-u-ca-${calendarTag}-nu-latn`, {
       year: 'numeric',
@@ -103,29 +123,12 @@ export function extractCalendarParts(
       day: 'numeric',
       timeZone: 'UTC',
     });
-    const parts = formatter.formatToParts(effectiveDate);
-    let year = 0;
-    let month = 0;
-    let day = 0;
-    for (const part of parts) {
-      const partType = String(part.type);
-      if (partType === 'year' || partType === 'relatedYear') {
-        const parsedY = Number.parseInt(part.value.replace(/[^0-9]/g, ''), 10);
-        if (Number.isFinite(parsedY)) year = parsedY;
-      } else if (part.type === 'month') {
-        const parsedM = Number.parseInt(part.value.replace(/[^0-9]/g, ''), 10);
-        if (Number.isFinite(parsedM)) month = parsedM;
-      } else if (part.type === 'day') {
-        const parsedD = Number.parseInt(part.value.replace(/[^0-9]/g, ''), 10);
-        if (Number.isFinite(parsedD)) day = parsedD;
-      }
-    }
-    if (month >= 1 && day >= 1) {
-      return { year, month, day };
-    }
+    const parsed = parseIntlPartsToYmd(formatter.formatToParts(effectiveDate));
+    if (parsed) return parsed;
   } catch {
-    // Fallback below
+    // Fallback to UTC Gregorian parts below
   }
+
   return {
     year: effectiveDate.getUTCFullYear(),
     month: effectiveDate.getUTCMonth() + 1,
@@ -133,60 +136,48 @@ export function extractCalendarParts(
   };
 }
 
-/**
- * Formats an ISO date or YYYY-MM-DD string into a target CalendarSystemConfig.
- */
-export function formatDateInCalendarSystem(
-  isoOrDateKey: string,
-  system: CalendarSystemConfig,
-  locale = 'en',
-  options?: { compact?: boolean }
-): string {
-  const rawDate = /^\d{4}-\d{2}-\d{2}$/.test(isoOrDateKey)
-    ? new Date(`${isoOrDateKey}T12:00:00.000Z`)
-    : new Date(isoOrDateKey);
-  if (Number.isNaN(rawDate.getTime())) {
-    return '';
-  }
-  const effectiveDate = applyDayOffset(rawDate, system.dayOffset);
+function resolveCalendarLocaleTag(systemLocale: string | undefined, fallbackLocale: string): string {
   const rawLocale =
-    system.locale && system.locale !== 'auto'
-      ? system.locale
-      : locale && locale !== 'auto'
-        ? locale
+    systemLocale && systemLocale !== 'auto'
+      ? systemLocale
+      : fallbackLocale && fallbackLocale !== 'auto'
+        ? fallbackLocale
         : 'en';
-  const effectiveLocale = rawLocale.split('-u-')[0];
+  return rawLocale.split('-u-')[0];
+}
+
+function tryFormatWithCustomFormatter(
+  effectiveDate: Date,
+  system: CalendarSystemConfig,
+  effectiveLocale: string,
+  compact: boolean
+): string | null {
   const customFn =
-    customFormatters.get(system.id) ??
-    customFormatters.get(system.intlCalendar);
-  if (customFn) {
-    try {
-      return customFn(effectiveDate, {
-        locale: effectiveLocale,
-        system,
-        compact: Boolean(options?.compact),
-      });
-    } catch {
-      // Fallback to Intl.DateTimeFormat
-    }
-  }
-  const calendarTag = (system.intlCalendar || 'gregory').trim();
+    customFormatters.get(system.id) ?? customFormatters.get(system.intlCalendar);
+  if (!customFn) return null;
   try {
-    const intlLocale = `${effectiveLocale}-u-ca-${calendarTag}`;
+    return customFn(effectiveDate, {
+      locale: effectiveLocale,
+      system,
+      compact,
+    });
+  } catch {
+    return null;
+  }
+}
+
+function formatWithIntlFallback(
+  effectiveDate: Date,
+  isoOrDateKey: string,
+  intlLocale: string,
+  compact: boolean
+): string {
+  try {
     const formatter = new Intl.DateTimeFormat(
       intlLocale,
-      options?.compact
-        ? {
-            day: 'numeric',
-            month: 'short',
-            timeZone: 'UTC',
-          }
-        : {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            timeZone: 'UTC',
-          }
+      compact
+        ? { day: 'numeric', month: 'short', timeZone: 'UTC' }
+        : { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }
     );
     return formatter.format(effectiveDate);
   } catch {
@@ -205,6 +196,180 @@ export function formatDateInCalendarSystem(
 }
 
 /**
+ * Formats an ISO date or YYYY-MM-DD string into a target CalendarSystemConfig.
+ */
+export function formatDateInCalendarSystem(
+  isoOrDateKey: string,
+  system: CalendarSystemConfig,
+  locale = 'en',
+  options?: { compact?: boolean }
+): string {
+  const rawDate = /^\d{4}-\d{2}-\d{2}$/.test(isoOrDateKey)
+    ? new Date(`${isoOrDateKey}T12:00:00.000Z`)
+    : new Date(isoOrDateKey);
+  if (Number.isNaN(rawDate.getTime())) {
+    return '';
+  }
+
+  const effectiveDate = applyDayOffset(rawDate, system.dayOffset);
+  const effectiveLocale = resolveCalendarLocaleTag(system.locale, locale);
+  const compact = Boolean(options?.compact);
+
+  const customResult = tryFormatWithCustomFormatter(
+    effectiveDate,
+    system,
+    effectiveLocale,
+    compact
+  );
+  if (customResult !== null) {
+    return customResult;
+  }
+
+  const calendarTag = (system.intlCalendar || 'gregory').trim();
+  return formatWithIntlFallback(
+    effectiveDate,
+    isoOrDateKey,
+    `${effectiveLocale}-u-ca-${calendarTag}`,
+    compact
+  );
+}
+
+function readTrimmedString(val: unknown): string {
+  return typeof val === 'string' ? val.trim() : '';
+}
+
+function extractDocAltDatesMap(doc: Record<string, unknown>): Record<string, unknown> | null {
+  if (doc.alternateDates && typeof doc.alternateDates === 'object' && !Array.isArray(doc.alternateDates)) {
+    return doc.alternateDates as Record<string, unknown>;
+  }
+  return null;
+}
+
+function resolveSystemOverrideText(
+  sys: CalendarSystemConfig,
+  doc: Record<string, unknown>,
+  sourceAltFields: Record<string, string>,
+  docAltDatesMap: Record<string, unknown> | null
+): string {
+  const fieldName = sourceAltFields[sys.id] || sys.overrideField;
+  const rawFieldOverride = fieldName ? readTrimmedString(doc[fieldName]) : '';
+  const rawJsonOverride = docAltDatesMap ? readTrimmedString(docAltDatesMap[sys.id]) : '';
+  return rawFieldOverride || rawJsonOverride;
+}
+
+function buildSingleSecondaryCalendarEntry(args: {
+  sys: CalendarSystemConfig;
+  occurrenceDate: string;
+  rawDateObj: Date;
+  isBaseOccurrence: boolean;
+  doc: Record<string, unknown>;
+  sourceAltFields: Record<string, string>;
+  docAltDatesMap: Record<string, unknown> | null;
+  locale: string;
+}): AlternateDateValue | null {
+  const {
+    sys,
+    occurrenceDate,
+    rawDateObj,
+    isBaseOccurrence,
+    doc,
+    sourceAltFields,
+    docAltDatesMap,
+    locale,
+  } = args;
+  const rawOverride = resolveSystemOverrideText(sys, doc, sourceAltFields, docAltDatesMap);
+  const parts = extractCalendarParts(rawDateObj, sys.intlCalendar, sys.dayOffset ?? 0);
+  const label = sys.label || sys.id;
+
+  if (rawOverride && isBaseOccurrence) {
+    return {
+      calendarId: sys.id,
+      label,
+      formatted: rawOverride,
+      compact: rawOverride,
+      intlCalendar: sys.intlCalendar,
+      year: parts?.year,
+      month: parts?.month,
+      day: parts?.day,
+      isOverridden: true,
+    };
+  }
+
+  const formatted = formatDateInCalendarSystem(occurrenceDate, sys, locale, { compact: false });
+  if (!formatted) return null;
+  const compact = formatDateInCalendarSystem(occurrenceDate, sys, locale, { compact: true });
+
+  return {
+    calendarId: sys.id,
+    label,
+    formatted,
+    compact: compact || formatted,
+    intlCalendar: sys.intlCalendar,
+    year: parts?.year,
+    month: parts?.month,
+    day: parts?.day,
+    isOverridden: false,
+  };
+}
+
+function appendDirectSourceFieldOverrides(
+  result: Record<string, AlternateDateValue>,
+  sourceAltFields: Record<string, string>,
+  doc: Record<string, unknown>
+): void {
+  for (const [calendarId, fieldName] of Object.entries(sourceAltFields)) {
+    if (result[calendarId] || !fieldName) continue;
+    const rawVal = readTrimmedString(doc[fieldName]);
+    if (rawVal) {
+      result[calendarId] = {
+        calendarId,
+        label: calendarId,
+        formatted: rawVal,
+        compact: rawVal,
+        isOverridden: true,
+      };
+    }
+  }
+}
+
+function appendJsonMapOverrides(
+  result: Record<string, AlternateDateValue>,
+  docAltDatesMap: Record<string, unknown>
+): void {
+  for (const [calendarId, val] of Object.entries(docAltDatesMap)) {
+    if (result[calendarId]) continue;
+    const trimmed = readTrimmedString(val);
+    if (trimmed) {
+      result[calendarId] = {
+        calendarId,
+        label: calendarId,
+        formatted: trimmed,
+        compact: trimmed,
+        isOverridden: true,
+      };
+    }
+  }
+}
+
+function populateSecondarySystems(args: {
+  result: Record<string, AlternateDateValue>;
+  secondaryCalendars: CalendarSystemConfig[];
+  occurrenceDate: string;
+  rawDateObj: Date;
+  isBaseOccurrence: boolean;
+  doc: Record<string, unknown>;
+  sourceAltFields: Record<string, string>;
+  docAltDatesMap: Record<string, unknown> | null;
+  locale: string;
+}): void {
+  for (const sys of args.secondaryCalendars) {
+    if (!sys?.enabled || !sys.id) continue;
+    const entry = buildSingleSecondaryCalendarEntry({ ...args, sys });
+    if (entry) args.result[sys.id] = entry;
+  }
+}
+
+/**
  * Computes all alternate calendar representations for a calendar occurrence.
  */
 export function resolveOccurrenceAlternateDates(params: {
@@ -216,107 +381,27 @@ export function resolveOccurrenceAlternateDates(params: {
   secondaryCalendars?: CalendarSystemConfig[];
   locale?: string;
 }): Record<string, AlternateDateValue> {
-  const {
-    occurrenceDate,
-    baseDateKey,
-    isRecurring,
-    doc,
-    source,
-    secondaryCalendars = [],
-    locale = 'en',
-  } = params;
+  const { occurrenceDate, baseDateKey, isRecurring, doc, source } = params;
   const result: Record<string, AlternateDateValue> = {};
   const sourceAltFields = source.fields.alternateDateFields ?? {};
   const isBaseOccurrence = !isRecurring || occurrenceDate === baseDateKey;
-  const docAltDatesMap =
-    doc.alternateDates &&
-    typeof doc.alternateDates === 'object' &&
-    !Array.isArray(doc.alternateDates)
-      ? (doc.alternateDates as Record<string, unknown>)
-      : null;
-  const rawDateObj = new Date(`${occurrenceDate}T12:00:00.000Z`);
+  const docAltDatesMap = extractDocAltDatesMap(doc);
 
-  for (const sys of secondaryCalendars) {
-    if (!sys || !sys.enabled || !sys.id) continue;
-    const fieldName = sourceAltFields[sys.id] || sys.overrideField;
-    const rawFieldVal = fieldName ? doc[fieldName] : undefined;
-    const rawFieldOverride =
-      typeof rawFieldVal === 'string' ? rawFieldVal.trim() : '';
-    const rawJsonOverride =
-      docAltDatesMap && typeof docAltDatesMap[sys.id] === 'string'
-        ? String(docAltDatesMap[sys.id]).trim()
-        : '';
-    const rawOverride = rawFieldOverride || rawJsonOverride;
-    const parts = extractCalendarParts(
-      rawDateObj,
-      sys.intlCalendar,
-      sys.dayOffset ?? 0
-    );
+  populateSecondarySystems({
+    result,
+    secondaryCalendars: params.secondaryCalendars ?? [],
+    occurrenceDate,
+    rawDateObj: new Date(`${occurrenceDate}T12:00:00.000Z`),
+    isBaseOccurrence,
+    doc,
+    sourceAltFields,
+    docAltDatesMap,
+    locale: params.locale ?? 'en',
+  });
 
-    if (rawOverride && isBaseOccurrence) {
-      result[sys.id] = {
-        calendarId: sys.id,
-        label: sys.label || sys.id,
-        formatted: rawOverride,
-        compact: rawOverride,
-        intlCalendar: sys.intlCalendar,
-        year: parts?.year,
-        month: parts?.month,
-        day: parts?.day,
-        isOverridden: true,
-      };
-      continue;
-    }
-
-    const formatted = formatDateInCalendarSystem(occurrenceDate, sys, locale, {
-      compact: false,
-    });
-    const compact = formatDateInCalendarSystem(occurrenceDate, sys, locale, {
-      compact: true,
-    });
-    if (formatted) {
-      result[sys.id] = {
-        calendarId: sys.id,
-        label: sys.label || sys.id,
-        formatted,
-        compact: compact || formatted,
-        intlCalendar: sys.intlCalendar,
-        year: parts?.year,
-        month: parts?.month,
-        day: parts?.day,
-        isOverridden: false,
-      };
-    }
-  }
-
-  for (const [calendarId, fieldName] of Object.entries(sourceAltFields)) {
-    if (result[calendarId] || !fieldName) continue;
-    const fieldVal = doc[fieldName];
-    const rawVal = typeof fieldVal === 'string' ? fieldVal.trim() : '';
-    if (rawVal && isBaseOccurrence) {
-      result[calendarId] = {
-        calendarId,
-        label: calendarId,
-        formatted: rawVal,
-        compact: rawVal,
-        isOverridden: true,
-      };
-    }
-  }
-
-  if (docAltDatesMap && isBaseOccurrence) {
-    for (const [calendarId, val] of Object.entries(docAltDatesMap)) {
-      if (result[calendarId]) continue;
-      if (typeof val === 'string' && val.trim()) {
-        result[calendarId] = {
-          calendarId,
-          label: calendarId,
-          formatted: val.trim(),
-          compact: val.trim(),
-          isOverridden: true,
-        };
-      }
-    }
+  if (isBaseOccurrence) {
+    appendDirectSourceFieldOverrides(result, sourceAltFields, doc);
+    if (docAltDatesMap) appendJsonMapOverrides(result, docAltDatesMap);
   }
 
   return result;

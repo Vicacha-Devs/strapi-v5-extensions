@@ -4,8 +4,34 @@ import type { CalendarPluginSettings } from '../../../shared/types';
 import {
   formatErrorMessage,
   getCalendarService,
+  type QuickCreateEntryParams,
   type StrapiRouteContext,
 } from '../types';
+
+function readOptString(val: unknown): string | undefined {
+  return typeof val === 'string' && val ? val : undefined;
+}
+
+function parseQuickCreateBody(body: Record<string, unknown>): QuickCreateEntryParams {
+  const statusRaw = body.bookingStatus;
+  const bookingStatus =
+    statusRaw === 'pending' || statusRaw === 'confirmed' ? statusRaw : undefined;
+  return {
+    sourceId: readOptString(body.sourceId),
+    title: String(body.title ?? ''),
+    startDate: String(body.startDate ?? ''),
+    endDate: readOptString(body.endDate),
+    location: readOptString(body.location),
+    category: readOptString(body.category),
+    summary: readOptString(body.summary),
+    rrule: readOptString(body.rrule),
+    customerName: readOptString(body.customerName),
+    customerEmail: readOptString(body.customerEmail),
+    customerPhone: readOptString(body.customerPhone),
+    partySize: body.partySize !== undefined ? Number(body.partySize) : undefined,
+    bookingStatus,
+  };
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsService = () =>
@@ -18,11 +44,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const query = ctx.query ?? {};
         const occurrences = await getOccurrenceService().getOccurrences({
-          from: typeof query.from === 'string' ? query.from : undefined,
-          to: typeof query.to === 'string' ? query.to : undefined,
-          locale: typeof query.locale === 'string' ? query.locale : undefined,
-          category: typeof query.category === 'string' ? query.category : undefined,
-          sourceId: typeof query.sourceId === 'string' ? query.sourceId : undefined,
+          from: readOptString(query.from),
+          to: readOptString(query.to),
+          locale: readOptString(query.locale),
+          category: readOptString(query.category),
+          sourceId: readOptString(query.sourceId),
           includeDrafts: query.includeDrafts !== 'false',
         });
 
@@ -47,12 +73,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const body = ctx.request?.body ?? {};
         const updated = await getOccurrenceService().rescheduleOccurrence({
-          sourceId: typeof body.sourceId === 'string' ? body.sourceId : undefined,
-          uid: typeof body.uid === 'string' ? body.uid : undefined,
+          sourceId: readOptString(body.sourceId),
+          uid: readOptString(body.uid),
           documentId: String(body.documentId ?? ''),
           occurrenceDate: String(body.occurrenceDate ?? ''),
           newStartDate: String(body.newStartDate ?? ''),
-          newEndDate: body.newEndDate ? String(body.newEndDate) : undefined,
+          newEndDate: readOptString(body.newEndDate),
           applyToSeries: Boolean(body.applyToSeries),
           cancelOccurrence: Boolean(body.cancelOccurrence),
         });
@@ -69,17 +95,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async quickCreate(ctx: StrapiRouteContext) {
       try {
-        const body = ctx.request?.body ?? {};
-        const created = await getOccurrenceService().quickCreateEntry({
-          sourceId: typeof body.sourceId === 'string' ? body.sourceId : undefined,
-          title: String(body.title ?? ''),
-          startDate: String(body.startDate ?? ''),
-          endDate: body.endDate ? String(body.endDate) : undefined,
-          location: body.location ? String(body.location) : undefined,
-          category: body.category ? String(body.category) : undefined,
-          summary: body.summary ? String(body.summary) : undefined,
-          rrule: body.rrule ? String(body.rrule) : undefined,
-        });
+        const body = (ctx.request?.body ?? {}) as Record<string, unknown>;
+        const created = await getOccurrenceService().quickCreateEntry(
+          parseQuickCreateBody(body)
+        );
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
