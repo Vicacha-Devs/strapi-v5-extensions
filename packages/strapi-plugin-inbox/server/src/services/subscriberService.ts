@@ -7,8 +7,60 @@ import {
   type SubscriberRecord,
   type SubscriberStatus,
 } from '../../../shared';
+import { getDocuments } from './docHelper';
 
 const EMAIL_Check = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeSubscriberTopics(topics?: string[]): string[] {
+  return Array.isArray(topics) && topics.length > 0
+    ? Array.from(new Set(topics))
+    : ['announcements'];
+}
+
+function pickSubscriberStr(...values: Array<string | undefined | null>): string {
+  for (const val of values) {
+    if (val && val.trim().length > 0) return val;
+  }
+  return '';
+}
+
+function buildSubscriberPayload(
+  email: string,
+  input: {
+    fullName?: string;
+    phone?: string;
+    locale?: string;
+    topics?: string[];
+    sourceFormSlug?: string;
+  },
+  existing: SubscriberRecord | null,
+  settings: InboxSettings
+): Omit<SubscriberRecord, 'documentId'> {
+  const doubleOptIn = settings.enableDoubleOptIn !== false;
+  const nowIso = new Date().toISOString();
+  const status: SubscriberStatus = doubleOptIn ? 'pending' : 'confirmed';
+
+  return {
+    email,
+    fullName: pickSubscriberStr(input.fullName, existing?.fullName),
+    phone: pickSubscriberStr(input.phone, existing?.phone),
+    locale: pickSubscriberStr(input.locale, settings.defaultLocale, 'es'),
+    topics: normalizeSubscriberTopics(input.topics),
+    status,
+    confirmToken: doubleOptIn ? randomBytes(20).toString('hex') : null,
+    unsubscribeToken: pickSubscriberStr(
+      existing?.unsubscribeToken,
+      randomBytes(20).toString('hex')
+    ),
+    confirmedAt: doubleOptIn ? null : nowIso,
+    unsubscribedAt: null,
+    sourceFormSlug: pickSubscriberStr(
+      input.sourceFormSlug,
+      existing?.sourceFormSlug,
+      'newsletter'
+    ),
+  };
+}
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async subscribe(input: {
@@ -31,48 +83,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }>('settings');
     const settings = await settingsService.getSettings();
 
-    const existingDocs = (await strapi.documents(SUBSCRIBER_UID).findMany({
+    const existingDocs = (await getDocuments(strapi, SUBSCRIBER_UID).findMany({
       filters: { email },
       limit: 1,
     })) as unknown as SubscriberRecord[];
 
     const existing = existingDocs[0] || null;
-    const topics =
-      Array.isArray(input.topics) && input.topics.length > 0
-        ? Array.from(new Set(input.topics))
-        : ['announcements'];
-    const locale = input.locale || settings.defaultLocale || 'es';
-    const doubleOptIn = settings.enableDoubleOptIn !== false;
-    const nowIso = new Date().toISOString();
-
-    const confirmToken = doubleOptIn ? randomBytes(20).toString('hex') : null;
-    const unsubscribeToken =
-      existing?.unsubscribeToken || randomBytes(20).toString('hex');
-    const status: SubscriberStatus = doubleOptIn ? 'pending' : 'confirmed';
-
-    const payload: Omit<SubscriberRecord, 'documentId'> = {
-      email,
-      fullName: input.fullName || existing?.fullName || '',
-      phone: input.phone || existing?.phone || '',
-      locale,
-      topics,
-      status,
-      confirmToken,
-      unsubscribeToken,
-      confirmedAt: doubleOptIn ? null : nowIso,
-      unsubscribedAt: null,
-      sourceFormSlug: input.sourceFormSlug || existing?.sourceFormSlug || 'newsletter',
-    };
+    const payload = buildSubscriberPayload(email, input, existing, settings);
 
     if (existing?.documentId) {
-      const updated = (await strapi.documents(SUBSCRIBER_UID).update({
+      const updated = (await getDocuments(strapi, SUBSCRIBER_UID).update({
         documentId: existing.documentId,
         data: payload as unknown as Record<string, unknown>,
       })) as unknown as SubscriberRecord;
       return updated;
     }
 
-    const created = (await strapi.documents(SUBSCRIBER_UID).create({
+    const created = (await getDocuments(strapi, SUBSCRIBER_UID).create({
       data: payload as unknown as Record<string, unknown>,
     })) as unknown as SubscriberRecord;
 
@@ -89,7 +116,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       throw new Error('Confirmation token is required');
     }
 
-    const docs = (await strapi.documents(SUBSCRIBER_UID).findMany({
+    const docs = (await getDocuments(strapi, SUBSCRIBER_UID).findMany({
       filters: { confirmToken: trimmed },
       limit: 1,
     })) as unknown as SubscriberRecord[];
@@ -101,7 +128,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       throw err;
     }
 
-    const updated = (await strapi.documents(SUBSCRIBER_UID).update({
+    const updated = (await getDocuments(strapi, SUBSCRIBER_UID).update({
       documentId: subscriber.documentId,
       data: {
         status: 'confirmed',
@@ -124,7 +151,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       throw new Error('Unsubscribe token is required');
     }
 
-    const docs = (await strapi.documents(SUBSCRIBER_UID).findMany({
+    const docs = (await getDocuments(strapi, SUBSCRIBER_UID).findMany({
       filters: { unsubscribeToken: trimmed },
       limit: 1,
     })) as unknown as SubscriberRecord[];
@@ -136,7 +163,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       throw err;
     }
 
-    const updated = (await strapi.documents(SUBSCRIBER_UID).update({
+    const updated = (await getDocuments(strapi, SUBSCRIBER_UID).update({
       documentId: subscriber.documentId,
       data: {
         status: 'unsubscribed',
@@ -160,7 +187,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     if (filters?.status) queryFilters.status = filters.status;
     if (filters?.locale) queryFilters.locale = filters.locale;
 
-    const docs = (await strapi.documents(SUBSCRIBER_UID).findMany({
+    const docs = (await getDocuments(strapi, SUBSCRIBER_UID).findMany({
       filters: queryFilters,
       limit: 500,
     })) as unknown as SubscriberRecord[];

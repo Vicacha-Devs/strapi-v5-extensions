@@ -39,6 +39,200 @@ function resolveRuleMessage(
   return fallback;
 }
 
+function isValidHttpUrl(strVal: string): boolean {
+  try {
+    const parsed = new URL(strVal);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
+function checkFieldOptions(
+  field: FormField,
+  rawValue: unknown,
+  strVal: string,
+  fieldLabel: string
+): string | null {
+  if (!Array.isArray(field.options) || field.options.length === 0) return null;
+  const allowed = new Set(field.options.map((o) => o.value));
+  if (field.type === 'select' || field.type === 'radio') {
+    return allowed.has(strVal) ? null : `${fieldLabel} contains an invalid selection`;
+  }
+  if (field.type === 'checkbox-group') {
+    const values = Array.isArray(rawValue) ? rawValue.map(String) : [strVal];
+    return values.some((v) => !allowed.has(v))
+      ? `${fieldLabel} contains an invalid selection`
+      : null;
+  }
+  return null;
+}
+
+function validateFieldTypeAndOptions(
+  field: FormField,
+  rawValue: unknown,
+  strVal: string,
+  fieldLabel: string,
+  locale: string,
+  rules: ValidationRule[]
+): string[] {
+  const fieldErrors: string[] = [];
+  if (field.type === 'email' && !EMAIL_REGEX.test(strVal)) {
+    const emailRule = rules.find((r) => r.type === 'email');
+    fieldErrors.push(
+      resolveRuleMessage(emailRule, locale, `${fieldLabel} must be a valid email address`)
+    );
+  }
+  if (field.type === 'url' && !isValidHttpUrl(strVal)) {
+    const urlRule = rules.find((r) => r.type === 'url');
+    fieldErrors.push(resolveRuleMessage(urlRule, locale, `${fieldLabel} must be a valid URL`));
+  }
+  const optError = checkFieldOptions(field, rawValue, strVal, fieldLabel);
+  if (optError) fieldErrors.push(optError);
+  return fieldErrors;
+}
+
+function checkLengthRule(
+  rule: ValidationRule,
+  limit: number,
+  strVal: string,
+  fieldLabel: string,
+  locale: string
+): string | null {
+  if (rule.type === 'minLength' && strVal.length < limit) {
+    return resolveRuleMessage(
+      rule,
+      locale,
+      `${fieldLabel} must be at least ${limit} characters`
+    );
+  }
+  if (rule.type === 'maxLength' && strVal.length > limit) {
+    return resolveRuleMessage(
+      rule,
+      locale,
+      `${fieldLabel} must be at most ${limit} characters`
+    );
+  }
+  return null;
+}
+
+function checkNumericBoundRule(
+  rule: ValidationRule,
+  limit: number,
+  rawValue: unknown,
+  fieldLabel: string,
+  locale: string
+): string | null {
+  const num = Number(rawValue);
+  if (rule.type === 'min' && (Number.isNaN(num) || num < limit)) {
+    return resolveRuleMessage(rule, locale, `${fieldLabel} must be at least ${limit}`);
+  }
+  if (rule.type === 'max' && (Number.isNaN(num) || num > limit)) {
+    return resolveRuleMessage(rule, locale, `${fieldLabel} must be at most ${limit}`);
+  }
+  return null;
+}
+
+function checkLengthOrNumberRule(
+  rule: ValidationRule,
+  rawValue: unknown,
+  strVal: string,
+  fieldLabel: string,
+  locale: string
+): string | null {
+  if (typeof rule.value !== 'number') return null;
+  return (
+    checkLengthRule(rule, rule.value, strVal, fieldLabel, locale) ??
+    checkNumericBoundRule(rule, rule.value, rawValue, fieldLabel, locale)
+  );
+}
+
+function checkPatternOrEmailRule(
+  rule: ValidationRule,
+  fieldType: string,
+  strVal: string,
+  fieldLabel: string,
+  locale: string
+): string | null {
+  if (rule.type === 'pattern' && typeof rule.value === 'string') {
+    try {
+      const regex = new RegExp(rule.value);
+      if (!regex.test(strVal)) {
+        return resolveRuleMessage(rule, locale, `${fieldLabel} format is invalid`);
+      }
+    } catch {
+      // Ignore malformed regex pattern
+    }
+  }
+  if (rule.type === 'email' && fieldType !== 'email' && !EMAIL_REGEX.test(strVal)) {
+    return resolveRuleMessage(rule, locale, `${fieldLabel} must be a valid email address`);
+  }
+  return null;
+}
+
+function evaluateCustomRules(
+  field: FormField,
+  rawValue: unknown,
+  strVal: string,
+  fieldLabel: string,
+  locale: string,
+  rules: ValidationRule[]
+): string[] {
+  const errors: string[] = [];
+  for (const rule of rules) {
+    if (rule.type === 'required') continue;
+    const lenOrNumErr = checkLengthOrNumberRule(rule, rawValue, strVal, fieldLabel, locale);
+    if (lenOrNumErr) errors.push(lenOrNumErr);
+    const patOrEmailErr = checkPatternOrEmailRule(rule, field.type, strVal, fieldLabel, locale);
+    if (patOrEmailErr) errors.push(patOrEmailErr);
+  }
+  return errors;
+}
+
+function resolveFieldLabel(field: FormField, locale: string): string {
+  return field.localizedLabels?.[locale] || field.label || field.name;
+}
+
+function buildRequiredError(
+  rules: ValidationRule[],
+  locale: string,
+  fieldLabel: string
+): string {
+  const reqRule = rules.find((r) => r.type === 'required');
+  const fallbackFn = LOCALIZED_REQUIRED_FALLBACK[locale] || LOCALIZED_REQUIRED_FALLBACK.en;
+  return resolveRuleMessage(reqRule, locale, fallbackFn(fieldLabel));
+}
+
+function validateSingleField(
+  field: FormField,
+  data: Record<string, unknown>,
+  locale: string
+): { fieldErrors: string[]; cleanedValue: unknown } {
+  const rawValue = data[field.name] ?? field.defaultValue;
+  const fieldLabel = resolveFieldLabel(field, locale);
+  const rules = field.validation || [];
+
+  if (field.required && isValueEmpty(rawValue)) {
+    return {
+      fieldErrors: [buildRequiredError(rules, locale, fieldLabel)],
+      cleanedValue: null,
+    };
+  }
+  if (isValueEmpty(rawValue)) {
+    return { fieldErrors: [], cleanedValue: rawValue ?? null };
+  }
+
+  const strVal = typeof rawValue === 'string' ? rawValue.trim() : String(rawValue);
+  const fieldErrors = [
+    ...validateFieldTypeAndOptions(field, rawValue, strVal, fieldLabel, locale, rules),
+    ...evaluateCustomRules(field, rawValue, strVal, fieldLabel, locale, rules),
+  ];
+  return {
+    fieldErrors,
+    cleanedValue: typeof rawValue === 'string' ? strVal : rawValue,
+  };
+}
+
 export function validateFormSubmission(
   fields: FormField[],
   data: Record<string, unknown>,
@@ -48,133 +242,12 @@ export function validateFormSubmission(
   const cleanedData: Record<string, unknown> = {};
 
   for (const field of fields) {
-    if (DECORATIVE_FIELD_TYPES.includes(field.type)) {
-      continue;
-    }
-
-    const rawValue = data[field.name] ?? field.defaultValue;
-    const fieldLabel = field.localizedLabels?.[locale] || field.label || field.name;
-    const fieldErrors: string[] = [];
-    const rules = field.validation || [];
-
-    if (field.required && isValueEmpty(rawValue)) {
-      const reqRule = rules.find((r) => r.type === 'required');
-      const fallbackFn = LOCALIZED_REQUIRED_FALLBACK[locale] || LOCALIZED_REQUIRED_FALLBACK.en;
-      fieldErrors.push(resolveRuleMessage(reqRule, locale, fallbackFn(fieldLabel)));
-      errors[field.name] = fieldErrors;
-      continue;
-    }
-
-    if (isValueEmpty(rawValue)) {
-      cleanedData[field.name] = rawValue ?? null;
-      continue;
-    }
-
-    const strVal = typeof rawValue === 'string' ? rawValue.trim() : String(rawValue);
-
-    if (field.type === 'email' && !EMAIL_REGEX.test(strVal)) {
-      const emailRule = rules.find((r) => r.type === 'email');
-      fieldErrors.push(
-        resolveRuleMessage(emailRule, locale, `${fieldLabel} must be a valid email address`)
-      );
-    }
-
-    if (field.type === 'url') {
-      try {
-        const parsed = new URL(strVal);
-        if (!['http:', 'https:'].includes(parsed.protocol)) {
-          throw new Error('Invalid protocol');
-        }
-      } catch {
-        const urlRule = rules.find((r) => r.type === 'url');
-        fieldErrors.push(resolveRuleMessage(urlRule, locale, `${fieldLabel} must be a valid URL`));
-      }
-    }
-
-    if (
-      (field.type === 'select' || field.type === 'radio') &&
-      Array.isArray(field.options) &&
-      field.options.length > 0
-    ) {
-      const allowed = new Set(field.options.map((o) => o.value));
-      if (!allowed.has(strVal)) {
-        fieldErrors.push(`${fieldLabel} contains an invalid selection`);
-      }
-    }
-
-    if (
-      field.type === 'checkbox-group' &&
-      Array.isArray(field.options) &&
-      field.options.length > 0
-    ) {
-      const allowed = new Set(field.options.map((o) => o.value));
-      const values = Array.isArray(rawValue) ? rawValue.map(String) : [strVal];
-      if (values.some((v) => !allowed.has(v))) {
-        fieldErrors.push(`${fieldLabel} contains an invalid selection`);
-      }
-    }
-
-    for (const rule of rules) {
-      if (rule.type === 'required') continue;
-
-      if (rule.type === 'minLength' && typeof rule.value === 'number') {
-        if (strVal.length < rule.value) {
-          fieldErrors.push(
-            resolveRuleMessage(
-              rule,
-              locale,
-              `${fieldLabel} must be at least ${rule.value} characters`
-            )
-          );
-        }
-      } else if (rule.type === 'maxLength' && typeof rule.value === 'number') {
-        if (strVal.length > rule.value) {
-          fieldErrors.push(
-            resolveRuleMessage(
-              rule,
-              locale,
-              `${fieldLabel} must be at most ${rule.value} characters`
-            )
-          );
-        }
-      } else if (rule.type === 'min' && typeof rule.value === 'number') {
-        const num = Number(rawValue);
-        if (Number.isNaN(num) || num < rule.value) {
-          fieldErrors.push(
-            resolveRuleMessage(rule, locale, `${fieldLabel} must be at least ${rule.value}`)
-          );
-        }
-      } else if (rule.type === 'max' && typeof rule.value === 'number') {
-        const num = Number(rawValue);
-        if (Number.isNaN(num) || num > rule.value) {
-          fieldErrors.push(
-            resolveRuleMessage(rule, locale, `${fieldLabel} must be at most ${rule.value}`)
-          );
-        }
-      } else if (rule.type === 'pattern' && typeof rule.value === 'string') {
-        try {
-          const regex = new RegExp(rule.value);
-          if (!regex.test(strVal)) {
-            fieldErrors.push(
-              resolveRuleMessage(rule, locale, `${fieldLabel} format is invalid`)
-            );
-          }
-        } catch {
-          // Ignore malformed regex pattern
-        }
-      } else if (rule.type === 'email' && field.type !== 'email') {
-        if (!EMAIL_REGEX.test(strVal)) {
-          fieldErrors.push(
-            resolveRuleMessage(rule, locale, `${fieldLabel} must be a valid email address`)
-          );
-        }
-      }
-    }
-
+    if (DECORATIVE_FIELD_TYPES.includes(field.type)) continue;
+    const { fieldErrors, cleanedValue } = validateSingleField(field, data, locale);
     if (fieldErrors.length > 0) {
       errors[field.name] = fieldErrors;
     } else {
-      cleanedData[field.name] = typeof rawValue === 'string' ? strVal : rawValue;
+      cleanedData[field.name] = cleanedValue;
     }
   }
 
@@ -247,6 +320,27 @@ export type FetchLike = (
   }
 ) => Promise<{ json(): Promise<unknown> }>;
 
+function resolveFetchRunner(fetchImpl?: FetchLike): FetchLike | undefined {
+  return fetchImpl ?? ((globalThis as unknown as { fetch?: FetchLike }).fetch);
+}
+
+async function postCaptchaVerify(
+  runner: FetchLike,
+  url: string,
+  params: URLSearchParams
+): Promise<Record<string, unknown> | null> {
+  try {
+    const res = await runner(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+    return (await res.json()) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 export async function verifyCaptchaToken(
   provider: CaptchaProvider,
   secret: string,
@@ -256,10 +350,10 @@ export async function verifyCaptchaToken(
 ): Promise<boolean> {
   if (provider === 'none') return true;
   const url = CAPTCHA_ENDPOINTS[provider];
-  if (!url) return false;
   const trimmedSecret = (secret || '').trim();
   const trimmedToken = (token || '').trim();
-  if (!trimmedSecret || !trimmedToken) return false;
+  const runner = resolveFetchRunner(fetchImpl);
+  if (!url || !trimmedSecret || !trimmedToken || !runner) return false;
 
   const params = new URLSearchParams({
     secret: trimmedSecret,
@@ -267,21 +361,8 @@ export async function verifyCaptchaToken(
   });
   if (ip) params.append('remoteip', ip);
 
-  const runner: FetchLike | undefined =
-    fetchImpl ?? ((globalThis as unknown as { fetch?: FetchLike }).fetch);
-  if (!runner) return false;
-
-  try {
-    const res = await runner(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
-    });
-    const json = (await res.json()) as { success?: boolean };
-    return Boolean(json && json.success);
-  } catch {
-    return false;
-  }
+  const json = await postCaptchaVerify(runner, url, params);
+  return Boolean(json?.success);
 }
 
 export async function testCaptchaSecretKey(
@@ -295,8 +376,7 @@ export async function testCaptchaSecretKey(
   const trimmedSecret = (secret || '').trim();
   if (!trimmedSecret) return { ok: false, reason: 'Secret key is empty' };
 
-  const runner: FetchLike | undefined =
-    fetchImpl ?? ((globalThis as unknown as { fetch?: FetchLike }).fetch);
+  const runner = resolveFetchRunner(fetchImpl);
   if (!runner) return { ok: false, reason: 'Fetch implementation unavailable' };
 
   const params = new URLSearchParams({
@@ -304,19 +384,13 @@ export async function testCaptchaSecretKey(
     response: 'test-token',
   });
 
-  try {
-    const res = await runner(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString(),
-    });
-    const json = (await res.json()) as { 'error-codes'?: string[] };
-    const codes = json?.['error-codes'] || [];
-    if (codes.includes('invalid-input-secret') || codes.includes('missing-input-secret')) {
-      return { ok: false, reason: 'Secret key is invalid' };
-    }
-    return { ok: true };
-  } catch {
+  const json = await postCaptchaVerify(runner, url, params);
+  if (!json) {
     return { ok: false, reason: 'Could not reach the CAPTCHA provider' };
   }
+  const codes = (json['error-codes'] as string[] | undefined) || [];
+  if (codes.includes('invalid-input-secret') || codes.includes('missing-input-secret')) {
+    return { ok: false, reason: 'Secret key is invalid' };
+  }
+  return { ok: true };
 }

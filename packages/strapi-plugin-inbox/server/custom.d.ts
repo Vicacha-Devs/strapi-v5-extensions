@@ -91,6 +91,7 @@ declare module '@strapi/strapi' {
       update(params: {
         documentId: string;
         locale?: string;
+        status?: 'draft' | 'published';
         data: Record<string, unknown>;
       }): Promise<Record<string, unknown> | null>;
     }
@@ -116,6 +117,41 @@ declare module '@strapi/strapi' {
       store(params: { type: string; name: string }): PluginStore;
       documents(uid: string): DocumentServiceInstance;
       plugin(name: string): PluginInstance;
+      db: {
+        query(uid: string): {
+          findMany(params?: Record<string, unknown>): Promise<Array<Record<string, unknown>>>;
+          findOne(params?: Record<string, unknown>): Promise<Record<string, unknown> | null>;
+          create(params: { data: Record<string, unknown> }): Promise<Record<string, unknown>>;
+          update(params: {
+            where: Record<string, unknown>;
+            data: Record<string, unknown>;
+          }): Promise<Record<string, unknown>>;
+          updateMany?(params: {
+            where: Record<string, unknown>;
+            data: Record<string, unknown>;
+          }): Promise<unknown>;
+          count(params?: Record<string, unknown>): Promise<number>;
+        };
+        lifecycles?: {
+          subscribe(subscriber: {
+            models?: string[];
+            beforeUpdate?: (event: {
+              params?: {
+                where?: Record<string, unknown>;
+                data?: Record<string, unknown>;
+              };
+            }) => void | Promise<void>;
+            afterCreate?: (event: {
+              result?: Record<string, unknown>;
+              params?: { data?: Record<string, unknown> };
+            }) => void | Promise<void>;
+            afterUpdate?: (event: {
+              result?: Record<string, unknown>;
+              params?: { data?: Record<string, unknown> };
+            }) => void | Promise<void>;
+          }): void;
+        };
+      };
       admin?: {
         services?: {
           permission?: {

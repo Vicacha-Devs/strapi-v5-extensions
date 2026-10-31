@@ -106,6 +106,9 @@
     "linkedCertificateNumber": {
       "type": "string"
     },
+    "formBuilderSubmissionId": {
+      "type": "integer"
+    },
     "ipAddress": {
       "type": "string",
       "private": true

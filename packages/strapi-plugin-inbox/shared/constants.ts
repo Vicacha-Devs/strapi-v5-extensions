@@ -11,7 +11,11 @@ import type {
 
 export const PLUGIN_ID = 'inbox';
 
-export const FORM_UID = `plugin::${PLUGIN_ID}.form`;
+export const FORM_BUILDER_CMS_PLUGIN_ID = 'strapi-plugin-form-builder-cms';
+export const FORM_BUILDER_CMS_FORM_UID = `plugin::${FORM_BUILDER_CMS_PLUGIN_ID}.form`;
+export const FORM_BUILDER_CMS_SUBMISSION_UID = `plugin::${FORM_BUILDER_CMS_PLUGIN_ID}.form-submission`;
+
+export const FORM_UID = FORM_BUILDER_CMS_FORM_UID;
 export const SUBMISSION_UID = `plugin::${PLUGIN_ID}.submission`;
 export const SUBSCRIBER_UID = `plugin::${PLUGIN_ID}.subscriber`;
 export const ALERT_BANNER_UID = `plugin::${PLUGIN_ID}.alert-banner`;
@@ -108,6 +112,8 @@ export const DEFAULT_INBOX_SETTINGS: InboxSettings = {
   enableDoubleOptIn: true,
   availableTopics: ['announcements', 'events', 'courses', 'newsletter'],
   availableDepartments: ['general', 'administration', 'services', 'education', 'social_aid'],
+  enableFormBuilderBridge: true,
+  autoSyncFormBuilderForms: true,
   enableBookingBridge: true,
   enableCertificateBridge: true,
   defaultNotifyEmails: [],

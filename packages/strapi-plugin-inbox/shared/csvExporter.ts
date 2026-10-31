@@ -22,10 +22,10 @@ export function escapeCsvCell(value: unknown): string {
   return sanitized;
 }
 
-export function submissionsToCsv(
+function collectDataFieldNames(
   submissions: SubmissionRecord[],
-  fields: FormField[] = []
-): string {
+  fields: FormField[]
+): string[] {
   const dataFieldNames: string[] = [];
   const seen = new Set<string>();
 
@@ -44,42 +44,53 @@ export function submissionsToCsv(
       }
     }
   }
+  return dataFieldNames;
+}
 
-  const baseHeaders = [
-    'referenceCode',
-    'formSlug',
-    'status',
-    'priority',
-    'department',
-    'locale',
-    'applicantName',
-    'applicantEmail',
-    'applicantPhone',
-    'submittedAt',
-    'secondaryDate',
-    'linkedBookingId',
-    'linkedCertificateNumber',
+function getBaseSubmissionValues(sub: SubmissionRecord): string[] {
+  return [
+    sub.referenceCode,
+    sub.formSlug,
+    sub.status,
+    sub.priority,
+    sub.department ?? '',
+    sub.locale,
+    sub.applicantName ?? '',
+    sub.applicantEmail ?? '',
+    sub.applicantPhone ?? '',
+    sub.submittedAt,
+    sub.secondaryDate?.formatted ?? '',
+    sub.linkedBookingId ?? '',
+    sub.linkedCertificateNumber ?? '',
   ];
+}
 
-  const headers = [...baseHeaders, ...dataFieldNames];
+const BASE_CSV_HEADERS = [
+  'referenceCode',
+  'formSlug',
+  'status',
+  'priority',
+  'department',
+  'locale',
+  'applicantName',
+  'applicantEmail',
+  'applicantPhone',
+  'submittedAt',
+  'secondaryDate',
+  'linkedBookingId',
+  'linkedCertificateNumber',
+];
+
+export function submissionsToCsv(
+  submissions: SubmissionRecord[],
+  fields: FormField[] = []
+): string {
+  const dataFieldNames = collectDataFieldNames(submissions, fields);
+  const headers = [...BASE_CSV_HEADERS, ...dataFieldNames];
   const rows: string[] = [headers.map(escapeCsvCell).join(',')];
 
   for (const sub of submissions) {
-    const baseValues = [
-      sub.referenceCode,
-      sub.formSlug,
-      sub.status,
-      sub.priority,
-      sub.department || '',
-      sub.locale,
-      sub.applicantName || '',
-      sub.applicantEmail || '',
-      sub.applicantPhone || '',
-      sub.submittedAt,
-      sub.secondaryDate?.formatted || '',
-      sub.linkedBookingId || '',
-      sub.linkedCertificateNumber || '',
-    ];
+    const baseValues = getBaseSubmissionValues(sub);
     const dynamicValues = dataFieldNames.map((name) => sub.data?.[name] ?? '');
     rows.push([...baseValues, ...dynamicValues].map(escapeCsvCell).join(','));
   }

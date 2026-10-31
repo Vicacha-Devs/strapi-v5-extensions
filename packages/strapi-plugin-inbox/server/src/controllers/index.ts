@@ -1,5 +1,7 @@
 import inboxController from './inboxController';
 
-export default {
+const controllers: Record<string, unknown> = {
   inboxController,
 };
+
+export default controllers;
