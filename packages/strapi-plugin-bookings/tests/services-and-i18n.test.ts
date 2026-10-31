@@ -1,14 +1,15 @@
-import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
-import { describe, it } from 'node:test';
-import { fileURLToPath } from 'node:url';
-import serverPlugin from '../server/src/index.ts';
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { describe, it } from "node:test";
+import { fileURLToPath } from "node:url";
+
+import serverPlugin from "../server/src/index.ts";
 import type {
   AvailabilityService,
   ReservationService,
   SettingsService,
-} from '../server/src/types.ts';
+} from "../server/src/types.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,75 +32,75 @@ function createMockStrapi() {
   const strapi: Record<string, unknown> = {
     config: {
       get(key: string) {
-        if (key === 'plugin::bookings') {
+        if (key === "plugin::bookings") {
           return {
-            defaultTimezone: 'UTC',
+            defaultTimezone: "UTC",
             defaultSlotDurationMinutes: 60,
             defaultCapacityPerSlot: 20,
             secondaryCalendars: [
               {
-                id: 'islamic-umalqura',
-                label: 'Hijri (Umm al-Qura)',
-                intlCalendar: 'islamic-umalqura',
+                id: "islamic-umalqura",
+                label: "Hijri (Umm al-Qura)",
+                intlCalendar: "islamic-umalqura",
                 dayOffset: 0,
                 enabled: true,
               },
             ],
             schemaExtensions: {
               booking: {
-                customDepartment: { type: 'string' },
+                customDepartment: { type: "string" },
               },
             },
-            customFields: [{ name: 'slot-picker', type: 'json' }],
+            customFields: [{ name: "slot-picker", type: "json" }],
           };
         }
         return {};
       },
     },
     contentTypes: {
-      'plugin::bookings.resource': {
-        uid: 'plugin::bookings.resource',
-        kind: 'collectionType',
+      "plugin::bookings.resource": {
+        uid: "plugin::bookings.resource",
+        kind: "collectionType",
         info: {
-          displayName: 'Booking Resource',
-          singularName: 'resource',
-          pluralName: 'resources',
+          displayName: "Booking Resource",
+          singularName: "resource",
+          pluralName: "resources",
         },
         attributes: {
-          name: { type: 'string' },
-          slotDurationMinutes: { type: 'integer' },
+          name: { type: "string" },
+          slotDurationMinutes: { type: "integer" },
         },
       },
-      'plugin::bookings.booking': {
-        uid: 'plugin::bookings.booking',
-        kind: 'collectionType',
+      "plugin::bookings.booking": {
+        uid: "plugin::bookings.booking",
+        kind: "collectionType",
         info: {
-          displayName: 'Booking',
-          singularName: 'booking',
-          pluralName: 'bookings',
+          displayName: "Booking",
+          singularName: "booking",
+          pluralName: "bookings",
         },
         attributes: {
-          bookingCode: { type: 'string' },
-          startDate: { type: 'datetime' },
-          partySize: { type: 'integer' },
-          status: { type: 'enumeration' },
+          bookingCode: { type: "string" },
+          startDate: { type: "datetime" },
+          partySize: { type: "integer" },
+          status: { type: "enumeration" },
         },
       },
-      'api::external-reservation.external-reservation': {
-        uid: 'api::external-reservation.external-reservation',
-        kind: 'collectionType',
+      "api::external-reservation.external-reservation": {
+        uid: "api::external-reservation.external-reservation",
+        kind: "collectionType",
         info: {
-          displayName: 'External Reservation',
-          singularName: 'external-reservation',
-          pluralName: 'external-reservations',
+          displayName: "External Reservation",
+          singularName: "external-reservation",
+          pluralName: "external-reservations",
         },
         attributes: {
-          clientName: { type: 'string' },
-          clientEmail: { type: 'email' },
-          reservationDate: { type: 'date' },
-          slotWindow: { type: 'enumeration' },
-          guests: { type: 'integer' },
-          status: { type: 'enumeration' },
+          clientName: { type: "string" },
+          clientEmail: { type: "email" },
+          reservationDate: { type: "date" },
+          slotWindow: { type: "enumeration" },
+          guests: { type: "integer" },
+          status: { type: "enumeration" },
         },
       },
     },
@@ -153,13 +154,7 @@ function createMockStrapi() {
           col.set(documentId, record);
           return record;
         },
-        async update({
-          documentId,
-          data,
-        }: {
-          documentId: string;
-          data: Record<string, unknown>;
-        }) {
+        async update({ documentId, data }: { documentId: string; data: Record<string, unknown> }) {
           const existing = col.get(documentId);
           if (!existing) {
             throw new Error(`Document ${documentId} not found`);
@@ -175,10 +170,10 @@ function createMockStrapi() {
       };
     },
     plugin(name: string) {
-      if (name === 'calendar') {
+      if (name === "calendar") {
         return {
           service(svcName: string) {
-            if (svcName === 'registry') {
+            if (svcName === "registry") {
               return {
                 async registerSource(src: unknown) {
                   companionSources.push(src);
@@ -189,7 +184,7 @@ function createMockStrapi() {
           },
         };
       }
-      if (name === 'bookings') {
+      if (name === "bookings") {
         return {
           service(svcName: string) {
             return servicesMap[svcName];
@@ -220,13 +215,9 @@ function createMockStrapi() {
   };
 }
 
-describe('Strapi Plugin Bookings Services, Controllers & Calendar Integration', () => {
-  it('registers customFields, schemaExtensions, and companion source with @vicacha-devs/strapi-plugin-calendar', async () => {
-    const {
-      strapi,
-      registeredCustomFields,
-      companionSources,
-    } = createMockStrapi();
+describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", () => {
+  it("registers customFields, schemaExtensions, and companion source with @vicacha-devs/strapi-plugin-calendar", async () => {
+    const { strapi, registeredCustomFields, companionSources } = createMockStrapi();
 
     serverPlugin.register({ strapi: strapi as never });
     await serverPlugin.bootstrap({ strapi: strapi as never });
@@ -234,62 +225,62 @@ describe('Strapi Plugin Bookings Services, Controllers & Calendar Integration', 
     assert.equal(registeredCustomFields.length, 1);
     assert.equal(companionSources.length, 1);
     const ct = (strapi.contentTypes as Record<string, { attributes: Record<string, unknown> }>)[
-      'plugin::bookings.booking'
+      "plugin::bookings.booking"
     ];
     assert.ok(ct.attributes.customDepartment);
   });
 
-  it('creates resources, computes slots with secondary calendars, enforces capacity, auto-assigns host by language, and supports token reschedule/cancel', async () => {
+  it("creates resources, computes slots with secondary calendars, enforces capacity, auto-assigns host by language, and supports token reschedule/cancel", async () => {
     const { strapi, services, ensureCollection } = createMockStrapi();
 
     const resource = await services.availability.saveResource({
-      name: 'Conference Room A',
-      resourceType: 'room',
+      name: "Conference Room A",
+      resourceType: "room",
       slotDurationMinutes: 60,
       capacityPerSlot: 15,
       maxPartySize: 15,
       minLeadTimeHours: 1,
       requiresApproval: false,
       weeklySchedule: {
-        mode: 'interval',
+        mode: "interval",
         days: {
-          '1': [{ start: '09:00', end: '11:00' }],
+          "1": [{ start: "09:00", end: "11:00" }],
         },
       },
       assignedHosts: [
-        { id: 'h-en', name: 'Sarah', languages: ['en'] },
-        { id: 'h-es', name: 'Carlos', languages: ['es', 'pt'] },
+        { id: "h-en", name: "Sarah", languages: ["en"] },
+        { id: "h-es", name: "Carlos", languages: ["es", "pt"] },
       ],
     });
 
     // Available slots for Monday 2026-10-19
     const slotsBefore = await services.availability.getAvailableSlots({
       resourceSlug: resource.slug,
-      from: '2026-10-19',
-      to: '2026-10-19',
+      from: "2026-10-19",
+      to: "2026-10-19",
       partySize: 10,
-      preferredLanguage: 'es',
+      preferredLanguage: "es",
     });
     assert.equal(slotsBefore.length, 2);
-    assert.ok(slotsBefore[0].secondaryDates?.['islamic-umalqura']);
+    assert.ok(slotsBefore[0].secondaryDates?.["islamic-umalqura"]);
 
     // Reserve 10 seats in 09:00-10:00 slot with preferredLanguage 'es'
     const res1 = await services.reservation.createReservation(
       {
         resourceDocumentId: resource.documentId,
-        customerName: 'Maria Gomez',
-        customerEmail: 'maria@example.org',
-        organization: 'Tech Org',
-        startDate: '2026-10-19T09:00:00.000Z',
-        endDate: '2026-10-19T10:00:00.000Z',
+        customerName: "Maria Gomez",
+        customerEmail: "maria@example.org",
+        organization: "Tech Org",
+        startDate: "2026-10-19T09:00:00.000Z",
+        endDate: "2026-10-19T10:00:00.000Z",
         partySize: 10,
-        preferredLanguage: 'es',
+        preferredLanguage: "es",
       },
       { skipLeadTimeCheck: true }
     );
 
-    assert.equal(res1.booking.status, 'confirmed');
-    assert.equal(res1.booking.assignedHost, 'Carlos');
+    assert.equal(res1.booking.status, "confirmed");
+    assert.equal(res1.booking.assignedHost, "Carlos");
     assert.ok(res1.cancelToken.length >= 32);
 
     // Attempting to reserve 8 more seats in the same 09:00-10:00 slot (capacity 15, 10 taken -> 5 left) must fail
@@ -298,10 +289,10 @@ describe('Strapi Plugin Bookings Services, Controllers & Calendar Integration', 
         services.reservation.createReservation(
           {
             resourceDocumentId: resource.documentId,
-            customerName: 'Overflow Guest',
-            customerEmail: 'overflow@example.org',
-            startDate: '2026-10-19T09:00:00.000Z',
-            endDate: '2026-10-19T10:00:00.000Z',
+            customerName: "Overflow Guest",
+            customerEmail: "overflow@example.org",
+            startDate: "2026-10-19T09:00:00.000Z",
+            endDate: "2026-10-19T10:00:00.000Z",
             partySize: 8,
           },
           { skipLeadTimeCheck: true }
@@ -314,9 +305,9 @@ describe('Strapi Plugin Bookings Services, Controllers & Calendar Integration', 
       () =>
         services.reservation.rescheduleBooking({
           bookingCode: res1.booking.bookingCode,
-          cancelToken: 'invalid-token',
-          newStartDate: '2026-10-19T10:00:00.000Z',
-          newEndDate: '2026-10-19T11:00:00.000Z',
+          cancelToken: "invalid-token",
+          newStartDate: "2026-10-19T10:00:00.000Z",
+          newEndDate: "2026-10-19T11:00:00.000Z",
         }),
       /Invalid or missing cancelToken/
     );
@@ -325,37 +316,37 @@ describe('Strapi Plugin Bookings Services, Controllers & Calendar Integration', 
     const rescheduled = await services.reservation.rescheduleBooking({
       bookingCode: res1.booking.bookingCode,
       cancelToken: res1.cancelToken,
-      newStartDate: '2026-10-19T10:00:00.000Z',
-      newEndDate: '2026-10-19T11:00:00.000Z',
+      newStartDate: "2026-10-19T10:00:00.000Z",
+      newEndDate: "2026-10-19T11:00:00.000Z",
     });
-    assert.equal(rescheduled.startDate, '2026-10-19T10:00:00.000Z');
+    assert.equal(rescheduled.startDate, "2026-10-19T10:00:00.000Z");
 
     // External collection source mapping test
     await services.settings.updateSettings({
       sources: [
         {
-          id: 'ext-source',
-          uid: 'api::external-reservation.external-reservation',
-          label: 'External Bookings',
-          color: '#2563eb',
+          id: "ext-source",
+          uid: "api::external-reservation.external-reservation",
+          label: "External Bookings",
+          color: "#2563eb",
           enabled: true,
-          customerNameField: 'clientName',
-          customerEmailField: 'clientEmail',
-          dateField: 'reservationDate',
-          slotLabelField: 'slotWindow',
-          partySizeField: 'guests',
-          statusField: 'status',
+          customerNameField: "clientName",
+          customerEmailField: "clientEmail",
+          dateField: "reservationDate",
+          slotLabelField: "slotWindow",
+          partySizeField: "guests",
+          statusField: "status",
         },
       ],
     });
-    ensureCollection('api::external-reservation.external-reservation').set('ext-1', {
-      documentId: 'ext-1',
-      clientName: 'External Partner',
-      clientEmail: 'partner@example.com',
-      reservationDate: '2026-10-19',
-      slotWindow: 'morning',
+    ensureCollection("api::external-reservation.external-reservation").set("ext-1", {
+      documentId: "ext-1",
+      clientName: "External Partner",
+      clientEmail: "partner@example.com",
+      reservationDate: "2026-10-19",
+      slotWindow: "morning",
       guests: 4,
-      status: 'confirmed',
+      status: "confirmed",
     });
 
     const calendarResult = await services.availability.getCalendarOccurrences({});
@@ -363,7 +354,7 @@ describe('Strapi Plugin Bookings Services, Controllers & Calendar Integration', 
     assert.equal(calendarResult.stats.totalGuests, 14);
 
     // Public Content-API Cancel with valid token
-    const contentApiCtrl = serverPlugin.controllers['content-api']({
+    const contentApiCtrl = serverPlugin.controllers["content-api"]({
       strapi: strapi as never,
     });
     const cancelCtx = {
@@ -373,7 +364,7 @@ describe('Strapi Plugin Bookings Services, Controllers & Calendar Integration', 
         body: {
           bookingCode: res1.booking.bookingCode,
           cancelToken: res1.cancelToken,
-          reason: 'Schedule change',
+          reason: "Schedule change",
         },
       },
       body: null as unknown,
@@ -385,16 +376,16 @@ describe('Strapi Plugin Bookings Services, Controllers & Calendar Integration', 
     };
     await contentApiCtrl.cancelReservation(cancelCtx);
     const cancelledData = (cancelCtx.body as { data: { status: string } }).data;
-    assert.equal(cancelledData.status, 'cancelled');
+    assert.equal(cancelledData.status, "cancelled");
   });
 });
 
-describe('10-Locale Admin Translation Parity', () => {
-  it('ensures all 10 locales contain identical keys and non-empty translations', () => {
-    const translationsDir = path.resolve(__dirname, '../admin/src/translations');
-    const locales = ['en', 'es', 'ar', 'fr', 'de', 'pt', 'tr', 'id', 'ur', 'zh'];
+describe("10-Locale Admin Translation Parity", () => {
+  it("ensures all 10 locales contain identical keys and non-empty translations", () => {
+    const translationsDir = path.resolve(__dirname, "../admin/src/translations");
+    const locales = ["en", "es", "ar", "fr", "de", "pt", "tr", "id", "ur", "zh"];
     const enJson = JSON.parse(
-      fs.readFileSync(path.join(translationsDir, 'en.json'), 'utf8')
+      fs.readFileSync(path.join(translationsDir, "en.json"), "utf8")
     ) as Record<string, string>;
     const expectedKeys = Object.keys(enJson).sort();
 
@@ -402,19 +393,12 @@ describe('10-Locale Admin Translation Parity', () => {
 
     for (const locale of locales) {
       const filePath = path.join(translationsDir, `${locale}.json`);
-      const data = JSON.parse(fs.readFileSync(filePath, 'utf8')) as Record<
-        string,
-        string
-      >;
+      const data = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<string, string>;
       const actualKeys = Object.keys(data).sort();
-      assert.deepEqual(
-        actualKeys,
-        expectedKeys,
-        `Locale ${locale} keys mismatch en.json`
-      );
+      assert.deepEqual(actualKeys, expectedKeys, `Locale ${locale} keys mismatch en.json`);
       for (const [k, v] of Object.entries(data)) {
         assert.ok(
-          typeof v === 'string' && v.trim().length > 0,
+          typeof v === "string" && v.trim().length > 0,
           `Empty translation for ${locale}.${k}`
         );
       }

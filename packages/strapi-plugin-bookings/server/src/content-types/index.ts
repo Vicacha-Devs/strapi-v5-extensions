@@ -1,5 +1,5 @@
-import resourceSchema from './resource/schema.json';
-import bookingSchema from './booking/schema.json';
+import bookingSchema from "./booking/schema.json";
+import resourceSchema from "./resource/schema.json";
 
 export default {
   resource: { schema: resourceSchema },

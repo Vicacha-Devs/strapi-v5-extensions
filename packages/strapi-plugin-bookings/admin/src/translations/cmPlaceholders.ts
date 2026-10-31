@@ -1,214 +1,384 @@
 export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
-  "en": {
-    "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder": "Enter booking reference code...",
+  en: {
+    "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder":
+      "Enter booking reference code...",
     "content-manager.content-types.plugin::bookings.booking.title.placeholder": "Enter title...",
-    "content-manager.content-types.plugin::bookings.booking.resource.placeholder": "Enter booked resource / space...",
-    "content-manager.content-types.plugin::bookings.booking.customerName.placeholder": "Enter visitor / applicant name...",
-    "content-manager.content-types.plugin::bookings.booking.customerEmail.placeholder": "info@mezquitabogota.org",
-    "content-manager.content-types.plugin::bookings.booking.customerPhone.placeholder": "+57 310 555 0199",
-    "content-manager.content-types.plugin::bookings.booking.organization.placeholder": "Enter organization / institution...",
+    "content-manager.content-types.plugin::bookings.booking.resource.placeholder":
+      "Enter booked resource / space...",
+    "content-manager.content-types.plugin::bookings.booking.customerName.placeholder":
+      "Enter visitor / applicant name...",
+    "content-manager.content-types.plugin::bookings.booking.customerEmail.placeholder":
+      "info@mezquitabogota.org",
+    "content-manager.content-types.plugin::bookings.booking.customerPhone.placeholder":
+      "+57 310 555 0199",
+    "content-manager.content-types.plugin::bookings.booking.organization.placeholder":
+      "Enter organization / institution...",
     "content-manager.content-types.plugin::bookings.booking.startDate.placeholder": "YYYY-MM-DD",
     "content-manager.content-types.plugin::bookings.booking.endDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder": "e.g., 10:00 AM",
+    "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder":
+      "e.g., 10:00 AM",
     "content-manager.content-types.plugin::bookings.booking.timezone.placeholder": "America/Bogota",
-    "content-manager.content-types.plugin::bookings.booking.partySize.placeholder": "Enter group / party size...",
+    "content-manager.content-types.plugin::bookings.booking.partySize.placeholder":
+      "Enter group / party size...",
     "content-manager.content-types.plugin::bookings.booking.status.placeholder": "Enter status...",
-    "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder": "e.g., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder": "Enter assigned host / guide...",
+    "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder":
+      "e.g., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder":
+      "Enter assigned host / guide...",
     "content-manager.content-types.plugin::bookings.booking.notes.placeholder": "Enter notes...",
-    "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder": "Enter internal staff notes...",
-    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder": "Enter cancellation token hash...",
-    "content-manager.content-types.plugin::bookings.booking.sourceCollection.placeholder": "Enter source collection...",
-    "content-manager.content-types.plugin::bookings.booking.metadata.placeholder": "Enter additional metadata (json)...",
-    "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage.placeholder": "e.g., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.booking.hijriDate.placeholder": "e.g., 15 Ramadan 1447 AH",
-    "content-manager.content-types.plugin::bookings.booking.documentId.placeholder": "Enter document id...",
+    "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder":
+      "Enter internal staff notes...",
+    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder":
+      "Enter cancellation token hash...",
+    "content-manager.content-types.plugin::bookings.booking.sourceCollection.placeholder":
+      "Enter source collection...",
+    "content-manager.content-types.plugin::bookings.booking.metadata.placeholder":
+      "Enter additional metadata (json)...",
+    "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage.placeholder":
+      "e.g., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.booking.hijriDate.placeholder":
+      "e.g., 15 Ramadan 1447 AH",
+    "content-manager.content-types.plugin::bookings.booking.documentId.placeholder":
+      "Enter document id...",
     "content-manager.content-types.plugin::bookings.resource.name.placeholder": "Enter name...",
-    "content-manager.content-types.plugin::bookings.resource.slug.placeholder": "auto-generated-url-slug",
-    "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder": "Enter resource type...",
-    "content-manager.content-types.plugin::bookings.resource.description.placeholder": "Enter description...",
+    "content-manager.content-types.plugin::bookings.resource.slug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder":
+      "Enter resource type...",
+    "content-manager.content-types.plugin::bookings.resource.description.placeholder":
+      "Enter description...",
     "content-manager.content-types.plugin::bookings.resource.color.placeholder": "#0F766E",
-    "content-manager.content-types.plugin::bookings.resource.timezone.placeholder": "America/Bogota",
-    "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder": "Enter slot duration (minutes)...",
-    "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes.placeholder": "Enter buffer before slot (minutes)...",
-    "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes.placeholder": "Enter buffer after slot (minutes)...",
-    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot.placeholder": "Enter capacity per slot...",
-    "content-manager.content-types.plugin::bookings.resource.maxPartySize.placeholder": "Enter maximum group size...",
-    "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours.placeholder": "Enter minimum lead time (hours)...",
-    "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays.placeholder": "Enter maximum advance booking (days)...",
-    "content-manager.content-types.plugin::bookings.resource.requiresApproval.placeholder": "Enter requires staff approval...",
-    "content-manager.content-types.plugin::bookings.resource.weeklySchedule.placeholder": "Enter weekly availability schedule...",
-    "content-manager.content-types.plugin::bookings.resource.seasonalSchedules.placeholder": "Enter seasonal schedules...",
-    "content-manager.content-types.plugin::bookings.resource.holidayRules.placeholder": "Enter holiday & festivity rules...",
-    "content-manager.content-types.plugin::bookings.resource.blackoutDates.placeholder": "Enter blackout / unavailable dates...",
-    "content-manager.content-types.plugin::bookings.resource.recurrenceRule.placeholder": "Enter recurrence rule (rrule)...",
-    "content-manager.content-types.plugin::bookings.resource.supportedLanguages.placeholder": "e.g., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.resource.assignedHosts.placeholder": "Enter assigned hosts / guides...",
-    "content-manager.content-types.plugin::bookings.resource.location.placeholder": "Enter location / venue...",
-    "content-manager.content-types.plugin::bookings.resource.price.placeholder": "Enter price / fee...",
-    "content-manager.content-types.plugin::bookings.resource.currency.placeholder": "e.g., COP or USD",
-    "content-manager.content-types.plugin::bookings.resource.isActive.placeholder": "Enter active...",
-    "content-manager.content-types.plugin::bookings.resource.metadata.placeholder": "Enter additional metadata (json)...",
-    "content-manager.content-types.plugin::bookings.resource.bookings.placeholder": "Enter associated bookings...",
-    "content-manager.content-types.plugin::bookings.resource.documentId.placeholder": "Enter document id..."
+    "content-manager.content-types.plugin::bookings.resource.timezone.placeholder":
+      "America/Bogota",
+    "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder":
+      "Enter slot duration (minutes)...",
+    "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes.placeholder":
+      "Enter buffer before slot (minutes)...",
+    "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes.placeholder":
+      "Enter buffer after slot (minutes)...",
+    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot.placeholder":
+      "Enter capacity per slot...",
+    "content-manager.content-types.plugin::bookings.resource.maxPartySize.placeholder":
+      "Enter maximum group size...",
+    "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours.placeholder":
+      "Enter minimum lead time (hours)...",
+    "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays.placeholder":
+      "Enter maximum advance booking (days)...",
+    "content-manager.content-types.plugin::bookings.resource.requiresApproval.placeholder":
+      "Enter requires staff approval...",
+    "content-manager.content-types.plugin::bookings.resource.weeklySchedule.placeholder":
+      "Enter weekly availability schedule...",
+    "content-manager.content-types.plugin::bookings.resource.seasonalSchedules.placeholder":
+      "Enter seasonal schedules...",
+    "content-manager.content-types.plugin::bookings.resource.holidayRules.placeholder":
+      "Enter holiday & festivity rules...",
+    "content-manager.content-types.plugin::bookings.resource.blackoutDates.placeholder":
+      "Enter blackout / unavailable dates...",
+    "content-manager.content-types.plugin::bookings.resource.recurrenceRule.placeholder":
+      "Enter recurrence rule (rrule)...",
+    "content-manager.content-types.plugin::bookings.resource.supportedLanguages.placeholder":
+      "e.g., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.resource.assignedHosts.placeholder":
+      "Enter assigned hosts / guides...",
+    "content-manager.content-types.plugin::bookings.resource.location.placeholder":
+      "Enter location / venue...",
+    "content-manager.content-types.plugin::bookings.resource.price.placeholder":
+      "Enter price / fee...",
+    "content-manager.content-types.plugin::bookings.resource.currency.placeholder":
+      "e.g., COP or USD",
+    "content-manager.content-types.plugin::bookings.resource.isActive.placeholder":
+      "Enter active...",
+    "content-manager.content-types.plugin::bookings.resource.metadata.placeholder":
+      "Enter additional metadata (json)...",
+    "content-manager.content-types.plugin::bookings.resource.bookings.placeholder":
+      "Enter associated bookings...",
+    "content-manager.content-types.plugin::bookings.resource.documentId.placeholder":
+      "Enter document id...",
   },
-  "es": {
-    "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder": "Ingresa código de reserva...",
+  es: {
+    "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder":
+      "Ingresa código de reserva...",
     "content-manager.content-types.plugin::bookings.booking.title.placeholder": "Ingresa título...",
-    "content-manager.content-types.plugin::bookings.booking.resource.placeholder": "Ingresa recurso o espacio reservado...",
-    "content-manager.content-types.plugin::bookings.booking.customerName.placeholder": "Ingresa nombre del visitante o solicitante...",
-    "content-manager.content-types.plugin::bookings.booking.customerEmail.placeholder": "info@mezquitabogota.org",
-    "content-manager.content-types.plugin::bookings.booking.customerPhone.placeholder": "+57 310 555 0199",
-    "content-manager.content-types.plugin::bookings.booking.organization.placeholder": "Ingresa organización o institución...",
+    "content-manager.content-types.plugin::bookings.booking.resource.placeholder":
+      "Ingresa recurso o espacio reservado...",
+    "content-manager.content-types.plugin::bookings.booking.customerName.placeholder":
+      "Ingresa nombre del visitante o solicitante...",
+    "content-manager.content-types.plugin::bookings.booking.customerEmail.placeholder":
+      "info@mezquitabogota.org",
+    "content-manager.content-types.plugin::bookings.booking.customerPhone.placeholder":
+      "+57 310 555 0199",
+    "content-manager.content-types.plugin::bookings.booking.organization.placeholder":
+      "Ingresa organización o institución...",
     "content-manager.content-types.plugin::bookings.booking.startDate.placeholder": "YYYY-MM-DD",
     "content-manager.content-types.plugin::bookings.booking.endDate.placeholder": "YYYY-MM-DD",
     "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder": "ej., 10:00 AM",
     "content-manager.content-types.plugin::bookings.booking.timezone.placeholder": "America/Bogota",
-    "content-manager.content-types.plugin::bookings.booking.partySize.placeholder": "Ingresa número de personas (tamaño del grupo)...",
-    "content-manager.content-types.plugin::bookings.booking.status.placeholder": "Ingresa estado...",
-    "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder": "ej., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder": "Ingresa anfitrión o guía asignado...",
+    "content-manager.content-types.plugin::bookings.booking.partySize.placeholder":
+      "Ingresa número de personas (tamaño del grupo)...",
+    "content-manager.content-types.plugin::bookings.booking.status.placeholder":
+      "Ingresa estado...",
+    "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder":
+      "ej., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder":
+      "Ingresa anfitrión o guía asignado...",
     "content-manager.content-types.plugin::bookings.booking.notes.placeholder": "Ingresa notas...",
-    "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder": "Ingresa notas internas del personal...",
-    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder": "Ingresa hash del token de cancelación...",
-    "content-manager.content-types.plugin::bookings.booking.sourceCollection.placeholder": "Ingresa colección de origen...",
-    "content-manager.content-types.plugin::bookings.booking.metadata.placeholder": "Ingresa metadatos adicionales (json)...",
-    "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage.placeholder": "ej., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.booking.hijriDate.placeholder": "ej., 15 Ramadán 1447 AH",
-    "content-manager.content-types.plugin::bookings.booking.documentId.placeholder": "Ingresa id del documento...",
+    "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder":
+      "Ingresa notas internas del personal...",
+    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder":
+      "Ingresa hash del token de cancelación...",
+    "content-manager.content-types.plugin::bookings.booking.sourceCollection.placeholder":
+      "Ingresa colección de origen...",
+    "content-manager.content-types.plugin::bookings.booking.metadata.placeholder":
+      "Ingresa metadatos adicionales (json)...",
+    "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage.placeholder":
+      "ej., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.booking.hijriDate.placeholder":
+      "ej., 15 Ramadán 1447 AH",
+    "content-manager.content-types.plugin::bookings.booking.documentId.placeholder":
+      "Ingresa id del documento...",
     "content-manager.content-types.plugin::bookings.resource.name.placeholder": "Ingresa nombre...",
-    "content-manager.content-types.plugin::bookings.resource.slug.placeholder": "slug-generado-automaticamente",
-    "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder": "Ingresa tipo de recurso...",
-    "content-manager.content-types.plugin::bookings.resource.description.placeholder": "Ingresa descripción...",
+    "content-manager.content-types.plugin::bookings.resource.slug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder":
+      "Ingresa tipo de recurso...",
+    "content-manager.content-types.plugin::bookings.resource.description.placeholder":
+      "Ingresa descripción...",
     "content-manager.content-types.plugin::bookings.resource.color.placeholder": "#0F766E",
-    "content-manager.content-types.plugin::bookings.resource.timezone.placeholder": "America/Bogota",
-    "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder": "Ingresa duración del turno (minutos)...",
-    "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes.placeholder": "Ingresa margen previo al turno (minutos)...",
-    "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes.placeholder": "Ingresa margen posterior al turno (minutos)...",
-    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot.placeholder": "Ingresa capacidad por franja horaria...",
-    "content-manager.content-types.plugin::bookings.resource.maxPartySize.placeholder": "Ingresa tamaño máximo del grupo...",
-    "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours.placeholder": "Ingresa anticipación mínima para reservar (horas)...",
-    "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays.placeholder": "Ingresa anticipación máxima de reserva (días)...",
-    "content-manager.content-types.plugin::bookings.resource.requiresApproval.placeholder": "Ingresa requiere aprobación previa...",
-    "content-manager.content-types.plugin::bookings.resource.weeklySchedule.placeholder": "Ingresa horario semanal de disponibilidad...",
-    "content-manager.content-types.plugin::bookings.resource.seasonalSchedules.placeholder": "Ingresa horarios especiales por temporada...",
-    "content-manager.content-types.plugin::bookings.resource.holidayRules.placeholder": "Ingresa reglas de días festivos...",
-    "content-manager.content-types.plugin::bookings.resource.blackoutDates.placeholder": "Ingresa fechas bloqueadas (no disponibles)...",
-    "content-manager.content-types.plugin::bookings.resource.recurrenceRule.placeholder": "Ingresa regla de recurrencia (rrule)...",
-    "content-manager.content-types.plugin::bookings.resource.supportedLanguages.placeholder": "ej., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.resource.assignedHosts.placeholder": "Ingresa anfitriones o guías asignados...",
-    "content-manager.content-types.plugin::bookings.resource.location.placeholder": "Ingresa ubicación / lugar...",
-    "content-manager.content-types.plugin::bookings.resource.price.placeholder": "Ingresa precio / tarifa...",
-    "content-manager.content-types.plugin::bookings.resource.currency.placeholder": "ej., COP o USD",
-    "content-manager.content-types.plugin::bookings.resource.isActive.placeholder": "Ingresa activo...",
-    "content-manager.content-types.plugin::bookings.resource.metadata.placeholder": "Ingresa metadatos adicionales (json)...",
-    "content-manager.content-types.plugin::bookings.resource.bookings.placeholder": "Ingresa reservas asociadas...",
-    "content-manager.content-types.plugin::bookings.resource.documentId.placeholder": "Ingresa id del documento..."
+    "content-manager.content-types.plugin::bookings.resource.timezone.placeholder":
+      "America/Bogota",
+    "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder":
+      "Ingresa duración del turno (minutos)...",
+    "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes.placeholder":
+      "Ingresa margen previo al turno (minutos)...",
+    "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes.placeholder":
+      "Ingresa margen posterior al turno (minutos)...",
+    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot.placeholder":
+      "Ingresa capacidad por franja horaria...",
+    "content-manager.content-types.plugin::bookings.resource.maxPartySize.placeholder":
+      "Ingresa tamaño máximo del grupo...",
+    "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours.placeholder":
+      "Ingresa anticipación mínima para reservar (horas)...",
+    "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays.placeholder":
+      "Ingresa anticipación máxima de reserva (días)...",
+    "content-manager.content-types.plugin::bookings.resource.requiresApproval.placeholder":
+      "Ingresa requiere aprobación previa...",
+    "content-manager.content-types.plugin::bookings.resource.weeklySchedule.placeholder":
+      "Ingresa horario semanal de disponibilidad...",
+    "content-manager.content-types.plugin::bookings.resource.seasonalSchedules.placeholder":
+      "Ingresa horarios especiales por temporada...",
+    "content-manager.content-types.plugin::bookings.resource.holidayRules.placeholder":
+      "Ingresa reglas de días festivos...",
+    "content-manager.content-types.plugin::bookings.resource.blackoutDates.placeholder":
+      "Ingresa fechas bloqueadas (no disponibles)...",
+    "content-manager.content-types.plugin::bookings.resource.recurrenceRule.placeholder":
+      "Ingresa regla de recurrencia (rrule)...",
+    "content-manager.content-types.plugin::bookings.resource.supportedLanguages.placeholder":
+      "ej., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.resource.assignedHosts.placeholder":
+      "Ingresa anfitriones o guías asignados...",
+    "content-manager.content-types.plugin::bookings.resource.location.placeholder":
+      "Ingresa ubicación / lugar...",
+    "content-manager.content-types.plugin::bookings.resource.price.placeholder":
+      "Ingresa precio / tarifa...",
+    "content-manager.content-types.plugin::bookings.resource.currency.placeholder":
+      "ej., COP o USD",
+    "content-manager.content-types.plugin::bookings.resource.isActive.placeholder":
+      "Ingresa activo...",
+    "content-manager.content-types.plugin::bookings.resource.metadata.placeholder":
+      "Ingresa metadatos adicionales (json)...",
+    "content-manager.content-types.plugin::bookings.resource.bookings.placeholder":
+      "Ingresa reservas asociadas...",
+    "content-manager.content-types.plugin::bookings.resource.documentId.placeholder":
+      "Ingresa id del documento...",
   },
-  "ar": {
-    "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder": "أدخل رمز الحجز المرجعي...",
+  ar: {
+    "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder":
+      "أدخل رمز الحجز المرجعي...",
     "content-manager.content-types.plugin::bookings.booking.title.placeholder": "أدخل العنوان...",
-    "content-manager.content-types.plugin::bookings.booking.resource.placeholder": "أدخل المورد أو القاعة المحجوزة...",
-    "content-manager.content-types.plugin::bookings.booking.customerName.placeholder": "أدخل اسم الزائر أو مقدم الطلب...",
-    "content-manager.content-types.plugin::bookings.booking.customerEmail.placeholder": "info@mezquitabogota.org",
-    "content-manager.content-types.plugin::bookings.booking.customerPhone.placeholder": "+57 310 555 0199",
-    "content-manager.content-types.plugin::bookings.booking.organization.placeholder": "أدخل المؤسسة أو الجهة...",
+    "content-manager.content-types.plugin::bookings.booking.resource.placeholder":
+      "أدخل المورد أو القاعة المحجوزة...",
+    "content-manager.content-types.plugin::bookings.booking.customerName.placeholder":
+      "أدخل اسم الزائر أو مقدم الطلب...",
+    "content-manager.content-types.plugin::bookings.booking.customerEmail.placeholder":
+      "info@mezquitabogota.org",
+    "content-manager.content-types.plugin::bookings.booking.customerPhone.placeholder":
+      "+57 310 555 0199",
+    "content-manager.content-types.plugin::bookings.booking.organization.placeholder":
+      "أدخل المؤسسة أو الجهة...",
     "content-manager.content-types.plugin::bookings.booking.startDate.placeholder": "YYYY-MM-DD",
     "content-manager.content-types.plugin::bookings.booking.endDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder": "مثال: 10:00 صباحاً",
+    "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder":
+      "مثال: 10:00 صباحاً",
     "content-manager.content-types.plugin::bookings.booking.timezone.placeholder": "America/Bogota",
-    "content-manager.content-types.plugin::bookings.booking.partySize.placeholder": "أدخل عدد الأفراد (حجم المجموعة)...",
+    "content-manager.content-types.plugin::bookings.booking.partySize.placeholder":
+      "أدخل عدد الأفراد (حجم المجموعة)...",
     "content-manager.content-types.plugin::bookings.booking.status.placeholder": "أدخل الحالة...",
-    "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder": "مثال: es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder": "أدخل المضيف أو المرشد المعين...",
+    "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder":
+      "مثال: es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder":
+      "أدخل المضيف أو المرشد المعين...",
     "content-manager.content-types.plugin::bookings.booking.notes.placeholder": "أدخل ملاحظات...",
-    "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder": "أدخل ملاحظات داخلية للموظفين...",
-    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder": "أدخل تجزئة رمز الإلغاء...",
-    "content-manager.content-types.plugin::bookings.booking.sourceCollection.placeholder": "أدخل المجموعة المصدرية...",
-    "content-manager.content-types.plugin::bookings.booking.metadata.placeholder": "أدخل بيانات وصفية إضافية (JSON)...",
-    "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage.placeholder": "مثال: es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.booking.hijriDate.placeholder": "مثال: ١٥ رمضان ١٤٤٧ هـ",
-    "content-manager.content-types.plugin::bookings.booking.documentId.placeholder": "أدخل معرف المستند...",
+    "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder":
+      "أدخل ملاحظات داخلية للموظفين...",
+    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder":
+      "أدخل تجزئة رمز الإلغاء...",
+    "content-manager.content-types.plugin::bookings.booking.sourceCollection.placeholder":
+      "أدخل المجموعة المصدرية...",
+    "content-manager.content-types.plugin::bookings.booking.metadata.placeholder":
+      "أدخل بيانات وصفية إضافية (JSON)...",
+    "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage.placeholder":
+      "مثال: es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.booking.hijriDate.placeholder":
+      "مثال: ١٥ رمضان ١٤٤٧ هـ",
+    "content-manager.content-types.plugin::bookings.booking.documentId.placeholder":
+      "أدخل معرف المستند...",
     "content-manager.content-types.plugin::bookings.resource.name.placeholder": "أدخل الاسم...",
-    "content-manager.content-types.plugin::bookings.resource.slug.placeholder": "معرف-الرابط-التلقائي",
-    "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder": "أدخل نوع المورد...",
-    "content-manager.content-types.plugin::bookings.resource.description.placeholder": "أدخل الوصف...",
+    "content-manager.content-types.plugin::bookings.resource.slug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder":
+      "أدخل نوع المورد...",
+    "content-manager.content-types.plugin::bookings.resource.description.placeholder":
+      "أدخل الوصف...",
     "content-manager.content-types.plugin::bookings.resource.color.placeholder": "#0F766E",
-    "content-manager.content-types.plugin::bookings.resource.timezone.placeholder": "America/Bogota",
-    "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder": "أدخل مدة الفترة الزمنية (بالدقائق)...",
-    "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes.placeholder": "أدخل فترة الفاصل قبل الموعد (بالدقائق)...",
-    "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes.placeholder": "أدخل فترة الفاصل بعد الموعد (بالدقائق)...",
-    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot.placeholder": "أدخل السعة لكل فترة زمنية...",
-    "content-manager.content-types.plugin::bookings.resource.maxPartySize.placeholder": "أدخل الحد الأقصى لحجم المجموعة...",
-    "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours.placeholder": "أدخل الحد الأدنى للمهلة قبل الحجز (بالساعات)...",
-    "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays.placeholder": "أدخل الحد الأقصى للحجز المسبق (بالأيام)...",
-    "content-manager.content-types.plugin::bookings.resource.requiresApproval.placeholder": "أدخل يتطلب موافقة الإدارة...",
-    "content-manager.content-types.plugin::bookings.resource.weeklySchedule.placeholder": "أدخل جدول التوفر الأسبوعي...",
-    "content-manager.content-types.plugin::bookings.resource.seasonalSchedules.placeholder": "أدخل الجداول الموسمية الخاصة...",
-    "content-manager.content-types.plugin::bookings.resource.holidayRules.placeholder": "أدخل قواعد العطلات والمناسبات...",
-    "content-manager.content-types.plugin::bookings.resource.blackoutDates.placeholder": "أدخل التواريخ المحجوبة (غير المتاحة)...",
-    "content-manager.content-types.plugin::bookings.resource.recurrenceRule.placeholder": "أدخل قاعدة التكرار (RRULE)...",
-    "content-manager.content-types.plugin::bookings.resource.supportedLanguages.placeholder": "مثال: es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.resource.assignedHosts.placeholder": "أدخل المضيفون أو المرشدون المعينون...",
-    "content-manager.content-types.plugin::bookings.resource.location.placeholder": "أدخل الموقع / القاعة...",
-    "content-manager.content-types.plugin::bookings.resource.price.placeholder": "أدخل السعر / الرسوم...",
-    "content-manager.content-types.plugin::bookings.resource.currency.placeholder": "مثال: COP أو USD",
+    "content-manager.content-types.plugin::bookings.resource.timezone.placeholder":
+      "America/Bogota",
+    "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder":
+      "أدخل مدة الفترة الزمنية (بالدقائق)...",
+    "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes.placeholder":
+      "أدخل فترة الفاصل قبل الموعد (بالدقائق)...",
+    "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes.placeholder":
+      "أدخل فترة الفاصل بعد الموعد (بالدقائق)...",
+    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot.placeholder":
+      "أدخل السعة لكل فترة زمنية...",
+    "content-manager.content-types.plugin::bookings.resource.maxPartySize.placeholder":
+      "أدخل الحد الأقصى لحجم المجموعة...",
+    "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours.placeholder":
+      "أدخل الحد الأدنى للمهلة قبل الحجز (بالساعات)...",
+    "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays.placeholder":
+      "أدخل الحد الأقصى للحجز المسبق (بالأيام)...",
+    "content-manager.content-types.plugin::bookings.resource.requiresApproval.placeholder":
+      "أدخل يتطلب موافقة الإدارة...",
+    "content-manager.content-types.plugin::bookings.resource.weeklySchedule.placeholder":
+      "أدخل جدول التوفر الأسبوعي...",
+    "content-manager.content-types.plugin::bookings.resource.seasonalSchedules.placeholder":
+      "أدخل الجداول الموسمية الخاصة...",
+    "content-manager.content-types.plugin::bookings.resource.holidayRules.placeholder":
+      "أدخل قواعد العطلات والمناسبات...",
+    "content-manager.content-types.plugin::bookings.resource.blackoutDates.placeholder":
+      "أدخل التواريخ المحجوبة (غير المتاحة)...",
+    "content-manager.content-types.plugin::bookings.resource.recurrenceRule.placeholder":
+      "أدخل قاعدة التكرار (RRULE)...",
+    "content-manager.content-types.plugin::bookings.resource.supportedLanguages.placeholder":
+      "مثال: es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.resource.assignedHosts.placeholder":
+      "أدخل المضيفون أو المرشدون المعينون...",
+    "content-manager.content-types.plugin::bookings.resource.location.placeholder":
+      "أدخل الموقع / القاعة...",
+    "content-manager.content-types.plugin::bookings.resource.price.placeholder":
+      "أدخل السعر / الرسوم...",
+    "content-manager.content-types.plugin::bookings.resource.currency.placeholder":
+      "مثال: COP أو USD",
     "content-manager.content-types.plugin::bookings.resource.isActive.placeholder": "أدخل نشط...",
-    "content-manager.content-types.plugin::bookings.resource.metadata.placeholder": "أدخل بيانات وصفية إضافية (JSON)...",
-    "content-manager.content-types.plugin::bookings.resource.bookings.placeholder": "أدخل الحجوزات المرتبطة...",
-    "content-manager.content-types.plugin::bookings.resource.documentId.placeholder": "أدخل معرف المستند..."
+    "content-manager.content-types.plugin::bookings.resource.metadata.placeholder":
+      "أدخل بيانات وصفية إضافية (JSON)...",
+    "content-manager.content-types.plugin::bookings.resource.bookings.placeholder":
+      "أدخل الحجوزات المرتبطة...",
+    "content-manager.content-types.plugin::bookings.resource.documentId.placeholder":
+      "أدخل معرف المستند...",
   },
-  "tr": {
-    "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder": "Rezervasyon Kodu girin...",
+  tr: {
+    "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder":
+      "Rezervasyon Kodu girin...",
     "content-manager.content-types.plugin::bookings.booking.title.placeholder": "Başlık girin...",
-    "content-manager.content-types.plugin::bookings.booking.resource.placeholder": "Rezerve Edilen Kaynak / Alan girin...",
-    "content-manager.content-types.plugin::bookings.booking.customerName.placeholder": "Ziyaretçi / Başvuru Sahibi Adı girin...",
-    "content-manager.content-types.plugin::bookings.booking.customerEmail.placeholder": "info@mezquitabogota.org",
-    "content-manager.content-types.plugin::bookings.booking.customerPhone.placeholder": "+57 310 555 0199",
-    "content-manager.content-types.plugin::bookings.booking.organization.placeholder": "Kurum / Organizasyon girin...",
+    "content-manager.content-types.plugin::bookings.booking.resource.placeholder":
+      "Rezerve Edilen Kaynak / Alan girin...",
+    "content-manager.content-types.plugin::bookings.booking.customerName.placeholder":
+      "Ziyaretçi / Başvuru Sahibi Adı girin...",
+    "content-manager.content-types.plugin::bookings.booking.customerEmail.placeholder":
+      "info@mezquitabogota.org",
+    "content-manager.content-types.plugin::bookings.booking.customerPhone.placeholder":
+      "+57 310 555 0199",
+    "content-manager.content-types.plugin::bookings.booking.organization.placeholder":
+      "Kurum / Organizasyon girin...",
     "content-manager.content-types.plugin::bookings.booking.startDate.placeholder": "YYYY-MM-DD",
     "content-manager.content-types.plugin::bookings.booking.endDate.placeholder": "YYYY-MM-DD",
     "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder": "örn., 10:00",
     "content-manager.content-types.plugin::bookings.booking.timezone.placeholder": "America/Bogota",
-    "content-manager.content-types.plugin::bookings.booking.partySize.placeholder": "Kişi Sayısı (Grup Büyüklüğü) girin...",
+    "content-manager.content-types.plugin::bookings.booking.partySize.placeholder":
+      "Kişi Sayısı (Grup Büyüklüğü) girin...",
     "content-manager.content-types.plugin::bookings.booking.status.placeholder": "Durum girin...",
-    "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder": "örn., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder": "Atanan Rehber / Görevli girin...",
+    "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder":
+      "örn., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder":
+      "Atanan Rehber / Görevli girin...",
     "content-manager.content-types.plugin::bookings.booking.notes.placeholder": "Notlar girin...",
-    "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder": "Dahili Personel Notları girin...",
-    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder": "İptal Jetonu Özeti (Hash) girin...",
-    "content-manager.content-types.plugin::bookings.booking.sourceCollection.placeholder": "Kaynak Koleksiyon girin...",
-    "content-manager.content-types.plugin::bookings.booking.metadata.placeholder": "Ek Meta Veriler (JSON) girin...",
-    "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage.placeholder": "örn., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.booking.hijriDate.placeholder": "örn., 15 Ramazan 1447 H",
-    "content-manager.content-types.plugin::bookings.booking.documentId.placeholder": "Belge Kimliği (ID) girin...",
+    "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder":
+      "Dahili Personel Notları girin...",
+    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder":
+      "İptal Jetonu Özeti (Hash) girin...",
+    "content-manager.content-types.plugin::bookings.booking.sourceCollection.placeholder":
+      "Kaynak Koleksiyon girin...",
+    "content-manager.content-types.plugin::bookings.booking.metadata.placeholder":
+      "Ek Meta Veriler (JSON) girin...",
+    "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage.placeholder":
+      "örn., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.booking.hijriDate.placeholder":
+      "örn., 15 Ramazan 1447 H",
+    "content-manager.content-types.plugin::bookings.booking.documentId.placeholder":
+      "Belge Kimliği (ID) girin...",
     "content-manager.content-types.plugin::bookings.resource.name.placeholder": "Ad girin...",
-    "content-manager.content-types.plugin::bookings.resource.slug.placeholder": "otomatik-url-kisa-adi",
-    "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder": "Kaynak Türü girin...",
-    "content-manager.content-types.plugin::bookings.resource.description.placeholder": "Açıklama girin...",
+    "content-manager.content-types.plugin::bookings.resource.slug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder":
+      "Kaynak Türü girin...",
+    "content-manager.content-types.plugin::bookings.resource.description.placeholder":
+      "Açıklama girin...",
     "content-manager.content-types.plugin::bookings.resource.color.placeholder": "#0F766E",
-    "content-manager.content-types.plugin::bookings.resource.timezone.placeholder": "America/Bogota",
-    "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder": "Seans Süresi (Dakika) girin...",
-    "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes.placeholder": "Seans Öncesi Ara Süre (Dakika) girin...",
-    "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes.placeholder": "Seans Sonrası Ara Süre (Dakika) girin...",
-    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot.placeholder": "Seans Başına Kapasite girin...",
-    "content-manager.content-types.plugin::bookings.resource.maxPartySize.placeholder": "Maksimum Grup Büyüklüğü girin...",
-    "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours.placeholder": "Minimum Ön Bildirim Süresi (Saat) girin...",
-    "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays.placeholder": "Maksimum İleri Tarihli Rezervasyon (Gün) girin...",
-    "content-manager.content-types.plugin::bookings.resource.requiresApproval.placeholder": "Yönetici Onayı Gerektirir girin...",
-    "content-manager.content-types.plugin::bookings.resource.weeklySchedule.placeholder": "Haftalık Uygunluk Programı girin...",
-    "content-manager.content-types.plugin::bookings.resource.seasonalSchedules.placeholder": "Mevsimsel / Dönemsel Programlar girin...",
-    "content-manager.content-types.plugin::bookings.resource.holidayRules.placeholder": "Tatil ve Bayram Kuralları girin...",
-    "content-manager.content-types.plugin::bookings.resource.blackoutDates.placeholder": "Kapalı / Uygun Olmayan Tarihler girin...",
-    "content-manager.content-types.plugin::bookings.resource.recurrenceRule.placeholder": "Tekrarlama Kuralı (RRULE) girin...",
-    "content-manager.content-types.plugin::bookings.resource.supportedLanguages.placeholder": "örn., es, en, ar, tr",
-    "content-manager.content-types.plugin::bookings.resource.assignedHosts.placeholder": "Atanan Rehberler / Görevliler girin...",
-    "content-manager.content-types.plugin::bookings.resource.location.placeholder": "Konum / Mekan girin...",
-    "content-manager.content-types.plugin::bookings.resource.price.placeholder": "Ücret / Fiyat girin...",
-    "content-manager.content-types.plugin::bookings.resource.currency.placeholder": "örn., COP veya USD",
-    "content-manager.content-types.plugin::bookings.resource.isActive.placeholder": "Aktif girin...",
-    "content-manager.content-types.plugin::bookings.resource.metadata.placeholder": "Ek Meta Veriler (JSON) girin...",
-    "content-manager.content-types.plugin::bookings.resource.bookings.placeholder": "İlgili Rezervasyonlar girin...",
-    "content-manager.content-types.plugin::bookings.resource.documentId.placeholder": "Belge Kimliği (ID) girin..."
-  }
+    "content-manager.content-types.plugin::bookings.resource.timezone.placeholder":
+      "America/Bogota",
+    "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder":
+      "Seans Süresi (Dakika) girin...",
+    "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes.placeholder":
+      "Seans Öncesi Ara Süre (Dakika) girin...",
+    "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes.placeholder":
+      "Seans Sonrası Ara Süre (Dakika) girin...",
+    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot.placeholder":
+      "Seans Başına Kapasite girin...",
+    "content-manager.content-types.plugin::bookings.resource.maxPartySize.placeholder":
+      "Maksimum Grup Büyüklüğü girin...",
+    "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours.placeholder":
+      "Minimum Ön Bildirim Süresi (Saat) girin...",
+    "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays.placeholder":
+      "Maksimum İleri Tarihli Rezervasyon (Gün) girin...",
+    "content-manager.content-types.plugin::bookings.resource.requiresApproval.placeholder":
+      "Yönetici Onayı Gerektirir girin...",
+    "content-manager.content-types.plugin::bookings.resource.weeklySchedule.placeholder":
+      "Haftalık Uygunluk Programı girin...",
+    "content-manager.content-types.plugin::bookings.resource.seasonalSchedules.placeholder":
+      "Mevsimsel / Dönemsel Programlar girin...",
+    "content-manager.content-types.plugin::bookings.resource.holidayRules.placeholder":
+      "Tatil ve Bayram Kuralları girin...",
+    "content-manager.content-types.plugin::bookings.resource.blackoutDates.placeholder":
+      "Kapalı / Uygun Olmayan Tarihler girin...",
+    "content-manager.content-types.plugin::bookings.resource.recurrenceRule.placeholder":
+      "Tekrarlama Kuralı (RRULE) girin...",
+    "content-manager.content-types.plugin::bookings.resource.supportedLanguages.placeholder":
+      "örn., es, en, ar, tr",
+    "content-manager.content-types.plugin::bookings.resource.assignedHosts.placeholder":
+      "Atanan Rehberler / Görevliler girin...",
+    "content-manager.content-types.plugin::bookings.resource.location.placeholder":
+      "Konum / Mekan girin...",
+    "content-manager.content-types.plugin::bookings.resource.price.placeholder":
+      "Ücret / Fiyat girin...",
+    "content-manager.content-types.plugin::bookings.resource.currency.placeholder":
+      "örn., COP veya USD",
+    "content-manager.content-types.plugin::bookings.resource.isActive.placeholder":
+      "Aktif girin...",
+    "content-manager.content-types.plugin::bookings.resource.metadata.placeholder":
+      "Ek Meta Veriler (JSON) girin...",
+    "content-manager.content-types.plugin::bookings.resource.bookings.placeholder":
+      "İlgili Rezervasyonlar girin...",
+    "content-manager.content-types.plugin::bookings.resource.documentId.placeholder":
+      "Belge Kimliği (ID) girin...",
+  },
 };

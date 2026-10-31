@@ -1,27 +1,33 @@
-import crypto from 'node:crypto';
+import crypto from "node:crypto";
+
 import type {
   BookingFilterQuery,
   BookingRecord,
   BookingResource,
   BookingSourceMapping,
   BookingStatus,
-} from '../../../shared/types';
+  BookingsPluginSettings,
+  CreateReservationInput,
+  RescheduleBookingInput,
+} from "../../../shared/types";
 
 const VALID_STATUSES = new Set<BookingStatus>([
-  'pending',
-  'confirmed',
-  'completed',
-  'cancelled',
-  'no_show',
+  "pending",
+  "confirmed",
+  "completed",
+  "cancelled",
+  "no_show",
 ]);
 
 export function normalizeStatus(raw: unknown): BookingStatus {
-  const str = String(raw ?? 'pending').toLowerCase().trim() as BookingStatus;
-  return VALID_STATUSES.has(str) ? str : 'pending';
+  const str = String(raw ?? "pending")
+    .toLowerCase()
+    .trim() as BookingStatus;
+  return VALID_STATUSES.has(str) ? str : "pending";
 }
 
 export function hashCancelToken(token: string): string {
-  return crypto.createHash('sha256').update(token, 'utf8').digest('hex');
+  return crypto.createHash("sha256").update(token, "utf8").digest("hex");
 }
 
 export function verifyCancelToken(
@@ -32,8 +38,8 @@ export function verifyCancelToken(
     return false;
   }
   const actualHash = hashCancelToken(token);
-  const aBuf = Buffer.from(actualHash, 'utf8');
-  const bBuf = Buffer.from(expectedHash, 'utf8');
+  const aBuf = Buffer.from(actualHash, "utf8");
+  const bBuf = Buffer.from(expectedHash, "utf8");
   if (aBuf.length !== bBuf.length) {
     return false;
   }
@@ -41,12 +47,12 @@ export function verifyCancelToken(
 }
 
 export function generateRawCancelToken(): string {
-  return crypto.randomBytes(24).toString('hex');
+  return crypto.randomBytes(24).toString("hex");
 }
 
 export function generateBookingCode(now = new Date()): string {
-  const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+  const datePart = now.toISOString().slice(0, 10).replace(/-/g, "");
+  const randomSuffix = crypto.randomBytes(3).toString("hex").toUpperCase();
   return `BKG-${datePart}-${randomSuffix}`;
 }
 
@@ -55,7 +61,7 @@ function asOptStr(val: unknown): string | undefined {
 }
 
 function asObjRecord(val: unknown): Record<string, unknown> | undefined {
-  return val && typeof val === 'object' ? (val as Record<string, unknown>) : undefined;
+  return val && typeof val === "object" ? (val as Record<string, unknown>) : undefined;
 }
 
 function resolveBookingResourceRef(
@@ -63,13 +69,11 @@ function resolveBookingResourceRef(
   resourceMap: Map<string, BookingResource>
 ) {
   const relResource = asObjRecord(raw.resource);
-  const rawResourceStr = typeof raw.resource === 'string' ? raw.resource : '';
+  const rawResourceStr = typeof raw.resource === "string" ? raw.resource : "";
   const resourceDocumentId = String(
     relResource?.documentId ?? relResource?.id ?? raw.resourceDocumentId ?? rawResourceStr
   );
-  const mappedResource = resourceDocumentId
-    ? resourceMap.get(resourceDocumentId)
-    : undefined;
+  const mappedResource = resourceDocumentId ? resourceMap.get(resourceDocumentId) : undefined;
   const resourceName = mappedResource?.name ?? asOptStr(relResource?.name);
   return {
     resourceDocumentId: resourceDocumentId || undefined,
@@ -78,7 +82,7 @@ function resolveBookingResourceRef(
   };
 }
 
-function asStr(val: unknown, fallback = ''): string {
+function asStr(val: unknown, fallback = ""): string {
   return val !== undefined && val !== null ? String(val) : fallback;
 }
 
@@ -87,8 +91,8 @@ function formatBookingDefaultTitle(
   resourceName: string | undefined,
   partySize: number
 ): string {
-  const resourceSuffix = resourceName ? ` — ${resourceName}` : '';
-  const sizeSuffix = partySize > 1 ? ` (${partySize})` : '';
+  const resourceSuffix = resourceName ? ` — ${resourceName}` : "";
+  const sizeSuffix = partySize > 1 ? ` (${partySize})` : "";
   return `${customerName}${resourceSuffix}${sizeSuffix}`;
 }
 
@@ -111,17 +115,15 @@ export function normalizeBookingRecord(
   raw: Record<string, unknown>,
   resourceMap: Map<string, BookingResource>
 ): BookingRecord {
-  const { resourceDocumentId, mappedResource, resourceName } =
-    resolveBookingResourceRef(raw, resourceMap);
-  const customerName = asStr(raw.customerName, 'Guest');
+  const { resourceDocumentId, mappedResource, resourceName } = resolveBookingResourceRef(
+    raw,
+    resourceMap
+  );
+  const customerName = asStr(raw.customerName, "Guest");
   const partySize = Math.max(1, Number(raw.partySize ?? 1));
   const documentId = asStr(raw.documentId ?? raw.id);
   const startDate = asStr(raw.startDate);
-  const defaultTitle = formatBookingDefaultTitle(
-    customerName,
-    resourceName,
-    partySize
-  );
+  const defaultTitle = formatBookingDefaultTitle(customerName, resourceName, partySize);
 
   return {
     documentId,
@@ -134,10 +136,10 @@ export function normalizeBookingRecord(
     customerEmail: asStr(raw.customerEmail),
     startDate,
     endDate: asStr(raw.endDate, startDate),
-    timezone: asStr(raw.timezone ?? mappedResource?.timezone, 'UTC'),
+    timezone: asStr(raw.timezone ?? mappedResource?.timezone, "UTC"),
     partySize,
     status: normalizeStatus(raw.status),
-    sourceCollection: asStr(raw.sourceCollection, 'plugin::bookings.booking'),
+    sourceCollection: asStr(raw.sourceCollection, "plugin::bookings.booking"),
     ...normalizeBookingOptionals(raw),
   };
 }
@@ -150,14 +152,13 @@ function resolveExternalSlotWindow(
 ): { startIso: string; endIso: string } {
   if (dateStr.length === 10) {
     const defaultWindows: Record<string, { start: string; end: string }> = {
-      morning: { start: '09:00', end: '12:00' },
-      afternoon: { start: '14:00', end: '17:00' },
-      evening: { start: '18:00', end: '20:00' },
-      ...(source.slotWindows ?? {}),
+      morning: { start: "09:00", end: "12:00" },
+      afternoon: { start: "14:00", end: "17:00" },
+      evening: { start: "18:00", end: "20:00" },
+      ...source.slotWindows,
     };
     const key = slotLabel.toLowerCase();
-    const windowSpec =
-      (slotLabel && defaultWindows[key]) || { start: '09:00', end: '10:00' };
+    const windowSpec = (slotLabel && defaultWindows[key]) || { start: "09:00", end: "10:00" };
     return {
       startIso: `${dateStr}T${windowSpec.start}:00.000Z`,
       endIso: initialEndIso || `${dateStr}T${windowSpec.end}:00.000Z`,
@@ -173,10 +174,7 @@ function resolveExternalSlotWindow(
   return { startIso: dateStr, endIso: initialEndIso };
 }
 
-function readMappedField(
-  row: Record<string, unknown>,
-  fieldName?: string
-): string | undefined {
+function readMappedField(row: Record<string, unknown>, fieldName?: string): string | undefined {
   return fieldName && row[fieldName] ? String(row[fieldName]) : undefined;
 }
 
@@ -186,9 +184,7 @@ function resolveExternalPartyAndStatus(
 ): { partySize: number; status: BookingStatus } {
   const rawParty = readMappedField(row, source.partySizeField);
   const partySize = rawParty ? Math.max(1, Number(rawParty)) : 1;
-  const status = source.statusField
-    ? normalizeStatus(row[source.statusField])
-    : 'confirmed';
+  const status = source.statusField ? normalizeStatus(row[source.statusField]) : "confirmed";
   return { partySize, status };
 }
 
@@ -200,17 +196,12 @@ export function mapExternalSourceRowToBooking(
   if (!rawDate) return null;
 
   const dateStr = String(rawDate).trim();
-  const slotLabel = readMappedField(row, source.slotLabelField) ?? '';
-  const initialEndIso = readMappedField(row, source.endDateField) ?? '';
-  const { startIso, endIso } = resolveExternalSlotWindow(
-    dateStr,
-    slotLabel,
-    initialEndIso,
-    source
-  );
+  const slotLabel = readMappedField(row, source.slotLabelField) ?? "";
+  const initialEndIso = readMappedField(row, source.endDateField) ?? "";
+  const { startIso, endIso } = resolveExternalSlotWindow(dateStr, slotLabel, initialEndIso, source);
 
   const documentId = asStr(row.documentId ?? row.id);
-  const customerName = asStr(row[source.customerNameField], 'Guest');
+  const customerName = asStr(row[source.customerNameField], "Guest");
   const { partySize, status } = resolveExternalPartyAndStatus(row, source);
 
   return {
@@ -219,15 +210,15 @@ export function mapExternalSourceRowToBooking(
     title: formatBookingDefaultTitle(customerName, source.label, partySize),
     resourceDocumentId: source.id,
     resourceName: source.label,
-    resourceColor: asStr(source.color, '#0d9488'),
+    resourceColor: asStr(source.color, "#0d9488"),
     customerName,
-    customerEmail: readMappedField(row, source.customerEmailField) ?? '',
+    customerEmail: readMappedField(row, source.customerEmailField) ?? "",
     customerPhone: readMappedField(row, source.customerPhoneField),
     organization: readMappedField(row, source.organizationField),
     startDate: startIso,
     endDate: endIso,
     slotLabel: asOptStr(slotLabel),
-    timezone: 'UTC',
+    timezone: "UTC",
     partySize,
     status,
     preferredLanguage: readMappedField(row, source.languageField),
@@ -240,7 +231,7 @@ function parseBoundaryMs(isoOrDate: string | undefined, endOfDay: boolean): numb
   if (!isoOrDate) return null;
   const normalized =
     isoOrDate.length === 10
-      ? `${isoOrDate}T${endOfDay ? '23:59:59.999Z' : '00:00:00.000Z'}`
+      ? `${isoOrDate}T${endOfDay ? "23:59:59.999Z" : "00:00:00.000Z"}`
       : isoOrDate;
   const ms = Date.parse(normalized);
   return Number.isNaN(ms) ? null : ms;
@@ -275,18 +266,14 @@ function matchesBookingAttributes(
   }
   if (
     query.preferredLanguage &&
-    booking.preferredLanguage?.toLowerCase() !==
-      query.preferredLanguage.toLowerCase()
+    booking.preferredLanguage?.toLowerCase() !== query.preferredLanguage.toLowerCase()
   ) {
     return false;
   }
   return !query.source || booking.sourceCollection === query.source;
 }
 
-function matchesBookingSearch(
-  booking: BookingRecord,
-  searchLower: string | undefined
-): boolean {
+function matchesBookingSearch(booking: BookingRecord, searchLower: string | undefined): boolean {
   if (!searchLower) return true;
   const haystack = [
     booking.bookingCode,
@@ -298,7 +285,7 @@ function matchesBookingSearch(
     booking.notes,
   ]
     .filter(Boolean)
-    .join(' ')
+    .join(" ")
     .toLowerCase();
   return haystack.includes(searchLower);
 }
@@ -328,12 +315,6 @@ export function filterAndSortBookings(
     .sort((a, b) => Date.parse(a.startDate) - Date.parse(b.startDate));
 }
 
-import type {
-  BookingsPluginSettings,
-  CreateReservationInput,
-  RescheduleBookingInput,
-} from '../../../shared/types';
-
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function trimOrUndefined(val: string | undefined): string | undefined {
@@ -345,14 +326,14 @@ export function validateReservationCustomerAndStart(input: CreateReservationInpu
   const customerName = input.customerName?.trim();
   const customerEmail = input.customerEmail?.trim().toLowerCase();
   if (!customerName) {
-    throw new Error('customerName is required');
+    throw new Error("customerName is required");
   }
   if (!customerEmail || !EMAIL_REGEX.test(customerEmail)) {
-    throw new Error('A valid customerEmail is required');
+    throw new Error("A valid customerEmail is required");
   }
   const startMs = Date.parse(input.startDate);
   if (Number.isNaN(startMs)) {
-    throw new Error('A valid ISO startDate is required');
+    throw new Error("A valid ISO startDate is required");
   }
   return { customerName, customerEmail, startMs };
 }
@@ -363,22 +344,17 @@ export function computeReservationTimingAndParty(
   resource: BookingResource | null,
   settings: BookingsPluginSettings
 ) {
-  const durationMins =
-    resource?.slotDurationMinutes ?? settings.defaultSlotDurationMinutes ?? 60;
-  const endMs = input.endDate
-    ? Date.parse(input.endDate)
-    : startMs + durationMins * 60_000;
+  const durationMins = resource?.slotDurationMinutes ?? settings.defaultSlotDurationMinutes ?? 60;
+  const endMs = input.endDate ? Date.parse(input.endDate) : startMs + durationMins * 60_000;
 
   if (Number.isNaN(endMs) || endMs <= startMs) {
-    throw new Error('endDate must be after startDate');
+    throw new Error("endDate must be after startDate");
   }
 
   const partySize = Math.max(1, Number(input.partySize ?? 1));
   const maxParty = resource?.maxPartySize ?? 50;
   if (partySize > maxParty) {
-    throw new Error(
-      `Requested partySize (${partySize}) exceeds maximum allowed (${maxParty})`
-    );
+    throw new Error(`Requested partySize (${partySize}) exceeds maximum allowed (${maxParty})`);
   }
   return { endMs, partySize };
 }
@@ -423,14 +399,14 @@ export function buildBookingCreatePayload(params: {
     startDate: new Date(startMs).toISOString(),
     endDate: new Date(endMs).toISOString(),
     slotLabel: trimOrUndefined(input.slotLabel),
-    timezone: asStr(input.timezone || resource?.timezone || settings.defaultTimezone, 'UTC'),
+    timezone: asStr(input.timezone || resource?.timezone || settings.defaultTimezone, "UTC"),
     partySize,
     status,
     preferredLanguage: trimOrUndefined(input.preferredLanguage),
     assignedHost,
     notes: trimOrUndefined(input.notes),
     cancelTokenHash,
-    sourceCollection: 'plugin::bookings.booking',
+    sourceCollection: "plugin::bookings.booking",
     metadata: input.metadata ?? undefined,
   };
 }
@@ -441,19 +417,17 @@ export function computeRescheduleWindow(
 ): { newStartMs: number; newEndMs: number } {
   const newStartMs = Date.parse(input.newStartDate);
   if (Number.isNaN(newStartMs)) {
-    throw new Error('A valid newStartDate is required');
+    throw new Error("A valid newStartDate is required");
   }
   const oldStartMs = Date.parse(String(targetRaw.startDate));
   const oldEndMs = Date.parse(String(targetRaw.endDate));
   const hasValidOldRange =
     !Number.isNaN(oldStartMs) && !Number.isNaN(oldEndMs) && oldEndMs > oldStartMs;
   const defaultDurationMs = hasValidOldRange ? oldEndMs - oldStartMs : 3_600_000;
-  const newEndMs = input.newEndDate
-    ? Date.parse(input.newEndDate)
-    : newStartMs + defaultDurationMs;
+  const newEndMs = input.newEndDate ? Date.parse(input.newEndDate) : newStartMs + defaultDurationMs;
 
   if (Number.isNaN(newEndMs) || newEndMs <= newStartMs) {
-    throw new Error('newEndDate must be after newStartDate');
+    throw new Error("newEndDate must be after newStartDate");
   }
   return { newStartMs, newEndMs };
 }

@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import {
   Badge,
   Box,
@@ -11,8 +10,10 @@ import {
   Textarea,
   TextInput,
   Typography,
-} from '@strapi/design-system';
-import type { BookingRecord, BookingStatus } from '../../../../shared/types';
+} from "@strapi/design-system";
+import React, { useState } from "react";
+
+import type { BookingRecord, BookingStatus } from "../../../../shared/types";
 
 export interface BookingSidePanelProps {
   t: (id: string, defaultMessage: string) => string;
@@ -28,11 +29,11 @@ export interface BookingSidePanelProps {
 }
 
 const BOOKING_STATUSES: BookingStatus[] = [
-  'pending',
-  'confirmed',
-  'completed',
-  'cancelled',
-  'no_show',
+  "pending",
+  "confirmed",
+  "completed",
+  "cancelled",
+  "no_show",
 ];
 
 const BookingDetailsSection: React.FC<{
@@ -47,11 +48,11 @@ const BookingDetailsSection: React.FC<{
         </Badge>
       )}
       <Badge>
-        {t('panel.partySize', 'Party Size')}: {booking.partySize}
+        {t("panel.partySize", "Party Size")}: {booking.partySize}
       </Badge>
       {booking.preferredLanguage && (
         <Badge>
-          {t('panel.language', 'Lang')}: {booking.preferredLanguage.toUpperCase()}
+          {t("panel.language", "Lang")}: {booking.preferredLanguage.toUpperCase()}
         </Badge>
       )}
     </Flex>
@@ -60,22 +61,22 @@ const BookingDetailsSection: React.FC<{
 
     <Flex direction="column" alignItems="stretch" gap={2}>
       <Typography variant="sigma" textColor="neutral600">
-        {t('panel.schedule', 'Schedule')}
+        {t("panel.schedule", "Schedule")}
       </Typography>
       <Typography variant="omega">
-        {booking.startDate.slice(0, 16).replace('T', ' ')} →{' '}
-        {booking.endDate.slice(0, 16).replace('T', ' ')} ({booking.timezone})
+        {booking.startDate.slice(0, 16).replace("T", " ")} →{" "}
+        {booking.endDate.slice(0, 16).replace("T", " ")} ({booking.timezone})
       </Typography>
       {booking.slotLabel && (
         <Typography variant="pi" textColor="neutral600">
-          {t('panel.slotLabel', 'Slot')}: {booking.slotLabel}
+          {t("panel.slotLabel", "Slot")}: {booking.slotLabel}
         </Typography>
       )}
     </Flex>
 
     <Flex direction="column" alignItems="stretch" gap={2}>
       <Typography variant="sigma" textColor="neutral600">
-        {t('panel.customer', 'Customer Details')}
+        {t("panel.customer", "Customer Details")}
       </Typography>
       <Typography variant="omega" fontWeight="bold">
         {booking.customerName}
@@ -86,9 +87,7 @@ const BookingDetailsSection: React.FC<{
         </Typography>
       )}
       <Typography variant="pi">{booking.customerEmail}</Typography>
-      {booking.customerPhone && (
-        <Typography variant="pi">{booking.customerPhone}</Typography>
-      )}
+      {booking.customerPhone && <Typography variant="pi">{booking.customerPhone}</Typography>}
       {booking.notes && (
         <Box padding={2} background="neutral100" hasRadius>
           <Typography variant="pi">{booking.notes}</Typography>
@@ -105,22 +104,16 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
   onUpdateStatus,
   onOpenInContentManager,
 }) => {
-  const [status, setStatus] = useState<BookingStatus>(
-    booking?.status ?? 'pending'
-  );
-  const [assignedHost, setAssignedHost] = useState<string>(
-    booking?.assignedHost ?? ''
-  );
-  const [internalNotes, setInternalNotes] = useState<string>(
-    booking?.internalNotes ?? ''
-  );
+  const [status, setStatus] = useState<BookingStatus>(booking?.status ?? "pending");
+  const [assignedHost, setAssignedHost] = useState<string>(booking?.assignedHost ?? "");
+  const [internalNotes, setInternalNotes] = useState<string>(booking?.internalNotes ?? "");
   const [saving, setSaving] = useState(false);
 
   React.useEffect(() => {
     if (booking) {
       setStatus(booking.status);
-      setAssignedHost(booking.assignedHost ?? '');
-      setInternalNotes(booking.internalNotes ?? '');
+      setAssignedHost(booking.assignedHost ?? "");
+      setInternalNotes(booking.internalNotes ?? "");
     }
   }, [booking]);
 
@@ -148,13 +141,13 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
       hasRadius
       shadow="filterShadow"
       padding={5}
-      style={{ minWidth: '340px', maxWidth: '420px' }}
+      style={{ minWidth: "340px", maxWidth: "420px" }}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
         <Flex justifyContent="space-between" alignItems="center">
           <Badge>{booking.bookingCode}</Badge>
           <Button variant="tertiary" size="S" onClick={onClose}>
-            {t('panel.close', 'Close')}
+            {t("panel.close", "Close")}
           </Button>
         </Flex>
 
@@ -167,15 +160,11 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
         <Divider />
 
         <Field.Root>
-          <Field.Label>
-            {t('panel.status', 'Booking Status')}
-          </Field.Label>
+          <Field.Label>{t("panel.status", "Booking Status")}</Field.Label>
           <SingleSelect
-            placeholder={t('placeholder.select_booking_status', 'Select booking status')}
+            placeholder={t("placeholder.select_booking_status", "Select booking status")}
             value={status}
-            onChange={(val: string | number) =>
-              setStatus(String(val) as BookingStatus)
-            }
+            onChange={(val: string | number) => setStatus(String(val) as BookingStatus)}
           >
             {BOOKING_STATUSES.map((st) => (
               <SingleSelectOption key={st} value={st}>
@@ -186,24 +175,18 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
         </Field.Root>
 
         <Field.Root>
-          <Field.Label>
-            {t('panel.assignedHost', 'Assigned Staff / Host')}
-          </Field.Label>
+          <Field.Label>{t("panel.assignedHost", "Assigned Staff / Host")}</Field.Label>
           <TextInput
-            placeholder={t('placeholder.assign_guide_or_host', 'Assign guide or host...')}
+            placeholder={t("placeholder.assign_guide_or_host", "Assign guide or host...")}
             value={assignedHost}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setAssignedHost(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAssignedHost(e.target.value)}
           />
         </Field.Root>
 
         <Field.Root>
-          <Field.Label>
-            {t('panel.internalNotes', 'Internal Notes')}
-          </Field.Label>
+          <Field.Label>{t("panel.internalNotes", "Internal Notes")}</Field.Label>
           <Textarea
-            placeholder={t('placeholder.internal_staff_notes', 'Internal staff notes...')}
+            placeholder={t("placeholder.internal_staff_notes", "Internal staff notes...")}
             value={internalNotes}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setInternalNotes(e.target.value)
@@ -212,18 +195,11 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
         </Field.Root>
 
         <Flex gap={2} justifyContent="space-between" wrap="wrap">
-          <Button
-            variant="default"
-            loading={saving}
-            onClick={handleSave}
-          >
-            {t('panel.save', 'Save Changes')}
+          <Button variant="default" loading={saving} onClick={handleSave}>
+            {t("panel.save", "Save Changes")}
           </Button>
-          <Button
-            variant="secondary"
-            onClick={() => onOpenInContentManager(booking)}
-          >
-            {t('panel.openEntry', 'Open in Content Manager')}
+          <Button variant="secondary" onClick={() => onOpenInContentManager(booking)}>
+            {t("panel.openEntry", "Open in Content Manager")}
           </Button>
         </Flex>
       </Flex>

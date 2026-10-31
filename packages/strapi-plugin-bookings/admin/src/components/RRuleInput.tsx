@@ -1,4 +1,1 @@
-export {
-  RRuleInput,
-  default,
-} from '@vicacha-devs/strapi-plugin-calendar/strapi-admin';
+export { RRuleInput, default } from "@vicacha-devs/strapi-plugin-calendar/strapi-admin";

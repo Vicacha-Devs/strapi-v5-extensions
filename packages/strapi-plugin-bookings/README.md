@@ -20,5 +20,5 @@ Generic **Bookings, Appointments, Resource Scheduling & Time-Slot Availability E
 - **100% Generic & Extensible**:
   - Extend `resource` and `booking` schemas via `schemaExtensions` in `config/plugins.ts` without forking the plugin.
   - Map existing Strapi collections into the Bookings Ledger via `sources`.
-- **10-Locale Admin UI**:
-  - Ships with full translations for `en`, `es`, `ar`, `fr`, `de`, `pt`, `tr`, `id`, `ur`, and `zh`.
+- **13-Locale Admin UI**:
+  - Ships with full translations for `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur`, and `zh`.

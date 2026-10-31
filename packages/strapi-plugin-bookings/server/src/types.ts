@@ -1,4 +1,6 @@
-import type { CalendarSystemFormatterFn as CalendarSystemFormatter } from '../../shared/calendarSystems';
+import type { ExpandedCalendarOccurrence as CalendarOccurrence } from "@vicacha-devs/strapi-plugin-calendar/shared";
+
+import type { CalendarSystemFormatterFn as CalendarSystemFormatter } from "../../shared/calendarSystems";
 import type {
   AvailableSlot,
   BookingFilterQuery,
@@ -15,35 +17,34 @@ import type {
   RescheduleBookingInput,
   SeasonalScheduleOverride,
   SecondaryCalendarConfig,
-} from '../../shared/types';
-import type { ExpandedCalendarOccurrence as CalendarOccurrence } from '@vicacha-devs/strapi-plugin-calendar/shared';
+} from "../../shared/types";
 
 export interface CustomFieldRegistration {
   name: string;
   type:
-    | 'string'
-    | 'text'
-    | 'richtext'
-    | 'integer'
-    | 'biginteger'
-    | 'float'
-    | 'decimal'
-    | 'date'
-    | 'time'
-    | 'datetime'
-    | 'boolean'
-    | 'enumeration'
-    | 'json'
-    | 'email'
-    | 'password'
-    | 'uid';
+    | "string"
+    | "text"
+    | "richtext"
+    | "integer"
+    | "biginteger"
+    | "float"
+    | "decimal"
+    | "date"
+    | "time"
+    | "datetime"
+    | "boolean"
+    | "enumeration"
+    | "json"
+    | "email"
+    | "password"
+    | "uid";
 }
 
 export interface BookingsPluginConfig {
   defaultTimezone?: string;
   defaultLocale?: string;
-  theme?: 'breeze' | 'emerald' | 'sand' | 'midnight' | 'classic';
-  secondaryCalendarLanguage?: 'local' | 'ar' | 'off';
+  theme?: "breeze" | "emerald" | "sand" | "midnight" | "classic";
+  secondaryCalendarLanguage?: "local" | "ar" | "off";
   defaultSlotDurationMinutes?: number;
   defaultBufferBeforeMinutes?: number;
   defaultBufferAfterMinutes?: number;
@@ -91,9 +92,7 @@ export interface SettingsService {
 export interface AvailabilityService {
   listResources(activeOnly?: boolean): Promise<BookingResource[]>;
   getResource(idOrSlug: string): Promise<BookingResource | null>;
-  saveResource(
-    payload: Partial<BookingResource> & { name: string }
-  ): Promise<BookingResource>;
+  saveResource(payload: Partial<BookingResource> & { name: string }): Promise<BookingResource>;
   getAvailableSlots(params: {
     resourceDocumentId?: string;
     resourceSlug?: string;
@@ -126,10 +125,7 @@ export interface ReservationService {
     input: RescheduleBookingInput,
     options?: { isAdmin?: boolean; referenceNow?: Date }
   ): Promise<BookingRecord>;
-  cancelBooking(
-    input: CancelBookingInput,
-    options?: { isAdmin?: boolean }
-  ): Promise<BookingRecord>;
+  cancelBooking(input: CancelBookingInput, options?: { isAdmin?: boolean }): Promise<BookingRecord>;
   exportCsv(query?: BookingFilterQuery): Promise<string>;
   exportICal(query?: BookingFilterQuery): Promise<string>;
 }

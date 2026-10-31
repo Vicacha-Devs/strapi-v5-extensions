@@ -1,17 +1,14 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../../../shared/pluginId';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../../../shared/pluginId";
 import type {
   BookingFilterQuery,
   BookingResource,
   BookingsPluginSettings,
   BookingStatus,
   CreateReservationInput,
-} from '../../../shared/types';
-import type {
-  AvailabilityService,
-  ReservationService,
-  SettingsService,
-} from '../types';
+} from "../../../shared/types";
+import type { AvailabilityService, ReservationService, SettingsService } from "../types";
 
 interface AdminContext {
   query: Record<string, string | undefined>;
@@ -26,12 +23,11 @@ interface AdminContext {
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getSettingsService = () =>
-    strapi.plugin(PLUGIN_ID).service('settings') as SettingsService;
+  const getSettingsService = () => strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
   const getAvailabilityService = () =>
-    strapi.plugin(PLUGIN_ID).service('availability') as AvailabilityService;
+    strapi.plugin(PLUGIN_ID).service("availability") as AvailabilityService;
   const getReservationService = () =>
-    strapi.plugin(PLUGIN_ID).service('reservation') as ReservationService;
+    strapi.plugin(PLUGIN_ID).service("reservation") as ReservationService;
 
   return {
     async getSettings(ctx: AdminContext) {
@@ -51,7 +47,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async listResources(ctx: AdminContext) {
-      const activeOnly = ctx.query.activeOnly === 'true';
+      const activeOnly = ctx.query.activeOnly === "true";
       const resources = await getAvailabilityService().listResources(activeOnly);
       ctx.body = { data: resources };
     },
@@ -61,7 +57,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         name?: string;
       };
       if (!body.name || !body.name.trim()) {
-        ctx.badRequest('Resource name is required');
+        ctx.badRequest("Resource name is required");
         return;
       }
       const saved = await getAvailabilityService().saveResource({
@@ -77,7 +73,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         to: ctx.query.to,
         resourceDocumentId: ctx.query.resourceDocumentId,
         resourceSlug: ctx.query.resourceSlug,
-        status: (ctx.query.status as BookingStatus | undefined) ?? '',
+        status: (ctx.query.status as BookingStatus | undefined) ?? "",
         preferredLanguage: ctx.query.preferredLanguage,
         search: ctx.query.search,
         source: ctx.query.source,
@@ -105,7 +101,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
         ctx.body = { data: result };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : 'Invalid booking payload');
+        ctx.badRequest(err instanceof Error ? err.message : "Invalid booking payload");
       }
     },
 
@@ -113,7 +109,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const documentId = ctx.params.documentId;
         if (!documentId) {
-          ctx.badRequest('documentId parameter is required');
+          ctx.badRequest("documentId parameter is required");
           return;
         }
         const body = (ctx.request.body ?? {}) as {
@@ -122,20 +118,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           internalNotes?: string;
         };
         if (!body.status) {
-          ctx.badRequest('status is required');
+          ctx.badRequest("status is required");
           return;
         }
-        const updated = await getReservationService().updateBookingStatus(
-          documentId,
-          body.status,
-          {
-            assignedHost: body.assignedHost,
-            internalNotes: body.internalNotes,
-          }
-        );
+        const updated = await getReservationService().updateBookingStatus(documentId, body.status, {
+          assignedHost: body.assignedHost,
+          internalNotes: body.internalNotes,
+        });
         ctx.body = { data: updated };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : 'Status update failed');
+        ctx.badRequest(err instanceof Error ? err.message : "Status update failed");
       }
     },
 
@@ -150,7 +142,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           partySize?: number;
         };
         if (!body.newStartDate) {
-          ctx.badRequest('newStartDate is required');
+          ctx.badRequest("newStartDate is required");
           return;
         }
         const updated = await getReservationService().rescheduleBooking(
@@ -166,7 +158,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: updated };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : 'Reschedule failed');
+        ctx.badRequest(err instanceof Error ? err.message : "Reschedule failed");
       }
     },
 
@@ -175,12 +167,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         from: ctx.query.from,
         to: ctx.query.to,
         resourceDocumentId: ctx.query.resourceDocumentId,
-        status: (ctx.query.status as BookingStatus | undefined) ?? '',
+        status: (ctx.query.status as BookingStatus | undefined) ?? "",
         search: ctx.query.search,
       });
-      ctx.set('Content-Type', 'text/csv; charset=utf-8');
-      ctx.set('Content-Disposition', 'attachment; filename="bookings.csv"');
-      ctx.set('X-Content-Type-Options', 'nosniff');
+      ctx.set("Content-Type", "text/csv; charset=utf-8");
+      ctx.set("Content-Disposition", 'attachment; filename="bookings.csv"');
+      ctx.set("X-Content-Type-Options", "nosniff");
       ctx.body = csv;
     },
 
@@ -189,11 +181,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         from: ctx.query.from,
         to: ctx.query.to,
         resourceDocumentId: ctx.query.resourceDocumentId,
-        status: (ctx.query.status as BookingStatus | undefined) ?? '',
+        status: (ctx.query.status as BookingStatus | undefined) ?? "",
       });
-      ctx.set('Content-Type', 'text/calendar; charset=utf-8');
-      ctx.set('Content-Disposition', 'attachment; filename="bookings.ics"');
-      ctx.set('X-Content-Type-Options', 'nosniff');
+      ctx.set("Content-Type", "text/calendar; charset=utf-8");
+      ctx.set("Content-Disposition", 'attachment; filename="bookings.ics"');
+      ctx.set("X-Content-Type-Options", "nosniff");
       ctx.body = ics;
     },
   };
