@@ -88,6 +88,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
+    "strapi-plugin-form-builder-cms": "1.1.0-rc.1",
     "styled-components": "6.3.11",
     "typescript": "5.9.3",
     "vitest": "4.1.0"
@@ -112,9 +113,6 @@
       "optional": true
     },
     "@vicacha-devs/strapi-plugin-certificates": {
-      "optional": true
-    },
-    "strapi-plugin-form-builder-cms": {
       "optional": true
     }
   },
