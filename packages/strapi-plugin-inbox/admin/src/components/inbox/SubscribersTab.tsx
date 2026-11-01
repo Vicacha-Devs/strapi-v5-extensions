@@ -17,13 +17,11 @@ import {
   Tr,
   Typography,
 } from "@strapi/design-system";
+import { LOCALE_OPTIONS } from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 
 import { PLUGIN_ID, type SubscriberRecord } from "../../../../shared";
-import {
-  LOCALE_OPTIONS,
-  TOPIC_OPTIONS,
-} from "../settings/LocalizationRoutingTab";
+import { TOPIC_OPTIONS } from "../settings/LocalizationRoutingTab";
 
 const cardBorderStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.2)",

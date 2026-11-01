@@ -10,24 +10,13 @@ import {
   Tabs,
   Typography,
 } from "@strapi/design-system";
+import {
+  LOCALE_OPTIONS,
+  mergeSelectOptions,
+} from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 
 import type { InboxSettings } from "../../../../shared";
-
-export const LOCALE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "es", label: "es — Español (Spanish)" },
-  { value: "en", label: "en — English" },
-  { value: "ar", label: "ar — العربية (Arabic)" },
-  { value: "tr", label: "tr — Türkçe (Turkish)" },
-  { value: "fr", label: "fr — Français (French)" },
-  { value: "de", label: "de — Deutsch (German)" },
-  { value: "pt", label: "pt — Português (Portuguese)" },
-  { value: "it", label: "it — Italiano (Italian)" },
-  { value: "ru", label: "ru — Русский (Russian)" },
-  { value: "id", label: "id — Bahasa Indonesia" },
-  { value: "ur", label: "ur — اردو (Urdu)" },
-  { value: "zh", label: "zh — 中文 (Chinese)" },
-];
 
 export const DEPARTMENT_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "general", label: "general — General Inquiries & Info" },
@@ -104,24 +93,6 @@ export const TOPIC_OPTIONS: Array<{ value: string; label: string }> = [
     label: "new_muslims — New Muslim Circle & Mentorship",
   },
 ];
-
-export function mergeSelectOptions(
-  predefined: Array<{ value: string; label: string }>,
-  currentValues: string[] = []
-): Array<{ value: string; label: string }> {
-  const known = new Set(predefined.map((opt) => opt.value));
-  const extras = currentValues
-    .filter((val) => val && !known.has(val))
-    .map((val) => ({ value: val, label: val }));
-  return [...predefined, ...extras];
-}
-
-export function parseCsvList(raw: string): string[] {
-  return raw
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
 
 export interface LocalizationRoutingTabProps {
   t: (id: string, defaultMessage: string) => string;

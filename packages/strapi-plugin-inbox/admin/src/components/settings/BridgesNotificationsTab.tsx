@@ -8,10 +8,10 @@ import {
   TextInput,
   Typography,
 } from "@strapi/design-system";
+import { parseCsvList } from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 
 import type { InboxSettings } from "../../../../shared";
-import { parseCsvList } from "./LocalizationRoutingTab";
 
 const subCardStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.2)",
