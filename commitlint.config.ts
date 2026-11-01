@@ -27,7 +27,7 @@ const types = [
 
 const parserPreset: LintOptions = {
   parserOpts: {
-    headerPattern: /^(?:\[([A-z]*-\d+)]\s)?(\w*)(?:\((.*)\))?!?:\s(.*)$/,
+    headerPattern: /^(?:\[([A-Za-z]+-\d+)]\s)?(\w*)(?:\((.*)\))?!?:\s(.*)$/,
     headerCorrespondence: ["ticket", "type", "scope", "subject"],
   },
 };
