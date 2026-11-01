@@ -8,10 +8,16 @@ import {
 } from "../../../shared";
 
 function getPluginConfig(strapi: Core.Strapi): Partial<MediaFeedsSettings> {
-  return strapi.config.get<Partial<MediaFeedsSettings>>(`plugin::${PLUGIN_ID}`) ?? {};
+  return (
+    strapi.config.get<Partial<MediaFeedsSettings>>(`plugin::${PLUGIN_ID}`) ?? {}
+  );
 }
 
-function pickNonEmptyArray<T>(primary?: T[], secondary?: T[], fallback: T[] = []): T[] {
+function pickNonEmptyArray<T>(
+  primary?: T[],
+  secondary?: T[],
+  fallback: T[] = []
+): T[] {
   if (primary && primary.length > 0) return primary;
   if (secondary && secondary.length > 0) return secondary;
   return fallback;
@@ -77,7 +83,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return this.mergeSettings(fileConfig, stored);
   },
 
-  async updateSettings(partial: Partial<MediaFeedsSettings>): Promise<MediaFeedsSettings> {
+  async updateSettings(
+    partial: Partial<MediaFeedsSettings>
+  ): Promise<MediaFeedsSettings> {
     const current = await this.getSettings();
     const updated = this.mergeSettings(current, partial);
     await this.getStore().set({

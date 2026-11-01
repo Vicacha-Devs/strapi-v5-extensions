@@ -45,7 +45,8 @@ const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
 };
 
 const INLINE_CODE_STYLE: React.CSSProperties = {
-  fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+  fontFamily:
+    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   fontSize: "0.88em",
   padding: "2px 6px",
   borderRadius: 4,
@@ -63,11 +64,14 @@ function buildLegacyPrimaryStream(
     scheduleLabel: liveStream.scheduleLabel || "Every Friday at 12:15 PM",
     eventSlug: "jumuah-khutbah",
     provider: liveStream.provider || "youtube",
-    watchUrl: liveStream.watchUrl || "https://www.youtube.com/watch?v=M7lc1UVf-VE",
+    watchUrl:
+      liveStream.watchUrl || "https://www.youtube.com/watch?v=M7lc1UVf-VE",
   };
 }
 
-function buildInitialStreams(data: MediaFeedsSettings): LiveBroadcastChannelItem[] {
+function buildInitialStreams(
+  data: MediaFeedsSettings
+): LiveBroadcastChannelItem[] {
   if (Array.isArray(data.liveStreams) && data.liveStreams.length > 0) {
     return data.liveStreams;
   }
@@ -85,7 +89,9 @@ export const SettingsPage: React.FC = () => {
   const { get, put } = useFetchClient();
   const { toggleNotification } = useNotification();
 
-  const [settings, setSettings] = useState<MediaFeedsSettings>(DEFAULT_MEDIA_FEEDS_SETTINGS);
+  const [settings, setSettings] = useState<MediaFeedsSettings>(
+    DEFAULT_MEDIA_FEEDS_SETTINGS
+  );
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -139,9 +145,14 @@ export const SettingsPage: React.FC = () => {
     updateLiveStreams([...current, nextItem]);
   };
 
-  const handlePatchStream = (id: string, patch: Partial<LiveBroadcastChannelItem>) => {
+  const handlePatchStream = (
+    id: string,
+    patch: Partial<LiveBroadcastChannelItem>
+  ) => {
     const current = settings.liveStreams ?? buildInitialStreams(settings);
-    updateLiveStreams(current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+    updateLiveStreams(
+      current.map((item) => (item.id === id ? { ...item, ...patch } : item))
+    );
   };
 
   const handleRemoveStream = (id: string) => {
@@ -158,10 +169,14 @@ export const SettingsPage: React.FC = () => {
 
       const payload: Partial<MediaFeedsSettings> = {
         ...settings,
-        supportedLocales: supportedLocales.length > 0 ? supportedLocales : ["es", "en"],
+        supportedLocales:
+          supportedLocales.length > 0 ? supportedLocales : ["es", "en"],
       };
 
-      const res = await put<{ data: MediaFeedsSettings }>(`/${PLUGIN_ID}/settings`, payload);
+      const res = await put<{ data: MediaFeedsSettings }>(
+        `/${PLUGIN_ID}/settings`,
+        payload
+      );
       if (res.data?.data) {
         setSettings({
           ...res.data.data,
@@ -222,8 +237,8 @@ export const SettingsPage: React.FC = () => {
               {t("settings.tab.podcast", "Podcast RSS 2.0 Feed")}
             </Tabs.Trigger>
             <Tabs.Trigger value="livestream">
-              {t("settings.tab.livestreams", "Live Broadcasts & Event Streams")} (
-              {liveStreams.length})
+              {t("settings.tab.livestreams", "Live Broadcasts & Event Streams")}{" "}
+              ({liveStreams.length})
             </Tabs.Trigger>
           </Tabs.List>
 
@@ -257,9 +272,14 @@ export const SettingsPage: React.FC = () => {
                     "Primary language code (e.g., es) used when no ?locale= query is supplied."
                   )}
                 >
-                  <Field.Label>{t("field.default_locale", "Default Locale")}</Field.Label>
+                  <Field.Label>
+                    {t("field.default_locale", "Default Locale")}
+                  </Field.Label>
                   <SingleSelect
-                    placeholder={t("placeholder.e_g_es", "Select default locale")}
+                    placeholder={t(
+                      "placeholder.e_g_es",
+                      "Select default locale"
+                    )}
                     value={settings.defaultLocale || "es"}
                     onChange={(val: string | number) =>
                       setSettings((prev) => ({
@@ -283,7 +303,9 @@ export const SettingsPage: React.FC = () => {
                     "Active locales exposed in localized News, Blog, and Podcast RSS feeds."
                   )}
                 >
-                  <Field.Label>{t("field.supported_locales", "Supported Locales")}</Field.Label>
+                  <Field.Label>
+                    {t("field.supported_locales", "Supported Locales")}
+                  </Field.Label>
                   <MultiSelect
                     name="supportedLocales"
                     withTags
@@ -291,11 +313,14 @@ export const SettingsPage: React.FC = () => {
                       "placeholder.select_supported_locales",
                       "Select supported locales..."
                     )}
-                    value={settings.supportedLocales || ["es", "en", "ar", "tr"]}
+                    value={
+                      settings.supportedLocales || ["es", "en", "ar", "tr"]
+                    }
                     onChange={(nextValues: string[]) =>
                       setSettings((prev) => ({
                         ...prev,
-                        supportedLocales: nextValues.length > 0 ? nextValues : ["es"],
+                        supportedLocales:
+                          nextValues.length > 0 ? nextValues : ["es"],
                       }))
                     }
                     onClear={() =>
@@ -334,7 +359,11 @@ export const SettingsPage: React.FC = () => {
                     "settings.ui.automatically_fall_back_to_default_locale_when_a",
                     "Automatically fall back to Default Locale when a translation is not yet published"
                   )}{" "}
-                  (<code style={INLINE_CODE_STYLE}>{settings.defaultLocale || "es"}</code>)
+                  (
+                  <code style={INLINE_CODE_STYLE}>
+                    {settings.defaultLocale || "es"}
+                  </code>
+                  )
                 </Checkbox>
               </Box>
             </Box>
@@ -369,7 +398,9 @@ export const SettingsPage: React.FC = () => {
                     "Channel <title> published in GET /api/media-feeds/podcasts/rss.xml."
                   )}
                 >
-                  <Field.Label>{t("field.podcast_feed_title", "Podcast Feed Title")}</Field.Label>
+                  <Field.Label>
+                    {t("field.podcast_feed_title", "Podcast Feed Title")}
+                  </Field.Label>
                   <TextInput
                     placeholder={t(
                       "placeholder.e_g_mezquita_central_de_bogot_jumu_ah_lectures",
@@ -421,7 +452,9 @@ export const SettingsPage: React.FC = () => {
                     "Populates the <itunes:category> RSS tag."
                   )}
                 >
-                  <Field.Label>{t("field.primary_category", "Primary Category")}</Field.Label>
+                  <Field.Label>
+                    {t("field.primary_category", "Primary Category")}
+                  </Field.Label>
                   <TextInput
                     placeholder={t(
                       "placeholder.e_g_religion_spirituality",
@@ -446,7 +479,9 @@ export const SettingsPage: React.FC = () => {
                     "Summary shown in Apple Podcasts, Spotify, and RSS reader directories."
                   )}
                 >
-                  <Field.Label>{t("field.podcast_description", "Podcast Description")}</Field.Label>
+                  <Field.Label>
+                    {t("field.podcast_description", "Podcast Description")}
+                  </Field.Label>
                   <Textarea
                     placeholder={t(
                       "placeholder.enter_a_description_for_apple_podcasts_and_spoti",

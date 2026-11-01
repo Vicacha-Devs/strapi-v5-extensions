@@ -1,4 +1,7 @@
-import type { AlternateDateValue, CalendarSystemConfig } from "./calendarSystems";
+import type {
+  AlternateDateValue,
+  CalendarSystemConfig,
+} from "./calendarSystems";
 
 export type MediaFeedType =
   | "video"

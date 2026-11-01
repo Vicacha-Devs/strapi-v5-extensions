@@ -20,7 +20,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   getSettingsService() {
     return strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings(): Promise<MediaFeedsSettings>;
-      updateSettings(partial: Partial<MediaFeedsSettings>): Promise<MediaFeedsSettings>;
+      updateSettings(
+        partial: Partial<MediaFeedsSettings>
+      ): Promise<MediaFeedsSettings>;
     };
   },
 
@@ -34,7 +36,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   getSyncService() {
     return strapi.plugin(PLUGIN_ID).service("syncService") as {
-      enrichUrl(url: string, fetchOembed?: boolean): Promise<EnrichedMediaMetadata>;
+      enrichUrl(
+        url: string,
+        fetchOembed?: boolean
+      ): Promise<EnrichedMediaMetadata>;
       syncConfiguredYouTubeSources(sourceId?: string): Promise<{
         syncedCount: number;
         skippedCount: number;
@@ -85,8 +90,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async syncYouTube(ctx: StrapiContext) {
     const sourceId =
-      typeof ctx.request?.body?.sourceId === "string" ? ctx.request.body.sourceId : undefined;
-    const data = await this.getSyncService().syncConfiguredYouTubeSources(sourceId);
+      typeof ctx.request?.body?.sourceId === "string"
+        ? ctx.request.body.sourceId
+        : undefined;
+    const data =
+      await this.getSyncService().syncConfiguredYouTubeSources(sourceId);
     ctx.body = { data };
   },
 });

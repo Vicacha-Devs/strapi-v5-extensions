@@ -1,4 +1,8 @@
-import type { MediaFeedItem, MediaLanguageTrack, PodcastFeedConfig } from "./types";
+import type {
+  MediaFeedItem,
+  MediaLanguageTrack,
+  PodcastFeedConfig,
+} from "./types";
 import { formatSecondsToDuration, resolveEpisodeForLocale } from "./urlParser";
 
 export function escapeXml(value?: string | null): string {
@@ -32,7 +36,10 @@ function toAbsoluteUrl(rawUrl: string, siteUrl: string): string {
   return `${siteUrl}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
 }
 
-function resolveEnclosureMimeType(audioMimeType: string | undefined, enclosureUrl: string): string {
+function resolveEnclosureMimeType(
+  audioMimeType: string | undefined,
+  enclosureUrl: string
+): string {
   if (audioMimeType) return audioMimeType;
   if (enclosureUrl.endsWith(".m4a")) return "audio/x-m4a";
   if (enclosureUrl.endsWith(".mp4")) return "video/mp4";
@@ -45,7 +52,10 @@ function resolveTranscriptMimeType(absUrl: string): string {
   return "application/pdf";
 }
 
-function renderTranscriptLines(tracks: MediaLanguageTrack[], siteUrl: string): string {
+function renderTranscriptLines(
+  tracks: MediaLanguageTrack[],
+  siteUrl: string
+): string {
   return tracks
     .filter((t) => Boolean(t.transcriptUrl || t.captionsUrl))
     .map((t) => {
@@ -57,14 +67,21 @@ function renderTranscriptLines(tracks: MediaLanguageTrack[], siteUrl: string): s
     .join("\n");
 }
 
-function resolveItemUrl(item: MediaFeedItem, siteUrl: string, activeLocale: string): string {
+function resolveItemUrl(
+  item: MediaFeedItem,
+  siteUrl: string,
+  activeLocale: string
+): string {
   if (item.sourceUrl && /^https?:\/\//i.test(item.sourceUrl)) {
     return item.sourceUrl;
   }
   return `${siteUrl}/${activeLocale}/media#${item.slug}`;
 }
 
-function renderItemImageTag(thumbnailUrl: string | null | undefined, siteUrl: string): string {
+function renderItemImageTag(
+  thumbnailUrl: string | null | undefined,
+  siteUrl: string
+): string {
   if (!thumbnailUrl) return "";
   return `\n      <itunes:image href="${escapeXml(toAbsoluteUrl(thumbnailUrl, siteUrl))}" />`;
 }
@@ -76,11 +93,15 @@ function renderPodcastItemXml(
   activeLocale: string
 ): string {
   const itemUrl = resolveItemUrl(item, siteUrl, activeLocale);
-  const enclosureUrl = item.audioUrl ? toAbsoluteUrl(item.audioUrl, siteUrl) : itemUrl;
+  const enclosureUrl = item.audioUrl
+    ? toAbsoluteUrl(item.audioUrl, siteUrl)
+    : itemUrl;
   const mimeType = resolveEnclosureMimeType(item.audioMimeType, enclosureUrl);
   const byteLength = item.audioByteLength ?? 0;
   const durationFormatted =
-    formatSecondsToDuration(item.durationSeconds) || item.duration || "00:30:00";
+    formatSecondsToDuration(item.durationSeconds) ||
+    item.duration ||
+    "00:30:00";
   const guid = `${item.documentId || item.slug}:${activeLocale}`;
   const transcriptLines = renderTranscriptLines(item.languageTracks, siteUrl);
   const imageTag = renderItemImageTag(item.thumbnailUrl, siteUrl);
@@ -108,8 +129,12 @@ function renderOwnerXml(feed: PodcastFeedConfig): string {
   if (!feed.ownerName && !feed.ownerEmail) return "";
   return [
     "    <itunes:owner>",
-    feed.ownerName ? `      <itunes:name>${escapeXml(feed.ownerName)}</itunes:name>` : "",
-    feed.ownerEmail ? `      <itunes:email>${escapeXml(feed.ownerEmail)}</itunes:email>` : "",
+    feed.ownerName
+      ? `      <itunes:name>${escapeXml(feed.ownerName)}</itunes:name>`
+      : "",
+    feed.ownerEmail
+      ? `      <itunes:email>${escapeXml(feed.ownerEmail)}</itunes:email>`
+      : "",
     "    </itunes:owner>",
   ]
     .filter(Boolean)
@@ -120,13 +145,22 @@ export function generatePodcastRssXml(
   episodes: MediaFeedItem[],
   options: GeneratePodcastRssOptions
 ): string {
-  const { feed, locale, defaultLocale = "es", seriesTitle, seriesDescription } = options;
+  const {
+    feed,
+    locale,
+    defaultLocale = "es",
+    seriesTitle,
+    seriesDescription,
+  } = options;
   const activeLocale = (locale || defaultLocale).trim().toLowerCase();
-  const channelTitle = seriesTitle ? `${feed.title} — ${seriesTitle}` : feed.title;
+  const channelTitle = seriesTitle
+    ? `${feed.title} — ${seriesTitle}`
+    : feed.title;
   const channelDescription = seriesDescription || feed.description;
   const siteUrl = feed.siteUrl.replace(/\/$/, "");
   const selfFeedUrl =
-    feed.feedUrl || `${siteUrl}/api/media-feeds/rss.xml?locale=${encodeURIComponent(activeLocale)}`;
+    feed.feedUrl ||
+    `${siteUrl}/api/media-feeds/rss.xml?locale=${encodeURIComponent(activeLocale)}`;
 
   const itemXmlBlocks = episodes.map((ep) =>
     renderPodcastItemXml(

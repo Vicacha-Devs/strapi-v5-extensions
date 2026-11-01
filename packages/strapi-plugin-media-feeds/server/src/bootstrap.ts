@@ -1,8 +1,14 @@
 import type { Core } from "@strapi/strapi";
 
-import { MEDIA_SERIES_UID, PLUGIN_ID, type MediaFeedsSettings } from "../../shared";
+import {
+  MEDIA_SERIES_UID,
+  PLUGIN_ID,
+  type MediaFeedsSettings,
+} from "../../shared";
 
-type DefaultSeriesEntry = NonNullable<MediaFeedsSettings["defaultSeries"]>[number];
+type DefaultSeriesEntry = NonNullable<
+  MediaFeedsSettings["defaultSeries"]
+>[number];
 
 function buildSeriesData(
   series: DefaultSeriesEntry,
@@ -39,7 +45,9 @@ async function seedDefaultSeriesIfNeeded(
       locale: settings.defaultLocale,
       limit: 100,
     });
-    const existingSlugs = new Set(existing.map((s) => (typeof s.slug === "string" ? s.slug : "")));
+    const existingSlugs = new Set(
+      existing.map((s) => (typeof s.slug === "string" ? s.slug : ""))
+    );
 
     for (const series of defaultSeries) {
       if (!series.slug || !series.title || existingSlugs.has(series.slug)) {

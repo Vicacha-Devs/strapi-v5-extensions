@@ -50,7 +50,11 @@ function readField(
   if (mappedKey && raw[mappedKey] !== undefined && raw[mappedKey] !== null) {
     return raw[mappedKey];
   }
-  if (fallbackKey && raw[fallbackKey] !== undefined && raw[fallbackKey] !== null) {
+  if (
+    fallbackKey &&
+    raw[fallbackKey] !== undefined &&
+    raw[fallbackKey] !== null
+  ) {
     return raw[fallbackKey];
   }
   return undefined;
@@ -106,8 +110,12 @@ function resolveRecordLocale(
   return requestedLocale || defaultLocale;
 }
 
-function resolveSlug(raw: Record<string, unknown>, f: MediaFeedsSourceFieldMap): string {
-  const candidate = readField(raw, f.slug, "slug") ?? raw.documentId ?? raw.id ?? "media-item";
+function resolveSlug(
+  raw: Record<string, unknown>,
+  f: MediaFeedsSourceFieldMap
+): string {
+  const candidate =
+    readField(raw, f.slug, "slug") ?? raw.documentId ?? raw.id ?? "media-item";
   return String(candidate);
 }
 
@@ -126,9 +134,14 @@ function resolveIdentityIds(
   };
 }
 
-function resolvePublishedAt(raw: Record<string, unknown>, f: MediaFeedsSourceFieldMap): string {
+function resolvePublishedAt(
+  raw: Record<string, unknown>,
+  f: MediaFeedsSourceFieldMap
+): string {
   const candidate =
-    readField(raw, f.publishedAt, "publishedAt") ?? raw.createdAt ?? new Date().toISOString();
+    readField(raw, f.publishedAt, "publishedAt") ??
+    raw.createdAt ??
+    new Date().toISOString();
   return String(candidate);
 }
 
@@ -136,7 +149,10 @@ function resolveDurationInfo(
   raw: Record<string, unknown>,
   f: MediaFeedsSourceFieldMap
 ): { duration: string | null; durationSeconds: number | null } {
-  const durationRaw = readField(raw, f.duration, "duration") as string | number | null;
+  const durationRaw = readField(raw, f.duration, "duration") as
+    | string
+    | number
+    | null;
   const durationSeconds = parseDurationToSeconds(durationRaw);
   const trimmed = typeof durationRaw === "string" ? durationRaw.trim() : "";
   const duration = trimmed || formatSecondsToDuration(durationSeconds);
@@ -153,7 +169,10 @@ function resolveTypeLabel(
   if (typeof raw.typeLabel === "string" && raw.typeLabel) {
     return raw.typeLabel;
   }
-  const labels = source?.typeLabels?.[recordLocale] ?? source?.typeLabels?.[defaultLocale] ?? {};
+  const labels =
+    source?.typeLabels?.[recordLocale] ??
+    source?.typeLabels?.[defaultLocale] ??
+    {};
   return labels[type] || type;
 }
 
@@ -179,9 +198,13 @@ function resolveMediaUrls(
     readField(raw, f.audioFile, "audioFile") ?? raw.audioUrl
   );
   const transcriptCandidate =
-    readField(raw, f.transcriptFile, "transcriptFile") ?? raw.transcriptPdf ?? raw.transcriptUrl;
+    readField(raw, f.transcriptFile, "transcriptFile") ??
+    raw.transcriptPdf ??
+    raw.transcriptUrl;
   const transcriptExtracted = extractMediaFieldUrl(transcriptCandidate);
-  const thumbExtracted = extractMediaFieldUrl(readField(raw, f.thumbnail, "thumbnail"));
+  const thumbExtracted = extractMediaFieldUrl(
+    readField(raw, f.thumbnail, "thumbnail")
+  );
   const explicitImageUrl = readStringField(raw, f.imageUrl, "imageUrl");
 
   return {
@@ -189,21 +212,30 @@ function resolveMediaUrls(
     audioMimeType: audioExtracted.mime,
     audioByteLength: audioExtracted.sizeBytes,
     transcriptUrl: transcriptExtracted.url,
-    thumbnailUrl: thumbExtracted.url || explicitImageUrl || parsedProvider.thumbnailUrl,
+    thumbnailUrl:
+      thumbExtracted.url || explicitImageUrl || parsedProvider.thumbnailUrl,
   };
 }
 
-function resolveProviderFields(raw: Record<string, unknown>, f: MediaFeedsSourceFieldMap) {
-  const rawSourceUrl = String(readField(raw, f.sourceUrl, "sourceUrl") ?? raw.href ?? "");
+function resolveProviderFields(
+  raw: Record<string, unknown>,
+  f: MediaFeedsSourceFieldMap
+) {
+  const rawSourceUrl = String(
+    readField(raw, f.sourceUrl, "sourceUrl") ?? raw.href ?? ""
+  );
   const explicitProvider = readStringField(raw, f.provider, "provider");
   const parsedProvider = parseMediaUrl(rawSourceUrl, explicitProvider);
 
   return {
     parsedProvider,
     provider: parsedProvider.provider,
-    externalId: readStringField(raw, f.externalId, "externalId") ?? parsedProvider.externalId,
+    externalId:
+      readStringField(raw, f.externalId, "externalId") ??
+      parsedProvider.externalId,
     sourceUrl: parsedProvider.canonicalUrl || rawSourceUrl,
-    embedUrl: readStringField(raw, f.embedUrl, "embedUrl") ?? parsedProvider.embedUrl,
+    embedUrl:
+      readStringField(raw, f.embedUrl, "embedUrl") ?? parsedProvider.embedUrl,
   };
 }
 
@@ -214,7 +246,12 @@ function computeOptionalSecondaryDates(
   alternateDateFields?: Record<string, string>
 ) {
   if (!settings.secondaryCalendars?.length) return undefined;
-  return computeSecondaryDates(publishedAt, settings.secondaryCalendars, raw, alternateDateFields);
+  return computeSecondaryDates(
+    publishedAt,
+    settings.secondaryCalendars,
+    raw,
+    alternateDateFields
+  );
 }
 
 export function normalizeRawMediaRecord(
@@ -227,13 +264,27 @@ export function normalizeRawMediaRecord(
 ): MediaFeedItem {
   const { source, settings, requestedLocale } = options;
   const f = source?.fields ?? DEFAULT_BUILT_IN_FIELDS;
-  const recordLocale = resolveRecordLocale(raw, requestedLocale, settings.defaultLocale);
+  const recordLocale = resolveRecordLocale(
+    raw,
+    requestedLocale,
+    settings.defaultLocale
+  );
 
   const title = readStringWithDefault(raw, f.title, "title", "Untitled Media");
   const slug = resolveSlug(raw, f);
-  const description = readStringWithDefault(raw, f.description, "description", "");
+  const description = readStringWithDefault(
+    raw,
+    f.description,
+    "description",
+    ""
+  );
   const transcript = readStringField(raw, f.transcript, "transcript");
-  const type = readStringWithDefault(raw, f.type, "type", source?.defaultType ?? "video");
+  const type = readStringWithDefault(
+    raw,
+    f.type,
+    "type",
+    source?.defaultType ?? "video"
+  );
   const providerInfo = resolveProviderFields(raw, f);
   const mediaUrls = resolveMediaUrls(raw, f, providerInfo.parsedProvider);
   const durationInfo = resolveDurationInfo(raw, f);
@@ -248,7 +299,13 @@ export function normalizeRawMediaRecord(
     description,
     transcript,
     type,
-    typeLabel: resolveTypeLabel(raw, type, recordLocale, settings.defaultLocale, source),
+    typeLabel: resolveTypeLabel(
+      raw,
+      type,
+      recordLocale,
+      settings.defaultLocale,
+      source
+    ),
     provider: providerInfo.provider,
     externalId: providerInfo.externalId,
     sourceUrl: providerInfo.sourceUrl,
@@ -259,12 +316,18 @@ export function normalizeRawMediaRecord(
     seriesSlug: readStringField(raw, f.seriesSlug, "seriesSlug"),
     ...durationInfo,
     publishedAt,
-    publishedAtLabel: readStringField(raw, f.publishedAtLabel, "publishedAtLabel"),
+    publishedAtLabel: readStringField(
+      raw,
+      f.publishedAtLabel,
+      "publishedAtLabel"
+    ),
     spokenLanguages: normalizeSpokenLanguages(
       readField(raw, f.spokenLanguages, "spokenLanguages"),
       defaultSpoken
     ),
-    languageTracks: normalizeLanguageTracks(readField(raw, f.languageTracks, "languageTracks")),
+    languageTracks: normalizeLanguageTracks(
+      readField(raw, f.languageTracks, "languageTracks")
+    ),
     chapters: normalizeChapterMarkers(readField(raw, f.chapters, "chapters")),
     featured: Boolean(readField(raw, f.featured, "featured")),
     isLive: Boolean(readField(raw, f.isLive, "isLive")),
@@ -277,5 +340,9 @@ export function normalizeRawMediaRecord(
     customData: extractCustomFields(raw, f.customFields),
   };
 
-  return resolveEpisodeForLocale(baseItem, requestedLocale || recordLocale, settings.defaultLocale);
+  return resolveEpisodeForLocale(
+    baseItem,
+    requestedLocale || recordLocale,
+    settings.defaultLocale
+  );
 }

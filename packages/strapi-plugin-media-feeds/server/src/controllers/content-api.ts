@@ -23,14 +23,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       getEpisodes(options?: QueryMediaFeedOptions): Promise<MediaFeedItem[]>;
       getSeriesList(locale?: string): Promise<MediaSeriesItem[]>;
       getLiveStatus(locale?: string): Promise<LiveBroadcastState>;
-      generateRssFeed(options?: { locale?: string; seriesSlug?: string }): Promise<string>;
+      generateRssFeed(options?: {
+        locale?: string;
+        seriesSlug?: string;
+      }): Promise<string>;
     };
   },
 
   async listEpisodes(ctx: StrapiContext) {
     const q = ctx.query ?? {};
     const limit = q.limit ? Number(q.limit) : undefined;
-    const featured = q.featured === "true" ? true : q.featured === "false" ? false : undefined;
+    const featured =
+      q.featured === "true" ? true : q.featured === "false" ? false : undefined;
 
     const data = await this.getFeedService().getEpisodes({
       locale: q.locale,
