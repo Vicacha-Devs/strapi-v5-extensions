@@ -33,15 +33,15 @@ function sanitizeCategoryKey(raw: string): string {
     .replace(/^_+|_+$/g, "");
 }
 
-export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps> = ({
-  categories,
-  defaultLocale,
-  supportedLocales,
-  onChange,
-}) => {
+export const DonationCategoriesManager: React.FC<
+  DonationCategoriesManagerProps
+> = ({ categories, defaultLocale, supportedLocales, onChange }) => {
   const { formatMessage } = useIntl();
-  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
-    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
+  const t = (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
 
   const [newKey, setNewKey] = useState("");
   const [newPrimaryLabel, setNewPrimaryLabel] = useState("");
@@ -58,17 +58,28 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
     const cleanKey = sanitizeCategoryKey(newKey || newPrimaryLabel);
     if (!cleanKey) {
       setErrorMsg(
-        t("settings.categories.error_key_required", "Please provide a valid Category Key.")
+        t(
+          "settings.categories.error_key_required",
+          "Please provide a valid Category Key."
+        )
       );
       return;
     }
     if (!newPrimaryLabel.trim()) {
-      setErrorMsg(t("settings.categories.error_label_required", "Please provide a display label."));
+      setErrorMsg(
+        t(
+          "settings.categories.error_label_required",
+          "Please provide a display label."
+        )
+      );
       return;
     }
 
     const labels: Record<string, string> = {};
-    const locales = supportedLocales.length > 0 ? supportedLocales : [primaryLoc, secondaryLoc];
+    const locales =
+      supportedLocales.length > 0
+        ? supportedLocales
+        : [primaryLoc, secondaryLoc];
     for (const loc of locales) {
       labels[loc] = newPrimaryLabel.trim();
     }
@@ -77,9 +88,10 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
       labels[secondaryLoc] = newSecondaryLabel.trim();
     }
 
-    const descriptions: Record<string, string> | undefined = newDescription.trim()
-      ? Object.fromEntries(locales.map((loc) => [loc, newDescription.trim()]))
-      : undefined;
+    const descriptions: Record<string, string> | undefined =
+      newDescription.trim()
+        ? Object.fromEntries(locales.map((loc) => [loc, newDescription.trim()]))
+        : undefined;
 
     const nextItem: DonationCategoryConfig = {
       key: cleanKey,
@@ -116,7 +128,11 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
     field: "taxDeductible" | "requiresAssessmentCalculator",
     checked: boolean
   ) => {
-    onChange(categories.map((cat) => (cat.key === key ? { ...cat, [field]: checked } : cat)));
+    onChange(
+      categories.map((cat) =>
+        cat.key === key ? { ...cat, [field]: checked } : cat
+      )
+    );
   };
 
   return (
@@ -127,7 +143,12 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
       shadow="filterShadow"
       style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
     >
-      <Flex justifyContent="space-between" alignItems="flex-start" wrap="wrap" gap={3}>
+      <Flex
+        justifyContent="space-between"
+        alignItems="flex-start"
+        wrap="wrap"
+        gap={3}
+      >
         <Box>
           <Typography variant="beta" as="h2">
             {t("settings.categories.title", "Donation Categories Manager")}
@@ -142,14 +163,24 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
           </Box>
         </Box>
         <Badge>
-          {t("settings.categories.count_badge", "{count} Categories Configured", {
-            count: categories.length,
-          })}
+          {t(
+            "settings.categories.count_badge",
+            "{count} Categories Configured",
+            {
+              count: categories.length,
+            }
+          )}
         </Badge>
       </Flex>
 
       {/* Add / Update Category Form */}
-      <Box marginTop={4} padding={4} background="neutral100" hasRadius style={cardBorderStyle}>
+      <Box
+        marginTop={4}
+        padding={4}
+        background="neutral100"
+        hasRadius
+        style={cardBorderStyle}
+      >
         <Typography variant="delta" as="h3">
           {t("settings.categories.add_heading", "Add or Update Category Key")}
         </Typography>
@@ -169,7 +200,9 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
               "Lowercase identifier stored on campaigns & pledges."
             )}
           >
-            <Field.Label>{t("settings.categories.field_key", "Category Key (slug)")}</Field.Label>
+            <Field.Label>
+              {t("settings.categories.field_key", "Category Key (slug)")}
+            </Field.Label>
             <TextInput
               name="newCategoryKey"
               placeholder={t(
@@ -187,9 +220,13 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
 
           <Field.Root name="newCategoryPrimaryLabel" required>
             <Field.Label>
-              {t("settings.categories.field_primary_label", "Display Label ({locale})", {
-                locale: primaryLoc.toUpperCase(),
-              })}
+              {t(
+                "settings.categories.field_primary_label",
+                "Display Label ({locale})",
+                {
+                  locale: primaryLoc.toUpperCase(),
+                }
+              )}
             </Field.Label>
             <TextInput
               name="newCategoryPrimaryLabel"
@@ -210,9 +247,13 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
 
           <Field.Root name="newCategorySecondaryLabel">
             <Field.Label>
-              {t("settings.categories.field_secondary_label", "Translated Label ({locale})", {
-                locale: secondaryLoc.toUpperCase(),
-              })}
+              {t(
+                "settings.categories.field_secondary_label",
+                "Translated Label ({locale})",
+                {
+                  locale: secondaryLoc.toUpperCase(),
+                }
+              )}
             </Field.Label>
             <TextInput
               name="newCategorySecondaryLabel"
@@ -221,13 +262,18 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
                 "e.g., General Mosque Fund"
               )}
               value={newSecondaryLabel}
-              onChange={(e: { target: { value: string } }) => setNewSecondaryLabel(e.target.value)}
+              onChange={(e: { target: { value: string } }) =>
+                setNewSecondaryLabel(e.target.value)
+              }
             />
           </Field.Root>
 
           <Field.Root name="newCategoryDescription">
             <Field.Label>
-              {t("settings.categories.field_description", "Short Description (optional)")}
+              {t(
+                "settings.categories.field_description",
+                "Short Description (optional)"
+              )}
             </Field.Label>
             <TextInput
               name="newCategoryDescription"
@@ -236,22 +282,37 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
                 "e.g., Supports daily operations and community welfare."
               )}
               value={newDescription}
-              onChange={(e: { target: { value: string } }) => setNewDescription(e.target.value)}
+              onChange={(e: { target: { value: string } }) =>
+                setNewDescription(e.target.value)
+              }
             />
           </Field.Root>
         </Box>
 
-        <Flex gap={4} paddingTop={3} wrap="wrap" alignItems="center" justifyContent="space-between">
+        <Flex
+          gap={4}
+          paddingTop={3}
+          wrap="wrap"
+          alignItems="center"
+          justifyContent="space-between"
+        >
           <Flex gap={4} wrap="wrap">
             <Checkbox
               checked={newTaxDeductible}
-              onCheckedChange={(val: boolean) => setNewTaxDeductible(Boolean(val))}
+              onCheckedChange={(val: boolean) =>
+                setNewTaxDeductible(Boolean(val))
+              }
             >
-              {t("settings.categories.tax_deductible", "Eligible for Tax Certificate")}
+              {t(
+                "settings.categories.tax_deductible",
+                "Eligible for Tax Certificate"
+              )}
             </Checkbox>
             <Checkbox
               checked={newRequiresCalculator}
-              onCheckedChange={(val: boolean) => setNewRequiresCalculator(Boolean(val))}
+              onCheckedChange={(val: boolean) =>
+                setNewRequiresCalculator(Boolean(val))
+              }
             >
               {t(
                 "settings.categories.requires_calculator",
@@ -282,15 +343,24 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
         {categories.length === 0 ? (
           <Box padding={4} background="neutral100" hasRadius>
             <Typography textColor="neutral600">
-              {t("settings.categories.empty", "No categories configured yet. Add one above.")}
+              {t(
+                "settings.categories.empty",
+                "No categories configured yet. Add one above."
+              )}
             </Typography>
           </Box>
         ) : (
           categories.map((cat) => {
             const labelPrimary =
-              cat.labels?.[primaryLoc] || cat.labels?.en || cat.labels?.es || cat.key;
+              cat.labels?.[primaryLoc] ||
+              cat.labels?.en ||
+              cat.labels?.es ||
+              cat.key;
             const descPrimary =
-              cat.descriptions?.[primaryLoc] || cat.descriptions?.en || cat.descriptions?.es || "";
+              cat.descriptions?.[primaryLoc] ||
+              cat.descriptions?.en ||
+              cat.descriptions?.es ||
+              "";
 
             return (
               <Box
@@ -300,21 +370,40 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
                 hasRadius
                 style={cardBorderStyle}
               >
-                <Flex justifyContent="space-between" alignItems="flex-start" wrap="wrap" gap={3}>
-                  <Flex direction="column" alignItems="flex-start" gap={1} style={{ flex: 1 }}>
+                <Flex
+                  justifyContent="space-between"
+                  alignItems="flex-start"
+                  wrap="wrap"
+                  gap={3}
+                >
+                  <Flex
+                    direction="column"
+                    alignItems="flex-start"
+                    gap={1}
+                    style={{ flex: 1 }}
+                  >
                     <Flex gap={2} alignItems="center" wrap="wrap">
                       <Typography fontWeight="bold" textColor="neutral800">
                         {labelPrimary}
                       </Typography>
                       <Badge>{cat.key}</Badge>
                       {cat.taxDeductible && (
-                        <Badge backgroundColor="success100" textColor="success700">
+                        <Badge
+                          backgroundColor="success100"
+                          textColor="success700"
+                        >
                           {t("settings.categories.badge_tax", "Tax Deductible")}
                         </Badge>
                       )}
                       {cat.requiresAssessmentCalculator && (
-                        <Badge backgroundColor="primary100" textColor="primary700">
-                          {t("settings.categories.badge_calc", "Assessment Calculator")}
+                        <Badge
+                          backgroundColor="primary100"
+                          textColor="primary700"
+                        >
+                          {t(
+                            "settings.categories.badge_calc",
+                            "Assessment Calculator"
+                          )}
                         </Badge>
                       )}
                     </Flex>
@@ -327,15 +416,26 @@ export const DonationCategoriesManager: React.FC<DonationCategoriesManagerProps>
                       <Checkbox
                         checked={Boolean(cat.taxDeductible)}
                         onCheckedChange={(val: boolean) =>
-                          handleToggleFlag(cat.key, "taxDeductible", Boolean(val))
+                          handleToggleFlag(
+                            cat.key,
+                            "taxDeductible",
+                            Boolean(val)
+                          )
                         }
                       >
-                        {t("settings.categories.tax_deductible", "Eligible for Tax Certificate")}
+                        {t(
+                          "settings.categories.tax_deductible",
+                          "Eligible for Tax Certificate"
+                        )}
                       </Checkbox>
                       <Checkbox
                         checked={Boolean(cat.requiresAssessmentCalculator)}
                         onCheckedChange={(val: boolean) =>
-                          handleToggleFlag(cat.key, "requiresAssessmentCalculator", Boolean(val))
+                          handleToggleFlag(
+                            cat.key,
+                            "requiresAssessmentCalculator",
+                            Boolean(val)
+                          )
                         }
                       >
                         {t(

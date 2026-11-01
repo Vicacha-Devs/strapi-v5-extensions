@@ -5,13 +5,31 @@ import {
   CurrencySelectField,
 } from "./components/CurrencyCountryInput";
 import { PluginIcon } from "./components/PluginIcon";
-import { countryCustomField, currencyCustomField } from "./fields/currencyCountryFields";
+import {
+  countryCustomField,
+  currencyCustomField,
+} from "./fields/currencyCountryFields";
 import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
 import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
 
-export { CurrencySelectField, CurrencyCustomFieldInput, CountryCustomFieldInput };
+export {
+  CurrencySelectField,
+  CurrencyCustomFieldInput,
+  CountryCustomFieldInput,
+};
 
-export const ALL_TRANSLATION_LOCALES = ["en", "es", "ar", "tr", "fr", "de", "pt", "id", "ms", "ur"];
+export const ALL_TRANSLATION_LOCALES = [
+  "en",
+  "es",
+  "ar",
+  "tr",
+  "fr",
+  "de",
+  "pt",
+  "id",
+  "ms",
+  "ur",
+];
 
 interface StrapiAdminApp {
   customFields?: {
@@ -78,18 +96,25 @@ export default {
   bootstrap() {},
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
-    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    const allLocales = Array.from(
+      new Set([...locales, "en", "es", "ar", "tr"])
+    );
     return Promise.all(
       allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(
+            `./translations/${locale}.json`
+          );
           const prefixed: Record<string, string> = {
             ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en),
-            ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en),
+            ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ??
+              CM_PLACEHOLDER_TRANSLATIONS.en),
           };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
-            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`)
+              ? k
+              : `${PLUGIN_ID}.${k}`;
             prefixed[fullKey] = v;
           }
           return { data: prefixed, locale };

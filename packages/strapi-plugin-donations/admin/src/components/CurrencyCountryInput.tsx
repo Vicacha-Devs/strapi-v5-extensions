@@ -32,7 +32,12 @@ export const CurrencySelectField: React.FC<CurrencySelectFieldProps> = ({
   const { locale } = useIntl();
   const normalizedValue = (value || "COP").trim().toUpperCase();
   const options = useMemo(
-    () => getOrderedCurrencyOptions(supportedCurrencies, locale || "en", normalizedValue),
+    () =>
+      getOrderedCurrencyOptions(
+        supportedCurrencies,
+        locale || "en",
+        normalizedValue
+      ),
     [supportedCurrencies, locale, normalizedValue]
   );
 
@@ -59,7 +64,9 @@ export const CurrencySelectField: React.FC<CurrencySelectFieldProps> = ({
 export interface StrapiCustomFieldInputProps {
   name: string;
   value?: unknown;
-  onChange: (event: { target: { name: string; value: string; type: string } }) => void;
+  onChange: (event: {
+    target: { name: string; value: string; type: string };
+  }) => void;
   label?: string;
   intlLabel?: { id: string; defaultMessage: string };
   description?: { id: string; defaultMessage: string };
@@ -69,7 +76,9 @@ export interface StrapiCustomFieldInputProps {
   error?: string;
 }
 
-export const CurrencyCustomFieldInput: React.FC<StrapiCustomFieldInputProps> = ({
+export const CurrencyCustomFieldInput: React.FC<
+  StrapiCustomFieldInputProps
+> = ({
   name,
   value,
   onChange,
@@ -82,17 +91,31 @@ export const CurrencyCustomFieldInput: React.FC<StrapiCustomFieldInputProps> = (
   error,
 }) => {
   const { formatMessage, locale } = useIntl();
-  const effectiveLabel = label || (intlLabel ? formatMessage(intlLabel) : "Currency (ISO 4217)");
-  const effectiveHint = hint || (description ? formatMessage(description) : undefined);
+  const effectiveLabel =
+    label || (intlLabel ? formatMessage(intlLabel) : "Currency (ISO 4217)");
+  const effectiveHint =
+    hint || (description ? formatMessage(description) : undefined);
   const currentCode =
-    typeof value === "string" && value.trim() ? value.trim().toUpperCase() : "COP";
+    typeof value === "string" && value.trim()
+      ? value.trim().toUpperCase()
+      : "COP";
   const options = useMemo(
-    () => getOrderedCurrencyOptions(["COP", "USD", "EUR", "TRY"], locale || "en", currentCode),
+    () =>
+      getOrderedCurrencyOptions(
+        ["COP", "USD", "EUR", "TRY"],
+        locale || "en",
+        currentCode
+      ),
     [locale, currentCode]
   );
 
   return (
-    <Field.Root name={name} required={required} error={error} hint={effectiveHint}>
+    <Field.Root
+      name={name}
+      required={required}
+      error={error}
+      hint={effectiveHint}
+    >
       <Field.Label>{effectiveLabel}</Field.Label>
       <SingleSelect
         name={name}
@@ -134,12 +157,22 @@ export const CountryCustomFieldInput: React.FC<StrapiCustomFieldInputProps> = ({
 }) => {
   const { formatMessage, locale } = useIntl();
   const effectiveLabel =
-    label || (intlLabel ? formatMessage(intlLabel) : "Country / Region (ISO 3166-1)");
-  const effectiveHint = hint || (description ? formatMessage(description) : undefined);
-  const currentCode = typeof value === "string" && value.trim() ? value.trim().toUpperCase() : "CO";
+    label ||
+    (intlLabel ? formatMessage(intlLabel) : "Country / Region (ISO 3166-1)");
+  const effectiveHint =
+    hint || (description ? formatMessage(description) : undefined);
+  const currentCode =
+    typeof value === "string" && value.trim()
+      ? value.trim().toUpperCase()
+      : "CO";
 
   return (
-    <Field.Root name={name} required={required} error={error} hint={effectiveHint}>
+    <Field.Root
+      name={name}
+      required={required}
+      error={error}
+      hint={effectiveHint}
+    >
       <Field.Label>{effectiveLabel}</Field.Label>
       <SingleSelect
         name={name}

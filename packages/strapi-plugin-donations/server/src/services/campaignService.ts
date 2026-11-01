@@ -26,7 +26,10 @@ import type settingsServiceFactory from "./settings";
 
 function buildPopulateFields(settings: DonationsSettings): string[] {
   const populate = ["localizations"];
-  if (settings.campaignMapping?.enabled && settings.campaignMapping.fields?.coverUrl) {
+  if (
+    settings.campaignMapping?.enabled &&
+    settings.campaignMapping.fields?.coverUrl
+  ) {
     populate.push(settings.campaignMapping.fields.coverUrl);
   }
   return populate;
@@ -36,9 +39,13 @@ function buildLocaleSearchOrder(
   requestedLocale: string,
   settings: DonationsSettings
 ): Array<string | undefined> {
-  const supported = Array.isArray(settings.supportedLocales) ? settings.supportedLocales : [];
+  const supported = Array.isArray(settings.supportedLocales)
+    ? settings.supportedLocales
+    : [];
   const unique = Array.from(
-    new Set([requestedLocale, settings.defaultLocale, ...supported].filter(Boolean))
+    new Set(
+      [requestedLocale, settings.defaultLocale, ...supported].filter(Boolean)
+    )
   );
   return [...unique, undefined];
 }
@@ -71,9 +78,12 @@ function matchesCampaignFilters(
   }
 ): boolean {
   if (params.onlyActive !== false && !item.isActive) return false;
-  if (params.campaignKind && item.campaignKind !== params.campaignKind) return false;
-  if (params.categoryKey && item.categoryKey !== params.categoryKey) return false;
-  if (params.invoiceStatus && item.invoiceStatus !== params.invoiceStatus) return false;
+  if (params.campaignKind && item.campaignKind !== params.campaignKind)
+    return false;
+  if (params.categoryKey && item.categoryKey !== params.categoryKey)
+    return false;
+  if (params.invoiceStatus && item.invoiceStatus !== params.invoiceStatus)
+    return false;
   return true;
 }
 
@@ -104,7 +114,10 @@ function buildCreateCampaignData(
 
   const slug = strVal(input.slug, slugifyTitle(title)).trim();
   const campaignKind = resolveCampaignKind(input.campaignKind);
-  const currency = strVal(input.currency, strVal(settings.baseCurrency, "COP")).toUpperCase();
+  const currency = strVal(
+    input.currency,
+    strVal(settings.baseCurrency, "COP")
+  ).toUpperCase();
   const goalAmount = Math.max(0, numVal(input.goalAmount, 0));
   const raisedAmount = Math.max(0, numVal(input.raisedAmount, 0));
   const dueDate = strOrNull(input.dueDate);
@@ -123,14 +136,24 @@ function buildCreateCampaignData(
     ? (input.evidences as Array<Record<string, unknown>>)
     : [];
   const evidences = rawEvidences.map((ev, idx) =>
-    normalizeEvidenceItem(ev, idx, currency, settings.secondaryCalendars, locale)
+    normalizeEvidenceItem(
+      ev,
+      idx,
+      currency,
+      settings.secondaryCalendars,
+      locale
+    )
   );
-  const defaultSuggested = settings.defaultSuggestedAmounts?.[currency] || [20000, 50000, 100000];
+  const defaultSuggested = settings.defaultSuggestedAmounts?.[currency] || [
+    20000, 50000, 100000,
+  ];
 
   const data: Record<string, unknown> = {
     [mapField("title")]: title,
     [mapField("slug")]: slug,
-    [mapField("description")]: normalizeRichTextValue(strVal(input.description, title)),
+    [mapField("description")]: normalizeRichTextValue(
+      strVal(input.description, title)
+    ),
     [mapField("body")]: normalizeRichTextValue(strVal(input.body)),
     [mapField("campaignKind")]: campaignKind,
     [mapField("categoryKey")]: strVal(input.categoryKey, "general_fund"),
@@ -146,12 +169,14 @@ function buildCreateCampaignData(
     [mapField("billingPeriod")]: strOrNull(input.billingPeriod),
     [mapField("invoiceReference")]: strOrNull(input.invoiceReference),
     [mapField("invoiceProvider")]: strOrNull(input.invoiceProvider),
-    [mapField("invoiceStatus")]: rawStatus === "paid" ? "paid" : progress.invoiceStatus,
+    [mapField("invoiceStatus")]:
+      rawStatus === "paid" ? "paid" : progress.invoiceStatus,
     [mapField("suggestedAmounts")]: Array.isArray(input.suggestedAmounts)
       ? input.suggestedAmounts
       : defaultSuggested,
     [mapField("allowCustomAmount")]: input.allowCustomAmount !== false,
-    [mapField("allowFullBalancePayoff")]: input.allowFullBalancePayoff !== false,
+    [mapField("allowFullBalancePayoff")]:
+      input.allowFullBalancePayoff !== false,
     [mapField("coverUrl")]: strOrNull(input.coverUrl),
     [mapField("invoiceDocumentUrl")]: strOrNull(input.invoiceDocumentUrl),
     [mapField("paymentGatewayUrl")]: strOrNull(input.paymentGatewayUrl),
@@ -199,21 +224,24 @@ function applyOptionalPatchFields(
     }
   }
   if (patch.description !== undefined) {
-    updateData[mapField("description")] = normalizeRichTextValue(patch.description);
+    updateData[mapField("description")] = normalizeRichTextValue(
+      patch.description
+    );
   }
   if (patch.body !== undefined) {
     updateData[mapField("body")] = normalizeRichTextValue(patch.body);
   }
   if (Array.isArray(patch.evidences)) {
-    updateData[mapField("evidences")] = (patch.evidences as Array<Record<string, unknown>>).map(
-      (ev, idx) =>
-        normalizeEvidenceItem(
-          ev,
-          idx,
-          current.currency,
-          settings.secondaryCalendars,
-          current.locale
-        )
+    updateData[mapField("evidences")] = (
+      patch.evidences as Array<Record<string, unknown>>
+    ).map((ev, idx) =>
+      normalizeEvidenceItem(
+        ev,
+        idx,
+        current.currency,
+        settings.secondaryCalendars,
+        current.locale
+      )
     );
   }
 }
@@ -225,14 +253,23 @@ function buildUpdateCampaignData(
 ): Record<string, unknown> {
   const mapField = createFieldMapper(settings.campaignMapping);
   const goalAmount =
-    patch.goalAmount !== undefined ? Math.max(0, numVal(patch.goalAmount, 0)) : current.goalAmount;
+    patch.goalAmount !== undefined
+      ? Math.max(0, numVal(patch.goalAmount, 0))
+      : current.goalAmount;
   const raisedAmount =
     patch.raisedAmount !== undefined
       ? Math.max(0, numVal(patch.raisedAmount, 0))
       : current.raisedAmount;
-  const campaignKind = strVal(patch.campaignKind, current.campaignKind) as CampaignKind;
-  const dueDate = patch.dueDate !== undefined ? strOrNull(patch.dueDate) : current.dueDate;
-  const rawStatus = strVal(patch.invoiceStatus, current.invoiceStatus) as InvoiceStatus;
+  const campaignKind = strVal(
+    patch.campaignKind,
+    current.campaignKind
+  ) as CampaignKind;
+  const dueDate =
+    patch.dueDate !== undefined ? strOrNull(patch.dueDate) : current.dueDate;
+  const rawStatus = strVal(
+    patch.invoiceStatus,
+    current.invoiceStatus
+  ) as InvoiceStatus;
 
   const progress = computeCampaignProgress({
     goalAmount,
@@ -246,7 +283,8 @@ function buildUpdateCampaignData(
   const updateData: Record<string, unknown> = {
     [mapField("goalAmount")]: goalAmount,
     [mapField("raisedAmount")]: raisedAmount,
-    [mapField("invoiceStatus")]: patch.invoiceStatus === "paid" ? "paid" : nextStatus,
+    [mapField("invoiceStatus")]:
+      patch.invoiceStatus === "paid" ? "paid" : nextStatus,
   };
 
   applyOptionalPatchFields(updateData, patch, current, settings, mapField);
@@ -283,7 +321,9 @@ function buildAddEvidenceUpdateData(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<typeof settingsServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<
+      typeof settingsServiceFactory
+    >;
 
   return {
     getTargetUid(settings: DonationsSettings): string {
@@ -300,7 +340,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       secondaryCalendars: string[],
       locale: string
     ): CampaignEvidenceItem {
-      return normalizeEvidenceItem(rawEv, index, defaultCurrency, secondaryCalendars, locale);
+      return normalizeEvidenceItem(
+        rawEv,
+        index,
+        defaultCurrency,
+        secondaryCalendars,
+        locale
+      );
     },
 
     normalizeCampaign(
@@ -322,7 +368,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     ): Promise<DonationCampaignItem[]> {
       const settings = await getSettingsSvc().getSettings();
       const uid = this.getTargetUid(settings);
-      const requestedLocale = strVal(params.locale, strVal(settings.defaultLocale, "en"));
+      const requestedLocale = strVal(
+        params.locale,
+        strVal(settings.defaultLocale, "en")
+      );
       const populate = buildPopulateFields(settings);
       const rawItems = await fetchRawCampaignsWithFallback(
         strapi,
@@ -337,11 +386,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         .filter((item) => matchesCampaignFilters(item, params));
     },
 
-    async findCampaignBySlug(slug: string, locale?: string): Promise<DonationCampaignItem | null> {
+    async findCampaignBySlug(
+      slug: string,
+      locale?: string
+    ): Promise<DonationCampaignItem | null> {
       if (!slug) return null;
       const all = await this.findCampaigns({ locale, onlyActive: false });
       return (
-        all.find((c) => c.slug === slug || c.documentId === slug || String(c.id) === slug) || null
+        all.find(
+          (c) =>
+            c.slug === slug || c.documentId === slug || String(c.id) === slug
+        ) || null
       );
     },
 
@@ -360,10 +415,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (bySlug[0]) return bySlug[0];
 
       const allDocs = await queryRecords(strapi, uid, {});
-      return allDocs.find((d) => matchesIdentifier(d, identifier, slugField)) || null;
+      return (
+        allDocs.find((d) => matchesIdentifier(d, identifier, slugField)) || null
+      );
     },
 
-    async createCampaign(input: Record<string, unknown>): Promise<DonationCampaignItem> {
+    async createCampaign(
+      input: Record<string, unknown>
+    ): Promise<DonationCampaignItem> {
       const settings = await getSettingsSvc().getSettings();
       const uid = this.getTargetUid(settings);
       const { data, locale } = buildCreateCampaignData(input, settings);
@@ -377,12 +436,20 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     ): Promise<DonationCampaignItem | null> {
       const settings = await getSettingsSvc().getSettings();
       const uid = this.getTargetUid(settings);
-      const existing = await this.findRawCampaignByIdentifier(identifier, settings);
+      const existing = await this.findRawCampaignByIdentifier(
+        identifier,
+        settings
+      );
       if (!existing) return null;
 
       const current = this.normalizeCampaign(existing, settings);
       const updateData = buildUpdateCampaignData(current, patch, settings);
-      const updated = await persistUpdatedRecord(strapi, uid, existing, updateData);
+      const updated = await persistUpdatedRecord(
+        strapi,
+        uid,
+        existing,
+        updateData
+      );
       return this.normalizeCampaign(updated, settings);
     },
 
@@ -394,7 +461,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const uid = this.getTargetUid(settings);
       const mapField = createFieldMapper(settings.campaignMapping);
 
-      const existing = await this.findRawCampaignByIdentifier(identifier, settings);
+      const existing = await this.findRawCampaignByIdentifier(
+        identifier,
+        settings
+      );
       if (!existing) return null;
 
       const current = this.normalizeCampaign(existing, settings);
@@ -411,8 +481,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         current.locale
       );
 
-      const updateData = buildAddEvidenceUpdateData(current, newEvidence, evidenceInput, mapField);
-      const updated = await persistUpdatedRecord(strapi, uid, existing, updateData);
+      const updateData = buildAddEvidenceUpdateData(
+        current,
+        newEvidence,
+        evidenceInput,
+        mapField
+      );
+      const updated = await persistUpdatedRecord(
+        strapi,
+        uid,
+        existing,
+        updateData
+      );
       return this.normalizeCampaign(updated, settings);
     },
 
@@ -424,16 +504,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const uid = this.getTargetUid(settings);
       const mapField = createFieldMapper(settings.campaignMapping);
 
-      const existing = await this.findRawCampaignByIdentifier(identifier, settings);
+      const existing = await this.findRawCampaignByIdentifier(
+        identifier,
+        settings
+      );
       if (!existing) return null;
 
       const current = this.normalizeCampaign(existing, settings);
-      const updatedEvidences = current.evidences.filter((ev) => ev.id !== evidenceId);
+      const updatedEvidences = current.evidences.filter(
+        (ev) => ev.id !== evidenceId
+      );
       const updateData: Record<string, unknown> = {
         [mapField("evidences")]: updatedEvidences,
       };
 
-      const updated = await persistUpdatedRecord(strapi, uid, existing, updateData);
+      const updated = await persistUpdatedRecord(
+        strapi,
+        uid,
+        existing,
+        updateData
+      );
       return this.normalizeCampaign(updated, settings);
     },
 
@@ -448,11 +538,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const uid = this.getTargetUid(settings);
       const mapField = createFieldMapper(settings.campaignMapping);
 
-      const existing = await this.findRawCampaignByIdentifier(campaignSlug, settings);
+      const existing = await this.findRawCampaignByIdentifier(
+        campaignSlug,
+        settings
+      );
       if (!existing) return null;
 
       const normalizedBefore = this.normalizeCampaign(existing, settings);
-      const newRaised = Number((normalizedBefore.raisedAmount + contributionAmount).toFixed(2));
+      const newRaised = Number(
+        (normalizedBefore.raisedAmount + contributionAmount).toFixed(2)
+      );
       const newDonorCount = normalizedBefore.donorCount + 1;
       const updatedProgress = computeCampaignProgress({
         goalAmount: normalizedBefore.goalAmount,
@@ -468,7 +563,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         [mapField("invoiceStatus")]: updatedProgress.invoiceStatus,
       };
 
-      const updated = await persistUpdatedRecord(strapi, uid, existing, updateData);
+      const updated = await persistUpdatedRecord(
+        strapi,
+        uid,
+        existing,
+        updateData
+      );
       return this.normalizeCampaign(updated, settings);
     },
   };

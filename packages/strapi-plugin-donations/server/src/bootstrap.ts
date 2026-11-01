@@ -21,17 +21,22 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   if (
     settings?.richTextCustomField &&
     (!Array.isArray(settings.availableRichTextCustomFields) ||
-      settings.availableRichTextCustomFields.includes(settings.richTextCustomField))
+      settings.availableRichTextCustomFields.includes(
+        settings.richTextCustomField
+      ))
   ) {
     const uid = `plugin::${PLUGIN_ID}.campaign`;
-    const ct = (strapi.contentTypes as Record<string, MutableContentType> | undefined)?.[uid];
+    const ct = (
+      strapi.contentTypes as Record<string, MutableContentType> | undefined
+    )?.[uid];
     if (ct) {
       for (const field of ["body"]) {
         if (ct.attributes?.[field]) {
           ct.attributes[field].customField = settings.richTextCustomField;
         }
         if (ct.__schema__?.attributes?.[field]) {
-          ct.__schema__.attributes[field].customField = settings.richTextCustomField;
+          ct.__schema__.attributes[field].customField =
+            settings.richTextCustomField;
         }
       }
     }

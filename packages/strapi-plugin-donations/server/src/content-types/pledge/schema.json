@@ -80,7 +80,14 @@
     },
     "paymentChannel": {
       "type": "enumeration",
-      "enum": ["bank_transfer", "digital_wallet", "card_gateway", "qr_code", "cash", "other"],
+      "enum": [
+        "bank_transfer",
+        "digital_wallet",
+        "card_gateway",
+        "qr_code",
+        "cash",
+        "other"
+      ],
       "default": "bank_transfer",
       "required": true
     },

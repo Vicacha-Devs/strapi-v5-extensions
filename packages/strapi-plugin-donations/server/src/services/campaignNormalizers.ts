@@ -31,7 +31,10 @@ export function resolveDocIdentifiers(raw: Record<string, unknown>): {
 } {
   const rawId = raw.id;
   const rawDocId = raw.documentId;
-  const id = typeof rawId === "string" || typeof rawId === "number" ? rawId : strVal(rawDocId);
+  const id =
+    typeof rawId === "string" || typeof rawId === "number"
+      ? rawId
+      : strVal(rawDocId);
   const documentId = strVal(rawDocId, strVal(rawId));
   return { id, documentId };
 }
@@ -104,11 +107,19 @@ export function normalizeEvidenceItem(
   secondaryCalendars: string[],
   locale: string
 ): CampaignEvidenceItem {
-  const rawType = strVal(rawEv.evidenceType, "paid_receipt") as CampaignEvidenceType;
-  const evidenceType: CampaignEvidenceType = VALID_EVIDENCE_TYPES.includes(rawType)
+  const rawType = strVal(
+    rawEv.evidenceType,
+    "paid_receipt"
+  ) as CampaignEvidenceType;
+  const evidenceType: CampaignEvidenceType = VALID_EVIDENCE_TYPES.includes(
+    rawType
+  )
     ? rawType
     : "paid_receipt";
-  const fallbackDate = strVal(rawEv.createdAt, new Date().toISOString().slice(0, 10));
+  const fallbackDate = strVal(
+    rawEv.createdAt,
+    new Date().toISOString().slice(0, 10)
+  );
   const date = strVal(rawEv.date, fallbackDate);
   const rawBody = strVal(rawEv.body, strVal(rawEv.description));
   const rawDesc = strVal(rawEv.description, strVal(rawEv.body));
@@ -136,12 +147,17 @@ function resolveSuggestedAmounts(
   settings: DonationsSettings
 ): number[] {
   if (Array.isArray(rawSuggested) && rawSuggested.length > 0) {
-    return rawSuggested.map((n) => Number(n)).filter((n) => Number.isFinite(n) && n > 0);
+    return rawSuggested
+      .map((n) => Number(n))
+      .filter((n) => Number.isFinite(n) && n > 0);
   }
   return settings.defaultSuggestedAmounts?.[currency] || [20000, 50000, 100000];
 }
 
-function resolveAvailableLocales(locale: string, rawLocalizations: unknown): string[] {
+function resolveAvailableLocales(
+  locale: string,
+  rawLocalizations: unknown
+): string[] {
   const localizations = Array.isArray(rawLocalizations) ? rawLocalizations : [];
   const extracted = localizations
     .map((l) => strVal((l as Record<string, unknown>)?.locale))
@@ -149,14 +165,18 @@ function resolveAvailableLocales(locale: string, rawLocalizations: unknown): str
   return Array.from(new Set([locale, ...extracted]));
 }
 
-function parseRawEvidencesList(rawEvidences: unknown): Array<Record<string, unknown>> {
+function parseRawEvidencesList(
+  rawEvidences: unknown
+): Array<Record<string, unknown>> {
   if (Array.isArray(rawEvidences)) {
     return rawEvidences as Array<Record<string, unknown>>;
   }
   if (typeof rawEvidences === "string" && rawEvidences.trim().startsWith("[")) {
     try {
       const parsed = JSON.parse(rawEvidences);
-      return Array.isArray(parsed) ? (parsed as Array<Record<string, unknown>>) : [];
+      return Array.isArray(parsed)
+        ? (parsed as Array<Record<string, unknown>>)
+        : [];
     } catch {
       return [];
     }
@@ -170,10 +190,16 @@ export function normalizeCampaignRecord(
   requestedLocale?: string
 ): DonationCampaignItem {
   const get = createFieldGetter(raw, settings.campaignMapping);
-  const currency = strVal(get("currency"), strVal(settings.baseCurrency, "COP")).toUpperCase();
+  const currency = strVal(
+    get("currency"),
+    strVal(settings.baseCurrency, "COP")
+  ).toUpperCase();
   const goalAmount = numVal(get("goalAmount"), 0);
   const raisedAmount = numVal(get("raisedAmount"), 0);
-  const campaignKind = strVal(get("campaignKind"), "major_campaign") as CampaignKind;
+  const campaignKind = strVal(
+    get("campaignKind"),
+    "major_campaign"
+  ) as CampaignKind;
   const dueDate = strOrNull(get("dueDate"));
   const rawStatus = strVal(get("invoiceStatus"), "open") as InvoiceStatus;
 
@@ -186,11 +212,23 @@ export function normalizeCampaignRecord(
   });
   const isPaid = rawStatus === "paid";
   const finalStatus: InvoiceStatus = isPaid ? "paid" : progress.invoiceStatus;
-  const locale = strVal(raw.locale, strVal(requestedLocale, strVal(settings.defaultLocale, "en")));
-  const refDate = strVal(dueDate, strVal(get("startDate"), strVal(raw.createdAt)));
+  const locale = strVal(
+    raw.locale,
+    strVal(requestedLocale, strVal(settings.defaultLocale, "en"))
+  );
+  const refDate = strVal(
+    dueDate,
+    strVal(get("startDate"), strVal(raw.createdAt))
+  );
 
   const evidences = parseRawEvidencesList(get("evidences", [])).map((ev, idx) =>
-    normalizeEvidenceItem(ev, idx, currency, settings.secondaryCalendars, locale)
+    normalizeEvidenceItem(
+      ev,
+      idx,
+      currency,
+      settings.secondaryCalendars,
+      locale
+    )
   );
   const accountedAmount = Number(
     evidences.reduce((sum, ev) => sum + numVal(ev.amountSpent, 0), 0).toFixed(2)
@@ -221,7 +259,11 @@ export function normalizeCampaignRecord(
     invoiceReference: strOrNull(get("invoiceReference")),
     invoiceProvider: strOrNull(get("invoiceProvider")),
     invoiceStatus: finalStatus,
-    suggestedAmounts: resolveSuggestedAmounts(get("suggestedAmounts"), currency, settings),
+    suggestedAmounts: resolveSuggestedAmounts(
+      get("suggestedAmounts"),
+      currency,
+      settings
+    ),
     allowCustomAmount: get("allowCustomAmount", true) !== false,
     allowFullBalancePayoff: get("allowFullBalancePayoff", true) !== false,
     coverUrl: extractMediaUrl(get("coverUrl")),
@@ -233,7 +275,11 @@ export function normalizeCampaignRecord(
     accountedAmount,
     locale,
     availableLocales: resolveAvailableLocales(locale, raw.localizations),
-    secondaryDates: computeSecondaryDates(refDate, settings.secondaryCalendars, locale),
+    secondaryDates: computeSecondaryDates(
+      refDate,
+      settings.secondaryCalendars,
+      locale
+    ),
   };
 }
 
@@ -246,7 +292,10 @@ export async function queryRecords(
     const docs = await strapi.documents(uid).findMany(queryOpts);
     return Array.isArray(docs) ? docs : [];
   } catch {
-    const entries = await strapi.entityService?.findMany(uid, queryOpts as Record<string, unknown>);
+    const entries = await strapi.entityService?.findMany(
+      uid,
+      queryOpts as Record<string, unknown>
+    );
     if (Array.isArray(entries)) return entries;
     return entries ? [entries] : [];
   }
@@ -267,7 +316,9 @@ export async function persistCreatedRecord(
     return created || data;
   } catch {
     const created = await strapi.entityService?.create(uid, {
-      data: locale ? { ...data, locale, publishedAt: new Date().toISOString() } : data,
+      data: locale
+        ? { ...data, locale, publishedAt: new Date().toISOString() }
+        : data,
     });
     return created || data;
   }
@@ -289,12 +340,16 @@ export async function persistUpdatedRecord(
       return updated || { ...existing, ...updateData };
     }
     const id = existing.id as string | number;
-    const updated = await strapi.entityService?.update(uid, id, { data: updateData });
+    const updated = await strapi.entityService?.update(uid, id, {
+      data: updateData,
+    });
     return updated || { ...existing, ...updateData };
   } catch {
     try {
       const id = existing.id as string | number;
-      const updated = await strapi.entityService?.update(uid, id, { data: updateData });
+      const updated = await strapi.entityService?.update(uid, id, {
+        data: updateData,
+      });
       return updated || { ...existing, ...updateData };
     } catch {
       return { ...existing, ...updateData };

@@ -27,7 +27,9 @@ export interface ContentApiControllerContext {
   notFound: (message: string) => unknown;
 }
 
-function extractBody(ctx: ContentApiControllerContext): Record<string, unknown> {
+function extractBody(
+  ctx: ContentApiControllerContext
+): Record<string, unknown> {
   const rawBody = ctx.request?.body;
   if (rawBody?.data && typeof rawBody.data === "object") {
     return rawBody.data;
@@ -37,11 +39,17 @@ function extractBody(ctx: ContentApiControllerContext): Record<string, unknown> 
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<typeof settingsServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<
+      typeof settingsServiceFactory
+    >;
   const getCampaignSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("campaign") as ReturnType<typeof campaignServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("campaign") as ReturnType<
+      typeof campaignServiceFactory
+    >;
   const getPledgeSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("pledge") as ReturnType<typeof pledgeServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("pledge") as ReturnType<
+      typeof pledgeServiceFactory
+    >;
 
   return {
     async listCampaigns(ctx: ContentApiControllerContext) {
@@ -50,7 +58,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         locale: locale ? String(locale) : undefined,
         campaignKind: kind ? (String(kind) as CampaignKind) : undefined,
         categoryKey: category ? String(category) : undefined,
-        invoiceStatus: invoiceStatus ? (String(invoiceStatus) as InvoiceStatus) : undefined,
+        invoiceStatus: invoiceStatus
+          ? (String(invoiceStatus) as InvoiceStatus)
+          : undefined,
         onlyActive: true,
       });
       ctx.body = { data };
@@ -61,7 +71,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const data = await getCampaignSvc().findCampaigns({
         locale: locale ? String(locale) : undefined,
         campaignKind: "utility_invoice",
-        invoiceStatus: invoiceStatus ? (String(invoiceStatus) as InvoiceStatus) : undefined,
+        invoiceStatus: invoiceStatus
+          ? (String(invoiceStatus) as InvoiceStatus)
+          : undefined,
         onlyActive: true,
       });
       ctx.body = { data };
@@ -101,7 +113,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const result = await getPledgeSvc().calculateAssessment(body);
         ctx.body = { data: result };
       } catch (err: unknown) {
-        ctx.badRequest((err as Error)?.message || "Unable to evaluate assessment calculation");
+        ctx.badRequest(
+          (err as Error)?.message || "Unable to evaluate assessment calculation"
+        );
       }
     },
 
@@ -115,7 +129,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
-        ctx.badRequest((err as Error)?.message || "Unable to submit donation pledge");
+        ctx.badRequest(
+          (err as Error)?.message || "Unable to submit donation pledge"
+        );
       }
     },
 
@@ -123,7 +139,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const payload = ctx.request?.body || {};
         const rawBody =
-          typeof ctx.request?.rawBody === "string" ? ctx.request.rawBody : JSON.stringify(payload);
+          typeof ctx.request?.rawBody === "string"
+            ? ctx.request.rawBody
+            : JSON.stringify(payload);
         const signatureHeader =
           ctx.request?.headers?.["x-webhook-signature"] ||
           ctx.request?.headers?.["x-signature"] ||
@@ -131,7 +149,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
         const result = await getPledgeSvc().handleGatewayWebhook({
           rawBody,
-          signatureHeader: signatureHeader ? String(signatureHeader) : undefined,
+          signatureHeader: signatureHeader
+            ? String(signatureHeader)
+            : undefined,
           payload,
         });
         ctx.body = { data: result };

@@ -59,8 +59,14 @@ const RichTextPluginSelector: React.FC<{
   setSettings: (next: DonationsSettings) => void;
   t: TranslateFn;
 }> = ({ settings, setSettings, t }) => {
-  const showTiptap = isPluginAvailable(settings, "plugin::tiptap-editor.RichText");
-  const showCkeditor = isPluginAvailable(settings, "plugin::ckeditor5.CKEditor");
+  const showTiptap = isPluginAvailable(
+    settings,
+    "plugin::tiptap-editor.RichText"
+  );
+  const showCkeditor = isPluginAvailable(
+    settings,
+    "plugin::ckeditor5.CKEditor"
+  );
 
   return (
     <Field.Root
@@ -85,12 +91,16 @@ const RichTextPluginSelector: React.FC<{
         onChange={(val: string | number) =>
           setSettings({
             ...settings,
-            richTextCustomField: String(val) === "__default__" ? "" : String(val),
+            richTextCustomField:
+              String(val) === "__default__" ? "" : String(val),
           })
         }
       >
         <SingleSelectOption value="__default__">
-          {t("settings.richtext.default_option", "Default Strapi Rich Text (Standard Markdown)")}
+          {t(
+            "settings.richtext.default_option",
+            "Default Strapi Rich Text (Standard Markdown)"
+          )}
         </SingleSelectOption>
         {showTiptap && (
           <SingleSelectOption value="plugin::tiptap-editor.RichText">
@@ -102,7 +112,10 @@ const RichTextPluginSelector: React.FC<{
         )}
         {showCkeditor && (
           <SingleSelectOption value="plugin::ckeditor5.CKEditor">
-            {t("settings.richtext.ckeditor_option", "CKEditor 5 (plugin::ckeditor5.CKEditor)")}
+            {t(
+              "settings.richtext.ckeditor_option",
+              "CKEditor 5 (plugin::ckeditor5.CKEditor)"
+            )}
           </SingleSelectOption>
         )}
       </SingleSelect>
@@ -116,8 +129,17 @@ export const SettingsCurrencyTab: React.FC<{
   setSettings: (next: DonationsSettings) => void;
   t: TranslateFn;
 }> = ({ settings, setSettings, t }) => {
-  const supportedCurrencies = settings.supportedCurrencies || ["COP", "USD", "EUR"];
-  const supportedLocales = settings.supportedLocales || ["es", "en", "ar", "tr"];
+  const supportedCurrencies = settings.supportedCurrencies || [
+    "COP",
+    "USD",
+    "EUR",
+  ];
+  const supportedLocales = settings.supportedLocales || [
+    "es",
+    "en",
+    "ar",
+    "tr",
+  ];
 
   return (
     <Box
@@ -152,9 +174,14 @@ export const SettingsCurrencyTab: React.FC<{
             "Default language for campaign descriptions and donor receipts."
           )}
         >
-          <Field.Label>{t("field.default_locale", "Default Locale")}</Field.Label>
+          <Field.Label>
+            {t("field.default_locale", "Default Locale")}
+          </Field.Label>
           <SingleSelect
-            placeholder={t("placeholder.select_default_locale", "Select default locale")}
+            placeholder={t(
+              "placeholder.select_default_locale",
+              "Select default locale"
+            )}
             value={settings.defaultLocale || "es"}
             onChange={(val: string | number) =>
               setSettings({ ...settings, defaultLocale: String(val) })
@@ -176,11 +203,16 @@ export const SettingsCurrencyTab: React.FC<{
             "ISO language codes enabled for localized donation campaigns."
           )}
         >
-          <Field.Label>{t("field.supported_locales", "Supported Locales")}</Field.Label>
+          <Field.Label>
+            {t("field.supported_locales", "Supported Locales")}
+          </Field.Label>
           <MultiSelect
             name="supportedLocales"
             withTags
-            placeholder={t("placeholder.select_supported_locales", "Select supported locales...")}
+            placeholder={t(
+              "placeholder.select_supported_locales",
+              "Select supported locales..."
+            )}
             value={supportedLocales}
             onChange={(nextValues: string[]) =>
               setSettings({
@@ -216,7 +248,9 @@ export const SettingsCurrencyTab: React.FC<{
           )}
           value={settings.baseCurrency || "COP"}
           supportedCurrencies={settings.supportedCurrencies}
-          onChange={(nextCode) => setSettings({ ...settings, baseCurrency: nextCode })}
+          onChange={(nextCode) =>
+            setSettings({ ...settings, baseCurrency: nextCode })
+          }
         />
 
         <Field.Root
@@ -227,17 +261,24 @@ export const SettingsCurrencyTab: React.FC<{
           )}
         >
           <Field.Label>
-            {t("field.supported_donor_currencies", "Supported Donor Currencies (ISO 4217)")}
+            {t(
+              "field.supported_donor_currencies",
+              "Supported Donor Currencies (ISO 4217)"
+            )}
           </Field.Label>
           <MultiSelect
             name="supportedCurrencies"
             withTags
-            placeholder={t("placeholder.add_currency_iso", "Select ISO 4217 currencies...")}
+            placeholder={t(
+              "placeholder.add_currency_iso",
+              "Select ISO 4217 currencies..."
+            )}
             value={supportedCurrencies}
             onChange={(nextValues: string[]) =>
               setSettings({
                 ...settings,
-                supportedCurrencies: nextValues.length > 0 ? nextValues : ["COP"],
+                supportedCurrencies:
+                  nextValues.length > 0 ? nextValues : ["COP"],
               })
             }
             onClear={() =>
@@ -256,7 +297,11 @@ export const SettingsCurrencyTab: React.FC<{
           <Field.Hint />
         </Field.Root>
 
-        <RichTextPluginSelector settings={settings} setSettings={setSettings} t={t} />
+        <RichTextPluginSelector
+          settings={settings}
+          setSettings={setSettings}
+          t={t}
+        />
       </Box>
     </Box>
   );
@@ -304,7 +349,10 @@ export const SettingsCertificatesTab: React.FC<{
           )}
         >
           <Field.Label>
-            {t("field.tax_certificate_template_slug", "Tax Certificate Template Slug")}
+            {t(
+              "field.tax_certificate_template_slug",
+              "Tax Certificate Template Slug"
+            )}
           </Field.Label>
           <TextInput
             name="taxCertificateTemplateSlug"
@@ -334,9 +382,16 @@ export const SettingsCertificatesTab: React.FC<{
       >
         <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
           <Box>
-            <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              paddingBottom={2}
+            >
               <Typography fontWeight="bold">
-                {t("settings.bridge.card_title", "Certificates Authority Bridge")}
+                {t(
+                  "settings.bridge.card_title",
+                  "Certificates Authority Bridge"
+                )}
               </Typography>
               <Badge>{bridgeBadgeLabel}</Badge>
             </Flex>
@@ -367,9 +422,16 @@ export const SettingsCertificatesTab: React.FC<{
 
         <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
           <Box>
-            <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              paddingBottom={2}
+            >
               <Typography fontWeight="bold">
-                {t("settings.auto_issue.card_title", "Auto-Issue on Pledge Verification")}
+                {t(
+                  "settings.auto_issue.card_title",
+                  "Auto-Issue on Pledge Verification"
+                )}
               </Typography>
               <Badge>{autoBadgeLabel}</Badge>
             </Flex>

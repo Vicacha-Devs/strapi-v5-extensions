@@ -33,7 +33,8 @@ export const countryCustomField = {
   },
   intlDescription: {
     id: `${PLUGIN_ID}.customField.country.description`,
-    defaultMessage: "Select an ISO 3166-1 alpha-2 country code with flag and default currency.",
+    defaultMessage:
+      "Select an ISO 3166-1 alpha-2 country code with flag and default currency.",
   },
   icon: PluginIcon,
   components: {

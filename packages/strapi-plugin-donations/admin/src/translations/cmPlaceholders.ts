@@ -1,6 +1,10 @@
-export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
   en: {
-    "content-manager.content-types.plugin::donations.campaign.title.placeholder": "Enter title...",
+    "content-manager.content-types.plugin::donations.campaign.title.placeholder":
+      "Enter title...",
     "content-manager.content-types.plugin::donations.campaign.slug.placeholder":
       "auto-generated-url-slug",
     "content-manager.content-types.plugin::donations.campaign.description.placeholder":
@@ -25,9 +29,12 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Enter featured...",
     "content-manager.content-types.plugin::donations.campaign.isActive.placeholder":
       "Enter active...",
-    "content-manager.content-types.plugin::donations.campaign.startDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::donations.campaign.endDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::donations.campaign.dueDate.placeholder": "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.startDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.endDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.dueDate.placeholder":
+      "YYYY-MM-DD",
     "content-manager.content-types.plugin::donations.campaign.billingPeriod.placeholder":
       "Enter billing period...",
     "content-manager.content-types.plugin::donations.campaign.invoiceReference.placeholder":
@@ -44,8 +51,10 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Enter allow full remaining balance payoff...",
     "content-manager.content-types.plugin::donations.campaign.ctaLabel.placeholder":
       "Enter call-to-action button label...",
-    "content-manager.content-types.plugin::donations.campaign.ctaHref.placeholder": "https://...",
-    "content-manager.content-types.plugin::donations.campaign.coverUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::donations.campaign.ctaHref.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::donations.campaign.coverUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::donations.campaign.invoiceDocumentUrl.placeholder":
       "https://...",
     "content-manager.content-types.plugin::donations.campaign.paymentGatewayUrl.placeholder":
@@ -94,7 +103,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "https://...",
     "content-manager.content-types.plugin::donations.pledge.donorNotes.placeholder":
       "Enter donor message / intention (niyyah)...",
-    "content-manager.content-types.plugin::donations.pledge.status.placeholder": "Enter status...",
+    "content-manager.content-types.plugin::donations.pledge.status.placeholder":
+      "Enter status...",
     "content-manager.content-types.plugin::donations.pledge.verifiedAt.placeholder":
       "Enter verified date & time...",
     "content-manager.content-types.plugin::donations.pledge.verifiedBy.placeholder":
@@ -133,9 +143,12 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Ingresa destacado...",
     "content-manager.content-types.plugin::donations.campaign.isActive.placeholder":
       "Ingresa activo...",
-    "content-manager.content-types.plugin::donations.campaign.startDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::donations.campaign.endDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::donations.campaign.dueDate.placeholder": "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.startDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.endDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.dueDate.placeholder":
+      "YYYY-MM-DD",
     "content-manager.content-types.plugin::donations.campaign.billingPeriod.placeholder":
       "Ingresa periodo de facturación...",
     "content-manager.content-types.plugin::donations.campaign.invoiceReference.placeholder":
@@ -152,13 +165,16 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Ingresa permitir pago total del saldo restante...",
     "content-manager.content-types.plugin::donations.campaign.ctaLabel.placeholder":
       "Ingresa texto del botón de acción (cta)...",
-    "content-manager.content-types.plugin::donations.campaign.ctaHref.placeholder": "https://...",
-    "content-manager.content-types.plugin::donations.campaign.coverUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::donations.campaign.ctaHref.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::donations.campaign.coverUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::donations.campaign.invoiceDocumentUrl.placeholder":
       "https://...",
     "content-manager.content-types.plugin::donations.campaign.paymentGatewayUrl.placeholder":
       "https://...",
-    "content-manager.content-types.plugin::donations.campaign.icon.placeholder": "Ingresa icono...",
+    "content-manager.content-types.plugin::donations.campaign.icon.placeholder":
+      "Ingresa icono...",
     "content-manager.content-types.plugin::donations.campaign.evidences.placeholder":
       "Ingresa comprobantes y evidencias de ejecución...",
     "content-manager.content-types.plugin::donations.campaign.documentId.placeholder":
@@ -179,7 +195,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Ingresa donación anónima...",
     "content-manager.content-types.plugin::donations.pledge.amount.placeholder":
       "Ingresa monto de la donación...",
-    "content-manager.content-types.plugin::donations.pledge.currency.placeholder": "ej., COP o USD",
+    "content-manager.content-types.plugin::donations.pledge.currency.placeholder":
+      "ej., COP o USD",
     "content-manager.content-types.plugin::donations.pledge.convertedBaseAmount.placeholder":
       "Ingresa monto convertido en moneda base...",
     "content-manager.content-types.plugin::donations.pledge.categoryKey.placeholder":
@@ -214,7 +231,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Ingresa id del documento...",
   },
   ar: {
-    "content-manager.content-types.plugin::donations.campaign.title.placeholder": "أدخل العنوان...",
+    "content-manager.content-types.plugin::donations.campaign.title.placeholder":
+      "أدخل العنوان...",
     "content-manager.content-types.plugin::donations.campaign.slug.placeholder":
       "معرف-الرابط-التلقائي",
     "content-manager.content-types.plugin::donations.campaign.description.placeholder":
@@ -233,13 +251,18 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "مثال: COP أو USD",
     "content-manager.content-types.plugin::donations.campaign.donorCount.placeholder":
       "أدخل إجمالي عدد المتبرعين...",
-    "content-manager.content-types.plugin::donations.campaign.isUrgent.placeholder": "أدخل عاجل...",
+    "content-manager.content-types.plugin::donations.campaign.isUrgent.placeholder":
+      "أدخل عاجل...",
     "content-manager.content-types.plugin::donations.campaign.isFeatured.placeholder":
       "أدخل مميز...",
-    "content-manager.content-types.plugin::donations.campaign.isActive.placeholder": "أدخل نشط...",
-    "content-manager.content-types.plugin::donations.campaign.startDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::donations.campaign.endDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::donations.campaign.dueDate.placeholder": "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.isActive.placeholder":
+      "أدخل نشط...",
+    "content-manager.content-types.plugin::donations.campaign.startDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.endDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.dueDate.placeholder":
+      "YYYY-MM-DD",
     "content-manager.content-types.plugin::donations.campaign.billingPeriod.placeholder":
       "أدخل فترة الفوترة...",
     "content-manager.content-types.plugin::donations.campaign.invoiceReference.placeholder":
@@ -256,13 +279,16 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "أدخل السماح بسداد كامل الرصيد المتبقي...",
     "content-manager.content-types.plugin::donations.campaign.ctaLabel.placeholder":
       "أدخل نص زر الإجراء (CTA)...",
-    "content-manager.content-types.plugin::donations.campaign.ctaHref.placeholder": "https://...",
-    "content-manager.content-types.plugin::donations.campaign.coverUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::donations.campaign.ctaHref.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::donations.campaign.coverUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::donations.campaign.invoiceDocumentUrl.placeholder":
       "https://...",
     "content-manager.content-types.plugin::donations.campaign.paymentGatewayUrl.placeholder":
       "https://...",
-    "content-manager.content-types.plugin::donations.campaign.icon.placeholder": "أدخل الأيقونة...",
+    "content-manager.content-types.plugin::donations.campaign.icon.placeholder":
+      "أدخل الأيقونة...",
     "content-manager.content-types.plugin::donations.campaign.evidences.placeholder":
       "أدخل إيصالات وإثباتات الشفافية...",
     "content-manager.content-types.plugin::donations.campaign.documentId.placeholder":
@@ -305,7 +331,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "https://...",
     "content-manager.content-types.plugin::donations.pledge.donorNotes.placeholder":
       "أدخل ملاحظات أو نية المتبرع...",
-    "content-manager.content-types.plugin::donations.pledge.status.placeholder": "أدخل الحالة...",
+    "content-manager.content-types.plugin::donations.pledge.status.placeholder":
+      "أدخل الحالة...",
     "content-manager.content-types.plugin::donations.pledge.verifiedAt.placeholder":
       "أدخل تاريخ ووقت التحقق...",
     "content-manager.content-types.plugin::donations.pledge.verifiedBy.placeholder":
@@ -318,7 +345,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "أدخل معرف المستند...",
   },
   tr: {
-    "content-manager.content-types.plugin::donations.campaign.title.placeholder": "Başlık girin...",
+    "content-manager.content-types.plugin::donations.campaign.title.placeholder":
+      "Başlık girin...",
     "content-manager.content-types.plugin::donations.campaign.slug.placeholder":
       "otomatik-url-kisa-adi",
     "content-manager.content-types.plugin::donations.campaign.description.placeholder":
@@ -343,9 +371,12 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Öne Çıkan girin...",
     "content-manager.content-types.plugin::donations.campaign.isActive.placeholder":
       "Aktif girin...",
-    "content-manager.content-types.plugin::donations.campaign.startDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::donations.campaign.endDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::donations.campaign.dueDate.placeholder": "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.startDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.endDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::donations.campaign.dueDate.placeholder":
+      "YYYY-MM-DD",
     "content-manager.content-types.plugin::donations.campaign.billingPeriod.placeholder":
       "Fatura Dönemi girin...",
     "content-manager.content-types.plugin::donations.campaign.invoiceReference.placeholder":
@@ -362,13 +393,16 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Kalan Bakiyenin Tamamını Ödemeye İzin Ver girin...",
     "content-manager.content-types.plugin::donations.campaign.ctaLabel.placeholder":
       "Eylem Çağrısı (CTA) Düğme Metni girin...",
-    "content-manager.content-types.plugin::donations.campaign.ctaHref.placeholder": "https://...",
-    "content-manager.content-types.plugin::donations.campaign.coverUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::donations.campaign.ctaHref.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::donations.campaign.coverUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::donations.campaign.invoiceDocumentUrl.placeholder":
       "https://...",
     "content-manager.content-types.plugin::donations.campaign.paymentGatewayUrl.placeholder":
       "https://...",
-    "content-manager.content-types.plugin::donations.campaign.icon.placeholder": "Simge girin...",
+    "content-manager.content-types.plugin::donations.campaign.icon.placeholder":
+      "Simge girin...",
     "content-manager.content-types.plugin::donations.campaign.evidences.placeholder":
       "Şeffaflık Makbuzları ve Kanıtlar girin...",
     "content-manager.content-types.plugin::donations.campaign.documentId.placeholder":
@@ -411,7 +445,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "https://...",
     "content-manager.content-types.plugin::donations.pledge.donorNotes.placeholder":
       "Bağışçı Notu / Niyeti girin...",
-    "content-manager.content-types.plugin::donations.pledge.status.placeholder": "Durum girin...",
+    "content-manager.content-types.plugin::donations.pledge.status.placeholder":
+      "Durum girin...",
     "content-manager.content-types.plugin::donations.pledge.verifiedAt.placeholder":
       "Doğrulanma Tarihi ve Saati girin...",
     "content-manager.content-types.plugin::donations.pledge.verifiedBy.placeholder":
