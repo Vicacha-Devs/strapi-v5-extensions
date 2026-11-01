@@ -3,16 +3,16 @@
   "version": "0.0.1",
   "private": true,
   "description": "Strapi v5 host dashboard app for developing and testing @vicacha-devs/strapi-plugin-calendar, @vicacha-devs/strapi-plugin-events, and other extensions",
-  "author": "Vicacha Devs",
   "license": "MIT",
+  "author": "Vicacha Devs",
   "scripts": {
     "build": "strapi build",
-    "develop": "strapi develop",
+    "clean": "rm -rf dist .strapi build",
     "dev": "strapi develop --watch-admin",
+    "develop": "strapi develop",
     "start": "strapi start",
     "strapi": "strapi",
-    "test:ts": "tsc --noEmit",
-    "clean": "rm -rf dist .strapi build"
+    "test:ts": "tsc --noEmit"
   },
   "dependencies": {
     "@strapi/plugin-cloud": "5.39.0",

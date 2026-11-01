@@ -1,4 +1,10 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const cwd = process.cwd();
@@ -21,14 +27,22 @@ if (existsSync(pkgPath)) {
   };
   const exportsMap = pkg.exports || {};
   for (const [exportKey, target] of Object.entries(exportsMap)) {
-    if (!target || typeof target !== "object" || typeof target.types !== "string") {
+    if (
+      !target ||
+      typeof target !== "object" ||
+      typeof target.types !== "string"
+    ) {
       continue;
     }
     const dtsPath = resolve(cwd, target.types);
     if (!existsSync(dtsPath)) {
       mkdirSync(dirname(dtsPath), { recursive: true });
       if (exportKey === "./shared") {
-        writeFileSync(dtsPath, "export * from '../../shared/index.js';\n", "utf8");
+        writeFileSync(
+          dtsPath,
+          "export * from '../../shared/index.js';\n",
+          "utf8"
+        );
       } else {
         writeFileSync(
           dtsPath,

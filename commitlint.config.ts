@@ -1,4 +1,8 @@
-import type { LintOptions, QualifiedRules, UserConfig } from "@commitlint/types";
+import type {
+  LintOptions,
+  QualifiedRules,
+  UserConfig,
+} from "@commitlint/types";
 import { RuleConfigSeverity } from "@commitlint/types";
 
 declare module "@commitlint/types" {

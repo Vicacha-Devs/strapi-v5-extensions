@@ -14,7 +14,9 @@ const isNoCi = args.includes("--no-ci");
 const PRIORITY_ORDER = ["strapi-plugin-calendar", "strapi-plugin-certificates"];
 
 const allPluginDirs = readdirSync(packagesDir, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && entry.name.startsWith("strapi-plugin-"))
+  .filter(
+    (entry) => entry.isDirectory() && entry.name.startsWith("strapi-plugin-")
+  )
   .map((entry) => entry.name)
   .sort((a, b) => {
     const idxA = PRIORITY_ORDER.indexOf(a);
@@ -29,11 +31,15 @@ const filterArg = args.find((arg) => arg.startsWith("--filter="));
 const targetFilter = filterArg ? filterArg.slice("--filter=".length) : null;
 
 const selectedDirs = targetFilter
-  ? allPluginDirs.filter((dir) => dir === targetFilter || `@vicacha-devs/${dir}` === targetFilter)
+  ? allPluginDirs.filter(
+      (dir) => dir === targetFilter || `@vicacha-devs/${dir}` === targetFilter
+    )
   : allPluginDirs;
 
 if (selectedDirs.length === 0) {
-  console.error(`No matching plugin packages found for filter: ${targetFilter}`);
+  console.error(
+    `No matching plugin packages found for filter: ${targetFilter}`
+  );
   process.exit(1);
 }
 
@@ -104,7 +110,10 @@ for (const dirName of selectedDirs) {
       [
         "@semantic-release/git",
         {
-          assets: [`packages/${dirName}/CHANGELOG.md`, `packages/${dirName}/package.json`],
+          assets: [
+            `packages/${dirName}/CHANGELOG.md`,
+            `packages/${dirName}/package.json`,
+          ],
           message: `chore(release): ${pkg.name}@\${nextRelease.version} [skip ci]\n\n\${nextRelease.notes}`,
         },
       ],
@@ -134,7 +143,15 @@ for (const dirName of selectedDirs) {
       writeFileSync(pkgJsonPath, `${JSON.stringify(pkg, null, 2)}\n`, "utf8");
       execFileSync(
         "pnpm",
-        ["publish", "--filter", pkg.name, "--no-git-checks", "--access", "public", "--provenance"],
+        [
+          "publish",
+          "--filter",
+          pkg.name,
+          "--no-git-checks",
+          "--access",
+          "public",
+          "--provenance",
+        ],
         {
           cwd: rootDir,
           stdio: "inherit",

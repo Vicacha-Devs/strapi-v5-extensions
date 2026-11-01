@@ -1,7 +1,11 @@
 import type { Linter } from "eslint";
 import { defineConfig } from "eslint/config";
 
-import { STRAPI_GLOBAL_IGNORES, STRAPI_SHARED_RULES, strapiBaseConfig } from "./base.ts";
+import {
+  STRAPI_GLOBAL_IGNORES,
+  STRAPI_SHARED_RULES,
+  strapiBaseConfig,
+} from "./base.ts";
 import { strapiAdminConfig } from "./strapi-admin.ts";
 import { strapiServerConfig } from "./strapi-server.ts";
 
