@@ -10,27 +10,16 @@ import {
   TextInput,
   Typography,
 } from "@strapi/design-system";
+import {
+  LOCALE_OPTIONS,
+  mergeSelectOptions,
+} from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 
 import type {
   BroadcastChannel,
   BroadcastSettings,
 } from "../../../shared/types";
-
-export const LOCALE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "es", label: "es — Español (Spanish)" },
-  { value: "en", label: "en — English" },
-  { value: "ar", label: "ar — العربية (Arabic)" },
-  { value: "tr", label: "tr — Türkçe (Turkish)" },
-  { value: "fr", label: "fr — Français (French)" },
-  { value: "de", label: "de — Deutsch (German)" },
-  { value: "pt", label: "pt — Português (Portuguese)" },
-  { value: "it", label: "it — Italiano (Italian)" },
-  { value: "ru", label: "ru — Русский (Russian)" },
-  { value: "id", label: "id — Bahasa Indonesia" },
-  { value: "ur", label: "ur — اردو (Urdu)" },
-  { value: "zh", label: "zh — 中文 (Chinese)" },
-];
 
 export const BROADCAST_TOPIC_OPTIONS: Array<{ value: string; label: string }> =
   [
@@ -78,17 +67,6 @@ export const BROADCAST_CHANNEL_OPTIONS: Array<{
   { value: "telegram", label: "telegram — Telegram Bot & Forum Topics" },
   { value: "whatsapp", label: "whatsapp — WhatsApp Cloud API / Gateway" },
 ];
-
-export function mergeSelectOptions(
-  predefined: Array<{ value: string; label: string }>,
-  currentValues: string[] = []
-): Array<{ value: string; label: string }> {
-  const known = new Set(predefined.map((opt) => opt.value));
-  const extras = currentValues
-    .filter((val) => val && !known.has(val))
-    .map((val) => ({ value: val, label: val }));
-  return [...predefined, ...extras];
-}
 
 const orgEmailCardBorderStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.22)",

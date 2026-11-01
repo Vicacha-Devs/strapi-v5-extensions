@@ -13,7 +13,7 @@ import {
   type SubscriberRecipient,
 } from "../../../shared";
 
-interface ControllerCtx {
+export interface ControllerCtx {
   params?: Record<string, string>;
   query?: Record<string, string>;
   request: {

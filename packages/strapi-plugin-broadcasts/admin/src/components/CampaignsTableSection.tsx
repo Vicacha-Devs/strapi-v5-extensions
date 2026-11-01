@@ -23,6 +23,26 @@ import type {
 } from "../../../shared/types";
 import type { TranslateFn } from "./DeliveryLedgerSection";
 
+export const RequiredTextField: React.FC<{
+  name: string;
+  label: string;
+  hint: string;
+  placeholder: string;
+  value: string;
+  onChange: (val: string) => void;
+}> = ({ name, label, hint, placeholder, value, onChange }) => (
+  <Field.Root name={name} required hint={hint}>
+    <Field.Label>{label}</Field.Label>
+    <TextInput
+      name={name}
+      placeholder={placeholder}
+      value={value}
+      onChange={(e: { target: { value: string } }) => onChange(e.target.value)}
+    />
+    <Field.Hint />
+  </Field.Root>
+);
+
 export interface EmailTemplateFieldProps {
   t: TranslateFn;
   emailTemplates: EmailDesignerTemplateSummary[];
