@@ -109,12 +109,16 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
 
   const handleSave = async () => {
     if (!term.trim() || !definition.trim()) {
-      onStatusMessage(t("glossary.msg.required", "Term and Definition are required."));
+      onStatusMessage(
+        t("glossary.msg.required", "Term and Definition are required.")
+      );
       return;
     }
     try {
       const audioVal =
-        audioFileId && audioFileId !== "none" ? Number(audioFileId) || audioFileId : null;
+        audioFileId && audioFileId !== "none"
+          ? Number(audioFileId) || audioFileId
+          : null;
       const payload = {
         term: term.trim(),
         category,
@@ -125,7 +129,10 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
         featured: true,
       };
       if (editingDocId) {
-        await put(`/${PLUGIN_ID}/glossary/${encodeURIComponent(editingDocId)}`, payload);
+        await put(
+          `/${PLUGIN_ID}/glossary/${encodeURIComponent(editingDocId)}`,
+          payload
+        );
         onStatusMessage(`Updated glossary term "${term.trim()}".`);
       } else {
         await post(`/${PLUGIN_ID}/glossary`, payload);
@@ -141,7 +148,9 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
   const handleDelete = async (item: GlossaryTermRecord) => {
     if (!item.documentId) return;
     try {
-      await del(`/${PLUGIN_ID}/glossary/${encodeURIComponent(item.documentId)}`);
+      await del(
+        `/${PLUGIN_ID}/glossary/${encodeURIComponent(item.documentId)}`
+      );
       onStatusMessage(`Removed glossary term "${item.term}".`);
       if (editingDocId === item.documentId) resetForm();
       await onReload();
@@ -217,20 +226,28 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
               <TextInput
                 placeholder={t("placeholder.e_g_mihrab", "e.g., Mihrab")}
                 value={term}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTerm(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setTerm(e.target.value)
+                }
               />
               <Field.Hint />
             </Field.Root>
           </Box>
 
           <Box style={{ minWidth: 0 }}>
-            <Field.Root hint={t("glossary.field.category_hint", "Thematic category")}>
+            <Field.Root
+              hint={t("glossary.field.category_hint", "Thematic category")}
+            >
               <Field.Label>{t("page.ui.category", "Category")}</Field.Label>
               <SingleSelect
                 value={category}
-                onChange={(val: string | number) => setCategory(String(val) as GlossaryCategory)}
+                onChange={(val: string | number) =>
+                  setCategory(String(val) as GlossaryCategory)
+                }
               >
-                {(Object.keys(GLOSSARY_CATEGORY_LABELS) as GlossaryCategory[]).map((val) => (
+                {(
+                  Object.keys(GLOSSARY_CATEGORY_LABELS) as GlossaryCategory[]
+                ).map((val) => (
                   <SingleSelectOption key={val} value={val}>
                     {getCategoryLabel(val)}
                   </SingleSelectOption>
@@ -248,7 +265,10 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
               )}
             >
               <Field.Label>
-                {t("field.native_script_arabic", "Arabic / Native Script (Optional)")}
+                {t(
+                  "field.native_script_arabic",
+                  "Arabic / Native Script (Optional)"
+                )}
               </Field.Label>
               <TextInput
                 placeholder={t("placeholder.e_g", "e.g., مِحْرَاب")}
@@ -268,7 +288,9 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
                 "Phonetic Latin transliteration (optional)"
               )}
             >
-              <Field.Label>{t("field.transliteration", "Transliteration (Optional)")}</Field.Label>
+              <Field.Label>
+                {t("field.transliteration", "Transliteration (Optional)")}
+              </Field.Label>
               <TextInput
                 placeholder={t("placeholder.e_g_mi_r_b", "e.g., Miḥrāb")}
                 value={transliteration}
@@ -297,7 +319,9 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
                 "e.g., Semicircular niche in the Qibla wall indicating the direction of Makkah."
               )}
               value={definition}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDefinition(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setDefinition(e.target.value)
+              }
             />
             <Field.Hint />
           </Field.Root>
@@ -307,7 +331,13 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
           <Divider />
         </Box>
 
-        <Flex paddingTop={4} justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+        <Flex
+          paddingTop={4}
+          justifyContent="space-between"
+          alignItems="center"
+          wrap="wrap"
+          gap={3}
+        >
           <Flex gap={3} alignItems="center" wrap="wrap">
             <Button
               variant="secondary"
@@ -317,13 +347,20 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
               {uploading
                 ? t("common.uploading", "Uploading…")
                 : audioFileId !== "none"
-                  ? t("glossary.btn.replace_audio", "Replace Audio (.mp3 / .wav)")
-                  : t("glossary.btn.upload_audio", "+ Upload Audio (.mp3 / .wav)")}
+                  ? t(
+                      "glossary.btn.replace_audio",
+                      "Replace Audio (.mp3 / .wav)"
+                    )
+                  : t(
+                      "glossary.btn.upload_audio",
+                      "+ Upload Audio (.mp3 / .wav)"
+                    )}
             </Button>
             {audioFileId !== "none" && (
               <Flex gap={2} alignItems="center">
                 <Badge active>
-                  {t("common.attached", "Attached")}: {audioFileName || `#${audioFileId}`}
+                  {t("common.attached", "Attached")}:{" "}
+                  {audioFileName || `#${audioFileId}`}
                 </Badge>
                 <Button
                   variant="tertiary"
@@ -338,7 +375,9 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
               </Flex>
             )}
           </Flex>
-          <Button onClick={handleSave}>{t("page.ui.add_term", "Add Term")}</Button>
+          <Button onClick={handleSave}>
+            {t("page.ui.add_term", "Add Term")}
+          </Button>
         </Flex>
       </Box>
 
@@ -346,7 +385,9 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
         <Thead>
           <Tr>
             <Th>
-              <Typography variant="sigma">{t("page.ui.letter", "Letter")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.letter", "Letter")}
+              </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
@@ -354,13 +395,19 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
               </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.category", "Category")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.category", "Category")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.definition", "Definition")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.definition", "Definition")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("common.actions", "Actions")}</Typography>
+              <Typography variant="sigma">
+                {t("common.actions", "Actions")}
+              </Typography>
             </Th>
           </Tr>
         </Thead>
@@ -374,7 +421,8 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
                 <Box paddingTop={2} paddingBottom={2}>
                   <Flex direction="column" alignItems="flex-start" gap={1}>
                     <Typography fontWeight="bold">
-                      {item.term} {item.nativeScript ? `(${item.nativeScript})` : ""}
+                      {item.term}{" "}
+                      {item.nativeScript ? `(${item.nativeScript})` : ""}
                     </Typography>
                     {item.transliteration && (
                       <Typography variant="pi" textColor="neutral600">
@@ -403,7 +451,8 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
                           textDecoration: "underline",
                         }}
                       >
-                        {t("glossary.play_audio", "Play Audio")} ({item.pronunciationAudio.name})
+                        {t("glossary.play_audio", "Play Audio")} (
+                        {item.pronunciationAudio.name})
                       </a>
                     )}
                   </Flex>
@@ -424,7 +473,11 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
                   >
                     {t("common.edit", "Edit")}
                   </Button>
-                  <Button size="S" variant="danger-light" onClick={() => handleDelete(item)}>
+                  <Button
+                    size="S"
+                    variant="danger-light"
+                    onClick={() => handleDelete(item)}
+                  >
                     {t("common.delete", "Delete")}
                   </Button>
                 </Flex>

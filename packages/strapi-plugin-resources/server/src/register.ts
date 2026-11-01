@@ -37,7 +37,9 @@ const register = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const extensions = config.schemaExtensions ?? {};
-  const contentTypes = strapi.contentTypes as Record<string, MutableContentTypeSchema> | undefined;
+  const contentTypes = strapi.contentTypes as
+    | Record<string, MutableContentTypeSchema>
+    | undefined;
 
   for (const [targetKey, extraAttributes] of Object.entries(extensions)) {
     if (!extraAttributes || typeof extraAttributes !== "object") continue;
@@ -47,7 +49,9 @@ const register = ({ strapi }: { strapi: Core.Strapi }) => {
     applyExtensionToSchema(contentTypes?.[resolvedUid], extraAttributes);
   }
 
-  strapi.log.info("[strapi-plugin-resources] Registering Media Library & Digital Catalog plugin");
+  strapi.log.info(
+    "[strapi-plugin-resources] Registering Media Library & Digital Catalog plugin"
+  );
 };
 
 export default register;

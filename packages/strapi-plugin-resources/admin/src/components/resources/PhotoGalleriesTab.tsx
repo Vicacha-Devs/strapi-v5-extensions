@@ -34,8 +34,12 @@ const GALLERY_CATEGORY_LABELS: Record<GalleryAlbumCategory, string> = {
   press: "Press & Media",
 };
 
-function extractDefinedIds(items: Array<{ id?: number | string }> = []): Array<number | string> {
-  return items.map((u) => u.id).filter((id): id is number | string => id !== undefined);
+function extractDefinedIds(
+  items: Array<{ id?: number | string }> = []
+): Array<number | string> {
+  return items
+    .map((u) => u.id)
+    .filter((id): id is number | string => id !== undefined);
 }
 
 export interface PhotoGalleriesTabProps {
@@ -60,15 +64,19 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
   const { t } = useResourcesTranslation();
   const [editingDocId, setEditingDocId] = React.useState<string | null>(null);
   const [title, setTitle] = React.useState("");
-  const [category, setCategory] = React.useState<GalleryAlbumCategory>("architecture");
+  const [category, setCategory] =
+    React.useState<GalleryAlbumCategory>("architecture");
   const [description, setDescription] = React.useState("");
-  const [selectedPhotoIds, setSelectedPhotoIds] = React.useState<Array<number | string>>([]);
+  const [selectedPhotoIds, setSelectedPhotoIds] = React.useState<
+    Array<number | string>
+  >([]);
   const [showLibraryPicker, setShowLibraryPicker] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
 
   const formPhotosInputRef = React.useRef<HTMLInputElement | null>(null);
   const rowPhotosInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [uploadingAlbum, setUploadingAlbum] = React.useState<GalleryAlbumRecord | null>(null);
+  const [uploadingAlbum, setUploadingAlbum] =
+    React.useState<GalleryAlbumRecord | null>(null);
 
   const getCategoryLabel = (cat: GalleryAlbumCategory) =>
     t(`gallery.category.${cat}`, GALLERY_CATEGORY_LABELS[cat] || cat);
@@ -79,7 +87,10 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
   );
 
   const selectedAssets = React.useMemo(
-    () => imageAssets.filter((img) => selectedPhotoIds.some((id) => String(id) === String(img.id))),
+    () =>
+      imageAssets.filter((img) =>
+        selectedPhotoIds.some((id) => String(id) === String(img.id))
+      ),
     [imageAssets, selectedPhotoIds]
   );
 
@@ -101,7 +112,9 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
     );
   };
 
-  const handleUploadForForm = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadForForm = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setUploading(true);
@@ -109,7 +122,9 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
       const uploaded = await uploadFilesToStrapiMediaLibrary(files, post);
       const newIds = extractDefinedIds(uploaded);
       setSelectedPhotoIds((prev) => [...prev, ...newIds]);
-      onStatusMessage(`Uploaded ${newIds.length} photo(s) to Media Library and selected them.`);
+      onStatusMessage(
+        `Uploaded ${newIds.length} photo(s) to Media Library and selected them.`
+      );
       await onReload();
     } catch (err) {
       onStatusMessage(`Photo upload failed: ${(err as Error).message}`);
@@ -119,7 +134,9 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
     }
   };
 
-  const handleUploadForAlbumRow = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadForAlbumRow = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     const album = uploadingAlbum;
     if (!files || !files.length || !album?.documentId) return;
@@ -130,10 +147,13 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
       const existingIds = extractDefinedIds(album.photos);
       const mergedIds = [...existingIds, ...newIds];
 
-      await put(`/${PLUGIN_ID}/galleries/${encodeURIComponent(album.documentId)}`, {
-        photoIds: mergedIds,
-        coverPhotoId: album.coverPhoto?.id ?? mergedIds[0] ?? null,
-      });
+      await put(
+        `/${PLUGIN_ID}/galleries/${encodeURIComponent(album.documentId)}`,
+        {
+          photoIds: mergedIds,
+          coverPhotoId: album.coverPhoto?.id ?? mergedIds[0] ?? null,
+        }
+      );
       onStatusMessage(
         `Added ${newIds.length} photo(s) to "${album.title}" (${mergedIds.length} total).`
       );
@@ -149,7 +169,9 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
 
   const handleSave = async () => {
     if (!title.trim()) {
-      onStatusMessage(t("gallery.msg.title_required", "Please enter an Album Title."));
+      onStatusMessage(
+        t("gallery.msg.title_required", "Please enter an Album Title.")
+      );
       return;
     }
     try {
@@ -162,7 +184,10 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
         featured: true,
       };
       if (editingDocId) {
-        await put(`/${PLUGIN_ID}/galleries/${encodeURIComponent(editingDocId)}`, payload);
+        await put(
+          `/${PLUGIN_ID}/galleries/${encodeURIComponent(editingDocId)}`,
+          payload
+        );
         onStatusMessage(`Updated gallery album "${title.trim()}".`);
       } else {
         await post(`/${PLUGIN_ID}/galleries`, payload);
@@ -178,7 +203,9 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
   const handleDelete = async (album: GalleryAlbumRecord) => {
     if (!album.documentId) return;
     try {
-      await del(`/${PLUGIN_ID}/galleries/${encodeURIComponent(album.documentId)}`);
+      await del(
+        `/${PLUGIN_ID}/galleries/${encodeURIComponent(album.documentId)}`
+      );
       onStatusMessage(`Removed gallery album "${album.title}".`);
       if (editingDocId === album.documentId) resetForm();
       await onReload();
@@ -262,7 +289,9 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
                   "e.g., Mosque Architecture & Calligraphy"
                 )}
                 value={title}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setTitle(e.target.value)
+                }
               />
               <Field.Hint />
             </Field.Root>
@@ -282,7 +311,9 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
                   setCategory(String(val) as GalleryAlbumCategory)
                 }
               >
-                {(Object.keys(GALLERY_CATEGORY_LABELS) as GalleryAlbumCategory[]).map((val) => (
+                {(
+                  Object.keys(GALLERY_CATEGORY_LABELS) as GalleryAlbumCategory[]
+                ).map((val) => (
                   <SingleSelectOption key={val} value={val}>
                     {getCategoryLabel(val)}
                   </SingleSelectOption>
@@ -299,7 +330,9 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
                 "Optional caption shown under the album title"
               )}
             >
-              <Field.Label>{t("field.album_description", "Description (Optional)")}</Field.Label>
+              <Field.Label>
+                {t("field.album_description", "Description (Optional)")}
+              </Field.Label>
               <TextInput
                 placeholder={t(
                   "placeholder.e_g_recorrido_fotogr_fico_por_el_sal_n_de_oraci_",
@@ -327,7 +360,13 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
           <Divider />
         </Box>
 
-        <Flex paddingTop={4} justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+        <Flex
+          paddingTop={4}
+          justifyContent="space-between"
+          alignItems="center"
+          wrap="wrap"
+          gap={3}
+        >
           <Flex gap={3} alignItems="center" wrap="wrap">
             <Button
               variant="secondary"
@@ -336,22 +375,34 @@ export const PhotoGalleriesTab: React.FC<PhotoGalleriesTabProps> = ({
             >
               {uploading
                 ? t("common.uploading", "Uploading…")
-                : t("gallery.btn.upload_photos_computer", "+ Upload Photos from Computer")}
+                : t(
+                    "gallery.btn.upload_photos_computer",
+                    "+ Upload Photos from Computer"
+                  )}
             </Button>
             {imageAssets.length > 0 && (
-              <Button variant="tertiary" onClick={() => setShowLibraryPicker((prev) => !prev)}>
+              <Button
+                variant="tertiary"
+                onClick={() => setShowLibraryPicker((prev) => !prev)}
+              >
                 {showLibraryPicker
-                  ? t("gallery.btn.hide_media_library", "Hide Media Library Picker")
+                  ? t(
+                      "gallery.btn.hide_media_library",
+                      "Hide Media Library Picker"
+                    )
                   : `${t("gallery.btn.choose_media_library", "Choose from Media Library")} (${imageAssets.length})`}
               </Button>
             )}
             {selectedPhotoIds.length > 0 && (
               <Badge active>
-                {selectedPhotoIds.length} {t("page.ui.photos", "Photos").toLowerCase()}
+                {selectedPhotoIds.length}{" "}
+                {t("page.ui.photos", "Photos").toLowerCase()}
               </Badge>
             )}
           </Flex>
-          <Button onClick={handleSave}>{t("page.ui.create_album", "Create Album")}</Button>
+          <Button onClick={handleSave}>
+            {t("page.ui.create_album", "Create Album")}
+          </Button>
         </Flex>
       </Box>
 

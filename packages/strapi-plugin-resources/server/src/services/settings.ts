@@ -18,17 +18,23 @@ function getDefaultSettings(strapi: Core.Strapi): ResourcesPluginSettings {
         ? cfg.supportedLocales
         : [...DEFAULT_RESOURCES_SETTINGS.supportedLocales],
     allowedDownloadExtensions:
-      Array.isArray(cfg.allowedDownloadExtensions) && cfg.allowedDownloadExtensions.length > 0
+      Array.isArray(cfg.allowedDownloadExtensions) &&
+      cfg.allowedDownloadExtensions.length > 0
         ? cfg.allowedDownloadExtensions
         : [...DEFAULT_RESOURCES_SETTINGS.allowedDownloadExtensions],
     allowedDownloadMimeTypes:
-      Array.isArray(cfg.allowedDownloadMimeTypes) && cfg.allowedDownloadMimeTypes.length > 0
+      Array.isArray(cfg.allowedDownloadMimeTypes) &&
+      cfg.allowedDownloadMimeTypes.length > 0
         ? cfg.allowedDownloadMimeTypes
         : [...DEFAULT_RESOURCES_SETTINGS.allowedDownloadMimeTypes],
   };
 }
 
-function pickTrimmedString(val: unknown, fallback: string, maxLen?: number): string {
+function pickTrimmedString(
+  val: unknown,
+  fallback: string,
+  maxLen?: number
+): string {
   if (typeof val !== "string" || !val.trim()) return fallback;
   const trimmed = val.trim();
   return maxLen ? trimmed.slice(0, maxLen) : trimmed;
@@ -43,9 +49,16 @@ function pickBoolean(val: unknown, fallback: boolean): boolean {
   return typeof val === "boolean" ? val : fallback;
 }
 
-function pickBoundedInt(val: unknown, min: number, max: number, fallback: number): number {
+function pickBoundedInt(
+  val: unknown,
+  min: number,
+  max: number,
+  fallback: number
+): number {
   const num = Number(val);
-  return Number.isFinite(num) && num >= min && num <= max ? Math.round(num) : fallback;
+  return Number.isFinite(num) && num >= min && num <= max
+    ? Math.round(num)
+    : fallback;
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
@@ -87,15 +100,28 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const next: ResourcesPluginSettings = {
         ...current,
-        organizationName: pickTrimmedString(input.organizationName, current.organizationName, 140),
-        defaultLocale: pickTrimmedString(input.defaultLocale, current.defaultLocale),
-        supportedLocales: pickStringList(input.supportedLocales, current.supportedLocales),
+        organizationName: pickTrimmedString(
+          input.organizationName,
+          current.organizationName,
+          140
+        ),
+        defaultLocale: pickTrimmedString(
+          input.defaultLocale,
+          current.defaultLocale
+        ),
+        supportedLocales: pickStringList(
+          input.supportedLocales,
+          current.supportedLocales
+        ),
         secondaryCalendar,
         enableCloudinaryOptimization: pickBoolean(
           input.enableCloudinaryOptimization,
           current.enableCloudinaryOptimization
         ),
-        autoSyncMediaFolders: pickBoolean(input.autoSyncMediaFolders, current.autoSyncMediaFolders),
+        autoSyncMediaFolders: pickBoolean(
+          input.autoSyncMediaFolders,
+          current.autoSyncMediaFolders
+        ),
         defaultPublicationsFolderPath: pickTrimmedString(
           input.defaultPublicationsFolderPath,
           current.defaultPublicationsFolderPath,

@@ -1,18 +1,27 @@
 export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
   en: {
-    "content-manager.content-types.plugin::resources.publication.title": "Title",
-    "content-manager.content-types.plugin::resources.publication.slug": "URL Slug",
-    "content-manager.content-types.plugin::resources.publication.summary": "Summary",
-    "content-manager.content-types.plugin::resources.publication.category": "Category",
+    "content-manager.content-types.plugin::resources.publication.title":
+      "Title",
+    "content-manager.content-types.plugin::resources.publication.slug":
+      "URL Slug",
+    "content-manager.content-types.plugin::resources.publication.summary":
+      "Summary",
+    "content-manager.content-types.plugin::resources.publication.category":
+      "Category",
     "content-manager.content-types.plugin::resources.publication.file":
       "Document / Publication File (PDF)",
-    "content-manager.content-types.plugin::resources.publication.coverImage": "Cover Image",
-    "content-manager.content-types.plugin::resources.publication.authorProfile": "Author Profile",
-    "content-manager.content-types.plugin::resources.publication.authorName": "Author Name",
-    "content-manager.content-types.plugin::resources.publication.authorSlug": "Author Slug",
+    "content-manager.content-types.plugin::resources.publication.coverImage":
+      "Cover Image",
+    "content-manager.content-types.plugin::resources.publication.authorProfile":
+      "Author Profile",
+    "content-manager.content-types.plugin::resources.publication.authorName":
+      "Author Name",
+    "content-manager.content-types.plugin::resources.publication.authorSlug":
+      "Author Slug",
     "content-manager.content-types.plugin::resources.publication.isbnOrReference":
       "ISBN or Institutional Reference Code",
-    "content-manager.content-types.plugin::resources.publication.pageCount": "Number of Pages",
+    "content-manager.content-types.plugin::resources.publication.pageCount":
+      "Number of Pages",
     "content-manager.content-types.plugin::resources.publication.languageCode":
       "Publication Language Code",
     "content-manager.content-types.plugin::resources.publication.publishedAtDate":
@@ -23,47 +32,64 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Media Library Folder Path",
     "content-manager.content-types.plugin::resources.publication.externalDownloadUrl":
       "External Download URL",
-    "content-manager.content-types.plugin::resources.publication.downloadCount": "Total Downloads",
-    "content-manager.content-types.plugin::resources.publication.featured": "Featured",
+    "content-manager.content-types.plugin::resources.publication.downloadCount":
+      "Total Downloads",
+    "content-manager.content-types.plugin::resources.publication.featured":
+      "Featured",
     "content-manager.content-types.plugin::resources.publication.allowPublicDownload":
       "Allow Public Download",
-    "content-manager.content-types.plugin::resources.gallery-album.title": "Title",
-    "content-manager.content-types.plugin::resources.gallery-album.slug": "URL Slug",
-    "content-manager.content-types.plugin::resources.gallery-album.category": "Category",
-    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto": "Cover Photo",
-    "content-manager.content-types.plugin::resources.gallery-album.photos": "Photos",
+    "content-manager.content-types.plugin::resources.gallery-album.title":
+      "Title",
+    "content-manager.content-types.plugin::resources.gallery-album.slug":
+      "URL Slug",
+    "content-manager.content-types.plugin::resources.gallery-album.category":
+      "Category",
+    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto":
+      "Cover Photo",
+    "content-manager.content-types.plugin::resources.gallery-album.photos":
+      "Photos",
     "content-manager.content-types.plugin::resources.gallery-album.mediaFolderId":
       "Media Library Folder ID",
     "content-manager.content-types.plugin::resources.gallery-album.mediaFolderPath":
       "Media Library Folder Path",
-    "content-manager.content-types.plugin::resources.gallery-album.eventDate": "Event / Album Date",
+    "content-manager.content-types.plugin::resources.gallery-album.eventDate":
+      "Event / Album Date",
     "content-manager.content-types.plugin::resources.gallery-album.secondaryDateOverride":
       "Secondary Date Override",
     "content-manager.content-types.plugin::resources.gallery-album.photographerCredit":
       "Photographer / Source Credit",
     "content-manager.content-types.plugin::resources.gallery-album.framingNotes":
       "Curatorial & Framing Notes",
-    "content-manager.content-types.plugin::resources.gallery-album.featured": "Featured",
-    "content-manager.content-types.plugin::resources.gallery-album.sortOrder": "Sort Order",
-    "content-manager.content-types.plugin::resources.glossary-term.term": "Glossary Term",
-    "content-manager.content-types.plugin::resources.glossary-term.slug": "URL Slug",
+    "content-manager.content-types.plugin::resources.gallery-album.featured":
+      "Featured",
+    "content-manager.content-types.plugin::resources.gallery-album.sortOrder":
+      "Sort Order",
+    "content-manager.content-types.plugin::resources.glossary-term.term":
+      "Glossary Term",
+    "content-manager.content-types.plugin::resources.glossary-term.slug":
+      "URL Slug",
     "content-manager.content-types.plugin::resources.glossary-term.nativeScript":
       "Original Arabic Script",
     "content-manager.content-types.plugin::resources.glossary-term.transliteration":
       "Transliteration",
     "content-manager.content-types.plugin::resources.glossary-term.definition":
       "Definition & Explanation",
-    "content-manager.content-types.plugin::resources.glossary-term.category": "Category",
+    "content-manager.content-types.plugin::resources.glossary-term.category":
+      "Category",
     "content-manager.content-types.plugin::resources.glossary-term.letterGroup":
       "Alphabetical Letter Group (A–Z)",
     "content-manager.content-types.plugin::resources.glossary-term.pronunciationAudio":
       "Pronunciation Audio File",
     "content-manager.content-types.plugin::resources.glossary-term.relatedTerms":
       "Related Glossary Terms",
-    "content-manager.content-types.plugin::resources.glossary-term.featured": "Featured",
-    "content-manager.content-types.plugin::resources.gallery-album.documentId": "Document ID",
-    "content-manager.content-types.plugin::resources.glossary-term.documentId": "Document ID",
-    "content-manager.content-types.plugin::resources.publication.documentId": "Document ID",
+    "content-manager.content-types.plugin::resources.glossary-term.featured":
+      "Featured",
+    "content-manager.content-types.plugin::resources.gallery-album.documentId":
+      "Document ID",
+    "content-manager.content-types.plugin::resources.glossary-term.documentId":
+      "Document ID",
+    "content-manager.content-types.plugin::resources.publication.documentId":
+      "Document ID",
     "content-manager.enum.general": "General",
     "content-manager.enum.community": "Community",
     "content-manager.enum.history": "Islamic History",
@@ -82,19 +108,28 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.press": "Press & Media",
   },
   es: {
-    "content-manager.content-types.plugin::resources.publication.title": "Título",
-    "content-manager.content-types.plugin::resources.publication.slug": "Slug (URL Amigable)",
-    "content-manager.content-types.plugin::resources.publication.summary": "Resumen",
-    "content-manager.content-types.plugin::resources.publication.category": "Categoría",
+    "content-manager.content-types.plugin::resources.publication.title":
+      "Título",
+    "content-manager.content-types.plugin::resources.publication.slug":
+      "Slug (URL Amigable)",
+    "content-manager.content-types.plugin::resources.publication.summary":
+      "Resumen",
+    "content-manager.content-types.plugin::resources.publication.category":
+      "Categoría",
     "content-manager.content-types.plugin::resources.publication.file":
       "Archivo de la Publicación (PDF)",
-    "content-manager.content-types.plugin::resources.publication.coverImage": "Imagen de Portada",
-    "content-manager.content-types.plugin::resources.publication.authorProfile": "Perfil del Autor",
-    "content-manager.content-types.plugin::resources.publication.authorName": "Nombre del Autor",
-    "content-manager.content-types.plugin::resources.publication.authorSlug": "Slug del Autor",
+    "content-manager.content-types.plugin::resources.publication.coverImage":
+      "Imagen de Portada",
+    "content-manager.content-types.plugin::resources.publication.authorProfile":
+      "Perfil del Autor",
+    "content-manager.content-types.plugin::resources.publication.authorName":
+      "Nombre del Autor",
+    "content-manager.content-types.plugin::resources.publication.authorSlug":
+      "Slug del Autor",
     "content-manager.content-types.plugin::resources.publication.isbnOrReference":
       "ISBN o Código de Referencia Institucional",
-    "content-manager.content-types.plugin::resources.publication.pageCount": "Número de Páginas",
+    "content-manager.content-types.plugin::resources.publication.pageCount":
+      "Número de Páginas",
     "content-manager.content-types.plugin::resources.publication.languageCode":
       "Código de Idioma de la Publicación",
     "content-manager.content-types.plugin::resources.publication.publishedAtDate":
@@ -107,14 +142,20 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Enlace de Descarga Externa (URL)",
     "content-manager.content-types.plugin::resources.publication.downloadCount":
       "Total de Descargas",
-    "content-manager.content-types.plugin::resources.publication.featured": "Destacado",
+    "content-manager.content-types.plugin::resources.publication.featured":
+      "Destacado",
     "content-manager.content-types.plugin::resources.publication.allowPublicDownload":
       "Permitir Descarga Pública",
-    "content-manager.content-types.plugin::resources.gallery-album.title": "Título",
-    "content-manager.content-types.plugin::resources.gallery-album.slug": "Slug (URL Amigable)",
-    "content-manager.content-types.plugin::resources.gallery-album.category": "Categoría",
-    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto": "Foto de Portada",
-    "content-manager.content-types.plugin::resources.gallery-album.photos": "Fotografías",
+    "content-manager.content-types.plugin::resources.gallery-album.title":
+      "Título",
+    "content-manager.content-types.plugin::resources.gallery-album.slug":
+      "Slug (URL Amigable)",
+    "content-manager.content-types.plugin::resources.gallery-album.category":
+      "Categoría",
+    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto":
+      "Foto de Portada",
+    "content-manager.content-types.plugin::resources.gallery-album.photos":
+      "Fotografías",
     "content-manager.content-types.plugin::resources.gallery-album.mediaFolderId":
       "ID de Carpeta en Biblioteca de Medios",
     "content-manager.content-types.plugin::resources.gallery-album.mediaFolderPath":
@@ -127,28 +168,36 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Crédito Fotográfico / Autor",
     "content-manager.content-types.plugin::resources.gallery-album.framingNotes":
       "Notas de Curaduría y Encuadre",
-    "content-manager.content-types.plugin::resources.gallery-album.featured": "Destacado",
+    "content-manager.content-types.plugin::resources.gallery-album.featured":
+      "Destacado",
     "content-manager.content-types.plugin::resources.gallery-album.sortOrder":
       "Orden de Clasificación",
-    "content-manager.content-types.plugin::resources.glossary-term.term": "Término del Glosario",
-    "content-manager.content-types.plugin::resources.glossary-term.slug": "Slug (URL Amigable)",
+    "content-manager.content-types.plugin::resources.glossary-term.term":
+      "Término del Glosario",
+    "content-manager.content-types.plugin::resources.glossary-term.slug":
+      "Slug (URL Amigable)",
     "content-manager.content-types.plugin::resources.glossary-term.nativeScript":
       "Escritura Original en Árabe",
     "content-manager.content-types.plugin::resources.glossary-term.transliteration":
       "Transliteración (Fonética)",
     "content-manager.content-types.plugin::resources.glossary-term.definition":
       "Definición y Explicación",
-    "content-manager.content-types.plugin::resources.glossary-term.category": "Categoría",
+    "content-manager.content-types.plugin::resources.glossary-term.category":
+      "Categoría",
     "content-manager.content-types.plugin::resources.glossary-term.letterGroup":
       "Letra Inicial (Índice Alfabético)",
     "content-manager.content-types.plugin::resources.glossary-term.pronunciationAudio":
       "Audio de Pronunciación",
     "content-manager.content-types.plugin::resources.glossary-term.relatedTerms":
       "Términos Relacionados",
-    "content-manager.content-types.plugin::resources.glossary-term.featured": "Destacado",
-    "content-manager.content-types.plugin::resources.gallery-album.documentId": "ID del Documento",
-    "content-manager.content-types.plugin::resources.glossary-term.documentId": "ID del Documento",
-    "content-manager.content-types.plugin::resources.publication.documentId": "ID del Documento",
+    "content-manager.content-types.plugin::resources.glossary-term.featured":
+      "Destacado",
+    "content-manager.content-types.plugin::resources.gallery-album.documentId":
+      "ID del Documento",
+    "content-manager.content-types.plugin::resources.glossary-term.documentId":
+      "ID del Documento",
+    "content-manager.content-types.plugin::resources.publication.documentId":
+      "ID del Documento",
     "content-manager.enum.general": "General",
     "content-manager.enum.community": "Comunidad",
     "content-manager.enum.history": "Historia Islámica",
@@ -167,21 +216,32 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.press": "Prensa y Medios",
   },
   ar: {
-    "content-manager.content-types.plugin::resources.publication.title": "العنوان",
-    "content-manager.content-types.plugin::resources.publication.slug": "المسار المختصر (Slug)",
-    "content-manager.content-types.plugin::resources.publication.summary": "الملخص",
-    "content-manager.content-types.plugin::resources.publication.category": "الفئة",
+    "content-manager.content-types.plugin::resources.publication.title":
+      "العنوان",
+    "content-manager.content-types.plugin::resources.publication.slug":
+      "المسار المختصر (Slug)",
+    "content-manager.content-types.plugin::resources.publication.summary":
+      "الملخص",
+    "content-manager.content-types.plugin::resources.publication.category":
+      "الفئة",
     "content-manager.content-types.plugin::resources.publication.file":
       "ملف المنشور / الوثيقة (PDF)",
-    "content-manager.content-types.plugin::resources.publication.coverImage": "صورة الغلاف",
-    "content-manager.content-types.plugin::resources.publication.authorProfile": "ملف المؤلف",
-    "content-manager.content-types.plugin::resources.publication.authorName": "اسم المؤلف",
-    "content-manager.content-types.plugin::resources.publication.authorSlug": "معرف المؤلف (Slug)",
+    "content-manager.content-types.plugin::resources.publication.coverImage":
+      "صورة الغلاف",
+    "content-manager.content-types.plugin::resources.publication.authorProfile":
+      "ملف المؤلف",
+    "content-manager.content-types.plugin::resources.publication.authorName":
+      "اسم المؤلف",
+    "content-manager.content-types.plugin::resources.publication.authorSlug":
+      "معرف المؤلف (Slug)",
     "content-manager.content-types.plugin::resources.publication.isbnOrReference":
       "الرقم المعياري (ISBN) أو رمز المرجع",
-    "content-manager.content-types.plugin::resources.publication.pageCount": "عدد الصفحات",
-    "content-manager.content-types.plugin::resources.publication.languageCode": "رمز لغة المنشور",
-    "content-manager.content-types.plugin::resources.publication.publishedAtDate": "تاريخ النشر",
+    "content-manager.content-types.plugin::resources.publication.pageCount":
+      "عدد الصفحات",
+    "content-manager.content-types.plugin::resources.publication.languageCode":
+      "رمز لغة المنشور",
+    "content-manager.content-types.plugin::resources.publication.publishedAtDate":
+      "تاريخ النشر",
     "content-manager.content-types.plugin::resources.publication.secondaryDateOverride":
       "تجاوز التاريخ الإضافي يدوياً",
     "content-manager.content-types.plugin::resources.publication.mediaFolderPath":
@@ -190,14 +250,20 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "رابط التحميل الخارجي",
     "content-manager.content-types.plugin::resources.publication.downloadCount":
       "إجمالي مرات التحميل",
-    "content-manager.content-types.plugin::resources.publication.featured": "مميز",
+    "content-manager.content-types.plugin::resources.publication.featured":
+      "مميز",
     "content-manager.content-types.plugin::resources.publication.allowPublicDownload":
       "السماح بالتحميل العام",
-    "content-manager.content-types.plugin::resources.gallery-album.title": "العنوان",
-    "content-manager.content-types.plugin::resources.gallery-album.slug": "المسار المختصر (Slug)",
-    "content-manager.content-types.plugin::resources.gallery-album.category": "الفئة",
-    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto": "صورة الغلاف",
-    "content-manager.content-types.plugin::resources.gallery-album.photos": "الصور",
+    "content-manager.content-types.plugin::resources.gallery-album.title":
+      "العنوان",
+    "content-manager.content-types.plugin::resources.gallery-album.slug":
+      "المسار المختصر (Slug)",
+    "content-manager.content-types.plugin::resources.gallery-album.category":
+      "الفئة",
+    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto":
+      "صورة الغلاف",
+    "content-manager.content-types.plugin::resources.gallery-album.photos":
+      "الصور",
     "content-manager.content-types.plugin::resources.gallery-album.mediaFolderId":
       "معرف مجلد مكتبة الوسائط",
     "content-manager.content-types.plugin::resources.gallery-album.mediaFolderPath":
@@ -210,25 +276,36 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "حقوق التصوير / المصور",
     "content-manager.content-types.plugin::resources.gallery-album.framingNotes":
       "ملاحظات العرض والتأطير",
-    "content-manager.content-types.plugin::resources.gallery-album.featured": "مميز",
-    "content-manager.content-types.plugin::resources.gallery-album.sortOrder": "ترتيب الفرز",
-    "content-manager.content-types.plugin::resources.glossary-term.term": "المصطلح",
-    "content-manager.content-types.plugin::resources.glossary-term.slug": "المسار المختصر (Slug)",
+    "content-manager.content-types.plugin::resources.gallery-album.featured":
+      "مميز",
+    "content-manager.content-types.plugin::resources.gallery-album.sortOrder":
+      "ترتيب الفرز",
+    "content-manager.content-types.plugin::resources.glossary-term.term":
+      "المصطلح",
+    "content-manager.content-types.plugin::resources.glossary-term.slug":
+      "المسار المختصر (Slug)",
     "content-manager.content-types.plugin::resources.glossary-term.nativeScript":
       "الرسم العربي الأصلي",
-    "content-manager.content-types.plugin::resources.glossary-term.transliteration": "النقل الصوتي",
-    "content-manager.content-types.plugin::resources.glossary-term.definition": "التعريف والشرح",
-    "content-manager.content-types.plugin::resources.glossary-term.category": "الفئة",
+    "content-manager.content-types.plugin::resources.glossary-term.transliteration":
+      "النقل الصوتي",
+    "content-manager.content-types.plugin::resources.glossary-term.definition":
+      "التعريف والشرح",
+    "content-manager.content-types.plugin::resources.glossary-term.category":
+      "الفئة",
     "content-manager.content-types.plugin::resources.glossary-term.letterGroup":
       "الحرف الأبجدي للتصنيف",
     "content-manager.content-types.plugin::resources.glossary-term.pronunciationAudio":
       "ملف صوت النطق",
     "content-manager.content-types.plugin::resources.glossary-term.relatedTerms":
       "المصطلحات ذات الصلة",
-    "content-manager.content-types.plugin::resources.glossary-term.featured": "مميز",
-    "content-manager.content-types.plugin::resources.gallery-album.documentId": "معرف المستند",
-    "content-manager.content-types.plugin::resources.glossary-term.documentId": "معرف المستند",
-    "content-manager.content-types.plugin::resources.publication.documentId": "معرف المستند",
+    "content-manager.content-types.plugin::resources.glossary-term.featured":
+      "مميز",
+    "content-manager.content-types.plugin::resources.gallery-album.documentId":
+      "معرف المستند",
+    "content-manager.content-types.plugin::resources.glossary-term.documentId":
+      "معرف المستند",
+    "content-manager.content-types.plugin::resources.publication.documentId":
+      "معرف المستند",
     "content-manager.enum.general": "عام",
     "content-manager.enum.community": "المجتمع",
     "content-manager.enum.history": "التاريخ الإسلامي",
@@ -247,22 +324,32 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.press": "الصحافة والإعلام",
   },
   tr: {
-    "content-manager.content-types.plugin::resources.publication.title": "Başlık",
-    "content-manager.content-types.plugin::resources.publication.slug": "Kısa Ad (URL Slug)",
-    "content-manager.content-types.plugin::resources.publication.summary": "Özet",
-    "content-manager.content-types.plugin::resources.publication.category": "Kategori",
+    "content-manager.content-types.plugin::resources.publication.title":
+      "Başlık",
+    "content-manager.content-types.plugin::resources.publication.slug":
+      "Kısa Ad (URL Slug)",
+    "content-manager.content-types.plugin::resources.publication.summary":
+      "Özet",
+    "content-manager.content-types.plugin::resources.publication.category":
+      "Kategori",
     "content-manager.content-types.plugin::resources.publication.file":
       "Yayın / Belge Dosyası (PDF)",
-    "content-manager.content-types.plugin::resources.publication.coverImage": "Kapak Görseli",
-    "content-manager.content-types.plugin::resources.publication.authorProfile": "Yazar Profili",
-    "content-manager.content-types.plugin::resources.publication.authorName": "Yazar Adı",
+    "content-manager.content-types.plugin::resources.publication.coverImage":
+      "Kapak Görseli",
+    "content-manager.content-types.plugin::resources.publication.authorProfile":
+      "Yazar Profili",
+    "content-manager.content-types.plugin::resources.publication.authorName":
+      "Yazar Adı",
     "content-manager.content-types.plugin::resources.publication.authorSlug":
       "Yazar Kısa Adı (Slug)",
     "content-manager.content-types.plugin::resources.publication.isbnOrReference":
       "ISBN veya Kurumsal Referans Kodu",
-    "content-manager.content-types.plugin::resources.publication.pageCount": "Sayfa Sayısı",
-    "content-manager.content-types.plugin::resources.publication.languageCode": "Yayın Dil Kodu",
-    "content-manager.content-types.plugin::resources.publication.publishedAtDate": "Yayın Tarihi",
+    "content-manager.content-types.plugin::resources.publication.pageCount":
+      "Sayfa Sayısı",
+    "content-manager.content-types.plugin::resources.publication.languageCode":
+      "Yayın Dil Kodu",
+    "content-manager.content-types.plugin::resources.publication.publishedAtDate":
+      "Yayın Tarihi",
     "content-manager.content-types.plugin::resources.publication.secondaryDateOverride":
       "Manuel İkincil Tarih (Hicri)",
     "content-manager.content-types.plugin::resources.publication.mediaFolderPath":
@@ -271,14 +358,20 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Harici İndirme Bağlantısı (URL)",
     "content-manager.content-types.plugin::resources.publication.downloadCount":
       "Toplam İndirme Sayısı",
-    "content-manager.content-types.plugin::resources.publication.featured": "Öne Çıkan",
+    "content-manager.content-types.plugin::resources.publication.featured":
+      "Öne Çıkan",
     "content-manager.content-types.plugin::resources.publication.allowPublicDownload":
       "Herkese Açık İndirmeye İzin Ver",
-    "content-manager.content-types.plugin::resources.gallery-album.title": "Başlık",
-    "content-manager.content-types.plugin::resources.gallery-album.slug": "Kısa Ad (URL Slug)",
-    "content-manager.content-types.plugin::resources.gallery-album.category": "Kategori",
-    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto": "Kapak Fotoğrafı",
-    "content-manager.content-types.plugin::resources.gallery-album.photos": "Fotoğraflar",
+    "content-manager.content-types.plugin::resources.gallery-album.title":
+      "Başlık",
+    "content-manager.content-types.plugin::resources.gallery-album.slug":
+      "Kısa Ad (URL Slug)",
+    "content-manager.content-types.plugin::resources.gallery-album.category":
+      "Kategori",
+    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto":
+      "Kapak Fotoğrafı",
+    "content-manager.content-types.plugin::resources.gallery-album.photos":
+      "Fotoğraflar",
     "content-manager.content-types.plugin::resources.gallery-album.mediaFolderId":
       "Medya Kütüphanesi Klasör Kimliği",
     "content-manager.content-types.plugin::resources.gallery-album.mediaFolderPath":
@@ -291,27 +384,36 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Fotoğrafçı / Kaynak Kredisi",
     "content-manager.content-types.plugin::resources.gallery-album.framingNotes":
       "Kürasyon ve Çerçeveleme Notları",
-    "content-manager.content-types.plugin::resources.gallery-album.featured": "Öne Çıkan",
-    "content-manager.content-types.plugin::resources.gallery-album.sortOrder": "Sıralama Düzeni",
-    "content-manager.content-types.plugin::resources.glossary-term.term": "Sözlük Terimi",
-    "content-manager.content-types.plugin::resources.glossary-term.slug": "Kısa Ad (URL Slug)",
+    "content-manager.content-types.plugin::resources.gallery-album.featured":
+      "Öne Çıkan",
+    "content-manager.content-types.plugin::resources.gallery-album.sortOrder":
+      "Sıralama Düzeni",
+    "content-manager.content-types.plugin::resources.glossary-term.term":
+      "Sözlük Terimi",
+    "content-manager.content-types.plugin::resources.glossary-term.slug":
+      "Kısa Ad (URL Slug)",
     "content-manager.content-types.plugin::resources.glossary-term.nativeScript":
       "Arapça Orijinal Yazımı",
     "content-manager.content-types.plugin::resources.glossary-term.transliteration":
       "Okunuş (Transliterasyon)",
-    "content-manager.content-types.plugin::resources.glossary-term.definition": "Tanım ve Açıklama",
-    "content-manager.content-types.plugin::resources.glossary-term.category": "Kategori",
+    "content-manager.content-types.plugin::resources.glossary-term.definition":
+      "Tanım ve Açıklama",
+    "content-manager.content-types.plugin::resources.glossary-term.category":
+      "Kategori",
     "content-manager.content-types.plugin::resources.glossary-term.letterGroup":
       "Alfabetik Harf Grubu",
     "content-manager.content-types.plugin::resources.glossary-term.pronunciationAudio":
       "Telaffuz Ses Dosyası",
-    "content-manager.content-types.plugin::resources.glossary-term.relatedTerms": "İlgili Terimler",
-    "content-manager.content-types.plugin::resources.glossary-term.featured": "Öne Çıkan",
+    "content-manager.content-types.plugin::resources.glossary-term.relatedTerms":
+      "İlgili Terimler",
+    "content-manager.content-types.plugin::resources.glossary-term.featured":
+      "Öne Çıkan",
     "content-manager.content-types.plugin::resources.gallery-album.documentId":
       "Belge Kimliği (ID)",
     "content-manager.content-types.plugin::resources.glossary-term.documentId":
       "Belge Kimliği (ID)",
-    "content-manager.content-types.plugin::resources.publication.documentId": "Belge Kimliği (ID)",
+    "content-manager.content-types.plugin::resources.publication.documentId":
+      "Belge Kimliği (ID)",
     "content-manager.enum.general": "Genel",
     "content-manager.enum.community": "Topluluk",
     "content-manager.enum.history": "İslam Tarihi",

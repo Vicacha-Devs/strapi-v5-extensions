@@ -8,11 +8,15 @@ interface FieldMetaConfig {
   placeholder?: string;
 }
 
-const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaConfig>> = {
+const RESOURCE_FIELD_METADATA_BY_UID: Record<
+  string,
+  Record<string, FieldMetaConfig>
+> = {
   [CONTENT_TYPE_UIDS.publication]: {
     title: {
       label: "Publication Title",
-      description: "Public title displayed on the Digital Library card and download page",
+      description:
+        "Public title displayed on the Digital Library card and download page",
       placeholder: "e.g., Mosque Visitor & Prayer Guide",
     },
     slug: {
@@ -28,7 +32,8 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     category: {
       label: "Category",
-      description: "Thematic category used to filter publications in the Digital Library",
+      description:
+        "Thematic category used to filter publications in the Digital Library",
     },
     file: {
       label: "PDF / eBook File",
@@ -37,15 +42,18 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     coverImage: {
       label: "Cover Image",
-      description: "Optional cover thumbnail displayed on the Digital Library card",
+      description:
+        "Optional cover thumbnail displayed on the Digital Library card",
     },
     authorProfile: {
       label: "Author Profile",
-      description: "Optional relation to a scholar or staff profile in the directory",
+      description:
+        "Optional relation to a scholar or staff profile in the directory",
     },
     authorName: {
       label: "Author Name",
-      description: "Author, scholar, or committee name displayed on the publication",
+      description:
+        "Author, scholar, or committee name displayed on the publication",
       placeholder: "e.g., Department of Education",
     },
     authorSlug: {
@@ -70,12 +78,14 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     publishedAtDate: {
       label: "Published Date",
-      description: "Publication release date (used to calculate the Hijri date label)",
+      description:
+        "Publication release date (used to calculate the Hijri date label)",
       placeholder: "YYYY-MM-DD",
     },
     secondaryDateOverride: {
       label: "Secondary Date Override",
-      description: "Optional Hijri date label override (automatically calculated if left blank)",
+      description:
+        "Optional Hijri date label override (automatically calculated if left blank)",
       placeholder: "e.g., 15 Ramadan 1447 AH",
     },
     mediaFolderPath: {
@@ -96,7 +106,8 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     featured: {
       label: "Featured",
-      description: "Highlight this publication at the top of the Digital Library",
+      description:
+        "Highlight this publication at the top of the Digital Library",
     },
     allowPublicDownload: {
       label: "Allow Public Download",
@@ -111,12 +122,14 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     slug: {
       label: "URL Slug",
-      description: "Unique URL-friendly identifier generated from the album title",
+      description:
+        "Unique URL-friendly identifier generated from the album title",
       placeholder: "auto-generated-url-slug",
     },
     description: {
       label: "Description",
-      description: "Optional caption or summary displayed beneath the album title",
+      description:
+        "Optional caption or summary displayed beneath the album title",
       placeholder: "e.g., Main prayer hall, mihrab, and central dome...",
     },
     category: {
@@ -125,7 +138,8 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     coverPhoto: {
       label: "Cover Photo",
-      description: "Optional main cover image for the album card (uses first photo if left empty)",
+      description:
+        "Optional main cover image for the album card (uses first photo if left empty)",
     },
     photos: {
       label: "Album Photos",
@@ -133,7 +147,8 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     mediaFolderId: {
       label: "Media Folder ID",
-      description: "Optional Strapi Media Library numeric folder ID for automated folder sync",
+      description:
+        "Optional Strapi Media Library numeric folder ID for automated folder sync",
     },
     mediaFolderPath: {
       label: "Media Folder Path",
@@ -148,7 +163,8 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     secondaryDateOverride: {
       label: "Secondary Date Override",
-      description: "Optional Hijri date label override (automatically calculated if left blank)",
+      description:
+        "Optional Hijri date label override (automatically calculated if left blank)",
       placeholder: "e.g., 15 Ramadan 1447 AH",
     },
     photographerCredit: {
@@ -158,7 +174,8 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     framingNotes: {
       label: "Editorial / Framing Notes",
-      description: "Optional internal or curatorial notes on photography framing and privacy",
+      description:
+        "Optional internal or curatorial notes on photography framing and privacy",
       placeholder: "e.g., Privacy-respecting architectural framing...",
     },
     featured: {
@@ -167,7 +184,8 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     sortOrder: {
       label: "Sort Order",
-      description: "Display order in the gallery grid (lower numbers appear first)",
+      description:
+        "Display order in the gallery grid (lower numbers appear first)",
     },
   },
   [CONTENT_TYPE_UIDS.glossaryTerm]: {
@@ -194,7 +212,8 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     definition: {
       label: "Definition",
       description: "Clear explanation displayed in glossary cards and tooltips",
-      placeholder: "e.g., Semicircular niche in the Qibla wall indicating the direction of Makkah.",
+      placeholder:
+        "e.g., Semicircular niche in the Qibla wall indicating the direction of Makkah.",
     },
     category: {
       label: "Category",
@@ -202,12 +221,14 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<string, Record<string, FieldMetaCon
     },
     letterGroup: {
       label: "Index Letter (A–Z)",
-      description: "Alphabetical index letter (A–Z) for grouping in the glossary",
+      description:
+        "Alphabetical index letter (A–Z) for grouping in the glossary",
       placeholder: "e.g., M",
     },
     pronunciationAudio: {
       label: "Pronunciation Audio",
-      description: "Optional audio recording (.mp3 / .wav) for pronouncing this glossary term",
+      description:
+        "Optional audio recording (.mp3 / .wav) for pronouncing this glossary term",
     },
     relatedTerms: {
       label: "Related Terms",
@@ -323,7 +344,9 @@ async function enrichPluginContentManagerMetadata(strapi: Core.Strapi) {
     )?.connection;
     if (typeof dbConn !== "function") return;
 
-    for (const [uid, fieldsConfig] of Object.entries(RESOURCE_FIELD_METADATA_BY_UID)) {
+    for (const [uid, fieldsConfig] of Object.entries(
+      RESOURCE_FIELD_METADATA_BY_UID
+    )) {
       await syncUidMetadataInStore(dbConn, uid, fieldsConfig);
     }
   } catch {
@@ -354,15 +377,21 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       },
     ];
 
-    await strapi.admin?.services?.permission?.actionProvider?.registerMany(actions);
+    await strapi.admin?.services?.permission?.actionProvider?.registerMany(
+      actions
+    );
 
-    const catalogService = strapi.plugin(PLUGIN_ID).service("catalogService") as {
+    const catalogService = strapi
+      .plugin(PLUGIN_ID)
+      .service("catalogService") as {
       seedDefaultResources: () => Promise<void>;
     };
     await catalogService.seedDefaultResources();
     await enrichPluginContentManagerMetadata(strapi);
   } catch (err) {
-    strapi.log.warn(`[strapi-plugin-resources] Bootstrap warning: ${(err as Error).message}`);
+    strapi.log.warn(
+      `[strapi-plugin-resources] Bootstrap warning: ${(err as Error).message}`
+    );
   }
 };
 

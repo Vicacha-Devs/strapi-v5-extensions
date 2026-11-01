@@ -17,7 +17,8 @@ const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
 };
 
 export const INLINE_CODE_STYLE: React.CSSProperties = {
-  fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+  fontFamily:
+    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   fontSize: "0.88em",
   padding: "2px 6px",
   borderRadius: 4,
@@ -66,11 +67,17 @@ const MIME_TYPE_PRESETS = [
 
 interface TabProps {
   settings: ResourcesPluginSettings;
-  setSettings: React.Dispatch<React.SetStateAction<ResourcesPluginSettings | null>>;
+  setSettings: React.Dispatch<
+    React.SetStateAction<ResourcesPluginSettings | null>
+  >;
   t: (id: string, defaultMessage: string) => string;
 }
 
-export const ResourcesOptimizationTab: React.FC<TabProps> = ({ settings, setSettings, t }) => (
+export const ResourcesOptimizationTab: React.FC<TabProps> = ({
+  settings,
+  setSettings,
+  t,
+}) => (
   <Tabs.Content value="optimization">
     <Box paddingTop={4}>
       <Box padding={6} background="neutral0" hasRadius shadow="filterShadow">
@@ -94,7 +101,12 @@ export const ResourcesOptimizationTab: React.FC<TabProps> = ({ settings, setSett
             alignItems: "start",
           }}
         >
-          <Box padding={4} background="neutral100" hasRadius style={SUB_CARD_BORDER_STYLE}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={SUB_CARD_BORDER_STYLE}
+          >
             <Checkbox
               checked={settings.enableCloudinaryOptimization}
               onCheckedChange={(checked: boolean) =>
@@ -104,7 +116,10 @@ export const ResourcesOptimizationTab: React.FC<TabProps> = ({ settings, setSett
                 })
               }
             >
-              {t("checkbox.enable_automatic_cloudinary_prefix", "Enable automatic Cloudinary")}{" "}
+              {t(
+                "checkbox.enable_automatic_cloudinary_prefix",
+                "Enable automatic Cloudinary"
+              )}{" "}
               <code style={INLINE_CODE_STYLE}>f_auto</code>,{" "}
               <code style={INLINE_CODE_STYLE}>q_auto</code>{" "}
               {t(
@@ -122,7 +137,12 @@ export const ResourcesOptimizationTab: React.FC<TabProps> = ({ settings, setSett
             </Box>
           </Box>
 
-          <Box padding={4} background="neutral100" hasRadius style={SUB_CARD_BORDER_STYLE}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={SUB_CARD_BORDER_STYLE}
+          >
             <Checkbox
               checked={settings.autoSyncMediaFolders}
               onCheckedChange={(checked: boolean) =>
@@ -132,8 +152,11 @@ export const ResourcesOptimizationTab: React.FC<TabProps> = ({ settings, setSett
                 })
               }
             >
-              {t("settings.ui.one_click_media_folder_sync", "One-Click Media Folder Sync")} (
-              <code style={INLINE_CODE_STYLE}>plugin::upload.folder</code>)
+              {t(
+                "settings.ui.one_click_media_folder_sync",
+                "One-Click Media Folder Sync"
+              )}{" "}
+              (<code style={INLINE_CODE_STYLE}>plugin::upload.folder</code>)
             </Checkbox>
             <Box paddingTop={2}>
               <Typography variant="pi" textColor="neutral600">
@@ -157,12 +180,18 @@ export const ResourcesOptimizationTab: React.FC<TabProps> = ({ settings, setSett
             </Field.Label>
             <NumberInput
               name="maxPhotosPerAlbum"
-              aria-label={t("field.max_photos_per_album", "Max Photos per Album (1–500)")}
+              aria-label={t(
+                "field.max_photos_per_album",
+                "Max Photos per Album (1–500)"
+              )}
               value={settings.maxPhotosPerAlbum ?? 60}
               onValueChange={(val: number | undefined) =>
                 setSettings({
                   ...settings,
-                  maxPhotosPerAlbum: typeof val === "number" && val >= 1 && val <= 500 ? val : 60,
+                  maxPhotosPerAlbum:
+                    typeof val === "number" && val >= 1 && val <= 500
+                      ? val
+                      : 60,
                 })
               }
             />
@@ -174,12 +203,20 @@ export const ResourcesOptimizationTab: React.FC<TabProps> = ({ settings, setSett
   </Tabs.Content>
 );
 
-export const ResourcesSecurityTab: React.FC<TabProps> = ({ settings, setSettings, t }) => {
+export const ResourcesSecurityTab: React.FC<TabProps> = ({
+  settings,
+  setSettings,
+  t,
+}) => {
   const selectedExtensions = settings.allowedDownloadExtensions || [];
-  const extensionOptions = Array.from(new Set([...EXTENSION_PRESETS, ...selectedExtensions]));
+  const extensionOptions = Array.from(
+    new Set([...EXTENSION_PRESETS, ...selectedExtensions])
+  );
 
   const selectedMimes = settings.allowedDownloadMimeTypes || [];
-  const mimeOptions = Array.from(new Set([...MIME_TYPE_PRESETS, ...selectedMimes]));
+  const mimeOptions = Array.from(
+    new Set([...MIME_TYPE_PRESETS, ...selectedMimes])
+  );
 
   return (
     <Tabs.Content value="security">
@@ -212,7 +249,10 @@ export const ResourcesSecurityTab: React.FC<TabProps> = ({ settings, setSettings
               )}
             >
               <Field.Label>
-                {t("field.allowed_download_extensions", "Allowed Download File Extensions")}
+                {t(
+                  "field.allowed_download_extensions",
+                  "Allowed Download File Extensions"
+                )}
               </Field.Label>
               <MultiSelect
                 name="allowedDownloadExtensions"
@@ -252,12 +292,18 @@ export const ResourcesSecurityTab: React.FC<TabProps> = ({ settings, setSettings
               )}
             >
               <Field.Label>
-                {t("field.allowed_download_mime_types", "Allowed Download MIME Types")}
+                {t(
+                  "field.allowed_download_mime_types",
+                  "Allowed Download MIME Types"
+                )}
               </Field.Label>
               <MultiSelect
                 name="allowedDownloadMimeTypes"
                 withTags
-                placeholder={t("placeholder.select_allowed_mimes", "Select allowed MIME types...")}
+                placeholder={t(
+                  "placeholder.select_allowed_mimes",
+                  "Select allowed MIME types..."
+                )}
                 value={selectedMimes}
                 onChange={(nextValues: string[]) =>
                   setSettings({

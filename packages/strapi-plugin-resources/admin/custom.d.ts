@@ -1,5 +1,12 @@
 declare module "react" {
-  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
+  export type ReactNode =
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | ReactElement
+    | ReactNode[];
 
   export interface ReactElement<P = unknown> {
     type: unknown;
@@ -13,7 +20,11 @@ declare module "react" {
 
   export interface ChangeEvent<T = Element> {
     target: T & { value: string; checked?: boolean; files?: FileList | null };
-    currentTarget: T & { value: string; checked?: boolean; files?: FileList | null };
+    currentTarget: T & {
+      value: string;
+      checked?: boolean;
+      files?: FileList | null;
+    };
   }
 
   export interface RefObject<T> {
@@ -29,7 +40,10 @@ declare module "react" {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
+  export function useEffect(
+    effect: () => void | (() => void),
+    deps?: readonly unknown[]
+  ): void;
   export function useMemo<T>(factory: () => T, deps?: readonly unknown[]): T;
   export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
@@ -52,8 +66,16 @@ declare module "react" {
 declare module "react/jsx-runtime" {
   import type { ReactElement } from "react";
   export const Fragment: unknown;
-  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
-  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsx(
+    type: unknown,
+    props: unknown,
+    key?: unknown
+  ): ReactElement;
+  export function jsxs(
+    type: unknown,
+    props: unknown,
+    key?: unknown
+  ): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
@@ -145,8 +167,14 @@ declare module "@strapi/strapi/admin" {
 
   export const useFetchClient: () => {
     get: (url: string) => Promise<{ data: FetchClientResponse }>;
-    post: (url: string, data?: unknown) => Promise<{ data: FetchClientResponse }>;
-    put: (url: string, data?: unknown) => Promise<{ data: FetchClientResponse }>;
+    post: (
+      url: string,
+      data?: unknown
+    ) => Promise<{ data: FetchClientResponse }>;
+    put: (
+      url: string,
+      data?: unknown
+    ) => Promise<{ data: FetchClientResponse }>;
     del: (url: string) => Promise<{ data: FetchClientResponse }>;
   };
 }

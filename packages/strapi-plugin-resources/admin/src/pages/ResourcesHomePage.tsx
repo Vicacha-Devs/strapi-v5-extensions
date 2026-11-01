@@ -1,4 +1,11 @@
-import { Box, Button, Divider, Flex, Main, Typography } from "@strapi/design-system";
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Main,
+  Typography,
+} from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
 import * as React from "react";
 
@@ -20,7 +27,9 @@ export const ResourcesHomePage: React.FC = () => {
   const { t } = useResourcesTranslation();
   const { get, post, put, del } = useFetchClient();
   const [activeTab, setActiveTab] = React.useState<ActiveTab>("publications");
-  const [publications, setPublications] = React.useState<PublicationRecord[]>([]);
+  const [publications, setPublications] = React.useState<PublicationRecord[]>(
+    []
+  );
   const [galleries, setGalleries] = React.useState<GalleryAlbumRecord[]>([]);
   const [glossary, setGlossary] = React.useState<GlossaryTermRecord[]>([]);
   const [mediaFiles, setMediaFiles] = React.useState<MediaLibraryAsset[]>([]);
@@ -74,13 +83,15 @@ export const ResourcesHomePage: React.FC = () => {
               variant={activeTab === "publications" ? "default" : "tertiary"}
               onClick={() => setActiveTab("publications")}
             >
-              {t("page.ui.tab_publications", "Publications")} ({publications.length})
+              {t("page.ui.tab_publications", "Publications")} (
+              {publications.length})
             </Button>
             <Button
               variant={activeTab === "galleries" ? "default" : "tertiary"}
               onClick={() => setActiveTab("galleries")}
             >
-              {t("page.ui.tab_photo_galleries", "Photo Galleries")} ({galleries.length})
+              {t("page.ui.tab_photo_galleries", "Photo Galleries")} (
+              {galleries.length})
             </Button>
             <Button
               variant={activeTab === "glossary" ? "default" : "tertiary"}
@@ -97,7 +108,11 @@ export const ResourcesHomePage: React.FC = () => {
               <Typography variant="omega" fontWeight="bold">
                 {statusMessage}
               </Typography>
-              <Button size="S" variant="tertiary" onClick={() => setStatusMessage("")}>
+              <Button
+                size="S"
+                variant="tertiary"
+                onClick={() => setStatusMessage("")}
+              >
                 {t("page.ui.dismiss", "Dismiss")}
               </Button>
             </Flex>

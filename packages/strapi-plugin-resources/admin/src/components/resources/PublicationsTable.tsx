@@ -36,7 +36,10 @@ interface PublicationFileCellProps {
   onUploadClick: (docId: string | null) => void;
 }
 
-const PublicationFileCell: React.FC<PublicationFileCellProps> = ({ pub, onUploadClick }) => {
+const PublicationFileCell: React.FC<PublicationFileCellProps> = ({
+  pub,
+  onUploadClick,
+}) => {
   const { t } = useResourcesTranslation();
   const downloadHref = pub.file?.url || pub.externalDownloadUrl;
 
@@ -48,20 +51,36 @@ const PublicationFileCell: React.FC<PublicationFileCellProps> = ({ pub, onUpload
             {pub.file.name} ({pub.file.formattedSize})
           </Badge>
           {downloadHref && (
-            <a href={downloadHref} target="_blank" rel="noreferrer" style={LINK_STYLE}>
+            <a
+              href={downloadHref}
+              target="_blank"
+              rel="noreferrer"
+              style={LINK_STYLE}
+            >
               {t("common.open", "Open")}
             </a>
           )}
         </>
       ) : pub.externalDownloadUrl ? (
-        <a href={pub.externalDownloadUrl} target="_blank" rel="noreferrer" style={LINK_STYLE}>
+        <a
+          href={pub.externalDownloadUrl}
+          target="_blank"
+          rel="noreferrer"
+          style={LINK_STYLE}
+        >
           {t("pub.external_link", "External Link")}
         </a>
       ) : (
         <Badge>{t("pub.no_file_attached", "No file attached")}</Badge>
       )}
-      <Button size="S" variant="secondary" onClick={() => onUploadClick(pub.documentId || null)}>
-        {pub.file ? t("pub.btn.replace_pdf", "Replace PDF") : t("pub.btn.upload_pdf", "Upload PDF")}
+      <Button
+        size="S"
+        variant="secondary"
+        onClick={() => onUploadClick(pub.documentId || null)}
+      >
+        {pub.file
+          ? t("pub.btn.replace_pdf", "Replace PDF")
+          : t("pub.btn.upload_pdf", "Upload PDF")}
       </Button>
     </Flex>
   );
@@ -87,10 +106,14 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
       <Thead>
         <Tr>
           <Th>
-            <Typography variant="sigma">{t("pub.table.publication", "Publication")}</Typography>
+            <Typography variant="sigma">
+              {t("pub.table.publication", "Publication")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("page.ui.category", "Category")}</Typography>
+            <Typography variant="sigma">
+              {t("page.ui.category", "Category")}
+            </Typography>
           </Th>
           <Th>
             <Typography variant="sigma">
@@ -103,7 +126,9 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
             </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("common.actions", "Actions")}</Typography>
+            <Typography variant="sigma">
+              {t("common.actions", "Actions")}
+            </Typography>
           </Th>
         </Tr>
       </Thead>
@@ -160,7 +185,11 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
                 >
                   {t("common.edit", "Edit")}
                 </Button>
-                <Button size="S" variant="danger-light" onClick={() => onDelete(pub)}>
+                <Button
+                  size="S"
+                  variant="danger-light"
+                  onClick={() => onDelete(pub)}
+                >
                   {t("common.delete", "Delete")}
                 </Button>
               </Flex>

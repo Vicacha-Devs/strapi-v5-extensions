@@ -1,4 +1,8 @@
-import type { GalleryAlbumCategory, GlossaryCategory, PublicationCategory } from "../../../shared";
+import type {
+  GalleryAlbumCategory,
+  GlossaryCategory,
+  PublicationCategory,
+} from "../../../shared";
 
 export interface SeedPublicationItem {
   locale: string;
@@ -60,7 +64,8 @@ export const DEFAULT_SEED_PUBLICATIONS: SeedPublicationItem[] = [
     mediaFolderPath: "/resources/publications",
     featured: true,
     allowPublicDownload: true,
-    externalDownloadUrl: "/media/resources/guia-bienvenida-visita-mezquita-es.pdf",
+    externalDownloadUrl:
+      "/media/resources/guia-bienvenida-visita-mezquita-es.pdf",
   },
   {
     locale: "es",
@@ -160,7 +165,8 @@ export const DEFAULT_SEED_GALLERY_ALBUMS: SeedGalleryAlbumItem[] = [
     eventDate: "2026-01-20",
     mediaFolderPath: "/resources/galleries/architecture",
     photographerCredit: "Archivo Fotográfico Institucional",
-    framingNotes: "Respeto a la privacidad de los asistentes; enfoque arquitectónico.",
+    framingNotes:
+      "Respeto a la privacidad de los asistentes; enfoque arquitectónico.",
     featured: true,
     sortOrder: 1,
   },
@@ -293,7 +299,8 @@ export const DEFAULT_SEED_GLOSSARY_TERMS: SeedGlossaryTermItem[] = [
     slug: "adhan-ar",
     nativeScript: "أَذَان",
     transliteration: "Adhān",
-    definition: "النداء الشرعي للإعلام بدخول وقت الصلاة المفروضة خمس مرات في اليوم والليلة.",
+    definition:
+      "النداء الشرعي للإعلام بدخول وقت الصلاة المفروضة خمس مرات في اليوم والليلة.",
     category: "worship",
     letterGroup: "#",
     relatedTerms: ["صلاة", "إقامة"],

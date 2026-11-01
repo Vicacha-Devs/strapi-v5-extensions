@@ -1,4 +1,7 @@
-export const CM_DESCRIPTION_TRANSLATIONS: Record<string, Record<string, string>> = {
+export const CM_DESCRIPTION_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
   en: {
     "content-manager.content-types.plugin::resources.publication.externalDownloadUrl.description":
       "Optional external URL (e.g., https://...) used only when no PDF/eBook File is uploaded above",
@@ -54,7 +57,8 @@ export const CM_DESCRIPTION_TRANSLATIONS: Record<string, Record<string, string>>
       "Public title displayed on the photo gallery album",
     "content-manager.content-types.plugin::resources.gallery-album.slug.description":
       "Unique URL-friendly identifier generated from the album title",
-    "content-manager.content-types.plugin::resources.gallery-album.description": "Description",
+    "content-manager.content-types.plugin::resources.gallery-album.description":
+      "Description",
     "content-manager.content-types.plugin::resources.gallery-album.description.description":
       "Optional caption or summary displayed beneath the album title",
     "content-manager.content-types.plugin::resources.gallery-album.category.description":
@@ -143,7 +147,8 @@ export const CM_DESCRIPTION_TRANSLATIONS: Record<string, Record<string, string>>
       "Título público mostrado en el álbum de la galería fotográfica",
     "content-manager.content-types.plugin::resources.gallery-album.slug.description":
       "Identificador único amigable para URL generado a partir del título del álbum",
-    "content-manager.content-types.plugin::resources.gallery-album.description": "Descripción",
+    "content-manager.content-types.plugin::resources.gallery-album.description":
+      "Descripción",
     "content-manager.content-types.plugin::resources.gallery-album.description.description":
       "Subtítulo o resumen opcional mostrado debajo del título del álbum",
     "content-manager.content-types.plugin::resources.gallery-album.category.description":
@@ -232,7 +237,8 @@ export const CM_DESCRIPTION_TRANSLATIONS: Record<string, Record<string, string>>
       "العنوان العام المعروض على ألبوم معرض الصور",
     "content-manager.content-types.plugin::resources.gallery-album.slug.description":
       "معرف رابط فريد يُنشأ تلقائياً من عنوان الألبوم",
-    "content-manager.content-types.plugin::resources.gallery-album.description": "الوصف",
+    "content-manager.content-types.plugin::resources.gallery-album.description":
+      "الوصف",
     "content-manager.content-types.plugin::resources.gallery-album.description.description":
       "وصف توضيحي أو ملخص اختياري يُعرض أسفل عنوان الألبوم",
     "content-manager.content-types.plugin::resources.gallery-album.category.description":
@@ -321,7 +327,8 @@ export const CM_DESCRIPTION_TRANSLATIONS: Record<string, Record<string, string>>
       "Fotoğraf galerisi albümünde gösterilen genel başlık",
     "content-manager.content-types.plugin::resources.gallery-album.slug.description":
       "Albüm başlığından otomatik oluşturulan benzersiz URL tanımlayıcısı",
-    "content-manager.content-types.plugin::resources.gallery-album.description": "Açıklama",
+    "content-manager.content-types.plugin::resources.gallery-album.description":
+      "Açıklama",
     "content-manager.content-types.plugin::resources.gallery-album.description.description":
       "Albüm başlığının altında gösterilen isteğe bağlı alt yazı veya özet",
     "content-manager.content-types.plugin::resources.gallery-album.category.description":
