@@ -17,10 +17,16 @@ export function computeSecondaryBadges(
   const targetLoc = effectiveSecondaryLang === "ar" ? "ar-SA" : localeCode;
   return activeSecondaryCalendars
     .map((sys) => {
-      const sysLocale = effectiveSecondaryLang === "ar" ? "ar-SA" : sys.locale || targetLoc;
-      return formatDateInCalendarSystem(dateKey, { ...sys, locale: sysLocale }, targetLoc, {
-        compact: true,
-      });
+      const sysLocale =
+        effectiveSecondaryLang === "ar" ? "ar-SA" : sys.locale || targetLoc;
+      return formatDateInCalendarSystem(
+        dateKey,
+        { ...sys, locale: sysLocale },
+        targetLoc,
+        {
+          compact: true,
+        }
+      );
     })
     .filter(Boolean);
 }
@@ -33,7 +39,8 @@ export function buildDayHeaderStyle(
 ): React.CSSProperties {
   const isEndAligned = activeTheme.dayNumberAlign === "end";
   const isCenterAligned = activeTheme.dayNumberAlign === "center";
-  const justifyCenter = isCompactYear || (isCenterAligned && !hasSecondaryBadges);
+  const justifyCenter =
+    isCompactYear || (isCenterAligned && !hasSecondaryBadges);
   return {
     display: "flex",
     flexDirection: isEndAligned ? "row-reverse" : "row",
@@ -54,7 +61,11 @@ export function buildDayNumberBadgeStyle(
   isCompactYear: boolean,
   isToday: boolean
 ): React.CSSProperties {
-  const fontSize = isCompactYear ? 12 : activeTheme.id === "monarch" ? 13.5 : 13;
+  const fontSize = isCompactYear
+    ? 12
+    : activeTheme.id === "monarch"
+      ? 13.5
+      : 13;
   const size = isCompactYear ? 22 : 26;
   const borderRadius = activeTheme.id === "forma" && !isToday ? "3px" : "999px";
   return {
@@ -79,7 +90,12 @@ export const DayCellMetaBadges: React.FC<{
   effectiveSecondaryLang: SecondaryCalendarLanguageMode;
   activeTheme: CalendarThemeDefinition;
   allowCreate: boolean;
-}> = ({ secondarySummary, effectiveSecondaryLang, activeTheme, allowCreate }) => (
+}> = ({
+  secondarySummary,
+  effectiveSecondaryLang,
+  activeTheme,
+  allowCreate,
+}) => (
   <span
     className="vicacha-fc-day-meta"
     style={{

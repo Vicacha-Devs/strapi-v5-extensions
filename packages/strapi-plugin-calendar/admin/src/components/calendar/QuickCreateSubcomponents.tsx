@@ -39,7 +39,10 @@ export function sourceIncludesKeyword(
   keyword: string
 ): boolean {
   if (!source) return false;
-  return source.id.toLowerCase().includes(keyword) || source.uid.toLowerCase().includes(keyword);
+  return (
+    source.id.toLowerCase().includes(keyword) ||
+    source.uid.toLowerCase().includes(keyword)
+  );
 }
 
 export function computeToggledWeekdays(
@@ -47,9 +50,13 @@ export function computeToggledWeekdays(
   code: RRuleWeekday
 ): RRuleWeekday[] {
   if (selectedWeekdays.includes(code)) {
-    return selectedWeekdays.length > 1 ? selectedWeekdays.filter((d) => d !== code) : [code];
+    return selectedWeekdays.length > 1
+      ? selectedWeekdays.filter((d) => d !== code)
+      : [code];
   }
-  return WEEKDAYS.map((w) => w.code).filter((c) => c === code || selectedWeekdays.includes(c));
+  return WEEKDAYS.map((w) => w.code).filter(
+    (c) => c === code || selectedWeekdays.includes(c)
+  );
 }
 
 export const QuickCreateHeader: React.FC<{
@@ -74,7 +81,12 @@ export const QuickCreateHeader: React.FC<{
       : t("calendar.quickCreateTitle", "Quick-Create Calendar Entry");
 
   return (
-    <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
+    <Flex
+      justifyContent="space-between"
+      alignItems="center"
+      wrap="wrap"
+      gap={2}
+    >
       <Flex alignItems="center" gap={2} wrap="wrap">
         <Typography variant="delta" fontWeight="bold">
           {headingText}
@@ -144,38 +156,52 @@ export const BookingVisitorFields: React.FC<{
     <>
       {onQuickCustomerNameChange && (
         <Field.Root>
-          <Field.Label>{t("calendar.field.customerName", "Visitor / Customer Name")}</Field.Label>
+          <Field.Label>
+            {t("calendar.field.customerName", "Visitor / Customer Name")}
+          </Field.Label>
           <TextInput
             value={quickCustomerName}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               onQuickCustomerNameChange(e.target.value)
             }
-            placeholder={t("placeholder.customer_name", "Defaults to reservation title if omitted")}
+            placeholder={t(
+              "placeholder.customer_name",
+              "Defaults to reservation title if omitted"
+            )}
           />
         </Field.Root>
       )}
 
       {onQuickCustomerEmailChange && (
         <Field.Root>
-          <Field.Label>{t("calendar.field.customerEmail", "Visitor / Customer Email")}</Field.Label>
+          <Field.Label>
+            {t("calendar.field.customerEmail", "Visitor / Customer Email")}
+          </Field.Label>
           <TextInput
             value={quickCustomerEmail}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               onQuickCustomerEmailChange(e.target.value)
             }
-            placeholder={t("placeholder.customer_email", "reservas@mezquitabogota.org")}
+            placeholder={t(
+              "placeholder.customer_email",
+              "reservas@mezquitabogota.org"
+            )}
           />
         </Field.Root>
       )}
 
       {onQuickPartySizeChange && (
         <Field.Root>
-          <Field.Label>{t("calendar.field.partySize", "Party Size (Guests)")}</Field.Label>
+          <Field.Label>
+            {t("calendar.field.partySize", "Party Size (Guests)")}
+          </Field.Label>
           <TextInput
             type="number"
             value={String(quickPartySize || 1)}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              onQuickPartySizeChange(Math.max(1, Number.parseInt(e.target.value || "1", 10) || 1))
+              onQuickPartySizeChange(
+                Math.max(1, Number.parseInt(e.target.value || "1", 10) || 1)
+              )
             }
           />
         </Field.Root>
@@ -204,9 +230,14 @@ export const QuickCreateRecurrenceSelect: React.FC<{
   if (!supportsRecurrence) return null;
   return (
     <Field.Root>
-      <Field.Label>{t("calendar.field.recurrence", "Recurrence Preset")}</Field.Label>
+      <Field.Label>
+        {t("calendar.field.recurrence", "Recurrence Preset")}
+      </Field.Label>
       <SingleSelect
-        placeholder={t("placeholder.select_recurrence_preset", "Select recurrence preset")}
+        placeholder={t(
+          "placeholder.select_recurrence_preset",
+          "Select recurrence preset"
+        )}
         value={quickRRule || "NONE"}
         onChange={onRecurrenceSelect}
       >
@@ -219,7 +250,9 @@ export const QuickCreateRecurrenceSelect: React.FC<{
           </SingleSelectOption>
         ))}
         {hasCustomWeeklyOption && (
-          <SingleSelectOption value={quickRRule}>{customWeeklyLabel}</SingleSelectOption>
+          <SingleSelectOption value={quickRRule}>
+            {customWeeklyLabel}
+          </SingleSelectOption>
         )}
       </SingleSelect>
     </Field.Root>
@@ -232,27 +265,46 @@ export const QuickCreateDateFields: React.FC<{
   endDateValue: Date | undefined;
   onStartDateChange: (nextDateStr: string) => void;
   onQuickEndChange?: (end: string) => void;
-}> = ({ t, startDateValue, endDateValue, onStartDateChange, onQuickEndChange }) => (
+}> = ({
+  t,
+  startDateValue,
+  endDateValue,
+  onStartDateChange,
+  onQuickEndChange,
+}) => (
   <>
     <Field.Root required>
-      <Field.Label>{t("calendar.field.startDate", "Start Date / Time")}</Field.Label>
+      <Field.Label>
+        {t("calendar.field.startDate", "Start Date / Time")}
+      </Field.Label>
       <DateTimePicker
         value={startDateValue}
         step={15}
         clearLabel={t("common.clear", "Clear")}
-        onChange={(date: Date | undefined) => onStartDateChange(date ? date.toISOString() : "")}
+        onChange={(date: Date | undefined) =>
+          onStartDateChange(date ? date.toISOString() : "")
+        }
         onClear={() => onStartDateChange("")}
       />
     </Field.Root>
 
     {onQuickEndChange && (
-      <Field.Root hint={t("placeholder.end_date_optional", "Defaults to +1 hour if omitted")}>
-        <Field.Label>{t("calendar.field.endDate", "End Date / Time (optional)")}</Field.Label>
+      <Field.Root
+        hint={t(
+          "placeholder.end_date_optional",
+          "Defaults to +1 hour if omitted"
+        )}
+      >
+        <Field.Label>
+          {t("calendar.field.endDate", "End Date / Time (optional)")}
+        </Field.Label>
         <DateTimePicker
           value={endDateValue}
           step={15}
           clearLabel={t("common.clear", "Clear")}
-          onChange={(date: Date | undefined) => onQuickEndChange(date ? date.toISOString() : "")}
+          onChange={(date: Date | undefined) =>
+            onQuickEndChange(date ? date.toISOString() : "")
+          }
           onClear={() => onQuickEndChange("")}
         />
         <Field.Hint />

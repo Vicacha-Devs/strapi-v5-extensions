@@ -7,7 +7,10 @@ import icalServiceFactory from "../server/src/services/ical";
 import occurrenceServiceFactory from "../server/src/services/occurrence";
 import registryServiceFactory from "../server/src/services/registry";
 import settingsServiceFactory from "../server/src/services/settings";
-import type { CalendarPluginServiceMap, StrapiRouteContext } from "../server/src/types";
+import type {
+  CalendarPluginServiceMap,
+  StrapiRouteContext,
+} from "../server/src/types";
 import {
   type CalendarPluginSettings,
   type DiscoveredContentType,
@@ -43,7 +46,8 @@ function createMockStrapi(pluginConfig: Record<string, unknown> = {}) {
 
   const strapi: Core.Strapi = {
     config: {
-      get: <T = unknown>(_key: string, defaultVal?: T): T => (pluginConfig ?? defaultVal) as T,
+      get: <T = unknown>(_key: string, defaultVal?: T): T =>
+        (pluginConfig ?? defaultVal) as T,
     },
     contentTypes: {
       "api::event.event": {
@@ -113,7 +117,9 @@ function createMockStrapi(pluginConfig: Record<string, unknown> = {}) {
     plugin: (name: string) => ({
       service: <T = Record<string, unknown>>(sName: string): T => {
         if (name === "calendar") {
-          return services[sName as keyof CalendarPluginServiceMap] as unknown as T;
+          return services[
+            sName as keyof CalendarPluginServiceMap
+          ] as unknown as T;
         }
         return {} as T;
       },
@@ -134,7 +140,8 @@ function createMockStrapi(pluginConfig: Record<string, unknown> = {}) {
 describe("Strapi Plugin Calendar Services & Controllers", () => {
   it("discovers non-system content types and classifies fields for the No-Code Mapper", async () => {
     const { services } = createMockStrapi();
-    const schemas: DiscoveredContentType[] = services.settings.discoverContentTypes();
+    const schemas: DiscoveredContentType[] =
+      services.settings.discoverContentTypes();
 
     expect(schemas.length).toBe(2);
     const eventSchema = schemas.find((s) => s.uid === "api::event.event");
@@ -190,17 +197,20 @@ describe("Strapi Plugin Calendar Services & Controllers", () => {
       },
     });
 
-    const occurrences: ExpandedCalendarOccurrence[] = await services.occurrence.getOccurrences({
-      from: "2026-05-01T00:00:00.000Z",
-      to: "2026-05-10T23:59:59.000Z",
-    });
+    const occurrences: ExpandedCalendarOccurrence[] =
+      await services.occurrence.getOccurrences({
+        from: "2026-05-01T00:00:00.000Z",
+        to: "2026-05-10T23:59:59.000Z",
+      });
 
     // 2 Friday Khutbahs (May 1 & May 8) + 1 Booking (May 3) = 3 unified occurrences
     expect(occurrences.length).toBe(3);
 
     const khutbah = occurrences.find((o) => o.sourceId === "events");
     expect(khutbah?.title).toBe("Weekly Friday Khutbah");
-    expect(khutbah?.alternateDates?.hijri?.formatted).toBe("14 Dhu al-Qiʻdah 1447 AH");
+    expect(khutbah?.alternateDates?.hijri?.formatted).toBe(
+      "14 Dhu al-Qiʻdah 1447 AH"
+    );
 
     const booking = occurrences.find((o) => o.sourceId === "bookings");
     expect(booking?.title).toBe("Hall Reservation - Wedding");
@@ -233,8 +243,12 @@ describe("Strapi Plugin Calendar Services & Controllers", () => {
       newStartDate: "2026-05-04T10:00:00.000Z",
       newEndDate: "2026-05-04T12:00:00.000Z",
     });
-    expect(documentsDb["api::booking.booking"][0].checkIn).toBe("2026-05-04T10:00:00.000Z");
-    expect(documentsDb["api::booking.booking"][0].checkOut).toBe("2026-05-04T12:00:00.000Z");
+    expect(documentsDb["api::booking.booking"][0].checkIn).toBe(
+      "2026-05-04T10:00:00.000Z"
+    );
+    expect(documentsDb["api::booking.booking"][0].checkOut).toBe(
+      "2026-05-04T12:00:00.000Z"
+    );
 
     // Quick-create new booking from slot selection
     const created = await services.occurrence.quickCreateEntry({
@@ -260,10 +274,15 @@ describe("Strapi Plugin Calendar Services & Controllers", () => {
         slug: { type: "uid" },
         startDate: { type: "datetime" },
         endDate: { type: "datetime" },
-        recurrence: { type: "customField", customField: "plugin::events.rrule" },
+        recurrence: {
+          type: "customField",
+          customField: "plugin::events.rrule",
+        },
       },
     };
-    (strapi.contentTypes as Record<string, unknown>)["plugin::bookings.booking"] = {
+    (strapi.contentTypes as Record<string, unknown>)[
+      "plugin::bookings.booking"
+    ] = {
       kind: "collectionType",
       options: { draftAndPublish: false },
       info: { displayName: "Booking", singularName: "booking" },
@@ -280,8 +299,12 @@ describe("Strapi Plugin Calendar Services & Controllers", () => {
     };
 
     const settings = await services.settings.getSettings();
-    expect(settings.sources.some((s) => s.uid === "plugin::events.event")).toBe(true);
-    expect(settings.sources.some((s) => s.uid === "plugin::bookings.booking")).toBe(true);
+    expect(settings.sources.some((s) => s.uid === "plugin::events.event")).toBe(
+      true
+    );
+    expect(
+      settings.sources.some((s) => s.uid === "plugin::bookings.booking")
+    ).toBe(true);
 
     const createdEvent = await services.occurrence.quickCreateEntry({
       sourceId: "events",

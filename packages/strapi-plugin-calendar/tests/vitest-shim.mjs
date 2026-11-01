@@ -1,5 +1,5 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 
 function createExpect(actual) {
   return {
@@ -10,7 +10,7 @@ function createExpect(actual) {
       assert.deepStrictEqual(actual, expected);
     },
     toContain(substring) {
-      if (typeof actual === 'string') {
+      if (typeof actual === "string") {
         assert.ok(
           actual.includes(substring),
           `Expected "${actual}" to contain "${substring}"`
@@ -21,7 +21,9 @@ function createExpect(actual) {
           `Expected array to contain ${JSON.stringify(substring)}`
         );
       } else {
-        assert.fail(`Expected string or array in toContain, got ${typeof actual}`);
+        assert.fail(
+          `Expected string or array in toContain, got ${typeof actual}`
+        );
       }
     },
     toBeGreaterThan(num) {

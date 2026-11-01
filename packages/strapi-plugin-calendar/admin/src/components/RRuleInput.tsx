@@ -63,7 +63,9 @@ const COMMON_TIMEZONES = [
 export interface RRuleInputProps {
   name: string;
   value?: unknown;
-  onChange: (event: { target: { name: string; value: unknown; type: string } }) => void;
+  onChange: (event: {
+    target: { name: string; value: unknown; type: string };
+  }) => void;
   attribute?: Record<string, unknown>;
   disabled?: boolean;
   error?: string;
@@ -80,7 +82,10 @@ interface SubSectionProps {
 }
 
 const RRuleFrequencyControls: React.FC<
-  SubSectionProps & { fieldValue: RRuleFieldValue; emitChange: (next: RRuleFieldValue) => void }
+  SubSectionProps & {
+    fieldValue: RRuleFieldValue;
+    emitChange: (next: RRuleFieldValue) => void;
+  }
 > = ({ t, disabled, parsedRule, fieldValue, updateRule, emitChange }) => {
   const isRepeating = parsedRule.freq !== "NONE";
   return (
@@ -90,16 +95,24 @@ const RRuleFrequencyControls: React.FC<
           <Field.Label>{t("rrule.frequency", "Repeat Frequency")}</Field.Label>
           <SingleSelect
             disabled={disabled}
-            placeholder={t("placeholder.select_repeat_frequency", "Select repeat frequency")}
+            placeholder={t(
+              "placeholder.select_repeat_frequency",
+              "Select repeat frequency"
+            )}
             value={parsedRule.freq}
             onChange={(val: string) =>
-              updateRule({ freq: val as RRuleFrequency, byDay: val === "WEEKLY" ? ["FR"] : [] })
+              updateRule({
+                freq: val as RRuleFrequency,
+                byDay: val === "WEEKLY" ? ["FR"] : [],
+              })
             }
           >
             <SingleSelectOption value="NONE">
               {t("rrule.freq.none", "Does not repeat (Single Entry)")}
             </SingleSelectOption>
-            <SingleSelectOption value="DAILY">{t("rrule.freq.daily", "Daily")}</SingleSelectOption>
+            <SingleSelectOption value="DAILY">
+              {t("rrule.freq.daily", "Daily")}
+            </SingleSelectOption>
             <SingleSelectOption value="WEEKLY">
               {t("rrule.freq.weekly", "Weekly")}
             </SingleSelectOption>
@@ -132,10 +145,15 @@ const RRuleFrequencyControls: React.FC<
       {isRepeating && (
         <Box style={{ flex: 1, minWidth: 190 }}>
           <Field.Root>
-            <Field.Label>{t("rrule.rscale", "Calendar Scale (RSCALE)")}</Field.Label>
+            <Field.Label>
+              {t("rrule.rscale", "Calendar Scale (RSCALE)")}
+            </Field.Label>
             <SingleSelect
               disabled={disabled}
-              placeholder={t("placeholder.select_calendar_scale", "Select calendar scale")}
+              placeholder={t(
+                "placeholder.select_calendar_scale",
+                "Select calendar scale"
+              )}
               value={parsedRule.rscale || "gregory"}
               onChange={(val: string) =>
                 updateRule({ rscale: val === "gregory" ? undefined : val })
@@ -158,7 +176,9 @@ const RRuleFrequencyControls: React.FC<
             disabled={disabled}
             placeholder={t("placeholder.select_timezone", "Select timezone")}
             value={fieldValue.timezone || "UTC"}
-            onChange={(tz: string) => emitChange({ ...fieldValue, timezone: String(tz) })}
+            onChange={(tz: string) =>
+              emitChange({ ...fieldValue, timezone: String(tz) })
+            }
           >
             {COMMON_TIMEZONES.map((tz) => (
               <SingleSelectOption key={tz} value={tz}>
@@ -217,7 +237,8 @@ const RRulePatternControls: React.FC<
               value={parsedRule.byMonth ?? 1}
               onValueChange={(val: number | undefined) =>
                 updateRule({
-                  byMonth: val && val >= 1 && val <= 13 ? Math.floor(val) : undefined,
+                  byMonth:
+                    val && val >= 1 && val <= 13 ? Math.floor(val) : undefined,
                 })
               }
             />
@@ -226,14 +247,17 @@ const RRulePatternControls: React.FC<
       )}
       <Box style={{ width: 160 }}>
         <Field.Root>
-          <Field.Label>{t("rrule.byMonthDay", "Day of Month (1-31)")}</Field.Label>
+          <Field.Label>
+            {t("rrule.byMonthDay", "Day of Month (1-31)")}
+          </Field.Label>
           <NumberInput
             disabled={disabled}
             placeholder={t("placeholder.1", "1")}
             value={parsedRule.byMonthDay ?? 1}
             onValueChange={(val: number | undefined) =>
               updateRule({
-                byMonthDay: val && val >= 1 && val <= 31 ? Math.floor(val) : undefined,
+                byMonthDay:
+                  val && val >= 1 && val <= 31 ? Math.floor(val) : undefined,
               })
             }
           />
@@ -243,7 +267,10 @@ const RRulePatternControls: React.FC<
   );
 };
 
-function applyEndModeChange(mode: string, updateRule: (patch: Partial<ParsedRRule>) => void): void {
+function applyEndModeChange(
+  mode: string,
+  updateRule: (patch: Partial<ParsedRRule>) => void
+): void {
   if (mode === "never") {
     updateRule({ count: undefined, until: undefined });
   } else if (mode === "count") {
@@ -251,7 +278,10 @@ function applyEndModeChange(mode: string, updateRule: (patch: Partial<ParsedRRul
   } else if (mode === "until") {
     const nextYear = new Date();
     nextYear.setUTCFullYear(nextYear.getUTCFullYear() + 1);
-    updateRule({ until: nextYear.toISOString().slice(0, 10), count: undefined });
+    updateRule({
+      until: nextYear.toISOString().slice(0, 10),
+      count: undefined,
+    });
   }
 }
 
@@ -266,7 +296,10 @@ const RRuleSeriesBoundsControls: React.FC<
           <Field.Label>{t("rrule.ends", "Series Ends")}</Field.Label>
           <SingleSelect
             disabled={disabled}
-            placeholder={t("placeholder.select_series_end_mode", "Select series end mode")}
+            placeholder={t(
+              "placeholder.select_series_end_mode",
+              "Select series end mode"
+            )}
             value={endMode}
             onChange={(mode: string) => applyEndModeChange(mode, updateRule)}
           >
@@ -286,7 +319,9 @@ const RRuleSeriesBoundsControls: React.FC<
       {endMode === "until" && (
         <Box style={{ width: 200 }}>
           <Field.Root>
-            <Field.Label>{t("rrule.untilDate", "Until Date (YYYY-MM-DD)")}</Field.Label>
+            <Field.Label>
+              {t("rrule.untilDate", "Until Date (YYYY-MM-DD)")}
+            </Field.Label>
             <DatePicker
               disabled={disabled}
               value={parseDateTimePickerValue(parsedRule.until)}
@@ -303,7 +338,9 @@ const RRuleSeriesBoundsControls: React.FC<
       {endMode === "count" && (
         <Box style={{ width: 180 }}>
           <Field.Root>
-            <Field.Label>{t("rrule.occurrenceCount", "Max Occurrences")}</Field.Label>
+            <Field.Label>
+              {t("rrule.occurrenceCount", "Max Occurrences")}
+            </Field.Label>
             <NumberInput
               disabled={disabled}
               placeholder={t("placeholder.10", "10")}
@@ -331,10 +368,18 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
 }) => {
   const { formatMessage } = useIntl();
   const t = (id: string, defaultMessage: string) =>
-    formatPluginMessageWithUrlLocale(PLUGIN_ID, id, defaultMessage, formatMessage);
+    formatPluginMessageWithUrlLocale(
+      PLUGIN_ID,
+      id,
+      defaultMessage,
+      formatMessage
+    );
 
   const fieldValue = useMemo(() => parseRRuleFieldValue(value, "UTC"), [value]);
-  const parsedRule = useMemo(() => parseRRule(fieldValue.rrule), [fieldValue.rrule]);
+  const parsedRule = useMemo(
+    () => parseRRule(fieldValue.rrule),
+    [fieldValue.rrule]
+  );
   const [newExdate, setNewExdate] = useState("");
 
   const endMode: "never" | "until" | "count" = parsedRule.until
@@ -349,7 +394,11 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
 
   const updateRule = (patch: Partial<ParsedRRule>) => {
     const merged = { ...parsedRule, ...patch };
-    emitChange({ ...fieldValue, rrule: buildRRule(merged), rscale: merged.rscale });
+    emitChange({
+      ...fieldValue,
+      rrule: buildRRule(merged),
+      rscale: merged.rscale,
+    });
   };
 
   const toggleWeekday = (day: RRuleWeekday) => {
@@ -387,9 +436,19 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
       <Flex direction="column" alignItems="stretch" gap={3}>
         {label && <Field.Label>{label}</Field.Label>}
 
-        <Box padding={4} background="neutral100" borderColor="neutral200" hasRadius>
+        <Box
+          padding={4}
+          background="neutral100"
+          borderColor="neutral200"
+          hasRadius
+        >
           <Flex direction="column" alignItems="stretch" gap={4}>
-            <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              wrap="wrap"
+              gap={2}
+            >
               <Typography variant="sigma" textColor="neutral600">
                 {t("rrule.summaryLabel", "Recurrence Summary")}
               </Typography>
@@ -439,13 +498,18 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                   <Box style={{ width: 240 }}>
                     <Field.Root>
                       <Field.Label>
-                        {t("rrule.exdates", "Excluded Dates (Holiday / Exception Dates)")}
+                        {t(
+                          "rrule.exdates",
+                          "Excluded Dates (Holiday / Exception Dates)"
+                        )}
                       </Field.Label>
                       <DatePicker
                         disabled={disabled}
                         value={parseDateTimePickerValue(newExdate)}
                         clearLabel={t("common.clear", "Clear")}
-                        onChange={(d: Date | undefined) => setNewExdate(d ? formatLocalYmd(d) : "")}
+                        onChange={(d: Date | undefined) =>
+                          setNewExdate(d ? formatLocalYmd(d) : "")
+                        }
                         onClear={() => setNewExdate("")}
                       />
                     </Field.Root>
@@ -463,12 +527,20 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                 {exdatesList.length > 0 && (
                   <Flex gap={2} paddingTop={2} wrap="wrap">
                     {exdatesList.map((dt) => (
-                      <Badge key={dt} backgroundColor="neutral200" textColor="neutral800">
+                      <Badge
+                        key={dt}
+                        backgroundColor="neutral200"
+                        textColor="neutral800"
+                      >
                         {dt}{" "}
                         <button
                           type="button"
                           onClick={() => handleRemoveExdate(dt)}
-                          style={{ border: "none", background: "transparent", cursor: "pointer" }}
+                          style={{
+                            border: "none",
+                            background: "transparent",
+                            cursor: "pointer",
+                          }}
                           aria-label={`Remove ${dt}`}
                         >
                           ×

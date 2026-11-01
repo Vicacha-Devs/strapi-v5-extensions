@@ -9,7 +9,9 @@ import type {
 } from "@fullcalendar/core";
 import allLocales from "@fullcalendar/core/locales-all";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin, { type DateClickArg } from "@fullcalendar/interaction";
+import interactionPlugin, {
+  type DateClickArg,
+} from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import multiMonthPlugin from "@fullcalendar/multimonth";
 import FullCalendar from "@fullcalendar/react";
@@ -101,9 +103,13 @@ const ALL_CALENDAR_LOCALES: LocaleInput[] = (() => {
  * per https://fullcalendar.io/docs/react#content-injection
  */
 function renderEventContent(eventArg: EventContentArg) {
-  const occ = eventArg.event.extendedProps?.occurrence as ExpandedCalendarOccurrence | undefined;
+  const occ = eventArg.event.extendedProps?.occurrence as
+    | ExpandedCalendarOccurrence
+    | undefined;
   const isCompactYear = eventArg.view?.type === "multiMonthYear";
-  const tooltip = [eventArg.timeText, eventArg.event.title].filter(Boolean).join(" • ");
+  const tooltip = [eventArg.timeText, eventArg.event.title]
+    .filter(Boolean)
+    .join(" • ");
   return (
     <div
       className="vicacha-fc-event-inner"
@@ -130,12 +136,18 @@ function renderEventContent(eventArg: EventContentArg) {
 function resolveVisualKeys(
   props: Pick<
     FullCalendarCanvasProps,
-    "theme" | "colorScheme" | "themePalette" | "secondaryCalendarLanguage" | "settings"
+    | "theme"
+    | "colorScheme"
+    | "themePalette"
+    | "secondaryCalendarLanguage"
+    | "settings"
   >
 ) {
   const { settings } = props;
   return {
-    activeThemeKey: (props.theme ?? settings?.theme ?? "breeze") as CalendarThemePreset,
+    activeThemeKey: (props.theme ??
+      settings?.theme ??
+      "breeze") as CalendarThemePreset,
     configuredColorScheme: (props.colorScheme ??
       settings?.colorScheme ??
       "auto") as CalendarColorScheme,
@@ -192,7 +204,9 @@ export interface FullCalendarCanvasProps {
   ) => void;
 }
 
-export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => {
+export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (
+  props
+) => {
   const {
     calendarRef,
     locale,
@@ -205,10 +219,15 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
     onSelectOccurrence,
     onDropOrResizeOccurrence,
   } = props;
-  const styledTheme = useTheme() as { colors?: { neutral0?: string } } | undefined;
+  const styledTheme = useTheme() as
+    | { colors?: { neutral0?: string } }
+    | undefined;
   const strapiNeutral0 = styledTheme?.colors?.neutral0;
 
-  const localeBundle = useMemo(() => getLocalizedCalendarBundle(locale), [locale]);
+  const localeBundle = useMemo(
+    () => getLocalizedCalendarBundle(locale),
+    [locale]
+  );
   const {
     activeThemeKey,
     configuredColorScheme,
@@ -217,10 +236,19 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
     allowCreate,
   } = resolveVisualKeys(props);
 
-  const activeColorScheme = detectEffectiveColorScheme(configuredColorScheme, strapiNeutral0);
+  const activeColorScheme = detectEffectiveColorScheme(
+    configuredColorScheme,
+    strapiNeutral0
+  );
 
   const activeTheme = useMemo(
-    () => resolveCalendarTheme(activeThemeKey, activeColorScheme, activePaletteKey, strapiNeutral0),
+    () =>
+      resolveCalendarTheme(
+        activeThemeKey,
+        activeColorScheme,
+        activePaletteKey,
+        strapiNeutral0
+      ),
     [activeThemeKey, activeColorScheme, activePaletteKey, strapiNeutral0]
   );
 
@@ -239,7 +267,10 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
     [settings?.timeFormat24h]
   );
 
-  const gridConfig = useMemo(() => buildCalendarGridConfig(settings), [settings]);
+  const gridConfig = useMemo(
+    () => buildCalendarGridConfig(settings),
+    [settings]
+  );
 
   const handleDatesSet = useCallback(
     (dateInfo: DatesSetArg) => {
@@ -278,9 +309,15 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
 
   const handleEventDropOrResize = useCallback(
     (arg: EventDropArg) => {
-      const occ = arg.event.extendedProps?.occurrence as ExpandedCalendarOccurrence | undefined;
+      const occ = arg.event.extendedProps?.occurrence as
+        | ExpandedCalendarOccurrence
+        | undefined;
       if (occ && arg.event.start) {
-        onDropOrResizeOccurrence(occ, arg.event.start.toISOString(), arg.event.end?.toISOString());
+        onDropOrResizeOccurrence(
+          occ,
+          arg.event.start.toISOString(),
+          arg.event.end?.toISOString()
+        );
       }
     },
     [onDropOrResizeOccurrence]
@@ -323,7 +360,11 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (props) => 
           )}
         >
           <span
-            style={buildDayNumberBadgeStyle(activeTheme, isCompactYear, Boolean(cellArg.isToday))}
+            style={buildDayNumberBadgeStyle(
+              activeTheme,
+              isCompactYear,
+              Boolean(cellArg.isToday)
+            )}
           >
             {cleanDayNumber}
           </span>

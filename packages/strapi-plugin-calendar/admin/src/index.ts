@@ -11,7 +11,18 @@ import { rruleCustomField } from "./fields/rruleField";
 
 export { FullCalendarCanvas, CalendarToolbar, RRuleInput, CalendarSidePanel };
 
-export const SUPPORTED_LOCALES = ["en", "es", "fr", "de", "pt", "it", "nl", "pl", "tr", "ar"];
+export const SUPPORTED_LOCALES = [
+  "en",
+  "es",
+  "fr",
+  "de",
+  "pt",
+  "it",
+  "nl",
+  "pl",
+  "tr",
+  "ar",
+];
 
 export default {
   register(app: StrapiAdminApp) {
@@ -55,7 +66,9 @@ export default {
       if (typeof app.addSettingsLink === "function") {
         app.addSettingsLink(calendarSettingsSection.id, calendarSettingsLink);
       } else {
-        app.createSettingSection(calendarSettingsSection, [calendarSettingsLink]);
+        app.createSettingSection(calendarSettingsSection, [
+          calendarSettingsLink,
+        ]);
       }
     } catch {
       app.createSettingSection(calendarSettingsSection, [calendarSettingsLink]);
@@ -77,15 +90,21 @@ export default {
   },
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
-    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    const allLocales = Array.from(
+      new Set([...locales, "en", "es", "ar", "tr"])
+    );
     return Promise.all(
       allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(
+            `./translations/${locale}.json`
+          );
           const prefixed: Record<string, string> = {};
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
-            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`)
+              ? k
+              : `${PLUGIN_ID}.${k}`;
             prefixed[fullKey] = v;
           }
           return { data: prefixed, locale };

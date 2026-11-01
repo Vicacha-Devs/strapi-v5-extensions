@@ -55,7 +55,10 @@ function buildEventStyleCss(
   `;
 }
 
-function buildTodayCellCss(scope: string, activeTheme: CalendarThemeDefinition): string {
+function buildTodayCellCss(
+  scope: string,
+  activeTheme: CalendarThemeDefinition
+): string {
   if (activeTheme.todayHeaderAccent === "top-bar") {
     return `
       ${scope} .fc-daygrid-day.fc-day-today {
@@ -82,7 +85,10 @@ function buildTodayCellCss(scope: string, activeTheme: CalendarThemeDefinition):
   `;
 }
 
-function buildInteractiveCursorCss(scope: string, allowCreate: boolean): string {
+function buildInteractiveCursorCss(
+  scope: string,
+  allowCreate: boolean
+): string {
   if (!allowCreate) return "";
   return `
     ${scope} .fc-daygrid-day,
@@ -104,7 +110,9 @@ function resolveThemeDefaults(activeTheme: CalendarThemeDefinition) {
     radius: activeTheme.containerRadius ?? "10px",
     shadow: activeTheme.containerShadow ?? "none",
     evtRadius: activeTheme.eventRadius ?? "6px",
-    fontFamily: activeTheme.fontFamily ?? "'Inter Variable', Inter, system-ui, sans-serif",
+    fontFamily:
+      activeTheme.fontFamily ??
+      "'Inter Variable', Inter, system-ui, sans-serif",
   };
 }
 

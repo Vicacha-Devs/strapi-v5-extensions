@@ -24,7 +24,9 @@ export interface SecondaryCalendarsSectionProps {
   onRemoveCalendar: (calId: string) => void;
 }
 
-export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps> = ({
+export const SecondaryCalendarsSection: React.FC<
+  SecondaryCalendarsSectionProps
+> = ({
   t,
   secondaryCalendars,
   onAddOrUpdateCalendar,
@@ -36,7 +38,8 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
   const [newCalId, setNewCalId] = useState<string>("hijri");
   const [newCalLabel, setNewCalLabel] = useState<string>("Hijri (Umm al-Qura)");
   const [newCalLocale, setNewCalLocale] = useState<string>("local");
-  const [newCalOverrideField, setNewCalOverrideField] = useState<string>("hijriDate");
+  const [newCalOverrideField, setNewCalOverrideField] =
+    useState<string>("hijriDate");
   const [newCalDayOffset, setNewCalDayOffset] = useState<number>(0);
 
   const handleEditCalendarSystem = (cal: CalendarSystemConfig) => {
@@ -61,7 +64,10 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
       id: cleanId,
       label: newCalLabel.trim() || cleanId,
       intlCalendar: newCalPreset,
-      locale: newCalLocale && newCalLocale !== "local" ? newCalLocale.trim() : undefined,
+      locale:
+        newCalLocale && newCalLocale !== "local"
+          ? newCalLocale.trim()
+          : undefined,
       dayOffset: newCalDayOffset || 0,
       overrideField: newCalOverrideField.trim() || undefined,
       enabled: true,
@@ -79,7 +85,12 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
       style={{ border: "1px solid rgba(128, 128, 128, 0.22)" }}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Flex justifyContent="space-between" alignItems="flex-start" wrap="wrap" gap={3}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="flex-start"
+          wrap="wrap"
+          gap={3}
+        >
           <Box style={{ flex: 1, minWidth: 280 }}>
             <Typography variant="delta" fontWeight="bold" tag="h2">
               {t(
@@ -98,7 +109,8 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
           </Box>
           <Flex gap={2} alignItems="center">
             <Badge active>
-              {secondaryCalendars.length} {t("settings.configuredCount", "Configured")}
+              {secondaryCalendars.length}{" "}
+              {t("settings.configuredCount", "Configured")}
             </Badge>
             <Button
               variant={isFormOpen ? "tertiary" : "secondary"}
@@ -123,7 +135,12 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
               borderLeft: "4px solid #0284C7",
             }}
           >
-            <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              wrap="wrap"
+              gap={3}
+            >
               <Flex gap={2} alignItems="center" wrap="wrap">
                 <Typography variant="omega" fontWeight="bold">
                   {cal.label}
@@ -133,17 +150,24 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
                 </Badge>
                 <Badge backgroundColor="primary100" textColor="primary700">
                   {cal.locale === "ar" || cal.locale === "ar-SA"
-                    ? t("settings.badge.arabicScript", "Arabic Script (العربية)")
+                    ? t(
+                        "settings.badge.arabicScript",
+                        "Arabic Script (العربية)"
+                      )
                     : t("settings.badge.localLanguage", "Local Language")}
                 </Badge>
                 {cal.overrideField && (
                   <Badge backgroundColor="neutral200" textColor="neutral800">
-                    {t("settings.badge.overrideField", "Override field")}: {cal.overrideField}
+                    {t("settings.badge.overrideField", "Override field")}:{" "}
+                    {cal.overrideField}
                   </Badge>
                 )}
                 <Badge backgroundColor="warning100" textColor="warning700">
                   {t("settings.badge.offset", "Offset")}:{" "}
-                  {(cal.dayOffset ?? 0) > 0 ? `+${cal.dayOffset}` : (cal.dayOffset ?? 0)}d
+                  {(cal.dayOffset ?? 0) > 0
+                    ? `+${cal.dayOffset}`
+                    : (cal.dayOffset ?? 0)}
+                  d
                 </Badge>
               </Flex>
 
@@ -156,10 +180,18 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
                 >
                   {t("settings.calendarEnabled", "Enabled")}
                 </Checkbox>
-                <Button variant="tertiary" size="S" onClick={() => handleEditCalendarSystem(cal)}>
+                <Button
+                  variant="tertiary"
+                  size="S"
+                  onClick={() => handleEditCalendarSystem(cal)}
+                >
                   {t("common.edit", "Edit")}
                 </Button>
-                <Button variant="danger-light" size="S" onClick={() => onRemoveCalendar(cal.id)}>
+                <Button
+                  variant="danger-light"
+                  size="S"
+                  onClick={() => onRemoveCalendar(cal.id)}
+                >
                   {t("common.remove", "Remove")}
                 </Button>
               </Flex>
@@ -176,7 +208,10 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
           >
             <Flex direction="column" alignItems="stretch" gap={4}>
               <Typography variant="sigma" textColor="neutral700">
-                {t("settings.configureCalendarTitle", "Configure Secondary Calendar System")}
+                {t(
+                  "settings.configureCalendarTitle",
+                  "Configure Secondary Calendar System"
+                )}
               </Typography>
 
               <div
@@ -204,14 +239,18 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
                     onChange={(val: string | number) => {
                       const strVal = String(val);
                       setNewCalPreset(strVal);
-                      const match = SUPPORTED_INTL_CALENDARS.find((c) => c.intlCalendar === strVal);
+                      const match = SUPPORTED_INTL_CALENDARS.find(
+                        (c) => c.intlCalendar === strVal
+                      );
                       if (match) {
                         setNewCalId(match.id.split("-")[0]);
                         setNewCalLabel(match.defaultLabel);
                       }
                     }}
                   >
-                    {SUPPORTED_INTL_CALENDARS.filter((c) => c.id !== "gregory").map((cal) => (
+                    {SUPPORTED_INTL_CALENDARS.filter(
+                      (c) => c.id !== "gregory"
+                    ).map((cal) => (
                       <SingleSelectOption key={cal.id} value={cal.intlCalendar}>
                         {cal.defaultLabel} ({cal.intlCalendar})
                       </SingleSelectOption>
@@ -221,15 +260,23 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
                 </Field.Root>
 
                 <Field.Root
-                  hint={t("settings.calendarIdHint", "Unique slug key for this calendar overlay.")}
+                  hint={t(
+                    "settings.calendarIdHint",
+                    "Unique slug key for this calendar overlay."
+                  )}
                 >
-                  <Field.Label>{t("settings.calendarId", "ID Key")}</Field.Label>
+                  <Field.Label>
+                    {t("settings.calendarId", "ID Key")}
+                  </Field.Label>
                   <TextInput
                     value={newCalId}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setNewCalId(e.target.value)
                     }
-                    placeholder={t("settings.calendarId.placeholder", "e.g., hijri")}
+                    placeholder={t(
+                      "settings.calendarId.placeholder",
+                      "e.g., hijri"
+                    )}
                   />
                   <Field.Hint />
                 </Field.Root>
@@ -240,7 +287,9 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
                     "Badge label displayed in calendar headers and tooltips."
                   )}
                 >
-                  <Field.Label>{t("settings.calendarLabel", "Display Label")}</Field.Label>
+                  <Field.Label>
+                    {t("settings.calendarLabel", "Display Label")}
+                  </Field.Label>
                   <TextInput
                     value={newCalLabel}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -264,17 +313,26 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
                     {t("settings.calendarScript", "Language / Script Override")}
                   </Field.Label>
                   <SingleSelect
-                    placeholder={t("settings.calendarScript.placeholder", "Select script override")}
+                    placeholder={t(
+                      "settings.calendarScript.placeholder",
+                      "Select script override"
+                    )}
                     value={newCalLocale || "local"}
                     onChange={(val: string | number) => {
                       setNewCalLocale(String(val));
                     }}
                   >
                     <SingleSelectOption value="local">
-                      {t("settings.calendarScript.local", "Follow Calendar Language (Local)")}
+                      {t(
+                        "settings.calendarScript.local",
+                        "Follow Calendar Language (Local)"
+                      )}
                     </SingleSelectOption>
                     <SingleSelectOption value="ar-SA">
-                      {t("settings.calendarScript.ar", "Arabic Script — العربية (ar-SA)")}
+                      {t(
+                        "settings.calendarScript.ar",
+                        "Arabic Script — العربية (ar-SA)"
+                      )}
                     </SingleSelectOption>
                     <SingleSelectOption value="es">
                       {t("settings.calendarScript.es", "Español (es)")}
@@ -300,13 +358,19 @@ export const SecondaryCalendarsSection: React.FC<SecondaryCalendarsSectionProps>
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setNewCalOverrideField(e.target.value)
                     }
-                    placeholder={t("settings.overrideField.placeholder", "e.g., hijriDate")}
+                    placeholder={t(
+                      "settings.overrideField.placeholder",
+                      "e.g., hijriDate"
+                    )}
                   />
                   <Field.Hint />
                 </Field.Root>
 
                 <Field.Root
-                  hint={t("settings.dayOffsetHint", "Moon-sighting adjustment in days (-2 to +2).")}
+                  hint={t(
+                    "settings.dayOffsetHint",
+                    "Moon-sighting adjustment in days (-2 to +2)."
+                  )}
                 >
                   <Field.Label>
                     {t("settings.dayOffset", "Lunar Day Offset (-2 to +2)")}

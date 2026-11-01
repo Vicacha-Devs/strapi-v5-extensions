@@ -24,13 +24,20 @@ export const CalendarThemeSection: React.FC<CalendarThemeSectionProps> = ({
   settings,
   onPatchSettings,
 }) => {
-  const styledTheme = useTheme() as { colors?: { neutral0?: string } } | undefined;
+  const styledTheme = useTheme() as
+    | { colors?: { neutral0?: string } }
+    | undefined;
   const strapiNeutral0 = styledTheme?.colors?.neutral0;
 
   const activeTheme: CalendarThemePreset = settings.theme ?? "breeze";
-  const configuredColorScheme: CalendarColorScheme = settings.colorScheme ?? "auto";
-  const effectiveColorScheme = detectEffectiveColorScheme(configuredColorScheme, strapiNeutral0);
-  const activePalette: CalendarColorPaletteId = settings.themePalette ?? "default";
+  const configuredColorScheme: CalendarColorScheme =
+    settings.colorScheme ?? "auto";
+  const effectiveColorScheme = detectEffectiveColorScheme(
+    configuredColorScheme,
+    strapiNeutral0
+  );
+  const activePalette: CalendarColorPaletteId =
+    settings.themePalette ?? "default";
 
   return (
     <Box>
@@ -69,13 +76,16 @@ export const CalendarThemeSection: React.FC<CalendarThemeSectionProps> = ({
               "Primary accent swatch applied to event pills, selected dates, and active view buttons."
             )}
           >
-            <Field.Label>{t("settings.paletteLabel", "Accent Color Palette")}</Field.Label>
+            <Field.Label>
+              {t("settings.paletteLabel", "Accent Color Palette")}
+            </Field.Label>
             <Flex gap={2} alignItems="center" wrap="wrap" paddingTop={1}>
               {Object.values(CALENDAR_COLOR_PALETTES).map((pal) => {
                 const isSelected = activePalette === pal.id;
                 const swatchColor =
                   pal.id === "default"
-                    ? (CALENDAR_THEME_PRESETS[activeTheme]?.primaryColor ?? "#0284C7")
+                    ? (CALENDAR_THEME_PRESETS[activeTheme]?.primaryColor ??
+                      "#0284C7")
                     : effectiveColorScheme === "dark"
                       ? pal.darkPrimary
                       : pal.lightPrimary;
@@ -96,8 +106,12 @@ export const CalendarThemeSection: React.FC<CalendarThemeSectionProps> = ({
                       height: 26,
                       borderRadius: "999px",
                       background: swatchColor,
-                      border: isSelected ? "2px solid #FFFFFF" : "1px solid rgba(128,128,128,0.35)",
-                      boxShadow: isSelected ? `0 0 0 2px ${swatchColor}` : "none",
+                      border: isSelected
+                        ? "2px solid #FFFFFF"
+                        : "1px solid rgba(128,128,128,0.35)",
+                      boxShadow: isSelected
+                        ? `0 0 0 2px ${swatchColor}`
+                        : "none",
                       cursor: "pointer",
                       padding: 0,
                       transition: "transform 0.12s ease",
@@ -117,26 +131,35 @@ export const CalendarThemeSection: React.FC<CalendarThemeSectionProps> = ({
             )}
           >
             <Field.Label>
-              {t("settings.colorSchemeLabel", "Calendar Appearance (Color Scheme)")}
+              {t(
+                "settings.colorSchemeLabel",
+                "Calendar Appearance (Color Scheme)"
+              )}
             </Field.Label>
             <Flex gap={2} alignItems="center" wrap="wrap" paddingTop={1}>
               <Button
                 size="S"
-                variant={configuredColorScheme === "auto" ? "default" : "tertiary"}
+                variant={
+                  configuredColorScheme === "auto" ? "default" : "tertiary"
+                }
                 onClick={() => onPatchSettings({ colorScheme: "auto" })}
               >
                 {t("calendar.scheme.auto", "Auto (Match Strapi Theme)")}
               </Button>
               <Button
                 size="S"
-                variant={configuredColorScheme === "light" ? "default" : "tertiary"}
+                variant={
+                  configuredColorScheme === "light" ? "default" : "tertiary"
+                }
                 onClick={() => onPatchSettings({ colorScheme: "light" })}
               >
                 {t("calendar.scheme.light", "Light")}
               </Button>
               <Button
                 size="S"
-                variant={configuredColorScheme === "dark" ? "default" : "tertiary"}
+                variant={
+                  configuredColorScheme === "dark" ? "default" : "tertiary"
+                }
                 onClick={() => onPatchSettings({ colorScheme: "dark" })}
               >
                 {t("calendar.scheme.dark", "Dark")}
@@ -242,14 +265,20 @@ export const CalendarThemeSection: React.FC<CalendarThemeSectionProps> = ({
                     preset.eventStyle === "solid"
                       ? preview.primaryColor
                       : `${preview.primaryColor}22`,
-                  color: preset.eventStyle === "solid" ? "#FFFFFF" : preview.cellText,
+                  color:
+                    preset.eventStyle === "solid"
+                      ? "#FFFFFF"
+                      : preview.cellText,
                   borderLeft:
                     preset.eventStyle === "accent-bar"
                       ? `5px solid ${preview.primaryColor}`
                       : `1px solid ${preview.primaryColor}55`,
                 }}
               >
-                {t("settings.theme.previewSampleEvent", "09:00 · Jumu'ah / Event")}
+                {t(
+                  "settings.theme.previewSampleEvent",
+                  "09:00 · Jumu'ah / Event"
+                )}
               </div>
 
               <div
@@ -259,7 +288,10 @@ export const CalendarThemeSection: React.FC<CalendarThemeSectionProps> = ({
                   lineHeight: 1.4,
                 }}
               >
-                {t(`settings.theme.${preset.id}.description`, preset.description)}
+                {t(
+                  `settings.theme.${preset.id}.description`,
+                  preset.description
+                )}
               </div>
             </button>
           );

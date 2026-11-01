@@ -42,8 +42,13 @@ declare module "react" {
     current: T | null;
   }
 
-  export function useState<T>(initial: T | (() => T)): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
+  export function useState<T>(
+    initial: T | (() => T)
+  ): [T, (next: T | ((prev: T) => T)) => void];
+  export function useEffect(
+    effect: () => void | (() => void),
+    deps?: readonly unknown[]
+  ): void;
   export function useCallback<T extends (...args: never[]) => unknown>(
     cb: T,
     deps: readonly unknown[]
@@ -75,8 +80,16 @@ declare module "react" {
 declare module "react/jsx-runtime" {
   import type { ReactElement } from "react";
   export const Fragment: unknown;
-  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
-  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsx(
+    type: unknown,
+    props: unknown,
+    key?: unknown
+  ): ReactElement;
+  export function jsxs(
+    type: unknown,
+    props: unknown,
+    key?: unknown
+  ): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
@@ -113,8 +126,14 @@ declare module "@strapi/strapi/admin" {
   }
   export interface FetchClient {
     get<T = DefaultFetchPayload>(url: string): Promise<FetchResponse<T>>;
-    post<T = DefaultFetchPayload>(url: string, body?: unknown): Promise<FetchResponse<T>>;
-    put<T = DefaultFetchPayload>(url: string, body?: unknown): Promise<FetchResponse<T>>;
+    post<T = DefaultFetchPayload>(
+      url: string,
+      body?: unknown
+    ): Promise<FetchResponse<T>>;
+    put<T = DefaultFetchPayload>(
+      url: string,
+      body?: unknown
+    ): Promise<FetchResponse<T>>;
     del<T = DefaultFetchPayload>(url: string): Promise<FetchResponse<T>>;
   }
   export function useFetchClient(): FetchClient;
@@ -406,7 +425,9 @@ declare module "@fullcalendar/react" {
     dayCellContent?: (
       arg: import("@fullcalendar/core").DayCellContentArg
     ) => import("react").ReactNode;
-    eventContent?: (arg: import("@fullcalendar/core").EventContentArg) => import("react").ReactNode;
+    eventContent?: (
+      arg: import("@fullcalendar/core").EventContentArg
+    ) => import("react").ReactNode;
   }
 
   export default class FullCalendar {

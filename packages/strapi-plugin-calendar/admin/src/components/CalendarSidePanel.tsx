@@ -36,7 +36,8 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
   const model = props.model ?? "";
   const docRecord = props.document ?? {};
   const documentId =
-    props.documentId ?? (typeof docRecord.documentId === "string" ? docRecord.documentId : "");
+    props.documentId ??
+    (typeof docRecord.documentId === "string" ? docRecord.documentId : "");
   const rawStartDate = resolveSidePanelStartDate(docRecord);
   const activeLocale = resolveActiveContentLocale(locale);
 
@@ -70,8 +71,11 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
     return settings.secondaryCalendars
       .filter((sys) => sys.enabled)
       .map((sys) => {
-        const rawFieldVal = sys.overrideField ? docRecord[sys.overrideField] : undefined;
-        const overrideVal = typeof rawFieldVal === "string" ? rawFieldVal.trim() : "";
+        const rawFieldVal = sys.overrideField
+          ? docRecord[sys.overrideField]
+          : undefined;
+        const overrideVal =
+          typeof rawFieldVal === "string" ? rawFieldVal.trim() : "";
         const formatted =
           overrideVal ||
           formatDateInCalendarSystem(rawStartDate, sys, activeLocale, {
@@ -92,7 +96,12 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
   }
 
   const t = (id: string, defaultMessage: string) =>
-    formatPluginMessageWithUrlLocale(PLUGIN_ID, id, defaultMessage, formatMessage);
+    formatPluginMessageWithUrlLocale(
+      PLUGIN_ID,
+      id,
+      defaultMessage,
+      formatMessage
+    );
 
   const icsUrl = `/api/calendar/${encodeURIComponent(documentId)}/invite.ics`;
 
@@ -104,11 +113,23 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
           {computedAlternateDates.length > 0 && (
             <Box padding={3} background="neutral100" hasRadius>
               <Typography variant="sigma" textColor="neutral600">
-                {t("sidePanel.secondaryCalendars", "Alternative Calendar Dates")}
+                {t(
+                  "sidePanel.secondaryCalendars",
+                  "Alternative Calendar Dates"
+                )}
               </Typography>
-              <Flex direction="column" alignItems="stretch" gap={1} paddingTop={2}>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={1}
+                paddingTop={2}
+              >
                 {computedAlternateDates.map((alt) => (
-                  <Flex key={alt.id} justifyContent="space-between" alignItems="center">
+                  <Flex
+                    key={alt.id}
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
                     <Typography variant="pi" textColor="neutral600">
                       {alt.label}:
                     </Typography>

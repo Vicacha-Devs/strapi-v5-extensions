@@ -151,13 +151,17 @@ export const CALENDAR_COLOR_PALETTES: Record<
   },
 };
 
-function detectFromHexLuminance(strapiNeutral0?: string): "light" | "dark" | null {
+function detectFromHexLuminance(
+  strapiNeutral0?: string
+): "light" | "dark" | null {
   if (typeof strapiNeutral0 !== "string" || !strapiNeutral0.startsWith("#")) {
     return null;
   }
   const hex = strapiNeutral0.slice(1).trim();
   const r =
-    hex.length === 3 ? Number.parseInt(hex[0] + hex[0], 16) : Number.parseInt(hex.slice(0, 2), 16);
+    hex.length === 3
+      ? Number.parseInt(hex[0] + hex[0], 16)
+      : Number.parseInt(hex.slice(0, 2), 16);
   if (Number.isNaN(r)) return null;
   return r < 128 ? "dark" : "light";
 }
@@ -172,7 +176,9 @@ function detectFromBrowserEnvironment(): "light" | "dark" {
   } catch {
     // ignore storage errors
   }
-  return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
+  return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches
+    ? "dark"
+    : "light";
 }
 
 /**
@@ -188,5 +194,7 @@ export function detectEffectiveColorScheme(
   if (colorScheme === "dark" || colorScheme === "light") {
     return colorScheme;
   }
-  return detectFromHexLuminance(strapiNeutral0) ?? detectFromBrowserEnvironment();
+  return (
+    detectFromHexLuminance(strapiNeutral0) ?? detectFromBrowserEnvironment()
+  );
 }

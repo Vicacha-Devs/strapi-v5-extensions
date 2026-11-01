@@ -5,8 +5,10 @@ import { PLUGIN_ID } from "../../../shared/pluginId";
 import { getCalendarService, type IcalService } from "../types";
 
 export default ({ strapi }: { strapi: Core.Strapi }): IcalService => {
-  const getSettingsService = () => getCalendarService(strapi, PLUGIN_ID, "settings");
-  const getOccurrenceService = () => getCalendarService(strapi, PLUGIN_ID, "occurrence");
+  const getSettingsService = () =>
+    getCalendarService(strapi, PLUGIN_ID, "settings");
+  const getOccurrenceService = () =>
+    getCalendarService(strapi, PLUGIN_ID, "occurrence");
 
   return {
     async buildFeedIcs(params: {
@@ -48,7 +50,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): IcalService => {
       });
 
       if (params.occurrenceDate) {
-        const filtered = occurrences.filter((o) => o.occurrenceDate === params.occurrenceDate);
+        const filtered = occurrences.filter(
+          (o) => o.occurrenceDate === params.occurrenceDate
+        );
         if (filtered.length > 0) {
           occurrences = filtered;
         }
@@ -57,7 +61,8 @@ export default ({ strapi }: { strapi: Core.Strapi }): IcalService => {
       }
 
       return generateIcsCalendar({
-        calendarTitle: occurrences[0]?.title || settings.feedTitle || "Calendar Invite",
+        calendarTitle:
+          occurrences[0]?.title || settings.feedTitle || "Calendar Invite",
         timezone: settings.defaultTimezone || "UTC",
         occurrences,
       });

@@ -13,10 +13,14 @@ function readOptString(val: unknown): string | undefined {
   return typeof val === "string" && val ? val : undefined;
 }
 
-function parseQuickCreateBody(body: Record<string, unknown>): QuickCreateEntryParams {
+function parseQuickCreateBody(
+  body: Record<string, unknown>
+): QuickCreateEntryParams {
   const statusRaw = body.bookingStatus;
   const bookingStatus =
-    statusRaw === "pending" || statusRaw === "confirmed" ? statusRaw : undefined;
+    statusRaw === "pending" || statusRaw === "confirmed"
+      ? statusRaw
+      : undefined;
   return {
     sourceId: readOptString(body.sourceId),
     title: String(body.title ?? ""),
@@ -29,14 +33,17 @@ function parseQuickCreateBody(body: Record<string, unknown>): QuickCreateEntryPa
     customerName: readOptString(body.customerName),
     customerEmail: readOptString(body.customerEmail),
     customerPhone: readOptString(body.customerPhone),
-    partySize: body.partySize !== undefined ? Number(body.partySize) : undefined,
+    partySize:
+      body.partySize !== undefined ? Number(body.partySize) : undefined,
     bookingStatus,
   };
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getSettingsService = () => getCalendarService(strapi, PLUGIN_ID, "settings");
-  const getOccurrenceService = () => getCalendarService(strapi, PLUGIN_ID, "occurrence");
+  const getSettingsService = () =>
+    getCalendarService(strapi, PLUGIN_ID, "settings");
+  const getOccurrenceService = () =>
+    getCalendarService(strapi, PLUGIN_ID, "occurrence");
 
   return {
     async getCalendar(ctx: StrapiRouteContext) {
@@ -86,7 +93,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, "Failed to reschedule occurrence."),
+            message: formatErrorMessage(
+              err,
+              "Failed to reschedule occurrence."
+            ),
           },
         };
       }
@@ -95,14 +105,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async quickCreate(ctx: StrapiRouteContext) {
       try {
         const body = (ctx.request?.body ?? {}) as Record<string, unknown>;
-        const created = await getOccurrenceService().quickCreateEntry(parseQuickCreateBody(body));
+        const created = await getOccurrenceService().quickCreateEntry(
+          parseQuickCreateBody(body)
+        );
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, "Failed to create calendar entry."),
+            message: formatErrorMessage(
+              err,
+              "Failed to create calendar entry."
+            ),
           },
         };
       }
@@ -122,7 +137,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     },
 
-    async updateSettings(ctx: StrapiRouteContext<Partial<CalendarPluginSettings>>) {
+    async updateSettings(
+      ctx: StrapiRouteContext<Partial<CalendarPluginSettings>>
+    ) {
       try {
         const body = ctx.request?.body ?? {};
         const updated = await getSettingsService().updateSettings(body);
@@ -159,7 +176,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 400;
         ctx.body = {
           error: {
-            message: formatErrorMessage(err, "Failed to discover content types."),
+            message: formatErrorMessage(
+              err,
+              "Failed to discover content types."
+            ),
           },
         };
       }

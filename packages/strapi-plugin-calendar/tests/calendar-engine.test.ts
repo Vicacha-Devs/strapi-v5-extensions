@@ -6,7 +6,10 @@ import {
   resolveOccurrenceAlternateDates,
   registerCalendarSystemFormatter,
 } from "../shared/calendarSystems";
-import { generateIcsCalendar, buildCalendarLinks } from "../shared/icalGenerator";
+import {
+  generateIcsCalendar,
+  buildCalendarLinks,
+} from "../shared/icalGenerator";
 import {
   parseRRule,
   buildRRule,
@@ -17,13 +20,17 @@ import {
 
 describe("RFC 5545 RRULE & RFC 7529 RSCALE Recurrence Engine", () => {
   it("parses and builds standard RFC 5545 RRULE strings and RFC 7529 RSCALE strings", () => {
-    const parsedWeekly = parseRRule("FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,FR;COUNT=10");
+    const parsedWeekly = parseRRule(
+      "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO,FR;COUNT=10"
+    );
     expect(parsedWeekly.freq).toBe("WEEKLY");
     expect(parsedWeekly.interval).toBe(1);
     expect(parsedWeekly.byDay).toEqual(["MO", "FR"]);
     expect(parsedWeekly.count).toBe(10);
 
-    const parsedRscale = parseRRule("RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1");
+    const parsedRscale = parseRRule(
+      "RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1"
+    );
     expect(parsedRscale.rscale).toBe("islamic-umalqura");
     expect(parsedRscale.freq).toBe("YEARLY");
     expect(parsedRscale.byMonth).toBe(9);
@@ -95,18 +102,24 @@ describe("Multi-Calendar Systems & Custom Formatters", () => {
       dayOffset: 0,
       enabled: true,
     });
-    const hijriShifted = formatDateInCalendarSystem("2026-05-01T12:00:00.000Z", {
-      id: "hijri",
-      label: "Hijri (+1)",
-      intlCalendar: "islamic-umalqura",
-      locale: "en-US",
-      dayOffset: 1,
-      enabled: true,
-    });
+    const hijriShifted = formatDateInCalendarSystem(
+      "2026-05-01T12:00:00.000Z",
+      {
+        id: "hijri",
+        label: "Hijri (+1)",
+        intlCalendar: "islamic-umalqura",
+        locale: "en-US",
+        dayOffset: 1,
+        enabled: true,
+      }
+    );
     expect(hijriBase.length).toBeGreaterThan(3);
     expect(hijriBase !== hijriShifted).toBe(true);
 
-    registerCalendarSystemFormatter("custom-lunar", (date) => `Lunar-${date.getUTCFullYear()}`);
+    registerCalendarSystemFormatter(
+      "custom-lunar",
+      (date) => `Lunar-${date.getUTCFullYear()}`
+    );
 
     const map = resolveOccurrenceAlternateDates({
       occurrenceDate: "2026-05-01",

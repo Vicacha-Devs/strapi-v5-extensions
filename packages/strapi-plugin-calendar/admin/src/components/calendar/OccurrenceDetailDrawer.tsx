@@ -49,7 +49,12 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
       shadow="tableShadow"
       style={{ borderLeft: `4px solid ${occurrence.color}` }}
     >
-      <Flex justifyContent="space-between" alignItems="flex-start" wrap="wrap" gap={4}>
+      <Flex
+        justifyContent="space-between"
+        alignItems="flex-start"
+        wrap="wrap"
+        gap={4}
+      >
         <Box style={{ flex: 2, minWidth: 260 }}>
           <Flex gap={2} alignItems="center" wrap="wrap">
             <Badge backgroundColor="neutral150" textColor="neutral800">
@@ -67,7 +72,11 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
             )}
             {occurrence.alternateDates &&
               Object.values(occurrence.alternateDates).map((alt) => (
-                <Badge key={alt.calendarId} backgroundColor="warning100" textColor="warning700">
+                <Badge
+                  key={alt.calendarId}
+                  backgroundColor="warning100"
+                  textColor="warning700"
+                >
                   {alt.label}: {alt.formatted}
                 </Badge>
               ))}
@@ -84,19 +93,24 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
               {occurrence.location ? ` • ${occurrence.location}` : ""}
             </Typography>
           </Box>
-          {occurrence.customFields && Object.keys(occurrence.customFields).length > 0 && (
-            <Box paddingTop={2}>
-              <Flex gap={2} wrap="wrap">
-                {Object.entries(occurrence.customFields).map(([k, v]) =>
-                  v !== null && v !== undefined && String(v).trim() !== "" ? (
-                    <Badge key={k} backgroundColor="neutral100" textColor="neutral700">
-                      {k}: {String(v)}
-                    </Badge>
-                  ) : null
-                )}
-              </Flex>
-            </Box>
-          )}
+          {occurrence.customFields &&
+            Object.keys(occurrence.customFields).length > 0 && (
+              <Box paddingTop={2}>
+                <Flex gap={2} wrap="wrap">
+                  {Object.entries(occurrence.customFields).map(([k, v]) =>
+                    v !== null && v !== undefined && String(v).trim() !== "" ? (
+                      <Badge
+                        key={k}
+                        backgroundColor="neutral100"
+                        textColor="neutral700"
+                      >
+                        {k}: {String(v)}
+                      </Badge>
+                    ) : null
+                  )}
+                </Flex>
+              </Box>
+            )}
         </Box>
 
         <Flex
@@ -105,10 +119,17 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
           gap={2}
           style={{ flex: "1 1 320px", minWidth: 260 }}
         >
-          <Flex gap={2} alignItems="flex-end" wrap="wrap" justifyContent="flex-end">
+          <Flex
+            gap={2}
+            alignItems="flex-end"
+            wrap="wrap"
+            justifyContent="flex-end"
+          >
             <Box style={{ minWidth: 180, maxWidth: 220 }}>
               <Field.Root>
-                <Field.Label>{t("calendar.rescheduleTo", "Reschedule Date")}</Field.Label>
+                <Field.Label>
+                  {t("calendar.rescheduleTo", "Reschedule Date")}
+                </Field.Label>
                 <DatePicker
                   size="S"
                   value={parseDateTimePickerValue(rescheduleDate)}
@@ -128,7 +149,9 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
           {occurrence.isRecurring && (
             <Checkbox
               checked={applyToSeries}
-              onCheckedChange={(checked: boolean) => onApplyToSeriesChange(Boolean(checked))}
+              onCheckedChange={(checked: boolean) =>
+                onApplyToSeriesChange(Boolean(checked))
+              }
             >
               {t("calendar.applyToSeries", "Apply to entire recurring series")}
             </Checkbox>
@@ -157,7 +180,11 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
             >
               {t("calendar.downloadIcs", ".ICS")}
             </Button>
-            <Button size="S" variant="danger-light" onClick={onCancelOccurrence}>
+            <Button
+              size="S"
+              variant="danger-light"
+              onClick={onCancelOccurrence}
+            >
               {t("calendar.cancelInstance", "Cancel Occurrence")}
             </Button>
             <Button size="S" variant="tertiary" onClick={onClose}>

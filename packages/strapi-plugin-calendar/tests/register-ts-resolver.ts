@@ -4,7 +4,9 @@ import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const vitestShimUrl = pathToFileURL(resolvePath(currentDir, "vitest-shim.ts")).href;
+const vitestShimUrl = pathToFileURL(
+  resolvePath(currentDir, "vitest-shim.ts")
+).href;
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
@@ -12,7 +14,10 @@ registerHooks({
       return { url: vitestShimUrl, shortCircuit: true };
     }
 
-    if ((specifier.startsWith("./") || specifier.startsWith("../")) && context.parentURL) {
+    if (
+      (specifier.startsWith("./") || specifier.startsWith("../")) &&
+      context.parentURL
+    ) {
       const parentDir = dirname(fileURLToPath(context.parentURL));
       const baseCandidate = resolvePath(parentDir, specifier);
 
@@ -45,7 +50,10 @@ registerHooks({
       };
     }
 
-    if ((url.endsWith(".ts") || url.endsWith(".tsx")) && !url.includes("/node_modules/")) {
+    if (
+      (url.endsWith(".ts") || url.endsWith(".tsx")) &&
+      !url.includes("/node_modules/")
+    ) {
       const filePath = fileURLToPath(url);
       const source = readFileSync(filePath, "utf8");
       const stripped = stripTypeScriptTypes(source, { mode: "strip" });

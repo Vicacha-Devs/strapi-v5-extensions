@@ -31,7 +31,10 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   const settingsService = getCalendarService(strapi, PLUGIN_ID, "settings");
-  if (settingsService && typeof settingsService.ensureInitialized === "function") {
+  if (
+    settingsService &&
+    typeof settingsService.ensureInitialized === "function"
+  ) {
     await settingsService.ensureInitialized();
   }
 };

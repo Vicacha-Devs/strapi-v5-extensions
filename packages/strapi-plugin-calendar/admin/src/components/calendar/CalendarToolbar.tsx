@@ -69,7 +69,11 @@ const QuickCreateButtons: React.FC<{
     );
   }
   return (
-    <Button variant="default" size="S" onClick={() => onOpenQuickCreate(enabledSources[0]?.id)}>
+    <Button
+      variant="default"
+      size="S"
+      onClick={() => onOpenQuickCreate(enabledSources[0]?.id)}
+    >
       + {t("calendar.quickCreate", "New Entry")}
     </Button>
   );
@@ -99,13 +103,22 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
 }) => {
   const localeBundle = getLocalizedCalendarBundle(effectiveLocale);
   const isRtl = effectiveDirection === "rtl";
-  const enabledSources = (settings?.sources ?? []).filter((src) => src.enabled !== false);
-  const showSecondaryBadge = Boolean(secondaryHeaderLabel && secondaryLangMode !== "off");
+  const enabledSources = (settings?.sources ?? []).filter(
+    (src) => src.enabled !== false
+  );
+  const showSecondaryBadge = Boolean(
+    secondaryHeaderLabel && secondaryLangMode !== "off"
+  );
 
   return (
     <Flex direction="column" alignItems="stretch" gap={4}>
       {/* Header Bar */}
-      <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+      <Flex
+        justifyContent="space-between"
+        alignItems="center"
+        wrap="wrap"
+        gap={3}
+      >
         <Box>
           <Typography variant="alpha" fontWeight="bold">
             {t("calendar.title", "Calendar & Scheduler")}
@@ -154,7 +167,12 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           >
             {t("calendar.downloadIcsFeed", "iCal Feed (.ics)")}
           </Button>
-          <Button variant="tertiary" size="S" tag="a" href={`/admin/settings/${PLUGIN_ID}`}>
+          <Button
+            variant="tertiary"
+            size="S"
+            tag="a"
+            href={`/admin/settings/${PLUGIN_ID}`}
+          >
             {t("calendar.settings", "Settings")}
           </Button>
         </Flex>
@@ -162,17 +180,34 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
 
       {/* Navigation, Source Filter & View Switcher Toolbar */}
       <Box padding={3} background="neutral0" hasRadius shadow="filterShadow">
-        <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="center"
+          wrap="wrap"
+          gap={3}
+        >
           <Flex gap={2} alignItems="center" wrap="wrap">
-            <Button variant="tertiary" size="S" onClick={() => onNavigate("prev")}>
+            <Button
+              variant="tertiary"
+              size="S"
+              onClick={() => onNavigate("prev")}
+            >
               {isRtl ? "→" : "←"} {localeBundle.buttonText.prev}
             </Button>
             {settings?.showTodayButton !== false && (
-              <Button variant="secondary" size="S" onClick={() => onNavigate("today")}>
+              <Button
+                variant="secondary"
+                size="S"
+                onClick={() => onNavigate("today")}
+              >
                 {localeBundle.buttonText.today}
               </Button>
             )}
-            <Button variant="tertiary" size="S" onClick={() => onNavigate("next")}>
+            <Button
+              variant="tertiary"
+              size="S"
+              onClick={() => onNavigate("next")}
+            >
               {localeBundle.buttonText.next} {isRtl ? "←" : "→"}
             </Button>
           </Flex>
@@ -214,7 +249,9 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
                 aria-label={t("calendar.toolbar.category", "Category Filter")}
                 placeholder={t("placeholder.all_categories", "All Categories")}
                 value={categoryFilter}
-                onChange={(val: string | number) => onCategoryFilterChange(String(val))}
+                onChange={(val: string | number) =>
+                  onCategoryFilterChange(String(val))
+                }
               >
                 <SingleSelectOption value="all">
                   {t("calendar.allCategories", "All Categories")}

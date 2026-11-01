@@ -101,7 +101,9 @@ describe("FullCalendar Localization & 10-Locale Translation Parity", () => {
     ]) {
       expect(themeKeys).toContain(key);
     }
-    expect(Object.keys(CALENDAR_COLOR_PALETTES).length).toBeGreaterThanOrEqual(7);
+    expect(Object.keys(CALENDAR_COLOR_PALETTES).length).toBeGreaterThanOrEqual(
+      7
+    );
 
     // Breezy (tinted event style, 10px container radius)
     const breezyLight = resolveCalendarTheme("breeze", "light", "default");
@@ -141,7 +143,12 @@ describe("FullCalendar Localization & 10-Locale Translation Parity", () => {
     expect(detectEffectiveColorScheme("dark", "#ffffff")).toBe("dark");
     expect(detectEffectiveColorScheme("light", "#212134")).toBe("light");
 
-    const autoDarkBreeze = resolveCalendarTheme("breeze", "auto", "default", "#212134");
+    const autoDarkBreeze = resolveCalendarTheme(
+      "breeze",
+      "auto",
+      "default",
+      "#212134"
+    );
     expect(autoDarkBreeze.cellBg).toBe("#030712");
     expect(autoDarkBreeze.headerBg).toBe("#111827");
   });

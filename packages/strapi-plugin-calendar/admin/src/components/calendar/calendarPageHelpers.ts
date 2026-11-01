@@ -16,13 +16,41 @@ import type {
 
 export const FALLBACK_RECURRENCE_PRESETS: RecurrencePreset[] = [
   { id: "daily", label: "Daily", rrule: "FREQ=DAILY;INTERVAL=1" },
-  { id: "weekly-mon", label: "Weekly on Mondays", rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO" },
-  { id: "weekly-tue", label: "Weekly on Tuesdays", rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=TU" },
-  { id: "weekly-wed", label: "Weekly on Wednesdays", rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=WE" },
-  { id: "weekly-thu", label: "Weekly on Thursdays", rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=TH" },
-  { id: "weekly-fri", label: "Weekly on Fridays", rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR" },
-  { id: "weekly-sat", label: "Weekly on Saturdays", rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=SA" },
-  { id: "weekly-sun", label: "Weekly on Sundays", rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=SU" },
+  {
+    id: "weekly-mon",
+    label: "Weekly on Mondays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=MO",
+  },
+  {
+    id: "weekly-tue",
+    label: "Weekly on Tuesdays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=TU",
+  },
+  {
+    id: "weekly-wed",
+    label: "Weekly on Wednesdays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=WE",
+  },
+  {
+    id: "weekly-thu",
+    label: "Weekly on Thursdays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=TH",
+  },
+  {
+    id: "weekly-fri",
+    label: "Weekly on Fridays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR",
+  },
+  {
+    id: "weekly-sat",
+    label: "Weekly on Saturdays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=SA",
+  },
+  {
+    id: "weekly-sun",
+    label: "Weekly on Sundays",
+    rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=SU",
+  },
   { id: "monthly", label: "Monthly", rrule: "FREQ=MONTHLY;INTERVAL=1" },
   { id: "yearly", label: "Yearly", rrule: "FREQ=YEARLY;INTERVAL=1" },
 ];
@@ -42,7 +70,9 @@ export const WEEKDAYS: Array<{
   { code: "SU", label: "Sun", fullName: "Sunday", jsDay: 0 },
 ];
 
-function parseOptionalStartDate(startDate?: Date | string | null): Date | undefined {
+function parseOptionalStartDate(
+  startDate?: Date | string | null
+): Date | undefined {
   if (typeof startDate === "string" && startDate.trim()) {
     const d = new Date(startDate);
     return Number.isNaN(d.getTime()) ? undefined : d;
@@ -103,7 +133,15 @@ export function buildOrderedRecurrencePresets(
 export function extractByDays(rrule: string): RRuleWeekday[] {
   const match = rrule.match(/BYDAY=([A-Z,]+)/i);
   if (!match?.[1]) return [];
-  const validCodes = new Set<RRuleWeekday>(["MO", "TU", "WE", "TH", "FR", "SA", "SU"]);
+  const validCodes = new Set<RRuleWeekday>([
+    "MO",
+    "TU",
+    "WE",
+    "TH",
+    "FR",
+    "SA",
+    "SU",
+  ]);
   return match[1]
     .toUpperCase()
     .split(",")
@@ -140,7 +178,10 @@ export function formatLocalYmd(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-export function alignStartDateToWeekday(startStr: string, targetCode: RRuleWeekday): string {
+export function alignStartDateToWeekday(
+  startStr: string,
+  targetCode: RRuleWeekday
+): string {
   if (!startStr) return startStr;
   const target = WEEKDAYS.find((w) => w.code === targetCode);
   if (!target) return startStr;
@@ -194,18 +235,30 @@ export function matchLoadedSourceId(
   const matched = loadedSources.find(
     (s) =>
       s.uid === sourceFilter ||
-      (sourceFilter === "events" && (s.id.includes("event") || s.uid.includes("event"))) ||
-      (sourceFilter === "bookings" && (s.id.includes("booking") || s.uid.includes("booking")))
+      (sourceFilter === "events" &&
+        (s.id.includes("event") || s.uid.includes("event"))) ||
+      (sourceFilter === "bookings" &&
+        (s.id.includes("booking") || s.uid.includes("booking")))
   );
   return matched ? matched.id : null;
 }
 
-export function normalizeSelectedEndSlot(startStr: string, endStr: string): string {
+export function normalizeSelectedEndSlot(
+  startStr: string,
+  endStr: string
+): string {
   if (!endStr) return "";
-  if (/^\d{4}-\d{2}-\d{2}$/.test(startStr) && /^\d{4}-\d{2}-\d{2}$/.test(endStr)) {
+  if (
+    /^\d{4}-\d{2}-\d{2}$/.test(startStr) &&
+    /^\d{4}-\d{2}-\d{2}$/.test(endStr)
+  ) {
     const startMs = new Date(`${startStr}T00:00:00.000Z`).getTime();
     const endMs = new Date(`${endStr}T00:00:00.000Z`).getTime();
-    if (!Number.isNaN(startMs) && !Number.isNaN(endMs) && endMs - startMs <= 86400000) {
+    if (
+      !Number.isNaN(startMs) &&
+      !Number.isNaN(endMs) &&
+      endMs - startMs <= 86400000
+    ) {
       return "";
     }
   }
@@ -223,7 +276,9 @@ export function resolveActiveSecondaryCalendars(
   if (configured.length > 0) {
     return configured;
   }
-  const hijriMatch = SUPPORTED_INTL_CALENDARS.find((c) => c.id === "islamic-umalqura");
+  const hijriMatch = SUPPORTED_INTL_CALENDARS.find(
+    (c) => c.id === "islamic-umalqura"
+  );
   return hijriMatch
     ? [
         {
@@ -272,7 +327,8 @@ export function buildSecondaryHeaderLabel(
   effectiveLocale: string,
   secondaryLangMode: SecondaryCalendarLanguageMode
 ): string {
-  if (activeSecondaryCalendars.length === 0 || secondaryLangMode === "off") return "";
+  if (activeSecondaryCalendars.length === 0 || secondaryLangMode === "off")
+    return "";
   const anchorIso = anchorDate.toISOString().slice(0, 10);
   const targetLoc = secondaryLangMode === "ar" ? "ar-SA" : effectiveLocale;
   return activeSecondaryCalendars
@@ -295,11 +351,16 @@ export function buildEnabledCalendarViews(
 ): Array<{ mode: CalendarViewMode; label: string }> {
   const b = getLocalizedCalendarBundle(effectiveLocale).buttonText;
   const list: Array<{ mode: CalendarViewMode; label: string }> = [];
-  if (settings?.monthView !== false) list.push({ mode: "dayGridMonth", label: b.month });
-  if (settings?.weekView !== false) list.push({ mode: "timeGridWeek", label: b.week });
-  if (settings?.dayView !== false) list.push({ mode: "timeGridDay", label: b.day });
-  if (settings?.agendaView !== false) list.push({ mode: "listMonth", label: b.list });
-  if (settings?.yearView !== false) list.push({ mode: "multiMonthYear", label: b.year });
+  if (settings?.monthView !== false)
+    list.push({ mode: "dayGridMonth", label: b.month });
+  if (settings?.weekView !== false)
+    list.push({ mode: "timeGridWeek", label: b.week });
+  if (settings?.dayView !== false)
+    list.push({ mode: "timeGridDay", label: b.day });
+  if (settings?.agendaView !== false)
+    list.push({ mode: "listMonth", label: b.list });
+  if (settings?.yearView !== false)
+    list.push({ mode: "multiMonthYear", label: b.year });
   return list;
 }
 
@@ -354,7 +415,8 @@ function computeStartEndIsoPair(
   const startIso = quickStart.includes("T")
     ? new Date(quickStart).toISOString()
     : `${quickStart}T10:00:00.000Z`;
-  const hasValidEnd = Boolean(quickEnd) && !Number.isNaN(new Date(quickEnd).getTime());
+  const hasValidEnd =
+    Boolean(quickEnd) && !Number.isNaN(new Date(quickEnd).getTime());
   const endIso = hasValidEnd
     ? new Date(quickEnd).toISOString()
     : new Date(new Date(startIso).getTime() + 3600000).toISOString();
@@ -374,9 +436,13 @@ export function buildQuickCreateRequestPayload(args: {
   quickCustomerEmail: string;
   quickPartySize: number;
 }): Record<string, unknown> {
-  const { startIso, endIso } = computeStartEndIsoPair(args.quickStart, args.quickEnd);
+  const { startIso, endIso } = computeStartEndIsoPair(
+    args.quickStart,
+    args.quickEnd
+  );
   const targetSource =
-    args.quickSourceId || (args.sourceFilter !== "all" ? args.sourceFilter : undefined);
+    args.quickSourceId ||
+    (args.sourceFilter !== "all" ? args.sourceFilter : undefined);
   return {
     sourceId: targetSource,
     title: args.quickTitle.trim(),
@@ -397,7 +463,9 @@ interface GlobalCmI18nWindow {
 
 export function resolveActiveContentLocale(fallbackLocale?: string): string {
   if (typeof window !== "undefined") {
-    const urlLoc = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
+    const urlLoc = new URLSearchParams(window.location.search).get(
+      "plugins[i18n][locale]"
+    );
     if (urlLoc) return urlLoc;
   }
   return fallbackLocale || "en";
@@ -411,8 +479,11 @@ export function formatPluginMessageWithUrlLocale(
 ): string {
   const fullKey = `${pluginId}.${id}`;
   if (typeof window !== "undefined") {
-    const urlLoc = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
-    const globalMessages = (globalThis as unknown as GlobalCmI18nWindow).__CM_I18N_MESSAGES__;
+    const urlLoc = new URLSearchParams(window.location.search).get(
+      "plugins[i18n][locale]"
+    );
+    const globalMessages = (globalThis as unknown as GlobalCmI18nWindow)
+      .__CM_I18N_MESSAGES__;
     const override = urlLoc ? globalMessages?.[urlLoc]?.[fullKey] : undefined;
     if (override) return override;
   }

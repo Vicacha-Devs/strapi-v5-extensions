@@ -3,7 +3,11 @@ import {
   detectEffectiveColorScheme,
   type CalendarColorPaletteDefinition as CalendarColorPalette,
 } from "./themePalettes";
-import type { CalendarColorPaletteId, CalendarColorScheme, CalendarThemePreset } from "./types";
+import type {
+  CalendarColorPaletteId,
+  CalendarColorScheme,
+  CalendarThemePreset,
+} from "./types";
 
 export interface CalendarThemeDefinition {
   id: CalendarThemePreset;
@@ -35,7 +39,10 @@ export interface CalendarThemeDefinition {
   badgeBorder: string;
 }
 
-export const CALENDAR_THEME_PRESETS: Record<CalendarThemePreset, CalendarThemeDefinition> = {
+export const CALENDAR_THEME_PRESETS: Record<
+  CalendarThemePreset,
+  CalendarThemeDefinition
+> = {
   breeze: {
     id: "breeze",
     label: "Breezy (Modern Default)",
@@ -132,7 +139,8 @@ export const CALENDAR_THEME_PRESETS: Record<CalendarThemePreset, CalendarThemeDe
     description:
       "FullCalendar Pulse style — right-aligned day numbers, crimson Today circle, elevated controls & dotted minor slots",
     category: "modern",
-    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+    fontFamily:
+      "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
     containerRadius: "8px",
     containerShadow: "0 1px 3px rgba(0, 0, 0, 0.12)",
     eventRadius: "6px",
@@ -224,7 +232,8 @@ export const CALENDAR_THEME_PRESETS: Record<CalendarThemePreset, CalendarThemeDe
     category: "design-system",
     fontFamily: "'Roboto Variable', Roboto, Helvetica, Arial, sans-serif",
     containerRadius: "8px",
-    containerShadow: "0px 2px 4px -1px rgba(0,0,0,0.08), 0px 4px 5px 0px rgba(0,0,0,0.05)",
+    containerShadow:
+      "0px 2px 4px -1px rgba(0,0,0,0.08), 0px 4px 5px 0px rgba(0,0,0,0.05)",
     eventRadius: "4px",
     eventStyle: "solid",
     dayNumberAlign: "center",
@@ -249,7 +258,8 @@ export const CALENDAR_THEME_PRESETS: Record<CalendarThemePreset, CalendarThemeDe
   emerald: {
     id: "emerald",
     label: "Emerald Mosque",
-    description: "Lush emerald & teal palette inspired by traditional Islamic architecture",
+    description:
+      "Lush emerald & teal palette inspired by traditional Islamic architecture",
     category: "heritage",
     fontFamily: "'Inter Variable', Inter, system-ui, sans-serif",
     containerRadius: "10px",
@@ -411,10 +421,18 @@ export function resolveCalendarTheme(
   paletteKey: CalendarColorPaletteId = "default",
   strapiNeutral0?: string
 ): CalendarThemeDefinition {
-  const base = CALENDAR_THEME_PRESETS[themeKey] ?? CALENDAR_THEME_PRESETS.breeze;
-  const effectiveScheme = detectEffectiveColorScheme(colorScheme, strapiNeutral0);
+  const base =
+    CALENDAR_THEME_PRESETS[themeKey] ?? CALENDAR_THEME_PRESETS.breeze;
+  const effectiveScheme = detectEffectiveColorScheme(
+    colorScheme,
+    strapiNeutral0
+  );
   const isDark = effectiveScheme === "dark" || themeKey === "midnight";
   const surfaced =
-    isDark && themeKey !== "midnight" ? applyDarkSurfaceOverride(base, themeKey) : { ...base };
-  return paletteKey !== "default" ? applyPaletteOverride(surfaced, paletteKey, isDark) : surfaced;
+    isDark && themeKey !== "midnight"
+      ? applyDarkSurfaceOverride(base, themeKey)
+      : { ...base };
+  return paletteKey !== "default"
+    ? applyPaletteOverride(surfaced, paletteKey, isDark)
+    : surfaced;
 }

@@ -30,14 +30,19 @@ export interface RegistryService {
   getRegisteredSources(): CalendarSourceMapping[];
   registerSecondaryCalendar(calendar: CalendarSystemConfig): void;
   getRegisteredSecondaryCalendars(): CalendarSystemConfig[];
-  registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void;
+  registerCalendarFormatter(
+    calendarId: string,
+    formatter: CalendarSystemFormatterFn
+  ): void;
   unregisterCalendarFormatter(calendarId: string): void;
 }
 
 export interface SettingsService {
   ensureInitialized(): Promise<CalendarPluginSettings>;
   getSettings(): Promise<CalendarPluginSettings>;
-  updateSettings(patch: Partial<CalendarPluginSettings>): Promise<CalendarPluginSettings>;
+  updateSettings(
+    patch: Partial<CalendarPluginSettings>
+  ): Promise<CalendarPluginSettings>;
   clearSettings(): Promise<CalendarPluginSettings>;
   discoverContentTypes(): DiscoveredContentType[];
 }
@@ -80,7 +85,10 @@ export interface QuickCreateEntryParams {
 }
 
 export interface OccurrenceService {
-  registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void;
+  registerCalendarFormatter(
+    calendarId: string,
+    formatter: CalendarSystemFormatterFn
+  ): void;
   unregisterCalendarFormatter(calendarId: string): void;
   formatDateInCalendarSystem(
     isoOrDateKey: string,
@@ -88,9 +96,15 @@ export interface OccurrenceService {
     locale?: string,
     options?: { compact?: boolean }
   ): string;
-  getOccurrences(params: OccurrenceQueryParams): Promise<ExpandedCalendarOccurrence[]>;
-  rescheduleOccurrence(params: RescheduleOccurrenceParams): Promise<Record<string, unknown>>;
-  quickCreateEntry(params: QuickCreateEntryParams): Promise<Record<string, unknown>>;
+  getOccurrences(
+    params: OccurrenceQueryParams
+  ): Promise<ExpandedCalendarOccurrence[]>;
+  rescheduleOccurrence(
+    params: RescheduleOccurrenceParams
+  ): Promise<Record<string, unknown>>;
+  quickCreateEntry(
+    params: QuickCreateEntryParams
+  ): Promise<Record<string, unknown>>;
 }
 
 export interface IcalService {
@@ -120,7 +134,9 @@ export function getCalendarService<K extends keyof CalendarPluginServiceMap>(
   pluginId: string,
   serviceName: K
 ): CalendarPluginServiceMap[K] {
-  return strapi.plugin(pluginId).service<CalendarPluginServiceMap[K]>(serviceName);
+  return strapi
+    .plugin(pluginId)
+    .service<CalendarPluginServiceMap[K]>(serviceName);
 }
 
 export function formatErrorMessage(err: unknown, fallback: string): string {

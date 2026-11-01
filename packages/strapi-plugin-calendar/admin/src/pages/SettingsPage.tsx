@@ -40,8 +40,10 @@ export const SettingsPage: React.FC = () => {
 
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
   const [contentTypes, setContentTypes] = useState<DiscoveredContentType[]>([]);
-  const [eventsSettings, setEventsSettings] = useState<EventsCompanionSettings | null>(null);
-  const [bookingsSettings, setBookingsSettings] = useState<BookingsCompanionSettings | null>(null);
+  const [eventsSettings, setEventsSettings] =
+    useState<EventsCompanionSettings | null>(null);
+  const [bookingsSettings, setBookingsSettings] =
+    useState<BookingsCompanionSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
 
@@ -49,8 +51,12 @@ export const SettingsPage: React.FC = () => {
     Promise.all([
       get<SettingsApiResponse>(`/${PLUGIN_ID}/settings`),
       get<ContentTypesApiResponse>(`/${PLUGIN_ID}/content-types`),
-      get<CompanionApiResponse<EventsCompanionSettings>>("/events/settings").catch(() => null),
-      get<CompanionApiResponse<BookingsCompanionSettings>>("/bookings/settings").catch(() => null),
+      get<CompanionApiResponse<EventsCompanionSettings>>(
+        "/events/settings"
+      ).catch(() => null),
+      get<CompanionApiResponse<BookingsCompanionSettings>>(
+        "/bookings/settings"
+      ).catch(() => null),
     ])
       .then(([settingsRes, ctRes, eventsRes, bookingsRes]) => {
         if (settingsRes?.data?.data) {
@@ -101,7 +107,10 @@ export const SettingsPage: React.FC = () => {
         setBookingsSettings(bookingsRes.data.data);
       }
       setSavedBanner(
-        t("settings.saved", "Calendar, Events, and Bookings settings saved successfully.")
+        t(
+          "settings.saved",
+          "Calendar, Events, and Bookings settings saved successfully."
+        )
       );
     } catch {
       setSavedBanner(t("settings.error", "Could not save settings."));
@@ -113,7 +122,10 @@ export const SettingsPage: React.FC = () => {
   const handleResetSettings = async () => {
     setSaving(true);
     try {
-      const res = await post<SettingsApiResponse>(`/${PLUGIN_ID}/clear-settings`, {});
+      const res = await post<SettingsApiResponse>(
+        `/${PLUGIN_ID}/clear-settings`,
+        {}
+      );
       if (res?.data?.data) {
         setSettings(res.data.data);
       }
@@ -128,8 +140,12 @@ export const SettingsPage: React.FC = () => {
   const handleAddOrUpdateSource = (nextSource: CalendarSourceMapping) => {
     if (!settings) return;
     const existing = settings.sources ?? [];
-    const updated = existing.some((s) => s.id === nextSource.id || s.uid === nextSource.uid)
-      ? existing.map((s) => (s.id === nextSource.id || s.uid === nextSource.uid ? nextSource : s))
+    const updated = existing.some(
+      (s) => s.id === nextSource.id || s.uid === nextSource.uid
+    )
+      ? existing.map((s) =>
+          s.id === nextSource.id || s.uid === nextSource.uid ? nextSource : s
+        )
       : [...existing, nextSource];
 
     setSettings({
@@ -142,7 +158,9 @@ export const SettingsPage: React.FC = () => {
     if (!settings) return;
     setSettings({
       ...settings,
-      sources: settings.sources.map((src) => (src.id === sourceId ? { ...src, enabled } : src)),
+      sources: settings.sources.map((src) =>
+        src.id === sourceId ? { ...src, enabled } : src
+      ),
     });
   };
 
@@ -181,7 +199,9 @@ export const SettingsPage: React.FC = () => {
     if (!settings) return;
     setSettings({
       ...settings,
-      secondaryCalendars: (settings.secondaryCalendars ?? []).filter((cal) => cal.id !== calId),
+      secondaryCalendars: (settings.secondaryCalendars ?? []).filter(
+        (cal) => cal.id !== calId
+      ),
     });
   };
 
@@ -223,14 +243,23 @@ export const SettingsPage: React.FC = () => {
         <Flex direction="column" alignItems="stretch" gap={4}>
           {savedBanner && (
             <Box padding={3} background="success100" hasRadius>
-              <Typography variant="omega" fontWeight="bold" textColor="success700">
+              <Typography
+                variant="omega"
+                fontWeight="bold"
+                textColor="success700"
+              >
                 {savedBanner}
               </Typography>
             </Box>
           )}
 
           <Tabs.Root defaultValue="theme">
-            <Tabs.List aria-label={t("settings.title", "Calendar, Events & Bookings Settings")}>
+            <Tabs.List
+              aria-label={t(
+                "settings.title",
+                "Calendar, Events & Bookings Settings"
+              )}
+            >
               <Tabs.Trigger value="theme">
                 {t("settings.tab.theme", "Theme & Appearance")}
               </Tabs.Trigger>
@@ -238,7 +267,8 @@ export const SettingsPage: React.FC = () => {
                 {t("settings.tab.general", "General & Views")}
               </Tabs.Trigger>
               <Tabs.Trigger value="sources">
-                {t("settings.tab.sources", "Collection Sources")} ({settings.sources?.length ?? 0})
+                {t("settings.tab.sources", "Collection Sources")} (
+                {settings.sources?.length ?? 0})
               </Tabs.Trigger>
               <Tabs.Trigger value="secondary">
                 {t("settings.tab.secondaryCalendars", "Secondary Calendars")} (
@@ -257,7 +287,9 @@ export const SettingsPage: React.FC = () => {
                 mode="theme"
                 t={t}
                 settings={settings}
-                onPatchSettings={(patch) => setSettings({ ...settings, ...patch })}
+                onPatchSettings={(patch) =>
+                  setSettings({ ...settings, ...patch })
+                }
               />
             </Tabs.Content>
 
@@ -266,7 +298,9 @@ export const SettingsPage: React.FC = () => {
                 mode="general"
                 t={t}
                 settings={settings}
-                onPatchSettings={(patch) => setSettings({ ...settings, ...patch })}
+                onPatchSettings={(patch) =>
+                  setSettings({ ...settings, ...patch })
+                }
               />
             </Tabs.Content>
 
@@ -298,10 +332,12 @@ export const SettingsPage: React.FC = () => {
                 eventsSettings={eventsSettings}
                 bookingsSettings={bookingsSettings}
                 onPatchEvents={(patch) =>
-                  eventsSettings && setEventsSettings({ ...eventsSettings, ...patch })
+                  eventsSettings &&
+                  setEventsSettings({ ...eventsSettings, ...patch })
                 }
                 onPatchBookings={(patch) =>
-                  bookingsSettings && setBookingsSettings({ ...bookingsSettings, ...patch })
+                  bookingsSettings &&
+                  setBookingsSettings({ ...bookingsSettings, ...patch })
                 }
               />
             </Tabs.Content>
@@ -313,10 +349,12 @@ export const SettingsPage: React.FC = () => {
                 eventsSettings={eventsSettings}
                 bookingsSettings={bookingsSettings}
                 onPatchEvents={(patch) =>
-                  eventsSettings && setEventsSettings({ ...eventsSettings, ...patch })
+                  eventsSettings &&
+                  setEventsSettings({ ...eventsSettings, ...patch })
                 }
                 onPatchBookings={(patch) =>
-                  bookingsSettings && setBookingsSettings({ ...bookingsSettings, ...patch })
+                  bookingsSettings &&
+                  setBookingsSettings({ ...bookingsSettings, ...patch })
                 }
               />
             </Tabs.Content>

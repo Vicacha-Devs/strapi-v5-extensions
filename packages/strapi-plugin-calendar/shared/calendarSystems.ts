@@ -61,7 +61,10 @@ export function unregisterCalendarSystemFormatter(calendarId: string): void {
   customFormatters.delete(calendarId);
 }
 
-export function getRegisteredCalendarFormatters(): ReadonlyMap<string, CalendarSystemFormatterFn> {
+export function getRegisteredCalendarFormatters(): ReadonlyMap<
+  string,
+  CalendarSystemFormatterFn
+> {
   return customFormatters;
 }
 
@@ -114,12 +117,15 @@ export function extractCalendarParts(
   const calendarTag = (intlCalendar || "gregory").trim().toLowerCase();
 
   try {
-    const formatter = new Intl.DateTimeFormat(`en-u-ca-${calendarTag}-nu-latn`, {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      timeZone: "UTC",
-    });
+    const formatter = new Intl.DateTimeFormat(
+      `en-u-ca-${calendarTag}-nu-latn`,
+      {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        timeZone: "UTC",
+      }
+    );
     const parsed = parseIntlPartsToYmd(formatter.formatToParts(effectiveDate));
     if (parsed) return parsed;
   } catch {
@@ -152,7 +158,9 @@ function tryFormatWithCustomFormatter(
   effectiveLocale: string,
   compact: boolean
 ): string | null {
-  const customFn = customFormatters.get(system.id) ?? customFormatters.get(system.intlCalendar);
+  const customFn =
+    customFormatters.get(system.id) ??
+    customFormatters.get(system.intlCalendar);
   if (!customFn) return null;
   try {
     return customFn(effectiveDate, {
@@ -237,7 +245,9 @@ function readTrimmedString(val: unknown): string {
   return typeof val === "string" ? val.trim() : "";
 }
 
-function extractDocAltDatesMap(doc: Record<string, unknown>): Record<string, unknown> | null {
+function extractDocAltDatesMap(
+  doc: Record<string, unknown>
+): Record<string, unknown> | null {
   if (
     doc.alternateDates &&
     typeof doc.alternateDates === "object" &&
@@ -256,7 +266,9 @@ function resolveSystemOverrideText(
 ): string {
   const fieldName = sourceAltFields[sys.id] || sys.overrideField;
   const rawFieldOverride = fieldName ? readTrimmedString(doc[fieldName]) : "";
-  const rawJsonOverride = docAltDatesMap ? readTrimmedString(docAltDatesMap[sys.id]) : "";
+  const rawJsonOverride = docAltDatesMap
+    ? readTrimmedString(docAltDatesMap[sys.id])
+    : "";
   return rawFieldOverride || rawJsonOverride;
 }
 
@@ -280,8 +292,17 @@ function buildSingleSecondaryCalendarEntry(args: {
     docAltDatesMap,
     locale,
   } = args;
-  const rawOverride = resolveSystemOverrideText(sys, doc, sourceAltFields, docAltDatesMap);
-  const parts = extractCalendarParts(rawDateObj, sys.intlCalendar, sys.dayOffset ?? 0);
+  const rawOverride = resolveSystemOverrideText(
+    sys,
+    doc,
+    sourceAltFields,
+    docAltDatesMap
+  );
+  const parts = extractCalendarParts(
+    rawDateObj,
+    sys.intlCalendar,
+    sys.dayOffset ?? 0
+  );
   const label = sys.label || sys.id;
 
   if (rawOverride && isBaseOccurrence) {
@@ -298,9 +319,13 @@ function buildSingleSecondaryCalendarEntry(args: {
     };
   }
 
-  const formatted = formatDateInCalendarSystem(occurrenceDate, sys, locale, { compact: false });
+  const formatted = formatDateInCalendarSystem(occurrenceDate, sys, locale, {
+    compact: false,
+  });
   if (!formatted) return null;
-  const compact = formatDateInCalendarSystem(occurrenceDate, sys, locale, { compact: true });
+  const compact = formatDateInCalendarSystem(occurrenceDate, sys, locale, {
+    compact: true,
+  });
 
   return {
     calendarId: sys.id,

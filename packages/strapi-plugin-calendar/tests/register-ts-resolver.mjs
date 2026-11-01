@@ -1,19 +1,21 @@
-import { registerHooks, stripTypeScriptTypes } from 'node:module';
-import { existsSync, readFileSync } from 'node:fs';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dirname, resolve as resolvePath } from 'node:path';
+import { existsSync, readFileSync } from "node:fs";
+import { registerHooks, stripTypeScriptTypes } from "node:module";
+import { dirname, resolve as resolvePath } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const vitestShimUrl = pathToFileURL(resolvePath(currentDir, 'vitest-shim.mjs')).href;
+const vitestShimUrl = pathToFileURL(
+  resolvePath(currentDir, "vitest-shim.mjs")
+).href;
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (specifier === 'vitest') {
+    if (specifier === "vitest") {
       return { url: vitestShimUrl, shortCircuit: true };
     }
 
     if (
-      (specifier.startsWith('./') || specifier.startsWith('../')) &&
+      (specifier.startsWith("./") || specifier.startsWith("../")) &&
       context.parentURL
     ) {
       const parentDir = dirname(fileURLToPath(context.parentURL));
@@ -23,8 +25,8 @@ registerHooks({
         `${baseCandidate}.ts`,
         `${baseCandidate}.tsx`,
         `${baseCandidate}.json`,
-        resolvePath(baseCandidate, 'index.ts'),
-        resolvePath(baseCandidate, 'index.tsx'),
+        resolvePath(baseCandidate, "index.ts"),
+        resolvePath(baseCandidate, "index.tsx"),
       ];
 
       for (const candidate of candidates) {
@@ -38,22 +40,25 @@ registerHooks({
   },
 
   load(url, context, nextLoad) {
-    if (url.endsWith('.json') && !url.includes('/node_modules/')) {
+    if (url.endsWith(".json") && !url.includes("/node_modules/")) {
       const filePath = fileURLToPath(url);
-      const source = readFileSync(filePath, 'utf8');
+      const source = readFileSync(filePath, "utf8");
       return {
-        format: 'module',
+        format: "module",
         source: `export default ${source}`,
         shortCircuit: true,
       };
     }
 
-    if ((url.endsWith('.ts') || url.endsWith('.tsx')) && !url.includes('/node_modules/')) {
+    if (
+      (url.endsWith(".ts") || url.endsWith(".tsx")) &&
+      !url.includes("/node_modules/")
+    ) {
       const filePath = fileURLToPath(url);
-      const source = readFileSync(filePath, 'utf8');
-      const stripped = stripTypeScriptTypes(source, { mode: 'strip' });
+      const source = readFileSync(filePath, "utf8");
+      const stripped = stripTypeScriptTypes(source, { mode: "strip" });
       return {
-        format: 'module',
+        format: "module",
         source: stripped,
         shortCircuit: true,
       };

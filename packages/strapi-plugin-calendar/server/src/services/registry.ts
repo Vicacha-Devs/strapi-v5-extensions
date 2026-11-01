@@ -37,7 +37,9 @@ export default ({ strapi: _strapi }: { strapi: Core.Strapi }) => {
 
     registerSecondaryCalendar(calendar: CalendarSystemConfig): void {
       if (!calendar || !calendar.id || !calendar.intlCalendar) {
-        throw new Error("Secondary calendar registration requires id and intlCalendar.");
+        throw new Error(
+          "Secondary calendar registration requires id and intlCalendar."
+        );
       }
       registeredCalendars.set(calendar.id, calendar);
     },
@@ -46,7 +48,10 @@ export default ({ strapi: _strapi }: { strapi: Core.Strapi }) => {
       return Array.from(registeredCalendars.values());
     },
 
-    registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void {
+    registerCalendarFormatter(
+      calendarId: string,
+      formatter: CalendarSystemFormatterFn
+    ): void {
       registerCalendarSystemFormatter(calendarId, formatter);
     },
 

@@ -77,7 +77,10 @@ function resolveTitleAndLocationLabels(
       ? t("calendar.field.bookingTitle", "Reservation Title / Purpose")
       : t("calendar.field.title", "Title"),
     titlePlaceholder: isBookingSource
-      ? t("placeholder.booking_title", "e.g., Guided Visit / Hall Reservation / Counseling")
+      ? t(
+          "placeholder.booking_title",
+          "e.g., Guided Visit / Hall Reservation / Counseling"
+        )
       : t(
           "placeholder.e_g_product_launch_workshop_reservation",
           "e.g., Product Launch / Workshop / Reservation"
@@ -118,7 +121,10 @@ export const QuickCreatePanel: React.FC<QuickCreatePanelProps> = (props) => {
     onSubmit,
   } = props;
 
-  const enabledSources = useMemo(() => sources.filter((s) => s.enabled !== false), [sources]);
+  const enabledSources = useMemo(
+    () => sources.filter((s) => s.enabled !== false),
+    [sources]
+  );
   const activeSource = useMemo(
     () => resolveActiveQuickSource(enabledSources, selectedSourceId),
     [enabledSources, selectedSourceId]
@@ -136,16 +142,27 @@ export const QuickCreatePanel: React.FC<QuickCreatePanelProps> = (props) => {
     [activeSource, isBookingSource]
   );
 
-  const startDateValue = useMemo(() => parseDateTimePickerValue(quickStart), [quickStart]);
-  const endDateValue = useMemo(() => parseDateTimePickerValue(quickEnd), [quickEnd]);
+  const startDateValue = useMemo(
+    () => parseDateTimePickerValue(quickStart),
+    [quickStart]
+  );
+  const endDateValue = useMemo(
+    () => parseDateTimePickerValue(quickEnd),
+    [quickEnd]
+  );
   const normalizedPresets = useMemo(
     () => buildOrderedRecurrencePresets(recurrencePresets, startDateValue),
     [recurrencePresets, startDateValue]
   );
 
-  const isWeekly = supportsRecurrence && quickRRule.toUpperCase().includes("FREQ=WEEKLY");
-  const selectedWeekdays = useMemo(() => extractByDays(quickRRule), [quickRRule]);
-  const hasCustomWeeklyOption = isWeekly && !normalizedPresets.some((p) => p.rrule === quickRRule);
+  const isWeekly =
+    supportsRecurrence && quickRRule.toUpperCase().includes("FREQ=WEEKLY");
+  const selectedWeekdays = useMemo(
+    () => extractByDays(quickRRule),
+    [quickRRule]
+  );
+  const hasCustomWeeklyOption =
+    isWeekly && !normalizedPresets.some((p) => p.rrule === quickRRule);
   const customWeeklyLabel = `${t("rrule.freq.weekly", "Weekly")} (${selectedWeekdays.join(", ")})`;
 
   const alignSingleDayRRule = (days: RRuleWeekday[]) => {
@@ -174,7 +191,9 @@ export const QuickCreatePanel: React.FC<QuickCreatePanelProps> = (props) => {
     onQuickStartChange(nextDateStr);
     if (!isWeekly || selectedWeekdays.length !== 1 || !nextDateStr) return;
     const dt = parseDateTimePickerValue(nextDateStr);
-    const match = dt ? WEEKDAYS.find((w) => w.jsDay === dt.getDay()) : undefined;
+    const match = dt
+      ? WEEKDAYS.find((w) => w.jsDay === dt.getDay())
+      : undefined;
     if (match && match.code !== selectedWeekdays[0]) {
       onQuickRRuleChange(`FREQ=WEEKLY;INTERVAL=1;BYDAY=${match.code}`);
     }
@@ -212,10 +231,14 @@ export const QuickCreatePanel: React.FC<QuickCreatePanelProps> = (props) => {
         >
           {enabledSources.length > 1 && onSelectedSourceIdChange && (
             <Field.Root>
-              <Field.Label>{t("calendar.field.sourceType", "Entry Collection / Type")}</Field.Label>
+              <Field.Label>
+                {t("calendar.field.sourceType", "Entry Collection / Type")}
+              </Field.Label>
               <SingleSelect
                 value={activeSource?.id || ""}
-                onChange={(val: string | number) => onSelectedSourceIdChange(String(val))}
+                onChange={(val: string | number) =>
+                  onSelectedSourceIdChange(String(val))
+                }
               >
                 {enabledSources.map((src) => (
                   <SingleSelectOption key={src.id} value={src.id}>
@@ -282,13 +305,18 @@ export const QuickCreatePanel: React.FC<QuickCreatePanelProps> = (props) => {
           <Box padding={3} background="neutral100" hasRadius>
             <Flex alignItems="center" gap={2} wrap="wrap">
               <Typography variant="pi" fontWeight="bold" textColor="neutral700">
-                {t("calendar.field.repeatWeekdays", "Repeat on Day(s) of Week:")}
+                {t(
+                  "calendar.field.repeatWeekdays",
+                  "Repeat on Day(s) of Week:"
+                )}
               </Typography>
               {WEEKDAYS.map((day) => (
                 <Button
                   key={day.code}
                   size="S"
-                  variant={selectedWeekdays.includes(day.code) ? "default" : "tertiary"}
+                  variant={
+                    selectedWeekdays.includes(day.code) ? "default" : "tertiary"
+                  }
                   onClick={() => handleToggleWeekday(day.code)}
                 >
                   {day.label}

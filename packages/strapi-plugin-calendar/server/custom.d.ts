@@ -30,7 +30,9 @@ declare module "@strapi/strapi" {
     }
 
     export interface DocumentServiceInstance {
-      findMany(params?: DocumentQueryOptions): Promise<Array<Record<string, unknown>>>;
+      findMany(
+        params?: DocumentQueryOptions
+      ): Promise<Array<Record<string, unknown>>>;
       findOne(params: {
         documentId: string;
         locale?: string;

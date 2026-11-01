@@ -85,7 +85,10 @@ function resolveStartEndFromDocument(
     return resolveDateOnlyWithSlot(rawStart, rawSlot, source);
   }
   const rawEnd = source.fields.endDate ? doc[source.fields.endDate] : null;
-  const allDay = typeof doc.allDay === "boolean" ? doc.allDay : Boolean(source.defaultAllDay);
+  const allDay =
+    typeof doc.allDay === "boolean"
+      ? doc.allDay
+      : Boolean(source.defaultAllDay);
   return {
     startDate: rawStart,
     endDate: typeof rawEnd === "string" && rawEnd ? rawEnd : null,
@@ -112,9 +115,14 @@ function resolveQueryWindow(params: OccurrenceQueryParams): {
   windowEnd: string;
 } {
   const now = new Date();
-  const defaultFrom = new Date(Date.UTC(now.getUTCFullYear(), 0, 1, 0, 0, 0)).toISOString();
-  const defaultTo = new Date(Date.UTC(now.getUTCFullYear(), 11, 31, 23, 59, 59)).toISOString();
-  const validFrom = params.from && !Number.isNaN(new Date(params.from).getTime());
+  const defaultFrom = new Date(
+    Date.UTC(now.getUTCFullYear(), 0, 1, 0, 0, 0)
+  ).toISOString();
+  const defaultTo = new Date(
+    Date.UTC(now.getUTCFullYear(), 11, 31, 23, 59, 59)
+  ).toISOString();
+  const validFrom =
+    params.from && !Number.isNaN(new Date(params.from).getTime());
   const validTo = params.to && !Number.isNaN(new Date(params.to).getTime());
   return {
     windowStart: validFrom ? params.from! : defaultFrom,
@@ -146,7 +154,9 @@ async function fetchDocumentsForSource(
 ): Promise<Array<Record<string, unknown>>> {
   const fallbackOpts = buildDocQueryOpts(params, false);
   try {
-    const primaryDocs = await strapi.documents(uid).findMany(buildDocQueryOpts(params, true));
+    const primaryDocs = await strapi
+      .documents(uid)
+      .findMany(buildDocQueryOpts(params, true));
     return primaryDocs.length > 0
       ? primaryDocs
       : await strapi.documents(uid).findMany(fallbackOpts);
@@ -176,9 +186,13 @@ function resolveDocColor(
   source: CalendarSourceMapping,
   categoryVal: string
 ): string {
-  const catColor = categoryVal ? source.categoryColors?.[categoryVal] : undefined;
+  const catColor = categoryVal
+    ? source.categoryColors?.[categoryVal]
+    : undefined;
   if (catColor) return catColor;
-  const docColorVal = source.fields.color ? doc[source.fields.color] : doc.color;
+  const docColorVal = source.fields.color
+    ? doc[source.fields.color]
+    : doc.color;
   if (typeof docColorVal === "string" && docColorVal.startsWith("#")) {
     return docColorVal;
   }
@@ -259,12 +273,16 @@ function buildOccurrenceItem(
     rscale: slot.rscale,
     isOverridden: slot.isOverridden,
     calendarLinks,
-    alternateDates: Object.keys(alternateDates).length > 0 ? alternateDates : undefined,
+    alternateDates:
+      Object.keys(alternateDates).length > 0 ? alternateDates : undefined,
     customFields: meta.customFields,
   };
 }
 
-function matchesCategoryParam(categoryVal: string, filterCategory?: string): boolean {
+function matchesCategoryParam(
+  categoryVal: string,
+  filterCategory?: string
+): boolean {
   if (!filterCategory || filterCategory === "all") return true;
   return categoryVal.toLowerCase() === filterCategory.toLowerCase();
 }
@@ -276,7 +294,10 @@ function resolveDocRecurrence(
   allDay: boolean
 ): RRuleFieldValue {
   const rawRecurrence = source.fields.rrule ? doc[source.fields.rrule] : null;
-  const tz = typeof doc.timezone === "string" && doc.timezone ? doc.timezone : defaultTimezone;
+  const tz =
+    typeof doc.timezone === "string" && doc.timezone
+      ? doc.timezone
+      : defaultTimezone;
   const recurrence = parseRRuleFieldValue(rawRecurrence, tz);
   if (allDay) recurrence.allDay = true;
   return recurrence;
@@ -293,7 +314,8 @@ function buildDocExpansionMeta(
   locale?: string
 ): DocExpansionMeta {
   const rawSlug = readField(doc, source.fields.slug);
-  const docLocale = typeof doc.locale === "string" ? optStr(doc.locale) : undefined;
+  const docLocale =
+    typeof doc.locale === "string" ? optStr(doc.locale) : undefined;
   return {
     doc,
     docId,
@@ -305,7 +327,9 @@ function buildDocExpansionMeta(
     summary: readField(doc, source.fields.summary),
     slug: optStr(rawSlug),
     categoryVal: optStr(categoryVal),
-    statusVal: mapStatus(source.fields.status ? doc[source.fields.status] : doc.status),
+    statusVal: mapStatus(
+      source.fields.status ? doc[source.fields.status] : doc.status
+    ),
     color: resolveDocColor(doc, source, categoryVal),
     baseDateKey,
     customFields: extractCustomFields(doc, source.fields.customFields),
@@ -329,7 +353,12 @@ function expandDocumentOccurrences(
   const categoryVal = readField(doc, source.fields.category);
   if (!matchesCategoryParam(categoryVal, params.category)) return [];
 
-  const recurrence = resolveDocRecurrence(doc, source, settings.defaultTimezone, startEnd.allDay);
+  const recurrence = resolveDocRecurrence(
+    doc,
+    source,
+    settings.defaultTimezone,
+    startEnd.allDay
+  );
   const slots = expandRuleSlots({
     baseStartDate: startEnd.startDate,
     baseEndDate: startEnd.endDate,
@@ -390,10 +419,14 @@ function buildRecurrenceOverridePayload(
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
-  const getSettingsService = () => getCalendarService(strapi, PLUGIN_ID, "settings");
+  const getSettingsService = () =>
+    getCalendarService(strapi, PLUGIN_ID, "settings");
 
   return {
-    registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void {
+    registerCalendarFormatter(
+      calendarId: string,
+      formatter: CalendarSystemFormatterFn
+    ): void {
       registerCalendarSystemFormatter(calendarId, formatter);
     },
 
@@ -410,11 +443,14 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
       return formatDateInCalendarSystem(isoOrDateKey, system, locale, options);
     },
 
-    async getOccurrences(params: OccurrenceQueryParams): Promise<ExpandedCalendarOccurrence[]> {
+    async getOccurrences(
+      params: OccurrenceQueryParams
+    ): Promise<ExpandedCalendarOccurrence[]> {
       const settings = await getSettingsService().getSettings();
       const { windowStart, windowEnd } = resolveQueryWindow(params);
       const activeSources = (settings.sources ?? []).filter(
-        (s: CalendarSourceMapping) => s.enabled && matchesSourceFilter(s, params.sourceId)
+        (s: CalendarSourceMapping) =>
+          s.enabled && matchesSourceFilter(s, params.sourceId)
       );
 
       const allOccurrences: ExpandedCalendarOccurrence[] = [];
@@ -422,13 +458,21 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
         const docs = await fetchDocumentsForSource(strapi, source.uid, params);
         for (const doc of docs) {
           allOccurrences.push(
-            ...expandDocumentOccurrences(doc, source, settings, params, windowStart, windowEnd)
+            ...expandDocumentOccurrences(
+              doc,
+              source,
+              settings,
+              params,
+              windowStart,
+              windowEnd
+            )
           );
         }
       }
 
       allOccurrences.sort(
-        (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        (a, b) =>
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
       return allOccurrences;
     },
@@ -439,7 +483,8 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
       const settings = await getSettingsService().getSettings();
       const source =
         (settings.sources ?? []).find(
-          (s: CalendarSourceMapping) => s.id === params.sourceId || s.uid === params.uid
+          (s: CalendarSourceMapping) =>
+            s.id === params.sourceId || s.uid === params.uid
         ) ?? settings.sources[0];
 
       if (!source) throw new Error("Target calendar source is not configured.");
@@ -448,14 +493,18 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
         documentId: params.documentId,
       });
       if (!existing) {
-        throw new Error(`Document ${params.documentId} not found in ${source.uid}.`);
+        throw new Error(
+          `Document ${params.documentId} not found in ${source.uid}.`
+        );
       }
 
       const rruleField = source.fields.rrule;
       const recurrence = rruleField
         ? parseRRuleFieldValue(existing[rruleField], settings.defaultTimezone)
         : null;
-      const useSeriesOverride = Boolean(recurrence?.rrule && !params.applyToSeries && rruleField);
+      const useSeriesOverride = Boolean(
+        recurrence?.rrule && !params.applyToSeries && rruleField
+      );
       const data = useSeriesOverride
         ? buildRecurrenceOverridePayload(recurrence!, rruleField!, params)
         : buildDirectUpdatePayload(params, source);
@@ -467,10 +516,16 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
       return updatedDoc ?? {};
     },
 
-    async quickCreateEntry(params: QuickCreateEntryParams): Promise<Record<string, unknown>> {
+    async quickCreateEntry(
+      params: QuickCreateEntryParams
+    ): Promise<Record<string, unknown>> {
       const settings = await getSettingsService().getSettings();
-      const source = resolveTargetSource(settings.sources ?? [], params.sourceId);
-      if (!source) throw new Error("No calendar collection source is configured.");
+      const source = resolveTargetSource(
+        settings.sources ?? [],
+        params.sourceId
+      );
+      if (!source)
+        throw new Error("No calendar collection source is configured.");
 
       const contentTypes = (strapi.contentTypes ?? {}) as Record<
         string,
@@ -485,7 +540,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
 
       if (shouldPublish) {
         try {
-          return await strapi.documents(source.uid).create({ data, status: "published" });
+          return await strapi
+            .documents(source.uid)
+            .create({ data, status: "published" });
         } catch {
           return await strapi.documents(source.uid).create({ data });
         }

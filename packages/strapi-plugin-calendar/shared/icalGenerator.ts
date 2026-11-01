@@ -134,7 +134,9 @@ export function generateIcsCalendar(params: {
     }
     if (occ.alternateDates) {
       for (const alt of Object.values(occ.alternateDates)) {
-        lines.push(`X-ALT-DATE-${alt.calendarId.toUpperCase()}:${escapeIcsText(alt.formatted)}`);
+        lines.push(
+          `X-ALT-DATE-${alt.calendarId.toUpperCase()}:${escapeIcsText(alt.formatted)}`
+        );
       }
     }
     const icsStatus =

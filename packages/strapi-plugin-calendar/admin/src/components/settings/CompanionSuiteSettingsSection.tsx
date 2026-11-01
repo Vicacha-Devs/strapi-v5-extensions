@@ -61,7 +61,9 @@ const GRID_3_COL: React.CSSProperties = {
   gap: 16,
 };
 
-export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSectionProps> = ({
+export const CompanionSuiteSettingsSection: React.FC<
+  CompanionSuiteSettingsSectionProps
+> = ({
   t,
   mode,
   eventsSettings,
@@ -72,7 +74,13 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
   if (mode === "events") {
     if (!eventsSettings) {
       return (
-        <Box padding={5} background="neutral0" hasRadius shadow="tableShadow" style={CARD_STYLE}>
+        <Box
+          padding={5}
+          background="neutral0"
+          hasRadius
+          shadow="tableShadow"
+          style={CARD_STYLE}
+        >
           <Typography variant="omega" textColor="neutral600">
             {t(
               "settings.eventsUnavailable",
@@ -84,12 +92,26 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
     }
 
     return (
-      <Box padding={5} background="neutral0" hasRadius shadow="tableShadow" style={CARD_STYLE}>
+      <Box
+        padding={5}
+        background="neutral0"
+        hasRadius
+        shadow="tableShadow"
+        style={CARD_STYLE}
+      >
         <Flex direction="column" alignItems="stretch" gap={5}>
-          <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
+          <Flex
+            justifyContent="space-between"
+            alignItems="center"
+            wrap="wrap"
+            gap={2}
+          >
             <Box>
               <Typography variant="delta" fontWeight="bold" tag="h2">
-                {t("settings.eventsHeading", "Events, RSVP Capacity & Waitlist Automation")}
+                {t(
+                  "settings.eventsHeading",
+                  "Events, RSVP Capacity & Waitlist Automation"
+                )}
               </Typography>
               <Box paddingTop={1}>
                 <Typography variant="pi" textColor="neutral600">
@@ -119,7 +141,9 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
               <NumberInput
                 value={eventsSettings.defaultCapacity || 100}
                 onValueChange={(val: number | undefined) =>
-                  onPatchEvents({ defaultCapacity: val && val >= 1 ? val : 100 })
+                  onPatchEvents({
+                    defaultCapacity: val && val >= 1 ? val : 100,
+                  })
                 }
               />
               <Field.Hint />
@@ -137,7 +161,9 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
               <NumberInput
                 value={eventsSettings.defaultMaxGuestsPerRegistration || 5}
                 onValueChange={(val: number | undefined) =>
-                  onPatchEvents({ defaultMaxGuestsPerRegistration: val && val >= 1 ? val : 5 })
+                  onPatchEvents({
+                    defaultMaxGuestsPerRegistration: val && val >= 1 ? val : 5,
+                  })
                 }
               />
               <Field.Hint />
@@ -145,14 +171,22 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
           </div>
 
           <div style={GRID_2_COL}>
-            <Box padding={4} background="neutral100" hasRadius style={SUB_BOX_STYLE}>
+            <Box
+              padding={4}
+              background="neutral100"
+              hasRadius
+              style={SUB_BOX_STYLE}
+            >
               <Checkbox
                 checked={eventsSettings.waitlistEnabledByDefault}
                 onCheckedChange={(checked: boolean) =>
                   onPatchEvents({ waitlistEnabledByDefault: Boolean(checked) })
                 }
               >
-                {t("settings.eventsWaitlist", "Enable Waitlist & Automatic Promotion")}
+                {t(
+                  "settings.eventsWaitlist",
+                  "Enable Waitlist & Automatic Promotion"
+                )}
               </Checkbox>
               <Box paddingTop={2}>
                 <Typography variant="pi" textColor="neutral600">
@@ -164,14 +198,22 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
               </Box>
             </Box>
 
-            <Box padding={4} background="neutral100" hasRadius style={SUB_BOX_STYLE}>
+            <Box
+              padding={4}
+              background="neutral100"
+              hasRadius
+              style={SUB_BOX_STYLE}
+            >
               <Checkbox
                 checked={eventsSettings.sendRsvpEmails}
                 onCheckedChange={(checked: boolean) =>
                   onPatchEvents({ sendRsvpEmails: Boolean(checked) })
                 }
               >
-                {t("settings.eventsSendEmails", "Send Confirmation & Waitlist Promotion Emails")}
+                {t(
+                  "settings.eventsSendEmails",
+                  "Send Confirmation & Waitlist Promotion Emails"
+                )}
               </Checkbox>
               <Box paddingTop={2}>
                 <Typography variant="pi" textColor="neutral600">
@@ -193,7 +235,9 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
                 "IANA timezone identifier used for event recurrence and iCal exports."
               )}
             >
-              <Field.Label>{t("settings.defaultTimezone", "Events Timezone (IANA)")}</Field.Label>
+              <Field.Label>
+                {t("settings.defaultTimezone", "Events Timezone (IANA)")}
+              </Field.Label>
               <TextInput
                 value={eventsSettings.defaultTimezone || "America/Bogota"}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -214,7 +258,8 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
               </Field.Label>
               <TextInput
                 value={
-                  eventsSettings.feedTitle || "Abu Bakr As-Siddiq Central Mosque — Events Calendar"
+                  eventsSettings.feedTitle ||
+                  "Abu Bakr As-Siddiq Central Mosque — Events Calendar"
                 }
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   onPatchEvents({ feedTitle: e.target.value })
@@ -230,7 +275,13 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
 
   if (!bookingsSettings) {
     return (
-      <Box padding={5} background="neutral0" hasRadius shadow="tableShadow" style={CARD_STYLE}>
+      <Box
+        padding={5}
+        background="neutral0"
+        hasRadius
+        shadow="tableShadow"
+        style={CARD_STYLE}
+      >
         <Typography variant="omega" textColor="neutral600">
           {t(
             "settings.bookingsUnavailable",
@@ -242,11 +293,20 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
   }
 
   return (
-    <Box padding={5} background="neutral0" hasRadius shadow="tableShadow" style={CARD_STYLE}>
+    <Box
+      padding={5}
+      background="neutral0"
+      hasRadius
+      shadow="tableShadow"
+      style={CARD_STYLE}
+    >
       <Flex direction="column" alignItems="stretch" gap={5}>
         <Box>
           <Typography variant="delta" fontWeight="bold" tag="h2">
-            {t("settings.bookingsHeading", "Bookings, Slot Duration & Approval Workflow")}
+            {t(
+              "settings.bookingsHeading",
+              "Bookings, Slot Duration & Approval Workflow"
+            )}
           </Typography>
           <Box paddingTop={1}>
             <Typography variant="pi" textColor="neutral600">
@@ -271,7 +331,9 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
             <NumberInput
               value={bookingsSettings.defaultSlotDurationMinutes}
               onValueChange={(v: number | undefined) =>
-                onPatchBookings({ defaultSlotDurationMinutes: Math.max(5, Number(v ?? 60)) })
+                onPatchBookings({
+                  defaultSlotDurationMinutes: Math.max(5, Number(v ?? 60)),
+                })
               }
             />
             <Field.Hint />
@@ -284,12 +346,17 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
             )}
           >
             <Field.Label>
-              {t("settings.bookingsCapacityPerSlot", "Default Capacity Per Slot")}
+              {t(
+                "settings.bookingsCapacityPerSlot",
+                "Default Capacity Per Slot"
+              )}
             </Field.Label>
             <NumberInput
               value={bookingsSettings.defaultCapacityPerSlot}
               onValueChange={(v: number | undefined) =>
-                onPatchBookings({ defaultCapacityPerSlot: Math.max(1, Number(v ?? 1)) })
+                onPatchBookings({
+                  defaultCapacityPerSlot: Math.max(1, Number(v ?? 1)),
+                })
               }
             />
             <Field.Hint />
@@ -307,7 +374,9 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
             <NumberInput
               value={bookingsSettings.defaultBufferBeforeMinutes}
               onValueChange={(v: number | undefined) =>
-                onPatchBookings({ defaultBufferBeforeMinutes: Math.max(0, Number(v ?? 0)) })
+                onPatchBookings({
+                  defaultBufferBeforeMinutes: Math.max(0, Number(v ?? 0)),
+                })
               }
             />
             <Field.Hint />
@@ -319,11 +388,15 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
               "Cooldown gap blocked after each booking ends."
             )}
           >
-            <Field.Label>{t("settings.bookingsBufferAfter", "Buffer After (Minutes)")}</Field.Label>
+            <Field.Label>
+              {t("settings.bookingsBufferAfter", "Buffer After (Minutes)")}
+            </Field.Label>
             <NumberInput
               value={bookingsSettings.defaultBufferAfterMinutes}
               onValueChange={(v: number | undefined) =>
-                onPatchBookings({ defaultBufferAfterMinutes: Math.max(0, Number(v ?? 0)) })
+                onPatchBookings({
+                  defaultBufferAfterMinutes: Math.max(0, Number(v ?? 0)),
+                })
               }
             />
             <Field.Hint />
@@ -341,7 +414,9 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
             <NumberInput
               value={bookingsSettings.defaultMinLeadTimeHours}
               onValueChange={(v: number | undefined) =>
-                onPatchBookings({ defaultMinLeadTimeHours: Math.max(0, Number(v ?? 2)) })
+                onPatchBookings({
+                  defaultMinLeadTimeHours: Math.max(0, Number(v ?? 2)),
+                })
               }
             />
             <Field.Hint />
@@ -354,12 +429,17 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
             )}
           >
             <Field.Label>
-              {t("settings.bookingsMaxAdvanceDays", "Max Advance Horizon (Days)")}
+              {t(
+                "settings.bookingsMaxAdvanceDays",
+                "Max Advance Horizon (Days)"
+              )}
             </Field.Label>
             <NumberInput
               value={bookingsSettings.defaultMaxAdvanceDays}
               onValueChange={(v: number | undefined) =>
-                onPatchBookings({ defaultMaxAdvanceDays: Math.max(1, Number(v ?? 90)) })
+                onPatchBookings({
+                  defaultMaxAdvanceDays: Math.max(1, Number(v ?? 90)),
+                })
               }
             />
             <Field.Hint />
@@ -369,14 +449,22 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
         <Divider />
 
         <div style={GRID_2_COL}>
-          <Box padding={4} background="neutral100" hasRadius style={SUB_BOX_STYLE}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={SUB_BOX_STYLE}
+          >
             <Checkbox
               checked={bookingsSettings.defaultRequiresApproval}
               onCheckedChange={(checked: boolean) =>
                 onPatchBookings({ defaultRequiresApproval: Boolean(checked) })
               }
             >
-              {t("settings.bookingsRequiresApproval", "Require Manual Admin Approval")}
+              {t(
+                "settings.bookingsRequiresApproval",
+                "Require Manual Admin Approval"
+              )}
             </Checkbox>
             <Box paddingTop={2}>
               <Typography variant="pi" textColor="neutral600">
@@ -388,14 +476,22 @@ export const CompanionSuiteSettingsSection: React.FC<CompanionSuiteSettingsSecti
             </Box>
           </Box>
 
-          <Box padding={4} background="neutral100" hasRadius style={SUB_BOX_STYLE}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={SUB_BOX_STYLE}
+          >
             <Checkbox
               checked={bookingsSettings.sendEmailNotifications}
               onCheckedChange={(checked: boolean) =>
                 onPatchBookings({ sendEmailNotifications: Boolean(checked) })
               }
             >
-              {t("settings.bookingsSendEmails", "Send Confirmation & Status Update Emails")}
+              {t(
+                "settings.bookingsSendEmails",
+                "Send Confirmation & Status Update Emails"
+              )}
             </Checkbox>
             <Box paddingTop={2}>
               <Typography variant="pi" textColor="neutral600">

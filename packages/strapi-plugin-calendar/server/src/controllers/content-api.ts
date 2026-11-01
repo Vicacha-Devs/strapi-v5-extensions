@@ -1,10 +1,15 @@
 import type { Core } from "@strapi/strapi";
 
 import { PLUGIN_ID } from "../../../shared/pluginId";
-import { formatErrorMessage, getCalendarService, type StrapiRouteContext } from "../types";
+import {
+  formatErrorMessage,
+  getCalendarService,
+  type StrapiRouteContext,
+} from "../types";
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getOccurrenceService = () => getCalendarService(strapi, PLUGIN_ID, "occurrence");
+  const getOccurrenceService = () =>
+    getCalendarService(strapi, PLUGIN_ID, "occurrence");
   const getIcalService = () => getCalendarService(strapi, PLUGIN_ID, "ical");
 
   return {
@@ -15,9 +20,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           from: typeof query.from === "string" ? query.from : undefined,
           to: typeof query.to === "string" ? query.to : undefined,
           locale: typeof query.locale === "string" ? query.locale : undefined,
-          category: typeof query.category === "string" ? query.category : undefined,
-          sourceId: typeof query.sourceId === "string" ? query.sourceId : undefined,
-          documentId: typeof query.documentId === "string" ? query.documentId : undefined,
+          category:
+            typeof query.category === "string" ? query.category : undefined,
+          sourceId:
+            typeof query.sourceId === "string" ? query.sourceId : undefined,
+          documentId:
+            typeof query.documentId === "string" ? query.documentId : undefined,
           includeDrafts: false,
         });
 
@@ -44,8 +52,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           from: typeof query.from === "string" ? query.from : undefined,
           to: typeof query.to === "string" ? query.to : undefined,
           locale: typeof query.locale === "string" ? query.locale : undefined,
-          category: typeof query.category === "string" ? query.category : undefined,
-          sourceId: typeof query.sourceId === "string" ? query.sourceId : undefined,
+          category:
+            typeof query.category === "string" ? query.category : undefined,
+          sourceId:
+            typeof query.sourceId === "string" ? query.sourceId : undefined,
         });
 
         ctx.set?.("Content-Type", "text/calendar; charset=utf-8");
@@ -69,7 +79,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const ics = await getIcalService().buildSingleInviteIcs({
           documentId,
           occurrenceDate:
-            typeof query.occurrenceDate === "string" ? query.occurrenceDate : undefined,
+            typeof query.occurrenceDate === "string"
+              ? query.occurrenceDate
+              : undefined,
           locale: typeof query.locale === "string" ? query.locale : undefined,
         });
 

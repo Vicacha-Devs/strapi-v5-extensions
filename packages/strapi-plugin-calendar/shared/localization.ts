@@ -4,7 +4,17 @@ import type {
   FullCalendarLocaleDefinition,
 } from "./types";
 
-const RTL_LANGUAGE_PREFIXES = new Set(["ar", "he", "iw", "fa", "ur", "ps", "sd", "ug", "yi"]);
+const RTL_LANGUAGE_PREFIXES = new Set([
+  "ar",
+  "he",
+  "iw",
+  "fa",
+  "ur",
+  "ps",
+  "sd",
+  "ug",
+  "yi",
+]);
 
 export const SUPPORTED_CALENDAR_LOCALES: FullCalendarLocaleDefinition[] = [
   {
@@ -242,9 +252,14 @@ export function isRtlLocale(locale?: string): boolean {
   return RTL_LANGUAGE_PREFIXES.has(baseLang);
 }
 
-export function getLocalizedCalendarBundle(locale?: string): FullCalendarLocaleDefinition {
+export function getLocalizedCalendarBundle(
+  locale?: string
+): FullCalendarLocaleDefinition {
   const code = normalizeLocaleCode(locale);
-  return SUPPORTED_CALENDAR_LOCALES.find((l) => l.code === code) ?? SUPPORTED_CALENDAR_LOCALES[0];
+  return (
+    SUPPORTED_CALENDAR_LOCALES.find((l) => l.code === code) ??
+    SUPPORTED_CALENDAR_LOCALES[0]
+  );
 }
 
 export function resolveFullCalendarLocale(
@@ -252,10 +267,18 @@ export function resolveFullCalendarLocale(
   defaultLocaleSetting?: string,
   runtimeOverrideLocale?: string
 ): string {
-  if (runtimeOverrideLocale && runtimeOverrideLocale !== "auto" && runtimeOverrideLocale.trim()) {
+  if (
+    runtimeOverrideLocale &&
+    runtimeOverrideLocale !== "auto" &&
+    runtimeOverrideLocale.trim()
+  ) {
     return normalizeLocaleCode(runtimeOverrideLocale);
   }
-  if (defaultLocaleSetting && defaultLocaleSetting !== "auto" && defaultLocaleSetting.trim()) {
+  if (
+    defaultLocaleSetting &&
+    defaultLocaleSetting !== "auto" &&
+    defaultLocaleSetting.trim()
+  ) {
     return normalizeLocaleCode(defaultLocaleSetting);
   }
   return normalizeLocaleCode(uiLocale || "en");
@@ -271,7 +294,10 @@ export function resolveCalendarDirection(
   return isRtlLocale(locale) ? "rtl" : "ltr";
 }
 
-export function resolveLocaleFirstDay(locale: string, configuredFirstDay?: number | null): number {
+export function resolveLocaleFirstDay(
+  locale: string,
+  configuredFirstDay?: number | null
+): number {
   if (
     typeof configuredFirstDay === "number" &&
     configuredFirstDay >= 0 &&

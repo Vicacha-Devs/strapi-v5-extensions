@@ -12,7 +12,10 @@ import {
 } from "@strapi/design-system";
 import React, { useEffect, useMemo, useState } from "react";
 
-import type { CalendarSourceMapping, DiscoveredContentType } from "../../../../shared/types";
+import type {
+  CalendarSourceMapping,
+  DiscoveredContentType,
+} from "../../../../shared/types";
 
 export interface CollectionSourcesSectionProps {
   t: (id: string, defaultMessage: string) => string;
@@ -31,7 +34,9 @@ const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.18)",
 };
 
-export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> = ({
+export const CollectionSourcesSection: React.FC<
+  CollectionSourcesSectionProps
+> = ({
   t,
   sources,
   contentTypes,
@@ -40,7 +45,9 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
   onRemoveSource,
 }) => {
   const [isFormOpen, setIsFormOpen] = useState<boolean>(true);
-  const [newSourceUid, setNewSourceUid] = useState<string>("plugin::events.event");
+  const [newSourceUid, setNewSourceUid] = useState<string>(
+    "plugin::events.event"
+  );
   const [newSourceLabel, setNewSourceLabel] = useState<string>(() =>
     t("settings.defaultSourceLabel", "Mosque Events")
   );
@@ -67,7 +74,9 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
           "slug",
         ].includes(n)
       ) ??
-      ct.fields.find((f) => f.type === "string" || f.type === "text" || f.type === "uid")?.name ??
+      ct.fields.find(
+        (f) => f.type === "string" || f.type === "text" || f.type === "uid"
+      )?.name ??
       ct.fields[0]?.name ??
       "title";
     const bestStart =
@@ -87,9 +96,13 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
       ct.fields[0]?.name ??
       "startDate";
     const bestEnd =
-      fieldNames.find((n) => ["endDate", "finishDate", "expiresAt"].includes(n)) ?? "endDate";
+      fieldNames.find((n) =>
+        ["endDate", "finishDate", "expiresAt"].includes(n)
+      ) ?? "endDate";
     const bestRRule =
-      fieldNames.find((n) => ["recurrence", "rrule", "recurrenceRule"].includes(n)) ?? "recurrence";
+      fieldNames.find((n) =>
+        ["recurrence", "rrule", "recurrenceRule"].includes(n)
+      ) ?? "recurrence";
 
     setNewTitleField(bestTitle);
     setNewStartField(bestStart);
@@ -163,9 +176,20 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
   };
 
   return (
-    <Box padding={5} background="neutral0" hasRadius shadow="tableShadow" style={CARD_BORDER_STYLE}>
+    <Box
+      padding={5}
+      background="neutral0"
+      hasRadius
+      shadow="tableShadow"
+      style={CARD_BORDER_STYLE}
+    >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Flex justifyContent="space-between" alignItems="flex-start" wrap="wrap" gap={3}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="flex-start"
+          wrap="wrap"
+          gap={3}
+        >
           <Box style={{ flex: 1, minWidth: 280 }}>
             <Typography variant="delta" fontWeight="bold" tag="h2">
               {t("settings.section.sources", "Mapped Collection Sources")}
@@ -196,7 +220,12 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
         </Flex>
 
         {sources.length === 0 ? (
-          <Box padding={4} background="neutral100" hasRadius style={SUB_CARD_BORDER_STYLE}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={SUB_CARD_BORDER_STYLE}
+          >
             <Typography variant="omega" textColor="neutral600">
               {t(
                 "settings.noSources",
@@ -217,7 +246,12 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                   borderLeft: `4px solid ${src.color || "#0284C7"}`,
                 }}
               >
-                <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+                <Flex
+                  justifyContent="space-between"
+                  alignItems="center"
+                  wrap="wrap"
+                  gap={3}
+                >
                   <Flex gap={3} alignItems="center" wrap="wrap">
                     <span
                       style={{
@@ -236,7 +270,8 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                     </Badge>
                     <Badge backgroundColor="primary100" textColor="primary700">
                       {t("settings.badge.title", "Title")}: {src.fields.title} ·{" "}
-                      {t("settings.badge.start", "Start")}: {src.fields.startDate}
+                      {t("settings.badge.start", "Start")}:{" "}
+                      {src.fields.startDate}
                       {src.fields.endDate
                         ? ` · ${t("settings.badge.end", "End")}: ${src.fields.endDate}`
                         : ""}
@@ -252,10 +287,18 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                     >
                       {t("settings.sourceEnabled", "Enabled")}
                     </Checkbox>
-                    <Button variant="tertiary" size="S" onClick={() => handleEditSource(src)}>
+                    <Button
+                      variant="tertiary"
+                      size="S"
+                      onClick={() => handleEditSource(src)}
+                    >
                       {t("common.edit", "Edit")}
                     </Button>
-                    <Button variant="danger-light" size="S" onClick={() => onRemoveSource(src.id)}>
+                    <Button
+                      variant="danger-light"
+                      size="S"
+                      onClick={() => onRemoveSource(src.id)}
+                    >
                       {t("common.remove", "Remove")}
                     </Button>
                   </Flex>
@@ -267,10 +310,18 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
 
         {/* Add / Update Collection Source Form */}
         {isFormOpen && (
-          <Box padding={5} background="neutral100" hasRadius style={SUB_CARD_BORDER_STYLE}>
+          <Box
+            padding={5}
+            background="neutral100"
+            hasRadius
+            style={SUB_CARD_BORDER_STYLE}
+          >
             <Flex direction="column" alignItems="stretch" gap={4}>
               <Typography variant="sigma" textColor="neutral700">
-                {t("settings.addSourceTitle", "Configure Collection Type Mapping")}
+                {t(
+                  "settings.addSourceTitle",
+                  "Configure Collection Type Mapping"
+                )}
               </Typography>
 
               <div
@@ -295,7 +346,11 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                         "settings.collectionType.placeholder",
                         "Select Strapi Collection Type"
                       )}
-                      value={newSourceUid || contentTypes[0]?.uid || "plugin::events.event"}
+                      value={
+                        newSourceUid ||
+                        contentTypes[0]?.uid ||
+                        "plugin::events.event"
+                      }
                       onChange={(val: string | number) => {
                         const uid = String(val);
                         const found = contentTypes.find((c) => c.uid === uid);
@@ -333,13 +388,18 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                     "Human-readable label shown on calendar filter chips."
                   )}
                 >
-                  <Field.Label>{t("settings.sourceLabel", "Calendar Filter Label")}</Field.Label>
+                  <Field.Label>
+                    {t("settings.sourceLabel", "Calendar Filter Label")}
+                  </Field.Label>
                   <TextInput
                     value={newSourceLabel}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setNewSourceLabel(e.target.value)
                     }
-                    placeholder={t("settings.sourceLabel.placeholder", "e.g., Mosque Events")}
+                    placeholder={t(
+                      "settings.sourceLabel.placeholder",
+                      "e.g., Mosque Events"
+                    )}
                   />
                   <Field.Hint />
                 </Field.Root>
@@ -350,13 +410,18 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                     "Hex color accent applied to calendar chips for this source."
                   )}
                 >
-                  <Field.Label>{t("settings.sourceColor", "Event Badge Color (Hex)")}</Field.Label>
+                  <Field.Label>
+                    {t("settings.sourceColor", "Event Badge Color (Hex)")}
+                  </Field.Label>
                   <TextInput
                     value={newSourceColor}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setNewSourceColor(e.target.value)
                     }
-                    placeholder={t("settings.sourceColor.placeholder", "e.g., #0284C7")}
+                    placeholder={t(
+                      "settings.sourceColor.placeholder",
+                      "e.g., #0284C7"
+                    )}
                   />
                   <Field.Hint />
                 </Field.Root>
@@ -376,11 +441,18 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                     "Attribute displayed as the calendar event title."
                   )}
                 >
-                  <Field.Label>{t("settings.field.title", "Title Field")}</Field.Label>
+                  <Field.Label>
+                    {t("settings.field.title", "Title Field")}
+                  </Field.Label>
                   <SingleSelect
-                    placeholder={t("settings.field.title.placeholder", "Select title field")}
+                    placeholder={t(
+                      "settings.field.title.placeholder",
+                      "Select title field"
+                    )}
                     value={newTitleField || "title"}
-                    onChange={(val: string | number) => setNewTitleField(String(val))}
+                    onChange={(val: string | number) =>
+                      setNewTitleField(String(val))
+                    }
                   >
                     {selectedCtFields.map((f) => (
                       <SingleSelectOption key={f.name} value={f.name}>
@@ -398,14 +470,18 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                     "Date or DateTime field used to place the entry on the grid."
                   )}
                 >
-                  <Field.Label>{t("settings.field.startDate", "Start Date Field")}</Field.Label>
+                  <Field.Label>
+                    {t("settings.field.startDate", "Start Date Field")}
+                  </Field.Label>
                   <SingleSelect
                     placeholder={t(
                       "settings.field.startDate.placeholder",
                       "Select start date field"
                     )}
                     value={newStartField || "startDate"}
-                    onChange={(val: string | number) => setNewStartField(String(val))}
+                    onChange={(val: string | number) =>
+                      setNewStartField(String(val))
+                    }
                   >
                     {selectedCtFields.map((f) => (
                       <SingleSelectOption key={f.name} value={f.name}>
@@ -430,7 +506,10 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setNewEndField(e.target.value)
                     }
-                    placeholder={t("settings.field.endDate.placeholder", "e.g., endDate")}
+                    placeholder={t(
+                      "settings.field.endDate.placeholder",
+                      "e.g., endDate"
+                    )}
                   />
                   <Field.Hint />
                 </Field.Root>
@@ -449,7 +528,10 @@ export const CollectionSourcesSection: React.FC<CollectionSourcesSectionProps> =
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       setNewRRuleField(e.target.value)
                     }
-                    placeholder={t("settings.field.rrule.placeholder", "e.g., recurrence")}
+                    placeholder={t(
+                      "settings.field.rrule.placeholder",
+                      "e.g., recurrence"
+                    )}
                   />
                   <Field.Hint />
                 </Field.Root>

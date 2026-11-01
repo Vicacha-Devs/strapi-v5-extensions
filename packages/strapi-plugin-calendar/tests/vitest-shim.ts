@@ -11,14 +11,19 @@ function createExpect(actual) {
     },
     toContain(substring) {
       if (typeof actual === "string") {
-        assert.ok(actual.includes(substring), `Expected "${actual}" to contain "${substring}"`);
+        assert.ok(
+          actual.includes(substring),
+          `Expected "${actual}" to contain "${substring}"`
+        );
       } else if (Array.isArray(actual)) {
         assert.ok(
           actual.includes(substring),
           `Expected array to contain ${JSON.stringify(substring)}`
         );
       } else {
-        assert.fail(`Expected string or array in toContain, got ${typeof actual}`);
+        assert.fail(
+          `Expected string or array in toContain, got ${typeof actual}`
+        );
       }
     },
     toBeGreaterThan(num) {

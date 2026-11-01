@@ -14,10 +14,16 @@ function matchesKeyword(
   canonicalUid: string
 ): boolean {
   if (source.uid === canonicalUid) return true;
-  return source.id.toLowerCase().includes(keyword) || source.uid.toLowerCase().includes(keyword);
+  return (
+    source.id.toLowerCase().includes(keyword) ||
+    source.uid.toLowerCase().includes(keyword)
+  );
 }
 
-export function matchesSourceFilter(source: CalendarSourceMapping, filter?: string): boolean {
+export function matchesSourceFilter(
+  source: CalendarSourceMapping,
+  filter?: string
+): boolean {
   if (!filter || filter === "all") return true;
   if (source.id === filter || source.uid === filter) return true;
   const lowerFilter = filter.toLowerCase();
@@ -65,7 +71,9 @@ function computeEffectiveEnd(
   rawStart: string,
   endDate?: string
 ): { normalizedStart: string; effectiveEnd: string } {
-  const normalizedStart = rawStart.includes("T") ? rawStart : `${rawStart}T10:00:00.000Z`;
+  const normalizedStart = rawStart.includes("T")
+    ? rawStart
+    : `${rawStart}T10:00:00.000Z`;
   const startMs = new Date(normalizedStart).getTime();
   const defaultEndIso = Number.isNaN(startMs)
     ? normalizedStart
@@ -180,13 +188,20 @@ function applyBookingCollectionFields(
     source
   );
   const phone = params.customerPhone?.trim();
-  setIfBookingFieldPresent(data, "customerPhone", phone || undefined, attrs, source);
+  setIfBookingFieldPresent(
+    data,
+    "customerPhone",
+    phone || undefined,
+    attrs,
+    source
+  );
 
   const partySize = Math.max(1, Math.floor(Number(params.partySize) || 1));
   setIfBookingFieldPresent(data, "partySize", partySize, attrs, source);
 
   const statusField = source.fields.status || "status";
-  const statusVal = params.bookingStatus === "pending" ? "pending" : "confirmed";
+  const statusVal =
+    params.bookingStatus === "pending" ? "pending" : "confirmed";
   setIfBookingFieldPresent(data, statusField, statusVal, attrs, source);
 
   const endField = source.fields.endDate || "endDate";
@@ -207,7 +222,10 @@ export function buildQuickCreatePayload(
   const rawStart = (params.startDate ?? "").trim();
   if (!rawStart) throw new Error("Start date is required.");
 
-  const { normalizedStart, effectiveEnd } = computeEffectiveEnd(rawStart, params.endDate);
+  const { normalizedStart, effectiveEnd } = computeEffectiveEnd(
+    rawStart,
+    params.endDate
+  );
   const slug = title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -233,7 +251,15 @@ export function buildQuickCreatePayload(
   applyCategoryIfApplicable(data, params, source, isPluginBooking);
 
   if (isPluginBooking) {
-    applyBookingCollectionFields(data, params, source, attrs, title, normalizedStart, effectiveEnd);
+    applyBookingCollectionFields(
+      data,
+      params,
+      source,
+      attrs,
+      title,
+      normalizedStart,
+      effectiveEnd
+    );
   }
 
   const shouldPublish =

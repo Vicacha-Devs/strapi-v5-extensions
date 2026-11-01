@@ -71,7 +71,10 @@ function appendAutoDetectedPluginSources(
   contentTypes: Record<string, unknown>
 ): void {
   for (const builtin of [BUILTIN_EVENTS_SOURCE, BUILTIN_BOOKINGS_SOURCE]) {
-    if (contentTypes[builtin.uid] && !mergedSources.some((s) => s.uid === builtin.uid)) {
+    if (
+      contentTypes[builtin.uid] &&
+      !mergedSources.some((s) => s.uid === builtin.uid)
+    ) {
       mergedSources.push({ ...builtin, fields: { ...builtin.fields } });
     }
   }
@@ -84,7 +87,9 @@ function mergeUserConfigSources(
   if (!Array.isArray(userSources)) return;
   for (const src of userSources) {
     if (!src?.id || !src.uid) continue;
-    const idx = mergedSources.findIndex((s) => s.id === src.id || s.uid === src.uid);
+    const idx = mergedSources.findIndex(
+      (s) => s.id === src.id || s.uid === src.uid
+    );
     if (idx >= 0) {
       mergedSources[idx] = {
         ...mergedSources[idx],
@@ -121,7 +126,9 @@ function mergePresetLists(
   if (!Array.isArray(stored)) return result;
   for (const item of stored) {
     if (!item?.id || !item.rrule) continue;
-    const idx = result.findIndex((p) => p.id === item.id || p.rrule === item.rrule);
+    const idx = result.findIndex(
+      (p) => p.id === item.id || p.rrule === item.rrule
+    );
     if (idx >= 0) {
       result[idx] = { ...result[idx], ...item };
     } else {
@@ -157,7 +164,11 @@ function mergeCalendarLists(
   return result;
 }
 
-function pickNonEmptyStr(val: unknown, fallback: string, maxLen?: number): string {
+function pickNonEmptyStr(
+  val: unknown,
+  fallback: string,
+  maxLen?: number
+): string {
   if (typeof val === "string" && val.trim()) {
     const trimmed = val.trim();
     return maxLen ? trimmed.slice(0, maxLen) : trimmed;
@@ -169,7 +180,11 @@ function pickBool(val: unknown, fallback: boolean): boolean {
   return typeof val === "boolean" ? val : fallback;
 }
 
-function pickEnum<T extends string>(val: unknown, allowed: readonly T[], fallback: T): T {
+function pickEnum<T extends string>(
+  val: unknown,
+  allowed: readonly T[],
+  fallback: T
+): T {
   return typeof val === "string" && (allowed as readonly string[]).includes(val)
     ? (val as T)
     : fallback;
@@ -196,10 +211,18 @@ function resolveThemePatch(
   patch: Partial<CalendarPluginSettings>
 ): Pick<
   CalendarPluginSettings,
-  "theme" | "colorScheme" | "themePalette" | "secondaryCalendarLanguage" | "primaryColor"
+  | "theme"
+  | "colorScheme"
+  | "themePalette"
+  | "secondaryCalendarLanguage"
+  | "primaryColor"
 > {
   return {
-    theme: pickRecordKey(patch.theme, CALENDAR_THEME_PRESETS, current.theme ?? "breeze"),
+    theme: pickRecordKey(
+      patch.theme,
+      CALENDAR_THEME_PRESETS,
+      current.theme ?? "breeze"
+    ),
     colorScheme: pickEnum(
       patch.colorScheme,
       ["auto", "light", "dark"] as const,
@@ -240,7 +263,10 @@ function resolveViewBooleansPatch(
     timeFormat24h: pickBool(patch.timeFormat24h, current.timeFormat24h ?? true),
     showWeekends: pickBool(patch.showWeekends, current.showWeekends),
     showTodayButton: pickBool(patch.showTodayButton, current.showTodayButton),
-    showCreateButton: pickBool(patch.showCreateButton, current.showCreateButton),
+    showCreateButton: pickBool(
+      patch.showCreateButton,
+      current.showCreateButton
+    ),
     monthView: pickBool(patch.monthView, current.monthView),
     weekView: pickBool(patch.weekView, current.weekView),
     dayView: pickBool(patch.dayView, current.dayView),
@@ -264,14 +290,23 @@ function buildUpdatedSettings(
     ...current,
     ...resolveThemePatch(current, patch),
     ...resolveViewBooleansPatch(current, patch),
-    defaultTimezone: pickNonEmptyStr(patch.defaultTimezone, current.defaultTimezone),
-    defaultLocale: pickNonEmptyStr(patch.defaultLocale, current.defaultLocale ?? "auto"),
+    defaultTimezone: pickNonEmptyStr(
+      patch.defaultTimezone,
+      current.defaultTimezone
+    ),
+    defaultLocale: pickNonEmptyStr(
+      patch.defaultLocale,
+      current.defaultLocale ?? "auto"
+    ),
     direction: pickEnum(
       patch.direction,
       ["auto", "ltr", "rtl"] as const,
       current.direction ?? "auto"
     ),
-    defaultView: typeof patch.defaultView === "string" ? patch.defaultView : current.defaultView,
+    defaultView:
+      typeof patch.defaultView === "string"
+        ? patch.defaultView
+        : current.defaultView,
     firstDayOfWeek: firstDay,
     weekNumberCalculation: pickEnum(
       patch.weekNumberCalculation,
@@ -284,8 +319,14 @@ function buildUpdatedSettings(
     feedTitle: pickNonEmptyStr(patch.feedTitle, current.feedTitle, 140),
     businessHours: pickArray(patch.businessHours, current.businessHours),
     sources: pickArray(patch.sources, current.sources),
-    secondaryCalendars: pickArray(patch.secondaryCalendars, current.secondaryCalendars ?? []),
-    recurrencePresets: pickArray(patch.recurrencePresets, current.recurrencePresets ?? []),
+    secondaryCalendars: pickArray(
+      patch.secondaryCalendars,
+      current.secondaryCalendars ?? []
+    ),
+    recurrencePresets: pickArray(
+      patch.recurrencePresets,
+      current.recurrencePresets ?? []
+    ),
   };
 }
 
@@ -295,10 +336,14 @@ interface RawSchemaShape {
   attributes?: Record<string, { type?: string; customField?: string }>;
 }
 
-function isDiscoverableSchema(uid: string, schema: unknown): schema is RawSchemaShape {
+function isDiscoverableSchema(
+  uid: string,
+  schema: unknown
+): schema is RawSchemaShape {
   if (!schema || typeof schema !== "object") return false;
   if (!uid.startsWith("api::") && !uid.startsWith("plugin::")) return false;
-  if (INTERNAL_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix))) return false;
+  if (INTERNAL_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix)))
+    return false;
   const typed = schema as RawSchemaShape;
   return !typed.kind || typed.kind === "collectionType";
 }
@@ -329,7 +374,8 @@ function scoreContentTypeUid(uid: string): number {
 
 export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
   const getStore = () => strapi.store({ type: "plugin", name: PLUGIN_ID });
-  const getRegistryService = () => getCalendarService(strapi, PLUGIN_ID, "registry");
+  const getRegistryService = () =>
+    getCalendarService(strapi, PLUGIN_ID, "registry");
 
   const getConfigDefaults = (): CalendarPluginSettings => {
     const userConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
@@ -373,8 +419,14 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     ...defaults,
     ...stored,
     sources: mergeSourceLists(defaults.sources, stored.sources),
-    secondaryCalendars: mergeCalendarLists(defaults.secondaryCalendars, stored.secondaryCalendars),
-    recurrencePresets: mergePresetLists(defaults.recurrencePresets, stored.recurrencePresets),
+    secondaryCalendars: mergeCalendarLists(
+      defaults.secondaryCalendars,
+      stored.secondaryCalendars
+    ),
+    recurrencePresets: mergePresetLists(
+      defaults.recurrencePresets,
+      stored.recurrencePresets
+    ),
   });
 
   const service: SettingsService = {
@@ -384,7 +436,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
         key: STORE_KEY,
       })) as Partial<CalendarPluginSettings> | null;
       const defaults = getConfigDefaults();
-      const merged = existing ? mergeStoredWithDefaults(defaults, existing) : defaults;
+      const merged = existing
+        ? mergeStoredWithDefaults(defaults, existing)
+        : defaults;
       await store.set({ key: STORE_KEY, value: merged });
       return merged;
     },
@@ -398,7 +452,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
       return stored ? mergeStoredWithDefaults(defaults, stored) : defaults;
     },
 
-    async updateSettings(patch: Partial<CalendarPluginSettings>): Promise<CalendarPluginSettings> {
+    async updateSettings(
+      patch: Partial<CalendarPluginSettings>
+    ): Promise<CalendarPluginSettings> {
       const current = await service.getSettings();
       const next = buildUpdatedSettings(current, patch);
       const store = getStore();

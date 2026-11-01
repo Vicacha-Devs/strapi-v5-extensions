@@ -79,11 +79,18 @@ const GeneralLanguageSelectFields: React.FC<SubFieldsProps> = ({
         "Language for month names, weekdays, and toolbar buttons."
       )}
     >
-      <Field.Label>{t("settings.defaultLocale", "Primary Calendar Language")}</Field.Label>
+      <Field.Label>
+        {t("settings.defaultLocale", "Primary Calendar Language")}
+      </Field.Label>
       <SingleSelect
-        placeholder={t("settings.defaultLocale.placeholder", "Select primary language")}
+        placeholder={t(
+          "settings.defaultLocale.placeholder",
+          "Select primary language"
+        )}
         value={settings.defaultLocale || "es"}
-        onChange={(val: string | number) => onPatchSettings({ defaultLocale: String(val) })}
+        onChange={(val: string | number) =>
+          onPatchSettings({ defaultLocale: String(val) })
+        }
       >
         <SingleSelectOption value="es">
           {t("settings.locale.es", "Español — Spanish (ES)")}
@@ -118,7 +125,10 @@ const GeneralLanguageSelectFields: React.FC<SubFieldsProps> = ({
       )}
     >
       <Field.Label>
-        {t("settings.secondaryCalendarLanguage", "Secondary Hijri / Arabic Date Display")}
+        {t(
+          "settings.secondaryCalendarLanguage",
+          "Secondary Hijri / Arabic Date Display"
+        )}
       </Field.Label>
       <SingleSelect
         placeholder={t(
@@ -128,12 +138,17 @@ const GeneralLanguageSelectFields: React.FC<SubFieldsProps> = ({
         value={settings.secondaryCalendarLanguage || "local"}
         onChange={(val: string | number) =>
           onPatchSettings({
-            secondaryCalendarLanguage: String(val) as SecondaryCalendarLanguageMode,
+            secondaryCalendarLanguage: String(
+              val
+            ) as SecondaryCalendarLanguageMode,
           })
         }
       >
         <SingleSelectOption value="local">
-          {t("settings.secondaryCalendarLanguage.local", "Local Language (e.g. 16 Rabiʻ II)")}
+          {t(
+            "settings.secondaryCalendarLanguage.local",
+            "Local Language (e.g. 16 Rabiʻ II)"
+          )}
         </SingleSelectOption>
         <SingleSelectOption value="ar">
           {t(
@@ -142,19 +157,32 @@ const GeneralLanguageSelectFields: React.FC<SubFieldsProps> = ({
           )}
         </SingleSelectOption>
         <SingleSelectOption value="off">
-          {t("settings.secondaryCalendarLanguage.off", "Off (Gregorian Calendar Only)")}
+          {t(
+            "settings.secondaryCalendarLanguage.off",
+            "Off (Gregorian Calendar Only)"
+          )}
         </SingleSelectOption>
       </SingleSelect>
       <Field.Hint />
     </Field.Root>
 
-    <Field.Root hint={t("settings.directionHint", "Grid column order (LTR or RTL for Arabic).")}>
+    <Field.Root
+      hint={t(
+        "settings.directionHint",
+        "Grid column order (LTR or RTL for Arabic)."
+      )}
+    >
       <Field.Label>{t("settings.direction", "Layout Direction")}</Field.Label>
       <SingleSelect
-        placeholder={t("settings.direction.placeholder", "Select layout direction")}
+        placeholder={t(
+          "settings.direction.placeholder",
+          "Select layout direction"
+        )}
         value={settings.direction || "auto"}
         onChange={(val: string | number) =>
-          onPatchSettings({ direction: String(val) as CalendarDirectionSetting })
+          onPatchSettings({
+            direction: String(val) as CalendarDirectionSetting,
+          })
         }
       >
         <SingleSelectOption value="auto">
@@ -171,11 +199,19 @@ const GeneralLanguageSelectFields: React.FC<SubFieldsProps> = ({
     </Field.Root>
 
     <Field.Root
-      hint={t("settings.defaultViewHint", "Initial view displayed when opening the calendar.")}
+      hint={t(
+        "settings.defaultViewHint",
+        "Initial view displayed when opening the calendar."
+      )}
     >
-      <Field.Label>{t("settings.defaultView", "Default Calendar View")}</Field.Label>
+      <Field.Label>
+        {t("settings.defaultView", "Default Calendar View")}
+      </Field.Label>
       <SingleSelect
-        placeholder={t("settings.defaultView.placeholder", "Select default view")}
+        placeholder={t(
+          "settings.defaultView.placeholder",
+          "Select default view"
+        )}
         value={settings.defaultView || "dayGridMonth"}
         onChange={(val: string | number) =>
           onPatchSettings({ defaultView: String(val) as CalendarViewMode })
@@ -207,11 +243,19 @@ const GeneralLanguageSelectFields: React.FC<SubFieldsProps> = ({
     </Field.Root>
 
     <Field.Root
-      hint={t("settings.firstDayHint", "Starting weekday column in Month and Week views.")}
+      hint={t(
+        "settings.firstDayHint",
+        "Starting weekday column in Month and Week views."
+      )}
     >
-      <Field.Label>{t("settings.firstDayOfWeek", "First Day of Week")}</Field.Label>
+      <Field.Label>
+        {t("settings.firstDayOfWeek", "First Day of Week")}
+      </Field.Label>
       <SingleSelect
-        placeholder={t("settings.firstDayOfWeek.placeholder", "Select first day of week")}
+        placeholder={t(
+          "settings.firstDayOfWeek.placeholder",
+          "Select first day of week"
+        )}
         value={String(settings.firstDayOfWeek ?? 1)}
         onChange={(val: string | number) =>
           onPatchSettings({ firstDayOfWeek: Number.parseInt(String(val), 10) })
@@ -230,8 +274,15 @@ const GeneralLanguageSelectFields: React.FC<SubFieldsProps> = ({
       <Field.Hint />
     </Field.Root>
 
-    <Field.Root hint={t("settings.weekCalcHint", "Standard used when computing week numbers.")}>
-      <Field.Label>{t("settings.weekNumberCalculation", "Week Calculation")}</Field.Label>
+    <Field.Root
+      hint={t(
+        "settings.weekCalcHint",
+        "Standard used when computing week numbers."
+      )}
+    >
+      <Field.Label>
+        {t("settings.weekNumberCalculation", "Week Calculation")}
+      </Field.Label>
       <SingleSelect
         placeholder={t(
           "settings.weekNumberCalculation.placeholder",
@@ -256,18 +307,30 @@ const GeneralLanguageSelectFields: React.FC<SubFieldsProps> = ({
   </>
 );
 
-const GeneralTimeGridFields: React.FC<SubFieldsProps> = ({ t, settings, onPatchSettings }) => (
+const GeneralTimeGridFields: React.FC<SubFieldsProps> = ({
+  t,
+  settings,
+  onPatchSettings,
+}) => (
   <>
     <Field.Root
-      hint={t("settings.timezoneHint", "IANA timezone identifier (e.g., America/Bogota or UTC).")}
+      hint={t(
+        "settings.timezoneHint",
+        "IANA timezone identifier (e.g., America/Bogota or UTC)."
+      )}
     >
-      <Field.Label>{t("settings.defaultTimezone", "Default Timezone (IANA)")}</Field.Label>
+      <Field.Label>
+        {t("settings.defaultTimezone", "Default Timezone (IANA)")}
+      </Field.Label>
       <TextInput
         value={settings.defaultTimezone || "America/Bogota"}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           onPatchSettings({ defaultTimezone: e.target.value })
         }
-        placeholder={t("settings.defaultTimezone.placeholder", "e.g., America/Bogota")}
+        placeholder={t(
+          "settings.defaultTimezone.placeholder",
+          "e.g., America/Bogota"
+        )}
       />
       <Field.Hint />
     </Field.Root>
@@ -290,7 +353,10 @@ const GeneralTimeGridFields: React.FC<SubFieldsProps> = ({ t, settings, onPatchS
     </Field.Root>
 
     <Field.Root
-      hint={t("settings.endHourHint", "Latest visible time slot in Week/Day TimeGrid (HH:MM:SS).")}
+      hint={t(
+        "settings.endHourHint",
+        "Latest visible time slot in Week/Day TimeGrid (HH:MM:SS)."
+      )}
     >
       <Field.Label>{t("settings.endHour", "Daily End Hour")}</Field.Label>
       <TextInput
@@ -305,7 +371,11 @@ const GeneralTimeGridFields: React.FC<SubFieldsProps> = ({ t, settings, onPatchS
   </>
 );
 
-const GeneralSlotAndFeedFields: React.FC<SubFieldsProps> = ({ t, settings, onPatchSettings }) => (
+const GeneralSlotAndFeedFields: React.FC<SubFieldsProps> = ({
+  t,
+  settings,
+  onPatchSettings,
+}) => (
   <div style={{ ...GRID_2_COL, marginTop: 16 }}>
     <Field.Root
       hint={t(
@@ -313,11 +383,18 @@ const GeneralSlotAndFeedFields: React.FC<SubFieldsProps> = ({ t, settings, onPat
         "Time interval for rows in Week and Day TimeGrid views."
       )}
     >
-      <Field.Label>{t("settings.slotDuration", "TimeGrid Slot Duration")}</Field.Label>
+      <Field.Label>
+        {t("settings.slotDuration", "TimeGrid Slot Duration")}
+      </Field.Label>
       <SingleSelect
-        placeholder={t("settings.slotDuration.placeholder", "Select slot interval")}
+        placeholder={t(
+          "settings.slotDuration.placeholder",
+          "Select slot interval"
+        )}
         value={settings.slotDuration || "00:30:00"}
-        onChange={(val: string | number) => onPatchSettings({ slotDuration: String(val) })}
+        onChange={(val: string | number) =>
+          onPatchSettings({ slotDuration: String(val) })
+        }
       >
         <SingleSelectOption value="00:15:00">
           {t("settings.slotDuration.15m", "15 min (00:15:00)")}
@@ -338,11 +415,16 @@ const GeneralSlotAndFeedFields: React.FC<SubFieldsProps> = ({ t, settings, onPat
         "Calendar title exported in /api/calendar/feed.ics for Google/Apple/Outlook subscriptions."
       )}
     >
-      <Field.Label>{t("settings.feedTitle", "Public iCal (.ics) Feed Title")}</Field.Label>
+      <Field.Label>
+        {t("settings.feedTitle", "Public iCal (.ics) Feed Title")}
+      </Field.Label>
       <TextInput
         value={
           settings.feedTitle ||
-          t("settings.defaultFeedTitle", "Abu Bakr As-Siddiq Central Mosque — General Calendar")
+          t(
+            "settings.defaultFeedTitle",
+            "Abu Bakr As-Siddiq Central Mosque — General Calendar"
+          )
         }
         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
           onPatchSettings({ feedTitle: e.target.value })
@@ -357,7 +439,11 @@ const GeneralSlotAndFeedFields: React.FC<SubFieldsProps> = ({ t, settings, onPat
   </div>
 );
 
-const GridAndViewCheckboxes: React.FC<SubFieldsProps> = ({ t, settings, onPatchSettings }) => (
+const GridAndViewCheckboxes: React.FC<SubFieldsProps> = ({
+  t,
+  settings,
+  onPatchSettings,
+}) => (
   <div style={GRID_2_COL}>
     <Box padding={4} background="neutral100" hasRadius style={SUB_BOX_STYLE}>
       <Flex direction="column" alignItems="flex-start" gap={3}>
@@ -369,7 +455,9 @@ const GridAndViewCheckboxes: React.FC<SubFieldsProps> = ({ t, settings, onPatchS
             <Checkbox
               key={vc.key}
               checked={Boolean(settings[vc.key])}
-              onCheckedChange={(c: boolean) => onPatchSettings({ [vc.key]: Boolean(c) })}
+              onCheckedChange={(c: boolean) =>
+                onPatchSettings({ [vc.key]: Boolean(c) })
+              }
             >
               {t(vc.labelId, vc.defaultLabel)}
             </Checkbox>
@@ -381,32 +469,46 @@ const GridAndViewCheckboxes: React.FC<SubFieldsProps> = ({ t, settings, onPatchS
     <Box padding={4} background="neutral100" hasRadius style={SUB_BOX_STYLE}>
       <Flex direction="column" alignItems="flex-start" gap={3}>
         <Typography variant="sigma" textColor="neutral700">
-          {t("settings.gridBehaviorGroup", "Grid Display & Interaction Options")}
+          {t(
+            "settings.gridBehaviorGroup",
+            "Grid Display & Interaction Options"
+          )}
         </Typography>
         <Flex gap={4} wrap="wrap">
           <Checkbox
             checked={settings.showWeekends}
-            onCheckedChange={(c: boolean) => onPatchSettings({ showWeekends: Boolean(c) })}
+            onCheckedChange={(c: boolean) =>
+              onPatchSettings({ showWeekends: Boolean(c) })
+            }
           >
             {t("settings.showWeekends", "Show Weekends")}
           </Checkbox>
           <Checkbox
             checked={Boolean(settings.weekNumbers)}
-            onCheckedChange={(c: boolean) => onPatchSettings({ weekNumbers: Boolean(c) })}
+            onCheckedChange={(c: boolean) =>
+              onPatchSettings({ weekNumbers: Boolean(c) })
+            }
           >
             {t("settings.weekNumbers", "Show Week Numbers")}
           </Checkbox>
           <Checkbox
             checked={settings.timeFormat24h !== false}
-            onCheckedChange={(c: boolean) => onPatchSettings({ timeFormat24h: Boolean(c) })}
+            onCheckedChange={(c: boolean) =>
+              onPatchSettings({ timeFormat24h: Boolean(c) })
+            }
           >
             {t("settings.timeFormat24h", "24-Hour Time Format")}
           </Checkbox>
           <Checkbox
             checked={settings.showCreateButton}
-            onCheckedChange={(c: boolean) => onPatchSettings({ showCreateButton: Boolean(c) })}
+            onCheckedChange={(c: boolean) =>
+              onPatchSettings({ showCreateButton: Boolean(c) })
+            }
           >
-            {t("settings.showCreateButton", "Enable Quick-Create & Slot Selection")}
+            {t(
+              "settings.showCreateButton",
+              "Enable Quick-Create & Slot Selection"
+            )}
           </Checkbox>
         </Flex>
       </Flex>
@@ -433,7 +535,11 @@ export const CalendarViewsSection: React.FC<CalendarViewsSectionProps> = ({
     >
       <Flex direction="column" alignItems="stretch" gap={5}>
         {showTheme && (
-          <CalendarThemeSection t={t} settings={settings} onPatchSettings={onPatchSettings} />
+          <CalendarThemeSection
+            t={t}
+            settings={settings}
+            onPatchSettings={onPatchSettings}
+          />
         )}
 
         {showTheme && showGeneral && <Divider />}
@@ -442,7 +548,10 @@ export const CalendarViewsSection: React.FC<CalendarViewsSectionProps> = ({
           <>
             <Box>
               <Typography variant="delta" fontWeight="bold" tag="h2">
-                {t("settings.section.general", "Language, TimeGrid & Schedule Configuration")}
+                {t(
+                  "settings.section.general",
+                  "Language, TimeGrid & Schedule Configuration"
+                )}
               </Typography>
               <Box paddingTop={1} paddingBottom={4}>
                 <Typography variant="pi" textColor="neutral600">
@@ -471,7 +580,11 @@ export const CalendarViewsSection: React.FC<CalendarViewsSectionProps> = ({
               />
             </Box>
             <Divider />
-            <GridAndViewCheckboxes t={t} settings={settings} onPatchSettings={onPatchSettings} />
+            <GridAndViewCheckboxes
+              t={t}
+              settings={settings}
+              onPatchSettings={onPatchSettings}
+            />
           </>
         )}
       </Flex>

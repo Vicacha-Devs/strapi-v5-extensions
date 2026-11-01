@@ -1,6 +1,10 @@
 export type RRuleFrequency = "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 export type RRuleWeekday = "MO" | "TU" | "WE" | "TH" | "FR" | "SA" | "SU";
-export type CalendarItemStatus = "scheduled" | "cancelled" | "postponed" | "rescheduled";
+export type CalendarItemStatus =
+  | "scheduled"
+  | "cancelled"
+  | "postponed"
+  | "rescheduled";
 export type CalendarViewMode =
   | "dayGridMonth"
   | "timeGridWeek"
