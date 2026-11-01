@@ -148,7 +148,12 @@ export const SeoChecks = ({
   return (
     <Modal.Content labelledBy="title">
       <Modal.Header>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+        <Typography
+          fontWeight="bold"
+          textColor="neutral800"
+          tag="h2"
+          id="title"
+        >
           {formatMessage({
             id: getTrad("Button.seo-analyze"),
             defaultMessage: "SEO Analyze",
