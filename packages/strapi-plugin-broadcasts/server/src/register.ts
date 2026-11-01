@@ -37,7 +37,9 @@ function extendContentTypeSchema(
     ? targetKey
     : `plugin::${PLUGIN_ID}.${targetKey}`;
 
-  const schema = strapi.contentTypes?.[resolvedUid] as SchemaContainer | undefined;
+  const schema = strapi.contentTypes?.[resolvedUid] as
+    | SchemaContainer
+    | undefined;
 
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
     if (!attrName || !attrDef || typeof attrDef !== "object") continue;
@@ -50,7 +52,9 @@ const register = ({ strapi }: { strapi: Core.Strapi }) => {
     schemaExtensions?: Record<string, Record<string, Record<string, unknown>>>;
   };
 
-  for (const [targetKey, extraAttributes] of Object.entries(config.schemaExtensions ?? {})) {
+  for (const [targetKey, extraAttributes] of Object.entries(
+    config.schemaExtensions ?? {}
+  )) {
     extendContentTypeSchema(strapi, targetKey, extraAttributes);
   }
 

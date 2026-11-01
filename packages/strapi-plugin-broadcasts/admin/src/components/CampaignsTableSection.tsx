@@ -17,7 +17,10 @@ import {
 import * as React from "react";
 
 import { CAMPAIGN_UID } from "../../../shared/constants";
-import type { CampaignRecord, EmailDesignerTemplateSummary } from "../../../shared/types";
+import type {
+  CampaignRecord,
+  EmailDesignerTemplateSummary,
+} from "../../../shared/types";
 import type { TranslateFn } from "./DeliveryLedgerSection";
 
 export interface EmailTemplateFieldProps {
@@ -41,7 +44,10 @@ export const EmailTemplateSelectorField: React.FC<EmailTemplateFieldProps> = ({
     )}
   >
     <Field.Label>
-      {t("field.email_designer_html_template_optional", "Email Designer HTML Template (optional)")}
+      {t(
+        "field.email_designer_html_template_optional",
+        "Email Designer HTML Template (optional)"
+      )}
     </Field.Label>
     {emailTemplates.length > 0 ? (
       <SingleSelect
@@ -50,10 +56,15 @@ export const EmailTemplateSelectorField: React.FC<EmailTemplateFieldProps> = ({
           "None (use inline campaign body)"
         )}
         value={value || "__none__"}
-        onChange={(val: string | number) => onChange(val === "__none__" ? "" : String(val))}
+        onChange={(val: string | number) =>
+          onChange(val === "__none__" ? "" : String(val))
+        }
       >
         <SingleSelectOption value="__none__">
-          {t("page.ui.none_use_inline_campaign_html", "None (use inline campaign HTML / text)")}
+          {t(
+            "page.ui.none_use_inline_campaign_html",
+            "None (use inline campaign HTML / text)"
+          )}
         </SingleSelectOption>
         <SingleSelectOption value="broadcastNewsletter">
           {t(
@@ -78,7 +89,9 @@ export const EmailTemplateSelectorField: React.FC<EmailTemplateFieldProps> = ({
           "Optional: e.g. 401 or broadcastNewsletter"
         )}
         value={value}
-        onChange={(e: { target: { value: string } }) => onChange(e.target.value)}
+        onChange={(e: { target: { value: string } }) =>
+          onChange(e.target.value)
+        }
       />
     )}
     <Field.Hint />
@@ -104,16 +117,22 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
     <Thead>
       <Tr>
         <Th>
-          <Typography variant="sigma">{t("page.ui.slug_title", "Slug / Title")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.slug_title", "Slug / Title")}
+          </Typography>
         </Th>
         <Th>
           <Typography variant="sigma">{t("page.ui.topic", "Topic")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t("page.ui.channels", "Channels")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.channels", "Channels")}
+          </Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t("page.ui.status", "Status")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.status", "Status")}
+          </Typography>
         </Th>
         <Th>
           <Typography variant="sigma">
@@ -121,16 +140,21 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
           </Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t("page.ui.delivery_stats", "Delivery Stats")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.delivery_stats", "Delivery Stats")}
+          </Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t("page.ui.actions", "Actions")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.actions", "Actions")}
+          </Typography>
         </Th>
       </Tr>
     </Thead>
     <Tbody>
       {campaigns.map((camp) => {
-        const sentTotal = (camp.stats?.sentCount || 0) + (camp.stats?.simulatedCount || 0);
+        const sentTotal =
+          (camp.stats?.sentCount || 0) + (camp.stats?.simulatedCount || 0);
         const failedTotal = camp.stats?.failedCount || 0;
 
         return (
@@ -144,7 +168,8 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
                   </Typography>
                   {camp.emailTemplateRef && (
                     <Badge>
-                      {t("page.ui.email_template_badge", "Email Template:")} {camp.emailTemplateRef}
+                      {t("page.ui.email_template_badge", "Email Template:")}{" "}
+                      {camp.emailTemplateRef}
                     </Badge>
                   )}
                 </Flex>
@@ -170,7 +195,11 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
             </Td>
             <Td>
               <Flex gap={2} wrap="wrap">
-                <Button variant="tertiary" size="S" onClick={() => onEdit(camp)}>
+                <Button
+                  variant="tertiary"
+                  size="S"
+                  onClick={() => onEdit(camp)}
+                >
                   {t("common.edit", "Edit")}
                 </Button>
                 {camp.documentId && (

@@ -18,7 +18,9 @@ import type {
 export function parseTargetList(raw?: string | string[]): string[] {
   if (!raw) return [];
   const items = Array.isArray(raw) ? raw : String(raw).split(",");
-  return Array.from(new Set(items.map((item) => String(item).trim()).filter(Boolean)));
+  return Array.from(
+    new Set(items.map((item) => String(item).trim()).filter(Boolean))
+  );
 }
 
 export function resolveTelegramTargets(
@@ -27,7 +29,9 @@ export function resolveTelegramTargets(
 ): string[] {
   const fromCampaign = parseTargetList(campaign.telegramChatId);
   if (fromCampaign.length > 0) return fromCampaign;
-  const fromTopic = parseTargetList(settings.telegramTopicChatMap?.[campaign.topic]);
+  const fromTopic = parseTargetList(
+    settings.telegramTopicChatMap?.[campaign.topic]
+  );
   if (fromTopic.length > 0) return fromTopic;
   return parseTargetList(settings.telegramDefaultChatId);
 }
@@ -81,7 +85,10 @@ export function createEmptyStats(): CampaignStats {
   };
 }
 
-export function recordResultInStats(stats: CampaignStats, result: ChannelDispatchResult): void {
+export function recordResultInStats(
+  stats: CampaignStats,
+  result: ChannelDispatchResult
+): void {
   stats.totalRecipients += 1;
   const bucket: ChannelDispatchCount = stats.byChannel[result.channel] || {
     sent: 0,
@@ -110,7 +117,9 @@ export function resolveEffectiveEmailTemplateRef(
   settings: BroadcastSettings
 ): string {
   if (settings.enableEmailDesignerBridge === false) return "";
-  return String(payload.emailTemplateRef || settings.defaultEmailTemplateRef || "").trim();
+  return String(
+    payload.emailTemplateRef || settings.defaultEmailTemplateRef || ""
+  ).trim();
 }
 
 export function buildEmailTemplateVariables(
@@ -118,10 +127,12 @@ export function buildEmailTemplateVariables(
   settings: BroadcastSettings,
   inlineHtml: string
 ): Record<string, string | number | undefined> {
-  const extraEntries = Object.entries(payload.templateData || {}).map(([k, v]) => [
-    k,
-    v !== undefined && v !== null ? escapeHtml(String(v)) : undefined,
-  ]);
+  const extraEntries = Object.entries(payload.templateData || {}).map(
+    ([k, v]) => [
+      k,
+      v !== undefined && v !== null ? escapeHtml(String(v)) : undefined,
+    ]
+  );
 
   return {
     subject: escapeHtml(payload.subject),
@@ -239,9 +250,13 @@ export async function sendViaSelfHostedGateway(
   if (!gatewayCheck.valid) throw new Error(gatewayCheck.errors.join("; "));
 
   const baseUrl = (settings.whatsappGatewayUrl || "").replace(/\/+$/, "");
-  const session = encodeURIComponent(settings.whatsappGatewaySession || "default");
+  const session = encodeURIComponent(
+    settings.whatsappGatewaySession || "default"
+  );
   const endpoint =
-    driver === "evolution" ? `${baseUrl}/message/sendText/${session}` : `${baseUrl}/api/sendText`;
+    driver === "evolution"
+      ? `${baseUrl}/message/sendText/${session}`
+      : `${baseUrl}/api/sendText`;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -279,14 +294,24 @@ export async function executeWhatsAppHttpSend(
     ? `${payload.textBody}\n\n🔗 ${payload.ctaUrl}`
     : payload.textBody;
   if (driver === "meta-cloud") {
-    return sendViaMetaCloudApi(payload, settings, target.evolutionNumber, fullText);
+    return sendViaMetaCloudApi(
+      payload,
+      settings,
+      target.evolutionNumber,
+      fullText
+    );
   }
   return sendViaSelfHostedGateway(driver, settings, target, fullText);
 }
 
-export function hasWhatsAppCredentials(driver: string, settings: BroadcastSettings): boolean {
+export function hasWhatsAppCredentials(
+  driver: string,
+  settings: BroadcastSettings
+): boolean {
   if (driver === "meta-cloud") {
-    return Boolean(settings.whatsappPhoneNumberId && settings.whatsappAccessToken);
+    return Boolean(
+      settings.whatsappPhoneNumberId && settings.whatsappAccessToken
+    );
   }
   return Boolean(settings.whatsappGatewayUrl);
 }

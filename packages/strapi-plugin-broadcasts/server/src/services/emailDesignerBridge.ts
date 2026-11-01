@@ -2,7 +2,8 @@ import type { Core } from "@strapi/strapi";
 
 import type { EmailDesignerTemplateSummary } from "../../../shared";
 
-export const EMAIL_DESIGNER_TEMPLATE_UID = "plugin::email-designer-5.email-designer-template";
+export const EMAIL_DESIGNER_TEMPLATE_UID =
+  "plugin::email-designer-5.email-designer-template";
 
 export interface EmailDesignerTemplateRow {
   id?: number;
@@ -31,7 +32,9 @@ export async function fetchRawEmailDesignerTemplates(
       strapi as unknown as {
         db?: {
           query?: (uid: string) => {
-            findMany?: (params?: Record<string, unknown>) => Promise<EmailDesignerTemplateRow[]>;
+            findMany?: (
+              params?: Record<string, unknown>
+            ) => Promise<EmailDesignerTemplateRow[]>;
           };
         };
       }
@@ -50,7 +53,9 @@ export async function fetchRawEmailDesignerTemplates(
 
   try {
     const docs = (await strapi
-      .documents(EMAIL_DESIGNER_TEMPLATE_UID as Parameters<typeof strapi.documents>[0])
+      .documents(
+        EMAIL_DESIGNER_TEMPLATE_UID as Parameters<typeof strapi.documents>[0]
+      )
       .findMany({ limit: 200 })) as unknown as EmailDesignerTemplateRow[];
     if (Array.isArray(docs)) return docs;
   } catch {
@@ -60,7 +65,9 @@ export async function fetchRawEmailDesignerTemplates(
   return [];
 }
 
-function toTemplateSummary(row: EmailDesignerTemplateRow): EmailDesignerTemplateSummary | null {
+function toTemplateSummary(
+  row: EmailDesignerTemplateRow
+): EmailDesignerTemplateSummary | null {
   const refId = Number(row.templateReferenceId ?? row.id ?? 0);
   const name = String(row.name || "").trim();
   if (!refId && !name) return null;
@@ -90,7 +97,9 @@ export async function listEmailDesignerTemplatesFromDb(
     summaries.push(summary);
   }
 
-  return summaries.sort((a, b) => a.templateReferenceId - b.templateReferenceId);
+  return summaries.sort(
+    (a, b) => a.templateReferenceId - b.templateReferenceId
+  );
 }
 
 function findDirectLocalizedTemplate(
@@ -100,7 +109,9 @@ function findDirectLocalizedTemplate(
 ): EmailDesignerTemplateRow | undefined {
   const lowerRef = trimmedRef.toLowerCase();
   const expectedName = `${lowerRef}_${normLocale}`;
-  const normalizedGroupTag = trimmedRef.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  const normalizedGroupTag = trimmedRef
+    .replace(/([a-z])([A-Z])/g, "$1-$2")
+    .toLowerCase();
 
   return rows.find((r) => {
     const rowName = String(r.name || "").toLowerCase();
@@ -124,7 +135,9 @@ function findSiblingBySuffix(
     return undefined;
   }
   const targetSiblingName = `${suffixMatch[1]}_${normLocale}`.toLowerCase();
-  return rows.find((r) => String(r.name || "").toLowerCase() === targetSiblingName);
+  return rows.find(
+    (r) => String(r.name || "").toLowerCase() === targetSiblingName
+  );
 }
 
 function findSiblingByCategoryTags(
@@ -142,7 +155,10 @@ function findSiblingByCategoryTags(
 
   return rows.find((r) => {
     const rTags = getNormalizedTags(r);
-    return rTags.includes(normLocale) && categoryTags.some((cat) => rTags.includes(cat));
+    return (
+      rTags.includes(normLocale) &&
+      categoryTags.some((cat) => rTags.includes(cat))
+    );
   });
 }
 
@@ -184,7 +200,11 @@ export async function resolveEmailDesignerTemplateFromDb(
 
   const normLocale = locale ? locale.toLowerCase() : undefined;
   if (normLocale) {
-    const localizedDirect = findDirectLocalizedTemplate(rows, trimmed, normLocale);
+    const localizedDirect = findDirectLocalizedTemplate(
+      rows,
+      trimmed,
+      normLocale
+    );
     if (localizedDirect) return localizedDirect;
   }
 
@@ -248,7 +268,10 @@ export async function trySendEmailViaDesigner5(params: {
   text: string;
   headers: Record<string, string>;
   templateVars: Record<string, string | number | undefined>;
-  interpolate: (tpl: string, vars: Record<string, string | number | undefined>) => string;
+  interpolate: (
+    tpl: string,
+    vars: Record<string, string | number | undefined>
+  ) => string;
 }): Promise<string | null> {
   const {
     strapi,

@@ -133,7 +133,8 @@ export const STARTER_CAMPAIGN_TEMPLATES: StarterCampaignTemplate[] = [
         ctaUrl: "https://mezquitabogota.org/es/horarios",
       },
       en: {
-        subject: "🕌 Friday Jumu’ah Reminder — {{organizationName}} ({{secondaryDate}})",
+        subject:
+          "🕌 Friday Jumu’ah Reminder — {{organizationName}} ({{secondaryDate}})",
         bodyText:
           "As-salamu alaykum {{recipientName}}. Join us this Friday for the Jumu’ah Khutbah and congregational prayer at {{organizationName}}. Hijri date: {{secondaryDate}}.",
         bodyHtml:
@@ -142,7 +143,8 @@ export const STARTER_CAMPAIGN_TEMPLATES: StarterCampaignTemplate[] = [
         ctaUrl: "https://mezquitabogota.org/en/prayer-times",
       },
       ar: {
-        subject: "🕌 تذكير صلاة وخطبة الجمعة — {{organizationName}} ({{secondaryDate}})",
+        subject:
+          "🕌 تذكير صلاة وخطبة الجمعة — {{organizationName}} ({{secondaryDate}})",
         bodyText:
           "السلام عليكم {{recipientName}}، ندعوكم لحضور خطبة وصلاة الجمعة في {{organizationName}}. التاريخ الهجري: {{secondaryDate}}.",
         bodyHtml:
@@ -185,7 +187,8 @@ export const STARTER_CAMPAIGN_TEMPLATES: StarterCampaignTemplate[] = [
         ctaUrl: "https://mezquitabogota.org/es/avisos",
       },
       en: {
-        subject: "🕯️ Urgent Community Notice: Salat al-Janazah at {{organizationName}}",
+        subject:
+          "🕯️ Urgent Community Notice: Salat al-Janazah at {{organizationName}}",
         bodyText:
           "Inna lillahi wa inna ilayhi raji’un. Funeral prayer (Salat al-Janazah) will be held at {{organizationName}} following Dhuhr prayer ({{secondaryDate}}).",
         ctaLabel: "Details & Location",

@@ -34,12 +34,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async updateSettings(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      updateSettings(patch: Partial<BroadcastSettings>): Promise<BroadcastSettings>;
+      updateSettings(
+        patch: Partial<BroadcastSettings>
+      ): Promise<BroadcastSettings>;
       getPublicSafeSettings(): Promise<BroadcastSettings>;
     }>("settings");
 
     try {
-      await svc.updateSettings((ctx.request.body || {}) as Partial<BroadcastSettings>);
+      await svc.updateSettings(
+        (ctx.request.body || {}) as Partial<BroadcastSettings>
+      );
       const data = await svc.getPublicSafeSettings();
       ctx.body = { data };
     } catch (err) {
@@ -62,7 +66,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async listCampaigns(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      listCampaigns(params?: { status?: string; topic?: string }): Promise<CampaignRecord[]>;
+      listCampaigns(params?: {
+        status?: string;
+        topic?: string;
+      }): Promise<CampaignRecord[]>;
     }>("campaignService");
 
     const data = await svc.listCampaigns({
@@ -78,7 +85,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }>("campaignService");
 
     try {
-      const data = await svc.createCampaign((ctx.request.body || {}) as Partial<CampaignRecord>);
+      const data = await svc.createCampaign(
+        (ctx.request.body || {}) as Partial<CampaignRecord>
+      );
       ctx.status = 201;
       ctx.body = { data };
     } catch (err) {
@@ -165,11 +174,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   async createAutomationRule(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      createRule(input: Partial<AutomationRuleRecord>): Promise<AutomationRuleRecord>;
+      createRule(
+        input: Partial<AutomationRuleRecord>
+      ): Promise<AutomationRuleRecord>;
     }>("automationService");
 
     try {
-      const data = await svc.createRule((ctx.request.body || {}) as Partial<AutomationRuleRecord>);
+      const data = await svc.createRule(
+        (ctx.request.body || {}) as Partial<AutomationRuleRecord>
+      );
       ctx.status = 201;
       ctx.body = { data };
     } catch (err) {

@@ -31,7 +31,8 @@ function buildRuleDocumentData(
     priority: rule.priority || "normal",
     subjectTemplate: rule.subjectTemplate,
     bodyTextTemplate: rule.bodyTextTemplate,
-    bodyHtmlTemplate: rule.bodyHtmlTemplate || `<p>${rule.bodyTextTemplate}</p>`,
+    bodyHtmlTemplate:
+      rule.bodyHtmlTemplate || `<p>${rule.bodyTextTemplate}</p>`,
     ctaLabelTemplate: rule.ctaLabelTemplate,
     ctaUrlTemplate: rule.ctaUrlTemplate,
     translations: rule.translations || {},
@@ -51,7 +52,8 @@ function buildPresetRulePayload(
     active: preset.active ?? true,
     priority: preset.priority || "normal",
     subjectTemplate: preset.subjectTemplate || "📢 {{title}}",
-    bodyTextTemplate: preset.bodyTextTemplate || "{{title}}: {{message}} ({{secondaryDate}})",
+    bodyTextTemplate:
+      preset.bodyTextTemplate || "{{title}}: {{message}} ({{secondaryDate}})",
     bodyHtmlTemplate: preset.bodyHtmlTemplate,
     ctaLabelTemplate: preset.ctaLabelTemplate,
     ctaUrlTemplate: preset.ctaUrlTemplate,
@@ -65,7 +67,11 @@ function doesRuleMatchTrigger(
   payload: Record<string, unknown>
 ): boolean {
   if (!rule.active || rule.eventName !== eventName) return false;
-  if (rule.targetContentType && payload.model && String(payload.model) !== rule.targetContentType) {
+  if (
+    rule.targetContentType &&
+    payload.model &&
+    String(payload.model) !== rule.targetContentType
+  ) {
     return false;
   }
   return true;
@@ -91,12 +97,25 @@ function extractTriggerVariables(
   settings: BroadcastSettings,
   secondaryDateFormatted: string
 ): Record<string, string | number | undefined> {
-  const entryRecord = (payload.entry as Record<string, unknown> | undefined) ?? payload;
+  const entryRecord =
+    (payload.entry as Record<string, unknown> | undefined) ?? payload;
 
   return {
-    title: firstNonEmptyString(entryRecord, ["title", "name", "subject"], eventName),
-    message: firstNonEmptyString(entryRecord, ["message", "summary", "description"], ""),
-    summary: firstNonEmptyString(entryRecord, ["summary", "description", "message"], ""),
+    title: firstNonEmptyString(
+      entryRecord,
+      ["title", "name", "subject"],
+      eventName
+    ),
+    message: firstNonEmptyString(
+      entryRecord,
+      ["message", "summary", "description"],
+      ""
+    ),
+    summary: firstNonEmptyString(
+      entryRecord,
+      ["summary", "description", "message"],
+      ""
+    ),
     code: firstNonEmptyString(entryRecord, ["code", "slug"], "event"),
     organizationName: settings.organizationName,
     siteBaseUrl: settings.siteBaseUrl,
@@ -148,7 +167,10 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
       createCampaign(input: Partial<CampaignRecord>): Promise<CampaignRecord>;
       dispatchCampaign(
         documentIdOrSlug: string
-      ): Promise<{ campaign: CampaignRecord; results: ChannelDispatchResult[] }>;
+      ): Promise<{
+        campaign: CampaignRecord;
+        results: ChannelDispatchResult[];
+      }>;
     };
   },
 
@@ -167,14 +189,20 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
     return (docs[0] as unknown as AutomationRuleRecord) || null;
   },
 
-  async findRuleByDocIdOrSlug(documentIdOrSlug: string): Promise<AutomationRuleRecord | null> {
+  async findRuleByDocIdOrSlug(
+    documentIdOrSlug: string
+  ): Promise<AutomationRuleRecord | null> {
     const byDoc = (await strapi
       .documents(AUTOMATION_RULE_UID)
-      .findOne({ documentId: documentIdOrSlug })) as unknown as AutomationRuleRecord | null;
+      .findOne({
+        documentId: documentIdOrSlug,
+      })) as unknown as AutomationRuleRecord | null;
     return byDoc ?? (await this.getRuleBySlug(documentIdOrSlug));
   },
 
-  async createRule(input: Partial<AutomationRuleRecord>): Promise<AutomationRuleRecord> {
+  async createRule(
+    input: Partial<AutomationRuleRecord>
+  ): Promise<AutomationRuleRecord> {
     const channels = normalizeChannels(input.channels);
     const candidate: Partial<AutomationRuleRecord> = {
       ...input,
@@ -222,7 +250,10 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
       data: buildRuleDocumentData(merged, channels, existing.active ?? true),
     });
 
-    return (updated as unknown as AutomationRuleRecord) || (merged as AutomationRuleRecord);
+    return (
+      (updated as unknown as AutomationRuleRecord) ||
+      (merged as AutomationRuleRecord)
+    );
   },
 
   async seedStarterRules(): Promise<number> {
@@ -251,8 +282,12 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
     results: ChannelDispatchResult[];
   }> {
     const campaignService = this.getCampaignService();
-    const campaign = await campaignService.createCampaign(buildAutoCampaignInput(rule, vars));
-    const dispatched = await campaignService.dispatchCampaign(campaign.documentId || campaign.slug);
+    const campaign = await campaignService.createCampaign(
+      buildAutoCampaignInput(rule, vars)
+    );
+    const dispatched = await campaignService.dispatchCampaign(
+      campaign.documentId || campaign.slug
+    );
 
     if (rule.documentId) {
       await strapi.documents(AUTOMATION_RULE_UID).update({
@@ -285,7 +320,9 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!settings.enableEventHubAutomations) return [];
 
     const allRules = await this.listRules();
-    const matchingRules = allRules.filter((rule) => doesRuleMatchTrigger(rule, eventName, payload));
+    const matchingRules = allRules.filter((rule) =>
+      doesRuleMatchTrigger(rule, eventName, payload)
+    );
     if (matchingRules.length === 0) return [];
 
     const secondaryCal = settings.secondaryCalendars?.[0] || "islamic-umalqura";
@@ -294,7 +331,12 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
       secondaryCal,
       settings.defaultLocale || "es"
     );
-    const vars = extractTriggerVariables(eventName, payload, settings, secondaryDate.formatted);
+    const vars = extractTriggerVariables(
+      eventName,
+      payload,
+      settings,
+      secondaryDate.formatted
+    );
 
     const outcomes = [];
     for (const rule of matchingRules) {
