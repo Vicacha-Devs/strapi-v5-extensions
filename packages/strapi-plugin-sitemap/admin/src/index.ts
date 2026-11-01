@@ -1,3 +1,5 @@
+import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
+
 import { PLUGIN_ID } from "./pluginId";
 import getTrad from "./utils/getTrad";
 
@@ -10,14 +12,6 @@ interface StrapiAdminApp {
 }
 
 const SUPPORTED_LOCALES = ["en", "es", "ar", "tr", "fr", "pt-BR"] as const;
-
-const prefixPluginTranslations = (
-  trad: Record<string, string>,
-  pluginId: string
-): Record<string, string> =>
-  Object.fromEntries(
-    Object.entries(trad).map(([key, value]) => [`${pluginId}.${key}`, value])
-  );
 
 export default {
   register(app: StrapiAdminApp) {
@@ -49,21 +43,11 @@ export default {
     });
   },
 
-  async registerTrads({ locales }: { locales: string[] }) {
-    return Promise.all(
-      locales.map(async (locale) => {
-        if (!(SUPPORTED_LOCALES as readonly string[]).includes(locale)) {
-          return { data: {}, locale };
-        }
-        try {
-          const { default: data } = await import(
-            `./translations/${locale}.json`
-          );
-          return { data: prefixPluginTranslations(data, PLUGIN_ID), locale };
-        } catch {
-          return { data: {}, locale };
-        }
-      })
-    );
-  },
+  registerTrads: createRegisterTrads({
+    pluginId: PLUGIN_ID,
+    defaultLocales: [],
+    supportedLocales: SUPPORTED_LOCALES,
+    keepUnprefixed: false,
+    loadTranslation: (locale) => import(`./translations/${locale}.json`),
+  }),
 };
