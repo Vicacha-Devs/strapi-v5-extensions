@@ -1,12 +1,10 @@
 import {
   Box,
   Button,
-  Checkbox,
   Field,
   Flex,
   Tabs,
   Textarea,
-  TextInput,
   Typography,
 } from "@strapi/design-system";
 import { Layouts, useFetchClient, useNotification } from "@strapi/strapi/admin";
@@ -15,25 +13,16 @@ import { useIntl } from "react-intl";
 
 import { PLUGIN_ID } from "../../../shared/pluginId";
 import type { CertificatesPluginSettings } from "../../../shared/types";
+import {
+  Code,
+  gridStyle,
+  renderCheckbox,
+  renderField,
+  SUB_CARD_BORDER,
+  TabPanelBox,
+} from "../components/SettingsTabHelpers";
 
-const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
-  border: "1px solid rgba(128, 128, 128, 0.18)",
-};
-
-const TAB_PANEL_STYLE: React.CSSProperties = {
-  borderTopLeftRadius: 0,
-  borderTopRightRadius: 0,
-};
-
-const INLINE_CODE_STYLE: React.CSSProperties = {
-  fontFamily:
-    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-  fontSize: "0.88em",
-  padding: "2px 6px",
-  borderRadius: 4,
-  background: "rgba(128, 128, 128, 0.16)",
-  border: "1px solid rgba(128, 128, 128, 0.25)",
-};
+type PluginSettings = CertificatesPluginSettings;
 
 export const SettingsPage: React.FC = () => {
   const { formatMessage } = useIntl();
@@ -41,108 +30,107 @@ export const SettingsPage: React.FC = () => {
     formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
   const { get, put, post } = useFetchClient();
   const { toggleNotification } = useNotification();
+  const notify = (type: "success" | "warning" | "danger", message: string) =>
+    toggleNotification({ type, message });
 
-  const [settings, setSettings] = useState<CertificatesPluginSettings | null>(
-    null
-  );
+  const [settings, setSettings] = useState<PluginSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [rotating, setRotating] = useState(false);
 
-  const loadSettings = useCallback(async () => {
+  const runAsync = async (
+    fn: () => Promise<void>,
+    errMsg: string,
+    setBusy?: (b: boolean) => void
+  ) => {
+    setBusy?.(true);
     try {
-      const res = await get<{ data: CertificatesPluginSettings }>(
-        `/${PLUGIN_ID}/settings`
-      );
-      if (res.data?.data) setSettings(res.data.data);
+      await fn();
     } catch {
-      toggleNotification({
-        type: "danger",
-        message: t(
+      notify("danger", errMsg);
+    } finally {
+      setBusy?.(false);
+    }
+  };
+
+  const loadSettings = useCallback(
+    () =>
+      runAsync(
+        async () => {
+          const res = await get<{ data: PluginSettings }>(
+            `/${PLUGIN_ID}/settings`
+          );
+          if (res.data?.data) setSettings(res.data.data);
+        },
+        t(
           "settings.ui.msg_failed_to_load_certificates_plugin_settings",
           "Failed to load certificates plugin settings"
-        ),
-      });
-    }
-  }, [get, toggleNotification]);
+        )
+      ),
+    [get, toggleNotification]
+  );
 
   useEffect(() => {
     void loadSettings();
   }, [loadSettings]);
 
-  const handleSave = async () => {
-    if (!settings) return;
-    setSaving(true);
-    try {
-      const res = await put<{ data: CertificatesPluginSettings }>(
-        `/${PLUGIN_ID}/settings`,
-        settings
-      );
-      if (res.data?.data) setSettings(res.data.data);
-      toggleNotification({
-        type: "success",
-        message: t(
-          "settings.ui.msg_certificates_authority_settings_saved",
-          "Certificates authority settings saved"
-        ),
-      });
-    } catch {
-      toggleNotification({
-        type: "danger",
-        message: t(
-          "settings.ui.msg_failed_to_save_settings",
-          "Failed to save settings"
-        ),
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
+  const handleSave = () =>
+    settings &&
+    runAsync(
+      async () => {
+        const res = await put<{ data: PluginSettings }>(
+          `/${PLUGIN_ID}/settings`,
+          settings
+        );
+        if (res.data?.data) setSettings(res.data.data);
+        notify(
+          "success",
+          t(
+            "settings.ui.msg_certificates_authority_settings_saved",
+            "Certificates authority settings saved"
+          )
+        );
+      },
+      t("settings.ui.msg_failed_to_save_settings", "Failed to save settings"),
+      setSaving
+    );
 
-  const handleRotateKeys = async () => {
-    setRotating(true);
-    try {
-      await post(`/${PLUGIN_ID}/settings/rotate-keys`, {});
-      toggleNotification({
-        type: "warning",
-        message: t(
-          "settings.ui.msg_generated_new_ed25519_signing_keypair",
-          "Generated new Ed25519 signing keypair"
-        ),
-      });
-      await loadSettings();
-    } catch {
-      toggleNotification({
-        type: "danger",
-        message: t(
-          "settings.ui.msg_failed_to_rotate_ed25519_keypair",
-          "Failed to rotate Ed25519 keypair"
-        ),
-      });
-    } finally {
-      setRotating(false);
-    }
-  };
+  const handleRotateKeys = () =>
+    runAsync(
+      async () => {
+        await post(`/${PLUGIN_ID}/settings/rotate-keys`, {});
+        notify(
+          "warning",
+          t(
+            "settings.ui.msg_generated_new_ed25519_signing_keypair",
+            "Generated new Ed25519 signing keypair"
+          )
+        );
+        await loadSettings();
+      },
+      t(
+        "settings.ui.msg_failed_to_rotate_ed25519_keypair",
+        "Failed to rotate Ed25519 keypair"
+      ),
+      setRotating
+    );
 
-  const handleSeedDefaults = async () => {
-    try {
-      const res = await post<{ data: { seededCount: number } }>(
-        `/${PLUGIN_ID}/templates/seed`,
-        {}
-      );
-      toggleNotification({
-        type: "success",
-        message: `Seeded ${res.data?.data?.seededCount ?? 0} default template(s)`,
-      });
-    } catch {
-      toggleNotification({
-        type: "danger",
-        message: t(
-          "settings.ui.msg_failed_to_seed_default_templates",
-          "Failed to seed default templates"
-        ),
-      });
-    }
-  };
+  const handleSeedDefaults = () =>
+    runAsync(
+      async () => {
+        const res = await post<{ data: { seededCount: number } }>(
+          `/${PLUGIN_ID}/templates/seed`,
+          {}
+        );
+        notify(
+          "success",
+          `Seeded ${res.data?.data?.seededCount ?? 0} default template(s)`
+        );
+      },
+      t(
+        "settings.ui.msg_failed_to_seed_default_templates",
+        "Failed to seed default templates"
+      )
+    );
 
   if (!settings) {
     return (
@@ -157,6 +145,22 @@ export const SettingsPage: React.FC = () => {
       </Layouts.Root>
     );
   }
+
+  const patchSettings = (patch: Partial<PluginSettings>) =>
+    setSettings({ ...settings, ...patch });
+
+  const updateEsign = (patch: Partial<PluginSettings["esign"]>) =>
+    patchSettings({
+      esign: {
+        ...(settings.esign || {
+          enabled: false,
+          provider: "docusign",
+          baseUrl: "https://demo.docusign.net/restapi",
+          accountId: "",
+        }),
+        ...patch,
+      },
+    });
 
   return (
     <Layouts.Root>
@@ -197,383 +201,256 @@ export const SettingsPage: React.FC = () => {
             </Tabs.Trigger>
           </Tabs.List>
 
-          <Tabs.Content value="organization">
+          <TabPanelBox value="organization">
+            <Typography variant="beta" fontWeight="bold">
+              {t(
+                "settings.ui.1_issuing_organization_verification_portal",
+                "Issuing Organization & Verification Portal"
+              )}
+            </Typography>
+            <Box marginTop={4} style={gridStyle(3)}>
+              {renderField(
+                t("field.organization_name", "Organization Name"),
+                t(
+                  "settings.ui.official_issuing_authority_name_printed_on_signe",
+                  "Official issuing authority name printed on signed certificates and verification payloads."
+                ),
+                t(
+                  "placeholder.e_g_mezquita_central_abu_bakr_as_siddiq",
+                  "e.g., Abu Bakr As-Siddiq Central Mosque"
+                ),
+                settings.organizationName,
+                (organizationName) => patchSettings({ organizationName })
+              )}
+              {renderField(
+                t(
+                  "field.organization_subheader_jurisdiction",
+                  "Organization Subheader / Jurisdiction"
+                ),
+                t(
+                  "settings.ui.legal_registration_or_jurisdiction_line_displaye",
+                  "Legal registration or jurisdiction line displayed beneath the organization header."
+                ),
+                t(
+                  "placeholder.e_g_bogot_d_c_colombia_personer_a_jur_dica_espec",
+                  "e.g., Bogotá D.C., Colombia — Special Legal Entity"
+                ),
+                settings.organizationSubheader,
+                (organizationSubheader) =>
+                  patchSettings({ organizationSubheader })
+              )}
+              {renderField(
+                t(
+                  "field.public_verification_base_url",
+                  "Public Verification Base URL"
+                ),
+                t(
+                  "settings.ui.base_url_encoded_into_certificate_qr_codes_for_i",
+                  "Base URL encoded into certificate QR codes for instant authenticity verification."
+                ),
+                t(
+                  "placeholder.e_g_https_mezquitacentralbogota_org_verify",
+                  "e.g., https://mezquitacentralbogota.org/verify"
+                ),
+                settings.verificationBaseUrl,
+                (verificationBaseUrl) => patchSettings({ verificationBaseUrl })
+              )}
+            </Box>
             <Box
-              padding={6}
-              background="neutral0"
+              marginTop={4}
+              padding={4}
+              background="neutral100"
               hasRadius
-              shadow="filterShadow"
-              style={TAB_PANEL_STYLE}
+              style={SUB_CARD_BORDER}
             >
-              <Typography variant="beta" fontWeight="bold">
-                {t(
-                  "settings.ui.1_issuing_organization_verification_portal",
-                  "Issuing Organization & Verification Portal"
+              <Flex direction="column" gap={3} alignItems="stretch">
+                {renderCheckbox(
+                  settings.maskPublicRecipientName,
+                  (maskPublicRecipientName) =>
+                    patchSettings({ maskPublicRecipientName }),
+                  t(
+                    "checkbox.mask_recipient_full_name_on_public_serial_lookup",
+                    "Mask recipient full name on public serial lookups unless verification token is provided"
+                  )
                 )}
-              </Typography>
-              <Box
-                marginTop={4}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                  gap: 20,
-                }}
-              >
-                <Field.Root
-                  hint={t(
-                    "settings.ui.official_issuing_authority_name_printed_on_signe",
-                    "Official issuing authority name printed on signed certificates and verification payloads."
-                  )}
-                >
-                  <Field.Label>
-                    {t("field.organization_name", "Organization Name")}
-                  </Field.Label>
-                  <TextInput
-                    placeholder={t(
-                      "placeholder.e_g_mezquita_central_abu_bakr_as_siddiq",
-                      "e.g., Abu Bakr As-Siddiq Central Mosque"
-                    )}
-                    value={settings.organizationName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings({
-                        ...settings,
-                        organizationName: e.target.value,
-                      })
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
-                <Field.Root
-                  hint={t(
-                    "settings.ui.legal_registration_or_jurisdiction_line_displaye",
-                    "Legal registration or jurisdiction line displayed beneath the organization header."
-                  )}
-                >
-                  <Field.Label>
-                    {t(
-                      "field.organization_subheader_jurisdiction",
-                      "Organization Subheader / Jurisdiction"
-                    )}
-                  </Field.Label>
-                  <TextInput
-                    placeholder={t(
-                      "placeholder.e_g_bogot_d_c_colombia_personer_a_jur_dica_espec",
-                      "e.g., Bogotá D.C., Colombia — Special Legal Entity"
-                    )}
-                    value={settings.organizationSubheader}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings({
-                        ...settings,
-                        organizationSubheader: e.target.value,
-                      })
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
-                <Field.Root
-                  hint={t(
-                    "settings.ui.base_url_encoded_into_certificate_qr_codes_for_i",
-                    "Base URL encoded into certificate QR codes for instant authenticity verification."
-                  )}
-                >
-                  <Field.Label>
-                    {t(
-                      "field.public_verification_base_url",
-                      "Public Verification Base URL"
-                    )}
-                  </Field.Label>
-                  <TextInput
-                    placeholder={t(
-                      "placeholder.e_g_https_mezquitacentralbogota_org_verify",
-                      "e.g., https://mezquitacentralbogota.org/verify"
-                    )}
-                    value={settings.verificationBaseUrl}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings({
-                        ...settings,
-                        verificationBaseUrl: e.target.value,
-                      })
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
-              </Box>
-              <Box
-                marginTop={4}
-                padding={4}
-                background="neutral100"
-                hasRadius
-                style={SUB_CARD_BORDER_STYLE}
-              >
-                <Flex direction="column" gap={3} alignItems="stretch">
-                  <Checkbox
-                    checked={settings.maskPublicRecipientName}
-                    onCheckedChange={(val: boolean) =>
-                      setSettings({
-                        ...settings,
-                        maskPublicRecipientName: Boolean(val),
-                      })
-                    }
-                  >
-                    {t(
-                      "checkbox.mask_recipient_full_name_on_public_serial_lookup",
-                      "Mask recipient full name on public serial lookups unless verification token is provided"
-                    )}
-                  </Checkbox>
-                  <Checkbox
-                    checked={settings.allowPublicApplications}
-                    onCheckedChange={(val: boolean) =>
-                      setSettings({
-                        ...settings,
-                        allowPublicApplications: Boolean(val),
-                      })
-                    }
-                  >
+                {renderCheckbox(
+                  settings.allowPublicApplications,
+                  (allowPublicApplications) =>
+                    patchSettings({ allowPublicApplications }),
+                  <>
                     {t(
                       "checkbox.allow_public_certificate_applications",
                       "Allow public certificate applications"
                     )}{" "}
                     (
-                    <code style={INLINE_CODE_STYLE}>
+                    <Code>
                       {t(
                         "settings.ui.endpoint_apply",
                         "POST /api/certificates/apply"
                       )}
-                    </code>
+                    </Code>
                     )
-                  </Checkbox>
-                </Flex>
-              </Box>
-            </Box>
-          </Tabs.Content>
-
-          <Tabs.Content value="docusign">
-            <Box
-              padding={6}
-              background="neutral0"
-              hasRadius
-              shadow="filterShadow"
-              style={TAB_PANEL_STYLE}
-            >
-              <Typography variant="beta" fontWeight="bold">
-                {t(
-                  "settings.ui.2_optional_docusign_e_signature_service",
-                  "Optional DocuSign E-Signature Service"
+                  </>
                 )}
-              </Typography>
-              <Box marginTop={1}>
-                <Typography variant="pi" textColor="neutral600">
-                  {t("settings.ui.secrets_prefix", "Secrets")} (
-                  <code style={INLINE_CODE_STYLE}>DOCUSIGN_ACCESS_TOKEN</code>{" "}
-                  {t("settings.ui.and_conjunction", "&")}{" "}
-                  <code style={INLINE_CODE_STYLE}>DOCUSIGN_WEBHOOK_SECRET</code>
-                  ){" "}
-                  {t(
-                    "settings.ui.secrets_loaded_from_env",
-                    "are loaded from environment variables. Connect webhook endpoint:"
-                  )}{" "}
-                  <code style={INLINE_CODE_STYLE}>
-                    {t(
-                      "settings.ui.endpoint_docusign_webhook",
-                      "POST /api/certificates/webhooks/docusign"
-                    )}
-                  </code>
-                </Typography>
-              </Box>
-              <Flex
-                direction="column"
-                gap={4}
-                marginTop={4}
-                alignItems="stretch"
-              >
-                <Box
-                  padding={4}
-                  background="neutral100"
-                  hasRadius
-                  style={SUB_CARD_BORDER_STYLE}
-                >
-                  <Checkbox
-                    checked={settings.esign?.enabled ?? false}
-                    onCheckedChange={(val: boolean) =>
-                      setSettings({
-                        ...settings,
-                        esign: {
-                          ...(settings.esign || {
-                            provider: "docusign",
-                            baseUrl: "https://demo.docusign.net/restapi",
-                            accountId: "",
-                          }),
-                          enabled: Boolean(val),
-                          provider: val ? "docusign" : "none",
-                        },
-                      })
-                    }
-                  >
-                    {t(
-                      "checkbox.enable_docusign_esignature_multi_party_envelope_",
-                      "Enable DocuSign eSignature multi-party envelope routing for Witnesses & Signatories"
-                    )}
-                  </Checkbox>
-                </Box>
-                <Box
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                    gap: 20,
-                  }}
-                >
-                  <Field.Root
-                    hint={t(
-                      "settings.ui.docusign_rest_api_endpoint_demo_sandbox_or_produ",
-                      "DocuSign REST API endpoint (demo sandbox or production account URI)."
-                    )}
-                  >
-                    <Field.Label>
-                      {t(
-                        "field.docusign_rest_api_base_url_https",
-                        "DocuSign REST API Base URL (HTTPS)"
-                      )}
-                    </Field.Label>
-                    <TextInput
-                      value={
-                        settings.esign?.baseUrl ||
-                        "https://demo.docusign.net/restapi"
-                      }
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSettings({
-                          ...settings,
-                          esign: { ...settings.esign, baseUrl: e.target.value },
-                        })
-                      }
-                      placeholder={t(
-                        "placeholder.e_g_https_demo_docusign_net_restapi",
-                        "e.g., https://demo.docusign.net/restapi"
-                      )}
-                    />
-                    <Field.Hint />
-                  </Field.Root>
-                  <Field.Root
-                    hint={t(
-                      "settings.ui.docusign_api_account_guid_used_when_dispatching_",
-                      "DocuSign API Account GUID used when dispatching signature envelopes."
-                    )}
-                  >
-                    <Field.Label>
-                      {t("field.docusign_account_id", "DocuSign Account ID")}
-                    </Field.Label>
-                    <TextInput
-                      value={
-                        settings.esign?.accountId || "ds-account-bogota-central"
-                      }
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSettings({
-                          ...settings,
-                          esign: {
-                            ...settings.esign,
-                            accountId: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder={t(
-                        "placeholder.e_g_a1b2c3d4",
-                        "e.g., a1b2c3d4-..."
-                      )}
-                    />
-                    <Field.Hint />
-                  </Field.Root>
-                </Box>
               </Flex>
             </Box>
-          </Tabs.Content>
+          </TabPanelBox>
 
-          <Tabs.Content value="keys">
-            <Box
-              padding={6}
-              background="neutral0"
-              hasRadius
-              shadow="filterShadow"
-              style={TAB_PANEL_STYLE}
-            >
-              <Flex
-                justifyContent="space-between"
-                alignItems="center"
-                wrap="wrap"
-                gap={2}
-              >
-                <Box>
-                  <Typography variant="beta" fontWeight="bold">
-                    {t(
-                      "settings.ui.3_ed25519_cryptographic_public_key",
-                      "Ed25519 Cryptographic Public Key"
-                    )}
-                  </Typography>
-                  <Box marginTop={1}>
-                    <Typography variant="pi" textColor="neutral600">
-                      {t(
-                        "settings.ui.active_key_fingerprint",
-                        "Active Key Fingerprint:"
-                      )}{" "}
-                      <code style={INLINE_CODE_STYLE}>
-                        {settings.publicKeyFingerprint}
-                      </code>
-                    </Typography>
-                  </Box>
-                </Box>
-                <Flex gap={2}>
-                  <Button variant="secondary" onClick={handleSeedDefaults}>
-                    {t(
-                      "settings.ui.seed_default_templates",
-                      "Seed Default Templates"
-                    )}
-                  </Button>
-                  <Button
-                    variant="danger-light"
-                    onClick={handleRotateKeys}
-                    loading={rotating}
-                  >
-                    {t(
-                      "settings.ui.rotate_ed25519_keypair",
-                      "Rotate Ed25519 Keypair"
-                    )}
-                  </Button>
-                </Flex>
-              </Flex>
-              <Box marginTop={4}>
-                <Field.Root
-                  hint={t(
-                    "settings.ui.public_key_pem_hint",
-                    "Read-only Ed25519 public key in SPKI PEM format used to verify certificate signatures offline."
+          <TabPanelBox value="docusign">
+            <Typography variant="beta" fontWeight="bold">
+              {t(
+                "settings.ui.2_optional_docusign_e_signature_service",
+                "Optional DocuSign E-Signature Service"
+              )}
+            </Typography>
+            <Box marginTop={1}>
+              <Typography variant="pi" textColor="neutral600">
+                {t("settings.ui.secrets_prefix", "Secrets")} (
+                <Code>DOCUSIGN_ACCESS_TOKEN</Code>{" "}
+                {t("settings.ui.and_conjunction", "&")}{" "}
+                <Code>DOCUSIGN_WEBHOOK_SECRET</Code>){" "}
+                {t(
+                  "settings.ui.secrets_loaded_from_env",
+                  "are loaded from environment variables. Connect webhook endpoint:"
+                )}{" "}
+                <Code>
+                  {t(
+                    "settings.ui.endpoint_docusign_webhook",
+                    "POST /api/certificates/webhooks/docusign"
                   )}
-                >
-                  <Field.Label>
-                    {t(
-                      "field.public_key_pem_published_at",
-                      "Public Key PEM (Published at"
-                    )}{" "}
-                    <code style={INLINE_CODE_STYLE}>
-                      {t(
-                        "settings.ui.endpoint_public_key",
-                        "GET /api/certificates/public-key"
-                      )}
-                    </code>{" "}
-                    {t(
-                      "field.for_offline_embassy_verification",
-                      "for offline embassy/consular verification)"
-                    )}
-                  </Field.Label>
-                  <Textarea
-                    placeholder={t(
-                      "placeholder.begin_public_key",
-                      "-----BEGIN PUBLIC KEY-----"
-                    )}
-                    value={settings.publicKeyPem}
-                    disabled
-                  />
-                  <Field.Hint />
-                </Field.Root>
-              </Box>
+                </Code>
+              </Typography>
             </Box>
-          </Tabs.Content>
+            <Flex direction="column" gap={4} marginTop={4} alignItems="stretch">
+              <Box
+                padding={4}
+                background="neutral100"
+                hasRadius
+                style={SUB_CARD_BORDER}
+              >
+                {renderCheckbox(
+                  settings.esign?.enabled ?? false,
+                  (enabled) =>
+                    updateEsign({
+                      enabled,
+                      provider: enabled ? "docusign" : "none",
+                    }),
+                  t(
+                    "checkbox.enable_docusign_esignature_multi_party_envelope_",
+                    "Enable DocuSign eSignature multi-party envelope routing for Witnesses & Signatories"
+                  )
+                )}
+              </Box>
+              <Box style={gridStyle(2)}>
+                {renderField(
+                  t(
+                    "field.docusign_rest_api_base_url_https",
+                    "DocuSign REST API Base URL (HTTPS)"
+                  ),
+                  t(
+                    "settings.ui.docusign_rest_api_endpoint_demo_sandbox_or_produ",
+                    "DocuSign REST API endpoint (demo sandbox or production account URI)."
+                  ),
+                  t(
+                    "placeholder.e_g_https_demo_docusign_net_restapi",
+                    "e.g., https://demo.docusign.net/restapi"
+                  ),
+                  settings.esign?.baseUrl ||
+                    "https://demo.docusign.net/restapi",
+                  (baseUrl) => updateEsign({ baseUrl })
+                )}
+                {renderField(
+                  t("field.docusign_account_id", "DocuSign Account ID"),
+                  t(
+                    "settings.ui.docusign_api_account_guid_used_when_dispatching_",
+                    "DocuSign API Account GUID used when dispatching signature envelopes."
+                  ),
+                  t("placeholder.e_g_a1b2c3d4", "e.g., a1b2c3d4-..."),
+                  settings.esign?.accountId || "ds-account-bogota-central",
+                  (accountId) => updateEsign({ accountId })
+                )}
+              </Box>
+            </Flex>
+          </TabPanelBox>
+
+          <TabPanelBox value="keys">
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              wrap="wrap"
+              gap={2}
+            >
+              <Box>
+                <Typography variant="beta" fontWeight="bold">
+                  {t(
+                    "settings.ui.3_ed25519_cryptographic_public_key",
+                    "Ed25519 Cryptographic Public Key"
+                  )}
+                </Typography>
+                <Box marginTop={1}>
+                  <Typography variant="pi" textColor="neutral600">
+                    {t(
+                      "settings.ui.active_key_fingerprint",
+                      "Active Key Fingerprint:"
+                    )}{" "}
+                    <Code>{settings.publicKeyFingerprint}</Code>
+                  </Typography>
+                </Box>
+              </Box>
+              <Flex gap={2}>
+                <Button variant="secondary" onClick={handleSeedDefaults}>
+                  {t(
+                    "settings.ui.seed_default_templates",
+                    "Seed Default Templates"
+                  )}
+                </Button>
+                <Button
+                  variant="danger-light"
+                  onClick={handleRotateKeys}
+                  loading={rotating}
+                >
+                  {t(
+                    "settings.ui.rotate_ed25519_keypair",
+                    "Rotate Ed25519 Keypair"
+                  )}
+                </Button>
+              </Flex>
+            </Flex>
+            <Box marginTop={4}>
+              <Field.Root
+                hint={t(
+                  "settings.ui.public_key_pem_hint",
+                  "Read-only Ed25519 public key in SPKI PEM format used to verify certificate signatures offline."
+                )}
+              >
+                <Field.Label>
+                  {t(
+                    "field.public_key_pem_published_at",
+                    "Public Key PEM (Published at"
+                  )}{" "}
+                  <Code>
+                    {t(
+                      "settings.ui.endpoint_public_key",
+                      "GET /api/certificates/public-key"
+                    )}
+                  </Code>{" "}
+                  {t(
+                    "field.for_offline_embassy_verification",
+                    "for offline embassy/consular verification)"
+                  )}
+                </Field.Label>
+                <Textarea
+                  placeholder={t(
+                    "placeholder.begin_public_key",
+                    "-----BEGIN PUBLIC KEY-----"
+                  )}
+                  value={settings.publicKeyPem}
+                  disabled
+                />
+                <Field.Hint />
+              </Field.Root>
+            </Box>
+          </TabPanelBox>
         </Tabs.Root>
       </Layouts.Content>
     </Layouts.Root>

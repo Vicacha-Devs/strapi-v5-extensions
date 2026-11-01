@@ -39,27 +39,21 @@ interface SettingsServiceContract {
   getSigningKeyPair(): Promise<Ed25519KeyPairMaterial>;
 }
 
-function trimStr(val: unknown, fallback = ""): string {
-  const s = val ? String(val).trim() : "";
-  return s || fallback;
-}
+const trimStr = (val: unknown, fallback = ""): string =>
+  (val ? String(val).trim() : "") || fallback;
 
-function trimOptStr(val: unknown): string | undefined {
-  const s = val ? String(val).trim() : "";
-  return s || undefined;
-}
+const trimOptStr = (val: unknown): string | undefined =>
+  trimStr(val) || undefined;
 
-function pickNonEmptyArray<T>(primary: T[] | undefined, fallback: T[]): T[] {
-  return Array.isArray(primary) && primary.length > 0 ? primary : fallback;
-}
+const pickNonEmptyArray = <T>(primary: T[] | undefined, fallback: T[]): T[] =>
+  Array.isArray(primary) && primary.length > 0 ? primary : fallback;
 
-function slugifyName(name: string, explicitSlug?: string): string {
-  if (explicitSlug && explicitSlug.trim()) return explicitSlug.trim();
-  return name
+const slugifyName = (name: string, explicitSlug?: string): string =>
+  trimStr(explicitSlug) ||
+  name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-}
 
 const DEFAULT_BODY_TEMPLATE =
   "This is to certify that {{recipientFullName}} has been officially attested by {{organizationName}} on {{issuedDateFormatted}}.";
@@ -69,15 +63,13 @@ function buildTemplateCreateData(
   data: Partial<CertificateTemplate>,
   settings: CertificatesPluginSettings
 ) {
+  const days = data.defaultValidityDays;
   return {
     name,
     slug: slugifyName(name, data.slug),
     description: trimStr(data.description),
     serialPrefix: trimStr(data.serialPrefix, "CERT").toUpperCase().slice(0, 8),
-    defaultValidityDays:
-      typeof data.defaultValidityDays === "number"
-        ? data.defaultValidityDays
-        : null,
+    defaultValidityDays: typeof days === "number" ? days : null,
     requiresWitnesses: Boolean(data.requiresWitnesses),
     minWitnesses: typeof data.minWitnesses === "number" ? data.minWitnesses : 0,
     requiresApproval: data.requiresApproval !== false,
@@ -105,15 +97,25 @@ function assertWitnessCount(
   witnesses: CertificateWitness[],
   enforceNow: boolean
 ): void {
-  if (
-    enforceNow &&
-    template?.requiresWitnesses &&
-    witnesses.length < template.minWitnesses
-  ) {
-    throw new Error(
-      `Template "${template.name}" requires at least ${template.minWitnesses} official witness(es) before issuance`
-    );
+  if (enforceNow && template?.requiresWitnesses) {
+    if (witnesses.length < template.minWitnesses) {
+      throw new Error(
+        `Template "${template.name}" requires at least ${template.minWitnesses} official witness(es) before issuance`
+      );
+    }
   }
+}
+
+function emitCertEvent(
+  strapi: Core.Strapi,
+  event: string,
+  record: CertificateRecord
+) {
+  strapi.eventHub?.emit(event, {
+    serialNumber: record.serialNumber,
+    templateSlug: record.templateSlug,
+    status: record.status,
+  });
 }
 
 function resolveIssueDatesAndIdentity(
@@ -125,14 +127,11 @@ function resolveIssueDatesAndIdentity(
     throw new Error("Invalid issuedAt date");
   }
   const issuedAt = issuedDateObj.toISOString();
-  const validityDays = template.defaultValidityDays;
+  const days = template.defaultValidityDays;
   const computedExpiry =
-    typeof validityDays === "number" && validityDays > 0
-      ? new Date(
-          issuedDateObj.getTime() + validityDays * 86_400_000
-        ).toISOString()
+    typeof days === "number" && days > 0
+      ? new Date(issuedDateObj.getTime() + days * 86_400_000).toISOString()
       : null;
-  const expiresAt: string | null = input.expiresAt ?? computedExpiry;
   const serialNumber = generateSerialNumber(
     template.serialPrefix,
     issuedDateObj.getUTCFullYear()
@@ -140,58 +139,20 @@ function resolveIssueDatesAndIdentity(
   const rawNationalId = trimOptStr(input.nationalIdRaw);
   return {
     issuedDateObj,
-    issuedAt,
-    expiresAt,
-    serialNumber,
-    verificationToken: generateVerificationToken(),
-    nationalIdMasked: rawNationalId ? maskNationalId(rawNationalId) : "",
-    nationalIdHash: rawNationalId
-      ? hashNationalId(rawNationalId, serialNumber)
-      : "",
+    fields: {
+      issuedAt,
+      expiresAt: (input.expiresAt ?? computedExpiry) as string | null,
+      serialNumber,
+      verificationToken: generateVerificationToken(),
+      nationalIdMasked: rawNationalId ? maskNationalId(rawNationalId) : "",
+      nationalIdHash: rawNationalId
+        ? hashNationalId(rawNationalId, serialNumber)
+        : "",
+    },
   };
 }
 
-function buildIssueRecordPayload(p: {
-  input: CertificateIssueInput;
-  template: CertificateTemplate;
-  recipientFullName: string;
-  status: CertificateStatus;
-  signatories: CertificateSignatory[];
-  witnesses: CertificateWitness[];
-  datesAndId: ReturnType<typeof resolveIssueDatesAndIdentity>;
-  secondaryDates: CertificateRecord["secondaryDates"];
-  signed: { payloadHash: string; signature: string };
-  fingerprint: string;
-}) {
-  return {
-    serialNumber: p.datesAndId.serialNumber,
-    templateDocumentId: p.template.documentId,
-    templateSlug: p.template.slug,
-    templateName: p.template.name,
-    status: p.status,
-    recipientFullName: p.recipientFullName,
-    recipientChosenName: trimStr(p.input.recipientChosenName),
-    recipientEmail: trimOptStr(p.input.recipientEmail),
-    recipientPhone: trimStr(p.input.recipientPhone),
-    recipientNationality: trimStr(p.input.recipientNationality),
-    nationalIdMasked: p.datesAndId.nationalIdMasked,
-    nationalIdHash: p.datesAndId.nationalIdHash,
-    issuedAt: p.datesAndId.issuedAt,
-    expiresAt: p.datesAndId.expiresAt,
-    signatories: p.signatories,
-    witnesses: p.witnesses,
-    customData: p.input.customData ?? {},
-    secondaryDates: p.secondaryDates,
-    canonicalPayloadHash: p.signed.payloadHash,
-    cryptographicSignature: p.signed.signature,
-    publicKeyFingerprint: p.fingerprint,
-    verificationToken: p.datesAndId.verificationToken,
-    linkedBookingCode: trimStr(p.input.linkedBookingCode),
-    notes: trimStr(p.input.notes),
-  };
-}
-
-interface ApproveCertificateOptions {
+export interface ApproveCertificateOptions {
   signatories?: CertificateSignatory[];
   witnesses?: Array<{
     fullName: string;
@@ -207,20 +168,21 @@ function resolveApprovalFields(
   existing: CertificateRecord,
   options?: ApproveCertificateOptions
 ) {
-  const witnesses =
-    options?.witnesses !== undefined
-      ? normalizeWitnesses(options.witnesses)
-      : existing.witnesses;
-  const signatories =
-    options?.signatories !== undefined
-      ? normalizeSignatories(options.signatories)
-      : existing.signatories;
-  const recipientChosenName =
-    options?.recipientChosenName !== undefined
-      ? trimStr(options.recipientChosenName)
-      : existing.recipientChosenName;
-  const notes = options?.notes !== undefined ? options.notes : existing.notes;
-  return { witnesses, signatories, recipientChosenName, notes };
+  return {
+    witnesses:
+      options?.witnesses !== undefined
+        ? normalizeWitnesses(options.witnesses)
+        : existing.witnesses,
+    signatories:
+      options?.signatories !== undefined
+        ? normalizeSignatories(options.signatories)
+        : existing.signatories,
+    recipientChosenName:
+      options?.recipientChosenName !== undefined
+        ? trimStr(options.recipientChosenName)
+        : existing.recipientChosenName,
+    notes: options?.notes !== undefined ? options.notes : existing.notes,
+  };
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
@@ -247,13 +209,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         if (doc) return normalizeTemplateRecord(doc);
       }
       if (identifier.templateSlug) {
-        const matches = await strapi.documents(TEMPLATE_UID).findMany({
+        const [first] = await strapi.documents(TEMPLATE_UID).findMany({
           filters: { slug: identifier.templateSlug },
           limit: 1,
         });
-        if (matches.length > 0) {
-          return normalizeTemplateRecord(matches[0]);
-        }
+        if (first) return normalizeTemplateRecord(first);
       }
       return null;
     },
@@ -272,11 +232,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async seedDefaultTemplates(): Promise<number> {
       const settings = await getSettingsService().getSettings();
-      const defaults = settings.defaultTemplates || [];
       let seededCount = 0;
-      for (const tpl of defaults) {
-        const existing = await this.findTemplate({ templateSlug: tpl.slug });
-        if (!existing) {
+      for (const tpl of settings.defaultTemplates || []) {
+        if (!(await this.findTemplate({ templateSlug: tpl.slug }))) {
           await this.createTemplate(tpl);
           seededCount++;
         }
@@ -311,60 +269,63 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         normalizeSignatories(input.signatories),
         template.defaultSignatories
       );
-      const datesAndId = resolveIssueDatesAndIdentity(input, template);
-      const activeCalendars = pickNonEmptyArray(
-        template.secondaryCalendars,
-        settings.secondaryCalendars
+      const { issuedDateObj, fields } = resolveIssueDatesAndIdentity(
+        input,
+        template
       );
       const secondaryDates = formatSecondaryCalendars(
-        datesAndId.issuedDateObj,
-        activeCalendars,
+        issuedDateObj,
+        pickNonEmptyArray(
+          template.secondaryCalendars,
+          settings.secondaryCalendars
+        ),
         trimStr(input.locale, trimStr(settings.defaultLocale, "en"))
       );
 
-      const canonicalPayload = buildCanonicalPayload({
-        serialNumber: datesAndId.serialNumber,
-        templateSlug: template.slug,
-        organizationName: trimStr(
-          template.organizationName,
-          settings.organizationName
-        ),
-        recipientFullName,
-        recipientChosenName: input.recipientChosenName,
-        nationalIdHash: datesAndId.nationalIdHash,
-        issuedAt: datesAndId.issuedAt,
-        expiresAt: datesAndId.expiresAt,
-        signatories,
-        witnesses,
-      });
-
       const signed = signCanonicalPayload(
-        canonicalPayload,
+        buildCanonicalPayload({
+          ...fields,
+          templateSlug: template.slug,
+          organizationName: trimStr(
+            template.organizationName,
+            settings.organizationName
+          ),
+          recipientFullName,
+          recipientChosenName: input.recipientChosenName,
+          signatories,
+          witnesses,
+        }),
         keyPair.privateKeyPem
       );
       const created = await strapi.documents(CERTIFICATE_UID).create({
-        data: buildIssueRecordPayload({
-          input,
-          template,
-          recipientFullName,
+        data: {
+          ...fields,
+          templateDocumentId: template.documentId,
+          templateSlug: template.slug,
+          templateName: template.name,
           status,
+          recipientFullName,
+          recipientChosenName: trimStr(input.recipientChosenName),
+          recipientEmail: trimOptStr(input.recipientEmail),
+          recipientPhone: trimStr(input.recipientPhone),
+          recipientNationality: trimStr(input.recipientNationality),
           signatories,
           witnesses,
-          datesAndId,
+          customData: input.customData ?? {},
           secondaryDates,
-          signed,
-          fingerprint: keyPair.fingerprint,
-        }),
+          canonicalPayloadHash: signed.payloadHash,
+          cryptographicSignature: signed.signature,
+          publicKeyFingerprint: keyPair.fingerprint,
+          linkedBookingCode: trimStr(input.linkedBookingCode),
+          notes: trimStr(input.notes),
+        },
       });
 
       const record = normalizeCertificateRecord(created, true);
-      strapi.eventHub?.emit(
+      emitCertEvent(
+        strapi,
         isIssued ? "certificates.issued" : "certificates.requested",
-        {
-          serialNumber: record.serialNumber,
-          templateSlug: record.templateSlug,
-          status: record.status,
-        }
+        record
       );
       return record;
     },
@@ -376,9 +337,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const existingDoc = await strapi
         .documents(CERTIFICATE_UID)
         .findOne({ documentId });
-      if (!existingDoc) {
-        throw new Error("Certificate record not found");
-      }
+      if (!existingDoc) throw new Error("Certificate record not found");
+
       const existing = normalizeCertificateRecord(existingDoc, true);
       const template = await this.findTemplate({
         templateDocumentId: existing.templateDocumentId,
@@ -393,24 +353,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const settings = await getSettingsService().getSettings();
       const issuedAt = new Date().toISOString();
 
-      const canonicalPayload = buildCanonicalPayload({
-        serialNumber: existing.serialNumber,
-        templateSlug: existing.templateSlug,
-        organizationName: trimStr(
-          template?.organizationName,
-          settings.organizationName
-        ),
-        recipientFullName: existing.recipientFullName,
-        recipientChosenName,
-        nationalIdHash: existing.nationalIdHash,
-        issuedAt,
-        expiresAt: existing.expiresAt,
-        signatories,
-        witnesses,
-      });
-
       const signed = signCanonicalPayload(
-        canonicalPayload,
+        buildCanonicalPayload({
+          ...existing,
+          organizationName: trimStr(
+            template?.organizationName,
+            settings.organizationName
+          ),
+          recipientChosenName,
+          issuedAt,
+          signatories,
+          witnesses,
+        }),
         keyPair.privateKeyPem
       );
       const updated = await strapi.documents(CERTIFICATE_UID).update({
@@ -427,17 +381,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           notes,
         },
       });
-
-      if (!updated) {
-        throw new Error("Failed to update certificate record");
-      }
+      if (!updated) throw new Error("Failed to update certificate record");
 
       const record = normalizeCertificateRecord(updated, true);
-      strapi.eventHub?.emit("certificates.issued", {
-        serialNumber: record.serialNumber,
-        templateSlug: record.templateSlug,
-        status: record.status,
-      });
+      emitCertEvent(strapi, "certificates.issued", record);
       return record;
     },
 
@@ -445,7 +392,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       documentId: string,
       reason: string
     ): Promise<CertificateRecord> {
-      const cleanReason = String(reason || "Revoked by administrator").trim();
+      const cleanReason = trimStr(reason, "Revoked by administrator");
       const updated = await strapi.documents(CERTIFICATE_UID).update({
         documentId,
         data: {
@@ -454,9 +401,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           revocationReason: cleanReason,
         },
       });
-      if (!updated) {
-        throw new Error("Certificate record not found");
-      }
+      if (!updated) throw new Error("Certificate record not found");
       const record = normalizeCertificateRecord(updated, false);
       strapi.eventHub?.emit("certificates.revoked", {
         serialNumber: record.serialNumber,
@@ -469,18 +414,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       serialNumber: string,
       options?: { token?: string; nationalId?: string }
     ): Promise<CertificateVerificationResult | null> {
-      const cleanSerial = String(serialNumber || "")
-        .trim()
-        .toUpperCase();
+      const cleanSerial = trimStr(serialNumber).toUpperCase();
       if (!cleanSerial) return null;
 
-      const matches = await strapi.documents(CERTIFICATE_UID).findMany({
+      const [match] = await strapi.documents(CERTIFICATE_UID).findMany({
         filters: { serialNumber: cleanSerial },
         limit: 1,
       });
-      if (matches.length === 0) return null;
+      if (!match) return null;
 
-      const cert = normalizeCertificateRecord(matches[0], true);
+      const cert = normalizeCertificateRecord(match, true);
       const settings = await getSettingsService().getSettings();
       const template = await this.findTemplate({
         templateDocumentId: cert.templateDocumentId,
@@ -505,13 +448,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           documentId: identifier.documentId,
         });
       } else if (identifier.serialNumber) {
-        const list = await strapi.documents(CERTIFICATE_UID).findMany({
+        const [first] = await strapi.documents(CERTIFICATE_UID).findMany({
           filters: {
             serialNumber: identifier.serialNumber.trim().toUpperCase(),
           },
           limit: 1,
         });
-        rawDoc = list[0] || null;
+        rawDoc = first || null;
       }
       if (!rawDoc) return null;
 
@@ -535,21 +478,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       templateSlug?: string;
       search?: string;
     }): Promise<{ records: CertificateRecord[]; stats: CertificateStats }> {
-      const allDocs = await strapi.documents(CERTIFICATE_UID).findMany({
-        limit: 500,
-      });
-      const allRecords = allDocs.map((d) =>
-        normalizeCertificateRecord(d, true)
+      const docs = await strapi
+        .documents(CERTIFICATE_UID)
+        .findMany({ limit: 500 });
+      return filterAndComputeCertificateStats(
+        docs.map((d) => normalizeCertificateRecord(d, true)),
+        filters
       );
-      return filterAndComputeCertificateStats(allRecords, filters);
     },
 
     async exportCsv(filters?: {
       status?: string;
       templateSlug?: string;
     }): Promise<string> {
-      const { records } = await this.listCertificates(filters);
-      return exportCertificatesToCsv(records);
+      return exportCertificatesToCsv(
+        (await this.listCertificates(filters)).records
+      );
     },
   };
 };
