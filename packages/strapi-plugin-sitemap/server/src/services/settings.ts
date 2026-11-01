@@ -1,99 +1,410 @@
-import type { Core } from '@strapi/strapi';
-import { CONTENT_TYPE_UID, PLUGIN_ID, SINGLE_URL_UID } from '../pluginId';
+import type { Core } from "@strapi/strapi";
 
-const toBool = (value: unknown): boolean => value === true || value === 'true';
+import {
+  CONTENT_TYPE_UID,
+  OPTION_UID,
+  PLUGIN_ID,
+  SINGLE_URL_UID,
+} from "../pluginId";
+import type {
+  CollectionTypeSettingItem,
+  ComponentSchema,
+  ContentTypeSchema,
+  CustomUrlRecord,
+  CustomUrlSettingItem,
+  DocumentsFn,
+  SitemapDefinitionRecord,
+  SitemapDefinitionSettingItem,
+  SitemapEntryConfig,
+  SitemapOptionRecord,
+  SitemapPluginConfig,
+  SitemapSettingsPayload,
+  SitemapSettingsUpdateInput,
+} from "./types";
+import { isTruthyFlag } from "./xml-builder";
 
-const toCollectionType = (row: any) => ({
-  type: row.type ?? '',
-  langcode: row.langcode ?? '',
-  pattern: row.pattern ?? '',
-  priority: Number(row.priority ?? 0),
-  frequency: row.frequency ?? '',
-  lastModified: toBool(row.lastModified),
-  thumbnail: row.thumbnail ?? '',
-  populateLinkedModels: toBool(row.populateLinkedModels),
-});
+const EXCLUDED_PLUGIN_PREFIXES = [
+  "plugin::upload.",
+  "plugin::users-permissions.",
+  "plugin::i18n.",
+  "plugin::content-releases.",
+  "plugin::review-workflows.",
+  `plugin::${PLUGIN_ID}.`,
+  "plugin::strapi-5-sitemap-plugin.",
+];
 
-const fromCollectionType = (item: any) => ({
-  type: item.type,
-  langcode: item.langcode,
-  pattern: item.pattern,
-  priority: item.priority,
-  frequency: item.frequency,
-  lastModified: String(toBool(item.lastModified)),
-  thumbnail: item.thumbnail,
-  populateLinkedModels: String(toBool(item.populateLinkedModels)),
-});
+export interface DbQueryRepo<T = Record<string, unknown>> {
+  findMany: (params?: Record<string, unknown>) => Promise<T[]>;
+  create?: (params: { data: unknown }) => Promise<T>;
+  update?: (params: {
+    where: Record<string, unknown>;
+    data: unknown;
+  }) => Promise<T>;
+  delete?: (params: { where: Record<string, unknown> }) => Promise<T>;
+  deleteMany?: (params: { where: Record<string, unknown> }) => Promise<unknown>;
+}
 
-const toCustomUrl = (row: any) => ({
-  url: String(row.slug ?? ''),
-  priority: Number(row.priority ?? 0),
-  frequency: row.frequency ?? '',
-});
+export const getDocuments = (strapi: Core.Strapi): DocumentsFn =>
+  ((uid: string) => strapi.documents(uid as never)) as unknown as DocumentsFn;
 
-const fromCustomUrl = (item: any) => ({
-  slug: item.url,
-  priority: item.priority,
-  frequency: item.frequency,
-});
-
-const settings = ({ strapi }: { strapi: Core.Strapi }) => {
-  const sitemapService = () => strapi.plugin(PLUGIN_ID).service('service');
-
-  /** Rows are matched to the submitted list by position (ordered by id) so ids stay stable. */
-  const syncRows = async (uid: typeof CONTENT_TYPE_UID | typeof SINGLE_URL_UID, items: any[]) => {
-    const query = strapi.db.query(uid);
-    const rows = await query.findMany({ orderBy: { id: 'asc' } });
-    for (let i = 0; i < items.length; i++) {
-      if (rows[i]) {
-        await query.update({ where: { id: rows[i].id }, data: items[i] });
-      } else {
-        await query.create({ data: items[i] });
-      }
+export const getDbQuery = <T = Record<string, unknown>>(
+  strapi: Core.Strapi,
+  uid: string
+): DbQueryRepo<T> | undefined =>
+  (
+    strapi.db as unknown as {
+      query?: (targetUid: string) => DbQueryRepo<T>;
     }
-    const surplus = rows.slice(items.length).map((row: any) => row.id);
-    if (surplus.length > 0) {
-      await query.deleteMany({ where: { id: { $in: surplus } } });
+  )?.query?.(uid);
+
+export const getContentTypesMap = (
+  strapi: Core.Strapi
+): Record<string, ContentTypeSchema> =>
+  (strapi.contentTypes ?? {}) as unknown as Record<string, ContentTypeSchema>;
+
+export const getComponentsMap = (
+  strapi: Core.Strapi
+): Record<string, ComponentSchema> =>
+  (strapi.components ?? {}) as unknown as Record<string, ComponentSchema>;
+
+export const getPluginConfig = (strapi: Core.Strapi): SitemapPluginConfig => {
+  const cfg = (
+    strapi.config as unknown as {
+      get?: (key: string, defaultVal?: unknown) => SitemapPluginConfig;
     }
-  };
+  )?.get?.(`plugin::${PLUGIN_ID}`, {});
+  return cfg && typeof cfg === "object" ? cfg : {};
+};
+
+export const toArray = <T>(value: unknown): T[] =>
+  Array.isArray(value) ? (value as T[]) : [];
+
+export const isVisibleCollectionType = (
+  key: string,
+  ct: ContentTypeSchema | undefined
+): boolean => {
+  if (!ct || ct.kind !== "collectionType") {
+    return false;
+  }
+  if (ct.pluginOptions?.["content-manager"]?.visible === false) {
+    return false;
+  }
+  if (key.startsWith("api::")) {
+    return true;
+  }
+  if (!key.startsWith("plugin::")) {
+    return false;
+  }
+  return !EXCLUDED_PLUGIN_PREFIXES.some((prefix) => key.startsWith(prefix));
+};
+
+export const persistOptionsRecord = async (
+  strapi: Core.Strapi,
+  existing: SitemapOptionRecord | null,
+  updateData: SitemapOptionRecord
+): Promise<unknown> => {
+  const optionQuery = getDbQuery<SitemapOptionRecord>(strapi, OPTION_UID);
+  if (!existing) {
+    if (optionQuery?.create) {
+      return optionQuery.create({ data: updateData });
+    }
+    return getDocuments(strapi)<SitemapOptionRecord>(OPTION_UID).create({
+      data: updateData,
+    });
+  }
+  if (optionQuery?.findMany && optionQuery?.update) {
+    const rows = await optionQuery.findMany({ limit: 1 });
+    const row = rows[0];
+    if (row && row.id != null) {
+      return optionQuery.update({
+        where: { id: row.id },
+        data: updateData,
+      });
+    }
+  }
+  return getDocuments(strapi)<SitemapOptionRecord>(OPTION_UID).update({
+    documentId: existing.documentId,
+    data: updateData,
+  });
+};
+
+export const normalizeCollectionTypeRow = (
+  row: SitemapEntryConfig
+): CollectionTypeSettingItem => ({
+  ...(row.id != null ? { id: row.id } : {}),
+  type: String(row.type ?? ""),
+  langcode: String(row.langcode ?? "-"),
+  pattern: String(row.pattern ?? ""),
+  priority: Number(row.priority ?? 0.5),
+  frequency: String(row.frequency ?? "monthly"),
+  lastModified: isTruthyFlag(row.lastModified),
+  thumbnail:
+    row.thumbnail && row.thumbnail !== "-" ? String(row.thumbnail) : "",
+  populateLinkedModels: isTruthyFlag(row.populateLinkedModels),
+});
+
+export const normalizeCustomUrlRow = (
+  row: CustomUrlRecord
+): CustomUrlSettingItem => ({
+  ...(row.id != null ? { id: row.id } : {}),
+  url: String(row.slug ?? row.url ?? "").replace(/^\/+/, ""),
+  priority: Number(row.priority ?? 0.5),
+  frequency: String(row.frequency ?? "monthly"),
+});
+
+export const normalizeSitemapDefinition = (
+  def: SitemapDefinitionRecord,
+  allEntries: SitemapEntryConfig[]
+): SitemapDefinitionSettingItem => {
+  const rawIndices = toArray<number>(def.collectionTypeConfigIndices);
+  const rawIds = toArray<number>(def.collectionTypeConfigIds);
+  const resolvedIndices =
+    rawIndices.length > 0
+      ? rawIndices.filter((idx) => idx >= 0 && idx < allEntries.length)
+      : rawIds
+          .map((id) => allEntries.findIndex((e) => Number(e.id) === Number(id)))
+          .filter((idx) => idx >= 0);
 
   return {
-    async getSettings() {
-      const [options, collectionRows, customRows] = await Promise.all([
-        sitemapService().getOptions(),
-        strapi.db.query(CONTENT_TYPE_UID).findMany({ orderBy: { id: 'asc' } }),
-        strapi.db.query(SINGLE_URL_UID).findMany({ orderBy: { id: 'asc' } }),
-      ]);
-      return {
-        baseUrl: options.baseUrl ?? '',
-        excludedUrls: options.excludedUrls,
-        useSitemapIndex: options.useSitemapIndex,
-        sitemaps: options.sitemapDefinitions,
-        collectionTypes: collectionRows.map(toCollectionType),
-        customURLs: customRows.map(toCustomUrl),
-      };
-    },
-
-    async updateSettings(data: any) {
-      try {
-        const collectionTypes = Array.isArray(data?.collectionTypes) ? data.collectionTypes : [];
-        const customURLs = Array.isArray(data?.customURLs) ? data.customURLs : [];
-        await syncRows(CONTENT_TYPE_UID, collectionTypes.map(fromCollectionType));
-        await syncRows(SINGLE_URL_UID, customURLs.map(fromCustomUrl));
-        await sitemapService().updateOptions({
-          baseUrl: data?.baseUrl,
-          excludedUrls: data?.excludedUrls,
-          useSitemapIndex: data?.useSitemapIndex,
-          sitemapDefinitions: data?.sitemaps,
-        });
-        return this.getSettings();
-      } catch (error) {
-        strapi.log.error('Error saving settings:', error);
-        throw new Error('Failed to save settings');
-      }
-    },
+    name: String(def.name ?? "").trim(),
+    collectionTypeConfigIndices: resolvedIndices,
+    ...(rawIds.length > 0 ? { collectionTypeConfigIds: rawIds } : {}),
+    includeCustomUrls: Boolean(def.includeCustomUrls),
   };
 };
+
+const deleteSurplusRows = async <T extends { id?: number | string }>(
+  repo: DbQueryRepo<T>,
+  existing: T[],
+  startIndex: number
+) => {
+  const surplusIds = existing
+    .slice(startIndex)
+    .map((row) => row?.id)
+    .filter((id): id is number | string => id != null);
+  if (surplusIds.length === 0) {
+    return;
+  }
+  if (repo.deleteMany) {
+    await repo.deleteMany({ where: { id: { $in: surplusIds } } });
+    return;
+  }
+  if (repo.delete) {
+    for (const id of surplusIds) {
+      await repo.delete({ where: { id } });
+    }
+  }
+};
+
+export const syncCollectionTypeRows = async (
+  strapi: Core.Strapi,
+  items: Partial<CollectionTypeSettingItem>[]
+): Promise<SitemapEntryConfig[]> => {
+  const repo = getDbQuery<SitemapEntryConfig>(strapi, CONTENT_TYPE_UID);
+  if (!repo) {
+    return [];
+  }
+  const existing = (await repo.findMany({ orderBy: { id: "asc" } })) ?? [];
+  const saved: SitemapEntryConfig[] = [];
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const rowData: SitemapEntryConfig = {
+      type: String(item.type ?? ""),
+      langcode: String(item.langcode || "-"),
+      pattern: String(item.pattern ?? ""),
+      priority: Number(item.priority ?? 0.5),
+      frequency: String(item.frequency || "monthly"),
+      lastModified: isTruthyFlag(item.lastModified) ? "true" : "false",
+      thumbnail:
+        item.thumbnail && item.thumbnail !== "-" ? String(item.thumbnail) : "",
+      populateLinkedModels: isTruthyFlag(item.populateLinkedModels)
+        ? "true"
+        : "false",
+    };
+
+    const existingRow = existing[i];
+    if (existingRow && existingRow.id != null && repo.update) {
+      const updated = await repo.update({
+        where: { id: existingRow.id },
+        data: rowData,
+      });
+      saved.push(updated ?? { id: existingRow.id, ...rowData });
+    } else if (repo.create) {
+      if (existingRow?.id != null && repo.delete) {
+        await repo.delete({ where: { id: existingRow.id } });
+      }
+      const created = await repo.create({ data: rowData });
+      saved.push(created ?? { id: i + 1, ...rowData });
+    } else {
+      saved.push({ id: existingRow?.id ?? i + 1, ...rowData });
+    }
+  }
+
+  await deleteSurplusRows(repo, existing, items.length);
+  return saved;
+};
+
+export const syncCustomUrlRows = async (
+  strapi: Core.Strapi,
+  items: (Partial<CustomUrlSettingItem> & { slug?: string })[]
+): Promise<CustomUrlRecord[]> => {
+  const repo = getDbQuery<CustomUrlRecord>(strapi, SINGLE_URL_UID);
+  if (!repo) {
+    return [];
+  }
+  const existing = (await repo.findMany({ orderBy: { id: "asc" } })) ?? [];
+  const saved: CustomUrlRecord[] = [];
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const rowData: CustomUrlRecord = {
+      slug: String(item.url ?? item.slug ?? "").replace(/^\/+/, ""),
+      priority: Number(item.priority ?? 0.5),
+      frequency: String(item.frequency || "monthly"),
+    };
+
+    const existingRow = existing[i];
+    if (existingRow && existingRow.id != null && repo.update) {
+      const updated = await repo.update({
+        where: { id: existingRow.id },
+        data: rowData,
+      });
+      saved.push(updated ?? { id: existingRow.id, ...rowData });
+    } else if (repo.create) {
+      if (existingRow?.id != null && repo.delete) {
+        await repo.delete({ where: { id: existingRow.id } });
+      }
+      const created = await repo.create({ data: rowData });
+      saved.push(created ?? { id: i + 1, ...rowData });
+    } else {
+      saved.push({ id: existingRow?.id ?? i + 1, ...rowData });
+    }
+  }
+
+  await deleteSurplusRows(repo, existing, items.length);
+  return saved;
+};
+
+export const readUnifiedSettings = async (
+  strapi: Core.Strapi
+): Promise<SitemapSettingsPayload> => {
+  const pluginCfg = getPluginConfig(strapi);
+  const optionDoc =
+    await getDocuments(strapi)<SitemapOptionRecord>(OPTION_UID).findFirst();
+  const ctRows =
+    (await getDbQuery<SitemapEntryConfig>(strapi, CONTENT_TYPE_UID)?.findMany({
+      orderBy: { id: "asc" },
+    })) ?? [];
+  const customRows =
+    (await getDbQuery<CustomUrlRecord>(strapi, SINGLE_URL_UID)?.findMany({
+      orderBy: { id: "asc" },
+    })) ?? [];
+
+  const rawDefs = toArray<SitemapDefinitionRecord>(
+    optionDoc?.sitemapDefinitions
+  );
+  return {
+    baseUrl: optionDoc?.baseUrl || pluginCfg.hostname || "",
+    collectionTypes: ctRows.map(normalizeCollectionTypeRow),
+    customURLs: customRows.map(normalizeCustomUrlRow),
+    excludedUrls: toArray<string>(optionDoc?.excludedUrls),
+    useSitemapIndex: Boolean(optionDoc?.useSitemapIndex),
+    sitemaps: rawDefs.map((def) => normalizeSitemapDefinition(def, ctRows)),
+  };
+};
+
+export const writeUnifiedSettings = async (
+  strapi: Core.Strapi,
+  data: SitemapSettingsUpdateInput
+) => {
+  const existingOption =
+    await getDocuments(strapi)<SitemapOptionRecord>(OPTION_UID).findFirst();
+
+  const savedCtRows = Array.isArray(data.collectionTypes)
+    ? await syncCollectionTypeRows(strapi, data.collectionTypes)
+    : ((await getDbQuery<SitemapEntryConfig>(
+        strapi,
+        CONTENT_TYPE_UID
+      )?.findMany({
+        orderBy: { id: "asc" },
+      })) ?? []);
+
+  if (Array.isArray(data.customURLs)) {
+    await syncCustomUrlRows(strapi, data.customURLs);
+  }
+
+  const rawSitemaps = Array.isArray(data.sitemaps)
+    ? data.sitemaps
+    : toArray<SitemapDefinitionRecord>(existingOption?.sitemapDefinitions);
+
+  const normalizedDefinitions: SitemapDefinitionRecord[] = rawSitemaps.map(
+    (def) => {
+      const indices = toArray<number>(def.collectionTypeConfigIndices);
+      const explicitIds = toArray<number>(def.collectionTypeConfigIds);
+      const mappedIds =
+        indices.length > 0
+          ? indices
+              .map((idx) => savedCtRows[idx]?.id)
+              .filter((id): id is number => typeof id === "number")
+          : explicitIds;
+
+      return {
+        name: String(def.name ?? "").trim(),
+        collectionTypeConfigIndices: indices,
+        collectionTypeConfigIds: mappedIds,
+        includeCustomUrls: Boolean(def.includeCustomUrls),
+      };
+    }
+  );
+
+  const resolvedBaseUrl =
+    data.baseUrl !== undefined
+      ? String(data.baseUrl)
+      : data.baseURL !== undefined
+        ? String(data.baseURL)
+        : (existingOption?.baseUrl ?? "");
+
+  const updateData: SitemapOptionRecord = {
+    baseUrl: resolvedBaseUrl,
+    excludedUrls:
+      data.excludedUrls !== undefined
+        ? toArray<string>(data.excludedUrls)
+        : toArray<string>(existingOption?.excludedUrls),
+    useSitemapIndex:
+      data.useSitemapIndex !== undefined
+        ? Boolean(data.useSitemapIndex)
+        : Boolean(existingOption?.useSitemapIndex),
+    sitemapDefinitions: normalizedDefinitions,
+  };
+
+  await persistOptionsRecord(strapi, existingOption, updateData);
+  const updatedSettings = await readUnifiedSettings(strapi);
+  return {
+    message: "Settings updated successfully",
+    ...updatedSettings,
+  };
+};
+
+const settings = ({ strapi }: { strapi: Core.Strapi }) => ({
+  async getSettings(): Promise<SitemapSettingsPayload> {
+    try {
+      return await readUnifiedSettings(strapi);
+    } catch (error) {
+      strapi.log.error("Error fetching sitemap settings:", error);
+      throw new Error("Failed to fetch sitemap settings", { cause: error });
+    }
+  },
+
+  async updateSettings(data: SitemapSettingsUpdateInput) {
+    try {
+      return await writeUnifiedSettings(strapi, data);
+    } catch (error) {
+      strapi.log.error("Error updating sitemap settings:", error);
+      throw new Error("Failed to update sitemap settings", { cause: error });
+    }
+  },
+});
 
 export default {
   settings,

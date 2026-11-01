@@ -1,47 +1,47 @@
 const contentType = {
   schema: {
-    kind: 'collectionType',
-    collectionName: 'strapi_5_sitemap_plugin_content_types',
+    kind: "collectionType",
+    collectionName: "strapi_5_sitemap_plugin_content_types",
     info: {
-      singularName: 'sitemap-content-type',
-      pluralName: 'sitemap-content-types',
-      displayName: 'Sitemap Content Type',
+      singularName: "sitemap-content-type",
+      pluralName: "sitemap-content-types",
+      displayName: "Sitemap Content Type",
     },
     options: {
-      comment: '',
+      comment: "",
     },
     pluginOptions: {
-      'content-manager': {
+      "content-manager": {
         visible: false,
       },
-      'content-type-builder': {
+      "content-type-builder": {
         visible: false,
       },
     },
     attributes: {
       type: {
-        type: 'string',
+        type: "string",
       },
       langcode: {
-        type: 'string',
+        type: "string",
       },
       pattern: {
-        type: 'string',
+        type: "string",
       },
       priority: {
-        type: 'float',
+        type: "float",
       },
       frequency: {
-        type: 'string',
+        type: "string",
       },
       lastModified: {
-        type: 'string',
+        type: "string",
       },
       thumbnail: {
-        type: 'string',
+        type: "string",
       },
       populateLinkedModels: {
-        type: 'string',
+        type: "string",
       },
     },
   },
@@ -49,33 +49,33 @@ const contentType = {
 
 const contentTypeSingle = {
   schema: {
-    kind: 'collectionType',
-    collectionName: 'strapi_5_sitemap_plugin_content_type_single_urls',
+    kind: "collectionType",
+    collectionName: "strapi_5_sitemap_plugin_content_type_single_urls",
     info: {
-      singularName: 'sitemap-content-type-single-url',
-      pluralName: 'sitemap-content-type-single-urls',
-      displayName: 'Sitemap Single URL',
+      singularName: "sitemap-content-type-single-url",
+      pluralName: "sitemap-content-type-single-urls",
+      displayName: "Sitemap Single URL",
     },
     options: {
-      comment: '',
+      comment: "",
     },
     pluginOptions: {
-      'content-manager': {
+      "content-manager": {
         visible: false,
       },
-      'content-type-builder': {
+      "content-type-builder": {
         visible: false,
       },
     },
     attributes: {
       slug: {
-        type: 'string',
+        type: "string",
       },
       priority: {
-        type: 'float',
+        type: "float",
       },
       frequency: {
-        type: 'string',
+        type: "string",
       },
     },
   },
@@ -83,38 +83,38 @@ const contentTypeSingle = {
 
 const options = {
   schema: {
-    kind: 'singleType',
-    collectionName: 'strapi_5_sitemap_plugin_options',
+    kind: "singleType",
+    collectionName: "strapi_5_sitemap_plugin_options",
     info: {
-      singularName: 'sitemap-option',
-      pluralName: 'sitemap-options',
-      displayName: 'Sitemap Options',
+      singularName: "sitemap-option",
+      pluralName: "sitemap-options",
+      displayName: "Sitemap Options",
     },
     options: {
-      comment: '',
+      comment: "",
     },
     pluginOptions: {
-      'content-manager': {
+      "content-manager": {
         visible: false,
       },
-      'content-type-builder': {
+      "content-type-builder": {
         visible: false,
       },
     },
     attributes: {
       baseUrl: {
-        type: 'string',
+        type: "string",
       },
       excludedUrls: {
-        type: 'json',
+        type: "json",
         default: [],
       },
       useSitemapIndex: {
-        type: 'boolean',
+        type: "boolean",
         default: false,
       },
       sitemapDefinitions: {
-        type: 'json',
+        type: "json",
         default: [],
       },
     },
@@ -122,7 +122,7 @@ const options = {
 };
 
 export default {
-  'sitemap-content-type': contentType,
-  'sitemap-content-type-single-url': contentTypeSingle,
-  'sitemap-option': options,
+  "sitemap-content-type": contentType,
+  "sitemap-content-type-single-url": contentTypeSingle,
+  "sitemap-option": options,
 };

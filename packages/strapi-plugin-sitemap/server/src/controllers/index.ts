@@ -1,45 +1,64 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from '../pluginId';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "../pluginId";
+import type { SitemapSettingsUpdateInput } from "../services/types";
 
 export interface SitemapControllerContext {
   params: Record<string, string | undefined>;
   query: Record<string, string | undefined>;
-  request: { body?: Record<string, unknown> };
+  request: {
+    body?: Record<string, unknown>;
+  };
   body?: unknown;
   set: (header: string, value: string) => void;
 }
 
 const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
   getSitemap: async (ctx: SitemapControllerContext) => {
-    const sitemap = await strapi.plugin(PLUGIN_ID).service('service').getSitemap();
-    ctx.set('Content-Type', 'application/xml');
+    const sitemap = await strapi
+      .plugin(PLUGIN_ID)
+      .service("service")
+      .getSitemap();
+    ctx.set("Content-Type", "application/xml");
     ctx.body = sitemap;
   },
   getSitemapBySlug: async (ctx: SitemapControllerContext) => {
     const slug = ctx.params.slug;
-    const sitemap = await strapi.plugin(PLUGIN_ID).service('service').getSitemap(slug);
-    ctx.set('Content-Type', 'application/xml');
+    const sitemap = await strapi
+      .plugin(PLUGIN_ID)
+      .service("service")
+      .getSitemap(slug);
+    ctx.set("Content-Type", "application/xml");
     ctx.body = sitemap;
   },
-  adminGETContentTypes: async (ctx: SitemapControllerContext) => {
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').getContentTypes();
+  getSettings: async (ctx: SitemapControllerContext) => {
+    ctx.body = await strapi.plugin(PLUGIN_ID).service("settings").getSettings();
   },
-  adminGETLocales: async (ctx: SitemapControllerContext) => {
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('service').getLocales();
-  },
-  adminAllowedFields: async (ctx: SitemapControllerContext) => {
+  updateSettings: async (ctx: SitemapControllerContext) => {
+    const body = ctx.request.body;
+    const rawData = body?.data !== undefined ? body.data : body;
+    const requestData = (rawData ?? {}) as SitemapSettingsUpdateInput;
     ctx.body = await strapi
       .plugin(PLUGIN_ID)
-      .service('service')
-      .getAllowedFields(ctx.query.singularName ?? ctx.query.type ?? '');
+      .service("settings")
+      .updateSettings(requestData);
   },
-  adminGetSettings: async (ctx: SitemapControllerContext) => {
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('settings').getSettings();
+  getContentTypes: async (ctx: SitemapControllerContext) => {
+    ctx.body = await strapi
+      .plugin(PLUGIN_ID)
+      .service("service")
+      .getContentTypes();
   },
-  adminPutSettings: async (ctx: SitemapControllerContext) => {
-    const body = ctx.request.body;
-    const requestData = body?.data !== undefined ? body.data : body;
-    ctx.body = await strapi.plugin(PLUGIN_ID).service('settings').updateSettings(requestData);
+  getLocales: async (ctx: SitemapControllerContext) => {
+    ctx.body = await strapi.plugin(PLUGIN_ID).service("service").getLocales();
+  },
+  getAllowedFields: async (ctx: SitemapControllerContext) => {
+    const typeName = ctx.query.singularName ?? ctx.query.type ?? "";
+    const populateLinkedModels = ctx.query.populateLinkedModels === "true";
+    ctx.body = await strapi
+      .plugin(PLUGIN_ID)
+      .service("service")
+      .getAllowedFields(typeName, populateLinkedModels);
   },
 });
 
