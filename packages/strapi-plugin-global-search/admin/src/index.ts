@@ -47,11 +47,17 @@ export default {
     app.addSettingsLink(
       {
         id: pluginId,
-        intlLabel: { id: `${pluginId}.settings.section`, defaultMessage: "Global Search" },
+        intlLabel: {
+          id: `${pluginId}.settings.section`,
+          defaultMessage: "Global Search",
+        },
       },
       [
         {
-          intlLabel: { id: `${pluginId}.settings.link`, defaultMessage: "Configuration" },
+          intlLabel: {
+            id: `${pluginId}.settings.link`,
+            defaultMessage: "Configuration",
+          },
           id: `${pluginId}-settings`,
           to: pluginId,
           permissions: pluginPermissions.settings,
@@ -73,7 +79,11 @@ export default {
    * every admin screen, not only the plugin page.
    */
   bootstrap() {
-    if (typeof document === "undefined" || document.getElementById(PORTAL_ROOT_ID)) return;
+    if (
+      typeof document === "undefined" ||
+      document.getElementById(PORTAL_ROOT_ID)
+    )
+      return;
 
     const container = document.createElement("div");
     container.id = PORTAL_ROOT_ID;
@@ -88,7 +98,10 @@ export default {
         try {
           const data =
             BUILTIN_TRANSLATIONS[locale] ||
-            ((await import(`./translations/${locale}.json`)).default as Record<string, string>);
+            ((await import(`./translations/${locale}.json`)).default as Record<
+              string,
+              string
+            >);
           const prefixed: Record<string, string> = {};
 
           Object.keys(data).forEach((key) => {

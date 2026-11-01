@@ -1,6 +1,10 @@
 import type { ContentTypeDescriptor, RankedHit } from "../types";
 import { TIER, TIER_LABELS } from "../utils/constants";
-import { getValuesAtPath, buildSnippet, humanizeFieldPath } from "../utils/text";
+import {
+  getValuesAtPath,
+  buildSnippet,
+  humanizeFieldPath,
+} from "../utils/text";
 
 type ScoreResult = Pick<
   RankedHit,
@@ -44,18 +48,36 @@ export default () => ({
     return null;
   },
 
-  score(entry: unknown, descriptor: ContentTypeDescriptor, query: string): ScoreResult {
+  score(
+    entry: unknown,
+    descriptor: ContentTypeDescriptor,
+    query: string
+  ): ScoreResult {
     const lowered = query.toLowerCase();
     const idPaths = ["id", "documentId", ...descriptor.idFields];
     const mainPaths =
-      descriptor.mainField && descriptor.mainField !== "id" ? [descriptor.mainField] : [];
+      descriptor.mainField && descriptor.mainField !== "id"
+        ? [descriptor.mainField]
+        : [];
 
     const attempts: Array<[number, string[], (value: string) => boolean]> = [
       [TIER.ID_EXACT, idPaths, (value) => value.toLowerCase() === lowered],
-      [TIER.ID_CONTAINS, idPaths, (value) => value.toLowerCase().includes(lowered)],
+      [
+        TIER.ID_CONTAINS,
+        idPaths,
+        (value) => value.toLowerCase().includes(lowered),
+      ],
       [TIER.MAIN_EXACT, mainPaths, (value) => value.toLowerCase() === lowered],
-      [TIER.MAIN_STARTS_WITH, mainPaths, (value) => value.toLowerCase().startsWith(lowered)],
-      [TIER.MAIN_CONTAINS, mainPaths, (value) => value.toLowerCase().includes(lowered)],
+      [
+        TIER.MAIN_STARTS_WITH,
+        mainPaths,
+        (value) => value.toLowerCase().startsWith(lowered),
+      ],
+      [
+        TIER.MAIN_CONTAINS,
+        mainPaths,
+        (value) => value.toLowerCase().includes(lowered),
+      ],
       [
         TIER.FIELD_CONTAINS,
         descriptor.topLevelFields,
@@ -102,7 +124,10 @@ export default () => ({
     if (a.exactCase !== b.exactCase) return a.exactCase ? -1 : 1;
     if (a.valueLength !== b.valueLength) return a.valueLength - b.valueLength;
 
-    return new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime();
+    return (
+      new Date(b.updatedAt || 0).getTime() -
+      new Date(a.updatedAt || 0).getTime()
+    );
   },
 
   sort(hits: RankedHit[]): RankedHit[] {

@@ -18,8 +18,12 @@ const hasToken = (storage: Storage | undefined): boolean => {
 
 const isAuthenticated = (): boolean => {
   if (typeof window === "undefined") return false;
-  if (hasToken(window.localStorage) || hasToken(window.sessionStorage)) return true;
-  if (typeof document !== "undefined" && /(?:^|;\s*)jwtToken=/.test(document.cookie || "")) {
+  if (hasToken(window.localStorage) || hasToken(window.sessionStorage))
+    return true;
+  if (
+    typeof document !== "undefined" &&
+    /(?:^|;\s*)jwtToken=/.test(document.cookie || "")
+  ) {
     return true;
   }
 

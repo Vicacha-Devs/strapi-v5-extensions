@@ -1,18 +1,26 @@
 import type { ContentTypeDescriptor } from "../types";
 
 /** `seo.metaTitle` + condition -> `{ seo: { metaTitle: condition } }` */
-const nest = (path: string, condition: Record<string, unknown>): Record<string, unknown> =>
+const nest = (
+  path: string,
+  condition: Record<string, unknown>
+): Record<string, unknown> =>
   path
     .split(".")
     .reverse()
-    .reduce((acc, segment) => ({ [segment]: acc }), condition as Record<string, unknown>);
+    .reduce(
+      (acc, segment) => ({ [segment]: acc }),
+      condition as Record<string, unknown>
+    );
 
 /**
  * Turns the component segments of the nested paths into a Document Service
  * populate tree, so the matched value is present on the returned entry and can
  * be ranked and excerpted. Only the components actually searched are populated.
  */
-const buildPopulate = (paths: string[]): Record<string, unknown> | undefined => {
+const buildPopulate = (
+  paths: string[]
+): Record<string, unknown> | undefined => {
   const tree: Record<string, Record<string, unknown>> = {};
 
   paths.forEach((path) => {
@@ -27,11 +35,16 @@ const buildPopulate = (paths: string[]): Record<string, unknown> | undefined => 
   });
 
   const toPopulate = (node: Record<string, unknown>): Record<string, unknown> =>
-    Object.entries(node).reduce((acc: Record<string, unknown>, [key, child]) => {
-      const childObj = child as Record<string, unknown>;
-      acc[key] = Object.keys(childObj).length ? { populate: toPopulate(childObj) } : true;
-      return acc;
-    }, {});
+    Object.entries(node).reduce(
+      (acc: Record<string, unknown>, [key, child]) => {
+        const childObj = child as Record<string, unknown>;
+        acc[key] = Object.keys(childObj).length
+          ? { populate: toPopulate(childObj) }
+          : true;
+        return acc;
+      },
+      {}
+    );
 
   return Object.keys(tree).length ? toPopulate(tree) : undefined;
 };
@@ -44,7 +57,9 @@ export default () => ({
   searchablePaths(descriptor: ContentTypeDescriptor): string[] {
     return [
       ...descriptor.idFields,
-      ...(descriptor.mainField && descriptor.mainField !== "id" ? [descriptor.mainField] : []),
+      ...(descriptor.mainField && descriptor.mainField !== "id"
+        ? [descriptor.mainField]
+        : []),
       ...descriptor.topLevelFields,
       ...descriptor.nestedFields,
     ];
@@ -56,7 +71,10 @@ export default () => ({
    * integer column is rejected by Postgres and misbehaves elsewhere.
    * `documentId` is always matched as a string.
    */
-  buildFilters(descriptor: ContentTypeDescriptor, query: string): { $or: unknown[] } | null {
+  buildFilters(
+    descriptor: ContentTypeDescriptor,
+    query: string
+  ): { $or: unknown[] } | null {
     const conditions: unknown[] = [{ documentId: { $containsi: query } }];
 
     if (/^\d+$/.test(query)) {

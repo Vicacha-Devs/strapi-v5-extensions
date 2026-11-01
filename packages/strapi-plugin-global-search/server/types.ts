@@ -64,8 +64,19 @@ export interface SearchParams {
 export interface SearchResult {
   query: string;
   results: RankedHit[];
-  groups: Array<{ uid: string; label: string; kind: string; count: number; truncated: boolean }>;
-  pagination: { page: number; pageSize: number; total: number; pageCount: number };
+  groups: Array<{
+    uid: string;
+    label: string;
+    kind: string;
+    count: number;
+    truncated: boolean;
+  }>;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
   meta: {
     searchedTypes: number;
     truncatedTypes: string[];
@@ -103,7 +114,9 @@ export interface StrapiPluginService {
   findConfiguration: (contentType: {
     uid: string;
   }) => Promise<{ settings?: { mainField?: string } } | undefined>;
-  getSearchableContentTypes: (opts?: { force?: boolean }) => Promise<ContentTypeDescriptor[]>;
+  getSearchableContentTypes: (opts?: {
+    force?: boolean;
+  }) => Promise<ContentTypeDescriptor[]>;
   getAllContentTypes: () => Promise<ContentTypeDescriptor[]>;
   clearCache: () => void;
   filterReadableTypes: (
@@ -116,7 +129,12 @@ export interface StrapiPluginService {
   search: (params?: SearchParams) => Promise<SearchResult>;
   buildParams: (
     descriptor: ContentTypeDescriptor,
-    opts: { query: string; locale?: string; limit: number; includeDrafts: boolean }
+    opts: {
+      query: string;
+      locale?: string;
+      limit: number;
+      includeDrafts: boolean;
+    }
   ) => Record<string, unknown> | null;
   score: (
     entry: unknown,
@@ -139,15 +157,29 @@ export interface StrapiPluginService {
 export interface StrapiLike {
   contentTypes: Record<string, ContentTypeShape>;
   components: Record<string, { attributes?: Record<string, AttributeShape> }>;
-  config: { get: (key: string, defaultValue?: unknown) => Record<string, unknown> };
+  config: {
+    get: (key: string, defaultValue?: unknown) => Record<string, unknown>;
+  };
   store: (opts: { type: string; name: string }) => {
-    get: (opts: { key: string }) => Promise<Record<string, unknown> | null | undefined>;
+    get: (opts: {
+      key: string;
+    }) => Promise<Record<string, unknown> | null | undefined>;
     set: (opts: { key: string; value: unknown }) => Promise<void>;
   };
-  log: { debug: (msg: string) => void; warn: (msg: string) => void; error: (msg: string) => void };
+  log: {
+    debug: (msg: string) => void;
+    warn: (msg: string) => void;
+    error: (msg: string) => void;
+  };
   plugin: (id: string) => { service: (name: string) => StrapiPluginService };
-  documents: (uid: string) => { findMany: (params: unknown) => Promise<unknown> };
+  documents: (uid: string) => {
+    findMany: (params: unknown) => Promise<unknown>;
+  };
   admin?: {
-    services: { permission: { actionProvider: { registerMany: (actions: unknown[]) => void } } };
+    services: {
+      permission: {
+        actionProvider: { registerMany: (actions: unknown[]) => void };
+      };
+    };
   };
 }

@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 
 import { fetchSearchableTypes } from "../api/searchApi";
-import type { ContentTypeSummary, PluginSettings, SchemaResponse } from "../types";
+import type {
+  ContentTypeSummary,
+  PluginSettings,
+  SchemaResponse,
+} from "../types";
 
 // The schema barely changes at runtime, and both the page and the palette ask
 // for it — resolve it once per admin session.

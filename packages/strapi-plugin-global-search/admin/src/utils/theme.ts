@@ -19,7 +19,8 @@ const resolve = (preference: string) => {
   if (preference === "dark") return darkTheme;
   if (preference === "light") return lightTheme;
 
-  const prefersDark = window.matchMedia && window.matchMedia(DARK_QUERY).matches;
+  const prefersDark =
+    window.matchMedia && window.matchMedia(DARK_QUERY).matches;
 
   return prefersDark ? darkTheme : lightTheme;
 };
@@ -43,7 +44,8 @@ export const useAdminTheme = () => {
 
     return () => {
       window.removeEventListener("storage", sync);
-      if (media && media.removeEventListener) media.removeEventListener("change", sync);
+      if (media && media.removeEventListener)
+        media.removeEventListener("change", sync);
       window.clearInterval(interval);
     };
   }, []);

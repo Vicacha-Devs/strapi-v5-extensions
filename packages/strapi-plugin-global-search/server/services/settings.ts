@@ -4,7 +4,8 @@ import { PLUGIN_ID } from "../utils/constants";
 
 const STORE_KEY = "settings";
 
-const getStore = (strapi: StrapiLike) => strapi.store({ type: "plugin", name: PLUGIN_ID });
+const getStore = (strapi: StrapiLike) =>
+  strapi.store({ type: "plugin", name: PLUGIN_ID });
 
 export default ({ strapi }: { strapi: StrapiLike }) => ({
   /**

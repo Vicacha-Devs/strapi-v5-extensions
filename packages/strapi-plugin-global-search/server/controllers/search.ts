@@ -3,7 +3,9 @@ import { PLUGIN_ID } from "../utils/constants";
 
 type Ctx = {
   request: { query: Record<string, unknown>; body?: Record<string, unknown> };
-  state: { userAbility?: { can: (action: string, subject: string) => boolean } | null };
+  state: {
+    userAbility?: { can: (action: string, subject: string) => boolean } | null;
+  };
   body?: unknown;
   throw: (code: number, msg: string) => void;
 };
@@ -39,7 +41,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       strapi.log.error(
         `[${PLUGIN_ID}] search request failed: ${(error as Error).stack || (error as Error).message}`
       );
-      ctx.throw(500, "Global search failed. Check the server logs for details.");
+      ctx.throw(
+        500,
+        "Global search failed. Check the server logs for details."
+      );
     }
   },
 });

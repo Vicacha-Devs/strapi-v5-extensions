@@ -9,7 +9,14 @@ import {
   VisuallyHidden,
 } from "@strapi/design-system";
 import { Search } from "@strapi/icons";
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from "react";
 import styled from "styled-components";
 
 import useGlobalSearch from "../hooks/useGlobalSearch";
@@ -30,7 +37,11 @@ interface SearchOverlayProps {
   onClose: () => void;
 }
 
-const navigateToHit = (hit: SearchHit, newTab: boolean, onClose: () => void) => {
+const navigateToHit = (
+  hit: SearchHit,
+  newTab: boolean,
+  onClose: () => void
+) => {
   const url = toAdminUrl(hit.adminUrl);
 
   if (newTab) {
@@ -73,9 +84,13 @@ const OverlayBody = ({
     return (
       <Box padding={6}>
         <Typography textColor="neutral500">
-          {t("palette.min_chars", "Type at least {count} characters to search.", {
-            count: minChars,
-          })}
+          {t(
+            "palette.min_chars",
+            "Type at least {count} characters to search.",
+            {
+              count: minChars,
+            }
+          )}
         </Typography>
       </Box>
     );
@@ -126,7 +141,10 @@ const OverlayBody = ({
   }
 
   return (
-    <ResultsScroller role="listbox" aria-label={t("palette.results_aria", "Search results")}>
+    <ResultsScroller
+      role="listbox"
+      aria-label={t("palette.results_aria", "Search results")}
+    >
       {results.map((hit, index) => (
         <ResultItem
           key={`${hit.contentTypeUid}-${hit.documentId || hit.id}-${hit.locale || ""}`}
@@ -159,7 +177,10 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
   const results = useMemo(() => search.data.results || [], [search.data]);
 
   useEffect(() => {
-    const timer = setTimeout(() => inputRef.current && inputRef.current.focus(), 0);
+    const timer = setTimeout(
+      () => inputRef.current && inputRef.current.focus(),
+      0
+    );
     return () => clearTimeout(timer);
   }, []);
 
@@ -174,7 +195,9 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
   const onKeyDown = (event: KeyboardEvent) => {
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setActiveIndex((index) => (results.length ? (index + 1) % results.length : 0));
+      setActiveIndex((index) =>
+        results.length ? (index + 1) % results.length : 0
+      );
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveIndex((index) =>
@@ -203,7 +226,12 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
             </Typography>
           </VisuallyHidden>
 
-          <Box paddingLeft={4} paddingRight={4} paddingTop={4} paddingBottom={3}>
+          <Box
+            paddingLeft={4}
+            paddingRight={4}
+            paddingTop={4}
+            paddingBottom={3}
+          >
             <TextInput
               ref={inputRef}
               name="global-search-palette"
@@ -235,7 +263,12 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
 
           <Divider />
 
-          <Flex justifyContent="space-between" padding={3} paddingLeft={4} paddingRight={4}>
+          <Flex
+            justifyContent="space-between"
+            padding={3}
+            paddingLeft={4}
+            paddingRight={4}
+          >
             <Typography variant="pi" textColor="neutral500">
               {t(
                 "palette.shortcuts_hint",
@@ -244,7 +277,9 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
             </Typography>
             {search.status === "success" && search.data.pagination.total > 0 ? (
               <Typography variant="pi" textColor="neutral500">
-                {t("palette.result_count", "{count} results", { count: totalCount })}
+                {t("palette.result_count", "{count} results", {
+                  count: totalCount,
+                })}
               </Typography>
             ) : null}
           </Flex>

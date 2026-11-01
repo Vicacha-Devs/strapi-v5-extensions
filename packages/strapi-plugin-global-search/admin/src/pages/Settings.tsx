@@ -20,7 +20,12 @@ import { Check } from "@strapi/icons";
 import { Layouts, Page, useNotification, useRBAC } from "@strapi/strapi/admin";
 import { useEffect, useState, type ChangeEvent } from "react";
 
-import { fetchAllTypes, fetchSettings, resetSettings, updateSettings } from "../api/searchApi";
+import {
+  fetchAllTypes,
+  fetchSettings,
+  resetSettings,
+  updateSettings,
+} from "../api/searchApi";
 import { invalidateSearchableTypes } from "../hooks/useSearchableTypes";
 import pluginPermissions from "../permissions";
 import type { ContentTypeSummary, PluginSettings } from "../types";
@@ -34,12 +39,18 @@ const getNumberFields = (): Array<{
   {
     name: "minChars",
     label: t("settings.min_chars_label", "Minimum characters"),
-    hint: t("settings.min_chars_hint", "Shorter queries are not sent to the server."),
+    hint: t(
+      "settings.min_chars_hint",
+      "Shorter queries are not sent to the server."
+    ),
   },
   {
     name: "debounce",
     label: t("settings.debounce_label", "Debounce (ms)"),
-    hint: t("settings.debounce_hint", "How long to wait after the last keystroke."),
+    hint: t(
+      "settings.debounce_hint",
+      "How long to wait after the last keystroke."
+    ),
   },
   {
     name: "perTypeLimit",
@@ -49,12 +60,18 @@ const getNumberFields = (): Array<{
   {
     name: "maxResults",
     label: t("settings.max_results_label", "Maximum results"),
-    hint: t("settings.max_results_hint", "Hard cap on the merged, ranked list."),
+    hint: t(
+      "settings.max_results_hint",
+      "Hard cap on the merged, ranked list."
+    ),
   },
   {
     name: "maxDepth",
     label: t("settings.max_depth_label", "Component depth"),
-    hint: t("settings.max_depth_hint", "How many component levels to search into."),
+    hint: t(
+      "settings.max_depth_hint",
+      "How many component levels to search into."
+    ),
   },
   {
     name: "queryTimeout",
@@ -76,19 +93,31 @@ const extractSaveErrorMessage = (error: unknown): string => {
 interface SearchBehaviourPanelProps {
   settings: PluginSettings;
   canEdit: boolean;
-  onSetField: <K extends keyof PluginSettings>(name: K, value: PluginSettings[K]) => void;
+  onSetField: <K extends keyof PluginSettings>(
+    name: K,
+    value: PluginSettings[K]
+  ) => void;
 }
 
-const SearchBehaviourPanel = ({ settings, canEdit, onSetField }: SearchBehaviourPanelProps) => {
+const SearchBehaviourPanel = ({
+  settings,
+  canEdit,
+  onSetField,
+}: SearchBehaviourPanelProps) => {
   const onText = t("common.on", "On");
   const offText = t("common.off", "Off");
   const deepLabel = t("settings.deep_label", "Search inside components");
   const draftsLabel = t("settings.drafts_label", "Include drafts");
-  const pluginsLabel = t("settings.plugins_label", "Include plugin content types");
+  const pluginsLabel = t(
+    "settings.plugins_label",
+    "Include plugin content types"
+  );
 
   return (
     <Box background="neutral0" padding={6} hasRadius shadow="tableShadow">
-      <Typography variant="delta">{t("settings.behaviour_title", "Search behaviour")}</Typography>
+      <Typography variant="delta">
+        {t("settings.behaviour_title", "Search behaviour")}
+      </Typography>
 
       <Box paddingTop={4}>
         <Grid.Root gap={4}>
@@ -101,7 +130,10 @@ const SearchBehaviourPanel = ({ settings, canEdit, onSetField }: SearchBehaviour
                   aria-label={field.label}
                   value={settings[field.name] as number}
                   onValueChange={(value: number | undefined) =>
-                    onSetField(field.name, value as PluginSettings[typeof field.name])
+                    onSetField(
+                      field.name,
+                      value as PluginSettings[typeof field.name]
+                    )
                   }
                   disabled={!canEdit}
                 />
@@ -113,7 +145,10 @@ const SearchBehaviourPanel = ({ settings, canEdit, onSetField }: SearchBehaviour
           <Grid.Item col={4} s={12}>
             <Field.Root
               name="deep"
-              hint={t("settings.deep_hint", "Also match fields nested in components.")}
+              hint={t(
+                "settings.deep_hint",
+                "Also match fields nested in components."
+              )}
             >
               <Field.Label>{deepLabel}</Field.Label>
               <Toggle
@@ -134,7 +169,10 @@ const SearchBehaviourPanel = ({ settings, canEdit, onSetField }: SearchBehaviour
           <Grid.Item col={4} s={12}>
             <Field.Root
               name="includeDrafts"
-              hint={t("settings.drafts_hint", "Search unpublished entries too.")}
+              hint={t(
+                "settings.drafts_hint",
+                "Search unpublished entries too."
+              )}
             >
               <Field.Label>{draftsLabel}</Field.Label>
               <Toggle
@@ -195,7 +233,9 @@ const ContentTypesTablePanel = ({
   onToggleContentType,
 }: ContentTypesTablePanelProps) => (
   <Box background="neutral0" padding={6} hasRadius shadow="tableShadow">
-    <Typography variant="delta">{t("settings.content_types_title", "Content types")}</Typography>
+    <Typography variant="delta">
+      {t("settings.content_types_title", "Content types")}
+    </Typography>
     <Box paddingTop={1} paddingBottom={4}>
       <Typography textColor="neutral600" variant="pi">
         {t(
@@ -214,10 +254,14 @@ const ContentTypesTablePanel = ({
             </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("settings.col_kind", "Kind")}</Typography>
+            <Typography variant="sigma">
+              {t("settings.col_kind", "Kind")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("settings.col_main_field", "Main field")}</Typography>
+            <Typography variant="sigma">
+              {t("settings.col_main_field", "Main field")}
+            </Typography>
           </Th>
           <Th>
             <Typography variant="sigma">
@@ -225,7 +269,9 @@ const ContentTypesTablePanel = ({
             </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("settings.col_enabled", "Enabled")}</Typography>
+            <Typography variant="sigma">
+              {t("settings.col_enabled", "Enabled")}
+            </Typography>
           </Th>
         </Tr>
       </Thead>
@@ -255,16 +301,22 @@ const ContentTypesTablePanel = ({
               <Typography textColor="neutral600">{type.mainField}</Typography>
             </Td>
             <Td>
-              <Typography textColor={type.searchable ? "neutral600" : "danger600"}>
+              <Typography
+                textColor={type.searchable ? "neutral600" : "danger600"}
+              >
                 {type.searchable ? type.fieldCount : t("common.none", "none")}
               </Typography>
             </Td>
             <Td>
               <Toggle
                 name={`enabled-${type.uid}`}
-                aria-label={t("settings.enable_for_type", "Enable search for {name}", {
-                  name: type.displayName,
-                })}
+                aria-label={t(
+                  "settings.enable_for_type",
+                  "Enable search for {name}",
+                  {
+                    name: type.displayName,
+                  }
+                )}
                 onLabel={t("common.on", "On")}
                 offLabel={t("common.off", "Off")}
                 checked={!excluded.includes(type.uid)}
@@ -287,19 +339,26 @@ const SettingsPage = () => {
   const [settings, setSettings] = useState<PluginSettings | null>(null);
   const [contentTypes, setContentTypes] = useState<ContentTypeSummary[]>([]);
 
-  const canEdit = (allowedActions as { canSettings?: boolean }).canSettings !== false;
+  const canEdit =
+    (allowedActions as { canSettings?: boolean }).canSettings !== false;
 
   const load = async () => {
     setIsLoading(true);
 
     try {
-      const [nextSettings, schema] = await Promise.all([fetchSettings(), fetchAllTypes()]);
+      const [nextSettings, schema] = await Promise.all([
+        fetchSettings(),
+        fetchAllTypes(),
+      ]);
       setSettings(nextSettings);
       setContentTypes(schema.contentTypes || []);
     } catch {
       toggleNotification({
         type: "danger",
-        message: t("settings.error_load", "Could not load global search settings."),
+        message: t(
+          "settings.error_load",
+          "Could not load global search settings."
+        ),
       });
     } finally {
       setIsLoading(false);
@@ -310,8 +369,13 @@ const SettingsPage = () => {
     load();
   }, []);
 
-  const setField = <K extends keyof PluginSettings>(name: K, value: PluginSettings[K]) =>
-    setSettings((previous) => (previous ? { ...previous, [name]: value } : previous));
+  const setField = <K extends keyof PluginSettings>(
+    name: K,
+    value: PluginSettings[K]
+  ) =>
+    setSettings((previous) =>
+      previous ? { ...previous, [name]: value } : previous
+    );
 
   const toggleContentType = (uid: string) => {
     setSettings((previous) => {
@@ -339,7 +403,10 @@ const SettingsPage = () => {
         message: t("settings.saved", "Global search settings saved."),
       });
     } catch (error: unknown) {
-      toggleNotification({ type: "danger", message: extractSaveErrorMessage(error) });
+      toggleNotification({
+        type: "danger",
+        message: extractSaveErrorMessage(error),
+      });
     } finally {
       setIsSaving(false);
     }
@@ -377,10 +444,19 @@ const SettingsPage = () => {
         )}
         primaryAction={
           <Flex gap={2}>
-            <Button variant="tertiary" onClick={restoreDefaults} disabled={!canEdit || isSaving}>
+            <Button
+              variant="tertiary"
+              onClick={restoreDefaults}
+              disabled={!canEdit || isSaving}
+            >
               {t("settings.restore_defaults", "Restore defaults")}
             </Button>
-            <Button startIcon={<Check />} onClick={save} loading={isSaving} disabled={!canEdit}>
+            <Button
+              startIcon={<Check />}
+              onClick={save}
+              loading={isSaving}
+              disabled={!canEdit}
+            >
               {t("settings.save", "Save")}
             </Button>
           </Flex>
@@ -400,7 +476,11 @@ const SettingsPage = () => {
 
           <Tabs.Content value="behaviour">
             <Box paddingTop={4}>
-              <SearchBehaviourPanel settings={settings} canEdit={canEdit} onSetField={setField} />
+              <SearchBehaviourPanel
+                settings={settings}
+                canEdit={canEdit}
+                onSetField={setField}
+              />
             </Box>
           </Tabs.Content>
 
