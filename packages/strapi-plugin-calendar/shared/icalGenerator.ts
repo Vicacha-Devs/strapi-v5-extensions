@@ -25,12 +25,13 @@ export function foldIcsLine(line: string): string {
   return chunks.join("\r\n");
 }
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
 export function toIcsTimestamp(iso: string, allDay = false): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {
     return "19700101T000000Z";
   }
-  const pad = (n: number) => String(n).padStart(2, "0");
   const y = date.getUTCFullYear();
   const m = pad(date.getUTCMonth() + 1);
   const d = pad(date.getUTCDate());

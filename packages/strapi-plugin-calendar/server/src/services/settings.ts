@@ -372,6 +372,25 @@ function scoreContentTypeUid(uid: string): number {
   return uid.startsWith("api::") ? 2 : 3;
 }
 
+function mergeStoredWithDefaults(
+  defaults: CalendarPluginSettings,
+  stored: Partial<CalendarPluginSettings>
+): CalendarPluginSettings {
+  return {
+    ...defaults,
+    ...stored,
+    sources: mergeSourceLists(defaults.sources, stored.sources),
+    secondaryCalendars: mergeCalendarLists(
+      defaults.secondaryCalendars,
+      stored.secondaryCalendars
+    ),
+    recurrencePresets: mergePresetLists(
+      defaults.recurrencePresets,
+      stored.recurrencePresets
+    ),
+  };
+}
+
 export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
   const getStore = () => strapi.store({ type: "plugin", name: PLUGIN_ID });
   const getRegistryService = () =>
@@ -398,36 +417,17 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     ];
     mergeUserSecondaryCalendars(mergedCalendars, userConfig.secondaryCalendars);
 
-    const mergedPresets = mergePresetLists(
-      DEFAULT_CALENDAR_SETTINGS.recurrencePresets,
-      userConfig.recurrencePresets
-    );
-
     return {
       ...DEFAULT_CALENDAR_SETTINGS,
       ...userConfig,
       sources: mergedSources,
       secondaryCalendars: mergedCalendars,
-      recurrencePresets: mergedPresets,
+      recurrencePresets: mergePresetLists(
+        DEFAULT_CALENDAR_SETTINGS.recurrencePresets,
+        userConfig.recurrencePresets
+      ),
     };
   };
-
-  const mergeStoredWithDefaults = (
-    defaults: CalendarPluginSettings,
-    stored: Partial<CalendarPluginSettings>
-  ): CalendarPluginSettings => ({
-    ...defaults,
-    ...stored,
-    sources: mergeSourceLists(defaults.sources, stored.sources),
-    secondaryCalendars: mergeCalendarLists(
-      defaults.secondaryCalendars,
-      stored.secondaryCalendars
-    ),
-    recurrencePresets: mergePresetLists(
-      defaults.recurrencePresets,
-      stored.recurrencePresets
-    ),
-  });
 
   const service: SettingsService = {
     async ensureInitialized(): Promise<CalendarPluginSettings> {
@@ -444,8 +444,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     },
 
     async getSettings(): Promise<CalendarPluginSettings> {
-      const store = getStore();
-      const stored = (await store.get({
+      const stored = (await getStore().get({
         key: STORE_KEY,
       })) as Partial<CalendarPluginSettings> | null;
       const defaults = getConfigDefaults();
@@ -455,17 +454,14 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => {
     async updateSettings(
       patch: Partial<CalendarPluginSettings>
     ): Promise<CalendarPluginSettings> {
-      const current = await service.getSettings();
-      const next = buildUpdatedSettings(current, patch);
-      const store = getStore();
-      await store.set({ key: STORE_KEY, value: next });
+      const next = buildUpdatedSettings(await service.getSettings(), patch);
+      await getStore().set({ key: STORE_KEY, value: next });
       return next;
     },
 
     async clearSettings(): Promise<CalendarPluginSettings> {
       const defaults = getConfigDefaults();
-      const store = getStore();
-      await store.set({ key: STORE_KEY, value: defaults });
+      await getStore().set({ key: STORE_KEY, value: defaults });
       return defaults;
     },
 

@@ -14,24 +14,15 @@ const VALID_FREQUENCIES: RRuleFrequency[] = [
   "MONTHLY",
   "YEARLY",
 ];
-const VALID_WEEKDAYS: RRuleWeekday[] = [
+const JS_DAY_TO_RRULE_DAY: RRuleWeekday[] = [
+  "SU",
   "MO",
   "TU",
   "WE",
   "TH",
   "FR",
   "SA",
-  "SU",
 ];
-const JS_DAY_TO_RRULE_DAY: Record<number, RRuleWeekday> = {
-  0: "SU",
-  1: "MO",
-  2: "TU",
-  3: "WE",
-  4: "TH",
-  5: "FR",
-  6: "SA",
-};
 const DAY_LABELS: Record<RRuleWeekday, string> = {
   MO: "Mon",
   TU: "Tue",
@@ -41,26 +32,15 @@ const DAY_LABELS: Record<RRuleWeekday, string> = {
   SA: "Sat",
   SU: "Sun",
 };
-const SINGULAR_FREQ_LABELS: Record<RRuleFrequency, string> = {
-  NONE: "",
-  DAILY: "Every day",
-  WEEKLY: "Every week",
-  MONTHLY: "Every month",
-  YEARLY: "Every year",
-};
-const PLURAL_FREQ_UNITS: Record<RRuleFrequency, string> = {
-  NONE: "days",
-  DAILY: "days",
-  WEEKLY: "weeks",
-  MONTHLY: "months",
-  YEARLY: "years",
+const FREQ_UNITS: Record<RRuleFrequency, [string, string]> = {
+  NONE: ["", "days"],
+  DAILY: ["Every day", "days"],
+  WEEKLY: ["Every week", "weeks"],
+  MONTHLY: ["Every month", "months"],
+  YEARLY: ["Every year", "years"],
 };
 
-function parseBoundedInt(
-  val: string,
-  min: number,
-  max: number
-): number | undefined {
+function parseBoundedInt(val: string, min: number, max: number) {
   const n = Number.parseInt(val, 10);
   return Number.isFinite(n) && n >= min && n <= max ? n : undefined;
 }
@@ -76,42 +56,42 @@ function parseByDayList(val: string): RRuleWeekday[] {
   return val
     .split(",")
     .map((d) => d.trim().slice(-2) as RRuleWeekday)
-    .filter((d) => VALID_WEEKDAYS.includes(d));
+    .filter((d) => JS_DAY_TO_RRULE_DAY.includes(d));
 }
 
-type RRulePartAssigner = (parsed: ParsedRRule, val: string) => void;
+const intAssigner =
+  (
+    key: "interval" | "byMonth" | "byMonthDay" | "count",
+    min: number,
+    max: number
+  ) =>
+  (p: ParsedRRule, v: string) => {
+    const n = parseBoundedInt(v, min, max);
+    if (n !== undefined) p[key] = n;
+  };
 
-const RRULE_PART_ASSIGNERS: Record<string, RRulePartAssigner> = {
-  RSCALE: (parsed, val) => {
-    if (val) parsed.rscale = val.toLowerCase();
+const RRULE_PART_ASSIGNERS: Record<
+  string,
+  (parsed: ParsedRRule, val: string) => void
+> = {
+  RSCALE: (p, v) => {
+    if (v) p.rscale = v.toLowerCase();
   },
-  FREQ: (parsed, val) => {
-    if (VALID_FREQUENCIES.includes(val as RRuleFrequency)) {
-      parsed.freq = val as RRuleFrequency;
+  FREQ: (p, v) => {
+    if (VALID_FREQUENCIES.includes(v as RRuleFrequency)) {
+      p.freq = v as RRuleFrequency;
     }
   },
-  INTERVAL: (parsed, val) => {
-    const n = parseBoundedInt(val, 1, 365);
-    if (n !== undefined) parsed.interval = n;
+  INTERVAL: intAssigner("interval", 1, 365),
+  BYDAY: (p, v) => {
+    p.byDay = parseByDayList(v);
   },
-  BYDAY: (parsed, val) => {
-    parsed.byDay = parseByDayList(val);
-  },
-  BYMONTH: (parsed, val) => {
-    const m = parseBoundedInt(val, 1, 13);
-    if (m !== undefined) parsed.byMonth = m;
-  },
-  BYMONTHDAY: (parsed, val) => {
-    const md = parseBoundedInt(val, 1, 31);
-    if (md !== undefined) parsed.byMonthDay = md;
-  },
-  COUNT: (parsed, val) => {
-    const c = parseBoundedInt(val, 1, 1000);
-    if (c !== undefined) parsed.count = c;
-  },
-  UNTIL: (parsed, val) => {
-    const u = parseUntilDate(val);
-    if (u !== undefined) parsed.until = u;
+  BYMONTH: intAssigner("byMonth", 1, 13),
+  BYMONTHDAY: intAssigner("byMonthDay", 1, 31),
+  COUNT: intAssigner("count", 1, 1000),
+  UNTIL: (p, v) => {
+    const u = parseUntilDate(v);
+    if (u !== undefined) p.until = u;
   },
 };
 
@@ -124,8 +104,10 @@ export function parseRRule(rawRule?: string | null): ParsedRRule {
   for (const part of cleaned.split(";")) {
     const [rawKey, rawVal] = part.split("=");
     if (!rawKey || !rawVal) continue;
-    const assigner = RRULE_PART_ASSIGNERS[rawKey.trim().toUpperCase()];
-    if (assigner) assigner(parsed, rawVal.trim().toUpperCase());
+    RRULE_PART_ASSIGNERS[rawKey.trim().toUpperCase()]?.(
+      parsed,
+      rawVal.trim().toUpperCase()
+    );
   }
   return parsed;
 }
@@ -141,7 +123,9 @@ function appendRscaleAndFreq(segments: string[], parsed: ParsedRRule): void {
 
 function appendRuleModifiers(segments: string[], parsed: ParsedRRule): void {
   if (parsed.freq === "WEEKLY" && Array.isArray(parsed.byDay)) {
-    const validDays = parsed.byDay.filter((d) => VALID_WEEKDAYS.includes(d));
+    const validDays = parsed.byDay.filter((d) =>
+      JS_DAY_TO_RRULE_DAY.includes(d)
+    );
     if (validDays.length > 0) segments.push(`BYDAY=${validDays.join(",")}`);
   }
   if (
@@ -154,10 +138,7 @@ function appendRuleModifiers(segments: string[], parsed: ParsedRRule): void {
   }
 }
 
-function appendMonthDayAndBounds(
-  segments: string[],
-  parsed: ParsedRRule
-): void {
+function appendMonthDayAndBounds(segments: string[], parsed: ParsedRRule) {
   const isMonthOrYear = parsed.freq === "MONTHLY" || parsed.freq === "YEARLY";
   if (
     isMonthOrYear &&
@@ -184,10 +165,10 @@ export function buildRRule(parsed: ParsedRRule): string {
 }
 
 function formatRRuleIntervalText(parsed: ParsedRRule): string {
-  if (parsed.interval === 1) {
-    return SINGULAR_FREQ_LABELS[parsed.freq] || "Every year";
-  }
-  return `Every ${parsed.interval} ${PLURAL_FREQ_UNITS[parsed.freq] || "years"}`;
+  const [singular, plural] = FREQ_UNITS[parsed.freq] || ["Every year", "years"];
+  return parsed.interval === 1
+    ? singular
+    : `Every ${parsed.interval} ${plural}`;
 }
 
 function formatRRuleSuffix(parsed: ParsedRRule): string {
@@ -283,9 +264,7 @@ export function parseRRuleFieldValue(
   return fallback;
 }
 
-function toDateKeyUTC(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
+const toDateKeyUTC = (date: Date) => date.toISOString().slice(0, 10);
 
 export interface ExpandedSlot {
   occurrenceDate: string;
@@ -297,38 +276,12 @@ export interface ExpandedSlot {
   override?: OccurrenceOverride;
 }
 
-interface SlotContext {
-  startObj: Date;
-  durationMs: number;
-  winStartMs: number;
-  winEndMs: number;
-  untilMs: number;
-  maxCount: number;
-  maxOccurrences: number;
-  parsed: ParsedRRule;
-  exdatesSet: Set<string>;
-  overridesMap: Record<string, OccurrenceOverride>;
-  effectiveRScale?: string;
-  isNonGregorianRScale: boolean;
-  targetMonth: number;
-  targetDayOfMonth: number;
-  targetWeekdays: RRuleWeekday[];
-  anchorMidnightMs: number;
-  timeOffsetMs: number;
-}
+type SlotContext = ReturnType<typeof createSlotContext>;
 
 function buildEffectiveSlot(
   candidateDate: Date,
   dateKey: string,
-  ctx: Pick<
-    SlotContext,
-    | "exdatesSet"
-    | "overridesMap"
-    | "durationMs"
-    | "winStartMs"
-    | "winEndMs"
-    | "effectiveRScale"
-  >,
+  ctx: SlotContext,
   isRecurring: boolean
 ): ExpandedSlot | null {
   if (ctx.exdatesSet.has(dateKey)) return null;
@@ -425,12 +378,7 @@ function resolveCalendarTargets(
   startObj: Date,
   parsed: ParsedRRule,
   effectiveRScale?: string
-): {
-  isNonGregorianRScale: boolean;
-  targetMonth: number;
-  targetDayOfMonth: number;
-  targetWeekdays: RRuleWeekday[];
-} {
+) {
   const isNonGregorianRScale =
     Boolean(effectiveRScale) &&
     effectiveRScale !== "gregory" &&
@@ -456,14 +404,12 @@ function resolveCalendarTargets(
   };
 }
 
-function createSlotContext(params: {
-  startObj: Date;
-  baseEndDate?: string | null;
-  recurrence?: RRuleFieldValue | null;
-  windowStart: string;
-  windowEnd: string;
-  maxOccurrences: number;
-}): SlotContext {
+function createSlotContext(
+  params: Parameters<typeof expandRuleSlots>[0] & {
+    startObj: Date;
+    maxOccurrences: number;
+  }
+) {
   const { startObj, baseEndDate, recurrence, windowStart, windowEnd } = params;
   const endObj = resolveEndDate(startObj, baseEndDate);
   const parsed = parseRRule(recurrence?.rrule);

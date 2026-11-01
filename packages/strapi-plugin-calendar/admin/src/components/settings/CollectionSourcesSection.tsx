@@ -34,6 +34,27 @@ const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.18)",
 };
 
+const GRID_3_STYLE: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+  gap: 16,
+};
+
+const GRID_2_STYLE: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: 16,
+};
+
+const TITLE_CANDIDATES =
+  "title,name,customerName,visitorName,headline,subject,fullName,slug".split(
+    ","
+  );
+const START_CANDIDATES =
+  "startDate,preferredDate,date,scheduledAt,releasedAt,publishedAt,createdAt,updatedAt".split(
+    ","
+  );
+
 export const CollectionSourcesSection: React.FC<
   CollectionSourcesSectionProps
 > = ({
@@ -44,87 +65,51 @@ export const CollectionSourcesSection: React.FC<
   onToggleSourceEnabled,
   onRemoveSource,
 }) => {
-  const [isFormOpen, setIsFormOpen] = useState<boolean>(true);
-  const [newSourceUid, setNewSourceUid] = useState<string>(
-    "plugin::events.event"
-  );
-  const [newSourceLabel, setNewSourceLabel] = useState<string>(() =>
+  const [isFormOpen, setIsFormOpen] = useState(true);
+  const [newSourceUid, setNewSourceUid] = useState("plugin::events.event");
+  const [newSourceLabel, setNewSourceLabel] = useState(() =>
     t("settings.defaultSourceLabel", "Mosque Events")
   );
-  const [newSourceColor, setNewSourceColor] = useState<string>("#0284C7");
-  const [newTitleField, setNewTitleField] = useState<string>("title");
-  const [newStartField, setNewStartField] = useState<string>("startDate");
-  const [newEndField, setNewEndField] = useState<string>("endDate");
-  const [newRRuleField, setNewRRuleField] = useState<string>("recurrence");
+  const [newSourceColor, setNewSourceColor] = useState("#0284C7");
+  const [newTitleField, setNewTitleField] = useState("title");
+  const [newStartField, setNewStartField] = useState("startDate");
+  const [newEndField, setNewEndField] = useState("endDate");
+  const [newRRuleField, setNewRRuleField] = useState("recurrence");
 
   const selectCollectionDefaults = (ct: DiscoveredContentType) => {
     setNewSourceUid(ct.uid);
     setNewSourceLabel(ct.displayName || ct.uid);
     const fieldNames = ct.fields.map((f) => f.name);
+    const findMatch = (candidates: string[]) =>
+      fieldNames.find((n) => candidates.includes(n));
     const bestTitle =
-      fieldNames.find((n) =>
-        [
-          "title",
-          "name",
-          "customerName",
-          "visitorName",
-          "headline",
-          "subject",
-          "fullName",
-          "slug",
-        ].includes(n)
-      ) ??
-      ct.fields.find(
-        (f) => f.type === "string" || f.type === "text" || f.type === "uid"
-      )?.name ??
+      findMatch(TITLE_CANDIDATES) ??
+      ct.fields.find((f) => ["string", "text", "uid"].includes(f.type))?.name ??
       ct.fields[0]?.name ??
       "title";
     const bestStart =
-      fieldNames.find((n) =>
-        [
-          "startDate",
-          "preferredDate",
-          "date",
-          "scheduledAt",
-          "releasedAt",
-          "publishedAt",
-          "createdAt",
-          "updatedAt",
-        ].includes(n)
-      ) ??
+      findMatch(START_CANDIDATES) ??
       ct.fields.find((f) => f.type === "datetime" || f.type === "date")?.name ??
       ct.fields[0]?.name ??
       "startDate";
-    const bestEnd =
-      fieldNames.find((n) =>
-        ["endDate", "finishDate", "expiresAt"].includes(n)
-      ) ?? "endDate";
-    const bestRRule =
-      fieldNames.find((n) =>
-        ["recurrence", "rrule", "recurrenceRule"].includes(n)
-      ) ?? "recurrence";
-
     setNewTitleField(bestTitle);
     setNewStartField(bestStart);
-    setNewEndField(bestEnd);
-    setNewRRuleField(bestRRule);
+    setNewEndField(
+      findMatch(["endDate", "finishDate", "expiresAt"]) ?? "endDate"
+    );
+    setNewRRuleField(
+      findMatch(["recurrence", "rrule", "recurrenceRule"]) ?? "recurrence"
+    );
   };
 
   useEffect(() => {
-    if (contentTypes.length > 0) {
-      const currentExists = contentTypes.find((ct) => ct.uid === newSourceUid);
-      if (currentExists) {
-        selectCollectionDefaults(currentExists);
-      } else {
-        const preferred =
-          contentTypes.find((ct) => ct.uid === "plugin::events.event") ??
-          contentTypes.find((ct) => !sources.some((s) => s.uid === ct.uid)) ??
-          contentTypes[0];
-        if (preferred) {
-          selectCollectionDefaults(preferred);
-        }
-      }
-    }
+    if (contentTypes.length === 0) return;
+    const preferred =
+      contentTypes.find((ct) => ct.uid === newSourceUid) ??
+      contentTypes.find((ct) => ct.uid === "plugin::events.event") ??
+      contentTypes.find((ct) => !sources.some((s) => s.uid === ct.uid)) ??
+      contentTypes[0];
+    if (preferred) selectCollectionDefaults(preferred);
   }, [contentTypes]);
 
   const selectedCtFields = useMemo(() => {
@@ -174,6 +159,50 @@ export const CollectionSourcesSection: React.FC<
 
     onAddOrUpdateSource(nextSource);
   };
+
+  const renderTextField = (
+    label: [string, string],
+    hint: [string, string],
+    placeholder: [string, string],
+    value: string,
+    onChange: (val: string) => void
+  ) => (
+    <Field.Root hint={t(hint[0], hint[1])}>
+      <Field.Label>{t(label[0], label[1])}</Field.Label>
+      <TextInput
+        value={value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          onChange(e.target.value)
+        }
+        placeholder={t(placeholder[0], placeholder[1])}
+      />
+      <Field.Hint />
+    </Field.Root>
+  );
+
+  const renderFieldSelect = (
+    label: [string, string],
+    hint: [string, string],
+    placeholder: [string, string],
+    value: string,
+    onChange: (val: string) => void
+  ) => (
+    <Field.Root required hint={t(hint[0], hint[1])}>
+      <Field.Label>{t(label[0], label[1])}</Field.Label>
+      <SingleSelect
+        placeholder={t(placeholder[0], placeholder[1])}
+        value={value}
+        onChange={(val: string | number) => onChange(String(val))}
+      >
+        {selectedCtFields.map((f) => (
+          <SingleSelectOption key={f.name} value={f.name}>
+            {f.name} ({f.type})
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+      <Field.Hint />
+    </Field.Root>
+  );
 
   return (
     <Box
@@ -324,13 +353,7 @@ export const CollectionSourcesSection: React.FC<
                 )}
               </Typography>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                  gap: 16,
-                }}
-              >
+              <div style={GRID_3_STYLE}>
                 <Field.Root
                   hint={t(
                     "settings.collectionTypeHint",
@@ -382,159 +405,76 @@ export const CollectionSourcesSection: React.FC<
                   <Field.Hint />
                 </Field.Root>
 
-                <Field.Root
-                  hint={t(
+                {renderTextField(
+                  ["settings.sourceLabel", "Calendar Filter Label"],
+                  [
                     "settings.sourceLabelHint",
-                    "Human-readable label shown on calendar filter chips."
-                  )}
-                >
-                  <Field.Label>
-                    {t("settings.sourceLabel", "Calendar Filter Label")}
-                  </Field.Label>
-                  <TextInput
-                    value={newSourceLabel}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNewSourceLabel(e.target.value)
-                    }
-                    placeholder={t(
-                      "settings.sourceLabel.placeholder",
-                      "e.g., Mosque Events"
-                    )}
-                  />
-                  <Field.Hint />
-                </Field.Root>
+                    "Human-readable label shown on calendar filter chips.",
+                  ],
+                  ["settings.sourceLabel.placeholder", "e.g., Mosque Events"],
+                  newSourceLabel,
+                  setNewSourceLabel
+                )}
 
-                <Field.Root
-                  hint={t(
+                {renderTextField(
+                  ["settings.sourceColor", "Event Badge Color (Hex)"],
+                  [
                     "settings.sourceColorHint",
-                    "Hex color accent applied to calendar chips for this source."
-                  )}
-                >
-                  <Field.Label>
-                    {t("settings.sourceColor", "Event Badge Color (Hex)")}
-                  </Field.Label>
-                  <TextInput
-                    value={newSourceColor}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNewSourceColor(e.target.value)
-                    }
-                    placeholder={t(
-                      "settings.sourceColor.placeholder",
-                      "e.g., #0284C7"
-                    )}
-                  />
-                  <Field.Hint />
-                </Field.Root>
+                    "Hex color accent applied to calendar chips for this source.",
+                  ],
+                  ["settings.sourceColor.placeholder", "e.g., #0284C7"],
+                  newSourceColor,
+                  setNewSourceColor
+                )}
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                  gap: 16,
-                }}
-              >
-                <Field.Root
-                  required
-                  hint={t(
+              <div style={GRID_2_STYLE}>
+                {renderFieldSelect(
+                  ["settings.field.title", "Title Field"],
+                  [
                     "settings.field.titleHint",
-                    "Attribute displayed as the calendar event title."
-                  )}
-                >
-                  <Field.Label>
-                    {t("settings.field.title", "Title Field")}
-                  </Field.Label>
-                  <SingleSelect
-                    placeholder={t(
-                      "settings.field.title.placeholder",
-                      "Select title field"
-                    )}
-                    value={newTitleField || "title"}
-                    onChange={(val: string | number) =>
-                      setNewTitleField(String(val))
-                    }
-                  >
-                    {selectedCtFields.map((f) => (
-                      <SingleSelectOption key={f.name} value={f.name}>
-                        {f.name} ({f.type})
-                      </SingleSelectOption>
-                    ))}
-                  </SingleSelect>
-                  <Field.Hint />
-                </Field.Root>
+                    "Attribute displayed as the calendar event title.",
+                  ],
+                  ["settings.field.title.placeholder", "Select title field"],
+                  newTitleField || "title",
+                  setNewTitleField
+                )}
 
-                <Field.Root
-                  required
-                  hint={t(
+                {renderFieldSelect(
+                  ["settings.field.startDate", "Start Date Field"],
+                  [
                     "settings.field.startDateHint",
-                    "Date or DateTime field used to place the entry on the grid."
-                  )}
-                >
-                  <Field.Label>
-                    {t("settings.field.startDate", "Start Date Field")}
-                  </Field.Label>
-                  <SingleSelect
-                    placeholder={t(
-                      "settings.field.startDate.placeholder",
-                      "Select start date field"
-                    )}
-                    value={newStartField || "startDate"}
-                    onChange={(val: string | number) =>
-                      setNewStartField(String(val))
-                    }
-                  >
-                    {selectedCtFields.map((f) => (
-                      <SingleSelectOption key={f.name} value={f.name}>
-                        {f.name} ({f.type})
-                      </SingleSelectOption>
-                    ))}
-                  </SingleSelect>
-                  <Field.Hint />
-                </Field.Root>
+                    "Date or DateTime field used to place the entry on the grid.",
+                  ],
+                  [
+                    "settings.field.startDate.placeholder",
+                    "Select start date field",
+                  ],
+                  newStartField || "startDate",
+                  setNewStartField
+                )}
 
-                <Field.Root
-                  hint={t(
+                {renderTextField(
+                  ["settings.field.endDate", "End Date Field (Optional)"],
+                  [
                     "settings.field.endDateHint",
-                    "Optional end Date/DateTime attribute for multi-hour or multi-day spans."
-                  )}
-                >
-                  <Field.Label>
-                    {t("settings.field.endDate", "End Date Field (Optional)")}
-                  </Field.Label>
-                  <TextInput
-                    value={newEndField}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNewEndField(e.target.value)
-                    }
-                    placeholder={t(
-                      "settings.field.endDate.placeholder",
-                      "e.g., endDate"
-                    )}
-                  />
-                  <Field.Hint />
-                </Field.Root>
+                    "Optional end Date/DateTime attribute for multi-hour or multi-day spans.",
+                  ],
+                  ["settings.field.endDate.placeholder", "e.g., endDate"],
+                  newEndField,
+                  setNewEndField
+                )}
 
-                <Field.Root
-                  hint={t(
+                {renderTextField(
+                  ["settings.field.rrule", "Recurrence Field (Optional)"],
+                  [
                     "settings.field.rruleHint",
-                    "Optional RFC 5545 RRULE field for repeating schedules."
-                  )}
-                >
-                  <Field.Label>
-                    {t("settings.field.rrule", "Recurrence Field (Optional)")}
-                  </Field.Label>
-                  <TextInput
-                    value={newRRuleField}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setNewRRuleField(e.target.value)
-                    }
-                    placeholder={t(
-                      "settings.field.rrule.placeholder",
-                      "e.g., recurrence"
-                    )}
-                  />
-                  <Field.Hint />
-                </Field.Root>
+                    "Optional RFC 5545 RRULE field for repeating schedules.",
+                  ],
+                  ["settings.field.rrule.placeholder", "e.g., recurrence"],
+                  newRRuleField,
+                  setNewRRuleField
+                )}
               </div>
 
               <Flex justifyContent="flex-end" gap={2}>

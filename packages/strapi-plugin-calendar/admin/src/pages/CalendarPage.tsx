@@ -1,13 +1,7 @@
 import type FullCalendar from "@fullcalendar/react";
 import { Box, Button, Flex, Typography } from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 
 import {
@@ -41,12 +35,17 @@ import { FullCalendarCanvas } from "../components/calendar/FullCalendarCanvas";
 import { OccurrenceDetailDrawer } from "../components/calendar/OccurrenceDetailDrawer";
 import { QuickCreatePanel } from "../components/calendar/QuickCreatePanel";
 
+type OccItem = ExpandedCalendarOccurrence;
+type SecLang = SecondaryCalendarLanguageMode;
+
 interface CalendarApiResponse {
-  data?: {
-    occurrences?: ExpandedCalendarOccurrence[];
-    settings?: CalendarPluginSettings;
-  };
+  data?: { occurrences?: OccItem[]; settings?: CalendarPluginSettings };
 }
+
+const getUrlParam = (key: string) =>
+  typeof window === "undefined"
+    ? null
+    : new URLSearchParams(window.location.search).get(key);
 
 export const CalendarPage: React.FC = () => {
   const { formatMessage, locale } = useIntl();
@@ -61,63 +60,58 @@ export const CalendarPage: React.FC = () => {
   );
 
   const [viewMode, setViewMode] = useState<CalendarViewMode>("dayGridMonth");
-  const [anchorDate, setAnchorDate] = useState<Date>(() => new Date());
-  const [dateWindow, setDateWindow] = useState<{ from: string; to: string }>(
-    buildInitialDateWindow
+  const [anchorDate, setAnchorDate] = useState(() => new Date());
+  const [dateWindow, setDateWindow] = useState(buildInitialDateWindow);
+  const [sourceFilter, setSourceFilter] = useState(
+    () => getUrlParam("source") || "all"
   );
-  const [sourceFilter, setSourceFilter] = useState<string>(() =>
-    typeof window === "undefined"
-      ? "all"
-      : new URLSearchParams(window.location.search).get("source") || "all"
-  );
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [localeOverride, setLocaleOverride] = useState<string>("auto");
-  const [secondaryLangMode, setSecondaryLangMode] =
-    useState<SecondaryCalendarLanguageMode>("local");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [localeOverride, setLocaleOverride] = useState("auto");
+  const [secondaryLangMode, setSecondaryLangMode] = useState<SecLang>("local");
 
-  const [occurrences, setOccurrences] = useState<ExpandedCalendarOccurrence[]>(
-    []
-  );
+  const [occurrences, setOccurrences] = useState<OccItem[]>([]);
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
 
-  const [selectedOccurrence, setSelectedOccurrence] =
-    useState<ExpandedCalendarOccurrence | null>(null);
-  const [rescheduleDate, setRescheduleDate] = useState<string>("");
-  const [applyToSeries, setApplyToSeries] = useState<boolean>(false);
-
-  const [showQuickCreate, setShowQuickCreate] = useState<boolean>(false);
-  const [quickSourceId, setQuickSourceId] = useState<string>("");
-  const [quickTitle, setQuickTitle] = useState<string>("");
-  const [quickStart, setQuickStart] = useState<string>("");
-  const [quickEnd, setQuickEnd] = useState<string>("");
-  const [quickLocation, setQuickLocation] = useState<string>("");
-  const [quickCategory] = useState<string>("general");
-  const [quickRRule, setQuickRRule] = useState<string>("");
-  const [quickCustomerName, setQuickCustomerName] = useState<string>("");
-  const [quickCustomerEmail, setQuickCustomerEmail] = useState<string>("");
-  const [quickPartySize, setQuickPartySize] = useState<number>(1);
-
-  const effectiveLocale = useMemo(
-    () =>
-      resolveFullCalendarLocale(
-        locale,
-        settings?.defaultLocale && settings.defaultLocale !== "auto"
-          ? settings.defaultLocale
-          : "es",
-        localeOverride
-      ),
-    [locale, settings?.defaultLocale, localeOverride]
+  const [selectedOccurrence, setSelectedOccurrence] = useState<OccItem | null>(
+    null
   );
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [applyToSeries, setApplyToSeries] = useState(false);
 
-  const effectiveDirection = useMemo(
-    () => resolveCalendarDirection(effectiveLocale, settings?.direction),
-    [effectiveLocale, settings?.direction]
+  const [showQuickCreate, setShowQuickCreate] = useState(false);
+  const [quickSourceId, setQuickSourceId] = useState("");
+  const [quickTitle, setQuickTitle] = useState("");
+  const [quickStart, setQuickStart] = useState("");
+  const [quickEnd, setQuickEnd] = useState("");
+  const [quickLocation, setQuickLocation] = useState("");
+  const [quickCategory] = useState("general");
+  const [quickRRule, setQuickRRule] = useState("");
+  const [quickCustomerName, setQuickCustomerName] = useState("");
+  const [quickCustomerEmail, setQuickCustomerEmail] = useState("");
+  const [quickPartySize, setQuickPartySize] = useState(1);
+
+  const defaultLoc =
+    settings?.defaultLocale && settings.defaultLocale !== "auto"
+      ? settings.defaultLocale
+      : "es";
+  const effectiveLocale = resolveFullCalendarLocale(
+    locale,
+    defaultLoc,
+    localeOverride
+  );
+  const effectiveDirection = resolveCalendarDirection(
+    effectiveLocale,
+    settings?.direction
   );
 
   const fetchCalendarData = useCallback(async () => {
     setLoading(true);
+    const loadErrorMsg = t(
+      "calendar.error.load",
+      "Could not load calendar occurrences."
+    );
     try {
       const params = new URLSearchParams({
         from: dateWindow.from,
@@ -130,40 +124,29 @@ export const CalendarPage: React.FC = () => {
         `/${PLUGIN_ID}/calendar?${params.toString()}`
       );
       const payload = res?.data?.data;
-      if (payload) {
-        const loadedOccs = Array.isArray(payload.occurrences)
-          ? payload.occurrences
-          : [];
-        setOccurrences(loadedOccs);
-        if (typeof window !== "undefined") {
-          const targetDocId = new URLSearchParams(window.location.search).get(
-            "documentId"
-          );
-          if (targetDocId) {
-            const match = loadedOccs.find((o) => o.documentId === targetDocId);
-            if (match) {
-              setSelectedOccurrence((prev) => prev ?? match);
-              setRescheduleDate((prev) => prev || match.occurrenceDate);
-              calendarRef.current?.getApi()?.gotoDate(match.startDate);
-            }
-          }
-        }
-        if (payload.settings) {
-          setSettings(payload.settings);
-          if (payload.settings.secondaryCalendarLanguage) {
-            setSecondaryLangMode(payload.settings.secondaryCalendarLanguage);
-          }
-        }
-        const loadErrorMsg = t(
-          "calendar.error.load",
-          "Could not load calendar occurrences."
-        );
-        setBannerMessage((prev) => (prev === loadErrorMsg ? null : prev));
+      if (!payload) return;
+      const loadedOccs = Array.isArray(payload.occurrences)
+        ? payload.occurrences
+        : [];
+      setOccurrences(loadedOccs);
+      const targetDocId = getUrlParam("documentId");
+      const match = targetDocId
+        ? loadedOccs.find((o) => o.documentId === targetDocId)
+        : undefined;
+      if (match) {
+        setSelectedOccurrence((prev) => prev ?? match);
+        setRescheduleDate((prev) => prev || match.occurrenceDate);
+        calendarRef.current?.getApi()?.gotoDate(match.startDate);
       }
+      if (payload.settings) {
+        setSettings(payload.settings);
+        if (payload.settings.secondaryCalendarLanguage) {
+          setSecondaryLangMode(payload.settings.secondaryCalendarLanguage);
+        }
+      }
+      setBannerMessage((prev) => (prev === loadErrorMsg ? null : prev));
     } catch {
-      setBannerMessage(
-        t("calendar.error.load", "Could not load calendar occurrences.")
-      );
+      setBannerMessage(loadErrorMsg);
     } finally {
       setLoading(false);
     }
@@ -186,148 +169,122 @@ export const CalendarPage: React.FC = () => {
 
     setQuickSourceId((prev) => {
       if (prev && loadedSources.some((s) => s.id === prev)) return prev;
-      const firstEnabled =
+      const first =
         loadedSources.find((s) => s.enabled !== false) ?? loadedSources[0];
-      return firstEnabled ? firstEnabled.id : prev;
+      return first ? first.id : prev;
     });
   }, [settings?.sources, sourceFilter]);
 
-  const sourceCounts = useMemo(
-    () => computeSourceCounts(occurrences, settings?.sources),
-    [occurrences, settings?.sources]
+  const sourceCounts = computeSourceCounts(occurrences, settings?.sources);
+  const visibleOccurrences = filterVisibleOccurrences(
+    occurrences,
+    sourceFilter
   );
-  const visibleOccurrences = useMemo(
-    () => filterVisibleOccurrences(occurrences, sourceFilter),
-    [occurrences, sourceFilter]
+  const availableCategories = collectAvailableCategories(
+    settings?.sources,
+    sourceFilter,
+    visibleOccurrences
   );
-
-  const availableCategories = useMemo(
-    () =>
-      collectAvailableCategories(
-        settings?.sources,
-        sourceFilter,
-        visibleOccurrences
-      ),
-    [visibleOccurrences, settings?.sources, sourceFilter]
+  const activeSecondaryCalendars = resolveActiveSecondaryCalendars(
+    secondaryLangMode,
+    settings?.secondaryCalendars
   );
-
-  const activeSecondaryCalendars = useMemo(
-    () =>
-      resolveActiveSecondaryCalendars(
-        secondaryLangMode,
-        settings?.secondaryCalendars
-      ),
-    [secondaryLangMode, settings?.secondaryCalendars]
+  const recurrencePresets = settings?.recurrencePresets?.length
+    ? settings.recurrencePresets
+    : FALLBACK_RECURRENCE_PRESETS;
+  const fullCalendarEvents = mapOccurrencesToFullCalendarEvents(
+    visibleOccurrences,
+    settings?.primaryColor
   );
 
-  const recurrencePresets = useMemo(
-    () =>
-      settings?.recurrencePresets && settings.recurrencePresets.length > 0
-        ? settings.recurrencePresets
-        : FALLBACK_RECURRENCE_PRESETS,
-    [settings?.recurrencePresets]
-  );
-
-  const fullCalendarEvents = useMemo(
-    () =>
-      mapOccurrencesToFullCalendarEvents(
-        visibleOccurrences,
-        settings?.primaryColor
-      ),
-    [visibleOccurrences, settings?.primaryColor]
-  );
-
-  const changeFullCalendarView = useCallback((nextView: CalendarViewMode) => {
+  const changeFullCalendarView = (nextView: CalendarViewMode) => {
     setViewMode(nextView);
     calendarRef.current?.getApi()?.changeView(nextView);
-  }, []);
+  };
 
-  const navigateCalendar = useCallback((action: "prev" | "today" | "next") => {
+  const navigateCalendar = (action: "prev" | "today" | "next") => {
     const api = calendarRef.current?.getApi();
     if (!api) return;
     if (action === "prev") api.prev();
     else if (action === "today") api.today();
     else api.next();
     setAnchorDate(api.getDate());
-  }, []);
+  };
 
-  const handleDatesSet = useCallback(
-    (currentStart: Date, fromIso: string, toIso: string) => {
-      setAnchorDate(currentStart);
-      const nextWin = expandDateWindowToYear(currentStart, fromIso, toIso);
-      setDateWindow((prev) =>
-        prev.from === nextWin.from && prev.to === nextWin.to ? prev : nextWin
-      );
-    },
-    []
-  );
+  const handleDatesSet = (start: Date, from: string, to: string) => {
+    setAnchorDate(start);
+    const nextWin = expandDateWindowToYear(start, from, to);
+    setDateWindow((prev) =>
+      prev.from === nextWin.from && prev.to === nextWin.to ? prev : nextWin
+    );
+  };
 
-  const scrollQuickCreateIntoView = useCallback(() => {
-    if (typeof window !== "undefined") {
-      window.setTimeout(() => {
-        quickCreateRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }, 40);
+  const scrollQuickCreateIntoView = () => {
+    if (typeof window === "undefined") return;
+    window.setTimeout(() => {
+      quickCreateRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }, 40);
+  };
+
+  const handleSelectSlot = (startStr: string, endStr: string) => {
+    setQuickStart(startStr);
+    setQuickEnd(normalizeSelectedEndSlot(startStr, endStr));
+    if (sourceFilter !== "all") {
+      setQuickSourceId(sourceFilter);
+    } else if (!quickSourceId && settings?.sources?.length) {
+      const first =
+        settings.sources.find((s) => s.enabled !== false) ??
+        settings.sources[0];
+      if (first) setQuickSourceId(first.id);
     }
-  }, []);
+    setShowQuickCreate(true);
+    scrollQuickCreateIntoView();
+  };
 
-  const handleSelectSlot = useCallback(
-    (startStr: string, endStr: string) => {
-      setQuickStart(startStr);
-      setQuickEnd(normalizeSelectedEndSlot(startStr, endStr));
-      if (sourceFilter !== "all") {
-        setQuickSourceId(sourceFilter);
-      } else if (!quickSourceId && settings?.sources?.length) {
-        const firstEnabled =
-          settings.sources.find((s) => s.enabled !== false) ??
-          settings.sources[0];
-        if (firstEnabled) setQuickSourceId(firstEnabled.id);
-      }
-      setShowQuickCreate(true);
-      scrollQuickCreateIntoView();
-    },
-    [quickSourceId, scrollQuickCreateIntoView, settings?.sources, sourceFilter]
-  );
+  const handleSelectOccurrence = (occ: OccItem) => {
+    setSelectedOccurrence(occ);
+    setRescheduleDate(occ.occurrenceDate);
+    setApplyToSeries(false);
+  };
 
-  const handleSelectOccurrence = useCallback(
-    (occ: ExpandedCalendarOccurrence) => {
-      setSelectedOccurrence(occ);
-      setRescheduleDate(occ.occurrenceDate);
-      setApplyToSeries(false);
-    },
-    []
-  );
+  const postReschedule = (
+    occ: OccItem,
+    newStartDate: string,
+    newEndDate?: string,
+    series = false,
+    cancelOccurrence = false
+  ) =>
+    post(`/${PLUGIN_ID}/calendar/reschedule`, {
+      sourceId: occ.sourceId,
+      uid: occ.uid,
+      documentId: occ.documentId,
+      occurrenceDate: occ.occurrenceDate,
+      newStartDate,
+      newEndDate,
+      applyToSeries: series,
+      cancelOccurrence,
+    });
 
-  const handleEventDropOrResize = useCallback(
-    async (
-      occ: ExpandedCalendarOccurrence,
-      newStartIso: string,
-      newEndIso?: string
-    ) => {
-      try {
-        await post(`/${PLUGIN_ID}/calendar/reschedule`, {
-          sourceId: occ.sourceId,
-          uid: occ.uid,
-          documentId: occ.documentId,
-          occurrenceDate: occ.occurrenceDate,
-          newStartDate: newStartIso,
-          newEndDate: newEndIso,
-          applyToSeries: false,
-        });
-        setBannerMessage(
-          `${t("calendar.rescheduled", "Rescheduled")} "${occ.title}" → ${newStartIso.slice(0, 10)}`
-        );
-        await fetchCalendarData();
-      } catch {
-        setBannerMessage(
-          t("calendar.error.reschedule", "Failed to reschedule occurrence.")
-        );
-      }
-    },
-    [post, t, fetchCalendarData]
-  );
+  const handleEventDropOrResize = async (
+    occ: OccItem,
+    newStartIso: string,
+    newEndIso?: string
+  ) => {
+    try {
+      await postReschedule(occ, newStartIso, newEndIso);
+      setBannerMessage(
+        `${t("calendar.rescheduled", "Rescheduled")} "${occ.title}" → ${newStartIso.slice(0, 10)}`
+      );
+      await fetchCalendarData();
+    } catch {
+      setBannerMessage(
+        t("calendar.error.reschedule", "Failed to reschedule occurrence.")
+      );
+    }
+  };
 
   const handleQuickCreateSubmit = async () => {
     if (!quickTitle.trim() || !quickStart) return;
@@ -346,7 +303,6 @@ export const CalendarPage: React.FC = () => {
         quickPartySize,
       });
       await post(`/${PLUGIN_ID}/calendar/quick-create`, payload);
-
       setShowQuickCreate(false);
       setQuickTitle("");
       setQuickLocation("");
@@ -366,30 +322,25 @@ export const CalendarPage: React.FC = () => {
   };
 
   const handleRescheduleSelected = async (cancelOccurrence = false) => {
-    if (!selectedOccurrence) return;
+    const occ = selectedOccurrence;
+    if (!occ) return;
     try {
       const newStartIso = rescheduleDate
-        ? `${rescheduleDate}${selectedOccurrence.startDate.slice(10)}`
-        : selectedOccurrence.startDate;
-      const startDiffMs =
-        new Date(newStartIso).getTime() -
-        new Date(selectedOccurrence.startDate).getTime();
+        ? `${rescheduleDate}${occ.startDate.slice(10)}`
+        : occ.startDate;
+      const diffMs =
+        new Date(newStartIso).getTime() - new Date(occ.startDate).getTime();
       const newEndIso =
-        !Number.isNaN(startDiffMs) && selectedOccurrence.endDate
-          ? new Date(
-              new Date(selectedOccurrence.endDate).getTime() + startDiffMs
-            ).toISOString()
+        !Number.isNaN(diffMs) && occ.endDate
+          ? new Date(new Date(occ.endDate).getTime() + diffMs).toISOString()
           : undefined;
-      await post(`/${PLUGIN_ID}/calendar/reschedule`, {
-        sourceId: selectedOccurrence.sourceId,
-        uid: selectedOccurrence.uid,
-        documentId: selectedOccurrence.documentId,
-        occurrenceDate: selectedOccurrence.occurrenceDate,
-        newStartDate: newStartIso,
-        newEndDate: newEndIso,
+      await postReschedule(
+        occ,
+        newStartIso,
+        newEndIso,
         applyToSeries,
-        cancelOccurrence,
-      });
+        cancelOccurrence
+      );
       setSelectedOccurrence(null);
       setBannerMessage(
         cancelOccurrence
@@ -404,30 +355,19 @@ export const CalendarPage: React.FC = () => {
     }
   };
 
-  const monthLabel = useMemo(
-    () =>
-      new Intl.DateTimeFormat(effectiveLocale, {
-        month: "long",
-        year: "numeric",
-        timeZone: "UTC",
-      }).format(anchorDate),
-    [anchorDate, effectiveLocale]
-  );
-  const secondaryHeaderLabel = useMemo(
-    () =>
-      buildSecondaryHeaderLabel(
-        activeSecondaryCalendars,
-        anchorDate,
-        effectiveLocale,
-        secondaryLangMode
-      ),
-    [activeSecondaryCalendars, anchorDate, effectiveLocale, secondaryLangMode]
+  const monthLabel = new Intl.DateTimeFormat(effectiveLocale, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(anchorDate);
+  const secondaryHeaderLabel = buildSecondaryHeaderLabel(
+    activeSecondaryCalendars,
+    anchorDate,
+    effectiveLocale,
+    secondaryLangMode
   );
   const todayKey = new Date().toISOString().slice(0, 10);
-  const enabledViews = useMemo(
-    () => buildEnabledCalendarViews(settings, effectiveLocale),
-    [settings, effectiveLocale]
-  );
+  const enabledViews = buildEnabledCalendarViews(settings, effectiveLocale);
 
   return (
     <Box padding={6} background="neutral100">

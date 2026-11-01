@@ -61,6 +61,100 @@ const GRID_3_COL: React.CSSProperties = {
   gap: 16,
 };
 
+const BOOKING_NUMBER_FIELDS: Array<{
+  key: keyof Pick<
+    BookingsCompanionSettings,
+    | "defaultSlotDurationMinutes"
+    | "defaultCapacityPerSlot"
+    | "defaultBufferBeforeMinutes"
+    | "defaultBufferAfterMinutes"
+    | "defaultMinLeadTimeHours"
+    | "defaultMaxAdvanceDays"
+  >;
+  labelId: string;
+  labelDefault: string;
+  hintId: string;
+  hintDefault: string;
+  min: number;
+  fallback: number;
+}> = [
+  {
+    key: "defaultSlotDurationMinutes",
+    labelId: "settings.bookingsSlotDuration",
+    labelDefault: "Slot Duration (Minutes)",
+    hintId: "settings.bookingsSlotDurationHint",
+    hintDefault: "Standard length of each bookable appointment slot.",
+    min: 5,
+    fallback: 60,
+  },
+  {
+    key: "defaultCapacityPerSlot",
+    labelId: "settings.bookingsCapacityPerSlot",
+    labelDefault: "Default Capacity Per Slot",
+    hintId: "settings.bookingsCapacityPerSlotHint",
+    hintDefault: "Concurrent reservations allowed per time slot.",
+    min: 1,
+    fallback: 1,
+  },
+  {
+    key: "defaultBufferBeforeMinutes",
+    labelId: "settings.bookingsBufferBefore",
+    labelDefault: "Buffer Before (Minutes)",
+    hintId: "settings.bookingsBufferBeforeHint",
+    hintDefault: "Preparation gap blocked before each booking starts.",
+    min: 0,
+    fallback: 0,
+  },
+  {
+    key: "defaultBufferAfterMinutes",
+    labelId: "settings.bookingsBufferAfter",
+    labelDefault: "Buffer After (Minutes)",
+    hintId: "settings.bookingsBufferAfterHint",
+    hintDefault: "Cooldown gap blocked after each booking ends.",
+    min: 0,
+    fallback: 0,
+  },
+  {
+    key: "defaultMinLeadTimeHours",
+    labelId: "settings.bookingsMinLeadHours",
+    labelDefault: "Minimum Lead Time (Hours)",
+    hintId: "settings.bookingsMinLeadHoursHint",
+    hintDefault: "Minimum notice required before a slot can be booked.",
+    min: 0,
+    fallback: 2,
+  },
+  {
+    key: "defaultMaxAdvanceDays",
+    labelId: "settings.bookingsMaxAdvanceDays",
+    labelDefault: "Max Advance Horizon (Days)",
+    hintId: "settings.bookingsMaxAdvanceDaysHint",
+    hintDefault: "How far in advance visitors may schedule bookings.",
+    min: 1,
+    fallback: 90,
+  },
+];
+
+const SettingCheckboxCard: React.FC<{
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+  hint: string;
+}> = ({ checked, onChange, label, hint }) => (
+  <Box padding={4} background="neutral100" hasRadius style={SUB_BOX_STYLE}>
+    <Checkbox
+      checked={checked}
+      onCheckedChange={(c: boolean) => onChange(Boolean(c))}
+    >
+      {label}
+    </Checkbox>
+    <Box paddingTop={2}>
+      <Typography variant="pi" textColor="neutral600">
+        {hint}
+      </Typography>
+    </Box>
+  </Box>
+);
+
 export const CompanionSuiteSettingsSection: React.FC<
   CompanionSuiteSettingsSectionProps
 > = ({
@@ -171,59 +265,32 @@ export const CompanionSuiteSettingsSection: React.FC<
           </div>
 
           <div style={GRID_2_COL}>
-            <Box
-              padding={4}
-              background="neutral100"
-              hasRadius
-              style={SUB_BOX_STYLE}
-            >
-              <Checkbox
-                checked={eventsSettings.waitlistEnabledByDefault}
-                onCheckedChange={(checked: boolean) =>
-                  onPatchEvents({ waitlistEnabledByDefault: Boolean(checked) })
-                }
-              >
-                {t(
-                  "settings.eventsWaitlist",
-                  "Enable Waitlist & Automatic Promotion"
-                )}
-              </Checkbox>
-              <Box paddingTop={2}>
-                <Typography variant="pi" textColor="neutral600">
-                  {t(
-                    "settings.eventsWaitlistHint",
-                    "Automatically promotes waitlisted attendees in FIFO order when a confirmed attendee cancels."
-                  )}
-                </Typography>
-              </Box>
-            </Box>
-
-            <Box
-              padding={4}
-              background="neutral100"
-              hasRadius
-              style={SUB_BOX_STYLE}
-            >
-              <Checkbox
-                checked={eventsSettings.sendRsvpEmails}
-                onCheckedChange={(checked: boolean) =>
-                  onPatchEvents({ sendRsvpEmails: Boolean(checked) })
-                }
-              >
-                {t(
-                  "settings.eventsSendEmails",
-                  "Send Confirmation & Waitlist Promotion Emails"
-                )}
-              </Checkbox>
-              <Box paddingTop={2}>
-                <Typography variant="pi" textColor="neutral600">
-                  {t(
-                    "settings.eventsSendEmailsHint",
-                    "Dispatches confirmation and waitlist promotion emails via the Strapi Email plugin."
-                  )}
-                </Typography>
-              </Box>
-            </Box>
+            <SettingCheckboxCard
+              checked={eventsSettings.waitlistEnabledByDefault}
+              onChange={(waitlistEnabledByDefault) =>
+                onPatchEvents({ waitlistEnabledByDefault })
+              }
+              label={t(
+                "settings.eventsWaitlist",
+                "Enable Waitlist & Automatic Promotion"
+              )}
+              hint={t(
+                "settings.eventsWaitlistHint",
+                "Automatically promotes waitlisted attendees in FIFO order when a confirmed attendee cancels."
+              )}
+            />
+            <SettingCheckboxCard
+              checked={eventsSettings.sendRsvpEmails}
+              onChange={(sendRsvpEmails) => onPatchEvents({ sendRsvpEmails })}
+              label={t(
+                "settings.eventsSendEmails",
+                "Send Confirmation & Waitlist Promotion Emails"
+              )}
+              hint={t(
+                "settings.eventsSendEmailsHint",
+                "Dispatches confirmation and waitlist promotion emails via the Strapi Email plugin."
+              )}
+            />
           </div>
 
           <Divider />
@@ -319,189 +386,59 @@ export const CompanionSuiteSettingsSection: React.FC<
         </Box>
 
         <div style={GRID_3_COL}>
-          <Field.Root
-            hint={t(
-              "settings.bookingsSlotDurationHint",
-              "Standard length of each bookable appointment slot."
-            )}
-          >
-            <Field.Label>
-              {t("settings.bookingsSlotDuration", "Slot Duration (Minutes)")}
-            </Field.Label>
-            <NumberInput
-              value={bookingsSettings.defaultSlotDurationMinutes}
-              onValueChange={(v: number | undefined) =>
-                onPatchBookings({
-                  defaultSlotDurationMinutes: Math.max(5, Number(v ?? 60)),
-                })
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
-
-          <Field.Root
-            hint={t(
-              "settings.bookingsCapacityPerSlotHint",
-              "Concurrent reservations allowed per time slot."
-            )}
-          >
-            <Field.Label>
-              {t(
-                "settings.bookingsCapacityPerSlot",
-                "Default Capacity Per Slot"
-              )}
-            </Field.Label>
-            <NumberInput
-              value={bookingsSettings.defaultCapacityPerSlot}
-              onValueChange={(v: number | undefined) =>
-                onPatchBookings({
-                  defaultCapacityPerSlot: Math.max(1, Number(v ?? 1)),
-                })
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
-
-          <Field.Root
-            hint={t(
-              "settings.bookingsBufferBeforeHint",
-              "Preparation gap blocked before each booking starts."
-            )}
-          >
-            <Field.Label>
-              {t("settings.bookingsBufferBefore", "Buffer Before (Minutes)")}
-            </Field.Label>
-            <NumberInput
-              value={bookingsSettings.defaultBufferBeforeMinutes}
-              onValueChange={(v: number | undefined) =>
-                onPatchBookings({
-                  defaultBufferBeforeMinutes: Math.max(0, Number(v ?? 0)),
-                })
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
-
-          <Field.Root
-            hint={t(
-              "settings.bookingsBufferAfterHint",
-              "Cooldown gap blocked after each booking ends."
-            )}
-          >
-            <Field.Label>
-              {t("settings.bookingsBufferAfter", "Buffer After (Minutes)")}
-            </Field.Label>
-            <NumberInput
-              value={bookingsSettings.defaultBufferAfterMinutes}
-              onValueChange={(v: number | undefined) =>
-                onPatchBookings({
-                  defaultBufferAfterMinutes: Math.max(0, Number(v ?? 0)),
-                })
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
-
-          <Field.Root
-            hint={t(
-              "settings.bookingsMinLeadHoursHint",
-              "Minimum notice required before a slot can be booked."
-            )}
-          >
-            <Field.Label>
-              {t("settings.bookingsMinLeadHours", "Minimum Lead Time (Hours)")}
-            </Field.Label>
-            <NumberInput
-              value={bookingsSettings.defaultMinLeadTimeHours}
-              onValueChange={(v: number | undefined) =>
-                onPatchBookings({
-                  defaultMinLeadTimeHours: Math.max(0, Number(v ?? 2)),
-                })
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
-
-          <Field.Root
-            hint={t(
-              "settings.bookingsMaxAdvanceDaysHint",
-              "How far in advance visitors may schedule bookings."
-            )}
-          >
-            <Field.Label>
-              {t(
-                "settings.bookingsMaxAdvanceDays",
-                "Max Advance Horizon (Days)"
-              )}
-            </Field.Label>
-            <NumberInput
-              value={bookingsSettings.defaultMaxAdvanceDays}
-              onValueChange={(v: number | undefined) =>
-                onPatchBookings({
-                  defaultMaxAdvanceDays: Math.max(1, Number(v ?? 90)),
-                })
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
+          {BOOKING_NUMBER_FIELDS.map((field) => (
+            <Field.Root
+              key={field.key}
+              hint={t(field.hintId, field.hintDefault)}
+            >
+              <Field.Label>{t(field.labelId, field.labelDefault)}</Field.Label>
+              <NumberInput
+                value={bookingsSettings[field.key]}
+                onValueChange={(v: number | undefined) =>
+                  onPatchBookings({
+                    [field.key]: Math.max(
+                      field.min,
+                      Number(v ?? field.fallback)
+                    ),
+                  })
+                }
+              />
+              <Field.Hint />
+            </Field.Root>
+          ))}
         </div>
 
         <Divider />
 
         <div style={GRID_2_COL}>
-          <Box
-            padding={4}
-            background="neutral100"
-            hasRadius
-            style={SUB_BOX_STYLE}
-          >
-            <Checkbox
-              checked={bookingsSettings.defaultRequiresApproval}
-              onCheckedChange={(checked: boolean) =>
-                onPatchBookings({ defaultRequiresApproval: Boolean(checked) })
-              }
-            >
-              {t(
-                "settings.bookingsRequiresApproval",
-                "Require Manual Admin Approval"
-              )}
-            </Checkbox>
-            <Box paddingTop={2}>
-              <Typography variant="pi" textColor="neutral600">
-                {t(
-                  "settings.bookingsRequiresApprovalHint",
-                  "Places new visitor reservations in pending status until confirmed by staff."
-                )}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box
-            padding={4}
-            background="neutral100"
-            hasRadius
-            style={SUB_BOX_STYLE}
-          >
-            <Checkbox
-              checked={bookingsSettings.sendEmailNotifications}
-              onCheckedChange={(checked: boolean) =>
-                onPatchBookings({ sendEmailNotifications: Boolean(checked) })
-              }
-            >
-              {t(
-                "settings.bookingsSendEmails",
-                "Send Confirmation & Status Update Emails"
-              )}
-            </Checkbox>
-            <Box paddingTop={2}>
-              <Typography variant="pi" textColor="neutral600">
-                {t(
-                  "settings.bookingsSendEmailsHint",
-                  "Automatically notifies visitors when their booking is created, approved, or rescheduled."
-                )}
-              </Typography>
-            </Box>
-          </Box>
+          <SettingCheckboxCard
+            checked={bookingsSettings.defaultRequiresApproval}
+            onChange={(defaultRequiresApproval) =>
+              onPatchBookings({ defaultRequiresApproval })
+            }
+            label={t(
+              "settings.bookingsRequiresApproval",
+              "Require Manual Admin Approval"
+            )}
+            hint={t(
+              "settings.bookingsRequiresApprovalHint",
+              "Places new visitor reservations in pending status until confirmed by staff."
+            )}
+          />
+          <SettingCheckboxCard
+            checked={bookingsSettings.sendEmailNotifications}
+            onChange={(sendEmailNotifications) =>
+              onPatchBookings({ sendEmailNotifications })
+            }
+            label={t(
+              "settings.bookingsSendEmails",
+              "Send Confirmation & Status Update Emails"
+            )}
+            hint={t(
+              "settings.bookingsSendEmailsHint",
+              "Automatically notifies visitors when their booking is created, approved, or rescheduled."
+            )}
+          />
         </div>
       </Flex>
     </Box>

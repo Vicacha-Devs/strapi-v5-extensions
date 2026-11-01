@@ -17,8 +17,6 @@ import type {
   CalendarItemStatus,
   CalendarPluginSettings,
   CalendarSourceMapping,
-  CalendarSystemConfig,
-  CalendarSystemFormatterFn,
   ExpandedCalendarOccurrence,
   RRuleFieldValue,
   TimeSlotWindow,
@@ -47,10 +45,9 @@ function resolveDateOnlyWithSlot(
   rawStart: string,
   rawSlot: unknown,
   source: CalendarSourceMapping
-): { startDate: string; endDate: string | null; allDay: boolean } {
+) {
   if (typeof rawSlot === "string" && rawSlot) {
-    const slotMap = { ...DEFAULT_TIME_SLOTS, ...source.timeSlotMap };
-    const mapped = slotMap[rawSlot];
+    const mapped = { ...DEFAULT_TIME_SLOTS, ...source.timeSlotMap }[rawSlot];
     if (mapped) {
       return {
         startDate: `${rawStart}T${mapped.start}.000Z`,
@@ -77,7 +74,7 @@ function resolveDateOnlyWithSlot(
 function resolveStartEndFromDocument(
   doc: Record<string, unknown>,
   source: CalendarSourceMapping
-): { startDate: string; endDate: string | null; allDay: boolean } | null {
+) {
   const rawStart = doc[source.fields.startDate];
   if (!rawStart || typeof rawStart !== "string") return null;
   if (/^\d{4}-\d{2}-\d{2}$/.test(rawStart)) {
@@ -110,17 +107,10 @@ function mapStatus(rawStatus: unknown): CalendarItemStatus {
   return STATUS_MAP[rawStatus.toLowerCase()] ?? "scheduled";
 }
 
-function resolveQueryWindow(params: OccurrenceQueryParams): {
-  windowStart: string;
-  windowEnd: string;
-} {
-  const now = new Date();
-  const defaultFrom = new Date(
-    Date.UTC(now.getUTCFullYear(), 0, 1, 0, 0, 0)
-  ).toISOString();
-  const defaultTo = new Date(
-    Date.UTC(now.getUTCFullYear(), 11, 31, 23, 59, 59)
-  ).toISOString();
+function resolveQueryWindow(params: OccurrenceQueryParams) {
+  const y = new Date().getUTCFullYear();
+  const defaultFrom = new Date(Date.UTC(y, 0, 1, 0, 0, 0)).toISOString();
+  const defaultTo = new Date(Date.UTC(y, 11, 31, 23, 59, 59)).toISOString();
   const validFrom =
     params.from && !Number.isNaN(new Date(params.from).getTime());
   const validTo = params.to && !Number.isNaN(new Date(params.to).getTime());
@@ -141,9 +131,7 @@ function buildDocQueryOpts(
   if (includeLocale && params.locale && params.locale !== "auto") {
     opts.locale = params.locale;
   }
-  if (!params.includeDrafts) {
-    opts.status = "published";
-  }
+  if (!params.includeDrafts) opts.status = "published";
   return opts;
 }
 
@@ -152,27 +140,19 @@ async function fetchDocumentsForSource(
   uid: string,
   params: OccurrenceQueryParams
 ): Promise<Array<Record<string, unknown>>> {
-  const fallbackOpts = buildDocQueryOpts(params, false);
-  try {
-    const primaryDocs = await strapi
+  const find = (withLocale: boolean) =>
+    strapi
       .documents(uid)
-      .findMany(buildDocQueryOpts(params, true));
-    return primaryDocs.length > 0
-      ? primaryDocs
-      : await strapi.documents(uid).findMany(fallbackOpts);
-  } catch {
-    try {
-      return await strapi.documents(uid).findMany(fallbackOpts);
-    } catch {
-      return [];
-    }
-  }
+      .findMany(buildDocQueryOpts(params, withLocale))
+      .catch(() => []);
+  const primaryDocs = await find(true);
+  return primaryDocs.length > 0 ? primaryDocs : find(false);
 }
 
 function extractCustomFields(
   doc: Record<string, unknown>,
   fieldKeys?: string[]
-): Record<string, unknown> | undefined {
+) {
   if (!Array.isArray(fieldKeys) || fieldKeys.length === 0) return undefined;
   const extracted: Record<string, unknown> = {};
   for (const key of fieldKeys) {
@@ -193,34 +173,16 @@ function resolveDocColor(
   const docColorVal = source.fields.color
     ? doc[source.fields.color]
     : doc.color;
-  if (typeof docColorVal === "string" && docColorVal.startsWith("#")) {
-    return docColorVal;
-  }
-  return source.color;
+  return typeof docColorVal === "string" && docColorVal.startsWith("#")
+    ? docColorVal
+    : source.color;
 }
 
 const optStr = (v?: string) => (v ? v : undefined);
 const readField = (doc: Record<string, unknown>, key?: string) =>
   key ? String(doc[key] ?? "") : "";
 
-interface DocExpansionMeta {
-  doc: Record<string, unknown>;
-  docId: string;
-  docLocale?: string;
-  source: CalendarSourceMapping;
-  recurrence: RRuleFieldValue;
-  baseTitle: string;
-  baseLocation: string;
-  summary: string;
-  slug?: string;
-  categoryVal?: string;
-  statusVal: CalendarItemStatus;
-  color: string;
-  baseDateKey: string;
-  customFields?: Record<string, unknown>;
-  secondaryCalendars: CalendarSystemConfig[];
-  locale: string;
-}
+type DocExpansionMeta = ReturnType<typeof buildDocExpansionMeta>;
 
 function buildOccurrenceItem(
   slot: ExpandedSlot,
@@ -311,21 +273,18 @@ function buildDocExpansionMeta(
   categoryVal: string,
   baseDateKey: string,
   settings: CalendarPluginSettings,
-  locale?: string
-): DocExpansionMeta {
-  const rawSlug = readField(doc, source.fields.slug);
-  const docLocale =
-    typeof doc.locale === "string" ? optStr(doc.locale) : undefined;
+  locale = "en"
+) {
   return {
     doc,
     docId,
-    docLocale,
+    docLocale: typeof doc.locale === "string" ? optStr(doc.locale) : undefined,
     source,
     recurrence,
     baseTitle: String(doc[source.fields.title] ?? doc.title ?? "Untitled"),
     baseLocation: readField(doc, source.fields.location),
     summary: readField(doc, source.fields.summary),
-    slug: optStr(rawSlug),
+    slug: optStr(readField(doc, source.fields.slug)),
     categoryVal: optStr(categoryVal),
     statusVal: mapStatus(
       source.fields.status ? doc[source.fields.status] : doc.status
@@ -334,7 +293,7 @@ function buildDocExpansionMeta(
     baseDateKey,
     customFields: extractCustomFields(doc, source.fields.customFields),
     secondaryCalendars: settings.secondaryCalendars ?? [],
-    locale: locale || "en",
+    locale,
   };
 }
 
@@ -402,20 +361,17 @@ function buildRecurrenceOverridePayload(
   rruleField: string,
   params: RescheduleOccurrenceParams
 ): Record<string, unknown> {
-  const nextOverrides = { ...recurrence.overrides };
-  nextOverrides[params.occurrenceDate] = {
-    ...nextOverrides[params.occurrenceDate],
-    originalDate: params.occurrenceDate,
-    cancelled: Boolean(params.cancelOccurrence),
-    startDate: params.newStartDate || undefined,
-    endDate: params.newEndDate || undefined,
-  };
-  return {
-    [rruleField]: {
-      ...recurrence,
-      overrides: nextOverrides,
+  const overrides = {
+    ...recurrence.overrides,
+    [params.occurrenceDate]: {
+      ...recurrence.overrides?.[params.occurrenceDate],
+      originalDate: params.occurrenceDate,
+      cancelled: Boolean(params.cancelOccurrence),
+      startDate: params.newStartDate || undefined,
+      endDate: params.newEndDate || undefined,
     },
   };
+  return { [rruleField]: { ...recurrence, overrides } };
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
@@ -423,25 +379,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
     getCalendarService(strapi, PLUGIN_ID, "settings");
 
   return {
-    registerCalendarFormatter(
-      calendarId: string,
-      formatter: CalendarSystemFormatterFn
-    ): void {
-      registerCalendarSystemFormatter(calendarId, formatter);
-    },
-
-    unregisterCalendarFormatter(calendarId: string): void {
-      unregisterCalendarSystemFormatter(calendarId);
-    },
-
-    formatDateInCalendarSystem(
-      isoOrDateKey: string,
-      system: CalendarSystemConfig,
-      locale = "en",
-      options?: { compact?: boolean }
-    ): string {
-      return formatDateInCalendarSystem(isoOrDateKey, system, locale, options);
-    },
+    registerCalendarFormatter: registerCalendarSystemFormatter,
+    unregisterCalendarFormatter: unregisterCalendarSystemFormatter,
+    formatDateInCalendarSystem,
 
     async getOccurrences(
       params: OccurrenceQueryParams

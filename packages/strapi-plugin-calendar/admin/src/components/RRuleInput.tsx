@@ -44,21 +44,30 @@ const WEEKDAYS: { code: RRuleWeekday; label: string }[] = [
   { code: "SU", label: "Sun" },
 ];
 
-const COMMON_TIMEZONES = [
-  "UTC",
-  "America/Bogota",
-  "America/New_York",
-  "America/Mexico_City",
-  "America/Sao_Paulo",
-  "Europe/Madrid",
-  "Europe/London",
-  "Europe/Paris",
-  "Europe/Berlin",
-  "Europe/Amsterdam",
-  "Europe/Istanbul",
-  "Asia/Riyadh",
-  "Asia/Dubai",
+const COMMON_TIMEZONES =
+  "UTC,America/Bogota,America/New_York,America/Mexico_City,America/Sao_Paulo,Europe/Madrid,Europe/London,Europe/Paris,Europe/Berlin,Europe/Amsterdam,Europe/Istanbul,Asia/Riyadh,Asia/Dubai".split(
+    ","
+  );
+
+const FREQ_OPTIONS: Array<[RRuleFrequency, string, string]> = [
+  ["NONE", "rrule.freq.none", "Does not repeat (Single Entry)"],
+  ["DAILY", "rrule.freq.daily", "Daily"],
+  ["WEEKLY", "rrule.freq.weekly", "Weekly"],
+  ["MONTHLY", "rrule.freq.monthly", "Monthly"],
+  ["YEARLY", "rrule.freq.yearly", "Yearly"],
 ];
+
+const END_OPTIONS: Array<["never" | "until" | "count", string, string]> = [
+  ["never", "rrule.ends.never", "Never (Ongoing)"],
+  ["until", "rrule.ends.until", "On Specific Date (UNTIL)"],
+  ["count", "rrule.ends.count", "After N Occurrences (COUNT)"],
+];
+
+const REMOVE_BTN_STYLE: React.CSSProperties = {
+  border: "none",
+  background: "transparent",
+  cursor: "pointer",
+};
 
 export interface RRuleInputProps {
   name: string;
@@ -73,199 +82,6 @@ export interface RRuleInputProps {
   required?: boolean;
   hint?: string;
 }
-
-interface SubSectionProps {
-  t: (id: string, defaultMessage: string) => string;
-  disabled: boolean;
-  parsedRule: ParsedRRule;
-  updateRule: (patch: Partial<ParsedRRule>) => void;
-}
-
-const RRuleFrequencyControls: React.FC<
-  SubSectionProps & {
-    fieldValue: RRuleFieldValue;
-    emitChange: (next: RRuleFieldValue) => void;
-  }
-> = ({ t, disabled, parsedRule, fieldValue, updateRule, emitChange }) => {
-  const isRepeating = parsedRule.freq !== "NONE";
-  return (
-    <Flex gap={3} wrap="wrap">
-      <Box style={{ flex: 1, minWidth: 170 }}>
-        <Field.Root>
-          <Field.Label>{t("rrule.frequency", "Repeat Frequency")}</Field.Label>
-          <SingleSelect
-            disabled={disabled}
-            placeholder={t(
-              "placeholder.select_repeat_frequency",
-              "Select repeat frequency"
-            )}
-            value={parsedRule.freq}
-            onChange={(val: string) =>
-              updateRule({
-                freq: val as RRuleFrequency,
-                byDay: val === "WEEKLY" ? ["FR"] : [],
-              })
-            }
-          >
-            <SingleSelectOption value="NONE">
-              {t("rrule.freq.none", "Does not repeat (Single Entry)")}
-            </SingleSelectOption>
-            <SingleSelectOption value="DAILY">
-              {t("rrule.freq.daily", "Daily")}
-            </SingleSelectOption>
-            <SingleSelectOption value="WEEKLY">
-              {t("rrule.freq.weekly", "Weekly")}
-            </SingleSelectOption>
-            <SingleSelectOption value="MONTHLY">
-              {t("rrule.freq.monthly", "Monthly")}
-            </SingleSelectOption>
-            <SingleSelectOption value="YEARLY">
-              {t("rrule.freq.yearly", "Yearly")}
-            </SingleSelectOption>
-          </SingleSelect>
-        </Field.Root>
-      </Box>
-
-      {isRepeating && (
-        <Box style={{ width: 130 }}>
-          <Field.Root>
-            <Field.Label>{t("rrule.interval", "Every (Interval)")}</Field.Label>
-            <NumberInput
-              disabled={disabled}
-              placeholder={t("placeholder.1", "1")}
-              value={parsedRule.interval}
-              onValueChange={(val: number | undefined) =>
-                updateRule({ interval: val && val >= 1 ? val : 1 })
-              }
-            />
-          </Field.Root>
-        </Box>
-      )}
-
-      {isRepeating && (
-        <Box style={{ flex: 1, minWidth: 190 }}>
-          <Field.Root>
-            <Field.Label>
-              {t("rrule.rscale", "Calendar Scale (RSCALE)")}
-            </Field.Label>
-            <SingleSelect
-              disabled={disabled}
-              placeholder={t(
-                "placeholder.select_calendar_scale",
-                "Select calendar scale"
-              )}
-              value={parsedRule.rscale || "gregory"}
-              onChange={(val: string) =>
-                updateRule({ rscale: val === "gregory" ? undefined : val })
-              }
-            >
-              {SUPPORTED_INTL_CALENDARS.map((cal) => (
-                <SingleSelectOption key={cal.id} value={cal.intlCalendar}>
-                  {cal.defaultLabel}
-                </SingleSelectOption>
-              ))}
-            </SingleSelect>
-          </Field.Root>
-        </Box>
-      )}
-
-      <Box style={{ flex: 1, minWidth: 180 }}>
-        <Field.Root>
-          <Field.Label>{t("rrule.timezone", "Timezone")}</Field.Label>
-          <SingleSelect
-            disabled={disabled}
-            placeholder={t("placeholder.select_timezone", "Select timezone")}
-            value={fieldValue.timezone || "UTC"}
-            onChange={(tz: string) =>
-              emitChange({ ...fieldValue, timezone: String(tz) })
-            }
-          >
-            {COMMON_TIMEZONES.map((tz) => (
-              <SingleSelectOption key={tz} value={tz}>
-                {tz}
-              </SingleSelectOption>
-            ))}
-          </SingleSelect>
-        </Field.Root>
-      </Box>
-    </Flex>
-  );
-};
-
-const RRulePatternControls: React.FC<
-  SubSectionProps & { toggleWeekday: (day: RRuleWeekday) => void }
-> = ({ t, disabled, parsedRule, updateRule, toggleWeekday }) => {
-  if (parsedRule.freq === "WEEKLY") {
-    return (
-      <Box>
-        <Typography variant="pi" fontWeight="bold">
-          {t("rrule.byDay", "Repeat on Weekdays")}
-        </Typography>
-        <Flex gap={2} paddingTop={2} wrap="wrap">
-          {WEEKDAYS.map((day) => {
-            const active = parsedRule.byDay.includes(day.code);
-            return (
-              <Button
-                key={day.code}
-                size="S"
-                variant={active ? "default" : "tertiary"}
-                disabled={disabled}
-                onClick={() => toggleWeekday(day.code)}
-              >
-                {t(`weekday.${day.code.toLowerCase()}`, day.label)}
-              </Button>
-            );
-          })}
-        </Flex>
-      </Box>
-    );
-  }
-
-  if (parsedRule.freq !== "MONTHLY" && parsedRule.freq !== "YEARLY") {
-    return null;
-  }
-
-  return (
-    <Flex gap={3} wrap="wrap">
-      {parsedRule.freq === "YEARLY" && (
-        <Box style={{ width: 160 }}>
-          <Field.Root>
-            <Field.Label>{t("rrule.byMonth", "Month (1-12)")}</Field.Label>
-            <NumberInput
-              disabled={disabled}
-              placeholder={t("placeholder.1", "1")}
-              value={parsedRule.byMonth ?? 1}
-              onValueChange={(val: number | undefined) =>
-                updateRule({
-                  byMonth:
-                    val && val >= 1 && val <= 13 ? Math.floor(val) : undefined,
-                })
-              }
-            />
-          </Field.Root>
-        </Box>
-      )}
-      <Box style={{ width: 160 }}>
-        <Field.Root>
-          <Field.Label>
-            {t("rrule.byMonthDay", "Day of Month (1-31)")}
-          </Field.Label>
-          <NumberInput
-            disabled={disabled}
-            placeholder={t("placeholder.1", "1")}
-            value={parsedRule.byMonthDay ?? 1}
-            onValueChange={(val: number | undefined) =>
-              updateRule({
-                byMonthDay:
-                  val && val >= 1 && val <= 31 ? Math.floor(val) : undefined,
-              })
-            }
-          />
-        </Field.Root>
-      </Box>
-    </Flex>
-  );
-};
 
 function applyEndModeChange(
   mode: string,
@@ -284,77 +100,6 @@ function applyEndModeChange(
     });
   }
 }
-
-const RRuleSeriesBoundsControls: React.FC<
-  SubSectionProps & { endMode: "never" | "until" | "count" }
-> = ({ t, disabled, parsedRule, updateRule, endMode }) => {
-  if (parsedRule.freq === "NONE") return null;
-  return (
-    <Flex gap={3} wrap="wrap" alignItems="flex-end">
-      <Box style={{ width: 180 }}>
-        <Field.Root>
-          <Field.Label>{t("rrule.ends", "Series Ends")}</Field.Label>
-          <SingleSelect
-            disabled={disabled}
-            placeholder={t(
-              "placeholder.select_series_end_mode",
-              "Select series end mode"
-            )}
-            value={endMode}
-            onChange={(mode: string) => applyEndModeChange(mode, updateRule)}
-          >
-            <SingleSelectOption value="never">
-              {t("rrule.ends.never", "Never (Ongoing)")}
-            </SingleSelectOption>
-            <SingleSelectOption value="until">
-              {t("rrule.ends.until", "On Specific Date (UNTIL)")}
-            </SingleSelectOption>
-            <SingleSelectOption value="count">
-              {t("rrule.ends.count", "After N Occurrences (COUNT)")}
-            </SingleSelectOption>
-          </SingleSelect>
-        </Field.Root>
-      </Box>
-
-      {endMode === "until" && (
-        <Box style={{ width: 200 }}>
-          <Field.Root>
-            <Field.Label>
-              {t("rrule.untilDate", "Until Date (YYYY-MM-DD)")}
-            </Field.Label>
-            <DatePicker
-              disabled={disabled}
-              value={parseDateTimePickerValue(parsedRule.until)}
-              clearLabel={t("common.clear", "Clear")}
-              onChange={(d: Date | undefined) =>
-                updateRule({ until: d ? formatLocalYmd(d) : undefined })
-              }
-              onClear={() => updateRule({ until: undefined })}
-            />
-          </Field.Root>
-        </Box>
-      )}
-
-      {endMode === "count" && (
-        <Box style={{ width: 180 }}>
-          <Field.Root>
-            <Field.Label>
-              {t("rrule.occurrenceCount", "Max Occurrences")}
-            </Field.Label>
-            <NumberInput
-              disabled={disabled}
-              placeholder={t("placeholder.10", "10")}
-              value={parsedRule.count ?? 10}
-              onValueChange={(val: number | undefined) =>
-                updateRule({ count: val && val >= 1 ? Math.floor(val) : 1 })
-              }
-            />
-          </Field.Root>
-        </Box>
-      )}
-    </Flex>
-  );
-};
 
 export const RRuleInput: React.FC<RRuleInputProps> = ({
   name,
@@ -382,6 +127,7 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
   );
   const [newExdate, setNewExdate] = useState("");
 
+  const isRepeating = parsedRule.freq !== "NONE";
   const endMode: "never" | "until" | "count" = parsedRule.until
     ? "until"
     : parsedRule.count
@@ -425,11 +171,57 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
     });
   };
 
+  const renderSelect = (
+    style: React.CSSProperties,
+    labelText: string,
+    placeholderText: string,
+    val: string,
+    options: Array<[string, string]>,
+    onSelect: (next: string) => void
+  ) => (
+    <Box style={style}>
+      <Field.Root>
+        <Field.Label>{labelText}</Field.Label>
+        <SingleSelect
+          disabled={disabled}
+          placeholder={placeholderText}
+          value={val}
+          onChange={onSelect}
+        >
+          {options.map(([optVal, optLabel]) => (
+            <SingleSelectOption key={optVal} value={optVal}>
+              {optLabel}
+            </SingleSelectOption>
+          ))}
+        </SingleSelect>
+      </Field.Root>
+    </Box>
+  );
+
+  const renderNumber = (
+    width: number,
+    labelText: string,
+    placeholderText: string,
+    val: number,
+    onValChange: (next: number | undefined) => void
+  ) => (
+    <Box style={{ width }}>
+      <Field.Root>
+        <Field.Label>{labelText}</Field.Label>
+        <NumberInput
+          disabled={disabled}
+          placeholder={placeholderText}
+          value={val}
+          onValueChange={onValChange}
+        />
+      </Field.Root>
+    </Box>
+  );
+
   const exdatesList = fieldValue.exdates ?? [];
-  const summaryText =
-    parsedRule.freq === "NONE"
-      ? t("rrule.freq.none", "Does not repeat (Single Entry)")
-      : describeRRule(fieldValue.rrule);
+  const summaryText = !isRepeating
+    ? t("rrule.freq.none", "Does not repeat (Single Entry)")
+    : describeRRule(fieldValue.rrule);
 
   return (
     <Field.Root name={name} error={error} hint={hint} required={required}>
@@ -457,14 +249,55 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
               </Badge>
             </Flex>
 
-            <RRuleFrequencyControls
-              t={t}
-              disabled={disabled}
-              parsedRule={parsedRule}
-              fieldValue={fieldValue}
-              updateRule={updateRule}
-              emitChange={emitChange}
-            />
+            <Flex gap={3} wrap="wrap">
+              {renderSelect(
+                { flex: 1, minWidth: 170 },
+                t("rrule.frequency", "Repeat Frequency"),
+                t(
+                  "placeholder.select_repeat_frequency",
+                  "Select repeat frequency"
+                ),
+                parsedRule.freq,
+                FREQ_OPTIONS.map(([v, id, def]) => [v, t(id, def)]),
+                (val) =>
+                  updateRule({
+                    freq: val as RRuleFrequency,
+                    byDay: val === "WEEKLY" ? ["FR"] : [],
+                  })
+              )}
+              {isRepeating &&
+                renderNumber(
+                  130,
+                  t("rrule.interval", "Every (Interval)"),
+                  t("placeholder.1", "1"),
+                  parsedRule.interval,
+                  (val) => updateRule({ interval: val && val >= 1 ? val : 1 })
+                )}
+              {isRepeating &&
+                renderSelect(
+                  { flex: 1, minWidth: 190 },
+                  t("rrule.rscale", "Calendar Scale (RSCALE)"),
+                  t(
+                    "placeholder.select_calendar_scale",
+                    "Select calendar scale"
+                  ),
+                  parsedRule.rscale || "gregory",
+                  SUPPORTED_INTL_CALENDARS.map((c) => [
+                    c.intlCalendar,
+                    c.defaultLabel,
+                  ]),
+                  (val) =>
+                    updateRule({ rscale: val === "gregory" ? undefined : val })
+                )}
+              {renderSelect(
+                { flex: 1, minWidth: 180 },
+                t("rrule.timezone", "Timezone"),
+                t("placeholder.select_timezone", "Select timezone"),
+                fieldValue.timezone || "UTC",
+                COMMON_TIMEZONES.map((tz) => [tz, tz]),
+                (tz) => emitChange({ ...fieldValue, timezone: String(tz) })
+              )}
+            </Flex>
 
             <Checkbox
               disabled={disabled}
@@ -476,23 +309,111 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
               {t("rrule.allDay", "All-day entry")}
             </Checkbox>
 
-            <RRulePatternControls
-              t={t}
-              disabled={disabled}
-              parsedRule={parsedRule}
-              updateRule={updateRule}
-              toggleWeekday={toggleWeekday}
-            />
+            {parsedRule.freq === "WEEKLY" && (
+              <Box>
+                <Typography variant="pi" fontWeight="bold">
+                  {t("rrule.byDay", "Repeat on Weekdays")}
+                </Typography>
+                <Flex gap={2} paddingTop={2} wrap="wrap">
+                  {WEEKDAYS.map((day) => {
+                    const active = parsedRule.byDay.includes(day.code);
+                    return (
+                      <Button
+                        key={day.code}
+                        size="S"
+                        variant={active ? "default" : "tertiary"}
+                        disabled={disabled}
+                        onClick={() => toggleWeekday(day.code)}
+                      >
+                        {t(`weekday.${day.code.toLowerCase()}`, day.label)}
+                      </Button>
+                    );
+                  })}
+                </Flex>
+              </Box>
+            )}
 
-            <RRuleSeriesBoundsControls
-              t={t}
-              disabled={disabled}
-              parsedRule={parsedRule}
-              updateRule={updateRule}
-              endMode={endMode}
-            />
+            {(parsedRule.freq === "MONTHLY" ||
+              parsedRule.freq === "YEARLY") && (
+              <Flex gap={3} wrap="wrap">
+                {parsedRule.freq === "YEARLY" &&
+                  renderNumber(
+                    160,
+                    t("rrule.byMonth", "Month (1-12)"),
+                    t("placeholder.1", "1"),
+                    parsedRule.byMonth ?? 1,
+                    (val) =>
+                      updateRule({
+                        byMonth:
+                          val && val >= 1 && val <= 13
+                            ? Math.floor(val)
+                            : undefined,
+                      })
+                  )}
+                {renderNumber(
+                  160,
+                  t("rrule.byMonthDay", "Day of Month (1-31)"),
+                  t("placeholder.1", "1"),
+                  parsedRule.byMonthDay ?? 1,
+                  (val) =>
+                    updateRule({
+                      byMonthDay:
+                        val && val >= 1 && val <= 31
+                          ? Math.floor(val)
+                          : undefined,
+                    })
+                )}
+              </Flex>
+            )}
 
-            {parsedRule.freq !== "NONE" && (
+            {isRepeating && (
+              <Flex gap={3} wrap="wrap" alignItems="flex-end">
+                {renderSelect(
+                  { width: 180 },
+                  t("rrule.ends", "Series Ends"),
+                  t(
+                    "placeholder.select_series_end_mode",
+                    "Select series end mode"
+                  ),
+                  endMode,
+                  END_OPTIONS.map(([v, id, def]) => [v, t(id, def)]),
+                  (mode) => applyEndModeChange(mode, updateRule)
+                )}
+                {endMode === "until" && (
+                  <Box style={{ width: 200 }}>
+                    <Field.Root>
+                      <Field.Label>
+                        {t("rrule.untilDate", "Until Date (YYYY-MM-DD)")}
+                      </Field.Label>
+                      <DatePicker
+                        disabled={disabled}
+                        value={parseDateTimePickerValue(parsedRule.until)}
+                        clearLabel={t("common.clear", "Clear")}
+                        onChange={(d: Date | undefined) =>
+                          updateRule({
+                            until: d ? formatLocalYmd(d) : undefined,
+                          })
+                        }
+                        onClear={() => updateRule({ until: undefined })}
+                      />
+                    </Field.Root>
+                  </Box>
+                )}
+                {endMode === "count" &&
+                  renderNumber(
+                    180,
+                    t("rrule.occurrenceCount", "Max Occurrences"),
+                    t("placeholder.10", "10"),
+                    parsedRule.count ?? 10,
+                    (val) =>
+                      updateRule({
+                        count: val && val >= 1 ? Math.floor(val) : 1,
+                      })
+                  )}
+              </Flex>
+            )}
+
+            {isRepeating && (
               <Box>
                 <Flex gap={2} paddingTop={1} wrap="wrap" alignItems="flex-end">
                   <Box style={{ width: 240 }}>
@@ -536,11 +457,7 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                         <button
                           type="button"
                           onClick={() => handleRemoveExdate(dt)}
-                          style={{
-                            border: "none",
-                            background: "transparent",
-                            cursor: "pointer",
-                          }}
+                          style={REMOVE_BTN_STYLE}
                           aria-label={`Remove ${dt}`}
                         >
                           ×
