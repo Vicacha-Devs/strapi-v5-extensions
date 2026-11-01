@@ -5,7 +5,9 @@ function resolveSecret(envKey: string): string {
   if (fromEnv && fromEnv.trim().length > 0) {
     return fromEnv.trim();
   }
-  console.warn(`[dashboard] Generating instance-isolated ephemeral secret for ${envKey}`);
+  console.warn(
+    `[dashboard] Generating instance-isolated ephemeral secret for ${envKey}`
+  );
   return randomBytes(32).toString("hex");
 }
 
