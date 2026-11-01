@@ -49,7 +49,7 @@
   },
   "scripts": {
     "build": "strapi-plugin build && node ../../scripts/ensure-esm-dist.ts",
-    "test": "npm run build && node --test tests/*.test.ts",
+    "test": "node --test tests/*.test.ts",
     "test:ts": "npm run test:ts:front && npm run test:ts:back",
     "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
     "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
@@ -60,7 +60,11 @@
   "dependencies": {
     "@strapi/design-system": "^2.0.0",
     "@strapi/icons": "^2.0.0",
-    "react-intl": "^6.6.8"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-intl": "^6.6.8",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "6.1.1",
@@ -68,19 +72,12 @@
     "@types/node": "22.10.2",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@vicacha-devs/plugin-shared": "workspace:*",
     "@vicacha-devs/typescript-config": "workspace:*",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.2",
-    "styled-components": "^6.1.13",
     "typescript": "5.9.3"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^5.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.0.0",
-    "styled-components": "^6.0.0"
+    "@strapi/strapi": "^5.0.0"
   },
   "engines": {
     "node": ">=20.16.0",
