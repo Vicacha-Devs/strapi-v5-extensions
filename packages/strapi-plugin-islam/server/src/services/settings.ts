@@ -20,7 +20,9 @@ function getPluginStore(strapi: Core.Strapi) {
   return strapi.store({ type: "plugin", name: PLUGIN_ID });
 }
 
-type PrayerMappingFields = NonNullable<IslamPluginSettings["prayerSettingMapping"]>["fields"];
+type PrayerMappingFields = NonNullable<
+  IslamPluginSettings["prayerSettingMapping"]
+>["fields"];
 
 interface CalendarSecondaryEntry {
   id?: string;
@@ -36,7 +38,9 @@ interface CalendarBridgeSettings {
 
 interface CalendarSettingsBridgeService {
   getSettings?: () => Promise<CalendarBridgeSettings>;
-  updateSettings?: (patch: CalendarBridgeSettings) => Promise<CalendarBridgeSettings>;
+  updateSettings?: (
+    patch: CalendarBridgeSettings
+  ) => Promise<CalendarBridgeSettings>;
 }
 
 function mergeCurrencyMap(
@@ -135,15 +139,27 @@ function mergeBasePluginSettings(
       ...base.ramadan,
       ...fileConfig.ramadan,
       ...stored.ramadan,
-      notes: mergeLocaleNotes(base.ramadan.notes, fileConfig.ramadan?.notes, stored.ramadan?.notes),
+      notes: mergeLocaleNotes(
+        base.ramadan.notes,
+        fileConfig.ramadan?.notes,
+        stored.ramadan?.notes
+      ),
     },
     eid: {
       ...base.eid,
       ...fileConfig.eid,
       ...stored.eid,
-      notes: mergeLocaleNotes(base.eid.notes, fileConfig.eid?.notes, stored.eid?.notes),
+      notes: mergeLocaleNotes(
+        base.eid.notes,
+        fileConfig.eid?.notes,
+        stored.eid?.notes
+      ),
     },
-    fiqhRates: mergeFiqhRates(base.fiqhRates, fileConfig.fiqhRates, stored.fiqhRates),
+    fiqhRates: mergeFiqhRates(
+      base.fiqhRates,
+      fileConfig.fiqhRates,
+      stored.fiqhRates
+    ),
     dailyPins: {
       ...base.dailyPins,
       ...fileConfig.dailyPins,
@@ -209,7 +225,11 @@ async function hydrateFromHostPrayerSetting(
   merged: IslamPluginSettings
 ): Promise<void> {
   const mapping = merged.prayerSettingMapping;
-  if (!mapping?.enabled || !mapping.uid || !strapi.contentTypes?.[mapping.uid]) {
+  if (
+    !mapping?.enabled ||
+    !mapping.uid ||
+    !strapi.contentTypes?.[mapping.uid]
+  ) {
     return;
   }
   try {
@@ -245,8 +265,14 @@ function mergePatchedPluginSettings(
     defaultLon: coords.lon,
     method: sanitizeMethodId(patch.method ?? current.method, current.method),
     school: sanitizeAsrSchool(patch.school ?? current.school, current.school),
-    calender: sanitizeCalendarMethod(patch.calender ?? current.calender, current.calender),
-    shifting: sanitizeHijriShift(patch.shifting ?? current.shifting, current.shifting),
+    calender: sanitizeCalendarMethod(
+      patch.calender ?? current.calender,
+      current.calender
+    ),
+    shifting: sanitizeHijriShift(
+      patch.shifting ?? current.shifting,
+      current.shifting
+    ),
     ramadan: {
       ...current.ramadan,
       ...patch.ramadan,
@@ -262,7 +288,10 @@ function mergePatchedPluginSettings(
       ...current.dailyPins,
       ...patch.dailyPins,
     },
-    quranFoundation: mergeQuranFoundationConfig(current.quranFoundation, patch.quranFoundation),
+    quranFoundation: mergeQuranFoundationConfig(
+      current.quranFoundation,
+      patch.quranFoundation
+    ),
   };
 }
 
@@ -281,7 +310,8 @@ function buildHostPrayerDataPayload(
     [f.jumuahKhutbahTime]: primaryJumuah?.khutbahTime || "12:15 PM",
     [f.jumuahPrayerTime]: primaryJumuah?.prayerTime || "12:45 PM",
     [f.ramadanBannerActive]: next.ramadan.bannerActive,
-    [f.ramadanNotes]: next.ramadan.notes[next.defaultLocale] || next.ramadan.notes.es || "",
+    [f.ramadanNotes]:
+      next.ramadan.notes[next.defaultLocale] || next.ramadan.notes.es || "",
   };
 }
 
@@ -290,12 +320,18 @@ async function syncToHostPrayerSetting(
   next: IslamPluginSettings
 ): Promise<void> {
   const mapping = next.prayerSettingMapping;
-  if (!mapping?.enabled || !mapping.uid || !strapi.contentTypes?.[mapping.uid]) {
+  if (
+    !mapping?.enabled ||
+    !mapping.uid ||
+    !strapi.contentTypes?.[mapping.uid]
+  ) {
     return;
   }
   try {
     const locale = next.defaultLocale || "es";
-    const docs = await strapi.documents(mapping.uid).findMany({ limit: 1, locale });
+    const docs = await strapi
+      .documents(mapping.uid)
+      .findMany({ limit: 1, locale });
     const existingDoc = docs?.[0];
     if (!existingDoc?.documentId) return;
     await strapi.documents(mapping.uid).update({
@@ -309,7 +345,10 @@ async function syncToHostPrayerSetting(
 }
 
 function isHijriSecondaryCalendar(entry: CalendarSecondaryEntry): boolean {
-  return entry.id === "hijri" || String(entry.intlCalendar || "").startsWith("islamic");
+  return (
+    entry.id === "hijri" ||
+    String(entry.intlCalendar || "").startsWith("islamic")
+  );
 }
 
 async function syncHijriOffsetToCalendarBridge(
@@ -326,7 +365,9 @@ async function syncHijriOffsetToCalendarBridge(
     if (!Array.isArray(calSettings?.secondaryCalendars)) return;
 
     const updatedCalendars = calSettings.secondaryCalendars.map((c) =>
-      isHijriSecondaryCalendar(c) ? { ...c, dayOffset: Number(next.shifting || 0) } : c
+      isHijriSecondaryCalendar(c)
+        ? { ...c, dayOffset: Number(next.shifting || 0) }
+        : c
     );
     await calService.updateSettings({
       ...calSettings,
@@ -339,7 +380,10 @@ async function syncHijriOffsetToCalendarBridge(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async getSettings(): Promise<IslamPluginSettings> {
-    const fileConfig = strapi.config.get<Partial<IslamPluginSettings>>(`plugin::${PLUGIN_ID}`, {});
+    const fileConfig = strapi.config.get<Partial<IslamPluginSettings>>(
+      `plugin::${PLUGIN_ID}`,
+      {}
+    );
     const store = getPluginStore(strapi);
     const rawStored = await store.get({ key: "settings" });
     const stored = (rawStored ?? {}) as Partial<IslamPluginSettings>;
@@ -349,7 +393,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return merged;
   },
 
-  async updateSettings(patch: Partial<IslamPluginSettings>): Promise<IslamPluginSettings> {
+  async updateSettings(
+    patch: Partial<IslamPluginSettings>
+  ): Promise<IslamPluginSettings> {
     const current = await this.getSettings();
     const next = mergePatchedPluginSettings(current, patch);
 

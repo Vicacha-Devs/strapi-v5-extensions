@@ -22,12 +22,16 @@ registerHooks({
     }
     if (specifier === "@vicacha-devs/strapi-plugin-calendar/shared") {
       return {
-        url: pathToFileURL(resolvePath(calendarPkgRoot, "shared/index.ts")).href,
+        url: pathToFileURL(resolvePath(calendarPkgRoot, "shared/index.ts"))
+          .href,
         shortCircuit: true,
       };
     }
 
-    if ((specifier.startsWith("./") || specifier.startsWith("../")) && context.parentURL) {
+    if (
+      (specifier.startsWith("./") || specifier.startsWith("../")) &&
+      context.parentURL
+    ) {
       const parentDir = dirname(fileURLToPath(context.parentURL));
       const baseCandidate = resolvePath(parentDir, specifier);
 
@@ -60,7 +64,10 @@ registerHooks({
       };
     }
 
-    if ((url.endsWith(".ts") || url.endsWith(".tsx")) && !url.includes("/node_modules/")) {
+    if (
+      (url.endsWith(".ts") || url.endsWith(".tsx")) &&
+      !url.includes("/node_modules/")
+    ) {
       const filePath = fileURLToPath(url);
       const source = readFileSync(filePath, "utf8");
       const stripped = stripTypeScriptTypes(source, { mode: "strip" });

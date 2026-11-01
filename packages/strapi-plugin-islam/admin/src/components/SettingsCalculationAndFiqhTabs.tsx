@@ -110,7 +110,9 @@ export const CalculationSettingsTab: React.FC<SettingsTabProps> = ({
             "Displayed on printable monthly prayer timetables and Ramadan calendars."
           )}
         >
-          <Field.Label>{t("field.mosque_official_name", "Mosque Official Name")}</Field.Label>
+          <Field.Label>
+            {t("field.mosque_official_name", "Mosque Official Name")}
+          </Field.Label>
           <TextInput
             name="mosqueName"
             placeholder={t(
@@ -157,7 +159,10 @@ export const CalculationSettingsTab: React.FC<SettingsTabProps> = ({
           )}
         >
           <Field.Label>
-            {t("field.longitude_decimal_degrees", "Longitude (Decimal Degrees)")}
+            {t(
+              "field.longitude_decimal_degrees",
+              "Longitude (Decimal Degrees)"
+            )}
           </Field.Label>
           <TextInput
             name="defaultLon"
@@ -181,12 +186,20 @@ export const CalculationSettingsTab: React.FC<SettingsTabProps> = ({
           )}
         >
           <Field.Label>
-            {t("field.astronomical_calculation_method", "Astronomical Calculation Method")}
+            {t(
+              "field.astronomical_calculation_method",
+              "Astronomical Calculation Method"
+            )}
           </Field.Label>
           <SingleSelect
-            placeholder={t("placeholder.select_calculation_method", "Select calculation method")}
+            placeholder={t(
+              "placeholder.select_calculation_method",
+              "Select calculation method"
+            )}
             value={String(settings.method || "3")}
-            onChange={(val: string | number) => setSettings({ ...settings, method: String(val) })}
+            onChange={(val: string | number) =>
+              setSettings({ ...settings, method: String(val) })
+            }
           >
             {CALCULATION_METHODS.map((m) => (
               <SingleSelectOption key={m.value} value={m.value}>
@@ -204,9 +217,14 @@ export const CalculationSettingsTab: React.FC<SettingsTabProps> = ({
             "Determines the afternoon Asr prayer entry time."
           )}
         >
-          <Field.Label>{t("field.asr_juristic_school", "Asr Juristic School")}</Field.Label>
+          <Field.Label>
+            {t("field.asr_juristic_school", "Asr Juristic School")}
+          </Field.Label>
           <SingleSelect
-            placeholder={t("placeholder.select_juristic_school", "Select juristic school")}
+            placeholder={t(
+              "placeholder.select_juristic_school",
+              "Select juristic school"
+            )}
             value={String(settings.school || "1")}
             onChange={(val: string | number) =>
               setSettings({
@@ -236,7 +254,10 @@ export const CalculationSettingsTab: React.FC<SettingsTabProps> = ({
           )}
         >
           <Field.Label>
-            {t("field.hijri_moon_sighting_offset_days", "Hijri Moon-Sighting Offset (Days)")}
+            {t(
+              "field.hijri_moon_sighting_offset_days",
+              "Hijri Moon-Sighting Offset (Days)"
+            )}
           </Field.Label>
           <SingleSelect
             placeholder={t(
@@ -258,10 +279,17 @@ export const CalculationSettingsTab: React.FC<SettingsTabProps> = ({
               {t("settings.ui.minus_1_day", "-1 Day")}
             </SingleSelectOption>
             <SingleSelectOption value="0">
-              {t("settings.ui.0_days_umm_al_qura_standard", "0 Days (Umm al-Qura Standard)")}
+              {t(
+                "settings.ui.0_days_umm_al_qura_standard",
+                "0 Days (Umm al-Qura Standard)"
+              )}
             </SingleSelectOption>
-            <SingleSelectOption value="1">{t("settings.ui.1_day", "+1 Day")}</SingleSelectOption>
-            <SingleSelectOption value="2">{t("settings.ui.2_days", "+2 Days")}</SingleSelectOption>
+            <SingleSelectOption value="1">
+              {t("settings.ui.1_day", "+1 Day")}
+            </SingleSelectOption>
+            <SingleSelectOption value="2">
+              {t("settings.ui.2_days", "+2 Days")}
+            </SingleSelectOption>
           </SingleSelect>
           <Field.Hint />
         </Field.Root>
@@ -270,7 +298,11 @@ export const CalculationSettingsTab: React.FC<SettingsTabProps> = ({
   </Tabs.Content>
 );
 
-export const FiqhRatesSettingsTab: React.FC<SettingsTabProps> = ({ settings, setSettings, t }) => (
+export const FiqhRatesSettingsTab: React.FC<SettingsTabProps> = ({
+  settings,
+  setSettings,
+  t,
+}) => (
   <Tabs.Content value="fiqh">
     <Box
       background="neutral0"
@@ -310,7 +342,10 @@ export const FiqhRatesSettingsTab: React.FC<SettingsTabProps> = ({ settings, set
           )}
         >
           <Field.Label>
-            {t("field.24k_gold_price_per_gram_cop", "24K Gold Price per Gram (COP)")}
+            {t(
+              "field.24k_gold_price_per_gram_cop",
+              "24K Gold Price per Gram (COP)"
+            )}
           </Field.Label>
           <TextInput
             name="goldCop"
@@ -340,7 +375,10 @@ export const FiqhRatesSettingsTab: React.FC<SettingsTabProps> = ({ settings, set
           )}
         >
           <Field.Label>
-            {t("field.pure_silver_price_per_gram_cop", "Pure Silver Price per Gram (COP)")}
+            {t(
+              "field.pure_silver_price_per_gram_cop",
+              "Pure Silver Price per Gram (COP)"
+            )}
           </Field.Label>
           <TextInput
             name="silverCop"
@@ -370,12 +408,17 @@ export const FiqhRatesSettingsTab: React.FC<SettingsTabProps> = ({ settings, set
           )}
         >
           <Field.Label>
-            {t("field.zakat_al_fitr_per_person_cop", "Zakat al-Fitr per Person (COP)")}
+            {t(
+              "field.zakat_al_fitr_per_person_cop",
+              "Zakat al-Fitr per Person (COP)"
+            )}
           </Field.Label>
           <TextInput
             name="fitranaCop"
             placeholder={t("placeholder.e_g_35000", "e.g., 35000")}
-            value={String(settings.fiqhRates.zakatAlFitrPerPersonByCurrency.COP)}
+            value={String(
+              settings.fiqhRates.zakatAlFitrPerPersonByCurrency.COP
+            )}
             onChange={(e: InputChangeEvent) =>
               setSettings({
                 ...settings,
@@ -400,7 +443,10 @@ export const FiqhRatesSettingsTab: React.FC<SettingsTabProps> = ({ settings, set
           )}
         >
           <Field.Label>
-            {t("field.fidyah_per_missed_fast_day_cop", "Fidyah per Missed Fast Day (COP)")}
+            {t(
+              "field.fidyah_per_missed_fast_day_cop",
+              "Fidyah per Missed Fast Day (COP)"
+            )}
           </Field.Label>
           <TextInput
             name="fidyahCop"

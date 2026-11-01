@@ -15,7 +15,11 @@ import {
   type ChapterVersesQueryParams,
   type VerseByKeyQueryParams,
 } from "./quranFoundationChaptersAndVerses";
-import { fetchQuranFoundationV4Json, getCached, setCached } from "./upstreamCacheAndHttp";
+import {
+  fetchQuranFoundationV4Json,
+  getCached,
+  setCached,
+} from "./upstreamCacheAndHttp";
 
 export {
   fetchQuranChapterInfoOperation,
@@ -26,7 +30,9 @@ export {
   type VerseByKeyQueryParams,
 };
 
-function extractAnswersArray(data: Record<string, unknown> | undefined): unknown[] {
+function extractAnswersArray(
+  data: Record<string, unknown> | undefined
+): unknown[] {
   if (!data) return [];
   if (Array.isArray(data.answers)) return data.answers;
   if (Array.isArray(data)) return data;
@@ -103,7 +109,12 @@ export async function fetchQuranChapterAudioOperation(
 ) {
   const qf = settings.quranFoundation;
   const chapterNumber = sanitizeSurahNumber(params?.chapterNumber, 1);
-  const reciterId = sanitizePositiveInt(params?.reciterId, qf.defaultChapterReciterId || 7, 1, 500);
+  const reciterId = sanitizePositiveInt(
+    params?.reciterId,
+    qf.defaultChapterReciterId || 7,
+    1,
+    500
+  );
   const segments = parseBoolParam(params?.segments, true);
 
   const cacheKey = `qf:chapter-audio:${reciterId}:${chapterNumber}:${segments}`;
@@ -149,18 +160,73 @@ const DEFAULT_QF_TRANSLATIONS = [
 ];
 
 const DEFAULT_QF_RECITATIONS = [
-  { id: 7, reciter_name: "Mishari Rashid al-`Afasy", style: "Murattal", isDefault: true },
-  { id: 2, reciter_name: "AbdulBaset AbdulSamad", style: "Murattal", isDefault: false },
-  { id: 1, reciter_name: "AbdulBaset AbdulSamad", style: "Mujawwad", isDefault: false },
-  { id: 3, reciter_name: "Abdur-Rahman as-Sudais", style: "Murattal", isDefault: false },
-  { id: 4, reciter_name: "Abu Bakr al-Shatri", style: "Murattal", isDefault: false },
+  {
+    id: 7,
+    reciter_name: "Mishari Rashid al-`Afasy",
+    style: "Murattal",
+    isDefault: true,
+  },
+  {
+    id: 2,
+    reciter_name: "AbdulBaset AbdulSamad",
+    style: "Murattal",
+    isDefault: false,
+  },
+  {
+    id: 1,
+    reciter_name: "AbdulBaset AbdulSamad",
+    style: "Mujawwad",
+    isDefault: false,
+  },
+  {
+    id: 3,
+    reciter_name: "Abdur-Rahman as-Sudais",
+    style: "Murattal",
+    isDefault: false,
+  },
+  {
+    id: 4,
+    reciter_name: "Abu Bakr al-Shatri",
+    style: "Murattal",
+    isDefault: false,
+  },
   { id: 5, reciter_name: "Hani ar-Rifai", style: "Murattal", isDefault: false },
-  { id: 6, reciter_name: "Mahmoud Khalil Al-Husary", style: "Murattal", isDefault: false },
-  { id: 12, reciter_name: "Mahmoud Khalil Al-Husary", style: "Muallim", isDefault: false },
-  { id: 9, reciter_name: "Mohamed Siddiq al-Minshawi", style: "Murattal", isDefault: false },
-  { id: 8, reciter_name: "Mohamed Siddiq al-Minshawi", style: "Mujawwad", isDefault: false },
-  { id: 10, reciter_name: "Sa`ud ash-Shuraym", style: "Murattal", isDefault: false },
-  { id: 11, reciter_name: "Mohamed al-Tablawi", style: "Murattal", isDefault: false },
+  {
+    id: 6,
+    reciter_name: "Mahmoud Khalil Al-Husary",
+    style: "Murattal",
+    isDefault: false,
+  },
+  {
+    id: 12,
+    reciter_name: "Mahmoud Khalil Al-Husary",
+    style: "Muallim",
+    isDefault: false,
+  },
+  {
+    id: 9,
+    reciter_name: "Mohamed Siddiq al-Minshawi",
+    style: "Murattal",
+    isDefault: false,
+  },
+  {
+    id: 8,
+    reciter_name: "Mohamed Siddiq al-Minshawi",
+    style: "Mujawwad",
+    isDefault: false,
+  },
+  {
+    id: 10,
+    reciter_name: "Sa`ud ash-Shuraym",
+    style: "Murattal",
+    isDefault: false,
+  },
+  {
+    id: 11,
+    reciter_name: "Mohamed al-Tablawi",
+    style: "Murattal",
+    isDefault: false,
+  },
 ];
 
 const DEFAULT_QF_TAFSIRS = [
@@ -192,17 +258,25 @@ export async function fetchQuranResourcesOperation(
   const qf = settings.quranFoundation;
   const locale = sanitizeLocale(params?.locale, settings.defaultLocale);
   const defaultReciterId = qf.defaultReciterId || 7;
-  const defaultChapterReciterId = qf.defaultChapterReciterId || defaultReciterId;
+  const defaultChapterReciterId =
+    qf.defaultChapterReciterId || defaultReciterId;
   const cacheKey = `qf:resources:${locale}:${defaultReciterId}`;
   const cached = getCached<Record<string, unknown>>(cacheKey);
   if (cached) return cached;
 
-  const [translationsRes, recitationsRes, chapterRecitersRes, tafsirsRes] = await Promise.all([
-    fetchQuranFoundationV4Json(qf, "resources/translations", { language: locale }),
-    fetchQuranFoundationV4Json(qf, "resources/recitations", { language: locale }),
-    fetchQuranFoundationV4Json(qf, "resources/chapter_reciters", { language: locale }),
-    fetchQuranFoundationV4Json(qf, "resources/tafsirs", { language: locale }),
-  ]);
+  const [translationsRes, recitationsRes, chapterRecitersRes, tafsirsRes] =
+    await Promise.all([
+      fetchQuranFoundationV4Json(qf, "resources/translations", {
+        language: locale,
+      }),
+      fetchQuranFoundationV4Json(qf, "resources/recitations", {
+        language: locale,
+      }),
+      fetchQuranFoundationV4Json(qf, "resources/chapter_reciters", {
+        language: locale,
+      }),
+      fetchQuranFoundationV4Json(qf, "resources/tafsirs", { language: locale }),
+    ]);
 
   const rawRecitations = Array.isArray(recitationsRes?.data?.recitations)
     ? (recitationsRes.data.recitations as Array<{ id?: number }>)
@@ -213,16 +287,25 @@ export async function fetchQuranResourcesOperation(
 
   const result = {
     locale,
-    source: translationsRes?.source || recitationsRes?.source || "curated_defaults",
+    source:
+      translationsRes?.source || recitationsRes?.source || "curated_defaults",
     defaultReciterId,
     defaultChapterReciterId,
     defaultReciterName: "Mishari Rashid al-`Afasy",
-    translations: translationsRes?.data?.translations || DEFAULT_QF_TRANSLATIONS,
+    translations:
+      translationsRes?.data?.translations || DEFAULT_QF_TRANSLATIONS,
     recitations: prioritizeDefaultReciter(rawRecitations, defaultReciterId),
-    chapterReciters: prioritizeDefaultReciter(rawChapterReciters, defaultChapterReciterId),
+    chapterReciters: prioritizeDefaultReciter(
+      rawChapterReciters,
+      defaultChapterReciterId
+    ),
     tafsirs: tafsirsRes?.data?.tafsirs || DEFAULT_QF_TAFSIRS,
   };
 
-  setCached(cacheKey, result, Math.max(settings.cacheTtlSeconds || 3600, 43200));
+  setCached(
+    cacheKey,
+    result,
+    Math.max(settings.cacheTtlSeconds || 3600, 43200)
+  );
   return result;
 }

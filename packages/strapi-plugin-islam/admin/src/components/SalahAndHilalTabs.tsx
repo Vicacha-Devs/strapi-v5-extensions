@@ -30,7 +30,10 @@ interface InputChangeEvent {
   };
 }
 
-export type HilalOccasionKey = "ramadan" | "eid_al_fitr" | "dhul_hijjah_eid_al_adha";
+export type HilalOccasionKey =
+  | "ramadan"
+  | "eid_al_fitr"
+  | "dhul_hijjah_eid_al_adha";
 
 export interface HilalCockpitTabProps {
   hilalOccasion: HilalOccasionKey;
@@ -91,16 +94,24 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
                 "Select the crescent sighting announcement type."
               )}
             >
-              <Field.Label>{t("field.liturgical_occasion", "Liturgical Occasion")}</Field.Label>
+              <Field.Label>
+                {t("field.liturgical_occasion", "Liturgical Occasion")}
+              </Field.Label>
               <SingleSelect
-                placeholder={t("placeholder.select_occasion", "Select occasion")}
+                placeholder={t(
+                  "placeholder.select_occasion",
+                  "Select occasion"
+                )}
                 value={hilalOccasion}
                 onChange={(val: string | number) =>
                   setHilalOccasion(String(val) as HilalOccasionKey)
                 }
               >
                 <SingleSelectOption value="ramadan">
-                  {t("page.ui.ramadan_start_of_ramadan_1st", "ramadan (Start of Ramadan 1st)")}
+                  {t(
+                    "page.ui.ramadan_start_of_ramadan_1st",
+                    "ramadan (Start of Ramadan 1st)"
+                  )}
                 </SingleSelectOption>
                 <SingleSelectOption value="eid_al_fitr">
                   {t(
@@ -133,9 +144,14 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
               </Field.Label>
               <TextInput
                 name="hilalGregorianDate"
-                placeholder={t("placeholder.e_g_2026_02_18", "e.g., 2026-02-18")}
+                placeholder={t(
+                  "placeholder.e_g_2026_02_18",
+                  "e.g., 2026-02-18"
+                )}
                 value={hilalGregorianDate}
-                onChange={(e: InputChangeEvent) => setHilalGregorianDate(e.target.value)}
+                onChange={(e: InputChangeEvent) =>
+                  setHilalGregorianDate(e.target.value)
+                }
               />
               <Field.Hint />
             </Field.Root>
@@ -154,9 +170,14 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
                 )}
               </Field.Label>
               <SingleSelect
-                placeholder={t("placeholder.select_day_offset", "Select day offset")}
+                placeholder={t(
+                  "placeholder.select_day_offset",
+                  "Select day offset"
+                )}
                 value={String(hilalShifting)}
-                onChange={(val: string | number) => setHilalShifting(String(val))}
+                onChange={(val: string | number) =>
+                  setHilalShifting(String(val))
+                }
               >
                 <SingleSelectOption value="-2">
                   {t("page.ui.minus_2_days", "-2 days")}
@@ -170,8 +191,12 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
                     "0 days (Astronomical / Umm al-Qura)"
                   )}
                 </SingleSelectOption>
-                <SingleSelectOption value="1">{t("page.ui.1_day", "+1 day")}</SingleSelectOption>
-                <SingleSelectOption value="2">{t("page.ui.2_days", "+2 days")}</SingleSelectOption>
+                <SingleSelectOption value="1">
+                  {t("page.ui.1_day", "+1 day")}
+                </SingleSelectOption>
+                <SingleSelectOption value="2">
+                  {t("page.ui.2_days", "+2 days")}
+                </SingleSelectOption>
               </SingleSelect>
               <Field.Hint />
             </Field.Root>
@@ -196,7 +221,9 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
                   "e.g., Head Imam of the Mosque"
                 )}
                 value={hilalImamName}
-                onChange={(e: InputChangeEvent) => setHilalImamName(e.target.value)}
+                onChange={(e: InputChangeEvent) =>
+                  setHilalImamName(e.target.value)
+                }
               />
               <Field.Hint />
             </Field.Root>
@@ -205,7 +232,9 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
         <Flex justifyContent="space-between" alignItems="center">
           <Checkbox
             checked={hilalActivateBanner}
-            onCheckedChange={(val: boolean) => setHilalActivateBanner(Boolean(val))}
+            onCheckedChange={(val: boolean) =>
+              setHilalActivateBanner(Boolean(val))
+            }
           >
             {t(
               "checkbox.activate_ramadan_eid_banner",
@@ -239,10 +268,14 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
         <Thead>
           <Tr>
             <Th>
-              <Typography variant="sigma">{t("page.ui.observance", "Observance")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.observance", "Observance")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.hijri_date", "Hijri Date")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.hijri_date", "Hijri Date")}
+              </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
@@ -250,7 +283,9 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
               </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.countdown", "Countdown")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.countdown", "Countdown")}
+              </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
@@ -263,13 +298,17 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
           {observances.map((obs) => (
             <Tr key={obs.id}>
               <Td>
-                <Typography fontWeight="bold">{obs.titles.es || obs.titles.en}</Typography>
+                <Typography fontWeight="bold">
+                  {obs.titles.es || obs.titles.en}
+                </Typography>
               </Td>
               <Td>
                 <Typography>{obs.hijriFormatted}</Typography>
               </Td>
               <Td>
-                <Typography fontWeight="bold">{obs.estimatedGregorianDate}</Typography>
+                <Typography fontWeight="bold">
+                  {obs.estimatedGregorianDate}
+                </Typography>
               </Td>
               <Td>
                 <Badge active={obs.daysUntil <= 30}>
@@ -279,7 +318,9 @@ export const HilalCockpitTab: React.FC<HilalCockpitTabProps> = ({
                 </Badge>
               </Td>
               <Td>
-                <Badge>{obs.fastingRecommendedOrObligatory.toUpperCase()}</Badge>
+                <Badge>
+                  {obs.fastingRecommendedOrObligatory.toUpperCase()}
+                </Badge>
               </Td>
             </Tr>
           ))}

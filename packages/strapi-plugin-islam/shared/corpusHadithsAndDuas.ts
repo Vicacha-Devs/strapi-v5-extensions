@@ -20,7 +20,8 @@ export const CURATED_HADITHS: CuratedHadithItem[] = [
     },
     arabicText:
       "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى، فَمَنْ كَانَتْ هِجْرَتُهُ إِلَى اللَّهِ وَرَسُولِهِ فَهِجْرَتُهُ إِلَى اللَّهِ وَرَسُولِهِ...",
-    transliteration: "Innamal-a'malu bin-niyyat, wa innama likulli imri'in ma nawa...",
+    transliteration:
+      "Innamal-a'malu bin-niyyat, wa innama likulli imri'in ma nawa...",
     translations: {
       es: "«Ciertamente las obras se juzgan por las intenciones, y a cada persona le corresponde aquello que tuvo intención de hacer...»",
       en: "“Actions are judged only by intentions, and every person shall have only that which they intended...”",
@@ -188,7 +189,8 @@ export const CURATED_DUAS: CuratedDuaItem[] = [
       ar: "أستغفر الله (٣ مرات) اللهم أنت السلام ومنك السلام",
       tr: "Selamdan Sonra: Allahümme Ente’s-Selâm",
     },
-    arabicText: "أَسْتَغْفِرُ اللَّهَ (ثَلَاثًا) اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+    arabicText:
+      "أَسْتَغْفِرُ اللَّهَ (ثَلَاثًا) اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
     transliteration:
       "Astaghfirullah (3x). Allahumma Antas-Salamu wa minkas-salamu, tabarakta ya Dhal-Jalali wal-Ikram",
     translations: {
@@ -222,7 +224,8 @@ export const CURATED_DUAS: CuratedDuaItem[] = [
       tr: "İftar Duası (Oruç Açarken)",
     },
     arabicText: "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ، وَثَبَتَ الأَجْرُ إِنْ شَاءَ اللَّهُ",
-    transliteration: "Dhahabadh-dhama'u wabtallatil-'uruqu, wa thabatal-ajru in sha'Allah",
+    transliteration:
+      "Dhahabadh-dhama'u wabtallatil-'uruqu, wa thabatal-ajru in sha'Allah",
     translations: {
       es: "Se ha ido la sed, se han humedecido las venas y se ha confirmado la recompensa, si Alá quiere.",
       en: "The thirst has gone, the veins are moistened, and the reward is confirmed, if Allah wills.",

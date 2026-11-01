@@ -19,7 +19,12 @@ import {
   type TranslateFn,
 } from "./SettingsCalculationAndFiqhTabs";
 
-export { CalculationSettingsTab, FiqhRatesSettingsTab, type SettingsTabProps, type TranslateFn };
+export {
+  CalculationSettingsTab,
+  FiqhRatesSettingsTab,
+  type SettingsTabProps,
+  type TranslateFn,
+};
 
 const subCardStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.22)",
@@ -34,12 +39,28 @@ export const QURAN_RECITER_OPTIONS = [
     name: "Mishari Rashid al-`Afasy",
     label: "7 — Mishari Rashid al-`Afasy (Murattal — Default)",
   },
-  { value: "2", name: "AbdulBaset AbdulSamad", label: "2 — AbdulBaset AbdulSamad (Murattal)" },
-  { value: "1", name: "AbdulBaset AbdulSamad", label: "1 — AbdulBaset AbdulSamad (Mujawwad)" },
-  { value: "3", name: "Abdur-Rahman as-Sudais", label: "3 — Abdur-Rahman as-Sudais" },
+  {
+    value: "2",
+    name: "AbdulBaset AbdulSamad",
+    label: "2 — AbdulBaset AbdulSamad (Murattal)",
+  },
+  {
+    value: "1",
+    name: "AbdulBaset AbdulSamad",
+    label: "1 — AbdulBaset AbdulSamad (Mujawwad)",
+  },
+  {
+    value: "3",
+    name: "Abdur-Rahman as-Sudais",
+    label: "3 — Abdur-Rahman as-Sudais",
+  },
   { value: "4", name: "Abu Bakr al-Shatri", label: "4 — Abu Bakr al-Shatri" },
   { value: "5", name: "Hani ar-Rifai", label: "5 — Hani ar-Rifai" },
-  { value: "6", name: "Mahmoud Khalil Al-Husary", label: "6 — Mahmoud Khalil Al-Husary" },
+  {
+    value: "6",
+    name: "Mahmoud Khalil Al-Husary",
+    label: "6 — Mahmoud Khalil Al-Husary",
+  },
   {
     value: "12",
     name: "Mahmoud Khalil Al-Husary",
@@ -102,16 +123,22 @@ export const QuranFoundationSettingsTab: React.FC<SettingsTabProps> = ({
             "Target OAuth2 & Content v4 endpoint environment."
           )}
         >
-          <Field.Label>{t("field.api_environment", "API Environment")}</Field.Label>
+          <Field.Label>
+            {t("field.api_environment", "API Environment")}
+          </Field.Label>
           <SingleSelect
-            placeholder={t("placeholder.select_environment", "Select environment")}
+            placeholder={t(
+              "placeholder.select_environment",
+              "Select environment"
+            )}
             value={settings.quranFoundation?.environment || "production"}
             onChange={(val: string | number) =>
               setSettings({
                 ...settings,
                 quranFoundation: {
                   ...settings.quranFoundation,
-                  environment: String(val) === "prelive" ? "prelive" : "production",
+                  environment:
+                    String(val) === "prelive" ? "prelive" : "production",
                 },
               })
             }
@@ -123,7 +150,10 @@ export const QuranFoundationSettingsTab: React.FC<SettingsTabProps> = ({
               )}
             </SingleSelectOption>
             <SingleSelectOption value="prelive">
-              {t("settings.ui.prelive_staging_sandbox_api", "prelive — Staging / Sandbox API")}
+              {t(
+                "settings.ui.prelive_staging_sandbox_api",
+                "prelive — Staging / Sandbox API"
+              )}
             </SingleSelectOption>
           </SingleSelect>
           <Field.Hint />
@@ -137,10 +167,16 @@ export const QuranFoundationSettingsTab: React.FC<SettingsTabProps> = ({
           )}
         >
           <Field.Label>
-            {t("field.default_arabic_mushaf_script", "Default Arabic Mushaf Script")}
+            {t(
+              "field.default_arabic_mushaf_script",
+              "Default Arabic Mushaf Script"
+            )}
           </Field.Label>
           <SingleSelect
-            placeholder={t("placeholder.select_arabic_script", "Select Arabic script")}
+            placeholder={t(
+              "placeholder.select_arabic_script",
+              "Select Arabic script"
+            )}
             value={settings.quranFoundation?.defaultScript || "uthmani"}
             onChange={(val: string | number) =>
               setSettings({
@@ -155,7 +191,10 @@ export const QuranFoundationSettingsTab: React.FC<SettingsTabProps> = ({
             }
           >
             <SingleSelectOption value="uthmani">
-              {t("settings.ui.uthmani_madinah_mushaf_uthmani", "uthmani — Madinah Mushaf Uthmani")}
+              {t(
+                "settings.ui.uthmani_madinah_mushaf_uthmani",
+                "uthmani — Madinah Mushaf Uthmani"
+              )}
             </SingleSelectOption>
             <SingleSelectOption value="uthmani_tajweed">
               {t(
@@ -164,7 +203,10 @@ export const QuranFoundationSettingsTab: React.FC<SettingsTabProps> = ({
               )}
             </SingleSelectOption>
             <SingleSelectOption value="imlaei">
-              {t("settings.ui.imlaei_standard_imlaei_script", "imlaei — Standard Imlaei Script")}
+              {t(
+                "settings.ui.imlaei_standard_imlaei_script",
+                "imlaei — Standard Imlaei Script"
+              )}
             </SingleSelectOption>
             <SingleSelectOption value="indopak_nastaleeq">
               {t(
@@ -183,7 +225,9 @@ export const QuranFoundationSettingsTab: React.FC<SettingsTabProps> = ({
             "Default reciter for verse-by-verse and chapter audio (7 = Mishari Rashid al-`Afasy)."
           )}
         >
-          <Field.Label>{t("field.default_audio_reciter_id", "Default Audio Reciter")}</Field.Label>
+          <Field.Label>
+            {t("field.default_audio_reciter_id", "Default Audio Reciter")}
+          </Field.Label>
           <SingleSelect
             name="qfReciter"
             placeholder={t(
@@ -232,7 +276,9 @@ export const QuranFoundationSettingsTab: React.FC<SettingsTabProps> = ({
           )}
         </Checkbox>
         <Checkbox
-          checked={Boolean(settings.quranFoundation?.disableBrowserAutoTranslate ?? true)}
+          checked={Boolean(
+            settings.quranFoundation?.disableBrowserAutoTranslate ?? true
+          )}
           onCheckedChange={(val: boolean) =>
             setSettings({
               ...settings,
@@ -274,7 +320,10 @@ export const EcosystemBridgesSettingsTab: React.FC<SettingsTabProps> = ({
       >
         <Flex direction="column" alignItems="flex-start" gap={1}>
           <Typography variant="beta" tag="h2">
-            {t("settings.ui.4_cross_plugin_ecosystem_bridges", "Cross-Plugin Ecosystem Bridges")}
+            {t(
+              "settings.ui.4_cross_plugin_ecosystem_bridges",
+              "Cross-Plugin Ecosystem Bridges"
+            )}
           </Typography>
           <Typography variant="pi" textColor="neutral600">
             {t(
@@ -292,13 +341,27 @@ export const EcosystemBridgesSettingsTab: React.FC<SettingsTabProps> = ({
             gap: 16,
           }}
         >
-          <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={subCardStyle}
+          >
             <Box>
-              <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                paddingBottom={2}
+              >
                 <Typography fontWeight="bold">
-                  {t("settings.ui.calendar_hijri_offset_bridge", "Calendar Hijri Offset Bridge")}
+                  {t(
+                    "settings.ui.calendar_hijri_offset_bridge",
+                    "Calendar Hijri Offset Bridge"
+                  )}
                 </Typography>
-                <Badge>{statusLabel(Boolean(settings.enableCalendarBridge))}</Badge>
+                <Badge>
+                  {statusLabel(Boolean(settings.enableCalendarBridge))}
+                </Badge>
               </Flex>
               <Typography variant="pi" textColor="neutral600">
                 {t(
@@ -325,13 +388,27 @@ export const EcosystemBridgesSettingsTab: React.FC<SettingsTabProps> = ({
             </Box>
           </Box>
 
-          <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={subCardStyle}
+          >
             <Box>
-              <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                paddingBottom={2}
+              >
                 <Typography fontWeight="bold">
-                  {t("settings.ui.donations_nisab_bridge", "Donations Nisab Bridge")}
+                  {t(
+                    "settings.ui.donations_nisab_bridge",
+                    "Donations Nisab Bridge"
+                  )}
                 </Typography>
-                <Badge>{statusLabel(Boolean(settings.enableDonationsBridge))}</Badge>
+                <Badge>
+                  {statusLabel(Boolean(settings.enableDonationsBridge))}
+                </Badge>
               </Flex>
               <Typography variant="pi" textColor="neutral600">
                 {t(
@@ -358,13 +435,27 @@ export const EcosystemBridgesSettingsTab: React.FC<SettingsTabProps> = ({
             </Box>
           </Box>
 
-          <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={subCardStyle}
+          >
             <Box>
-              <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                paddingBottom={2}
+              >
                 <Typography fontWeight="bold">
-                  {t("settings.ui.inbox_hilal_alert_bridge", "Inbox Hilal Alert Bridge")}
+                  {t(
+                    "settings.ui.inbox_hilal_alert_bridge",
+                    "Inbox Hilal Alert Bridge"
+                  )}
                 </Typography>
-                <Badge>{statusLabel(Boolean(settings.enableInboxAlertBridge))}</Badge>
+                <Badge>
+                  {statusLabel(Boolean(settings.enableInboxAlertBridge))}
+                </Badge>
               </Flex>
               <Typography variant="pi" textColor="neutral600">
                 {t(

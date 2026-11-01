@@ -38,7 +38,9 @@ function createMockStrapi(customConfig: Record<string, any> = {}) {
   };
 
   let calendarSettings: any = {
-    secondaryCalendars: [{ id: "hijri", intlCalendar: "islamic-umalqura", dayOffset: 0 }],
+    secondaryCalendars: [
+      { id: "hijri", intlCalendar: "islamic-umalqura", dayOffset: 0 },
+    ],
   };
 
   const strapi: any = {
@@ -77,12 +79,23 @@ function createMockStrapi(customConfig: Record<string, any> = {}) {
           return docsByUid[uid];
         },
         async create({ data }: { data: Record<string, any> }) {
-          const created = { documentId: `doc-${docsByUid[uid].length + 1}`, ...data };
+          const created = {
+            documentId: `doc-${docsByUid[uid].length + 1}`,
+            ...data,
+          };
           docsByUid[uid].unshift(created);
           return created;
         },
-        async update({ documentId, data }: { documentId: string; data: Record<string, any> }) {
-          const idx = docsByUid[uid].findIndex((d) => d.documentId === documentId);
+        async update({
+          documentId,
+          data,
+        }: {
+          documentId: string;
+          data: Record<string, any>;
+        }) {
+          const idx = docsByUid[uid].findIndex(
+            (d) => d.documentId === documentId
+          );
           if (idx >= 0) {
             docsByUid[uid][idx] = { ...docsByUid[uid][idx], ...data };
             return docsByUid[uid][idx];
@@ -147,12 +160,16 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
 
     assert.equal(hilalRes.settings.shifting, "-1");
     assert.equal(hilalRes.settings.ramadan.bannerActive, true);
-    assert.equal(hilalRes.settings.ramadan.confirmedStartGregorian, "2027-02-08");
+    assert.equal(
+      hilalRes.settings.ramadan.confirmedStartGregorian,
+      "2027-02-08"
+    );
 
     const calSettings = strapi.__getCalendarSettings();
     assert.equal(calSettings.secondaryCalendars[0].dayOffset, -1);
 
-    const hostPrayerDoc = strapi.__docsByUid["api::prayer-setting.prayer-setting"][0];
+    const hostPrayerDoc =
+      strapi.__docsByUid["api::prayer-setting.prayer-setting"][0];
     assert.equal(hostPrayerDoc.shifting, "-1");
     assert.equal(hostPrayerDoc.ramadanBannerActive, true);
 
@@ -170,7 +187,10 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
     await serverPlugin.bootstrap({ strapi });
 
     const contentCtrl = serverPlugin.controllers["content-api"]({ strapi });
-    const ctxPrayer: any = { query: { date: "2026-10-20", locale: "es" }, body: null };
+    const ctxPrayer: any = {
+      query: { date: "2026-10-20", locale: "es" },
+      body: null,
+    };
     await contentCtrl.getPrayerTimes(ctxPrayer);
     assert.equal(ctxPrayer.body.data.dateGregorian, "2026-10-20");
 
@@ -186,7 +206,9 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
     assert.equal(headers["X-Content-Type-Options"], "nosniff");
     assert.ok(String(ctxIcs.body).includes("BEGIN:VCALENDAR"));
 
-    const trads = await adminPlugin.registerTrads({ locales: ["es", "en", "ar", "tr"] });
+    const trads = await adminPlugin.registerTrads({
+      locales: ["es", "en", "ar", "tr"],
+    });
     assert.ok(trads.length >= 4);
   });
 
@@ -217,7 +239,10 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
       url: string;
     }> = [];
 
-    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = (async (
+      input: RequestInfo | URL,
+      init?: RequestInit
+    ) => {
       const urlStr = String(input);
 
       if (urlStr.includes("/oauth2/token")) {
@@ -240,9 +265,14 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
         url: urlStr,
       });
 
-      if (urlStr.includes("apis-prelive.quran.foundation") && !firstVerseCall401Triggered) {
+      if (
+        urlStr.includes("apis-prelive.quran.foundation") &&
+        !firstVerseCall401Triggered
+      ) {
         firstVerseCall401Triggered = true;
-        return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
+        return new Response(JSON.stringify({ message: "Unauthorized" }), {
+          status: 401,
+        });
       }
 
       if (urlStr.includes("/hadith_references/by_ayah/2:255/hadiths")) {
@@ -295,7 +325,8 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
               id: 1,
               chapter_id: 1,
               format: "mp3",
-              audio_url: "https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/1.mp3",
+              audio_url:
+                "https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/1.mp3",
               timestamps: [
                 {
                   verse_key: "1:1",
@@ -343,8 +374,16 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
         return new Response(
           JSON.stringify({
             recitations: [
-              { id: 2, reciter_name: "AbdulBaset AbdulSamad", style: "Murattal" },
-              { id: 7, reciter_name: "Mishari Rashid al-`Afasy", style: "Murattal" },
+              {
+                id: 2,
+                reciter_name: "AbdulBaset AbdulSamad",
+                style: "Murattal",
+              },
+              {
+                id: 7,
+                reciter_name: "Mishari Rashid al-`Afasy",
+                style: "Murattal",
+              },
             ],
           }),
           { status: 200, headers: { "Content-Type": "application/json" } }
@@ -369,14 +408,22 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
       };
       await contentCtrl.getQuranAyahHadiths(ctxHadiths);
       assert.equal(hadithHeaders["X-Translation-Integrity"], "notranslate");
-      assert.equal((ctxHadiths.body.data as any).source, "quran_foundation_oauth2");
+      assert.equal(
+        (ctxHadiths.body.data as any).source,
+        "quran_foundation_oauth2"
+      );
       assert.equal((ctxHadiths.body.data as any).hadiths.length, 1);
-      assert.equal((ctxHadiths.body.data as any).hadiths[0].collection, "bukhari");
+      assert.equal(
+        (ctxHadiths.body.data as any).hadiths[0].collection,
+        "bukhari"
+      );
       assert.equal((ctxHadiths.body.data as any).answers.length, 1);
       assert.equal(tokenRequests, 2);
       assert.ok(
         capturedAuthHeaders.some(
-          (h) => h.clientId === "test-qf-client-id" && h.authToken === "mock-qf-token-2"
+          (h) =>
+            h.clientId === "test-qf-client-id" &&
+            h.authToken === "mock-qf-token-2"
         )
       );
 
@@ -387,7 +434,10 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
       })) as any;
       assert.equal(audioRes.source, "quran_foundation_oauth2");
       assert.equal(audioRes.audioFile.timestamps.length, 1);
-      assert.deepEqual(audioRes.audioFile.timestamps[0].segments[0], [1, 0, 1120]);
+      assert.deepEqual(
+        audioRes.audioFile.timestamps[0].segments[0],
+        [1, 0, 1120]
+      );
 
       const surah36Res = (await islamService.getQuranChapterVerses({
         chapterNumber: 36,
@@ -395,14 +445,22 @@ describe("@vicacha-devs/strapi-plugin-islam — Strapi Services, Controllers, Br
       })) as any;
       assert.equal(surah36Res.source, "quran_foundation_public_v4");
       assert.equal(surah36Res.verses[0].verse_key, "36:1");
-      assert.equal(surah36Res.translationPolicy.disableBrowserAutoTranslate, true);
+      assert.equal(
+        surah36Res.translationPolicy.disableBrowserAutoTranslate,
+        true
+      );
       assert.equal(surah36Res.translationPolicy.htmlAttributes.translate, "no");
 
-      const resourcesRes = (await islamService.getQuranResources({ locale: "es" })) as any;
+      const resourcesRes = (await islamService.getQuranResources({
+        locale: "es",
+      })) as any;
       assert.equal(resourcesRes.defaultReciterId, 7);
       assert.equal(resourcesRes.defaultReciterName, "Mishari Rashid al-`Afasy");
       assert.equal(resourcesRes.recitations[0].id, 7);
-      assert.equal(resourcesRes.recitations[0].reciter_name, "Mishari Rashid al-`Afasy");
+      assert.equal(
+        resourcesRes.recitations[0].reciter_name,
+        "Mishari Rashid al-`Afasy"
+      );
       assert.equal(resourcesRes.recitations[0].isDefault, true);
       assert.equal(resourcesRes.recitations[1].id, 2);
       assert.equal(resourcesRes.recitations[1].isDefault, false);

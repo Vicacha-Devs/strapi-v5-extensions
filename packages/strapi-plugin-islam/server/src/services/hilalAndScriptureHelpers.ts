@@ -28,7 +28,11 @@ type RamadanConfig = IslamPluginSettings["ramadan"];
 type EidConfig = IslamPluginSettings["eid"];
 
 export interface ConfirmHilalSightingInput {
-  occasion: "ramadan" | "eid_al_fitr" | "dhul_hijjah_eid_al_adha" | "monthly_hilal";
+  occasion:
+    | "ramadan"
+    | "eid_al_fitr"
+    | "dhul_hijjah_eid_al_adha"
+    | "monthly_hilal";
   hijriYear?: number;
   hijriMonth?: number;
   confirmedGregorianDate: string;
@@ -57,7 +61,10 @@ const VALID_DUA_CATEGORIES: ReadonlySet<DuaCategorySlug> = new Set([
   "adhan",
 ]);
 
-function normalizeLocaleRecord(raw: unknown, fallbackText = ""): Record<SupportedLocale, string> {
+function normalizeLocaleRecord(
+  raw: unknown,
+  fallbackText = ""
+): Record<SupportedLocale, string> {
   const defaultMap: Record<SupportedLocale, string> = fallbackText
     ? { es: fallbackText, en: fallbackText, ar: fallbackText, tr: fallbackText }
     : { ...EMPTY_LOCALE_TEXT };
@@ -85,7 +92,9 @@ function normalizeEntryId(e: Record<string, unknown>): string {
 }
 
 function normalizeRefKey(e: Record<string, unknown>, fallback: string): string {
-  return typeof e.referenceKey === "string" && e.referenceKey ? e.referenceKey : fallback;
+  return typeof e.referenceKey === "string" && e.referenceKey
+    ? e.referenceKey
+    : fallback;
 }
 
 function mapCustomAyahEntry(e: Record<string, unknown>): CuratedAyahItem {
@@ -99,7 +108,8 @@ function mapCustomAyahEntry(e: Record<string, unknown>): CuratedAyahItem {
     surahNameAr: "",
     surahNameTranslit: refKey,
     arabicUthmani: typeof e.arabicText === "string" ? e.arabicText : "",
-    transliteration: typeof e.transliteration === "string" ? e.transliteration : "",
+    transliteration:
+      typeof e.transliteration === "string" ? e.transliteration : "",
     translations: normalizeLocaleRecord(e.translations),
     reflections: normalizeLocaleRecord(e.reflections),
     topicTags: normalizeTopicTags(e.topicTags),
@@ -115,14 +125,21 @@ function mapCustomHadithEntry(e: Record<string, unknown>): CuratedHadithItem {
     collectionNames: {
       es: refKey,
       en: refKey,
-      ar: typeof e.referenceKey === "string" && e.referenceKey ? e.referenceKey : "حديث",
-      tr: typeof e.referenceKey === "string" && e.referenceKey ? e.referenceKey : "Hadis",
+      ar:
+        typeof e.referenceKey === "string" && e.referenceKey
+          ? e.referenceKey
+          : "حديث",
+      tr:
+        typeof e.referenceKey === "string" && e.referenceKey
+          ? e.referenceKey
+          : "Hadis",
     },
     hadithNumber: normalizeRefKey(e, "1"),
     grading: e.gradingOrCategory === "Hasan" ? "Hasan" : "Sahih",
     narrator: { ...EMPTY_LOCALE_TEXT },
     arabicText: typeof e.arabicText === "string" ? e.arabicText : "",
-    transliteration: typeof e.transliteration === "string" ? e.transliteration : "",
+    transliteration:
+      typeof e.transliteration === "string" ? e.transliteration : "",
     translations: normalizeLocaleRecord(e.translations),
     keyTakeaways: normalizeLocaleRecord(e.reflections),
     topicTags: normalizeTopicTags(e.topicTags),
@@ -130,7 +147,10 @@ function mapCustomHadithEntry(e: Record<string, unknown>): CuratedHadithItem {
 }
 
 function normalizeDuaCategory(raw: unknown): DuaCategorySlug {
-  if (typeof raw === "string" && VALID_DUA_CATEGORIES.has(raw as DuaCategorySlug)) {
+  if (
+    typeof raw === "string" &&
+    VALID_DUA_CATEGORIES.has(raw as DuaCategorySlug)
+  ) {
     return raw as DuaCategorySlug;
   }
   return "travel_daily";
@@ -149,7 +169,8 @@ function mapCustomDuaEntry(e: Record<string, unknown>): CuratedDuaItem {
     },
     titles: normalizeLocaleRecord(e.reflections, refKey),
     arabicText: typeof e.arabicText === "string" ? e.arabicText : "",
-    transliteration: typeof e.transliteration === "string" ? e.transliteration : "",
+    transliteration:
+      typeof e.transliteration === "string" ? e.transliteration : "",
     translations: normalizeLocaleRecord(e.translations),
     virtueAndSource: normalizeLocaleRecord(null, normalizeRefKey(e, "")),
     recommendedRepetitions: Number(e.recommendedRepetitions) || 1,
@@ -171,7 +192,8 @@ function applyOccasionUpdates(
   if (occasion === "ramadan") {
     nextRamadan.confirmedStartGregorian = confirmedDate;
     nextRamadan.hijriYear = hijriYear;
-    nextRamadan.bannerActive = activateBanner !== undefined ? Boolean(activateBanner) : true;
+    nextRamadan.bannerActive =
+      activateBanner !== undefined ? Boolean(activateBanner) : true;
   } else if (occasion === "eid_al_fitr") {
     nextEid.eidAlFitrDateGregorian = confirmedDate;
     nextEid.eidAlFitrActive = true;
@@ -210,7 +232,11 @@ async function publishHilalInboxAlertIfEnabled(
   try {
     await strapi.documents("plugin::inbox.alert-banner").create({
       data: {
-        title: buildHilalInboxAlertTitle(input.occasion, hijriYear, confirmedDate),
+        title: buildHilalInboxAlertTitle(
+          input.occasion,
+          hijriYear,
+          confirmedDate
+        ),
         severity: "announcement",
         active: true,
       },
@@ -224,19 +250,25 @@ export async function confirmHilalSightingOperation(
   strapi: Core.Strapi,
   settingsService: {
     getSettings(): Promise<IslamPluginSettings>;
-    updateSettings(patch: Partial<IslamPluginSettings>): Promise<IslamPluginSettings>;
+    updateSettings(
+      patch: Partial<IslamPluginSettings>
+    ): Promise<IslamPluginSettings>;
   },
   input: ConfirmHilalSightingInput
 ) {
   const current = await settingsService.getSettings();
   const confirmedDate = sanitizeIsoDateYmd(input.confirmedGregorianDate);
-  const shifting = sanitizeHijriShift(input.shifting ?? current.shifting, current.shifting);
+  const shifting = sanitizeHijriShift(
+    input.shifting ?? current.shifting,
+    current.shifting
+  );
   const hijriDetails = gregorianToHijri(confirmedDate, Number(shifting), "es");
 
   const hijriYear = Number(input.hijriYear) || hijriDetails.year;
   const hijriMonth = Number(input.hijriMonth) || hijriDetails.monthNumber;
   const approvedByImam =
-    sanitizePlainText(input.approvedByImam, 120) || "Sheikh Principal de la Mezquita";
+    sanitizePlainText(input.approvedByImam, 120) ||
+    "Sheikh Principal de la Mezquita";
 
   const { nextRamadan, nextEid } = applyOccasionUpdates(
     input.occasion,
@@ -255,23 +287,31 @@ export async function confirmHilalSightingOperation(
 
   let announcementDoc: Record<string, unknown> | null;
   try {
-    announcementDoc = await strapi.documents(`plugin::${PLUGIN_ID}.hilal-announcement`).create({
-      data: {
-        occasion: input.occasion,
-        hijriYear,
-        hijriMonth,
-        confirmedGregorianDate: confirmedDate,
-        shiftingApplied: shifting,
-        approvedByImam,
-        notes: input.notes || {},
-        broadcastDispatched: Boolean(input.dispatchBroadcast),
-      },
-    });
+    announcementDoc = await strapi
+      .documents(`plugin::${PLUGIN_ID}.hilal-announcement`)
+      .create({
+        data: {
+          occasion: input.occasion,
+          hijriYear,
+          hijriMonth,
+          confirmedGregorianDate: confirmedDate,
+          shiftingApplied: shifting,
+          approvedByImam,
+          notes: input.notes || {},
+          broadcastDispatched: Boolean(input.dispatchBroadcast),
+        },
+      });
   } catch {
     announcementDoc = null;
   }
 
-  await publishHilalInboxAlertIfEnabled(strapi, input, updatedSettings, hijriYear, confirmedDate);
+  await publishHilalInboxAlertIfEnabled(
+    strapi,
+    input,
+    updatedSettings,
+    hijriYear,
+    confirmedDate
+  );
 
   return {
     settings: updatedSettings,
@@ -301,19 +341,25 @@ export async function getScriptureHubOperation(
 
   let customEntries: Array<Record<string, unknown>>;
   try {
-    customEntries = await strapi.documents(`plugin::${PLUGIN_ID}.scripture-entry`).findMany({
-      filters: { active: true },
-      limit: 100,
-    });
+    customEntries = await strapi
+      .documents(`plugin::${PLUGIN_ID}.scripture-entry`)
+      .findMany({
+        filters: { active: true },
+        limit: 100,
+      });
   } catch {
     customEntries = [];
   }
 
-  const customAyat = customEntries.filter((e) => e.entryKind === "ayah").map(mapCustomAyahEntry);
+  const customAyat = customEntries
+    .filter((e) => e.entryKind === "ayah")
+    .map(mapCustomAyahEntry);
   const customHadiths = customEntries
     .filter((e) => e.entryKind === "hadith")
     .map(mapCustomHadithEntry);
-  const customDuas = customEntries.filter((e) => e.entryKind === "dua").map(mapCustomDuaEntry);
+  const customDuas = customEntries
+    .filter((e) => e.entryKind === "dua")
+    .map(mapCustomDuaEntry);
 
   let ayat = [...CURATED_AYAT, ...customAyat];
   let hadiths = [...CURATED_HADITHS, ...customHadiths];
@@ -321,7 +367,9 @@ export async function getScriptureHubOperation(
 
   if (topicFilter) {
     ayat = ayat.filter((a) => matchesTopicFilter(a.topicTags, topicFilter));
-    hadiths = hadiths.filter((h) => matchesTopicFilter(h.topicTags, topicFilter));
+    hadiths = hadiths.filter((h) =>
+      matchesTopicFilter(h.topicTags, topicFilter)
+    );
     duas = duas.filter((d) => matchesTopicFilter(d.topicTags, topicFilter));
   }
 
@@ -329,7 +377,11 @@ export async function getScriptureHubOperation(
     duas = duas.filter((d) => d.category.toLowerCase() === categoryFilter);
   }
 
-  const dailyInspiration = getDailyInspirationBundle(date, locale, settings.dailyPins);
+  const dailyInspiration = getDailyInspirationBundle(
+    date,
+    locale,
+    settings.dailyPins
+  );
   const surahNum = Number(params?.surahNumber);
   const selectedSurah =
     surahNum >= 1 && surahNum <= 114

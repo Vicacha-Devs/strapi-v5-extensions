@@ -34,20 +34,28 @@ const NisabCurrencyCard: React.FC<{
     >
       <Typography fontWeight="bold">{title}</Typography>
       <Typography>
-        {t("page.ui.gold_nisab_line", "Gold Nisab ({grams}g): {prefix}{amount} {currency}", {
-          grams: nisab.gold.weightGrams,
-          prefix,
-          amount: nisab.gold.nisabAmount.toLocaleString(),
-          currency: currencyCode,
-        })}
+        {t(
+          "page.ui.gold_nisab_line",
+          "Gold Nisab ({grams}g): {prefix}{amount} {currency}",
+          {
+            grams: nisab.gold.weightGrams,
+            prefix,
+            amount: nisab.gold.nisabAmount.toLocaleString(),
+            currency: currencyCode,
+          }
+        )}
       </Typography>
       <Typography>
-        {t("page.ui.silver_nisab_line", "Silver Nisab ({grams}g): {prefix}{amount} {currency}", {
-          grams: nisab.silver.weightGrams,
-          prefix,
-          amount: nisab.silver.nisabAmount.toLocaleString(),
-          currency: currencyCode,
-        })}
+        {t(
+          "page.ui.silver_nisab_line",
+          "Silver Nisab ({grams}g): {prefix}{amount} {currency}",
+          {
+            grams: nisab.silver.weightGrams,
+            prefix,
+            amount: nisab.silver.nisabAmount.toLocaleString(),
+            currency: currencyCode,
+          }
+        )}
       </Typography>
       <Typography variant="pi" textColor="neutral600">
         {t(
@@ -93,7 +101,13 @@ export const FiqhCockpitTab: React.FC<{
 
   return (
     <Box>
-      <Box marginBottom={6} background="neutral0" padding={5} hasRadius shadow="filterShadow">
+      <Box
+        marginBottom={6}
+        background="neutral0"
+        padding={5}
+        hasRadius
+        shadow="filterShadow"
+      >
         <Box marginBottom={4} style={{ marginBottom: 16 }}>
           <Typography variant="delta" tag="h2">
             {t(
@@ -105,9 +119,13 @@ export const FiqhCockpitTab: React.FC<{
         <Flex gap={6} wrap="wrap" alignItems="stretch">
           {nisabCop && (
             <NisabCurrencyCard
-              title={t("page.ui.cop_standard_title", "Colombian Peso (COP) — {standard} Standard", {
-                standard: nisabCop.standard.toUpperCase(),
-              })}
+              title={t(
+                "page.ui.cop_standard_title",
+                "Colombian Peso (COP) — {standard} Standard",
+                {
+                  standard: nisabCop.standard.toUpperCase(),
+                }
+              )}
               nisab={nisabCop}
               currencyCode="COP"
               t={t}
@@ -115,9 +133,13 @@ export const FiqhCockpitTab: React.FC<{
           )}
           {nisabUsd && (
             <NisabCurrencyCard
-              title={t("page.ui.usd_standard_title", "US Dollar (USD) — {standard} Standard", {
-                standard: nisabUsd.standard.toUpperCase(),
-              })}
+              title={t(
+                "page.ui.usd_standard_title",
+                "US Dollar (USD) — {standard} Standard",
+                {
+                  standard: nisabUsd.standard.toUpperCase(),
+                }
+              )}
               nisab={nisabUsd}
               currencyCode="USD"
               t={t}
@@ -146,14 +168,21 @@ export const FiqhCockpitTab: React.FC<{
             style={{ flex: 1, minWidth: 220 }}
           >
             <Typography fontWeight="bold">
-              {t("page.ui.zakat_al_fitr_per_person", "Zakat al-Fitr (Per Person)")}
+              {t(
+                "page.ui.zakat_al_fitr_per_person",
+                "Zakat al-Fitr (Per Person)"
+              )}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
-              {t("page.ui.fitrana_summary_line", "{cop} COP / ${usd} USD (≈ {kg} kg staple food)", {
-                cop: ratesDisplay.fitrCop,
-                usd: ratesDisplay.fitrUsd,
-                kg: ratesDisplay.foodKg,
-              })}
+              {t(
+                "page.ui.fitrana_summary_line",
+                "{cop} COP / ${usd} USD (≈ {kg} kg staple food)",
+                {
+                  cop: ratesDisplay.fitrCop,
+                  usd: ratesDisplay.fitrUsd,
+                  kg: ratesDisplay.foodKg,
+                }
+              )}
             </Typography>
           </Flex>
           <Flex
@@ -166,7 +195,10 @@ export const FiqhCockpitTab: React.FC<{
             style={{ flex: 1, minWidth: 220 }}
           >
             <Typography fontWeight="bold">
-              {t("page.ui.fidyah_per_missed_fast_day", "Fidyah (Per Missed Fast Day)")}
+              {t(
+                "page.ui.fidyah_per_missed_fast_day",
+                "Fidyah (Per Missed Fast Day)"
+              )}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
               {t("page.ui.fidyah_summary_line", "{cop} COP / ${usd} USD", {
@@ -185,7 +217,10 @@ export const FiqhCockpitTab: React.FC<{
             style={{ flex: 1, minWidth: 220 }}
           >
             <Typography fontWeight="bold">
-              {t("page.ui.qibla_bearing_distance_to_makkah", "Qibla Bearing & Distance to Makkah")}
+              {t(
+                "page.ui.qibla_bearing_distance_to_makkah",
+                "Qibla Bearing & Distance to Makkah"
+              )}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
               {t(

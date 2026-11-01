@@ -24,16 +24,36 @@ export const DEFAULT_ISLAM_SETTINGS: IslamPluginSettings = {
     isha: 0,
   },
   iqamahRules: [
-    { prayerName: "fajr", mode: "offset_minutes", offsetMinutes: 20, notes: "20 min after Adhan" },
-    { prayerName: "dhuhr", mode: "offset_minutes", offsetMinutes: 15, notes: "15 min after Adhan" },
-    { prayerName: "asr", mode: "offset_minutes", offsetMinutes: 15, notes: "15 min after Adhan" },
+    {
+      prayerName: "fajr",
+      mode: "offset_minutes",
+      offsetMinutes: 20,
+      notes: "20 min after Adhan",
+    },
+    {
+      prayerName: "dhuhr",
+      mode: "offset_minutes",
+      offsetMinutes: 15,
+      notes: "15 min after Adhan",
+    },
+    {
+      prayerName: "asr",
+      mode: "offset_minutes",
+      offsetMinutes: 15,
+      notes: "15 min after Adhan",
+    },
     {
       prayerName: "maghrib",
       mode: "offset_minutes",
       offsetMinutes: 10,
       notes: "10 min after Adhan",
     },
-    { prayerName: "isha", mode: "offset_minutes", offsetMinutes: 15, notes: "15 min after Adhan" },
+    {
+      prayerName: "isha",
+      mode: "offset_minutes",
+      offsetMinutes: 15,
+      notes: "15 min after Adhan",
+    },
     {
       prayerName: "jumuah",
       mode: "fixed_time",

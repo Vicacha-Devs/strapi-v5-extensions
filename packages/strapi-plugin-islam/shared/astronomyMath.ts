@@ -31,7 +31,10 @@ const COMPASS_16 = [
   "NNW",
 ] as const;
 
-export const PRAYER_LABELS: Record<SupportedLocale, Record<DailyFivePrayerId, string>> = {
+export const PRAYER_LABELS: Record<
+  SupportedLocale,
+  Record<DailyFivePrayerId, string>
+> = {
   es: {
     fajr: "Fajr (Alba)",
     dhuhr: "Dhuhr (Mediodía)",
@@ -123,10 +126,14 @@ export function solarPosition(julianDay: number): {
   const d = julianDay - 2451545.0;
   const g = ((357.529 + 0.98560028 * d) % 360) * DEG_TO_RAD;
   const q = (280.459 + 0.98564736 * d) % 360;
-  const l = ((q + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) % 360) * DEG_TO_RAD;
+  const l =
+    ((q + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) % 360) * DEG_TO_RAD;
   const e = (23.439 - 0.00000036 * d) * DEG_TO_RAD;
 
-  const ra = ((Math.atan2(Math.cos(e) * Math.sin(l), Math.cos(l)) * RAD_TO_DEG + 360) % 360) / 15;
+  const ra =
+    ((Math.atan2(Math.cos(e) * Math.sin(l), Math.cos(l)) * RAD_TO_DEG + 360) %
+      360) /
+    15;
   const declinationRad = Math.asin(Math.sin(e) * Math.sin(l));
 
   let eqt = q / 15 - ra;
@@ -161,7 +168,9 @@ function applyMeridiemAdjustment(hours: number, meridiem?: string): number {
   return hours;
 }
 
-export function parseHhMmToMinutes(rawTime: string | undefined | null): number | null {
+export function parseHhMmToMinutes(
+  rawTime: string | undefined | null
+): number | null {
   if (typeof rawTime !== "string") return null;
   const match = rawTime
     .trim()
@@ -194,7 +203,9 @@ export function resolveIqamahTime(
     }
   }
 
-  const offset = Number.isFinite(rule.offsetMinutes) ? Math.max(0, rule.offsetMinutes) : 15;
+  const offset = Number.isFinite(rule.offsetMinutes)
+    ? Math.max(0, rule.offsetMinutes)
+    : 15;
   const mins = adhanMinutes + offset;
   return { iqamah: minutesToHhMm(mins), iqamahMinutes: mins };
 }

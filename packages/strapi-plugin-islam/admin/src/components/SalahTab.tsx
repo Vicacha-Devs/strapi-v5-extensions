@@ -12,10 +12,20 @@ import {
 } from "@strapi/design-system";
 import React from "react";
 
-import type { DailyFivePrayerId, DailyPrayerTimetable, IslamPluginSettings } from "../../../shared";
+import type {
+  DailyFivePrayerId,
+  DailyPrayerTimetable,
+  IslamPluginSettings,
+} from "../../../shared";
 import type { TranslateFn } from "./SettingsTabs";
 
-const ORDERED_PRAYERS: DailyFivePrayerId[] = ["fajr", "dhuhr", "asr", "maghrib", "isha"];
+const ORDERED_PRAYERS: DailyFivePrayerId[] = [
+  "fajr",
+  "dhuhr",
+  "asr",
+  "maghrib",
+  "isha",
+];
 
 const SalahPrayerRow: React.FC<{
   pKey: DailyFivePrayerId;
@@ -73,7 +83,13 @@ export const SalahCockpitTab: React.FC<{
 
   return (
     <Box>
-      <Box marginBottom={6} background="neutral0" padding={5} hasRadius shadow="filterShadow">
+      <Box
+        marginBottom={6}
+        background="neutral0"
+        padding={5}
+        hasRadius
+        shadow="filterShadow"
+      >
         <Flex
           justifyContent="space-between"
           alignItems="center"
@@ -108,10 +124,14 @@ export const SalahCockpitTab: React.FC<{
               })}
             </Badge>
             <Badge>
-              {t("page.ui.badge_next_prayer", "Next: {prayer} (in {minutes} min)", {
-                prayer: timetable.nextPrayer.toUpperCase(),
-                minutes: timetable.minutesUntilNextAdhan,
-              })}
+              {t(
+                "page.ui.badge_next_prayer",
+                "Next: {prayer} (in {minutes} min)",
+                {
+                  prayer: timetable.nextPrayer.toUpperCase(),
+                  minutes: timetable.minutesUntilNextAdhan,
+                }
+              )}
             </Badge>
           </Flex>
         </Flex>
@@ -125,7 +145,9 @@ export const SalahCockpitTab: React.FC<{
                 </Typography>
               </Th>
               <Th>
-                <Typography variant="sigma">{t("page.ui.adhan_time", "Adhan Time")}</Typography>
+                <Typography variant="sigma">
+                  {t("page.ui.adhan_time", "Adhan Time")}
+                </Typography>
               </Th>
               <Th>
                 <Typography variant="sigma">
@@ -138,7 +160,9 @@ export const SalahCockpitTab: React.FC<{
                 </Typography>
               </Th>
               <Th>
-                <Typography variant="sigma">{t("page.ui.notes", "Notes")}</Typography>
+                <Typography variant="sigma">
+                  {t("page.ui.notes", "Notes")}
+                </Typography>
               </Th>
             </Tr>
           </Thead>
@@ -179,10 +203,14 @@ export const SalahCockpitTab: React.FC<{
               {t("page.ui.jumu_ah_khutbah_salah", "Jumu’ah Khutbah & Salah")}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
-              {t("page.ui.jumuah_times_summary", "Khutbah: {khutbah} • Salah: {prayer}", {
-                khutbah: timetable.jumuah.primaryKhutbahTime,
-                prayer: timetable.jumuah.primaryPrayerTime,
-              })}
+              {t(
+                "page.ui.jumuah_times_summary",
+                "Khutbah: {khutbah} • Salah: {prayer}",
+                {
+                  khutbah: timetable.jumuah.primaryKhutbahTime,
+                  prayer: timetable.jumuah.primaryPrayerTime,
+                }
+              )}
             </Typography>
           </Flex>
           <Flex
@@ -198,7 +226,8 @@ export const SalahCockpitTab: React.FC<{
               {t("page.ui.sunrise_window_ishraq", "Sunrise Window (Ishraq)")}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
-              {timetable.prohibitedTimes.sunrise.start} – {timetable.prohibitedTimes.sunrise.end}
+              {timetable.prohibitedTimes.sunrise.start} –{" "}
+              {timetable.prohibitedTimes.sunrise.end}
             </Typography>
           </Flex>
           <Flex
@@ -214,7 +243,8 @@ export const SalahCockpitTab: React.FC<{
               {t("page.ui.zawal_solar_zenith", "Zawal (Solar Zenith)")}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
-              {timetable.prohibitedTimes.zawal.start} – {timetable.prohibitedTimes.zawal.end}
+              {timetable.prohibitedTimes.zawal.start} –{" "}
+              {timetable.prohibitedTimes.zawal.end}
             </Typography>
           </Flex>
           <Flex
@@ -230,7 +260,8 @@ export const SalahCockpitTab: React.FC<{
               {t("page.ui.sunset_window_ghurub", "Sunset Window (Ghurub)")}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
-              {timetable.prohibitedTimes.sunset.start} – {timetable.prohibitedTimes.sunset.end}
+              {timetable.prohibitedTimes.sunset.start} –{" "}
+              {timetable.prohibitedTimes.sunset.end}
             </Typography>
           </Flex>
           <Flex
@@ -243,13 +274,20 @@ export const SalahCockpitTab: React.FC<{
             style={{ flex: 1, minWidth: 200 }}
           >
             <Typography fontWeight="bold">
-              {t("page.ui.last_third_of_the_night_tahajjud", "Last Third of the Night (Tahajjud)")}
+              {t(
+                "page.ui.last_third_of_the_night_tahajjud",
+                "Last Third of the Night (Tahajjud)"
+              )}
             </Typography>
             <Typography variant="pi" textColor="neutral600">
-              {t("page.ui.last_third_summary", "Starts at {lastThird} (Midnight: {midnight})", {
-                lastThird: timetable.times.lastThird,
-                midnight: timetable.times.midnight,
-              })}
+              {t(
+                "page.ui.last_third_summary",
+                "Starts at {lastThird} (Midnight: {midnight})",
+                {
+                  lastThird: timetable.times.lastThird,
+                  midnight: timetable.times.midnight,
+                }
+              )}
             </Typography>
           </Flex>
         </Flex>

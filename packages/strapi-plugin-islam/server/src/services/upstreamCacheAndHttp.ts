@@ -1,4 +1,7 @@
-import type { QuranFoundationConfig, QuranFoundationEnvironment } from "../../../shared";
+import type {
+  QuranFoundationConfig,
+  QuranFoundationEnvironment,
+} from "../../../shared";
 
 interface CacheEntry<T> {
   expiresAt: number;
@@ -70,18 +73,30 @@ function readFirstEnv(...keys: string[]): string {
   return "";
 }
 
-export function resolveQuranFoundationCredentials(qfConfig: QuranFoundationConfig): QfCredentials {
+export function resolveQuranFoundationCredentials(
+  qfConfig: QuranFoundationConfig
+): QfCredentials {
   const clientId = readFirstEnv("QF_CLIENT_ID", "QURAN_FOUNDATION_CLIENT_ID");
-  const clientSecret = readFirstEnv("QF_CLIENT_SECRET", "QURAN_FOUNDATION_CLIENT_SECRET");
+  const clientSecret = readFirstEnv(
+    "QF_CLIENT_SECRET",
+    "QURAN_FOUNDATION_CLIENT_SECRET"
+  );
   const envOverride = readFirstEnv("QF_ENV", "QURAN_FOUNDATION_ENV");
-  const envRaw = (envOverride || qfConfig.environment || "production").toLowerCase();
-  const environment: QuranFoundationEnvironment = envRaw === "prelive" ? "prelive" : "production";
+  const envRaw = (
+    envOverride ||
+    qfConfig.environment ||
+    "production"
+  ).toLowerCase();
+  const environment: QuranFoundationEnvironment =
+    envRaw === "prelive" ? "prelive" : "production";
 
   const isPrelive = environment === "prelive";
   const oauth2BaseUrl = isPrelive
     ? qfConfig.oauth2BaseUrlPrelive
     : qfConfig.oauth2BaseUrlProduction;
-  const apiBaseUrl = isPrelive ? qfConfig.apiBaseUrlPrelive : qfConfig.apiBaseUrlProduction;
+  const apiBaseUrl = isPrelive
+    ? qfConfig.apiBaseUrlPrelive
+    : qfConfig.apiBaseUrlProduction;
 
   return {
     clientId,
@@ -101,9 +116,13 @@ function isTokenCacheValid(creds: QfCredentials): boolean {
   );
 }
 
-async function requestOAuth2Token(creds: QfCredentials): Promise<QfTokenBundle | null> {
+async function requestOAuth2Token(
+  creds: QfCredentials
+): Promise<QfTokenBundle | null> {
   const tokenEndpoint = `${creds.oauth2BaseUrl.replace(/\/+$/, "")}/oauth2/token`;
-  const basicAuth = Buffer.from(`${creds.clientId}:${creds.clientSecret}`).toString("base64");
+  const basicAuth = Buffer.from(
+    `${creds.clientId}:${creds.clientSecret}`
+  ).toString("base64");
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 3500);
@@ -207,8 +226,15 @@ async function fetchWithTimeout(
   }
 }
 
-function isPreliveSurahSupported(creds: QfCredentials, targetSurah?: number): boolean {
-  return creds.environment !== "prelive" || targetSurah === undefined || targetSurah <= 2;
+function isPreliveSurahSupported(
+  creds: QfCredentials,
+  targetSurah?: number
+): boolean {
+  return (
+    creds.environment !== "prelive" ||
+    targetSurah === undefined ||
+    targetSurah <= 2
+  );
 }
 
 async function executeSingleQfAttempt(
@@ -255,7 +281,9 @@ async function tryAuthenticatedQfFetch(
   tokenBundle = await getQuranFoundationAccessToken(qfConfig, true);
   if (!tokenBundle) return null;
   const retry = await executeSingleQfAttempt(url, tokenBundle);
-  return retry?.payload ? { data: retry.payload, source: "quran_foundation_oauth2" } : null;
+  return retry?.payload
+    ? { data: retry.payload, source: "quran_foundation_oauth2" }
+    : null;
 }
 
 export async function fetchQuranFoundationV4Json(

@@ -181,7 +181,8 @@ export const TASBIH_PRESETS: TasbihPresetItem[] = [
 
 export const SHAHADA_REFERENCE = {
   arabic: "أَشْهَدُ أَنْ لَا إِلَٰهَ إِلَّا ٱللَّٰهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا رَسُولُ ٱللَّٰهِ",
-  transliteration: "Ash-hadu an la ilaha illa Allah, wa ash-hadu anna Muhammadan Rasulu Allah",
+  transliteration:
+    "Ash-hadu an la ilaha illa Allah, wa ash-hadu anna Muhammadan Rasulu Allah",
   translations: {
     es: "Atestiguo que no hay divinidad digna de adoración sino Alá, y atestiguo que Muhammad es el Mensajero de Alá.",
     en: "I bear witness that there is no deity worthy of worship except Allah, and I bear witness that Muhammad is the Messenger of Allah.",
@@ -303,7 +304,9 @@ export function getDailyInspirationBundle(
   pins?: DailyInspirationPins
 ): DailyInspirationBundle {
   const cleanDate = dateIso.slice(0, 10);
-  const seed = cleanDate.split("-").reduce((acc, part) => acc * 31 + Number(part || 1), 7);
+  const seed = cleanDate
+    .split("-")
+    .reduce((acc, part) => acc * 31 + Number(part || 1), 7);
 
   const pinnedAyah = findById(CURATED_AYAT, pins?.pinnedAyahId);
   const pinnedHadith = findById(CURATED_HADITHS, pins?.pinnedHadithId);
@@ -315,10 +318,15 @@ export function getDailyInspirationBundle(
   return {
     date: cleanDate,
     locale,
-    ayahOfTheDay: pinnedAyah ?? CURATED_AYAT[Math.abs(seed) % CURATED_AYAT.length],
-    hadithOfTheDay: pinnedHadith ?? CURATED_HADITHS[Math.abs(seed + 3) % CURATED_HADITHS.length],
-    duaOfTheDay: pinnedDua ?? CURATED_DUAS[Math.abs(seed + 5) % CURATED_DUAS.length],
-    nameOfAllahOfTheDay: pinnedAsma ?? ASMA_UL_HUSNA[Math.abs(seed + 7) % ASMA_UL_HUSNA.length],
+    ayahOfTheDay:
+      pinnedAyah ?? CURATED_AYAT[Math.abs(seed) % CURATED_AYAT.length],
+    hadithOfTheDay:
+      pinnedHadith ??
+      CURATED_HADITHS[Math.abs(seed + 3) % CURATED_HADITHS.length],
+    duaOfTheDay:
+      pinnedDua ?? CURATED_DUAS[Math.abs(seed + 5) % CURATED_DUAS.length],
+    nameOfAllahOfTheDay:
+      pinnedAsma ?? ASMA_UL_HUSNA[Math.abs(seed + 7) % ASMA_UL_HUSNA.length],
     isPinnedOverride: {
       ayah: Boolean(pinnedAyah),
       hadith: Boolean(pinnedHadith),
