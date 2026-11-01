@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { publint } from "publint";
@@ -7,12 +7,22 @@ import { formatMessage } from "publint/utils";
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packagesDir = join(rootDir, "packages");
 
-const pluginDirs = readdirSync(packagesDir, { withFileTypes: true })
-  .filter(
-    (entry) => entry.isDirectory() && entry.name.startsWith("strapi-plugin-")
-  )
-  .map((entry) => join(packagesDir, entry.name))
-  .sort();
+const pluginDirs = existsSync(packagesDir)
+  ? readdirSync(packagesDir, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() && entry.name.startsWith("strapi-plugin-")
+      )
+      .map((entry) => join(packagesDir, entry.name))
+      .sort()
+  : [];
+
+if (pluginDirs.length === 0) {
+  console.warn(
+    "[publint] No Strapi plugin packages found in packages/. Skipping."
+  );
+  process.exit(0);
+}
 
 let totalErrors = 0;
 

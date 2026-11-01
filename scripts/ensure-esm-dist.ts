@@ -8,9 +8,11 @@ import {
 import { dirname, resolve } from "node:path";
 
 const cwd = process.cwd();
+const distDir = resolve(cwd, "dist");
+
 for (const subdir of ["server", "admin", "shared"]) {
-  const mjsPath = resolve(cwd, "dist", subdir, "index.mjs");
-  const jsPath = resolve(cwd, "dist", subdir, "index.js");
+  const mjsPath = resolve(distDir, subdir, "index.mjs");
+  const jsPath = resolve(distDir, subdir, "index.js");
   if (existsSync(mjsPath)) {
     copyFileSync(mjsPath, jsPath);
   }
@@ -51,5 +53,16 @@ if (existsSync(pkgPath)) {
         );
       }
     }
+  }
+}
+
+if (existsSync(distDir)) {
+  const distPkgPath = resolve(distDir, "package.json");
+  if (!existsSync(distPkgPath)) {
+    writeFileSync(
+      distPkgPath,
+      `${JSON.stringify({ type: "module" }, null, 2)}\n`,
+      "utf8"
+    );
   }
 }
