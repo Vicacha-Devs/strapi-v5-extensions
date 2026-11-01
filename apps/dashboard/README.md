@@ -12,8 +12,7 @@ Strapi v5 host application for developing, testing, and demonstrating all 12 `@v
 - `@vicacha-devs/strapi-plugin-media-feeds` — Audio/video archive, YouTube OEmbed enricher, Apple/Spotify Podcast RSS 2.0, and live broadcast status.
 - `@vicacha-devs/strapi-plugin-broadcasts` — Omnichannel WhatsApp, Telegram, and Email campaigns with event-driven automation rules.
 - `@vicacha-devs/strapi-plugin-resources` — Downloadable PDF publications, photo gallery albums, and searchable phonetic glossary.
-- `@vicacha-devs/strapi-plugin-seo` — SEO component management, Open Graph/social previews, structured data checks, and keyword density analysis.
-- `@vicacha-devs/strapi-plugin-sitemap` — Multilingual XML sitemap and sitemap index generation.
+- `@vicacha-devs/strapi-plugin-seo` & `@vicacha-devs/strapi-plugin-sitemap` — Multilingual SEO analysis and XML sitemap generation.
 
 ## Usage
 
