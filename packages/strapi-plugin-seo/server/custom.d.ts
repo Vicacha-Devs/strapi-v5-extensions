@@ -1,7 +1,14 @@
-declare function setImmediate(callback: (...args: unknown[]) => void, ...args: unknown[]): unknown;
+declare function setImmediate(
+  callback: (...args: unknown[]) => void,
+  ...args: unknown[]
+): unknown;
 
 declare module "lodash" {
-  export function get<T = unknown>(object: unknown, path: string | string[], defaultValue?: T): T;
+  export function get<T = unknown>(
+    object: unknown,
+    path: string | string[],
+    defaultValue?: T
+  ): T;
   const lodashDefault: {
     get: typeof get;
   };
@@ -50,7 +57,10 @@ declare module "@strapi/strapi" {
     }
 
     export interface PluginServiceMethods {
-      getSeoComponent(): { attributes?: Record<string, unknown>; category?: string } | null;
+      getSeoComponent(): {
+        attributes?: Record<string, unknown>;
+        category?: string;
+      } | null;
       getContentTypes(): unknown;
       createSeoComponent(): Promise<unknown>;
       getSettings(): Promise<unknown>;
@@ -69,7 +79,11 @@ declare module "@strapi/strapi" {
       components: Record<string, ComponentSchema>;
       plugins: Record<string, PluginInstance>;
       plugin(name: string): PluginInstance;
-      store(params: { environment?: string; type: string; name: string }): PluginStore;
+      store(params: {
+        environment?: string;
+        type: string;
+        name: string;
+      }): PluginStore;
       reload?: (() => void) & { isWatching?: boolean };
       log?: {
         debug?(msg: string): void;

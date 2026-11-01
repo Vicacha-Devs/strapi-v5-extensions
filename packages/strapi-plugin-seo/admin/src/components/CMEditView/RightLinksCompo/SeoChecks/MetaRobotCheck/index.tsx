@@ -6,7 +6,10 @@ import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import type {
+  SeoChecksState,
+  SeoCheckStatus,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { qualityVerdict } from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
@@ -21,7 +24,8 @@ const robotTags = [
   { name: "noarchive", message: "Search engines will cache your page." },
   {
     name: "nosnippet",
-    message: "Search engines will show a snippet of this page in search results.",
+    message:
+      "Search engines will show a snippet of this page in search results.",
   },
   {
     name: "noimageindex",
@@ -118,7 +122,13 @@ export const MetaRobotCheck = ({ metaRobots, checks }: MetaRobotCheckProps) => {
               </Typography>
             </Flex>
           ))}
-          <Flex spacing={2} paddingTop={4} paddingLeft={2} paddingRight={2} paddingBottom={4}>
+          <Flex
+            spacing={2}
+            paddingTop={4}
+            paddingLeft={2}
+            paddingRight={2}
+            paddingBottom={4}
+          >
             <Status variant="secondary" showBullet={false}>
               <Typography>
                 <Typography fontWeight="bold">

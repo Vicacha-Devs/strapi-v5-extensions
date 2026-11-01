@@ -3,7 +3,10 @@ import { CheckCircle, CrossCircle, WarningCircle } from "@strapi/icons";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import type {
+  SeoChecksState,
+  SeoCheckStatus,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { qualityVerdict } from "../../../utils/checks";
 
@@ -17,11 +20,15 @@ export const PreviewChecks = ({ checks }: PreviewChecksProps) => {
     Boolean(c && typeof c === "object" && "qualityVerdict" in c)
   );
 
-  const good = values.filter((check) => check.qualityVerdict === qualityVerdict.good).length;
+  const good = values.filter(
+    (check) => check.qualityVerdict === qualityVerdict.good
+  ).length;
   const improvements = values.filter(
     (check) => check.qualityVerdict === qualityVerdict.improvements
   ).length;
-  const bad = values.filter((check) => check.qualityVerdict === qualityVerdict.bad).length;
+  const bad = values.filter(
+    (check) => check.qualityVerdict === qualityVerdict.bad
+  ).length;
 
   return (
     <Box paddingTop={2}>

@@ -15,7 +15,9 @@ interface SettingsService {
 }
 
 export const settingsController = ({ strapi }: { strapi: Core.Strapi }) => {
-  const settingsService = strapi.plugin("seo").service<SettingsService>("settings");
+  const settingsService = strapi
+    .plugin("seo")
+    .service<SettingsService>("settings");
 
   const getSettings = async (
     ctx: SettingsControllerContext

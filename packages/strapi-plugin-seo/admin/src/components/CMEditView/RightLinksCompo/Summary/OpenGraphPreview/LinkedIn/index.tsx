@@ -30,7 +30,9 @@ export const LinkedInOGPreview = ({ image, title }: LinkedInOGPreviewProps) => {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div style={{ width: "100%", position: "relative", paddingTop: "52.5%" }}>
+        <div
+          style={{ width: "100%", position: "relative", paddingTop: "52.5%" }}
+        >
           <img
             src={image.url}
             alt={title}

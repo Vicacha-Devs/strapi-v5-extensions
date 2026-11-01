@@ -5,7 +5,10 @@ import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import type {
+  SeoChecksState,
+  SeoCheckStatus,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { qualityVerdict } from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
@@ -16,7 +19,10 @@ interface MetaDescriptionCheckProps {
   checks: SeoChecksState;
 }
 
-export const MetaDescriptionCheck = ({ metaDescription, checks }: MetaDescriptionCheckProps) => {
+export const MetaDescriptionCheck = ({
+  metaDescription,
+  checks,
+}: MetaDescriptionCheckProps) => {
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
 

@@ -1,9 +1,19 @@
-import { Box, Divider, EmptyStateLayout, Flex, Modal, Typography } from "@strapi/design-system";
+import {
+  Box,
+  Divider,
+  EmptyStateLayout,
+  Flex,
+  Modal,
+  Typography,
+} from "@strapi/design-system";
 import get from "lodash/get";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { ContentManagerFormValues, SeoComponentValues } from "../../../../../../../shared";
+import type {
+  ContentManagerFormValues,
+  SeoComponentValues,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { Illo } from "../../../../HomePage/Main/EmptyComponentLayout/illo";
 import { KeywordCheck } from "./KeywordCheck";
@@ -43,15 +53,32 @@ export const BrowserPreview = ({ modifiedData }: BrowserPreviewProps) => {
 
             <Divider marginBottom={4} width="100%" />
 
-            {metaTitle && <MetaChecks item={metaTitle} max={60} label="title" />}
+            {metaTitle && (
+              <MetaChecks item={metaTitle} max={60} label="title" />
+            )}
             {metaDescription && (
-              <MetaChecks item={metaDescription} max={160} label="description" minLimit={true} />
+              <MetaChecks
+                item={metaDescription}
+                max={160}
+                label="description"
+                minLimit={true}
+              />
             )}
             {keywords && (
               <React.Fragment>
-                {metaTitle && <KeywordCheck item={metaTitle} keywords={keywords} label="title" />}
+                {metaTitle && (
+                  <KeywordCheck
+                    item={metaTitle}
+                    keywords={keywords}
+                    label="title"
+                  />
+                )}
                 {metaDescription && (
-                  <KeywordCheck item={metaDescription} keywords={keywords} label="description" />
+                  <KeywordCheck
+                    item={metaDescription}
+                    keywords={keywords}
+                    label="description"
+                  />
                 )}
               </React.Fragment>
             )}

@@ -125,7 +125,10 @@ describe("strapi-plugin-seo", () => {
 
     const created = await seoSvc.createSeoComponent();
     assert.ok(created);
-    assert.equal(strapi.getCreatedComponentPayload().component.category, "shared");
+    assert.equal(
+      strapi.getCreatedComponentPayload().component.category,
+      "shared"
+    );
   });
 
   it("initializes and updates plugin settings store", async () => {
@@ -134,7 +137,10 @@ describe("strapi-plugin-seo", () => {
 
     const initialSettings = await settingsSvc.getSettings();
     assert.ok(initialSettings["api::article.article"]);
-    assert.equal(initialSettings["api::article.article"].seoChecks.metaTitle, true);
+    assert.equal(
+      initialSettings["api::article.article"].seoChecks.metaTitle,
+      true
+    );
 
     const updatedSettings = {
       ...initialSettings,

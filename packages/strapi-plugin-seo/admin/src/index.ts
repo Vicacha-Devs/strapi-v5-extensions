@@ -56,10 +56,12 @@ export default {
     });
   },
   bootstrap(app: StrapiAdminApp) {
-    app.getPlugin("content-manager").injectComponent("editView", "right-links", {
-      name: "SeoChecker",
-      Component: SeoChecker,
-    });
+    app
+      .getPlugin("content-manager")
+      .injectComponent("editView", "right-links", {
+        name: "SeoChecker",
+        Component: SeoChecker,
+      });
   },
   async registerTrads(app: { locales: string[] }) {
     const { locales } = app;

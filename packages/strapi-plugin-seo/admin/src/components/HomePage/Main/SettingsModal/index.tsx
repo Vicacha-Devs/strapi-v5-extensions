@@ -1,10 +1,20 @@
-import { Box, Button, Grid, Modal, Switch, Typography } from "@strapi/design-system";
+import {
+  Box,
+  Button,
+  Grid,
+  Modal,
+  Switch,
+  Typography,
+} from "@strapi/design-system";
 import { Cog, Information } from "@strapi/icons";
 import { ContentBox, useNotification } from "@strapi/strapi/admin";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { ContentTypeSeoItem, SeoSettingsMap } from "../../../../../../shared";
+import type {
+  ContentTypeSeoItem,
+  SeoSettingsMap,
+} from "../../../../../../shared";
 import { useSettingsApi } from "../../../../hooks/useSettingsApi";
 import { getTrad } from "../../../../utils/getTrad";
 
@@ -30,7 +40,8 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
   const [alternativeText, setAlternativeText] = React.useState(true);
   const [lastUpdatedAt, setLastUpdatedAt] = React.useState(true);
 
-  const [defaultSettings, setDefaultSettings] = React.useState<SeoSettingsMap | null>(null);
+  const [defaultSettings, setDefaultSettings] =
+    React.useState<SeoSettingsMap | null>(null);
 
   React.useEffect(() => {
     const fetchDefaultSettings = async () => {
@@ -66,7 +77,9 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
     }
 
     const collectionName =
-      defaultSettings?.[item?.uid]?.collectionName ?? item?.globalId ?? item?.uid;
+      defaultSettings?.[item?.uid]?.collectionName ??
+      item?.globalId ??
+      item?.uid;
 
     const newSettings: SeoSettingsMap = {
       ...defaultSettings,
@@ -107,7 +120,11 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
   return (
     <Modal.Root open={isOpen} onOpenChange={setIsOpen}>
       <Modal.Trigger>
-        <Button variant="tertiary" startIcon={<Cog />} onClick={() => setupModalSettings()}>
+        <Button
+          variant="tertiary"
+          startIcon={<Cog />}
+          onClick={() => setupModalSettings()}
+        >
           {formatMessage({
             id: getTrad("SEOPage.info.settings"),
             defaultMessage: "Settings",
@@ -116,7 +133,12 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
       </Modal.Trigger>
       <Modal.Content labelledBy="title">
         <Modal.Header>
-          <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+          <Typography
+            fontWeight="bold"
+            textColor="neutral800"
+            as="h2"
+            id="title"
+          >
             {formatMessage({
               id: getTrad("SEOPage.info.settings"),
               defaultMessage: "Settings",
@@ -139,7 +161,8 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
                 })}
                 subtitle={formatMessage({
                   id: getTrad("SEOPage.info.settings.information"),
-                  defaultMessage: "Disable SEO checks for this specific content-type.",
+                  defaultMessage:
+                    "Disable SEO checks for this specific content-type.",
                 })}
                 icon={<Information />}
                 iconBackground="primary100"
@@ -221,7 +244,9 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
                   >
                     <Switch
                       checked={state}
-                      onCheckedChange={() => stateSetter((isChecked) => !isChecked)}
+                      onCheckedChange={() =>
+                        stateSetter((isChecked) => !isChecked)
+                      }
                     />
                     <Typography variant="delta">
                       {formatMessage({

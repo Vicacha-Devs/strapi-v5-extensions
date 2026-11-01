@@ -5,7 +5,10 @@ import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import type {
+  SeoChecksState,
+  SeoCheckStatus,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { qualityVerdict } from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
@@ -16,7 +19,10 @@ interface LastUpdatedAtCheckProps {
   checks: SeoChecksState;
 }
 
-export const LastUpdatedAtCheck = ({ updatedAt, checks }: LastUpdatedAtCheckProps) => {
+export const LastUpdatedAtCheck = ({
+  updatedAt,
+  checks,
+}: LastUpdatedAtCheckProps) => {
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
 
@@ -40,13 +46,16 @@ export const LastUpdatedAtCheck = ({ updatedAt, checks }: LastUpdatedAtCheckProp
       };
     } else {
       const oneYearAgo = Date.parse(
-        new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString()
+        new Date(
+          new Date().setFullYear(new Date().getFullYear() - 1)
+        ).toISOString()
       );
       if (Date.parse(updatedAt) >= oneYearAgo) {
         status = {
           message: formatMessage({
             id: getTrad("SEOChecks.lastUpdatedAtCheck.success"),
-            defaultMessage: "Awesome! This content was last modified in less than an year ago!",
+            defaultMessage:
+              "Awesome! This content was last modified in less than an year ago!",
           }),
           qualityVerdict: qualityVerdict.good,
         };

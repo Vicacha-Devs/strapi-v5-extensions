@@ -3,7 +3,10 @@ import isEqual from "lodash/isEqual";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import type {
+  SeoChecksState,
+  SeoCheckStatus,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { qualityVerdict } from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
@@ -14,7 +17,10 @@ interface StructuredDataCheckProps {
   checks: SeoChecksState;
 }
 
-export const StructuredDataCheck = ({ structuredData, checks }: StructuredDataCheckProps) => {
+export const StructuredDataCheck = ({
+  structuredData,
+  checks,
+}: StructuredDataCheckProps) => {
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
 

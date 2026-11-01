@@ -15,7 +15,10 @@ import type {
   RichTextBlockNode,
 } from "../../../../../shared";
 import { getRegularImageAltTexts } from "./getRegularImageAltTexts";
-import { type FieldDescriptor, getRichTextAndBlocksFields } from "./getRichTextAndBlocksFields";
+import {
+  type FieldDescriptor,
+  getRichTextAndBlocksFields,
+} from "./getRichTextAndBlocksFields";
 
 const converter = new showdown.Converter();
 
@@ -42,7 +45,8 @@ const isImageElementMissingAlt = (element: RichTextBlockNode): boolean => {
 
 const isMediaAttrElementMissingAlt = (element: RichTextBlockNode): boolean => {
   if (element.type === "image" && element.image) return false;
-  const isMediaType = element.type === "image" || element.type === "mediaLibraryImage";
+  const isMediaType =
+    element.type === "image" || element.type === "mediaLibraryImage";
   if (!isMediaType || !element.attrs) return false;
   return !element.attrs.alt && !element.attrs.alternativeText;
 };
@@ -53,7 +57,10 @@ const countMissingBlockImageAlts = (nodes: RichTextBlockNode[]): number => {
   nodes.forEach((element) => {
     if (!element || typeof element !== "object") return;
 
-    if (isImageElementMissingAlt(element) || isMediaAttrElementMissingAlt(element)) {
+    if (
+      isImageElementMissingAlt(element) ||
+      isMediaAttrElementMissingAlt(element)
+    ) {
       missingCount += 1;
     }
 
@@ -68,7 +75,9 @@ const countMissingBlockImageAlts = (nodes: RichTextBlockNode[]): number => {
   return missingCount;
 };
 
-const extractNodesFromParsedObject = (value: unknown): RichTextBlockNode[] | null => {
+const extractNodesFromParsedObject = (
+  value: unknown
+): RichTextBlockNode[] | null => {
   if (Array.isArray(value)) {
     return value as RichTextBlockNode[];
   }
@@ -81,7 +90,9 @@ const extractNodesFromParsedObject = (value: unknown): RichTextBlockNode[] | nul
   return null;
 };
 
-const tryParseJsonStringNodes = (rawString: string): RichTextBlockNode[] | null => {
+const tryParseJsonStringNodes = (
+  rawString: string
+): RichTextBlockNode[] | null => {
   const trimmed = rawString.trim();
   if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
     return null;
@@ -93,7 +104,9 @@ const tryParseJsonStringNodes = (rawString: string): RichTextBlockNode[] | null 
   }
 };
 
-const tryParseRichTextNodes = (rawValue: unknown): RichTextBlockNode[] | null => {
+const tryParseRichTextNodes = (
+  rawValue: unknown
+): RichTextBlockNode[] | null => {
   if (typeof rawValue === "string") {
     return tryParseJsonStringNodes(rawValue);
   }
@@ -119,12 +132,18 @@ const getEmptyAltCount = (
   let blockOccurences = 0;
 
   if (isBlock && Array.isArray(richtext)) {
-    blockOccurences = countMissingBlockImageAlts(richtext as RichTextBlockNode[]);
+    blockOccurences = countMissingBlockImageAlts(
+      richtext as RichTextBlockNode[]
+    );
   } else if (typeof richtext === "string" && richtext) {
-    markdownOccurrences = richtext.split("\n").filter((entry) => entry.includes("![](")).length;
+    markdownOccurrences = richtext
+      .split("\n")
+      .filter((entry) => entry.includes("![](")).length;
 
     const htmlImages = richtext.match(/<img[^>]*\/?>/g) || [];
-    htmlOccurrences = htmlImages.filter((image) => !image.includes("alt=")).length;
+    htmlOccurrences = htmlImages.filter(
+      (image) => !image.includes("alt=")
+    ).length;
   }
 
   return {
@@ -180,10 +199,18 @@ const buildKeywordDensityObject = (
   keywords.forEach((keyword) => {
     if (!isEmpty(keyword)) {
       const trimmedKeyword = keyword.trim();
-      const regex = new RegExp(trimmedKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g");
+      const regex = new RegExp(
+        trimmedKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "g"
+      );
       const count = (words.join(" ").match(regex) || []).length;
 
-      if (!Object.prototype.hasOwnProperty.call(tempKeywordsDensity, trimmedKeyword)) {
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          tempKeywordsDensity,
+          trimmedKeyword
+        )
+      ) {
         tempKeywordsDensity[trimmedKeyword] = { count };
       } else {
         tempKeywordsDensity[trimmedKeyword].count += count;
@@ -194,7 +221,9 @@ const buildKeywordDensityObject = (
   return tempKeywordsDensity;
 };
 
-const adjustIntersections = (data: RichTextAnalysisResult): RichTextAnalysisResult => {
+const adjustIntersections = (
+  data: RichTextAnalysisResult
+): RichTextAnalysisResult => {
   const { emptyAltCount } = data;
   let occurrences = 0;
 
@@ -224,10 +253,19 @@ const recordIncrease = (
   isBlock: boolean,
   name: string | null = null
 ) => {
-  const { words, length, emptyAlts } = increaseCounter(base, field, isBlock, name);
+  const { words, length, emptyAlts } = increaseCounter(
+    base,
+    field,
+    isBlock,
+    name
+  );
   acc.wordCount += length;
   acc.targetAlts.push(emptyAlts);
-  acc.keywordsDensity = buildKeywordDensityObject(acc.keywords, words, acc.keywordsDensity);
+  acc.keywordsDensity = buildKeywordDensityObject(
+    acc.keywords,
+    words,
+    acc.keywordsDensity
+  );
 };
 
 const processComponentFieldItem = (
@@ -241,7 +279,13 @@ const processComponentFieldItem = (
   if (isArray(item)) {
     item.forEach((entry) => {
       if (entry && typeof entry === "object") {
-        recordIncrease(acc, entry as Record<string, unknown>, field, isBlock, name);
+        recordIncrease(
+          acc,
+          entry as Record<string, unknown>,
+          field,
+          isBlock,
+          name
+        );
       }
     });
   } else {
@@ -276,13 +320,26 @@ const processSingleFieldDescriptor = (
     return;
   }
 
-  const dzComponents = get<Array<Record<string, unknown>>>(modifiedData, data.inDz, []);
+  const dzComponents = get<Array<Record<string, unknown>>>(
+    modifiedData,
+    data.inDz,
+    []
+  );
   if (isEmpty(dzComponents)) return;
 
-  const matchingComponents = dzComponents.filter((x) => x.__component === data.name);
+  const matchingComponents = dzComponents.filter(
+    (x) => x.__component === data.name
+  );
   matchingComponents.forEach((component) => {
     const item = get<unknown>(component, data.field!, []);
-    processComponentFieldItem(acc, item, component, data.field!, isBlock, data.name);
+    processComponentFieldItem(
+      acc,
+      item,
+      component,
+      data.field!,
+      isBlock,
+      data.name
+    );
   });
 };
 
@@ -297,7 +354,10 @@ export const getRichTextData = (
     modifiedData
   );
 
-  const { intersections, altTexts } = getRegularImageAltTexts(contentType, modifiedData);
+  const { intersections, altTexts } = getRegularImageAltTexts(
+    contentType,
+    modifiedData
+  );
 
   const emptyAltCount: EmptyAltCount = {
     intersections,
@@ -308,7 +368,9 @@ export const getRichTextData = (
 
   const seoKeywords = modifiedData?.seo?.keywords ?? "";
   const keywords =
-    typeof seoKeywords === "string" && seoKeywords ? seoKeywords.toLowerCase().split(",") : [];
+    typeof seoKeywords === "string" && seoKeywords
+      ? seoKeywords.toLowerCase().split(",")
+      : [];
 
   const richTextAcc: AnalysisAccumulator = {
     wordCount: 0,

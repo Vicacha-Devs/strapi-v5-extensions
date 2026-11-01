@@ -1,6 +1,9 @@
 import isNull from "lodash/isNull";
 
-import type { ContentManagerFormValues, ContentTypeSchemaInfo } from "../../../../../shared";
+import type {
+  ContentManagerFormValues,
+  ContentTypeSchemaInfo,
+} from "../../../../../shared";
 
 const recursiveSearch = (
   obj: Record<string, unknown>,
@@ -22,7 +25,11 @@ const recursiveSearch = (
     if (key === keyword && typeof value !== "object") {
       alternativeTexts.push(typeof value === "string" ? value : "");
       imageNames.push(typeof obj.name === "string" ? obj.name : "");
-    } else if (typeof value === "object" && !relations.includes(key) && !isNull(value)) {
+    } else if (
+      typeof value === "object" &&
+      !relations.includes(key) &&
+      !isNull(value)
+    ) {
       recursiveSearch(
         value as Record<string, unknown>,
         keyword,
