@@ -1,8 +1,18 @@
-import { Badge, Box, EmptyStateLayout, Flex, Modal, Typography } from "@strapi/design-system";
+import {
+  Badge,
+  Box,
+  EmptyStateLayout,
+  Flex,
+  Modal,
+  Typography,
+} from "@strapi/design-system";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { ContentManagerFormValues, OpenGraphData } from "../../../../../../../shared";
+import type {
+  ContentManagerFormValues,
+  OpenGraphData,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { Illo } from "../../../../HomePage/Main/EmptyComponentLayout/illo";
 import { FacebookOGPreview } from "./Facebook";
@@ -15,7 +25,8 @@ interface OpenGraphPreviewProps {
 
 export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
   const { formatMessage } = useIntl();
-  const openGraph: OpenGraphData | null | undefined = modifiedData?.seo?.openGraph;
+  const openGraph: OpenGraphData | null | undefined =
+    modifiedData?.seo?.openGraph;
 
   return (
     <Modal.Content labelledBy="title">
@@ -28,7 +39,9 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
         </Typography>
       </Modal.Header>
       <Modal.Body>
-        {openGraph?.ogTitle && openGraph?.ogDescription && openGraph?.ogImage ? (
+        {openGraph?.ogTitle &&
+        openGraph?.ogDescription &&
+        openGraph?.ogImage ? (
           <>
             <Flex alignItems="left" direction="column" gap={2}>
               <Flex gap={1}>

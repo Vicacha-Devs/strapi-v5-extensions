@@ -21,7 +21,10 @@ const isContentManagerVisible = (ct: Core.ContentTypeSchema): boolean => {
   return pluginOptions?.["content-manager"]?.visible !== false;
 };
 
-const shouldIncludeContentType = (name: string, ct: Core.ContentTypeSchema): boolean => {
+const shouldIncludeContentType = (
+  name: string,
+  ct: Core.ContentTypeSchema
+): boolean => {
   if (name.startsWith("api::")) return true;
   return name.startsWith("plugin::") && isContentManagerVisible(ct);
 };
@@ -31,7 +34,10 @@ const resolveGlobalId = (name: string, ct: Core.ContentTypeSchema): string => {
   return ct.info?.displayName ?? name;
 };
 
-const buildContentTypeSeoItem = (name: string, ct: Core.ContentTypeSchema): ContentTypeSeoItem => ({
+const buildContentTypeSeoItem = (
+  name: string,
+  ct: Core.ContentTypeSchema
+): ContentTypeSeoItem => ({
   seo: Boolean(_.get(ct, "attributes.seo.component", null)),
   uid: ct.uid ?? name,
   kind: ct.kind ?? "collectionType",
@@ -66,7 +72,8 @@ export const seoService = ({ strapi }: { strapi: Core.Strapi }) => ({
 
       const object = buildContentTypeSeoItem(name, ct);
       if (name.startsWith("api::")) {
-        const targetList = ct.kind === "collectionType" ? collectionTypes : singleTypes;
+        const targetList =
+          ct.kind === "collectionType" ? collectionTypes : singleTypes;
         targetList.push(object);
       } else if (isAllowedPluginContentType(name)) {
         plugins.push(object);
@@ -87,23 +94,25 @@ export const seoService = ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     try {
-      return await strapi.plugin("content-type-builder").services.components.createComponent({
-        component: {
-          category: "shared",
-          displayName: seoContent.info.displayName,
-          icon: seoContent.info.icon,
-          attributes: seoContent.attributes,
-        },
-        components: [
-          {
-            tmpUID: "shared.open-graph",
+      return await strapi
+        .plugin("content-type-builder")
+        .services.components.createComponent({
+          component: {
             category: "shared",
-            displayName: openGraph.info.displayName,
-            icon: openGraph.info.icon,
-            attributes: openGraph.attributes,
+            displayName: seoContent.info.displayName,
+            icon: seoContent.info.icon,
+            attributes: seoContent.attributes,
           },
-        ],
-      });
+          components: [
+            {
+              tmpUID: "shared.open-graph",
+              category: "shared",
+              displayName: openGraph.info.displayName,
+              icon: openGraph.info.icon,
+              attributes: openGraph.attributes,
+            },
+          ],
+        });
     } catch (error) {
       strapi.log?.error?.(String(error));
       return null;

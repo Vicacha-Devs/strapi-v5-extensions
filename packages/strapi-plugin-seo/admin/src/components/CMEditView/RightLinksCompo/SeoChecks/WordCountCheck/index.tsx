@@ -5,7 +5,10 @@ import isNumber from "lodash/isNumber";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import type {
+  SeoChecksState,
+  SeoCheckStatus,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { qualityVerdict } from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
@@ -43,7 +46,8 @@ export const WordCountCheck = ({ wordCount, checks }: WordCountCheckProps) => {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.wordCountCheck.300"),
-          defaultMessage: "Your 1st level Richtext contents have less than 300 words.",
+          defaultMessage:
+            "Your 1st level Richtext contents have less than 300 words.",
         }),
         qualityVerdict: qualityVerdict.improvements,
       };

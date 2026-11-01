@@ -1,5 +1,10 @@
 import { Accordion, Box, IconButton, Typography } from "@strapi/design-system";
-import { CheckCircle, CrossCircle, Information, WarningCircle } from "@strapi/icons";
+import {
+  CheckCircle,
+  CrossCircle,
+  Information,
+  WarningCircle,
+} from "@strapi/icons";
 import * as React from "react";
 
 import type { SeoCheckStatus } from "../../../../../../../shared";
@@ -12,7 +17,12 @@ interface SEOAccordionProps {
   label: string;
 }
 
-export const SEOAccordion = ({ title, status, component, label }: SEOAccordionProps) => {
+export const SEOAccordion = ({
+  title,
+  status,
+  component,
+  label,
+}: SEOAccordionProps) => {
   const getIcon = () => {
     switch (status?.qualityVerdict) {
       case qualityVerdict.good:

@@ -12,7 +12,12 @@ interface MetaChecksProps {
   minLimit?: boolean;
 }
 
-export const MetaChecks = ({ item, max, label, minLimit = false }: MetaChecksProps) => {
+export const MetaChecks = ({
+  item,
+  max,
+  label,
+  minLimit = false,
+}: MetaChecksProps) => {
   const { formatMessage } = useIntl();
 
   const getIcon = () => {
@@ -33,7 +38,8 @@ export const MetaChecks = ({ item, max, label, minLimit = false }: MetaChecksPro
         {formatMessage(
           {
             id: getTrad("SEOSocialPreview.meta-length-check"),
-            defaultMessage: "Your {label} is {length} characters long (max {max})",
+            defaultMessage:
+              "Your {label} is {length} characters long (max {max})",
           },
           {
             label,

@@ -32,7 +32,12 @@ export const Header = ({ seoComponent }: HeaderProps) => {
                 })}
               </LinkButton>
             )}
-            <LinkButton tag={NavLink} variant="tertiary" to="/" startIcon={<ArrowLeft />}>
+            <LinkButton
+              tag={NavLink}
+              variant="tertiary"
+              to="/"
+              startIcon={<ArrowLeft />}
+            >
               {formatMessage({
                 id: getTrad("SEOPage.header.button.back"),
                 defaultMessage: "Back",

@@ -10,7 +10,9 @@ export const Serp = ({ metaTitle, metaDescription }: SerpProps) => {
   const metaTitleToDisplay =
     metaTitle.length > 60 ? `${metaTitle.substring(0, 56)} ...` : metaTitle;
   const metaDescriptionToDisplay =
-    metaDescription.length > 160 ? `${metaDescription.substring(0, 156)} ...` : metaDescription;
+    metaDescription.length > 160
+      ? `${metaDescription.substring(0, 156)} ...`
+      : metaDescription;
 
   return (
     <Box padding={4} background="neutral100" width="580px">

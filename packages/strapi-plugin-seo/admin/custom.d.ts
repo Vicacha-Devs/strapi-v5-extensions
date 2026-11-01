@@ -1,5 +1,12 @@
 declare module "react" {
-  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
+  export type ReactNode =
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | ReactElement
+    | ReactNode[];
 
   export interface ReactElement<P = unknown> {
     type: unknown;
@@ -41,7 +48,10 @@ declare module "react" {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
+  export function useEffect(
+    effect: () => void | (() => void),
+    deps?: readonly unknown[]
+  ): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
   export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
@@ -74,8 +84,16 @@ declare module "react" {
 declare module "react/jsx-runtime" {
   import type { ReactElement } from "react";
   export const Fragment: unknown;
-  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
-  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsx(
+    type: unknown,
+    props: unknown,
+    key?: unknown
+  ): ReactElement;
+  export function jsxs(
+    type: unknown,
+    props: unknown,
+    key?: unknown
+  ): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
@@ -149,7 +167,9 @@ declare module "@strapi/strapi/admin" {
     unlockAppWithAutoreload: () => void;
   };
 
-  export const private_AutoReloadOverlayBlockerProvider: FC<{ children?: ReactNode }>;
+  export const private_AutoReloadOverlayBlockerProvider: FC<{
+    children?: ReactNode;
+  }>;
 
   export function unstable_useContentManagerContext(): {
     model: string;
@@ -203,7 +223,9 @@ declare module "@strapi/strapi/admin" {
 
 declare module "@strapi/design-system" {
   import type { FC, ReactNode } from "react";
-  export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
+  export type DesignComponentProps = Record<string, unknown> & {
+    children?: ReactNode;
+  };
 
   export const Alert: FC<DesignComponentProps>;
   export const Badge: FC<DesignComponentProps>;
@@ -303,7 +325,9 @@ declare module "lodash/isArray" {
 }
 
 declare module "lodash/isObject" {
-  export default function isObject(value: unknown): value is Record<string, unknown>;
+  export default function isObject(
+    value: unknown
+  ): value is Record<string, unknown>;
 }
 
 declare module "lodash/pull" {

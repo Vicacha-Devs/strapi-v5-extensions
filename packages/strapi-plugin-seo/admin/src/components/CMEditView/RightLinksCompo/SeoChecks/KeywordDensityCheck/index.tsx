@@ -20,7 +20,10 @@ interface KeywordDensityCheckProps {
   checks: SeoChecksState;
 }
 
-export const KeywordDensityCheck = ({ keywordsDensity, checks }: KeywordDensityCheckProps) => {
+export const KeywordDensityCheck = ({
+  keywordsDensity,
+  checks,
+}: KeywordDensityCheckProps) => {
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
 

@@ -1,4 +1,10 @@
-import { Box, Button, Modal, TextButton, Typography } from "@strapi/design-system";
+import {
+  Box,
+  Button,
+  Modal,
+  TextButton,
+  Typography,
+} from "@strapi/design-system";
 import { ArrowRight, Eye } from "@strapi/icons";
 import {
   unstable_useContentManagerContext as useContentManagerContext,
@@ -41,7 +47,8 @@ const initialState: SeoChecksState = {
   preview: true,
 };
 
-export const SeoCheckerContext = React.createContext<React.Dispatch<SeoCheckerAction> | null>(null);
+export const SeoCheckerContext =
+  React.createContext<React.Dispatch<SeoCheckerAction> | null>(null);
 
 const buildMetaChecksPreview = (
   seoChecks: SeoChecksConfig,
@@ -78,7 +85,8 @@ export const Summary = () => {
   const [localChecks, setLocalChecks] = React.useState<SeoChecksState>({});
   const [checks, dispatch] = React.useReducer(reducer, initialState);
 
-  const { model, collectionType, id, form, contentType, components } = useContentManagerContext();
+  const { model, collectionType, id, form, contentType, components } =
+    useContentManagerContext();
   const { values: modifiedData } = form;
 
   const { metaTitle, metaDescription, openGraph } = modifiedData.seo ?? {};
@@ -122,7 +130,11 @@ export const Summary = () => {
     const fetchChecks = async () => {
       if (!(JSON.stringify(localChecks) === JSON.stringify(checks))) {
         if (checks?.preview) {
-          const status = await getAllChecks(modifiedData, components, contentType);
+          const status = await getAllChecks(
+            modifiedData,
+            components,
+            contentType
+          );
 
           dispatch({
             type: "UPDATE_FOR_PREVIEW",
@@ -146,7 +158,12 @@ export const Summary = () => {
   return (
     <SeoCheckerContext.Provider value={dispatch}>
       <Box paddingTop={4} width="100%">
-        <Typography tag="h2" variant="sigma" textTransform="uppercase" textColor="neutral600">
+        <Typography
+          tag="h2"
+          variant="sigma"
+          textTransform="uppercase"
+          textColor="neutral600"
+        >
           {formatMessage({
             id: getTrad("Plugin.name"),
             defaultMessage: "SEO Plugin",

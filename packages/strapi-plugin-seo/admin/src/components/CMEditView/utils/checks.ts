@@ -44,7 +44,11 @@ export const getMetaTitleCheckPreview = (
 export const getMetaDescriptionPreview = (
   modifiedData: ContentManagerFormValues
 ): SeoCheckStatus => {
-  const metaDescription = get<string | null>(modifiedData, "seo.metaDescription", null);
+  const metaDescription = get<string | null>(
+    modifiedData,
+    "seo.metaDescription",
+    null
+  );
 
   let status: SeoCheckStatus = {
     message: "",
@@ -70,9 +74,19 @@ export const getMetaDescriptionPreview = (
   return status;
 };
 
-export const getAlternativeTextPreview = (emptyAltCount: EmptyAltCount): SeoCheckStatus => {
-  const intersections = get<number | null>(emptyAltCount, "intersections", null);
-  const richTextAlts = get<EmptyAltCount["richTextAlts"]>(emptyAltCount, "richTextAlts", []);
+export const getAlternativeTextPreview = (
+  emptyAltCount: EmptyAltCount
+): SeoCheckStatus => {
+  const intersections = get<number | null>(
+    emptyAltCount,
+    "intersections",
+    null
+  );
+  const richTextAlts = get<EmptyAltCount["richTextAlts"]>(
+    emptyAltCount,
+    "richTextAlts",
+    []
+  );
   const altTexts = get<string[]>(emptyAltCount, "altTexts", []);
 
   let status: SeoCheckStatus = {
@@ -80,7 +94,9 @@ export const getAlternativeTextPreview = (emptyAltCount: EmptyAltCount): SeoChec
     qualityVerdict: qualityVerdict.good,
   };
 
-  const missingRichTextAlt = richTextAlts.filter((x) => x.occurences !== 0).length;
+  const missingRichTextAlt = richTextAlts.filter(
+    (x) => x.occurences !== 0
+  ).length;
   if (intersections === 0) {
     status = {
       message: "",
@@ -100,7 +116,9 @@ export const getAlternativeTextPreview = (emptyAltCount: EmptyAltCount): SeoChec
   return status;
 };
 
-export const getWordCountPreview = (wordCount: number | null): SeoCheckStatus => {
+export const getWordCountPreview = (
+  wordCount: number | null
+): SeoCheckStatus => {
   let status: SeoCheckStatus = {
     message: "",
     qualityVerdict: qualityVerdict.good,
@@ -115,7 +133,9 @@ export const getWordCountPreview = (wordCount: number | null): SeoCheckStatus =>
   return status;
 };
 
-export const getKeywordDensityPreview = (keywordsDensity: KeywordDensityMap): SeoCheckStatus => {
+export const getKeywordDensityPreview = (
+  keywordsDensity: KeywordDensityMap
+): SeoCheckStatus => {
   let status: SeoCheckStatus = {
     message: "",
     qualityVerdict: qualityVerdict.good,
@@ -146,8 +166,14 @@ export const getKeywordDensityPreview = (keywordsDensity: KeywordDensityMap): Se
   return status;
 };
 
-export const canonicalUrlPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
-  const canonicalUrl = get<string | null>(modifiedData, "seo.canonicalURL", null);
+export const canonicalUrlPreview = (
+  modifiedData: ContentManagerFormValues
+): SeoCheckStatus => {
+  const canonicalUrl = get<string | null>(
+    modifiedData,
+    "seo.canonicalURL",
+    null
+  );
   let status: SeoCheckStatus = {
     message: "",
     qualityVerdict: qualityVerdict.good,
@@ -161,7 +187,9 @@ export const canonicalUrlPreview = (modifiedData: ContentManagerFormValues): Seo
   return status;
 };
 
-export const lastUpdatedAtPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
+export const lastUpdatedAtPreview = (
+  modifiedData: ContentManagerFormValues
+): SeoCheckStatus => {
   const updatedAt = get<string | null>(modifiedData, "updatedAt", null);
 
   let status: SeoCheckStatus = {
@@ -176,7 +204,9 @@ export const lastUpdatedAtPreview = (modifiedData: ContentManagerFormValues): Se
     };
   } else {
     const oneYearAgo = Date.parse(
-      new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString()
+      new Date(
+        new Date().setFullYear(new Date().getFullYear() - 1)
+      ).toISOString()
     );
     if (Date.parse(updatedAt) >= oneYearAgo) {
       status = {
@@ -188,7 +218,9 @@ export const lastUpdatedAtPreview = (modifiedData: ContentManagerFormValues): Se
   return status;
 };
 
-export const metaRobotPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
+export const metaRobotPreview = (
+  modifiedData: ContentManagerFormValues
+): SeoCheckStatus => {
   const metaRobots = get<string | null>(modifiedData, "seo.metaRobots", null);
   if (isNull(metaRobots) || isEmpty(metaRobots)) {
     return {
@@ -202,8 +234,14 @@ export const metaRobotPreview = (modifiedData: ContentManagerFormValues): SeoChe
   };
 };
 
-export const openGraphPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
-  const openGraph = get<OpenGraphData | null>(modifiedData, "seo.openGraph", null);
+export const openGraphPreview = (
+  modifiedData: ContentManagerFormValues
+): SeoCheckStatus => {
+  const openGraph = get<OpenGraphData | null>(
+    modifiedData,
+    "seo.openGraph",
+    null
+  );
 
   let status: SeoCheckStatus = {
     message: "",
@@ -215,7 +253,11 @@ export const openGraphPreview = (modifiedData: ContentManagerFormValues): SeoChe
       message: "",
       qualityVerdict: qualityVerdict.bad,
     };
-  } else if (!openGraph.ogTitle || !openGraph.ogDescription || !openGraph.ogImage) {
+  } else if (
+    !openGraph.ogTitle ||
+    !openGraph.ogDescription ||
+    !openGraph.ogImage
+  ) {
     status = {
       message: "",
       qualityVerdict: qualityVerdict.improvements,
@@ -224,7 +266,9 @@ export const openGraphPreview = (modifiedData: ContentManagerFormValues): SeoChe
   return status;
 };
 
-export const structuredDataPreview = (modifiedData: ContentManagerFormValues): SeoCheckStatus => {
+export const structuredDataPreview = (
+  modifiedData: ContentManagerFormValues
+): SeoCheckStatus => {
   const structuredData = get<unknown>(modifiedData, "seo.structuredData", null);
   let status: SeoCheckStatus = {
     message: "",

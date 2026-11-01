@@ -40,13 +40,17 @@ const collectFieldsByType = (
   fieldType: "richtext" | "blocks"
 ): FieldDescriptor[] => {
   const fields: FieldDescriptor[] = [];
-  const attributes: Record<string, SchemaAttribute> = contentType?.attributes ?? {};
+  const attributes: Record<string, SchemaAttribute> =
+    contentType?.attributes ?? {};
   const safeComponents: ComponentSchemasMap = components ?? {};
 
   Object.entries(attributes).forEach(([field, fieldProperties]) => {
     if (matchesFieldType(fieldProperties, fieldType)) {
       fields.push({ name: field, field: null });
-    } else if (fieldProperties?.type === "component" && fieldProperties.component) {
+    } else if (
+      fieldProperties?.type === "component" &&
+      fieldProperties.component
+    ) {
       const compAttrs: Record<string, SchemaAttribute> =
         safeComponents[fieldProperties.component]?.attributes ?? {};
       Object.entries(compAttrs).forEach(([field2, fieldProperties2]) => {
@@ -58,7 +62,8 @@ const collectFieldsByType = (
   });
 
   Object.entries(safeComponents).forEach(([componentName, componentData]) => {
-    const compAttrs: Record<string, SchemaAttribute> = componentData?.attributes ?? {};
+    const compAttrs: Record<string, SchemaAttribute> =
+      componentData?.attributes ?? {};
     Object.entries(compAttrs).forEach(([field, fieldProperties]) => {
       if (matchesFieldType(fieldProperties, fieldType)) {
         fields.push({ name: componentName, field });
@@ -85,21 +90,33 @@ export const getRichTextAndBlocksFields = (
     }
   });
 
-  const richTextFields = collectFieldsByType(contentType, components, "richtext");
+  const richTextFields = collectFieldsByType(
+    contentType,
+    components,
+    "richtext"
+  );
   const blockFields = collectFieldsByType(contentType, components, "blocks");
 
   const filterFields = (fields: FieldDescriptor[]) => {
     dynamicZones.forEach((dz) => {
-      const dynamicZoneData = get<Array<Record<string, unknown>>>(modifiedData, dz, []);
+      const dynamicZoneData = get<Array<Record<string, unknown>>>(
+        modifiedData,
+        dz,
+        []
+      );
 
       fields.forEach((field, index) => {
-        const componentExistsInDZ = dynamicZoneData.filter((x) => x.__component === field.name);
+        const componentExistsInDZ = dynamicZoneData.filter(
+          (x) => x.__component === field.name
+        );
 
         if (
           !isEmpty(componentExistsInDZ) &&
           !field.inDz &&
           field.field &&
-          dynamicZoneData.find((x) => Object.prototype.hasOwnProperty.call(x, field.field!))
+          dynamicZoneData.find((x) =>
+            Object.prototype.hasOwnProperty.call(x, field.field!)
+          )
         ) {
           fields[index] = { ...field, inDz: dz };
         }

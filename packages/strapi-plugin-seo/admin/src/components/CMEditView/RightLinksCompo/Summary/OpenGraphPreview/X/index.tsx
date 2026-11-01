@@ -8,7 +8,11 @@ interface TwitterOGPreviewProps {
   description: string;
 }
 
-export const TwitterOGPreview = ({ image, title, description }: TwitterOGPreviewProps) => {
+export const TwitterOGPreview = ({
+  image,
+  title,
+  description,
+}: TwitterOGPreviewProps) => {
   return (
     <div
       style={{
@@ -30,7 +34,9 @@ export const TwitterOGPreview = ({ image, title, description }: TwitterOGPreview
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div style={{ width: "100%", position: "relative", paddingTop: "52.5%" }}>
+        <div
+          style={{ width: "100%", position: "relative", paddingTop: "52.5%" }}
+        >
           <img
             src={image.url}
             alt={title}

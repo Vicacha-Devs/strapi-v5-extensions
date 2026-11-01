@@ -17,7 +17,10 @@ import * as React from "react";
 import { useIntl } from "react-intl";
 import { NavLink } from "react-router-dom";
 
-import type { ContentTypeSeoItem, ContentTypesResponse } from "../../../../../shared";
+import type {
+  ContentTypeSeoItem,
+  ContentTypesResponse,
+} from "../../../../../shared";
 import { getTrad } from "../../../utils/getTrad";
 import { Illo } from "./EmptyComponentLayout/illo";
 import { SettingsModal } from "./SettingsModal";
@@ -82,7 +85,12 @@ const ContentTypeTabTable = ({
 
   const createAction =
     createLinkTo && createButtonId ? (
-      <LinkButton tag={NavLink} to={createLinkTo} variant="secondary" startIcon={<Plus />}>
+      <LinkButton
+        tag={NavLink}
+        to={createLinkTo}
+        variant="secondary"
+        startIcon={<Plus />}
+      >
         {formatMessage({
           id: getTrad(createButtonId),
           defaultMessage: createButtonDefaultMessage,
@@ -135,7 +143,11 @@ export const Main = ({ contentTypes }: MainProps) => {
 
   return (
     <Box padding={8}>
-      <Tabs.Root id="tabs" variant="simple" defaultValue={TabValues.collectionTypes}>
+      <Tabs.Root
+        id="tabs"
+        variant="simple"
+        defaultValue={TabValues.collectionTypes}
+      >
         <Tabs.List>
           <Tabs.Trigger value={TabValues.collectionTypes}>
             <Typography>

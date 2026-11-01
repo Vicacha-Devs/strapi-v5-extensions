@@ -17,7 +17,8 @@ import { getTrad } from "../../utils/getTrad";
 
 export const HomePage = React.memo(() => {
   const { get, post } = useFetchClient();
-  const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
+  const { lockAppWithAutoreload, unlockAppWithAutoreload } =
+    useAutoReloadOverlayBlocker();
 
   const { formatMessage } = useIntl();
   const [isLoading, setIsLoading] = React.useState(true);
@@ -28,7 +29,9 @@ export const HomePage = React.memo(() => {
 
   const fetchSeoComponent = async () => {
     try {
-      const { data } = await get<Record<string, unknown> | null>(`/${pluginId}/component`);
+      const { data } = await get<Record<string, unknown> | null>(
+        `/${pluginId}/component`
+      );
       return data;
     } catch {
       return null;
@@ -37,7 +40,9 @@ export const HomePage = React.memo(() => {
 
   const fetchContentTypes = async () => {
     try {
-      const { data } = await get<ContentTypesResponse>(`/${pluginId}/content-types`);
+      const { data } = await get<ContentTypesResponse>(
+        `/${pluginId}/content-types`
+      );
       return data;
     } catch {
       return null;
@@ -46,7 +51,9 @@ export const HomePage = React.memo(() => {
 
   const createSeoComponent = async () => {
     try {
-      const { data } = await post<Record<string, unknown> | null>(`/${pluginId}/component`);
+      const { data } = await post<Record<string, unknown> | null>(
+        `/${pluginId}/component`
+      );
       return data;
     } catch {
       return null;

@@ -8,7 +8,11 @@ interface FacebookOGPreviewProps {
   description: string;
 }
 
-export const FacebookOGPreview = ({ image, title, description }: FacebookOGPreviewProps) => {
+export const FacebookOGPreview = ({
+  image,
+  title,
+  description,
+}: FacebookOGPreviewProps) => {
   return (
     <div
       style={{
@@ -27,7 +31,9 @@ export const FacebookOGPreview = ({ image, title, description }: FacebookOGPrevi
           backgroundPosition: "center",
         }}
       >
-        <div style={{ width: "100%", position: "relative", paddingTop: "52.5%" }}>
+        <div
+          style={{ width: "100%", position: "relative", paddingTop: "52.5%" }}
+        >
           <img
             src={image.url}
             alt={title}
@@ -43,7 +49,13 @@ export const FacebookOGPreview = ({ image, title, description }: FacebookOGPrevi
         </div>
       </div>
 
-      <div style={{ backgroundColor: "#f2f3f5", padding: "12px 10px", lineHeight: "1.4" }}>
+      <div
+        style={{
+          backgroundColor: "#f2f3f5",
+          padding: "12px 10px",
+          lineHeight: "1.4",
+        }}
+      >
         <div
           style={{
             fontSize: "12px",

@@ -29,7 +29,9 @@ export const settingsService = ({ strapi }: { strapi: Core.Strapi }) => {
     return pluginStore.get<SeoSettingsMap>({ key: "settings" });
   };
 
-  const createConfigFromData = async (settings: SeoSettingsMap): Promise<SeoSettingsMap> => {
+  const createConfigFromData = async (
+    settings: SeoSettingsMap
+  ): Promise<SeoSettingsMap> => {
     const pluginStore = getPluginStore();
     await pluginStore.set({ key: "settings", value: settings });
     return pluginStore.get<SeoSettingsMap>({ key: "settings" });
@@ -45,7 +47,10 @@ export const settingsService = ({ strapi }: { strapi: Core.Strapi }) => {
       let updated = false;
       const keys = Object.keys(strapi.contentTypes || {});
       keys.forEach((key) => {
-        if ((key.includes("api::") || key.includes("plugin::")) && !config[key]) {
+        if (
+          (key.includes("api::") || key.includes("plugin::")) &&
+          !config[key]
+        ) {
           config[key] = {
             collectionName: key.split(".").pop() || key,
             seoChecks: { ...DEFAULT_SEO_CHECKS },

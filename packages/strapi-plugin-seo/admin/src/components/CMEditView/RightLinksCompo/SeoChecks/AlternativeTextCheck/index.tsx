@@ -39,7 +39,9 @@ export const AlternativeTextCheck = ({
   };
 
   React.useEffect(() => {
-    const missingRichTextAlt = richTextAlts.filter((x) => x.occurences !== 0).length;
+    const missingRichTextAlt = richTextAlts.filter(
+      (x) => x.occurences !== 0
+    ).length;
 
     if (intersections === 0) {
       status = {
@@ -55,7 +57,8 @@ export const AlternativeTextCheck = ({
       status = {
         message: `${count} ${formatMessage({
           id: getTrad("SEOChecks.alternativeTextCheck.intersection-negative"),
-          defaultMessage: "Some images from a media field are missing an alt attribute.",
+          defaultMessage:
+            "Some images from a media field are missing an alt attribute.",
         })}`,
         qualityVerdict: qualityVerdict.improvements,
       };
@@ -99,7 +102,8 @@ export const AlternativeTextCheck = ({
               </Typography>
               {formatMessage({
                 id: getTrad("SEOChecks.alternativeTextCheck.missing-image"),
-                defaultMessage: "missing on first level image fields or inside a component.",
+                defaultMessage:
+                  "missing on first level image fields or inside a component.",
               })}
             </Typography>
           </Flex>
@@ -112,8 +116,11 @@ export const AlternativeTextCheck = ({
                   <Typography paddingLeft={1}>
                     <Typography fontWeight="bold">{alt.occurences} </Typography>
                     {formatMessage({
-                      id: getTrad("SEOChecks.alternativeTextCheck.missing-text"),
-                      defaultMessage: "missing alt in the following richtext field:",
+                      id: getTrad(
+                        "SEOChecks.alternativeTextCheck.missing-text"
+                      ),
+                      defaultMessage:
+                        "missing alt in the following richtext field:",
                     })}
                     <Typography fontWeight="bold"> {alt.field}</Typography>
                   </Typography>
@@ -121,7 +128,13 @@ export const AlternativeTextCheck = ({
               )}
             </Flex>
           ))}
-          <Flex spacing={2} paddingTop={4} paddingLeft={2} paddingRight={2} paddingBottom={4}>
+          <Flex
+            spacing={2}
+            paddingTop={4}
+            paddingLeft={2}
+            paddingRight={2}
+            paddingBottom={4}
+          >
             <Status variant="secondary" showBullet={false}>
               <Typography>
                 <Typography fontWeight="bold">

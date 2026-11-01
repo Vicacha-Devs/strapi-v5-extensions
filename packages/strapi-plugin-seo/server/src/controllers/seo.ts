@@ -17,7 +17,10 @@ export const seoController = ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     try {
-      const data = await strapi.plugin("seo").service("seo").createSeoComponent();
+      const data = await strapi
+        .plugin("seo")
+        .service("seo")
+        .createSeoComponent();
       if (data && typeof strapi.reload === "function") {
         setImmediate(() => strapi.reload!());
       }

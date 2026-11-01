@@ -14,7 +14,9 @@ interface KeywordCheckProps {
 export const KeywordCheck = ({ item, keywords, label }: KeywordCheckProps) => {
   const { formatMessage } = useIntl();
   const _keywords = keywords.split(",");
-  const matches = _keywords.filter((x) => item.toLowerCase().includes(x.toLowerCase().trim()));
+  const matches = _keywords.filter((x) =>
+    item.toLowerCase().includes(x.toLowerCase().trim())
+  );
 
   const getIcon = () => {
     if (matches.length === 0) {
@@ -30,7 +32,8 @@ export const KeywordCheck = ({ item, keywords, label }: KeywordCheckProps) => {
         {formatMessage(
           {
             id: getTrad("SEOSocialPreview.keyword-check"),
-            defaultMessage: "You use {count} keyword(s) in your {label} ({matches})",
+            defaultMessage:
+              "You use {count} keyword(s) in your {label} ({matches})",
           },
           {
             count: matches.length,

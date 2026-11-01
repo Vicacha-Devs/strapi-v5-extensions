@@ -1,6 +1,12 @@
-import type { SeoCheckerAction, SeoChecksState } from "../../../../../../shared";
+import type {
+  SeoCheckerAction,
+  SeoChecksState,
+} from "../../../../../../shared";
 
-export function reducer(state: SeoChecksState, action: SeoCheckerAction): SeoChecksState {
+export function reducer(
+  state: SeoChecksState,
+  action: SeoCheckerAction
+): SeoChecksState {
   switch (action.type) {
     case "UPDATE_PONCTUAL":
       return {

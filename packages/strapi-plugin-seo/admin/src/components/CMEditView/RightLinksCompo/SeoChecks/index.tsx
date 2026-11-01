@@ -1,4 +1,9 @@
-import { Box, EmptyStateLayout, Modal, Typography } from "@strapi/design-system";
+import {
+  Box,
+  EmptyStateLayout,
+  Modal,
+  Typography,
+} from "@strapi/design-system";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -47,11 +52,18 @@ const BasicMetaChecksSection = ({
   keywordsDensity,
 }: BasicMetaChecksSectionProps) => (
   <>
-    {checks?.metaTitle && <MetaTitleCheck metaTitle={seo.metaTitle ?? null} checks={checks} />}
-    {checks?.metaDescription && (
-      <MetaDescriptionCheck metaDescription={seo.metaDescription ?? null} checks={checks} />
+    {checks?.metaTitle && (
+      <MetaTitleCheck metaTitle={seo.metaTitle ?? null} checks={checks} />
     )}
-    {checks?.wordCount && <WordCountCheck wordCount={wordCount} checks={checks} />}
+    {checks?.metaDescription && (
+      <MetaDescriptionCheck
+        metaDescription={seo.metaDescription ?? null}
+        checks={checks}
+      />
+    )}
+    {checks?.wordCount && (
+      <WordCountCheck wordCount={wordCount} checks={checks} />
+    )}
     {checks?.keywordsDensity && (
       <KeywordDensityCheck keywordsDensity={keywordsDensity} checks={checks} />
     )}
@@ -63,16 +75,29 @@ interface TechnicalMetaChecksSectionProps {
   checks: SeoChecksState;
 }
 
-const TechnicalMetaChecksSection = ({ seo, checks }: TechnicalMetaChecksSectionProps) => (
+const TechnicalMetaChecksSection = ({
+  seo,
+  checks,
+}: TechnicalMetaChecksSectionProps) => (
   <>
-    {checks?.openGraph && <OpenGraphCheck openGraph={seo.openGraph ?? null} checks={checks} />}
+    {checks?.openGraph && (
+      <OpenGraphCheck openGraph={seo.openGraph ?? null} checks={checks} />
+    )}
     {checks?.canonicalUrl && (
-      <CanonicalUrlCheck canonicalUrl={seo.canonicalURL ?? null} checks={checks} />
+      <CanonicalUrlCheck
+        canonicalUrl={seo.canonicalURL ?? null}
+        checks={checks}
+      />
     )}
     {checks?.structuredData && (
-      <StructuredDataCheck structuredData={seo.structuredData ?? null} checks={checks} />
+      <StructuredDataCheck
+        structuredData={seo.structuredData ?? null}
+        checks={checks}
+      />
     )}
-    {checks?.metaRobots && <MetaRobotCheck metaRobots={seo.metaRobots ?? null} checks={checks} />}
+    {checks?.metaRobots && (
+      <MetaRobotCheck metaRobots={seo.metaRobots ?? null} checks={checks} />
+    )}
   </>
 );
 
@@ -96,7 +121,9 @@ const MediaAndFreshnessChecksSection = ({
         checks={checks}
       />
     )}
-    {checks?.lastUpdatedAt && <LastUpdatedAtCheck updatedAt={updatedAt} checks={checks} />}
+    {checks?.lastUpdatedAt && (
+      <LastUpdatedAtCheck updatedAt={updatedAt} checks={checks} />
+    )}
   </>
 );
 

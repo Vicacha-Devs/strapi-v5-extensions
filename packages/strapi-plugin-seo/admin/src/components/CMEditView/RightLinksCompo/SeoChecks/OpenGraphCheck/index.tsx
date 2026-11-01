@@ -3,7 +3,11 @@ import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import type { OpenGraphData, SeoChecksState, SeoCheckStatus } from "../../../../../../../shared";
+import type {
+  OpenGraphData,
+  SeoChecksState,
+  SeoCheckStatus,
+} from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
 import { qualityVerdict } from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
@@ -32,7 +36,11 @@ export const OpenGraphCheck = ({ openGraph, checks }: OpenGraphCheckProps) => {
         }),
         qualityVerdict: qualityVerdict.bad,
       };
-    } else if (!openGraph.ogTitle || !openGraph.ogDescription || !openGraph.ogImage) {
+    } else if (
+      !openGraph.ogTitle ||
+      !openGraph.ogDescription ||
+      !openGraph.ogImage
+    ) {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.openGraphCheck.not-configured"),
