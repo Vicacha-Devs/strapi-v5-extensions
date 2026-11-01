@@ -349,6 +349,7 @@ export const plugins: PluginPackageMeta[] = [
     schemaFile: "sitemap",
     dir: "strapi-plugin-sitemap",
     screenshot: "/screenshots/sitemap-admin.png",
+    contentManagerScreenshot: "/screenshots/sitemap-content-manager.png",
     settingsScreenshot: "/screenshots/sitemap-settings.png",
   },
 ];

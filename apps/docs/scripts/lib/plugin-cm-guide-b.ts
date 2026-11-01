@@ -214,7 +214,8 @@ export const PLUGIN_CM_GUIDE_B: Record<string, PluginContentManagerGuide> = {
     ],
   },
   "sitemap": {
-    sidebarGroup: "Maps All Public Content Manager Collection Types & Single Types",
+    sidebarGroup:
+      "Maps All Public Content Manager Collection Types & Single Types",
     cmEntities: [
       "`plugin::sitemap.sitemap-content-type` (Internal URL pattern mapping for Content Manager entities)",
       "`plugin::sitemap.sitemap-content-type-single-url` (Internal custom static URL entries)",
@@ -227,7 +228,8 @@ export const PLUGIN_CM_GUIDE_B: Record<string, PluginContentManagerGuide> = {
     ],
     howToUseSteps: [
       "**Publish Content in Content Manager**: Author and publish localized entries in any `api::*` or `plugin::*` collection inside `/admin/content-manager`.",
-      "**Map URL Patterns in Sitemap Settings**: Open `/admin/settings/sitemap` (or `/admin/settings/strapi-5-sitemap-plugin`) -> **Collection Types** tab and bind each Content Manager collection UID + locale to its frontend route pattern (e.g., `/[locale]/articles/[slug]`).",
+      "**Map URL Patterns in Sitemap Settings**: Open `/admin/settings/sitemap` -> **Collection Types** tab and bind each Content Manager collection UID + locale to its frontend route pattern (e.g., `/[locale]/articles/[slug]`).",
+      "**Configure Sitemap Index, Custom & Excluded URLs**: Use the **General & Sitemap Index** tab (`Use sitemap index with multiple sitemaps` + `getSitemapBySlug in Users & Permissions → Public → Sitemap`), **Custom URLs** tab, and **Excluded URLs** tab in `/admin/settings/sitemap`.",
     ],
     cmMermaid: `flowchart LR
   CM["Publish Localized Documents in Content Manager (api::* & plugin::*)"] --> Map["URL Pattern Mapping (plugin::sitemap.sitemap-content-type)"]

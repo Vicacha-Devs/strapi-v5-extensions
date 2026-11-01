@@ -26,7 +26,10 @@ When a certificate (`plugin::certificates.certificate`) is issued, its canonical
 ```ts
 import { createPrivateKey, createPublicKey, sign, verify } from "node:crypto";
 
-export function signCanonicalPayload(canonicalJson: string, privateKeyPem: string): string {
+export function signCanonicalPayload(
+  canonicalJson: string,
+  privateKeyPem: string
+): string {
   const privateKey = createPrivateKey(privateKeyPem);
   const signature = sign(null, Buffer.from(canonicalJson, "utf8"), privateKey);
   return signature.toString("base64url");
@@ -64,7 +67,9 @@ export function verifyWebhookHmac(
   secret: string
 ): boolean {
   if (!secret || !providedHexSignature) return false;
-  const expected = createHmac("sha256", secret).update(rawBody, "utf8").digest();
+  const expected = createHmac("sha256", secret)
+    .update(rawBody, "utf8")
+    .digest();
   const actual = Buffer.from(providedHexSignature, "hex");
   if (expected.length !== actual.length) return false;
   return timingSafeEqual(expected, actual);

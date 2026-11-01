@@ -8,7 +8,10 @@ interface GuideTemplateEntry {
   body: string;
 }
 
-const GUIDE_TEMPLATES: Record<NonDefaultLocale, Record<string, GuideTemplateEntry>> = {
+const GUIDE_TEMPLATES: Record<
+  NonDefaultLocale,
+  Record<string, GuideTemplateEntry>
+> = {
   es: {
     "getting-started": {
       title: "Primeros Pasos",
@@ -118,7 +121,8 @@ pnpm format:check && pnpm lint && pnpm verify
   ar: {
     "getting-started": {
       title: "البدء السريع",
-      description: "تثبيت وإعداد إضافات @vicacha-devs على نظام Strapi v5 والتحقق من جاهزيتها.",
+      description:
+        "تثبيت وإعداد إضافات @vicacha-devs على نظام Strapi v5 والتحقق من جاهزيتها.",
       body: `## متطلبات النظام الأساسية
 
 | المكون | الإصدار المطلوب | ملاحظات تقنية |
@@ -297,7 +301,9 @@ pnpm format:check && pnpm lint && pnpm verify
   },
 };
 
-export function generateLocalizedLandingAndGuides(contentDocsRoot: string): void {
+export function generateLocalizedLandingAndGuides(
+  contentDocsRoot: string
+): void {
   const locales: NonDefaultLocale[] = ["es", "ar", "tr"];
   for (const locale of locales) {
     const landingMdx = buildLocalizedLanding(locale);
@@ -314,7 +320,11 @@ export function generateLocalizedLandingAndGuides(contentDocsRoot: string): void
         guideData.body.trim(),
         "",
       ].join("\n");
-      writeMarkdownFile(contentDocsRoot, `${locale}/guides/${guideName}.md`, md);
+      writeMarkdownFile(
+        contentDocsRoot,
+        `${locale}/guides/${guideName}.md`,
+        md
+      );
     }
   }
 }

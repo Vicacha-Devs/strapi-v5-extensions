@@ -1,13 +1,22 @@
 #!/usr/bin/env node
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stringify } from "yaml";
 
 import { type PluginPackageMeta, plugins } from "../docs-packages.ts";
 import { assertWithinBoundary } from "./lib/plugin-doc-builder.ts";
-import { loadPluginRoutes, type NormalizedPluginRoute } from "./lib/route-loader.ts";
+import {
+  loadPluginRoutes,
+  type NormalizedPluginRoute,
+} from "./lib/route-loader.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DOCS_ROOT = resolve(HERE, "..");
@@ -53,70 +62,51 @@ interface OpenApiOperation {
   responses: Record<string, unknown>;
 }
 
-function strapiAttrToOpenApi(attr: RawStrapiAttribute): Record<string, unknown> {
-  switch (attr.type) {
-    case "string":
-    case "uid":
-    case "text":
-    case "richtext":
-      return {
-        type: "string",
-        ...(attr.maxLength ? { maxLength: attr.maxLength } : {}),
-        ...(attr.default !== undefined ? { default: attr.default } : {}),
-      };
-    case "email":
-      return { type: "string", format: "email" };
-    case "date":
-      return { type: "string", format: "date" };
-    case "datetime":
-      return { type: "string", format: "date-time" };
-    case "integer":
-    case "biginteger":
-      return {
-        type: "integer",
-        ...(attr.min !== undefined ? { minimum: attr.min } : {}),
-        ...(attr.default !== undefined ? { default: attr.default } : {}),
-      };
-    case "float":
-    case "decimal":
-      return { type: "number" };
-    case "boolean":
-      return {
-        type: "boolean",
-        ...(attr.default !== undefined ? { default: attr.default } : {}),
-      };
-    case "enumeration":
-      return {
-        type: "string",
-        enum: attr.enum || [],
-        ...(attr.default !== undefined ? { default: attr.default } : {}),
-      };
-    case "json":
-      return { type: "object", additionalProperties: true };
-    case "media":
-      return {
-        type: "object",
-        description: "Strapi Media Library asset reference",
-        properties: {
-          id: { type: "integer" },
-          url: { type: "string" },
-          mime: { type: "string" },
-        },
-      };
-    case "relation":
-      return {
-        type: "string",
-        description: `Relation (${attr.relation || "manyToOne"}) to ${attr.target || "target entity"} documentId`,
-      };
-    default:
-      return { type: "string" };
+function strapiAttrToOpenApi(
+  attr: RawStrapiAttribute
+): Record<string, unknown> {
+  const def = attr.default !== undefined ? { default: attr.default } : {};
+  const t = attr.type || "string";
+  if (t === "email" || t === "date") return { type: "string", format: t };
+  if (t === "datetime") return { type: "string", format: "date-time" };
+  if (t === "integer" || t === "biginteger") {
+    return {
+      type: "integer",
+      ...(attr.min !== undefined ? { minimum: attr.min } : {}),
+      ...def,
+    };
   }
+  if (t === "float" || t === "decimal") return { type: "number" };
+  if (t === "boolean") return { type: "boolean", ...def };
+  if (t === "enumeration") {
+    return { type: "string", enum: attr.enum || [], ...def };
+  }
+  if (t === "json") return { type: "object", additionalProperties: true };
+  if (t === "media") {
+    return {
+      type: "object",
+      description: "Strapi Media Library asset reference",
+      properties: {
+        id: { type: "integer" },
+        url: { type: "string" },
+        mime: { type: "string" },
+      },
+    };
+  }
+  if (t === "relation") {
+    return {
+      type: "string",
+      description: `Relation (${attr.relation || "manyToOne"}) to ${attr.target || "target entity"} documentId`,
+    };
+  }
+  return {
+    type: "string",
+    ...(attr.maxLength ? { maxLength: attr.maxLength } : {}),
+    ...def,
+  };
 }
 
-function loadContentTypeSchemas(pkgDir: string): {
-  schemas: Record<string, unknown>;
-  entriesMeta: ContentTypeEntryMeta[];
-} {
+function loadContentTypeSchemas(pkgDir: string) {
   const ctDir = join(pkgDir, "server/src/content-types");
   const schemas: Record<string, unknown> = {};
   const entriesMeta: ContentTypeEntryMeta[] = [];
@@ -127,19 +117,20 @@ function loadContentTypeSchemas(pkgDir: string): {
     const schemaPath = join(ctDir, entry.name, "schema.json");
     if (!existsSync(schemaPath)) continue;
     const raw = JSON.parse(readFileSync(schemaPath, "utf8")) as {
-      info?: {
-        displayName?: string;
-        singularName?: string;
-        pluralName?: string;
-        description?: string;
-      };
+      info?: Record<string, string | undefined>;
       attributes?: Record<string, RawStrapiAttribute>;
     };
-    const displayName = (raw.info?.displayName || entry.name).replace(/[^a-zA-Z0-9]/g, "");
-    const singularName = String(raw.info?.singularName || entry.name).toLowerCase();
-    const pluralName = String(raw.info?.pluralName || `${singularName}s`).toLowerCase();
+    const rawTitle = raw.info?.displayName || entry.name;
+    const displayName = rawTitle.replace(/[^a-zA-Z0-9]/g, "");
+    const singularName = (raw.info?.singularName || entry.name).toLowerCase();
+    const pluralName = (
+      raw.info?.pluralName || `${singularName}s`
+    ).toLowerCase();
     const properties: Record<string, unknown> = {
-      documentId: { type: "string", description: "Strapi v5 Document Service unique identifier" },
+      documentId: {
+        type: "string",
+        description: "Strapi v5 Document Service unique identifier",
+      },
     };
     const required: string[] = [];
 
@@ -151,7 +142,7 @@ function loadContentTypeSchemas(pkgDir: string): {
 
     schemas[displayName] = {
       type: "object",
-      description: raw.info?.description || `${raw.info?.displayName || entry.name} record`,
+      description: raw.info?.description || `${rawTitle} record`,
       properties,
       ...(required.length > 0 ? { required } : {}),
     };
@@ -181,95 +172,105 @@ function resolveSchemaRefForRoute(
   }
 
   for (const meta of entriesMeta) {
-    const tokens = [meta.singularName, meta.pluralName, meta.folderName].flatMap((t) =>
-      t.split(/[-_]+/).filter((w) => w.length >= 4)
-    );
+    const tokens = [
+      meta.singularName,
+      meta.pluralName,
+      meta.folderName,
+    ].flatMap((t) => t.split(/[-_]+/).filter((w) => w.length >= 4));
     if (tokens.some((tok) => hay.includes(tok))) {
       return `#/components/schemas/${meta.displayName}`;
     }
   }
-  if (entriesMeta.length === 1) {
-    return `#/components/schemas/${entriesMeta[0].displayName}`;
-  }
-  return undefined;
+  return entriesMeta.length === 1
+    ? `#/components/schemas/${entriesMeta[0].displayName}`
+    : undefined;
 }
+
+const STATIC_MEDIA_RESPONSES: Array<[string, string, string]> = [
+  [".ics", "text/calendar", "RFC 5545 iCalendar (.ics) stream"],
+  ["/csv", "text/csv", "Formula-injection-safe CSV export"],
+  [".csv", "text/csv", "Formula-injection-safe CSV export"],
+  [".xml", "application/xml", "UTF-8 XML feed / Sitemap document"],
+  ["/print", "text/html", "Printable credential HTML document"],
+  ["/printable", "text/html", "Printable credential HTML document"],
+];
 
 function resolveResponseMediaAndSchema(
   pathStr: string,
   matchedRef: string | undefined
 ): Record<string, unknown> {
-  if (pathStr.endsWith(".ics")) {
-    return {
-      "text/calendar": {
-        schema: { type: "string", description: "RFC 5545 iCalendar (.ics) stream" },
-      },
-    };
+  const staticHit = STATIC_MEDIA_RESPONSES.find(([ext]) =>
+    pathStr.endsWith(ext)
+  );
+  if (staticHit) {
+    const [, media, description] = staticHit;
+    return { [media]: { schema: { type: "string", description } } };
   }
-  if (pathStr.endsWith("/csv") || pathStr.endsWith(".csv")) {
-    return {
-      "text/csv": {
-        schema: { type: "string", description: "Formula-injection-safe CSV export" },
-      },
-    };
-  }
-  if (pathStr.endsWith(".xml")) {
-    return {
-      "application/xml": {
-        schema: { type: "string", description: "UTF-8 XML feed / Sitemap document" },
-      },
-    };
-  }
-  if (pathStr.endsWith("/print") || pathStr.endsWith("/printable")) {
-    return {
-      "text/html": {
-        schema: { type: "string", description: "Printable credential HTML document" },
-      },
-    };
-  }
+  const data = matchedRef
+    ? { $ref: matchedRef }
+    : { type: "object", additionalProperties: true };
   return {
-    "application/json": {
-      schema: matchedRef
-        ? { type: "object", properties: { data: { $ref: matchedRef } } }
-        : {
-            type: "object",
-            properties: { data: { type: "object", additionalProperties: true } },
-          },
-    },
+    "application/json": { schema: { type: "object", properties: { data } } },
   };
 }
 
-function buildQueryParameters(method: string, pathStr: string): OpenApiParameter[] {
+function buildQueryParameters(
+  method: string,
+  pathStr: string
+): OpenApiParameter[] {
   if (method !== "get") return [];
   const p = pathStr.toLowerCase();
-  const params: OpenApiParameter[] = [];
-  const addQ = (name: string, description: string, type = "string"): void => {
-    params.push({ name, in: "query", required: false, description, schema: { type } });
-  };
+  let specs: Array<[string, string, string?]> = [];
 
-  if (p.includes("occurrences") || p.endsWith("feed.ics") || p.endsWith("/calendar")) {
-    addQ("from", "Start of ISO-8601 date/time query window");
-    addQ("to", "End of ISO-8601 date/time query window");
-    addQ("sourceId", "Filter by registered calendar collection source ID");
-    addQ("category", "Filter by category name");
-    addQ("locale", "BCP-47 content/display locale (e.g. en, es, ar, tr)");
+  if (/occurrences|feed\.ics$|\/calendar$/.test(p)) {
+    specs = [
+      ["from", "Start of ISO-8601 date/time query window"],
+      ["to", "End of ISO-8601 date/time query window"],
+      ["sourceId", "Filter by registered calendar collection source ID"],
+      ["category", "Filter by category name"],
+      ["locale", "BCP-47 content/display locale (e.g. en, es, ar, tr)"],
+    ];
   } else if (p.includes("/slots")) {
-    addQ("from", "Start date (YYYY-MM-DD)");
-    addQ("to", "End date (YYYY-MM-DD)");
-    addQ("partySize", "Requested guest count", "integer");
-    addQ("preferredLanguage", "Preferred host language code");
+    specs = [
+      ["from", "Start date (YYYY-MM-DD)"],
+      ["to", "End date (YYYY-MM-DD)"],
+      ["partySize", "Requested guest count", "integer"],
+      ["preferredLanguage", "Preferred host language code"],
+    ];
   } else if (p.includes("/qibla")) {
-    addQ("lat", "Observer latitude in decimal degrees", "number");
-    addQ("lng", "Observer longitude in decimal degrees", "number");
+    specs = [
+      ["lat", "Observer latitude in decimal degrees", "number"],
+      ["lng", "Observer longitude in decimal degrees", "number"],
+    ];
   } else if (p.includes("/prayer-times")) {
-    addQ("date", "Target Gregorian date (YYYY-MM-DD)");
-    addQ("method", "Astronomical calculation method code");
+    specs = [
+      ["date", "Target Gregorian date (YYYY-MM-DD)"],
+      ["method", "Astronomical calculation method code"],
+    ];
   } else if (p.includes("/search")) {
-    addQ("q", "Search query string");
-    addQ("locale", "Filter matches by Strapi locale");
-  } else if (!p.includes("{") && !p.includes("settings") && !p.includes("public-key")) {
-    addQ("locale", "Optional Strapi i18n locale filter");
+    specs = [
+      ["q", "Search query string"],
+      ["locale", "Filter matches by Strapi locale"],
+    ];
+  } else if (p.includes("allowed-fields")) {
+    specs = [
+      ["singularName", "Singular name or UID of the target collection type"],
+      [
+        "populateLinkedModels",
+        "Whether to include first-level relation scalar fields",
+        "boolean",
+      ],
+    ];
+  } else if (!/(\{|settings|public-key|content-types|locales)/.test(p)) {
+    specs = [["locale", "Optional Strapi i18n locale filter"]];
   }
-  return params;
+  return specs.map(([name, description, type = "string"]) => ({
+    name,
+    in: "query",
+    required: false,
+    description,
+    schema: { type },
+  }));
 }
 
 function buildOperationId(method: string, pathStr: string): string {
@@ -282,7 +283,11 @@ function buildOperationId(method: string, pathStr: string): string {
   return `${method.toLowerCase()}${parts.join("")}`;
 }
 
-function humanizeHandler(handler: string, method: string, pathStr: string): string {
+function humanizeHandler(
+  handler: string,
+  method: string,
+  pathStr: string
+): string {
   const action = handler.split(".").pop() || "";
   if (action && action !== "index") {
     return action
@@ -306,31 +311,26 @@ function buildOpenApiSpec(
   routes: NormalizedPluginRoute[],
   contentTypeSchemas: Record<string, unknown>,
   entriesMeta: ContentTypeEntryMeta[]
-): {
-  openapi: string;
-  info: Record<string, string>;
-  servers: Array<Record<string, string>>;
-  paths: Record<string, Record<string, OpenApiOperation>>;
-  components: Record<string, unknown>;
-} {
+) {
   const paths: Record<string, Record<string, OpenApiOperation>> = {};
 
   for (const r of routes) {
     if (!paths[r.path]) paths[r.path] = {};
-    const paramMatches = [...r.path.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
-    const pathParameters: OpenApiParameter[] = paramMatches.map((paramName) => ({
-      name: paramName,
+    const pathParameters: OpenApiParameter[] = [
+      ...r.path.matchAll(/\{(\w+)\}/g),
+    ].map(([, name]) => ({
+      name,
       in: "path",
       required: true,
-      description: `Target ${paramName} identifier`,
+      description: `Target ${name} identifier`,
       schema: { type: "string" },
     }));
-    const queryParameters = buildQueryParameters(r.method, r.path);
-    const parameters = [...pathParameters, ...queryParameters];
+    const parameters = [
+      ...pathParameters,
+      ...buildQueryParameters(r.method, r.path),
+    ];
 
     const tag = r.routeType === "content-api" ? "Content API" : "Admin API";
-    const summary = humanizeHandler(r.handler, r.method, r.path);
-    const operationId = buildOperationId(r.method, r.path);
     const matchedRef = resolveSchemaRefForRoute(r.path, r.handler, entriesMeta);
     const authNote =
       r.routeType === "content-api" && r.authenticated
@@ -338,8 +338,8 @@ function buildOpenApiSpec(
         : "";
 
     const operation: OpenApiOperation = {
-      operationId,
-      summary,
+      operationId: buildOperationId(r.method, r.path),
+      summary: humanizeHandler(r.handler, r.method, r.path),
       description: `Strapi v5 ${tag} endpoint handled by \`${r.handler}\`.${authNote}`,
       tags: [tag],
       ...(parameters.length > 0 ? { parameters } : {}),
@@ -352,8 +352,12 @@ function buildOpenApiSpec(
         "400": { description: "Bad Request — validation or parameter error" },
         ...(r.authenticated
           ? {
-              "401": { description: "Unauthorized — missing or invalid Bearer token" },
-              "403": { description: "Forbidden — insufficient Strapi RBAC permissions" },
+              "401": {
+                description: "Unauthorized — missing or invalid Bearer token",
+              },
+              "403": {
+                description: "Forbidden — insufficient Strapi RBAC permissions",
+              },
             }
           : {}),
       },
@@ -386,7 +390,8 @@ function buildOpenApiSpec(
       title: `${pluginMeta.label} (${pluginMeta.npmName})`,
       version: pkgJson.version || "1.0.0",
       description:
-        pkgJson.description || `OpenAPI specification for ${pluginMeta.npmName} Strapi v5 plugin.`,
+        pkgJson.description ||
+        `OpenAPI specification for ${pluginMeta.npmName} Strapi v5 plugin.`,
     },
     servers: [
       {
@@ -404,7 +409,9 @@ function buildOpenApiSpec(
           description: "Strapi v5 API Token or Admin JWT Bearer authentication",
         },
       },
-      ...(Object.keys(contentTypeSchemas).length > 0 ? { schemas: contentTypeSchemas } : {}),
+      ...(Object.keys(contentTypeSchemas).length > 0
+        ? { schemas: contentTypeSchemas }
+        : {}),
     },
   };
 }
@@ -412,14 +419,14 @@ function buildOpenApiSpec(
 function generateSidebarLinks(
   spec: { paths: Record<string, Record<string, OpenApiOperation>> },
   slug: string
-): Array<{ label: string; collapsed: boolean; items: Array<{ label: string; link: string }> }> {
+) {
   const basePath = `/${slug}/api/`;
   const tagGroups: Record<string, Array<{ label: string; link: string }>> = {};
 
   for (const [, methods] of Object.entries(spec.paths || {})) {
     for (const [, op] of Object.entries(methods)) {
       if (!op.operationId) continue;
-      const tag = (op.tags && op.tags[0]) || "Operations";
+      const tag = op.tags?.[0] || "Operations";
       if (!tagGroups[tag]) tagGroups[tag] = [];
       tagGroups[tag].push({
         label: op.summary || op.operationId,
@@ -428,8 +435,8 @@ function generateSidebarLinks(
     }
   }
 
-  return Object.entries(tagGroups).map(([tag, items]) => ({
-    label: tag,
+  return Object.entries(tagGroups).map(([label, items]) => ({
+    label,
     collapsed: true,
     items,
   }));
@@ -445,20 +452,24 @@ async function main(): Promise<void> {
       resolve(PACKAGES_DIR, basename(pluginMeta.dir)),
       PACKAGES_DIR
     );
-    const pkgJson = JSON.parse(readFileSync(join(pkgDir, "package.json"), "utf8")) as {
-      version?: string;
-      description?: string;
-    };
+    const pkgJson = JSON.parse(
+      readFileSync(join(pkgDir, "package.json"), "utf8")
+    ) as { version?: string; description?: string };
     const routes = await loadPluginRoutes(pkgDir, pluginMeta.pluginId);
     const { schemas: ctSchemas, entriesMeta } = loadContentTypeSchemas(pkgDir);
 
-    const spec = buildOpenApiSpec(pluginMeta, pkgJson, routes, ctSchemas, entriesMeta);
-    const yamlContent = stringify(spec, { lineWidth: 110 });
+    const spec = buildOpenApiSpec(
+      pluginMeta,
+      pkgJson,
+      routes,
+      ctSchemas,
+      entriesMeta
+    );
     const outPath = assertWithinBoundary(
       resolve(OUTPUT_DIR, `${basename(pluginMeta.schemaFile)}.yaml`),
       OUTPUT_DIR
     );
-    writeFileSync(outPath, yamlContent, "utf8");
+    writeFileSync(outPath, stringify(spec, { lineWidth: 110 }), "utf8");
 
     sidebarData[pluginMeta.slug] = generateSidebarLinks(spec, pluginMeta.slug);
     generatedCount++;
@@ -467,9 +478,18 @@ async function main(): Promise<void> {
     );
   }
 
-  const sidebarPath = assertWithinBoundary(resolve(OUTPUT_DIR, "_sidebar.json"), OUTPUT_DIR);
-  writeFileSync(sidebarPath, `${JSON.stringify(sidebarData, null, 2)}\n`, "utf8");
-  console.warn(`[generate-openapi] Done! Generated ${generatedCount} OpenAPI specs.`);
+  const sidebarPath = assertWithinBoundary(
+    resolve(OUTPUT_DIR, "_sidebar.json"),
+    OUTPUT_DIR
+  );
+  writeFileSync(
+    sidebarPath,
+    `${JSON.stringify(sidebarData, null, 2)}\n`,
+    "utf8"
+  );
+  console.warn(
+    `[generate-openapi] Done! Generated ${generatedCount} OpenAPI specs.`
+  );
 }
 
 await main();

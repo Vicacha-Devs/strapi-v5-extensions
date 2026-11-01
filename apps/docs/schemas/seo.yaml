@@ -79,13 +79,6 @@ paths:
       description: Strapi v5 Admin API endpoint handled by `seo.findContentTypes`.
       tags:
         - Admin API
-      parameters:
-        - name: locale
-          in: query
-          required: false
-          description: Optional Strapi i18n locale filter
-          schema:
-            type: string
       security:
         - bearerAuth: []
       responses:

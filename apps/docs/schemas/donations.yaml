@@ -534,6 +534,7 @@ components:
           type: number
         currency:
           type: string
+          default: COP
         donorCount:
           type: integer
           minimum: 0
@@ -629,6 +630,7 @@ components:
           type: number
         currency:
           type: string
+          default: COP
         convertedBaseAmount:
           type: number
         categoryKey:

@@ -51,6 +51,7 @@ Generic multi-language video, podcast, audio lecture, YouTube item, or live broa
 | `title`            | `string`        | Yes    | —                                                                                                 |
 | `slug`             | `uid`           | Yes    | —                                                                                                 |
 | `description`      | `text`          | Yes    | —                                                                                                 |
+| `transcript`       | `richtext`      | No     | —                                                                                                 |
 | `type`             | `string`        | Yes    | default: `"video"`                                                                                |
 | `provider`         | `enumeration`   | No     | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
 | `externalId`       | `string`        | No     | —                                                                                                 |

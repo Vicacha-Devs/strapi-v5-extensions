@@ -51,7 +51,11 @@ pnpm add @vicacha-devs/strapi-plugin-notes \
 Enable and configure your installed plugins in your Strapi v5 host application's `config/plugins.ts`:
 
 ```ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   "calendar": {
     enabled: true,
     config: {
@@ -91,7 +95,10 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
     enabled: true,
     config: {
       organizationName: env("CERTIFICATES_ORG_NAME", "Central Organization"),
-      verificationBaseUrl: env("CERTIFICATES_VERIFY_URL", "https://example.org/verify"),
+      verificationBaseUrl: env(
+        "CERTIFICATES_VERIFY_URL",
+        "https://example.org/verify"
+      ),
     },
   },
   "donations": {

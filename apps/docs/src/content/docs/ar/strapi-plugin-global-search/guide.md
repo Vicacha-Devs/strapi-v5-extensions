@@ -15,7 +15,11 @@ pnpm add @vicacha-devs/strapi-plugin-global-search
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   "global-search": {
     enabled: true,
     config: {

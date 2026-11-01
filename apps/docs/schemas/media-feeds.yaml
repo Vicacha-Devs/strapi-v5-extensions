@@ -285,6 +285,8 @@ components:
           type: string
         description:
           type: string
+        transcript:
+          type: string
         type:
           type: string
           default: video

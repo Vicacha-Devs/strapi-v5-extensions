@@ -20,10 +20,16 @@ pnpm add @vicacha-devs/strapi-plugin-calendar @vicacha-devs/strapi-plugin-events
 ## 2. Configuración en `config/plugins.ts`
 
 ```ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   calendar: {
     enabled: true,
-    config: { defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "America/Bogota") },
+    config: {
+      defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "America/Bogota"),
+    },
   },
   events: { enabled: true },
   bookings: { enabled: true },

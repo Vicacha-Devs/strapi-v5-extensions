@@ -104,7 +104,8 @@ export default () => ({
           id: "ramadan-start",
           label: "Every 1st of Ramadan (Hijri Yearly)",
           rrule: "RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1",
-          description: "Recurs annually on 1 Ramadan in the Islamic Umm al-Qura calendar",
+          description:
+            "Recurs annually on 1 Ramadan in the Islamic Umm al-Qura calendar",
         },
       ],
     },

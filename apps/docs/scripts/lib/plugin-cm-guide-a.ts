@@ -232,7 +232,8 @@ export const PLUGIN_CM_GUIDE_A: Record<string, PluginContentManagerGuide> = {
     ],
   },
   "global-search": {
-    sidebarGroup: "All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)",
+    sidebarGroup:
+      "All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)",
     cmEntities: [
       "Universal Introspection across all `api::*` and `plugin::*` Content Manager Collection Types, Single Types, and Nested Components",
     ],

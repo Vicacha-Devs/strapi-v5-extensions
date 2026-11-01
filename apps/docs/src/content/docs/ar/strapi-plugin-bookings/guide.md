@@ -15,7 +15,11 @@ pnpm add @vicacha-devs/strapi-plugin-calendar @vicacha-devs/strapi-plugin-bookin
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   bookings: {
     enabled: true,
     config: {

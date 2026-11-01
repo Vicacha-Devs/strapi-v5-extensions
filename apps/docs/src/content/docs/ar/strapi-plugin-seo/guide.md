@@ -15,7 +15,11 @@ pnpm add @vicacha-devs/strapi-plugin-seo
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   seo: {
     enabled: true,
     config: {

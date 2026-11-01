@@ -79,7 +79,8 @@ export const PLUGIN_SAMPLE_CONFIG: Record<string, string> = {
     '      baseCurrency: "USD",\n      autoIssueCertificateOnVerify: true,\n      enableCertificatesBridge: true,',
   "events":
     '      defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),\n      defaultCapacity: 100,\n      waitlistEnabledByDefault: true,',
-  "global-search": "      minChars: 2,\n      maxResults: 100,\n      includeDrafts: true,",
+  "global-search":
+    "      minChars: 2,\n      maxResults: 100,\n      includeDrafts: true,",
   "inbox": "      enableRateLimiting: true,\n      doubleOptInRequired: true,",
   "islam":
     '      defaultLat: 4.6685,\n      defaultLon: -74.0758,\n      method: "3",\n      quranFoundation: {\n        defaultScript: "uthmani",\n        defaultReciterId: 7, // Mishari Rashid al-`Afasy\n        defaultChapterReciterId: 7, // Mishari Rashid al-`Afasy\n      },\n      enableInboxAlertBridge: true,',
@@ -123,7 +124,8 @@ export const SITEMAP_INLINE_CONTENT_TYPES: ContentTypeDoc[] = [
     visibleInContentManager: false,
     draftAndPublish: false,
     localized: false,
-    description: "Custom static URL entry included alongside dynamic CMS entries in sitemap.xml",
+    description:
+      "Custom static URL entry included alongside dynamic CMS entries in sitemap.xml",
     attributes: {
       slug: { type: "string" },
       priority: { type: "float" },
@@ -159,15 +161,18 @@ export const LOCALE_TEXT: Record<SupportedLocale, LocaleDocText> = {
       "Content-Type entities, Strapi v5 locations, interactive Pele architecture diagrams, and end-to-end use cases with screenshots for",
     installHeading: "1. Installation & Peer Setup",
     configHeading: "2. Server Configuration (`config/plugins.ts`)",
-    configIntro: "Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:",
+    configIntro:
+      "Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:",
     adminHeading: "3. Strapi v5 Admin UI Tour",
     adminIntro:
       "Once enabled, the plugin registers its workspace and settings inside the Strapi v5 Admin panel using Strapi Design System v2 components:",
     uiKeysHeading: "Key Localized Admin UI Labels",
     uiKeyCol: "Translation Key",
     uiValCol: "Rendered UI Label",
-    schemasHeading: "4. Content-Type Entities, Locations & Schemas (`strapi.documents`)",
-    overviewSchemasHeading: "2. Content-Type Entities, Locations & Schemas (`strapi.documents`)",
+    schemasHeading:
+      "4. Content-Type Entities, Locations & Schemas (`strapi.documents`)",
+    overviewSchemasHeading:
+      "2. Content-Type Entities, Locations & Schemas (`strapi.documents`)",
     whereToFindLabel: "Where to Find Content-Type Entities in Strapi v5",
     useCasesHeading: "5. End-to-End Use Cases & Workflows",
     overviewUseCasesHeading: "3. End-to-End Use Cases & Workflows",
@@ -184,14 +189,16 @@ export const LOCALE_TEXT: Record<SupportedLocale, LocaleDocText> = {
     scopeCol: "Scope",
     handlerCol: "Controller Handler",
     authCol: "Auth",
-    serviceHeading: "7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)",
+    serviceHeading:
+      "7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)",
     troubleshootingHeading: "8. Troubleshooting & Verification",
     troubleshootingItems: [
       "**Admin panel changes not visible**: Run `pnpm strapi build` after modifying `config/plugins.ts`.",
       '**Peer dependency isolation**: Keep `hoistPattern: ["*", "!@strapi/*"]` in `pnpm-workspace.yaml` so `@strapi/*` contexts are never duplicated.',
       "**TypeScript type-checking**: Validate both `admin/tsconfig.json` and `server/tsconfig.json` via `pnpm --filter <pkg> test:ts`.",
     ],
-    exploreUseCasesLink: "Explore Content-Type Entities & Use Cases (with Interactive Diagrams)",
+    exploreUseCasesLink:
+      "Explore Content-Type Entities & Use Cases (with Interactive Diagrams)",
     exploreGuideLink: "Explore the Developer Guide & Admin UI Tour",
     exploreApiLink: "Explore the Interactive OpenAPI Reference",
     featuresHeading: "1. Key Capabilities & Architecture",
@@ -207,14 +214,17 @@ export const LOCALE_TEXT: Record<SupportedLocale, LocaleDocText> = {
     configHeading: "2. Configuración del Servidor (`config/plugins.ts`)",
     configIntro:
       "Agregue la configuración del plugin en el archivo `config/plugins.ts` de su aplicación Strapi v5:",
-    adminHeading: "3. Recorrido por la Interfaz de Administración (Strapi v5 Admin UI)",
+    adminHeading:
+      "3. Recorrido por la Interfaz de Administración (Strapi v5 Admin UI)",
     adminIntro:
       "Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro del panel de administración de Strapi v5 utilizando Strapi Design System v2:",
     uiKeysHeading: "Etiquetas Localizadas de la Interfaz (Español)",
     uiKeyCol: "Clave de Traducción",
     uiValCol: "Texto en Interfaz",
-    schemasHeading: "4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)",
-    overviewSchemasHeading: "2. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)",
+    schemasHeading:
+      "4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)",
+    overviewSchemasHeading:
+      "2. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)",
     whereToFindLabel: "Dónde Encontrar las Entidades Content-Type en Strapi v5",
     useCasesHeading: "5. Casos de Uso y Flujos de Trabajo",
     overviewUseCasesHeading: "3. Casos de Uso y Flujos de Trabajo",
@@ -231,7 +241,8 @@ export const LOCALE_TEXT: Record<SupportedLocale, LocaleDocText> = {
     scopeCol: "Ámbito",
     handlerCol: "Controlador",
     authCol: "Autenticación",
-    serviceHeading: "7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)",
+    serviceHeading:
+      "7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)",
     troubleshootingHeading: "8. Solución de Problemas y Verificación",
     troubleshootingItems: [
       "**Cambios no visibles en el panel Admin**: Ejecute `pnpm strapi build` después de editar `config/plugins.ts`.",
@@ -253,15 +264,18 @@ export const LOCALE_TEXT: Record<SupportedLocale, LocaleDocText> = {
       "كيانات أنواع المحتوى ومواقعها في Strapi v5 ومخططات Pele التفاعلية وحالات الاستخدام المصورة لإضافة",
     installHeading: "1. التثبيت وإعداد الاعتماديات",
     configHeading: "2. إعدادات الخادم (`config/plugins.ts`)",
-    configIntro: "أضف إعدادات الإضافة إلى ملف `config/plugins.ts` في مشروع Strapi v5 الخاص بك:",
+    configIntro:
+      "أضف إعدادات الإضافة إلى ملف `config/plugins.ts` في مشروع Strapi v5 الخاص بك:",
     adminHeading: "3. جولة في واجهة الإدارة (Strapi v5 Admin UI — دعم RTL)",
     adminIntro:
       "بمجرد تفعيل الإضافة، يتم تسجيل مساحة العمل والإعدادات داخل لوحة تحكم Strapi v5 مع دعم كامل للغة العربية واتجاه RTL:",
     uiKeysHeading: "نماذج من نصوص الواجهة المعربة (العربية)",
     uiKeyCol: "مفتاح الترجمة",
     uiValCol: "النص المعروض في الواجهة",
-    schemasHeading: "4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)",
-    overviewSchemasHeading: "2. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)",
+    schemasHeading:
+      "4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)",
+    overviewSchemasHeading:
+      "2. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)",
     whereToFindLabel: "أين تجد كيانات أنواع المحتوى في Strapi v5",
     useCasesHeading: "5. حالات الاستخدام ومسارات العمل المتكاملة",
     overviewUseCasesHeading: "3. حالات الاستخدام ومسارات العمل المتكاملة",
@@ -271,21 +285,25 @@ export const LOCALE_TEXT: Record<SupportedLocale, LocaleDocText> = {
     typeCol: "النوع في Strapi",
     reqCol: "إلزامي",
     detailsCol: "القيود / العلاقات",
-    routesHeading: "6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)",
-    overviewRoutesHeading: "4. نقاط النهاية البرمجية REST API (`content-api` و `admin`)",
+    routesHeading:
+      "6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)",
+    overviewRoutesHeading:
+      "4. نقاط النهاية البرمجية REST API (`content-api` و `admin`)",
     methodCol: "الطريقة",
     pathCol: "مسار نقطة النهاية",
     scopeCol: "النطاق",
     handlerCol: "المعالج (Handler)",
     authCol: "المصادقة",
-    serviceHeading: "7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)",
+    serviceHeading:
+      "7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)",
     troubleshootingHeading: "8. استكشاف الأخطاء والتحقق من الجودة",
     troubleshootingItems: [
       "**عدم ظهور التغييرات في لوحة الإدارة**: قم بتشغيل `pnpm strapi build` بعد تعديل ملف `config/plugins.ts`.",
       '**عزل حزم Strapi**: حافظ على إعداد `hoistPattern: ["*", "!@strapi/*"]` داخل `pnpm-workspace.yaml` لمنع تكرار سياق React.',
       "**فحص الأنواع الصارم (TypeScript)**: قم بتشغيل `pnpm check` للتحقق من سلامة حزمتي الواجهة والخادم.",
     ],
-    exploreUseCasesLink: "استكشف كيانات المحتوى وحالات الاستخدام (مع المخططات التفاعلية)",
+    exploreUseCasesLink:
+      "استكشف كيانات المحتوى وحالات الاستخدام (مع المخططات التفاعلية)",
     exploreGuideLink: "استكشف دليل المطور وواجهة الإدارة",
     exploreApiLink: "استكشف مرجع OpenAPI التفاعلي",
     featuresHeading: "1. المزايا الرئيسية والقدرات المعمارية",
@@ -307,8 +325,10 @@ export const LOCALE_TEXT: Record<SupportedLocale, LocaleDocText> = {
     uiKeysHeading: "Yerelleştirilmiş Arayüz Etiketleri (Türkçe)",
     uiKeyCol: "Çeviri Anahtarı",
     uiValCol: "Arayüz Metni",
-    schemasHeading: "4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)",
-    overviewSchemasHeading: "2. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)",
+    schemasHeading:
+      "4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)",
+    overviewSchemasHeading:
+      "2. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)",
     whereToFindLabel: "Strapi v5 İçinde İçerik Türü Varlıkları Nerede Bulunur?",
     useCasesHeading: "5. Uçtan Uca Kullanım Senaryoları ve İş Akışları",
     overviewUseCasesHeading: "3. Uçtan Uca Kullanım Senaryoları ve İş Akışları",
@@ -319,13 +339,15 @@ export const LOCALE_TEXT: Record<SupportedLocale, LocaleDocText> = {
     reqCol: "Zorunlu",
     detailsCol: "Kısıtlamalar / İlişki",
     routesHeading: "6. REST API Uç Noktaları (`content-api` ve `admin`)",
-    overviewRoutesHeading: "4. REST API Uç Noktaları (`content-api` ve `admin`)",
+    overviewRoutesHeading:
+      "4. REST API Uç Noktaları (`content-api` ve `admin`)",
     methodCol: "Metot",
     pathCol: "Uç Nokta Yolu",
     scopeCol: "Kapsam",
     handlerCol: "Denetleyici (Handler)",
     authCol: "Kimlik Doğrulama",
-    serviceHeading: "7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)",
+    serviceHeading:
+      "7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)",
     troubleshootingHeading: "8. Sorun Giderme ve Doğrulama",
     troubleshootingItems: [
       "**Yönetim paneli değişiklikleri görünmüyor**: `config/plugins.ts` dosyasını güncelledikten sonra `pnpm strapi build` komutunu çalıştırın.",

@@ -15,7 +15,11 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   islam: {
     enabled: true,
     config: {
@@ -249,10 +253,12 @@ flowchart LR
 const pluginService = strapi.plugin("islam")?.service("islamService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi.documents("plugin::islam.hilal-announcement").findMany({
-  limit: 25,
-  sort: "createdAt:desc",
-});
+const records = await strapi
+  .documents("plugin::islam.hilal-announcement")
+  .findMany({
+    limit: 25,
+    sort: "createdAt:desc",
+  });
 ```
 
 ## 8. Troubleshooting & Verification

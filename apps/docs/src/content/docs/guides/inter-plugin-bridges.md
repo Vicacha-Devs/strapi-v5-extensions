@@ -30,7 +30,11 @@ During `bootstrap`, both `@vicacha-devs/strapi-plugin-events` and `@vicacha-devs
 // Inside packages/strapi-plugin-events/server/src/bootstrap.ts
 const calendarPlugin = strapi.plugin("calendar");
 const calendarRegistry = calendarPlugin?.service("registry");
-if (calendarRegistry && typeof calendarRegistry.registerSource === "function" && settings) {
+if (
+  calendarRegistry &&
+  typeof calendarRegistry.registerSource === "function" &&
+  settings
+) {
   for (const source of settings.sources ?? []) {
     await calendarRegistry.registerSource({
       id: source.id,
@@ -66,12 +70,12 @@ When a pledge (`plugin::donations.pledge`) is verified via a Wompi/Stripe HMAC-S
 ```ts
 // Inside packages/strapi-plugin-donations/server/src/services/pledgeService.ts
 const certPlugin = strapi.plugin("certificates");
-const certService = (certPlugin?.service("issuance") ?? certPlugin?.service("certificate")) as
-  | CertificateIssuerService
-  | undefined;
+const certService = (certPlugin?.service("issuance") ??
+  certPlugin?.service("certificate")) as CertificateIssuerService | undefined;
 if (certService && typeof certService.issueCertificate === "function") {
   const issued = await certService.issueCertificate({
-    templateSlug: settings.defaultCertificateTemplateSlug || "certificado-donacion-anual",
+    templateSlug:
+      settings.defaultCertificateTemplateSlug || "certificado-donacion-anual",
     recipientFullName: String(existing.donorName || "Donante Anónimo"),
     recipientDocumentId: String(existing.donorDocumentNumber || ""),
     recipientEmail: String(existing.donorEmail || ""),

@@ -18,7 +18,10 @@ import {
   yamlQuote,
 } from "./lib/plugin-doc-builder.ts";
 import { PLUGIN_ENTITY_GUIDE } from "./lib/plugin-use-cases.ts";
-import { loadPluginRoutes, loadPluginServiceNames } from "./lib/route-loader.ts";
+import {
+  loadPluginRoutes,
+  loadPluginServiceNames,
+} from "./lib/route-loader.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DOCS_ROOT = resolve(HERE, "..");
@@ -41,8 +44,14 @@ async function main(): Promise<void> {
   for (const plugin of plugins) {
     const safeDir = basename(plugin.dir);
     const safeSlug = basename(plugin.slug);
-    const pkgDir = assertWithinBoundary(resolve(PACKAGES_ROOT, safeDir), PACKAGES_ROOT);
-    const readmePath = assertWithinBoundary(resolve(pkgDir, "README.md"), pkgDir);
+    const pkgDir = assertWithinBoundary(
+      resolve(PACKAGES_ROOT, safeDir),
+      PACKAGES_ROOT
+    );
+    const readmePath = assertWithinBoundary(
+      resolve(pkgDir, "README.md"),
+      pkgDir
+    );
 
     if (!existsSync(readmePath)) {
       console.error(`[sync-readmes] Missing README: ${readmePath}`);
@@ -96,7 +105,11 @@ async function main(): Promise<void> {
           "",
           buildContentManagerSectionMarkdown(plugin, "en").trimEnd(),
           "",
-          buildUseCasesMarkdown(plugin, undefined, "End-to-End Use Cases & Workflows").trimEnd(),
+          buildUseCasesMarkdown(
+            plugin,
+            undefined,
+            "End-to-End Use Cases & Workflows"
+          ).trimEnd(),
           "",
         ].join("\n")
       : "";

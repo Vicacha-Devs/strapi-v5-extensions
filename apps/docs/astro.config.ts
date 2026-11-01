@@ -29,7 +29,10 @@ type SidebarItem = SidebarSlugItem | SidebarTagGroup;
 
 const sidebarJsonUrl = new URL("./schemas/_sidebar.json", import.meta.url);
 const apiSidebar: Record<string, SidebarTagGroup[]> = existsSync(sidebarJsonUrl)
-  ? (JSON.parse(readFileSync(sidebarJsonUrl, "utf-8")) as Record<string, SidebarTagGroup[]>)
+  ? (JSON.parse(readFileSync(sidebarJsonUrl, "utf-8")) as Record<
+      string,
+      SidebarTagGroup[]
+    >)
   : {};
 
 const apiPluginConfigs = plugins

@@ -36,10 +36,17 @@ type NextLoad = (url: string, context: unknown) => unknown;
 
 interface NodeModuleWithTypeScriptHooks {
   registerHooks: (hooks: {
-    resolve: (specifier: string, context: ResolveContext, nextResolve: NextResolve) => unknown;
+    resolve: (
+      specifier: string,
+      context: ResolveContext,
+      nextResolve: NextResolve
+    ) => unknown;
     load: (url: string, context: unknown, nextLoad: NextLoad) => unknown;
   }) => void;
-  stripTypeScriptTypes: (code: string, options?: { mode?: "strip" | "transform" }) => string;
+  stripTypeScriptTypes: (
+    code: string,
+    options?: { mode?: "strip" | "transform" }
+  ) => string;
 }
 
 const tsModuleApi = nodeModule as unknown as NodeModuleWithTypeScriptHooks;
@@ -50,8 +57,15 @@ export function ensureTsModuleHooks(): void {
   if (hooksRegistered) return;
   hooksRegistered = true;
   tsModuleApi.registerHooks({
-    resolve(specifier: string, context: ResolveContext, nextResolve: NextResolve) {
-      if ((specifier.startsWith("./") || specifier.startsWith("../")) && context.parentURL) {
+    resolve(
+      specifier: string,
+      context: ResolveContext,
+      nextResolve: NextResolve
+    ) {
+      if (
+        (specifier.startsWith("./") || specifier.startsWith("../")) &&
+        context.parentURL
+      ) {
         const parentDir = dirname(fileURLToPath(context.parentURL));
         const baseCandidate = resolve(parentDir, specifier);
         const candidates = [
@@ -72,9 +86,16 @@ export function ensureTsModuleHooks(): void {
     load(url: string, context: unknown, nextLoad: NextLoad) {
       if (url.endsWith(".json") && !url.includes("/node_modules/")) {
         const source = readFileSync(fileURLToPath(url), "utf8");
-        return { format: "module", source: `export default ${source}`, shortCircuit: true };
+        return {
+          format: "module",
+          source: `export default ${source}`,
+          shortCircuit: true,
+        };
       }
-      if ((url.endsWith(".ts") || url.endsWith(".tsx")) && !url.includes("/node_modules/")) {
+      if (
+        (url.endsWith(".ts") || url.endsWith(".tsx")) &&
+        !url.includes("/node_modules/")
+      ) {
         const source = readFileSync(fileURLToPath(url), "utf8");
         return {
           format: "module",
@@ -106,16 +127,26 @@ export async function loadPluginRoutes(
   const normalized: NormalizedPluginRoute[] = [];
 
   for (const [groupKey, groupVal] of Object.entries(exported)) {
-    const routeList = Array.isArray(groupVal) ? groupVal : groupVal?.routes || [];
+    const routeList = Array.isArray(groupVal)
+      ? groupVal
+      : groupVal?.routes || [];
     const routeType =
       (!Array.isArray(groupVal) && groupVal?.type) ||
-      (groupKey.includes("content") || groupKey === "frontend" ? "content-api" : "admin");
+      (groupKey.includes("content") || groupKey === "frontend"
+        ? "content-api"
+        : "admin");
 
     for (const route of routeList) {
       if (!route?.method || !route?.path) continue;
-      const prefix = routeType === "content-api" ? `/api/${pluginId}` : `/${pluginId}`;
-      const cleanRoutePath = route.path.startsWith("/") ? route.path : `/${route.path}`;
-      const fullPath = `${prefix}${cleanRoutePath}`.replace(/:([A-Za-z0-9_]+)/g, "{$1}");
+      const prefix =
+        routeType === "content-api" ? `/api/${pluginId}` : `/${pluginId}`;
+      const cleanRoutePath = route.path.startsWith("/")
+        ? route.path
+        : `/${route.path}`;
+      const fullPath = `${prefix}${cleanRoutePath}`.replace(
+        /:([A-Za-z0-9_]+)/g,
+        "{$1}"
+      );
       const isPublic = route.config?.auth === false;
       normalized.push({
         method: String(route.method).toLowerCase(),
@@ -129,7 +160,9 @@ export async function loadPluginRoutes(
   return normalized;
 }
 
-export async function loadPluginServiceNames(pkgDir: string): Promise<string[]> {
+export async function loadPluginServiceNames(
+  pkgDir: string
+): Promise<string[]> {
   ensureTsModuleHooks();
   const candidates = [
     join(pkgDir, "server/src/services/index.ts"),

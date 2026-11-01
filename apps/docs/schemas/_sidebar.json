@@ -969,56 +969,24 @@
       "collapsed": true,
       "items": [
         {
-          "label": "Admin GET",
-          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmin/"
+          "label": "Get Settings",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapsettings/"
         },
         {
-          "label": "Admin POST",
-          "link": "/strapi-plugin-sitemap/api/operations/postsitemapadmin/"
+          "label": "Update Settings",
+          "link": "/strapi-plugin-sitemap/api/operations/putsitemapsettings/"
         },
         {
-          "label": "Admin PUT",
-          "link": "/strapi-plugin-sitemap/api/operations/putsitemapadmin/"
+          "label": "Get Content Types",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapcontenttypes/"
         },
         {
-          "label": "Admin DELETE",
-          "link": "/strapi-plugin-sitemap/api/operations/deletesitemapadmin/"
+          "label": "Get Locales",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemaplocales/"
         },
         {
-          "label": "Admin GETContent Types",
-          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmingetcontenttypes/"
-        },
-        {
-          "label": "Admin GETLocales",
-          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmingetlocales/"
-        },
-        {
-          "label": "Admin Allowed Fields",
-          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadminallowedfields/"
-        },
-        {
-          "label": "Admin Get Options",
-          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmingetoptions/"
-        },
-        {
-          "label": "Admin Put Options",
-          "link": "/strapi-plugin-sitemap/api/operations/putsitemapadminputoptions/"
-        },
-        {
-          "label": "Admin Get Custom URLs",
-          "link": "/strapi-plugin-sitemap/api/operations/getsitemapadmincustomurls/"
-        },
-        {
-          "label": "Admin Post Custom URLs",
-          "link": "/strapi-plugin-sitemap/api/operations/postsitemapadmincustomurls/"
-        },
-        {
-          "label": "Admin Put Custom URLs",
-          "link": "/strapi-plugin-sitemap/api/operations/putsitemapadmincustomurls/"
-        },
-        {
-          "label": "Admin Delete Custom URLs",
-          "link": "/strapi-plugin-sitemap/api/operations/deletesitemapadmincustomurls/"
+          "label": "Get Allowed Fields",
+          "link": "/strapi-plugin-sitemap/api/operations/getsitemapallowedfields/"
         }
       ]
     }

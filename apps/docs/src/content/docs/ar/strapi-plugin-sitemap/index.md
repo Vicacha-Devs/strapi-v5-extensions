@@ -4,7 +4,7 @@ description: "مولد خرائط الموقع XML وفهارسها لنظام S
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-sitemap` · **Plugin ID**: `sitemap` · **Category**: `Editorial & SEO` · **Version**: `1.1.0` · **Routes**: `15`
+> **Package**: `@vicacha-devs/strapi-plugin-sitemap` · **Plugin ID**: `sitemap` · **Category**: `Editorial & SEO` · **Version**: `1.1.0` · **Routes**: `7`
 
 مولد خرائط الموقع XML وفهارسها لنظام Strapi v5 مع دعم الروابط البديلة متعددة اللغات (hreflang) والروابط المخصصة.
 
@@ -91,6 +91,8 @@ Global sitemap configuration (baseUrl, excludedUrls, useSitemapIndex, sitemapDef
 - `plugin::sitemap.sitemap-content-type-single-url` (Internal custom static URL entries)
 - `plugin::sitemap.sitemap-option` (Internal global sitemap settings)
 
+![خريطة الموقع XML و Hreflang — واجهة إدارة الكيانات في مدير المحتوى Strapi v5](/screenshots/sitemap-content-manager.png)
+
 ### لماذا تنشئ هذه الإضافة كيانات داخل مدير المحتوى (Content Manager)؟
 
 `@vicacha-devs/strapi-plugin-sitemap` keeps its 3 configuration schemas (`sitemap-content-type`, `sitemap-content-type-single-url`, `sitemap-option`) hidden from the Content Manager sidebar (`content-manager.visible: false`) to prevent accidental schema edits, while dynamically reading published documents and `i18n` localizations from **every public Content Manager Collection Type** (`api::*` and `plugin::*`):
@@ -100,7 +102,8 @@ Global sitemap configuration (baseUrl, excludedUrls, useSitemapIndex, sitemapDef
 ### كيفية الاستخدام داخل مدير المحتوى في Strapi (خطوة بخطوة)
 
 1. **Publish Content in Content Manager**: Author and publish localized entries in any `api::*` or `plugin::*` collection inside `/admin/content-manager`.
-2. **Map URL Patterns in Sitemap Settings**: Open `/admin/settings/sitemap` (or `/admin/settings/strapi-5-sitemap-plugin`) -> **Collection Types** tab and bind each Content Manager collection UID + locale to its frontend route pattern (e.g., `/[locale]/articles/[slug]`).
+2. **Map URL Patterns in Sitemap Settings**: Open `/admin/settings/sitemap` -> **Collection Types** tab and bind each Content Manager collection UID + locale to its frontend route pattern (e.g., `/[locale]/articles/[slug]`).
+3. **Configure Sitemap Index, Custom & Excluded URLs**: Use the **General & Sitemap Index** tab (`Use sitemap index with multiple sitemaps` + `getSitemapBySlug in Users & Permissions → Public → Sitemap`), **Custom URLs** tab, and **Excluded URLs** tab in `/admin/settings/sitemap`.
 
 ### التزامن بين مدير المحتوى ومساحة عمل الإضافة
 
@@ -133,25 +136,27 @@ flowchart LR
 
 ![XML Sitemap & Hreflang — Strapi v5 Admin Workspace](/screenshots/sitemap-admin.png)
 
-### Use Case 2 — Hybrid Static + CMS Sitemap with Custom Single URLs
+### Use Case 2 — Hybrid Static + CMS Sitemap with Custom Single URLs & Excluded Paths
 
-- **What it is for**: Include static frontend routes (`/`, `/es/contact`, `/ar/prayer-times`) alongside dynamic CMS entries in the same XML sitemap.
-- **How it works**: Add static route entries in the **Custom URLs** tab (`plugin::sitemap.sitemap-content-type-single-url`) and exclude internal routes in the **Excluded URLs** tab.
+- **What it is for**: Include static frontend routes (`/es`, `/es/about-us`, `/en/about-us`) alongside dynamic CMS entries in the same XML sitemap while excluding internal paths (`/admin`, `/api`, `/404`).
+- **How it works**: Add static route entries in the **Custom URLs** tab (`plugin::sitemap.sitemap-content-type-single-url`) and exclude internal routes in the **Excluded URLs** tab of `/admin/settings/sitemap`.
 
 ```mermaid
 flowchart LR
-  CustomTab["Custom URLs Tab (POST /sitemap/admin-custom-urls)"] --> SingleEntity["plugin::sitemap.sitemap-content-type-single-url"]
+  CustomTab["Custom URLs Tab (PUT /sitemap/settings)"] --> SingleEntity["plugin::sitemap.sitemap-content-type-single-url"]
   SingleEntity --> Merge["Merge Static URLs + Dynamic Content-Type URLs"]
 ```
 
+![XML Sitemap & Hreflang — Strapi v5 Content Manager Entities](/screenshots/sitemap-content-manager.png)
+
 ### Use Case 3 — Multi-File Sitemap Index (`sitemap-{slug}.xml`) for Large Sites
 
-- **What it is for**: Split large portals into dedicated sub-sitemaps (e.g., `/api/sitemap/sitemap-articles.xml`, `/api/sitemap/sitemap-events.xml`) referenced by a master `<sitemapindex>`.
-- **How it works**: Enable `useSitemapIndex: true` and define `sitemapDefinitions` in the **General & Sitemap Index** tab of `/admin/settings/sitemap` (`PUT /sitemap/admin-put-options`).
+- **What it is for**: Split large portals into dedicated sub-sitemaps (e.g., `/api/sitemap/sitemap-pages.xml`, `/api/sitemap/sitemap-editorial-and-library.xml`, `/api/sitemap/sitemap-events-and-liturgy.xml`) referenced by a master `<sitemapindex>`.
+- **How it works**: Enable **Use sitemap index with multiple sitemaps** (`useSitemapIndex: true`), grant `getSitemapBySlug` in `Users & Permissions → Public → Sitemap`, and define `sitemapDefinitions` in the **General & Sitemap Index** tab of `/admin/settings/sitemap` (`PUT /sitemap/settings`).
 
 ```mermaid
 flowchart LR
-  Settings["/admin/settings/sitemap (General & Sitemap Index Tab)"] -->Defs["Define Sub-Sitemaps (articles, events, publications)"]
+  Settings["/admin/settings/sitemap (General & Sitemap Index Tab)"] -->Defs["Define Sub-Sitemaps (pages, editorial-and-library, events-and-liturgy)"]
   Defs --> IndexXml["GET /api/sitemap/sitemap.xml (<sitemapindex>)"]
   IndexXml --> SubXml["GET /api/sitemap/sitemap-{slug}.xml"]
 ```
@@ -160,15 +165,12 @@ flowchart LR
 
 ## 4. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة  | مسار نقطة النهاية                  | النطاق        | المعالج (Handler)                 | المصادقة   |
-| :------- | :--------------------------------- | :------------ | :-------------------------------- | :--------- |
-| `GET`    | `/api/sitemap/sitemap.xml`         | `content-api` | `controller.getSitemap`           | Bearer JWT |
-| `GET`    | `/api/sitemap/sitemap-{slug}.xml`  | `content-api` | `controller.getSitemapBySlug`     | Bearer JWT |
-| `GET`    | `/sitemap/admin`                   | `admin`       | `controller.adminGET`             | Bearer JWT |
-| `POST`   | `/sitemap/admin`                   | `admin`       | `controller.adminPOST`            | Bearer JWT |
-| `PUT`    | `/sitemap/admin`                   | `admin`       | `controller.adminPUT`             | Bearer JWT |
-| `DELETE` | `/sitemap/admin`                   | `admin`       | `controller.adminDELETE`          | Bearer JWT |
-| `GET`    | `/sitemap/admin-get-content-types` | `admin`       | `controller.adminGETContentTypes` | Bearer JWT |
-| `GET`    | `/sitemap/admin-get-locales`       | `admin`       | `controller.adminGETLocales`      | Bearer JWT |
-| `GET`    | `/sitemap/admin-allowed-fields`    | `admin`       | `controller.adminAllowedFields`   | Bearer JWT |
-| `GET`    | `/sitemap/admin-get-options`       | `admin`       | `controller.adminGetOptions`      | Bearer JWT |
+| الطريقة | مسار نقطة النهاية                 | النطاق        | المعالج (Handler)             | المصادقة   |
+| :------ | :-------------------------------- | :------------ | :---------------------------- | :--------- |
+| `GET`   | `/api/sitemap/sitemap.xml`        | `content-api` | `controller.getSitemap`       | Bearer JWT |
+| `GET`   | `/api/sitemap/sitemap-{slug}.xml` | `content-api` | `controller.getSitemapBySlug` | Bearer JWT |
+| `GET`   | `/sitemap/settings`               | `admin`       | `controller.getSettings`      | Bearer JWT |
+| `PUT`   | `/sitemap/settings`               | `admin`       | `controller.updateSettings`   | Bearer JWT |
+| `GET`   | `/sitemap/content-types`          | `admin`       | `controller.getContentTypes`  | Bearer JWT |
+| `GET`   | `/sitemap/locales`                | `admin`       | `controller.getLocales`       | Bearer JWT |
+| `GET`   | `/sitemap/allowed-fields`         | `admin`       | `controller.getAllowedFields` | Bearer JWT |

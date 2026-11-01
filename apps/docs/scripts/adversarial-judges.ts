@@ -59,7 +59,9 @@ function readPngDimensions(
   filePath: string
 ): { width: number; height: number; bytes: number } | null {
   const buf = readFileSync(filePath);
-  const pngMagic = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  const pngMagic = Buffer.from([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+  ]);
   if (buf.length < 24 || !buf.subarray(0, 8).equals(pngMagic)) {
     return null;
   }
@@ -81,12 +83,16 @@ function judge1Modularity(): JudgeResult {
     ".mdx",
     ".css",
   ]);
-  const allFiles = walkFiles(REPO_ROOT).filter((f) => checkedExts.has(extname(f)));
+  const allFiles = walkFiles(REPO_ROOT).filter((f) =>
+    checkedExts.has(extname(f))
+  );
 
   for (const file of allFiles) {
     const lines = readFileSync(file, "utf8").split("\n").length;
     if (lines > 500) {
-      failures.push(`${relative(REPO_ROOT, file)} has ${lines} lines (limit: 500)`);
+      failures.push(
+        `${relative(REPO_ROOT, file)} has ${lines} lines (limit: 500)`
+      );
     }
   }
   return {
@@ -104,7 +110,10 @@ function judge2Completeness(): JudgeResult {
       failures.push(`Missing OpenAPI schema: schemas/${p.schemaFile}.yaml`);
     } else {
       const yamlText = readFileSync(schemaPath, "utf8");
-      if (!yamlText.includes("openapi: 3.0.3") || !yamlText.includes("paths:")) {
+      if (
+        !yamlText.includes("openapi: 3.0.3") ||
+        !yamlText.includes("paths:")
+      ) {
         failures.push(`Invalid OpenAPI spec in schemas/${p.schemaFile}.yaml`);
       }
     }
@@ -112,17 +121,26 @@ function judge2Completeness(): JudgeResult {
     for (const pageName of ["index.md", "use-cases.md", "guide.md"]) {
       const pagePath = join(CONTENT_ROOT, p.slug, pageName);
       if (!existsSync(pagePath)) {
-        failures.push(`Missing plugin page: src/content/docs/${p.slug}/${pageName}`);
+        failures.push(
+          `Missing plugin page: src/content/docs/${p.slug}/${pageName}`
+        );
         continue;
       }
       const text = readFileSync(pagePath, "utf8");
       if (!text.includes("```mermaid")) {
-        failures.push(`${p.slug}/${pageName} is missing Pele Mermaid diagrams (\`\`\`mermaid)`);
+        failures.push(
+          `${p.slug}/${pageName} is missing Pele Mermaid diagrams (\`\`\`mermaid)`
+        );
       }
       if (!text.includes(p.screenshot)) {
-        failures.push(`${p.slug}/${pageName} is missing Playwright screenshot ${p.screenshot}`);
+        failures.push(
+          `${p.slug}/${pageName} is missing Playwright screenshot ${p.screenshot}`
+        );
       }
-      if (p.contentManagerScreenshot && !text.includes(p.contentManagerScreenshot)) {
+      if (
+        p.contentManagerScreenshot &&
+        !text.includes(p.contentManagerScreenshot)
+      ) {
         failures.push(
           `${p.slug}/${pageName} is missing Content Manager screenshot ${p.contentManagerScreenshot}`
         );
@@ -137,22 +155,36 @@ function judge2Completeness(): JudgeResult {
           `${p.slug}/${pageName} is missing Settings Panel screenshot ${p.settingsScreenshot}`
         );
       }
-      if (!text.includes("Use Case 1 —") || !text.includes("Content Manager Use Case 1 —")) {
+      if (
+        !text.includes("Use Case 1 —") ||
+        !text.includes("Content Manager Use Case 1 —")
+      ) {
         failures.push(
           `${p.slug}/${pageName} is missing End-to-End or Content Manager Use Cases documentation`
         );
       }
       if (
-        !text.includes("Why This Plugin Creates & Integrates Content Manager Entities") ||
+        !text.includes(
+          "Why This Plugin Creates & Integrates Content Manager Entities"
+        ) ||
         !text.includes("How to Use in Strapi Content Manager (Step-by-Step)")
       ) {
-        failures.push(`${p.slug}/${pageName} is missing Content Manager Why / How-to-Use sections`);
+        failures.push(
+          `${p.slug}/${pageName} is missing Content Manager Why / How-to-Use sections`
+        );
       }
-      if (!text.includes("/admin/content-manager") && !text.includes("/admin/plugins/")) {
-        failures.push(`${p.slug}/${pageName} is missing Content-Type entity Admin location paths`);
+      if (
+        !text.includes("/admin/content-manager") &&
+        !text.includes("/admin/plugins/")
+      ) {
+        failures.push(
+          `${p.slug}/${pageName} is missing Content-Type entity Admin location paths`
+        );
       }
       if (/\b(TODO:|FIXME:|coming soon|lorem ipsum)\b/i.test(text)) {
-        failures.push(`${p.slug}/${pageName} contains forbidden placeholder text`);
+        failures.push(
+          `${p.slug}/${pageName} contains forbidden placeholder text`
+        );
       }
     }
   }
@@ -180,18 +212,26 @@ function judge3I18nAndRtlParity(): JudgeResult {
     for (const relPage of requiredRelativePages) {
       const fullPath = join(CONTENT_ROOT, prefix, relPage);
       if (!existsSync(fullPath)) {
-        failures.push(`Missing [${locale}] page: ${relative(DOCS_ROOT, fullPath)}`);
+        failures.push(
+          `Missing [${locale}] page: ${relative(DOCS_ROOT, fullPath)}`
+        );
         continue;
       }
       const content = readFileSync(fullPath, "utf8");
       if (content.trim().length < 200) {
-        failures.push(`Page too short (<200 chars): ${relative(DOCS_ROOT, fullPath)}`);
+        failures.push(
+          `Page too short (<200 chars): ${relative(DOCS_ROOT, fullPath)}`
+        );
       }
       if (locale === "ar" && !/[\u0600-\u06FF]/.test(content)) {
-        failures.push(`Arabic page lacks Arabic script: ${relative(DOCS_ROOT, fullPath)}`);
+        failures.push(
+          `Arabic page lacks Arabic script: ${relative(DOCS_ROOT, fullPath)}`
+        );
       }
       if (locale === "tr" && !/[çğıöşüÇĞİÖŞÜ]/.test(content)) {
-        failures.push(`Turkish page lacks Turkish characters: ${relative(DOCS_ROOT, fullPath)}`);
+        failures.push(
+          `Turkish page lacks Turkish characters: ${relative(DOCS_ROOT, fullPath)}`
+        );
       }
     }
   }
@@ -224,8 +264,12 @@ function judge4VisualAndLinks(): JudgeResult {
       ...(p.contentManagerScreenshot
         ? [p.contentManagerScreenshot.replace("/screenshots/", "")]
         : []),
-      ...(p.paletteScreenshot ? [p.paletteScreenshot.replace("/screenshots/", "")] : []),
-      ...(p.settingsScreenshot ? [p.settingsScreenshot.replace("/screenshots/", "")] : []),
+      ...(p.paletteScreenshot
+        ? [p.paletteScreenshot.replace("/screenshots/", "")]
+        : []),
+      ...(p.settingsScreenshot
+        ? [p.settingsScreenshot.replace("/screenshots/", "")]
+        : []),
     ]),
   ];
 
@@ -251,7 +295,9 @@ function judge4VisualAndLinks(): JudgeResult {
     for (const llmFile of ["llms.txt", "llms-full.txt"]) {
       const p = join(DIST_ROOT, llmFile);
       if (!existsSync(p) || statSync(p).size < 500) {
-        failures.push(`Missing or empty AI documentation index: dist/${llmFile}`);
+        failures.push(
+          `Missing or empty AI documentation index: dist/${llmFile}`
+        );
       }
     }
 
@@ -264,11 +310,17 @@ function judge4VisualAndLinks(): JudgeResult {
     for (const p of plugins) {
       const useCasesHtmlPath = join(DIST_ROOT, p.slug, "use-cases/index.html");
       if (!existsSync(useCasesHtmlPath)) {
-        failures.push(`Missing built Use Cases page: dist/${p.slug}/use-cases/index.html`);
+        failures.push(
+          `Missing built Use Cases page: dist/${p.slug}/use-cases/index.html`
+        );
       } else {
         const html = readFileSync(useCasesHtmlPath, "utf8");
-        if (!html.includes('class="pele-diagram not-content" data-pele-b64="')) {
-          failures.push(`dist/${p.slug}/use-cases/index.html is missing Pele diagram containers`);
+        if (
+          !html.includes('class="pele-diagram not-content" data-pele-b64="')
+        ) {
+          failures.push(
+            `dist/${p.slug}/use-cases/index.html is missing Pele diagram containers`
+          );
         }
       }
     }
@@ -285,11 +337,15 @@ function judge4VisualAndLinks(): JudgeResult {
 
     for (const htmlFile of htmlFiles) {
       const html = readFileSync(htmlFile, "utf8");
-      const imgMatches = [...html.matchAll(/<img[^>]+src="(\/[^"#?]+)"/g)].map((m) => m[1]);
+      const imgMatches = [...html.matchAll(/<img[^>]+src="(\/[^"#?]+)"/g)].map(
+        (m) => m[1]
+      );
       for (const src of imgMatches) {
         const assetPath = join(DIST_ROOT, src);
         if (!existsSync(assetPath)) {
-          failures.push(`Broken image src="${src}" in ${relative(DIST_ROOT, htmlFile)}`);
+          failures.push(
+            `Broken image src="${src}" in ${relative(DIST_ROOT, htmlFile)}`
+          );
         }
       }
     }
@@ -332,13 +388,19 @@ function judge5Security(): JudgeResult {
   );
 
   const forbiddenPatterns = [
-    { regex: /0\.0\.0\.0/, reason: "Forbidden 0.0.0.0 binding (must use 127.0.0.1)" },
+    {
+      regex: /0\.0\.0\.0/,
+      reason: "Forbidden 0.0.0.0 binding (must use 127.0.0.1)",
+    },
     {
       regex: /\b(innerHTML|outerHTML|insertAdjacentHTML|document\.write)\b/,
       reason: "Unsafe DOM sink",
     },
     { regex: /dangerouslySetInnerHTML/, reason: "Unsafe React HTML injection" },
-    { regex: /BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY/, reason: "Hardcoded private key" },
+    {
+      regex: /BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY/,
+      reason: "Hardcoded private key",
+    },
     {
       regex: /localStorage\.setItem\s*\(\s*['"][^'"]*token/i,
       reason: "Token stored in localStorage",

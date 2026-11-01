@@ -15,7 +15,11 @@ pnpm add @vicacha-devs/strapi-plugin-donations
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   donations: {
     enabled: true,
     config: {

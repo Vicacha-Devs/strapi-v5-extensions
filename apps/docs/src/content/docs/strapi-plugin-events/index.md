@@ -60,7 +60,11 @@ export default ({ env }) => ({
       // 2. Optional Custom Recurrence Presets for Quick-Create & RRuleInput
       recurrencePresets: [
         { id: "daily", label: "Daily", rrule: "FREQ=DAILY;INTERVAL=1" },
-        { id: "weekly-fri", label: "Weekly on Fridays", rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR" },
+        {
+          id: "weekly-fri",
+          label: "Weekly on Fridays",
+          rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR",
+        },
         { id: "monthly", label: "Monthly", rrule: "FREQ=MONTHLY;INTERVAL=1" },
       ],
 
@@ -119,7 +123,9 @@ export default {
       .service("occurrence")
       .registerCalendarFormatter("custom-fiscal", (date, { compact }) => {
         const quarter = Math.floor(date.getUTCMonth() / 3) + 1;
-        return compact ? `Q${quarter}` : `FY${date.getUTCFullYear()} Q${quarter}`;
+        return compact
+          ? `Q${quarter}`
+          : `FY${date.getUTCFullYear()} Q${quarter}`;
       });
   },
 };

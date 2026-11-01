@@ -15,7 +15,11 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   "media-feeds": {
     enabled: true,
     config: {
@@ -76,6 +80,7 @@ Generic multi-language video, podcast, audio lecture, YouTube item, or live broa
 | `title`            | `string`      | Yes     | —                                                                                                 |
 | `slug`             | `uid`         | Yes     | —                                                                                                 |
 | `description`      | `text`        | Yes     | —                                                                                                 |
+| `transcript`       | `richtext`    | No      | —                                                                                                 |
 | `type`             | `string`      | Yes     | default: `"video"`                                                                                |
 | `provider`         | `enumeration` | No      | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
 | `externalId`       | `string`      | No      | —                                                                                                 |
@@ -226,10 +231,12 @@ flowchart LR
 const pluginService = strapi.plugin("media-feeds")?.service("feedService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi.documents("plugin::media-feeds.media-item").findMany({
-  limit: 25,
-  sort: "createdAt:desc",
-});
+const records = await strapi
+  .documents("plugin::media-feeds.media-item")
+  .findMany({
+    limit: 25,
+    sort: "createdAt:desc",
+  });
 ```
 
 ## 8. Sorun Giderme ve Doğrulama

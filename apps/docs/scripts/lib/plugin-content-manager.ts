@@ -1,7 +1,10 @@
 // Renders the Strapi v5 Content Manager Integration section (Screenshot, Why, How to Use,
 // Interactive Pele Mermaid Diagram, and Content Manager Use Cases) for every plugin.
 
-import type { PluginPackageMeta, SupportedLocale } from "../../docs-packages.ts";
+import type {
+  PluginPackageMeta,
+  SupportedLocale,
+} from "../../docs-packages.ts";
 import { PLUGIN_CM_GUIDE_A } from "./plugin-cm-guide-a.ts";
 import { PLUGIN_CM_GUIDE_B } from "./plugin-cm-guide-b.ts";
 
@@ -41,34 +44,44 @@ interface CmLocaleHeadings {
 
 export const CM_LOCALE_HEADINGS: Record<SupportedLocale, CmLocaleHeadings> = {
   en: {
-    sectionHeading: "Strapi v5 Content Manager Integration (`/admin/content-manager`)",
+    sectionHeading:
+      "Strapi v5 Content Manager Integration (`/admin/content-manager`)",
     sidebarGroupLabel: "Content Manager Sidebar Group",
     registeredEntitiesLabel: "Content Manager Entities & Components",
     whyHeading: "Why This Plugin Creates & Integrates Content Manager Entities",
     howToUseHeading: "How to Use in Strapi Content Manager (Step-by-Step)",
-    workflowDiagramHeading: "Content Manager & Plugin Workspace Synchronization",
+    workflowDiagramHeading:
+      "Content Manager & Plugin Workspace Synchronization",
     useCasesHeading: "Content Manager Use Cases & Editorial Workflows",
     purposeLabel: "Why & What it is for",
     stepsLabel: "How to use in Content Manager",
-    screenshotCaptionSuffix: "Strapi v5 Content Manager Entities & Editorial View",
+    screenshotCaptionSuffix:
+      "Strapi v5 Content Manager Entities & Editorial View",
   },
   es: {
-    sectionHeading: "Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)",
+    sectionHeading:
+      "Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)",
     sidebarGroupLabel: "Grupo en la Barra Lateral del Content Manager",
     registeredEntitiesLabel: "Entidades y Componentes en el Content Manager",
-    whyHeading: "Por Qué Este Plugin Crea e Integra Entidades en el Content Manager",
-    howToUseHeading: "Cómo Usarlo en el Content Manager de Strapi (Paso a Paso)",
-    workflowDiagramHeading: "Sincronización entre el Content Manager y el Espacio del Plugin",
+    whyHeading:
+      "Por Qué Este Plugin Crea e Integra Entidades en el Content Manager",
+    howToUseHeading:
+      "Cómo Usarlo en el Content Manager de Strapi (Paso a Paso)",
+    workflowDiagramHeading:
+      "Sincronización entre el Content Manager y el Espacio del Plugin",
     useCasesHeading: "Casos de Uso en el Content Manager y Flujos Editoriales",
     purposeLabel: "Para qué sirve y por qué usarlo",
     stepsLabel: "Cómo ejecutarlo en el Content Manager",
-    screenshotCaptionSuffix: "Vista de Entidades en el Content Manager de Strapi v5",
+    screenshotCaptionSuffix:
+      "Vista de Entidades en el Content Manager de Strapi v5",
   },
   ar: {
-    sectionHeading: "التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)",
+    sectionHeading:
+      "التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)",
     sidebarGroupLabel: "مجموعة الشريط الجانبي في مدير المحتوى",
     registeredEntitiesLabel: "الكيانات والمكونات المسجلة في مدير المحتوى",
-    whyHeading: "لماذا تنشئ هذه الإضافة كيانات داخل مدير المحتوى (Content Manager)؟",
+    whyHeading:
+      "لماذا تنشئ هذه الإضافة كيانات داخل مدير المحتوى (Content Manager)؟",
     howToUseHeading: "كيفية الاستخدام داخل مدير المحتوى في Strapi (خطوة بخطوة)",
     workflowDiagramHeading: "التزامن بين مدير المحتوى ومساحة عمل الإضافة",
     useCasesHeading: "حالات الاستخدام داخل مدير المحتوى ومسارات العمل التحريرية",
@@ -82,12 +95,16 @@ export const CM_LOCALE_HEADINGS: Record<SupportedLocale, CmLocaleHeadings> = {
     sidebarGroupLabel: "İçerik Yöneticisi Kenar Çubuğu Grubu",
     registeredEntitiesLabel: "İçerik Yöneticisi Varlıkları ve Bileşenleri",
     whyHeading: "Bu Eklenti Neden Content Manager Varlıkları Oluşturur?",
-    howToUseHeading: "Strapi Content Manager İçinde Nasıl Kullanılır? (Adım Adım)",
-    workflowDiagramHeading: "Content Manager ve Eklenti Çalışma Alanı Senkronizasyonu",
-    useCasesHeading: "Content Manager Kullanım Senaryoları ve Editöryal İş Akışları",
+    howToUseHeading:
+      "Strapi Content Manager İçinde Nasıl Kullanılır? (Adım Adım)",
+    workflowDiagramHeading:
+      "Content Manager ve Eklenti Çalışma Alanı Senkronizasyonu",
+    useCasesHeading:
+      "Content Manager Kullanım Senaryoları ve Editöryal İş Akışları",
     purposeLabel: "Amacı ve Neden Kullanıldığı",
     stepsLabel: "Content Manager İçinde Uygulama Adımları",
-    screenshotCaptionSuffix: "Strapi v5 Content Manager Varlık ve Düzenleme Görünümü",
+    screenshotCaptionSuffix:
+      "Strapi v5 Content Manager Varlık ve Düzenleme Görünümü",
   },
 };
 
@@ -101,7 +118,9 @@ export function buildContentManagerSectionMarkdown(
 
   const h = CM_LOCALE_HEADINGS[locale] || CM_LOCALE_HEADINGS.en;
   const localizedLabel =
-    locale === "en" ? pluginMeta.label : pluginMeta.translations[locale] || pluginMeta.label;
+    locale === "en"
+      ? pluginMeta.label
+      : pluginMeta.translations[locale] || pluginMeta.label;
   const heading = headingOverride || h.sectionHeading;
 
   const lines: string[] = [
@@ -136,7 +155,14 @@ export function buildContentManagerSectionMarkdown(
   );
 
   if (cmGuide.cmMermaid) {
-    lines.push(`### ${h.workflowDiagramHeading}`, "", "```mermaid", cmGuide.cmMermaid, "```", "");
+    lines.push(
+      `### ${h.workflowDiagramHeading}`,
+      "",
+      "```mermaid",
+      cmGuide.cmMermaid,
+      "```",
+      ""
+    );
   }
 
   if (cmGuide.cmUseCases.length > 0) {

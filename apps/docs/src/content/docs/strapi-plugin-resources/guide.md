@@ -15,7 +15,11 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   resources: {
     enabled: true,
     config: {
@@ -267,13 +271,17 @@ flowchart LR
 
 ```ts
 // Registered services on plugin "resources": "settings", "mediaLibraryService", "catalogService"
-const pluginService = strapi.plugin("resources")?.service("mediaLibraryService");
+const pluginService = strapi
+  .plugin("resources")
+  ?.service("mediaLibraryService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi.documents("plugin::resources.gallery-album").findMany({
-  limit: 25,
-  sort: "createdAt:desc",
-});
+const records = await strapi
+  .documents("plugin::resources.gallery-album")
+  .findMany({
+    limit: 25,
+    sort: "createdAt:desc",
+  });
 ```
 
 ## 8. Troubleshooting & Verification

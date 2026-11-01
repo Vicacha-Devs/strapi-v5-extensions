@@ -1,7 +1,16 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { basename, join, resolve, sep } from "node:path";
 
-import type { PluginPackageMeta, SupportedLocale } from "../../docs-packages.ts";
+import type {
+  PluginPackageMeta,
+  SupportedLocale,
+} from "../../docs-packages.ts";
 import { buildContentManagerSectionMarkdown } from "./plugin-content-manager.ts";
 import {
   type ContentTypeDoc,
@@ -11,7 +20,10 @@ import {
   type SchemaAttributeDoc,
   SITEMAP_INLINE_CONTENT_TYPES,
 } from "./plugin-doc-i18n.ts";
-import { PLUGIN_ENTITY_GUIDE, type UseCaseScreenshotKind } from "./plugin-use-cases.ts";
+import {
+  PLUGIN_ENTITY_GUIDE,
+  type UseCaseScreenshotKind,
+} from "./plugin-use-cases.ts";
 import type { NormalizedPluginRoute } from "./route-loader.ts";
 
 export interface InspectedPluginDetails {
@@ -26,11 +38,17 @@ interface RawSchemaJson {
   collectionName?: string;
   info?: { singularName?: string; displayName?: string; description?: string };
   options?: { draftAndPublish?: boolean };
-  pluginOptions?: { "content-manager"?: { visible?: boolean }; "i18n"?: { localized?: boolean } };
+  pluginOptions?: {
+    "content-manager"?: { visible?: boolean };
+    "i18n"?: { localized?: boolean };
+  };
   attributes?: Record<string, SchemaAttributeDoc>;
 }
 
-export function assertWithinBoundary(targetPath: string, baseDir: string): string {
+export function assertWithinBoundary(
+  targetPath: string,
+  baseDir: string
+): string {
   const resolved = resolve(targetPath);
   const boundary = resolve(baseDir) + sep;
   if (!resolved.startsWith(boundary)) {
@@ -43,15 +61,17 @@ export function yamlQuote(s: unknown): string {
   return `"${String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
 }
 
+function readJson<T>(filePath: string): T {
+  return JSON.parse(readFileSync(filePath, "utf8")) as T;
+}
+
 export function inspectPluginDetails(
   pkgDir: string,
   serviceNames: string[] = ["service"]
 ): InspectedPluginDetails {
-  const pkgJson = JSON.parse(readFileSync(join(pkgDir, "package.json"), "utf8")) as {
-    name?: string;
-    version?: string;
-    description?: string;
-  };
+  const pkgJson = readJson<InspectedPluginDetails["pkgJson"]>(
+    join(pkgDir, "package.json")
+  );
   const ctDir = join(pkgDir, "server/src/content-types");
   const compDir = join(pkgDir, "server/src/components");
   const contentTypes: ContentTypeDoc[] = [];
@@ -61,13 +81,14 @@ export function inspectPluginDetails(
       if (!entry.isDirectory()) continue;
       const schemaPath = join(ctDir, entry.name, "schema.json");
       if (!existsSync(schemaPath)) continue;
-      const raw = JSON.parse(readFileSync(schemaPath, "utf8")) as RawSchemaJson;
+      const raw = readJson<RawSchemaJson>(schemaPath);
       contentTypes.push({
         singularName: raw.info?.singularName || entry.name,
         displayName: raw.info?.displayName || entry.name,
         kind: raw.kind || "collectionType",
         collectionName: raw.collectionName || entry.name,
-        visibleInContentManager: raw.pluginOptions?.["content-manager"]?.visible !== false,
+        visibleInContentManager:
+          raw.pluginOptions?.["content-manager"]?.visible !== false,
         draftAndPublish: Boolean(raw.options?.draftAndPublish),
         localized: Boolean(raw.pluginOptions?.i18n?.localized),
         description: raw.info?.description || "",
@@ -82,7 +103,7 @@ export function inspectPluginDetails(
   if (existsSync(compDir)) {
     for (const entry of readdirSync(compDir, { withFileTypes: true })) {
       if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
-      const raw = JSON.parse(readFileSync(join(compDir, entry.name), "utf8")) as RawSchemaJson;
+      const raw = readJson<RawSchemaJson>(join(compDir, entry.name));
       const compSlug = entry.name.replace(/\.json$/, "");
       contentTypes.push({
         uidOverride: `shared.${compSlug}`,
@@ -100,35 +121,32 @@ export function inspectPluginDetails(
   }
 
   const translations = {} as Record<SupportedLocale, Record<string, string>>;
-  const locales: SupportedLocale[] = ["en", "es", "ar", "tr"];
-  for (const loc of locales) {
-    const candidates = [
+  for (const loc of ["en", "es", "ar", "tr"] as SupportedLocale[]) {
+    const found = [
       join(pkgDir, `admin/src/translations/${loc}.json`),
       join(pkgDir, `admin/translations/${loc}.json`),
-    ];
-    const found = candidates.find(existsSync);
-    translations[loc] = found
-      ? (JSON.parse(readFileSync(found, "utf8")) as Record<string, string>)
-      : {};
+    ].find(existsSync);
+    translations[loc] = found ? readJson<Record<string, string>>(found) : {};
   }
 
   return { pkgJson, contentTypes, translations, serviceNames };
 }
 
-function buildSampleTranslationsTable(dict: Record<string, string>, t: LocaleDocText): string {
-  const entries = Object.entries(dict)
-    .filter(([k, v]) => typeof v === "string" && v.trim().length > 0 && !k.includes("."))
-    .slice(0, 8);
-  const fallbackEntries =
-    entries.length >= 4
-      ? entries
-      : Object.entries(dict)
-          .filter(([, v]) => typeof v === "string" && v.trim().length > 0 && v.length < 90)
-          .slice(0, 8);
-
-  if (fallbackEntries.length === 0) return "";
-  const rows = fallbackEntries.map(
-    ([k, v]) => `| \`${k}\` | ${String(v).replace(/\|/g, "\\|").replace(/\n/g, " ")} |`
+function buildSampleTranslationsTable(
+  dict: Record<string, string>,
+  t: LocaleDocText
+): string {
+  const valid = Object.entries(dict).filter(
+    ([, v]) => typeof v === "string" && v.trim().length > 0
+  );
+  const direct = valid.filter(([k]) => !k.includes(".")).slice(0, 8);
+  const chosen =
+    direct.length >= 4
+      ? direct
+      : valid.filter(([, v]) => v.length < 90).slice(0, 8);
+  if (chosen.length === 0) return "";
+  const rows = chosen.map(
+    ([k, v]) => `| \`${k}\` | ${v.replace(/\|/g, "\\|").replace(/\n/g, " ")} |`
   );
   return [
     `### ${t.uiKeysHeading}`,
@@ -144,32 +162,41 @@ function resolveUseCaseScreenshot(
   pluginMeta: PluginPackageMeta,
   kind?: UseCaseScreenshotKind
 ): { url: string; caption: string } | null {
-  if (!kind) return null;
-  if (kind === "palette" && pluginMeta.paletteScreenshot) {
-    return {
-      url: pluginMeta.paletteScreenshot,
-      caption: `${pluginMeta.label} — Spotlight Cmd+K Command Palette`,
-    };
-  }
-  if (kind === "content-manager" && pluginMeta.contentManagerScreenshot) {
-    return {
-      url: pluginMeta.contentManagerScreenshot,
-      caption: `${pluginMeta.label} — Strapi v5 Content Manager Entities`,
-    };
-  }
-  if (kind === "settings" && pluginMeta.settingsScreenshot) {
-    return {
-      url: pluginMeta.settingsScreenshot,
-      caption: `${pluginMeta.label} — Strapi v5 Settings Panel`,
-    };
-  }
-  if (kind === "admin" && pluginMeta.screenshot) {
-    return {
-      url: pluginMeta.screenshot,
-      caption: `${pluginMeta.label} — Strapi v5 Admin Workspace`,
-    };
-  }
-  return null;
+  const map: Record<UseCaseScreenshotKind, [string | undefined, string]> = {
+    "palette": [
+      pluginMeta.paletteScreenshot,
+      "Spotlight Cmd+K Command Palette",
+    ],
+    "content-manager": [
+      pluginMeta.contentManagerScreenshot,
+      "Strapi v5 Content Manager Entities",
+    ],
+    "settings": [pluginMeta.settingsScreenshot, "Strapi v5 Settings Panel"],
+    "admin": [pluginMeta.screenshot, "Strapi v5 Admin Workspace"],
+  };
+  const entry = kind ? map[kind] : undefined;
+  if (!entry?.[0]) return null;
+  return { url: entry[0], caption: `${pluginMeta.label} — ${entry[1]}` };
+}
+
+function optShot(
+  label: string,
+  url: string | undefined,
+  kind: "settings" | "palette"
+): string[] {
+  const suffix =
+    kind === "settings"
+      ? "Strapi v5 Settings Panel"
+      : "Spotlight Cmd+K Command Palette";
+  return url ? [`![${label} — ${suffix}](${url})`, ""] : [];
+}
+
+function localeMeta(meta: PluginPackageMeta, locale: SupportedLocale) {
+  const t = LOCALE_TEXT[locale] || LOCALE_TEXT.en;
+  const label =
+    locale === "en" ? meta.label : meta.translations[locale] || meta.label;
+  const prefixUrl = locale === "en" ? "" : `/${locale}`;
+  return { t, label, prefixUrl };
 }
 
 export function buildContentTypesMarkdown(
@@ -188,11 +215,12 @@ export function buildContentTypesMarkdown(
     if (entityGuide.entityMermaid) {
       blocks.push("```mermaid", entityGuide.entityMermaid, "```", "");
     }
-    blocks.push(`### ${tResolved.whereToFindLabel}`, "");
-    for (const locItem of entityGuide.whereToFind) {
-      blocks.push(`- ${locItem}`);
-    }
-    blocks.push("");
+    blocks.push(
+      `### ${tResolved.whereToFindLabel}`,
+      "",
+      ...entityGuide.whereToFind.map((locItem) => `- ${locItem}`),
+      ""
+    );
   }
 
   if (contentTypes.length === 0) {
@@ -201,7 +229,8 @@ export function buildContentTypesMarkdown(
   }
 
   for (const ct of contentTypes) {
-    const uid = ct.uidOverride || `plugin::${pluginMeta.pluginId}.${ct.singularName}`;
+    const uid =
+      ct.uidOverride || `plugin::${pluginMeta.pluginId}.${ct.singularName}`;
     const cmLocation =
       ct.kind === "component"
         ? "`/admin/plugins/content-type-builder` (Component)"
@@ -219,16 +248,19 @@ export function buildContentTypesMarkdown(
       "| :--- | :--- | :--- | :--- |"
     );
     for (const [attrName, attr] of Object.entries(ct.attributes)) {
-      const req = attr.required ? "Yes" : "No";
-      const details: string[] = [];
-      if (attr.enum) details.push(`enum: \`${attr.enum.join(", ")}\``);
-      if (attr.target) details.push(`target: \`${attr.target}\``);
-      if (attr.customField) details.push(`customField: \`${attr.customField}\``);
-      if (attr.component) details.push(`component: \`${attr.component}\``);
-      if (attr.maxLength) details.push(`max: ${attr.maxLength}`);
-      if (attr.default !== undefined) details.push(`default: \`${JSON.stringify(attr.default)}\``);
-      if (attr.private) details.push("`private: true`");
-      blocks.push(`| \`${attrName}\` | \`${attr.type}\` | ${req} | ${details.join("; ") || "—"} |`);
+      const details = [
+        attr.enum && `enum: \`${attr.enum.join(", ")}\``,
+        attr.target && `target: \`${attr.target}\``,
+        attr.customField && `customField: \`${attr.customField}\``,
+        attr.component && `component: \`${attr.component}\``,
+        attr.maxLength && `max: ${attr.maxLength}`,
+        attr.default !== undefined &&
+          `default: \`${JSON.stringify(attr.default)}\``,
+        attr.private && "`private: true`",
+      ].filter(Boolean);
+      blocks.push(
+        `| \`${attrName}\` | \`${attr.type}\` | ${attr.required ? "Yes" : "No"} | ${details.join("; ") || "—"} |`
+      );
     }
     blocks.push("");
   }
@@ -243,38 +275,32 @@ export function buildUseCasesMarkdown(
   const tResolved = t || LOCALE_TEXT.en;
   const entityGuide = PLUGIN_ENTITY_GUIDE[pluginMeta.pluginId];
   if (!entityGuide || !Array.isArray(entityGuide.useCases)) return "";
-  const heading = headingOverride || tResolved.useCasesHeading;
-  const lines = [`## ${heading}`, ""];
-  for (const [title, purpose, workflow, mermaid, screenshotKind] of entityGuide.useCases) {
+  const lines = [`## ${headingOverride || tResolved.useCasesHeading}`, ""];
+  for (const [title, purpose, flow, mmd, kind] of entityGuide.useCases) {
     lines.push(
       `### ${title}`,
       "",
       `- **What it is for**: ${purpose}`,
-      `- **How it works**: ${workflow}`,
+      `- **How it works**: ${flow}`,
       ""
     );
-    if (mermaid) {
-      lines.push("```mermaid", mermaid, "```", "");
-    }
-    const shot = resolveUseCaseScreenshot(pluginMeta, screenshotKind);
-    if (shot) {
-      lines.push(`![${shot.caption}](${shot.url})`, "");
-    }
+    if (mmd) lines.push("```mermaid", mmd, "```", "");
+    const shot = resolveUseCaseScreenshot(pluginMeta, kind);
+    if (shot) lines.push(`![${shot.caption}](${shot.url})`, "");
   }
   return lines.join("\n");
 }
 
 export function buildUseCasesPageMarkdown(
-  pluginMeta: PluginPackageMeta,
+  meta: PluginPackageMeta,
   details: InspectedPluginDetails,
   locale: SupportedLocale
 ): string {
-  const t = LOCALE_TEXT[locale] || LOCALE_TEXT.en;
-  const localizedLabel =
-    locale === "en" ? pluginMeta.label : pluginMeta.translations[locale] || pluginMeta.label;
-  const title = `${localizedLabel} — ${t.useCasesPageTitleSuffix}`;
-  const description = `${t.useCasesPageDescPrefix} ${pluginMeta.npmName}.`;
-  const prefixUrl = locale === "en" ? "" : `/${locale}`;
+  const { t, label, prefixUrl } = localeMeta(meta, locale);
+  const title = `${label} — ${t.useCasesPageTitleSuffix}`;
+  const description = `${t.useCasesPageDescPrefix} ${meta.npmName}.`;
+  const h1 = "1. " + t.schemasHeading.replace(/^\d+\.\s*/, "");
+  const h3 = "3. " + t.useCasesHeading.replace(/^\d+\.\s*/, "");
 
   return [
     "---",
@@ -282,20 +308,15 @@ export function buildUseCasesPageMarkdown(
     `description: ${yamlQuote(description)}`,
     "---",
     "",
-    `> **Package**: \`${pluginMeta.npmName}\` · **Plugin ID**: \`${pluginMeta.pluginId}\` · **Admin Workspace**: \`/admin/plugins/${pluginMeta.pluginId}\``,
+    `> **Package**: \`${meta.npmName}\` · **Plugin ID**: \`${meta.pluginId}\` · **Admin Workspace**: \`/admin/plugins/${meta.pluginId}\``,
     "",
-    buildContentTypesMarkdown(
-      pluginMeta,
-      details.contentTypes,
-      t,
-      "1. " + t.schemasHeading.replace(/^\d+\.\s*/, "")
-    ),
-    buildContentManagerSectionMarkdown(pluginMeta, locale),
-    buildUseCasesMarkdown(pluginMeta, t, "3. " + t.useCasesHeading.replace(/^\d+\.\s*/, "")),
+    buildContentTypesMarkdown(meta, details.contentTypes, t, h1),
+    buildContentManagerSectionMarkdown(meta, locale),
+    buildUseCasesMarkdown(meta, t, h3),
     "---",
     "",
-    `- [${t.exploreGuideLink}](${prefixUrl}/${pluginMeta.slug}/guide/)`,
-    `- [${t.exploreApiLink}](/${pluginMeta.slug}/api/)`,
+    `- [${t.exploreGuideLink}](${prefixUrl}/${meta.slug}/guide/)`,
+    `- [${t.exploreApiLink}](/${meta.slug}/api/)`,
     "",
   ].join("\n");
 }
@@ -305,13 +326,12 @@ function buildRoutesTableMarkdown(
   t: LocaleDocText,
   headingOverride?: string
 ): string {
-  const heading = headingOverride || t.routesHeading;
   const rows = routes.map(
     (r) =>
       `| \`${r.method.toUpperCase()}\` | \`${r.path}\` | \`${r.routeType}\` | \`${r.handler}\` | ${r.authenticated ? "Bearer JWT" : "Public"} |`
   );
   return [
-    `## ${heading}`,
+    `## ${headingOverride || t.routesHeading}`,
     "",
     `| ${t.methodCol} | ${t.pathCol} | ${t.scopeCol} | ${t.handlerCol} | ${t.authCol} |`,
     "| :--- | :--- | :--- | :--- | :--- |",
@@ -321,38 +341,39 @@ function buildRoutesTableMarkdown(
 }
 
 export function buildGuidePageMarkdown(
-  pluginMeta: PluginPackageMeta,
+  meta: PluginPackageMeta,
   details: InspectedPluginDetails,
   routes: NormalizedPluginRoute[],
   locale: SupportedLocale
 ): string {
-  const t = LOCALE_TEXT[locale] || LOCALE_TEXT.en;
-  const localizedLabel =
-    locale === "en" ? pluginMeta.label : pluginMeta.translations[locale] || pluginMeta.label;
-  const title = `${localizedLabel} — ${t.guideTitleSuffix}`;
-  const description = `${t.guideDescPrefix} ${pluginMeta.npmName}.`;
+  const { t, label } = localeMeta(meta, locale);
+  const title = `${label} — ${t.guideTitleSuffix}`;
+  const description = `${t.guideDescPrefix} ${meta.npmName}.`;
   const peerInstall =
-    pluginMeta.slug === "strapi-plugin-events" || pluginMeta.slug === "strapi-plugin-bookings"
-      ? `pnpm add @vicacha-devs/strapi-plugin-calendar ${pluginMeta.npmName}`
-      : `pnpm add ${pluginMeta.npmName}`;
+    meta.slug === "strapi-plugin-events" ||
+    meta.slug === "strapi-plugin-bookings"
+      ? `pnpm add @vicacha-devs/strapi-plugin-calendar ${meta.npmName}`
+      : `pnpm add ${meta.npmName}`;
 
-  const docContentTypes = details.contentTypes.filter((ct) => ct.kind !== "component");
+  const docCts = details.contentTypes.filter((ct) => ct.kind !== "component");
   const sampleUid =
-    docContentTypes.length > 0
-      ? `plugin::${pluginMeta.pluginId}.${docContentTypes[0].singularName}`
-      : `plugin::${pluginMeta.pluginId}`;
+    docCts.length > 0
+      ? `plugin::${meta.pluginId}.${docCts[0].singularName}`
+      : `plugin::${meta.pluginId}`;
 
   const sampleUiTable = buildSampleTranslationsTable(
     details.translations[locale] || details.translations.en || {},
     t
   );
   const configFields =
-    PLUGIN_SAMPLE_CONFIG[pluginMeta.pluginId] || "      // Plugin configuration options";
+    PLUGIN_SAMPLE_CONFIG[meta.pluginId] ||
+    "      // Plugin configuration options";
   const serviceList =
     Array.isArray(details.serviceNames) && details.serviceNames.length > 0
       ? details.serviceNames
       : ["service"];
-  const primaryService = serviceList.find((s) => s !== "settings") || serviceList[0] || "service";
+  const primaryService =
+    serviceList.find((s) => s !== "settings") || serviceList[0] || "service";
 
   return [
     "---",
@@ -373,7 +394,7 @@ export function buildGuidePageMarkdown(
     "```ts",
     "// config/plugins.ts",
     "export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({",
-    `  ${JSON.stringify(pluginMeta.pluginId)}: {`,
+    `  ${JSON.stringify(meta.pluginId)}: {`,
     "    enabled: true,",
     "    config: {",
     configFields,
@@ -382,35 +403,28 @@ export function buildGuidePageMarkdown(
     "});",
     "```",
     "",
-    ...(pluginMeta.settingsScreenshot
-      ? [`![${localizedLabel} — Strapi v5 Settings Panel](${pluginMeta.settingsScreenshot})`, ""]
-      : []),
+    ...optShot(label, meta.settingsScreenshot, "settings"),
     `## ${t.adminHeading}`,
     "",
     t.adminIntro,
     "",
-    `![${localizedLabel} — Strapi v5 Admin UI](${pluginMeta.screenshot})`,
+    `![${label} — Strapi v5 Admin UI](${meta.screenshot})`,
     "",
-    ...(pluginMeta.paletteScreenshot
-      ? [
-          `![${localizedLabel} — Spotlight Cmd+K Command Palette](${pluginMeta.paletteScreenshot})`,
-          "",
-        ]
-      : []),
+    ...optShot(label, meta.paletteScreenshot, "palette"),
     sampleUiTable,
-    buildContentTypesMarkdown(pluginMeta, details.contentTypes, t),
-    buildContentManagerSectionMarkdown(pluginMeta, locale),
-    buildUseCasesMarkdown(pluginMeta, t),
+    buildContentTypesMarkdown(meta, details.contentTypes, t),
+    buildContentManagerSectionMarkdown(meta, locale),
+    buildUseCasesMarkdown(meta, t),
     buildRoutesTableMarkdown(routes, t),
     `## ${t.serviceHeading}`,
     "",
     "```ts",
-    `// Registered services on plugin "${pluginMeta.pluginId}": ${serviceList.map((s) => `"${s}"`).join(", ")}`,
-    `const pluginService = strapi.plugin(${JSON.stringify(pluginMeta.pluginId)})?.service(${JSON.stringify(primaryService)});`,
+    `// Registered services on plugin "${meta.pluginId}": ${serviceList.map((s) => `"${s}"`).join(", ")}`,
+    `const pluginService = strapi.plugin(${JSON.stringify(meta.pluginId)})?.service(${JSON.stringify(primaryService)});`,
     "",
-    docContentTypes.length > 0
+    docCts.length > 0
       ? `// Querying records via the Strapi v5 Document Service API\nconst records = await strapi.documents(${JSON.stringify(sampleUid)}).findMany({\n  limit: 25,\n  sort: "createdAt:desc",\n});`
-      : `// Retrieving plugin settings via Strapi plugin store\nconst store = strapi.store({ type: "plugin", name: ${JSON.stringify(pluginMeta.pluginId)} });\nconst settings = await store.get({ key: "settings" });`,
+      : `// Retrieving plugin settings via Strapi plugin store\nconst store = strapi.store({ type: "plugin", name: ${JSON.stringify(meta.pluginId)} });\nconst settings = await store.get({ key: "settings" });`,
     "```",
     "",
     `## ${t.troubleshootingHeading}`,
@@ -421,62 +435,57 @@ export function buildGuidePageMarkdown(
 }
 
 export function buildLocalizedOverviewMarkdown(
-  pluginMeta: PluginPackageMeta,
+  meta: PluginPackageMeta,
   details: InspectedPluginDetails,
   routes: NormalizedPluginRoute[],
   locale: SupportedLocale
 ): string {
-  const t = LOCALE_TEXT[locale] || LOCALE_TEXT.en;
-  const localizedLabel =
-    locale === "en" ? pluginMeta.label : pluginMeta.translations[locale] || pluginMeta.label;
-  const subtitle =
-    pluginMeta.summary?.[locale] ||
-    pluginMeta.summary?.en ||
-    details.pkgJson.description ||
-    localizedLabel;
-
-  const prefixUrl = locale === "en" ? "" : `/${locale}`;
+  const { t, label, prefixUrl } = localeMeta(meta, locale);
+  const s = meta.summary;
+  const subtitle = s?.[locale] || s?.en || details.pkgJson.description || label;
 
   return [
     "---",
-    `title: ${yamlQuote(`${localizedLabel} (${pluginMeta.npmName})`)}`,
+    `title: ${yamlQuote(`${label} (${meta.npmName})`)}`,
     `description: ${yamlQuote(subtitle)}`,
     "prev: false",
     "---",
     "",
-    `> **Package**: \`${pluginMeta.npmName}\` · **Plugin ID**: \`${pluginMeta.pluginId}\` · **Category**: \`${pluginMeta.category}\` · **Version**: \`${details.pkgJson.version}\` · **Routes**: \`${routes.length}\``,
+    `> **Package**: \`${meta.npmName}\` · **Plugin ID**: \`${meta.pluginId}\` · **Category**: \`${meta.category}\` · **Version**: \`${details.pkgJson.version}\` · **Routes**: \`${routes.length}\``,
     "",
     subtitle,
     "",
     "```bash",
-    `pnpm add ${pluginMeta.npmName}`,
+    `pnpm add ${meta.npmName}`,
     "```",
     "",
-    `![${localizedLabel} — Strapi v5 Admin UI](${pluginMeta.screenshot})`,
+    `![${label} — Strapi v5 Admin UI](${meta.screenshot})`,
     "",
-    ...(pluginMeta.paletteScreenshot
-      ? [
-          `![${localizedLabel} — Spotlight Cmd+K Command Palette](${pluginMeta.paletteScreenshot})`,
-          "",
-        ]
-      : []),
-    ...(pluginMeta.settingsScreenshot
-      ? [`![${localizedLabel} — Strapi v5 Settings Panel](${pluginMeta.settingsScreenshot})`, ""]
-      : []),
+    ...optShot(label, meta.paletteScreenshot, "palette"),
+    ...optShot(label, meta.settingsScreenshot, "settings"),
     `## ${t.featuresHeading}`,
     "",
-    `- [${t.exploreUseCasesLink}](${prefixUrl}/${pluginMeta.slug}/use-cases/)`,
-    `- [${t.exploreGuideLink}](${prefixUrl}/${pluginMeta.slug}/guide/)`,
-    `- [${t.exploreApiLink}](/strapi-plugin-${pluginMeta.slug.replace(/^strapi-plugin-/, "")}/api/)`,
+    `- [${t.exploreUseCasesLink}](${prefixUrl}/${meta.slug}/use-cases/)`,
+    `- [${t.exploreGuideLink}](${prefixUrl}/${meta.slug}/guide/)`,
+    `- [${t.exploreApiLink}](/strapi-plugin-${meta.slug.replace(/^strapi-plugin-/, "")}/api/)`,
     "",
-    buildContentTypesMarkdown(pluginMeta, details.contentTypes, t, t.overviewSchemasHeading),
-    buildContentManagerSectionMarkdown(pluginMeta, locale),
-    buildUseCasesMarkdown(pluginMeta, t, t.overviewUseCasesHeading),
+    buildContentTypesMarkdown(
+      meta,
+      details.contentTypes,
+      t,
+      t.overviewSchemasHeading
+    ),
+    buildContentManagerSectionMarkdown(meta, locale),
+    buildUseCasesMarkdown(meta, t, t.overviewUseCasesHeading),
     buildRoutesTableMarkdown(routes.slice(0, 10), t, t.overviewRoutesHeading),
   ].join("\n");
 }
 
-export function writeMarkdownFile(rootDir: string, relativePath: string, content: string): void {
+export function writeMarkdownFile(
+  rootDir: string,
+  relativePath: string,
+  content: string
+): void {
   const target = assertWithinBoundary(resolve(rootDir, relativePath), rootDir);
   mkdirSync(resolve(target, ".."), { recursive: true });
   const cleanName = basename(target);

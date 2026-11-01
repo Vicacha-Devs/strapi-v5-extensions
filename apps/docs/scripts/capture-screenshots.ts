@@ -14,13 +14,24 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const DOCS_ROOT = resolve(HERE, "..");
 const REPO_ROOT = resolve(DOCS_ROOT, "../..");
 const SCREENSHOTS_DIR = resolve(DOCS_ROOT, "public/screenshots");
-const DEFAULT_LIVE_ADMIN_URL = process.env.STRAPI_ADMIN_URL || "http://127.0.0.1:1338";
-const DEFAULT_BACKEND_DIR = resolve(REPO_ROOT, "../central-mosque-bogota/backend");
+const DEFAULT_LIVE_ADMIN_URL =
+  process.env.STRAPI_ADMIN_URL || "http://127.0.0.1:1338";
+const DEFAULT_BACKEND_DIR = resolve(
+  REPO_ROOT,
+  "../central-mosque-bogota/backend"
+);
 
-function signHs256Jwt(payload: Record<string, unknown>, secret: string): string {
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
+function signHs256Jwt(
+  payload: Record<string, unknown>,
+  secret: string
+): string {
+  const header = Buffer.from(
+    JSON.stringify({ alg: "HS256", typ: "JWT" })
+  ).toString("base64url");
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = createHmac("sha256", secret).update(`${header}.${body}`).digest("base64url");
+  const sig = createHmac("sha256", secret)
+    .update(`${header}.${body}`)
+    .digest("base64url");
   return `${header}.${body}.${sig}`;
 }
 
@@ -43,7 +54,9 @@ async function resolveLiveStrapiAuth(baseUrl: string): Promise<string | null> {
   try {
     const envPath = resolve(DEFAULT_BACKEND_DIR, ".env");
     const dbPath = resolve(DEFAULT_BACKEND_DIR, ".tmp/data.db");
-    const secret = process.env.STRAPI_ADMIN_JWT_SECRET || readEnvValue(envPath, "ADMIN_JWT_SECRET");
+    const secret =
+      process.env.STRAPI_ADMIN_JWT_SECRET ||
+      readEnvValue(envPath, "ADMIN_JWT_SECRET");
     if (!secret || !existsSync(dbPath)) return null;
 
     const row = execFileSync(
@@ -61,7 +74,13 @@ async function resolveLiveStrapiAuth(baseUrl: string): Promise<string | null> {
 
     const now = Math.floor(Date.now() / 1000);
     const token = signHs256Jwt(
-      { userId: String(userId), sessionId, type: "access", iat: now, exp: now + 3600 },
+      {
+        userId: String(userId),
+        sessionId,
+        type: "access",
+        iat: now,
+        exp: now + 3600,
+      },
       secret
     );
 
@@ -75,20 +94,27 @@ async function resolveLiveStrapiAuth(baseUrl: string): Promise<string | null> {
   }
 }
 
-async function waitForStrapiPageReady(page: Page, extraWaitMs = 2400): Promise<void> {
+async function waitForStrapiPageReady(
+  page: Page,
+  extraWaitMs = 2400
+): Promise<void> {
   await page.waitForLoadState("networkidle").catch(() => {});
   await page.waitForTimeout(extraWaitMs);
 }
 
 const CONTENT_MANAGER_ROUTES: Record<string, string> = {
-  "bookings": "/admin/content-manager/collection-types/plugin::bookings.resource",
-  "broadcasts": "/admin/content-manager/collection-types/plugin::broadcasts.campaign",
+  "bookings":
+    "/admin/content-manager/collection-types/plugin::bookings.resource",
+  "broadcasts":
+    "/admin/content-manager/collection-types/plugin::broadcasts.campaign",
   "calendar":
     "/admin/content-manager/collection-types/plugin::events.event/ewuorq6yjf1l2n0wr0uw32ib?plugins[i18n][locale]=en",
-  "certificates": "/admin/content-manager/collection-types/plugin::certificates.template",
+  "certificates":
+    "/admin/content-manager/collection-types/plugin::certificates.template",
   "donations":
     "/admin/content-manager/collection-types/plugin::donations.campaign?plugins[i18n][locale]=en",
-  "events": "/admin/content-manager/collection-types/plugin::events.event?plugins[i18n][locale]=en",
+  "events":
+    "/admin/content-manager/collection-types/plugin::events.event?plugins[i18n][locale]=en",
   "inbox": "/admin/content-manager/collection-types/plugin::inbox.alert-banner",
   "islam":
     "/admin/content-manager/collection-types/plugin::islam.scripture-entry?plugins[i18n][locale]=en",
@@ -111,7 +137,10 @@ async function captureContentManagerScreenshot(
   const cmRoute = CONTENT_MANAGER_ROUTES[pluginId];
   if (!cmRoute) return;
   const cmFile = basename(cmScreenshotPath);
-  const cmOutPath = assertWithinBoundary(resolve(SCREENSHOTS_DIR, cmFile), SCREENSHOTS_DIR);
+  const cmOutPath = assertWithinBoundary(
+    resolve(SCREENSHOTS_DIR, cmFile),
+    SCREENSHOTS_DIR
+  );
   await page.goto(`${baseUrl}${cmRoute}`, { waitUntil: "domcontentloaded" });
   await waitForStrapiPageReady(page, 2500);
 
@@ -122,7 +151,9 @@ async function captureContentManagerScreenshot(
   }
 
   if (pluginId === "notes") {
-    const addNoteBtn = page.locator("button", { hasText: /Add a note|Añadir una nota/i }).first();
+    const addNoteBtn = page
+      .locator("button", { hasText: /Add a note|Añadir una nota/i })
+      .first();
     if ((await addNoteBtn.count()) > 0) {
       await addNoteBtn.click().catch(() => {});
       await page.waitForTimeout(700);
@@ -151,7 +182,9 @@ async function captureContentManagerScreenshot(
   }
 
   await page.screenshot({ path: cmOutPath, fullPage: false });
-  console.warn(`[capture-screenshots] captured live public/screenshots/${cmFile}`);
+  console.warn(
+    `[capture-screenshots] captured live public/screenshots/${cmFile}`
+  );
 }
 
 async function captureFromLiveStrapi(
@@ -166,7 +199,9 @@ async function captureFromLiveStrapi(
   });
 
   const cookieName = ["jwt", "Token"].join("");
-  await context.addCookies([{ name: cookieName, value: jwtToken, domain: host, path: "/" }]);
+  await context.addCookies([
+    { name: cookieName, value: jwtToken, domain: host, path: "/" },
+  ]);
   await context.addInitScript(
     ({ key, val, raw }: { key: string; val: string; raw: string }) => {
       window.localStorage.setItem(key, val);
@@ -191,7 +226,9 @@ async function captureFromLiveStrapi(
     await page.goto(`${baseUrl}/admin`, { waitUntil: "domcontentloaded" });
     await waitForStrapiPageReady(page, 2500);
     await page.screenshot({ path: overviewTarget, fullPage: false });
-    console.warn("[capture-screenshots] captured live public/screenshots/dashboard-overview.png");
+    console.warn(
+      "[capture-screenshots] captured live public/screenshots/dashboard-overview.png"
+    );
   }
 
   for (const plugin of plugins) {
@@ -208,46 +245,78 @@ async function captureFromLiveStrapi(
     if (cmOnly) continue;
 
     const adminFile = basename(plugin.screenshot);
-    const adminOutPath = assertWithinBoundary(resolve(SCREENSHOTS_DIR, adminFile), SCREENSHOTS_DIR);
-    const settingsFile = plugin.settingsScreenshot ? basename(plugin.settingsScreenshot) : null;
+    const adminOutPath = assertWithinBoundary(
+      resolve(SCREENSHOTS_DIR, adminFile),
+      SCREENSHOTS_DIR
+    );
+    const settingsFile = plugin.settingsScreenshot
+      ? basename(plugin.settingsScreenshot)
+      : null;
     const settingsOutPath = settingsFile
-      ? assertWithinBoundary(resolve(SCREENSHOTS_DIR, settingsFile), SCREENSHOTS_DIR)
+      ? assertWithinBoundary(
+          resolve(SCREENSHOTS_DIR, settingsFile),
+          SCREENSHOTS_DIR
+        )
       : null;
 
     if (plugin.pluginId === "sitemap") {
-      await page.goto(`${baseUrl}/admin/settings/strapi-5-sitemap-plugin`, {
+      const clickTabAndShot = async (tabPattern: RegExp, file: string) => {
+        const out = assertWithinBoundary(
+          resolve(SCREENSHOTS_DIR, file),
+          SCREENSHOTS_DIR
+        );
+        const tab = page
+          .locator("button, [role='tab']", { hasText: tabPattern })
+          .first();
+        if ((await tab.count()) > 0) {
+          await tab.click();
+          await page.waitForTimeout(800);
+        }
+        await page.screenshot({ path: out, fullPage: false });
+        console.warn(
+          `[capture-screenshots] captured live public/screenshots/${file}`
+        );
+      };
+      await page.goto(`${baseUrl}/admin/settings/sitemap`, {
         waitUntil: "domcontentloaded",
       });
       await waitForStrapiPageReady(page, 2400);
-      const indexCheckbox = page.locator("button[role='checkbox'], input[type='checkbox']").first();
-      if ((await indexCheckbox.count()) > 0) {
-        const ariaChecked = await indexCheckbox.getAttribute("aria-checked");
-        if (ariaChecked === "false") {
-          await indexCheckbox.click();
-          await page.waitForTimeout(500);
-        }
-      }
-      if (settingsOutPath) {
-        await page.screenshot({ path: settingsOutPath, fullPage: false });
-        console.warn(`[capture-screenshots] captured live public/screenshots/${settingsFile}`);
-      }
-      const collectionTypesTab = page
-        .locator("button, [role='tab']", { hasText: /Collection Types/i })
+      const indexCheckbox = page
+        .locator("button[role='checkbox'], input[type='checkbox']")
         .first();
-      if ((await collectionTypesTab.count()) > 0) {
-        await collectionTypesTab.click();
-        await page.waitForTimeout(800);
+      if (
+        (await indexCheckbox.count()) > 0 &&
+        (await indexCheckbox.getAttribute("aria-checked")) === "false"
+      ) {
+        await indexCheckbox.click();
+        await page.waitForTimeout(500);
       }
-      await page.screenshot({ path: adminOutPath, fullPage: false });
-      console.warn(`[capture-screenshots] captured live public/screenshots/${adminFile}`);
+      if (settingsOutPath && settingsFile) {
+        await page.screenshot({ path: settingsOutPath, fullPage: false });
+        console.warn(
+          `[capture-screenshots] captured live public/screenshots/${settingsFile}`
+        );
+      }
+      await clickTabAndShot(/Collection Types/i, adminFile);
+      if (plugin.contentManagerScreenshot) {
+        await clickTabAndShot(
+          /Custom URLs/i,
+          basename(plugin.contentManagerScreenshot)
+        );
+      }
+      await clickTabAndShot(/Excluded URLs/i, "sitemap-excluded-urls.png");
       continue;
     }
 
     if (plugin.pluginId === "seo") {
-      await page.goto(`${baseUrl}/admin/seo`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${baseUrl}/admin/seo`, {
+        waitUntil: "domcontentloaded",
+      });
       await waitForStrapiPageReady(page, 2400);
       await page.screenshot({ path: adminOutPath, fullPage: false });
-      console.warn(`[capture-screenshots] captured live public/screenshots/${adminFile}`);
+      console.warn(
+        `[capture-screenshots] captured live public/screenshots/${adminFile}`
+      );
 
       if (settingsOutPath) {
         const singleTypesTab = page
@@ -258,16 +327,22 @@ async function captureFromLiveStrapi(
           await page.waitForTimeout(800);
         }
         await page.screenshot({ path: settingsOutPath, fullPage: false });
-        console.warn(`[capture-screenshots] captured live public/screenshots/${settingsFile}`);
+        console.warn(
+          `[capture-screenshots] captured live public/screenshots/${settingsFile}`
+        );
       }
       continue;
     }
 
     if (plugin.pluginId === "notes") {
-      await page.goto(`${baseUrl}/admin/plugins/notes`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${baseUrl}/admin/plugins/notes`, {
+        waitUntil: "domcontentloaded",
+      });
       await waitForStrapiPageReady(page, 2400);
       await page.screenshot({ path: adminOutPath, fullPage: false });
-      console.warn(`[capture-screenshots] captured live public/screenshots/${adminFile}`);
+      console.warn(
+        `[capture-screenshots] captured live public/screenshots/${adminFile}`
+      );
 
       if (settingsOutPath) {
         await page.goto(
@@ -275,13 +350,17 @@ async function captureFromLiveStrapi(
           { waitUntil: "domcontentloaded" }
         );
         await waitForStrapiPageReady(page, 2600);
-        const addNoteBtn = page.locator("button", { hasText: "Add a note" }).first();
+        const addNoteBtn = page
+          .locator("button", { hasText: "Add a note" })
+          .first();
         if ((await addNoteBtn.count()) > 0) {
           await addNoteBtn.click();
           await page.waitForTimeout(800);
         }
         await page.screenshot({ path: settingsOutPath, fullPage: false });
-        console.warn(`[capture-screenshots] captured live public/screenshots/${settingsFile}`);
+        console.warn(
+          `[capture-screenshots] captured live public/screenshots/${settingsFile}`
+        );
       }
       continue;
     }
@@ -291,13 +370,17 @@ async function captureFromLiveStrapi(
         waitUntil: "domcontentloaded",
       });
       await waitForStrapiPageReady(page, 2200);
-      const searchInput = page.locator('input[type="text"], input[type="search"]').first();
+      const searchInput = page
+        .locator('input[type="text"], input[type="search"]')
+        .first();
       if ((await searchInput.count()) > 0) {
         await searchInput.fill("Islam");
         await page.waitForTimeout(1400);
       }
       await page.screenshot({ path: adminOutPath, fullPage: false });
-      console.warn(`[capture-screenshots] captured live public/screenshots/${adminFile}`);
+      console.warn(
+        `[capture-screenshots] captured live public/screenshots/${adminFile}`
+      );
 
       if (plugin.paletteScreenshot) {
         const paletteFile = basename(plugin.paletteScreenshot);
@@ -310,7 +393,9 @@ async function captureFromLiveStrapi(
         });
         await waitForStrapiPageReady(page, 2200);
         const bookingsTab = page
-          .locator("button, [role='tab']", { hasText: "Bookings & Availability" })
+          .locator("button, [role='tab']", {
+            hasText: "Bookings & Availability",
+          })
           .first();
         if ((await bookingsTab.count()) > 0) {
           await bookingsTab.click();
@@ -325,7 +410,9 @@ async function captureFromLiveStrapi(
         await page.keyboard.press("ArrowDown");
         await page.waitForTimeout(300);
         await page.screenshot({ path: paletteOutPath, fullPage: false });
-        console.warn(`[capture-screenshots] captured live public/screenshots/${paletteFile}`);
+        console.warn(
+          `[capture-screenshots] captured live public/screenshots/${paletteFile}`
+        );
       }
 
       if (settingsOutPath) {
@@ -334,7 +421,9 @@ async function captureFromLiveStrapi(
         });
         await waitForStrapiPageReady(page, 2400);
         await page.screenshot({ path: settingsOutPath, fullPage: false });
-        console.warn(`[capture-screenshots] captured live public/screenshots/${settingsFile}`);
+        console.warn(
+          `[capture-screenshots] captured live public/screenshots/${settingsFile}`
+        );
       }
       continue;
     }
@@ -344,7 +433,9 @@ async function captureFromLiveStrapi(
     });
     await waitForStrapiPageReady(page, 2500);
     await page.screenshot({ path: adminOutPath, fullPage: false });
-    console.warn(`[capture-screenshots] captured live public/screenshots/${adminFile}`);
+    console.warn(
+      `[capture-screenshots] captured live public/screenshots/${adminFile}`
+    );
 
     if (settingsOutPath) {
       await page.goto(`${baseUrl}/admin/settings/${plugin.pluginId}`, {
@@ -352,7 +443,9 @@ async function captureFromLiveStrapi(
       });
       await waitForStrapiPageReady(page, 2500);
       await page.screenshot({ path: settingsOutPath, fullPage: false });
-      console.warn(`[capture-screenshots] captured live public/screenshots/${settingsFile}`);
+      console.warn(
+        `[capture-screenshots] captured live public/screenshots/${settingsFile}`
+      );
     }
   }
 
@@ -362,7 +455,8 @@ async function captureFromLiveStrapi(
 async function main(): Promise<void> {
   mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 
-  const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+  const chromePath =
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
   const browser = await chromium.launch({
     headless: true,
     ...(existsSync(chromePath) ? { executablePath: chromePath } : {}),

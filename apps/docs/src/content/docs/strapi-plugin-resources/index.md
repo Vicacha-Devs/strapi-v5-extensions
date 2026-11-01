@@ -46,7 +46,16 @@ export default ({ env }) => ({
       enableCloudinaryOptimization: true,
       autoSyncMediaFolders: true,
       maxPhotosPerAlbum: 200,
-      allowedDownloadExtensions: [".pdf", ".epub", ".mobi", ".zip", ".mp3", ".m4a", ".ogg", ".wav"],
+      allowedDownloadExtensions: [
+        ".pdf",
+        ".epub",
+        ".mobi",
+        ".zip",
+        ".mp3",
+        ".m4a",
+        ".ogg",
+        ".wav",
+      ],
       allowedDownloadMimeTypes: [
         "application/pdf",
         "application/epub+zip",

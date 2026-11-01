@@ -304,19 +304,20 @@ export const PLUGIN_ENTITY_GUIDE_B: Record<string, PluginEntityGuideEntry> = {
         "admin",
       ],
       [
-        "Use Case 2 — Hybrid Static + CMS Sitemap with Custom Single URLs",
-        "Include static frontend routes (`/`, `/es/contact`, `/ar/prayer-times`) alongside dynamic CMS entries in the same XML sitemap.",
-        "Add static route entries in the **Custom URLs** tab (`plugin::sitemap.sitemap-content-type-single-url`) and exclude internal routes in the **Excluded URLs** tab.",
+        "Use Case 2 — Hybrid Static + CMS Sitemap with Custom Single URLs & Excluded Paths",
+        "Include static frontend routes (`/es`, `/es/about-us`, `/en/about-us`) alongside dynamic CMS entries in the same XML sitemap while excluding internal paths (`/admin`, `/api`, `/404`).",
+        "Add static route entries in the **Custom URLs** tab (`plugin::sitemap.sitemap-content-type-single-url`) and exclude internal routes in the **Excluded URLs** tab of `/admin/settings/sitemap`.",
         `flowchart LR
-  CustomTab["Custom URLs Tab (POST /sitemap/admin-custom-urls)"] --> SingleEntity["plugin::sitemap.sitemap-content-type-single-url"]
+  CustomTab["Custom URLs Tab (PUT /sitemap/settings)"] --> SingleEntity["plugin::sitemap.sitemap-content-type-single-url"]
   SingleEntity --> Merge["Merge Static URLs + Dynamic Content-Type URLs"]`,
+        "content-manager",
       ],
       [
         "Use Case 3 — Multi-File Sitemap Index (`sitemap-{slug}.xml`) for Large Sites",
-        "Split large portals into dedicated sub-sitemaps (e.g., `/api/sitemap/sitemap-articles.xml`, `/api/sitemap/sitemap-events.xml`) referenced by a master `<sitemapindex>`.",
-        "Enable `useSitemapIndex: true` and define `sitemapDefinitions` in the **General & Sitemap Index** tab of `/admin/settings/sitemap` (`PUT /sitemap/admin-put-options`).",
+        "Split large portals into dedicated sub-sitemaps (e.g., `/api/sitemap/sitemap-pages.xml`, `/api/sitemap/sitemap-editorial-and-library.xml`, `/api/sitemap/sitemap-events-and-liturgy.xml`) referenced by a master `<sitemapindex>`.",
+        "Enable **Use sitemap index with multiple sitemaps** (`useSitemapIndex: true`), grant `getSitemapBySlug` in `Users & Permissions → Public → Sitemap`, and define `sitemapDefinitions` in the **General & Sitemap Index** tab of `/admin/settings/sitemap` (`PUT /sitemap/settings`).",
         `flowchart LR
-  Settings["/admin/settings/sitemap (General & Sitemap Index Tab)"] -->Defs["Define Sub-Sitemaps (articles, events, publications)"]
+  Settings["/admin/settings/sitemap (General & Sitemap Index Tab)"] -->Defs["Define Sub-Sitemaps (pages, editorial-and-library, events-and-liturgy)"]
   Defs --> IndexXml["GET /api/sitemap/sitemap.xml (<sitemapindex>)"]
   IndexXml --> SubXml["GET /api/sitemap/sitemap-{slug}.xml"]`,
         "settings",

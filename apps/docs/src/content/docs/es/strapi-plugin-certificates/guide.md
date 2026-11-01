@@ -15,12 +15,19 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   certificates: {
     enabled: true,
     config: {
       organizationName: env("CERTIFICATES_ORG_NAME", "Central Organization"),
-      verificationBaseUrl: env("CERTIFICATES_VERIFY_URL", "https://example.org/verify"),
+      verificationBaseUrl: env(
+        "CERTIFICATES_VERIFY_URL",
+        "https://example.org/verify"
+      ),
     },
   },
 });
@@ -269,10 +276,12 @@ flowchart LR
 const pluginService = strapi.plugin("certificates")?.service("issuance");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi.documents("plugin::certificates.certificate").findMany({
-  limit: 25,
-  sort: "createdAt:desc",
-});
+const records = await strapi
+  .documents("plugin::certificates.certificate")
+  .findMany({
+    limit: 25,
+    sort: "createdAt:desc",
+  });
 ```
 
 ## 8. Solución de Problemas y Verificación
