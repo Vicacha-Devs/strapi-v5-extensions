@@ -4,10 +4,17 @@ export type AsrSchoolId = "1" | "2";
 export type CalendarMethodId = "MATHEMATICAL" | "UAQ" | "HJCoSA" | "DIYANET";
 export type HijriShiftId = "-2" | "-1" | "0" | "1" | "2";
 export type NisabStandardId = "common" | "classical";
-export type PrayerNameId = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha" | "jumuah";
+export type PrayerNameId =
+  | "fajr"
+  | "dhuhr"
+  | "asr"
+  | "maghrib"
+  | "isha"
+  | "jumuah";
 export type DailyFivePrayerId = "fajr" | "dhuhr" | "asr" | "maghrib" | "isha";
 
-export type LocalizedStringMap = Record<SupportedLocale, string> & Record<string, string>;
+export type LocalizedStringMap = Record<SupportedLocale, string> &
+  Record<string, string>;
 
 export interface IqamahRule {
   prayerName: PrayerNameId;
@@ -309,9 +316,19 @@ export interface IslamicObservanceItem {
   hijriFormatted: string;
   estimatedGregorianDate: string;
   daysUntil: number;
-  category: "eid" | "ramadan" | "fasting" | "sacred_night" | "hajj" | "commemoration";
+  category:
+    | "eid"
+    | "ramadan"
+    | "fasting"
+    | "sacred_night"
+    | "hajj"
+    | "commemoration";
   isPublicHolidayInIslam: boolean;
-  fastingRecommendedOrObligatory: "obligatory" | "sunnah" | "forbidden" | "none";
+  fastingRecommendedOrObligatory:
+    | "obligatory"
+    | "sunnah"
+    | "forbidden"
+    | "none";
   titles: LocalizedStringMap;
   descriptions: LocalizedStringMap;
 }
@@ -343,7 +360,12 @@ export interface CuratedAyahItem {
 
 export interface CuratedHadithItem {
   id: string;
-  collectionSlug: "bukhari" | "muslim" | "nawawi40" | "riyad_assalihin" | "tirmidhi";
+  collectionSlug:
+    | "bukhari"
+    | "muslim"
+    | "nawawi40"
+    | "riyad_assalihin"
+    | "tirmidhi";
   collectionNames: LocalizedStringMap;
   hadithNumber: string;
   grading: "Sahih" | "Hasan";

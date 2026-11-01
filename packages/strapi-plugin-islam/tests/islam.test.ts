@@ -31,14 +31,20 @@ describe("@vicacha-devs/strapi-plugin-islam — Astronomical Salah, Qibla, Hijri
     assert.ok(qibla.direction.degrees > 64 && qibla.direction.degrees < 66.5);
     assert.equal(qibla.direction.cardinal, "ENE");
     assert.equal(qibla.direction.from, "True North");
-    assert.ok(qibla.distance.kilometers > 12000 && qibla.distance.kilometers < 12500);
+    assert.ok(
+      qibla.distance.kilometers > 12000 && qibla.distance.kilometers < 12500
+    );
     assert.ok(qibla.distance.miles > 7400 && qibla.distance.miles < 7800);
   });
 
   it("computes Daily & Monthly Salah, Adhan, Iqamah, Prohibited (Makruh) windows, and .ics calendar feed", () => {
-    const timetable = computeDailyPrayerTimetable("2026-10-20", DEFAULT_ISLAM_SETTINGS, {
-      nowMinutesOverride: 13 * 60, // 1:00 PM (during Dhuhr window)
-    });
+    const timetable = computeDailyPrayerTimetable(
+      "2026-10-20",
+      DEFAULT_ISLAM_SETTINGS,
+      {
+        nowMinutesOverride: 13 * 60, // 1:00 PM (during Dhuhr window)
+      }
+    );
 
     assert.equal(timetable.dateGregorian, "2026-10-20");
     assert.equal(timetable.activePrayer, "dhuhr");
@@ -51,14 +57,24 @@ describe("@vicacha-devs/strapi-plugin-islam — Astronomical Salah, Qibla, Hijri
     assert.match(timetable.times.isha, /^\d{2}:\d{2}$/);
 
     // Verify Iqamah offset rule (+20 min for Fajr)
-    const fajrRule = resolveIqamahTime("fajr", 280, DEFAULT_ISLAM_SETTINGS.iqamahRules);
+    const fajrRule = resolveIqamahTime(
+      "fajr",
+      280,
+      DEFAULT_ISLAM_SETTINGS.iqamahRules
+    );
     assert.equal(fajrRule.iqamahMinutes, 300);
     assert.equal(fajrRule.iqamah, "05:00");
 
     // Verify Monthly timetable & RFC 5545 .ics generation
-    const monthly = computeMonthlyPrayerTimetable("2026-10", DEFAULT_ISLAM_SETTINGS);
+    const monthly = computeMonthlyPrayerTimetable(
+      "2026-10",
+      DEFAULT_ISLAM_SETTINGS
+    );
     assert.equal(monthly.length, 31);
-    const ics = generatePrayerCalendarIcs(monthly.slice(0, 2), "Mezquita Central de Bogotá");
+    const ics = generatePrayerCalendarIcs(
+      monthly.slice(0, 2),
+      "Mezquita Central de Bogotá"
+    );
     assert.ok(ics.includes("BEGIN:VCALENDAR"));
     assert.ok(ics.includes("BEGIN:VEVENT"));
     assert.ok(ics.includes("END:VCALENDAR"));
@@ -70,7 +86,12 @@ describe("@vicacha-devs/strapi-plugin-islam — Astronomical Salah, Qibla, Hijri
     assert.ok(hijriBase.year >= 1448);
     assert.notEqual(hijriBase.date, hijriShifted.date);
 
-    const roundTripGreg = hijriToGregorian(hijriBase.year, hijriBase.monthNumber, hijriBase.day, 0);
+    const roundTripGreg = hijriToGregorian(
+      hijriBase.year,
+      hijriBase.monthNumber,
+      hijriBase.day,
+      0
+    );
     assert.equal(roundTripGreg, "2026-10-20");
 
     const observances = computeUpcomingObservances("2026-10-20", 0, "es");
@@ -106,18 +127,24 @@ describe("@vicacha-devs/strapi-plugin-islam — Astronomical Salah, Qibla, Hijri
   });
 
   it("calculates Zakat al-Mal (with 24K/22K/18K gold carat purity & agricultural Ushr), Nisab (common & classical), Zakat al-Fitr, Fidyah, and Kaffarah", () => {
-    const nisabCommon = calculateNisabThresholds(DEFAULT_ISLAM_SETTINGS.fiqhRates, {
-      currency: "COP",
-      standard: "common",
-    });
+    const nisabCommon = calculateNisabThresholds(
+      DEFAULT_ISLAM_SETTINGS.fiqhRates,
+      {
+        currency: "COP",
+        standard: "common",
+      }
+    );
     assert.equal(nisabCommon.gold.weightGrams, 85);
     assert.equal(nisabCommon.silver.weightGrams, 595);
     assert.equal(nisabCommon.gold.nisabAmount, 85 * 385000);
 
-    const nisabClassical = calculateNisabThresholds(DEFAULT_ISLAM_SETTINGS.fiqhRates, {
-      currency: "USD",
-      standard: "classical",
-    });
+    const nisabClassical = calculateNisabThresholds(
+      DEFAULT_ISLAM_SETTINGS.fiqhRates,
+      {
+        currency: "USD",
+        standard: "classical",
+      }
+    );
     assert.equal(nisabClassical.gold.weightGrams, 87.48);
     assert.equal(nisabClassical.silver.weightGrams, 612.36);
 
@@ -156,6 +183,9 @@ describe("@vicacha-devs/strapi-plugin-islam — Astronomical Salah, Qibla, Hijri
     assert.equal(fitranaResult.zakatAlFitr.totalDue, 4 * 35_000);
     assert.equal(fitranaResult.fidyah.totalDue, 5 * 25_000);
     assert.equal(fitranaResult.kaffarah.totalDue, 250_000);
-    assert.equal(fitranaResult.grandTotalPayable, 140_000 + 125_000 + 250_000 + 50_000);
+    assert.equal(
+      fitranaResult.grandTotalPayable,
+      140_000 + 125_000 + 250_000 + 50_000
+    );
   });
 });

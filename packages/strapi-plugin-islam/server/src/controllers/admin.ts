@@ -1,6 +1,10 @@
 import type { Core } from "@strapi/strapi";
 
-import { PLUGIN_ID, sanitizePlainText, type IslamPluginSettings } from "../../../shared";
+import {
+  PLUGIN_ID,
+  sanitizePlainText,
+  type IslamPluginSettings,
+} from "../../../shared";
 import type { ConfirmHilalSightingInput } from "../services/hilalAndScriptureHelpers";
 import type createIslamService from "../services/islamService";
 import type createSettingsService from "../services/settings";
@@ -19,12 +23,13 @@ export interface KoaAdminContext {
   set?: (header: string, value: string) => void;
 }
 
-const ALLOWED_OCCASIONS: ReadonlySet<ConfirmHilalSightingInput["occasion"]> = new Set([
-  "ramadan",
-  "eid_al_fitr",
-  "dhul_hijjah_eid_al_adha",
-  "monthly_hilal",
-]);
+const ALLOWED_OCCASIONS: ReadonlySet<ConfirmHilalSightingInput["occasion"]> =
+  new Set([
+    "ramadan",
+    "eid_al_fitr",
+    "dhul_hijjah_eid_al_adha",
+    "monthly_hilal",
+  ]);
 
 function extractBodyRecord(ctx: KoaAdminContext): Record<string, unknown> {
   const rawBody = ctx.request?.body;
@@ -46,7 +51,9 @@ function resolveNotesRecord(raw: unknown): Record<string, string> {
   return raw as Record<string, string>;
 }
 
-function buildHilalPayload(body: Record<string, unknown>): ConfirmHilalSightingInput {
+function buildHilalPayload(
+  body: Record<string, unknown>
+): ConfirmHilalSightingInput {
   return {
     occasion: resolveOccasion(body.occasion),
     hijriYear: Number(body.hijriYear) || undefined,
@@ -72,7 +79,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   return {
     async getOverview(ctx: KoaAdminContext) {
-      const locale = typeof ctx.query?.locale === "string" ? ctx.query.locale : undefined;
+      const locale =
+        typeof ctx.query?.locale === "string" ? ctx.query.locale : undefined;
       const data = await getIslamService().getAdminOverview(locale);
       ctx.body = { data };
     },
@@ -90,7 +98,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async confirmHilal(ctx: KoaAdminContext) {
       const body = extractBodyRecord(ctx);
-      const data = await getIslamService().confirmHilalSighting(buildHilalPayload(body));
+      const data = await getIslamService().confirmHilalSighting(
+        buildHilalPayload(body)
+      );
       ctx.body = { data };
     },
 
@@ -101,7 +111,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           pinnedAyahId: resolveOptionalPinText(body.pinnedAyahId),
           pinnedHadithId: resolveOptionalPinText(body.pinnedHadithId),
           pinnedDuaId: resolveOptionalPinText(body.pinnedDuaId),
-          pinnedAsmaNumber: body.pinnedAsmaNumber ? Number(body.pinnedAsmaNumber) : null,
+          pinnedAsmaNumber: body.pinnedAsmaNumber
+            ? Number(body.pinnedAsmaNumber)
+            : null,
         },
       });
       ctx.body = { data };

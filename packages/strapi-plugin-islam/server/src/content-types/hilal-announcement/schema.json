@@ -21,7 +21,12 @@
   "attributes": {
     "occasion": {
       "type": "enumeration",
-      "enum": ["ramadan", "eid_al_fitr", "dhul_hijjah_eid_al_adha", "monthly_hilal"],
+      "enum": [
+        "ramadan",
+        "eid_al_fitr",
+        "dhul_hijjah_eid_al_adha",
+        "monthly_hilal"
+      ],
       "default": "ramadan",
       "required": true
     },

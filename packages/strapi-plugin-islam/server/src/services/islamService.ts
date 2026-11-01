@@ -70,8 +70,11 @@ function resolveLocationWithDefaults(
     settings.defaultLat,
     settings.defaultLon
   );
-  const city = sanitizePlainText(params?.city || settings.city, 80) || settings.city;
-  const country = sanitizePlainText(params?.country || settings.country, 80) || settings.country;
+  const city =
+    sanitizePlainText(params?.city || settings.city, 80) || settings.city;
+  const country =
+    sanitizePlainText(params?.country || settings.country, 80) ||
+    settings.country;
   return { lat, lon, city, country };
 }
 
@@ -98,15 +101,19 @@ async function resolveExternalPrayerTimesOverride(
   const cached = getCached<Record<string, string>>(cacheKey);
   if (cached) return cached;
 
-  const upstream = await tryFetchUpstreamJson(settings.externalApiBaseUrl, "prayer-time/", {
-    lat,
-    lon,
-    method: settings.method,
-    school: settings.school,
-    calender: settings.calender,
-    shifting: settings.shifting,
-    date,
-  });
+  const upstream = await tryFetchUpstreamJson(
+    settings.externalApiBaseUrl,
+    "prayer-time/",
+    {
+      lat,
+      lon,
+      method: settings.method,
+      school: settings.school,
+      calender: settings.calender,
+      shifting: settings.shifting,
+      date,
+    }
+  );
 
   const times = extractUpstreamPrayerTimes(upstream);
   if (times) {
@@ -119,12 +126,19 @@ function extractUpstreamNisabSpotPrices(
   upstream: Record<string, unknown> | null
 ): { goldUnit: number; silverUnit: number } | null {
   const dataObj = upstream?.data as Record<string, unknown> | undefined;
-  const thresholds = dataObj?.nisab_thresholds as Record<string, unknown> | undefined;
+  const thresholds = dataObj?.nisab_thresholds as
+    | Record<string, unknown>
+    | undefined;
   const goldObj = thresholds?.gold as Record<string, unknown> | undefined;
   const silverObj = thresholds?.silver as Record<string, unknown> | undefined;
   const gPrice = Number(goldObj?.unit_price);
   const sPrice = Number(silverObj?.unit_price);
-  if (Number.isFinite(gPrice) && gPrice > 0 && Number.isFinite(sPrice) && sPrice > 0) {
+  if (
+    Number.isFinite(gPrice) &&
+    gPrice > 0 &&
+    Number.isFinite(sPrice) &&
+    sPrice > 0
+  ) {
     return { goldUnit: gPrice, silverUnit: sPrice };
   }
   return null;
@@ -142,11 +156,15 @@ async function resolveExternalNisabSpotPrices(
   const cached = getCached<{ goldUnit: number; silverUnit: number }>(cacheKey);
   if (cached) return cached;
 
-  const upstream = await tryFetchUpstreamJson(settings.externalApiBaseUrl, "zakat-nisab/", {
-    standard,
-    currency: currency.toLowerCase(),
-    unit: "g",
-  });
+  const upstream = await tryFetchUpstreamJson(
+    settings.externalApiBaseUrl,
+    "zakat-nisab/",
+    {
+      standard,
+      currency: currency.toLowerCase(),
+      unit: "g",
+    }
+  );
 
   const prices = extractUpstreamNisabSpotPrices(upstream);
   if (prices) {
@@ -159,7 +177,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsService = () =>
     strapi.plugin(PLUGIN_ID).service("settings") as {
       getSettings(): Promise<IslamPluginSettings>;
-      updateSettings(patch: Partial<IslamPluginSettings>): Promise<IslamPluginSettings>;
+      updateSettings(
+        patch: Partial<IslamPluginSettings>
+      ): Promise<IslamPluginSettings>;
     };
 
   return {
@@ -174,7 +194,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const settings = await getSettingsService().getSettings();
       const date = sanitizeIsoDateYmd(params?.date);
       const locale = sanitizeLocale(params?.locale, settings.defaultLocale);
-      const { lat, lon, city, country } = resolveLocationWithDefaults(settings, params);
+      const { lat, lon, city, country } = resolveLocationWithDefaults(
+        settings,
+        params
+      );
       const externalTimesOverride = await resolveExternalPrayerTimesOverride(
         settings,
         date,
@@ -202,14 +225,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       locale?: string;
     }): Promise<{
       yearMonth: string;
-      location: { city: string; country: string; lat: number; lon: number; timezone: string };
+      location: {
+        city: string;
+        country: string;
+        lat: number;
+        lon: number;
+        timezone: string;
+      };
       qibla: ReturnType<typeof calculateQiblaCompass>;
       days: DailyPrayerTimetable[];
     }> {
       const settings = await getSettingsService().getSettings();
       const yearMonth = sanitizeIsoYearMonth(params?.yearMonth || params?.date);
       const locale = sanitizeLocale(params?.locale, settings.defaultLocale);
-      const { lat, lon, city, country } = resolveLocationWithDefaults(settings, params);
+      const { lat, lon, city, country } = resolveLocationWithDefaults(
+        settings,
+        params
+      );
 
       const days = computeMonthlyPrayerTimetable(yearMonth, settings, {
         lat,
@@ -251,7 +283,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       country?: string;
     }) {
       const settings = await getSettingsService().getSettings();
-      const { lat, lon, city, country } = resolveLocationWithDefaults(settings, params);
+      const { lat, lon, city, country } = resolveLocationWithDefaults(
+        settings,
+        params
+      );
       return calculateQiblaCompass(lat, lon, city, country);
     },
 
@@ -262,11 +297,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const shiftingNum = Number(settings.shifting || 0);
 
       const hijri = gregorianToHijri(date, shiftingNum, locale);
-      const upcomingObservances = computeUpcomingObservances(date, shiftingNum, locale, {
-        ramadanStartGregorian: settings.ramadan.confirmedStartGregorian,
-        eidAlFitrDateGregorian: settings.eid.eidAlFitrDateGregorian,
-        eidAlAdhaDateGregorian: settings.eid.eidAlAdhaDateGregorian,
-      });
+      const upcomingObservances = computeUpcomingObservances(
+        date,
+        shiftingNum,
+        locale,
+        {
+          ramadanStartGregorian: settings.ramadan.confirmedStartGregorian,
+          eidAlFitrDateGregorian: settings.eid.eidAlFitrDateGregorian,
+          eidAlAdhaDateGregorian: settings.eid.eidAlAdhaDateGregorian,
+        }
+      );
 
       let recentHilalAnnouncements: Array<Record<string, unknown>>;
       try {
@@ -301,7 +341,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const shiftingNum = Number(settings.shifting || 0);
 
       if (params?.direction === "hijri_to_gregorian") {
-        const y = Math.max(1300, Math.min(1600, Number(params.hijriYear) || 1448));
+        const y = Math.max(
+          1300,
+          Math.min(1600, Number(params.hijriYear) || 1448)
+        );
         const m = Math.max(1, Math.min(12, Number(params.hijriMonth) || 1));
         const d = Math.max(1, Math.min(30, Number(params.hijriDay) || 1));
         const gregorian = hijriToGregorian(y, m, d, shiftingNum);
@@ -344,7 +387,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return fetchQuranChaptersOperation(settings, params);
     },
 
-    async getQuranChapterInfo(params: { chapterNumber: number | string; locale?: string }) {
+    async getQuranChapterInfo(params: {
+      chapterNumber: number | string;
+      locale?: string;
+    }) {
       const settings = await getSettingsService().getSettings();
       return fetchQuranChapterInfoOperation(settings, params);
     },
@@ -389,11 +435,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       unit?: string;
     }): Promise<NisabThresholdResult> {
       const settings = await getSettingsService().getSettings();
-      const currency = sanitizeCurrency(params?.currency, settings.fiqhRates.defaultCurrency);
-      const standard = sanitizeNisabStandard(params?.standard, settings.fiqhRates.defaultStandard);
+      const currency = sanitizeCurrency(
+        params?.currency,
+        settings.fiqhRates.defaultCurrency
+      );
+      const standard = sanitizeNisabStandard(
+        params?.standard,
+        settings.fiqhRates.defaultStandard
+      );
       const unit: "g" | "oz" = params?.unit === "oz" ? "oz" : "g";
 
-      const externalSpot = await resolveExternalNisabSpotPrices(settings, currency, standard);
+      const externalSpot = await resolveExternalNisabSpotPrices(
+        settings,
+        currency,
+        standard
+      );
 
       return calculateNisabThresholds(settings.fiqhRates, {
         currency,
@@ -433,7 +489,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async getAdminOverview(localeParam?: string) {
       const settings = await getSettingsService().getSettings();
-      const locale: SupportedLocale = sanitizeLocale(localeParam, settings.defaultLocale);
+      const locale: SupportedLocale = sanitizeLocale(
+        localeParam,
+        settings.defaultLocale
+      );
       const todayTimetable = await this.getDailyPrayerTimes({ locale });
       const observances = await this.getHijriAndObservances({ locale });
       const scripture = await this.getScriptureHub({ locale });
@@ -446,7 +505,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         standard: settings.fiqhRates.defaultStandard,
       });
 
-      const qfCreds = resolveQuranFoundationCredentials(settings.quranFoundation);
+      const qfCreds = resolveQuranFoundationCredentials(
+        settings.quranFoundation
+      );
 
       return {
         settings,
@@ -460,7 +521,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           apiBaseUrl: qfCreds.apiBaseUrl,
           publicFallbackBaseUrl: settings.quranFoundation.publicFallbackBaseUrl,
           defaultReciterId: settings.quranFoundation.defaultReciterId,
-          disableBrowserAutoTranslate: settings.quranFoundation.disableBrowserAutoTranslate,
+          disableBrowserAutoTranslate:
+            settings.quranFoundation.disableBrowserAutoTranslate,
         },
         corpusCounts: {
           surahs: scripture.surahCount,

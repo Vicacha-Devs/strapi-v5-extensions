@@ -94,7 +94,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         locale: q.locale,
       });
       ctx.set("Content-Type", "text/calendar; charset=utf-8");
-      ctx.set("Content-Disposition", 'attachment; filename="salah-timetable.ics"');
+      ctx.set(
+        "Content-Disposition",
+        'attachment; filename="salah-timetable.ics"'
+      );
       ctx.set("X-Content-Type-Options", "nosniff");
       ctx.body = icsContent;
     },
@@ -122,7 +125,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async convertDate(ctx: KoaContentContext) {
       const q = getQuery(ctx);
       const direction =
-        q.direction === "hijri_to_gregorian" ? "hijri_to_gregorian" : "gregorian_to_hijri";
+        q.direction === "hijri_to_gregorian"
+          ? "hijri_to_gregorian"
+          : "gregorian_to_hijri";
       const data = await getIslamService().convertDate({
         direction,
         date: q.date,

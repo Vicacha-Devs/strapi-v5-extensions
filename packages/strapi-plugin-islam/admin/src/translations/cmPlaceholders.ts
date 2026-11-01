@@ -1,4 +1,7 @@
-export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
   en: {
     "content-manager.content-types.plugin::islam.hilal-announcement.occasion.placeholder":
       "Enter islamic occasion / sighting event...",
@@ -132,7 +135,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "https://...",
     "content-manager.content-types.plugin::islam.scripture-entry.topicTags.placeholder":
       "أدخل الوسوم الموضوعية...",
-    "content-manager.content-types.plugin::islam.scripture-entry.active.placeholder": "أدخل نشط...",
+    "content-manager.content-types.plugin::islam.scripture-entry.active.placeholder":
+      "أدخل نشط...",
     "content-manager.content-types.plugin::islam.scripture-entry.documentId.placeholder":
       "أدخل معرف المستند...",
   },

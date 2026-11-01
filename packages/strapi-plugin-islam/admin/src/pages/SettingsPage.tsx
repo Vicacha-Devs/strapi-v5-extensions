@@ -1,4 +1,13 @@
-import { Badge, Box, Button, Divider, Flex, Main, Tabs, Typography } from "@strapi/design-system";
+import {
+  Badge,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Main,
+  Tabs,
+  Typography,
+} from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
 import React, { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
@@ -30,7 +39,8 @@ const SettingsHeaderSummary: React.FC<{
   const qfEnv = settings.quranFoundation?.environment || "production";
   const reciterId = String(settings.quranFoundation?.defaultReciterId || 7);
   const reciterName =
-    QURAN_RECITER_OPTIONS.find((r) => r.value === reciterId)?.name || "Mishari Rashid al-`Afasy";
+    QURAN_RECITER_OPTIONS.find((r) => r.value === reciterId)?.name ||
+    "Mishari Rashid al-`Afasy";
 
   return (
     <Flex
@@ -61,10 +71,14 @@ const SettingsHeaderSummary: React.FC<{
             })}
           </Badge>
           <Badge>
-            {t("settings.ui.badge_method_school", "Method: #{method} (School: {school})", {
-              method: settings.method,
-              school: schoolLabel,
-            })}
+            {t(
+              "settings.ui.badge_method_school",
+              "Method: #{method} (School: {school})",
+              {
+                method: settings.method,
+                school: schoolLabel,
+              }
+            )}
           </Badge>
           <Badge>
             {t("settings.ui.badge_hijri_offset", "Hijri Offset: {days}d", {
@@ -114,7 +128,10 @@ export const SettingsPage: React.FC = () => {
     setSaving(true);
     setSavedBanner(false);
     try {
-      const res = await put<SettingsApiResponse>(`/${PLUGIN_ID}/settings`, settings);
+      const res = await put<SettingsApiResponse>(
+        `/${PLUGIN_ID}/settings`,
+        settings
+      );
       if (res?.data?.data) {
         setSettings(res.data.data);
         setSavedBanner(true);
@@ -129,7 +146,10 @@ export const SettingsPage: React.FC = () => {
       <Main>
         <Box padding={8}>
           <Typography>
-            {t("settings.ui.loading_islam_suite_settings", "Loading Islam Suite settings...")}
+            {t(
+              "settings.ui.loading_islam_suite_settings",
+              "Loading Islam Suite settings..."
+            )}
           </Typography>
         </Box>
       </Main>
@@ -168,7 +188,10 @@ export const SettingsPage: React.FC = () => {
               )}
             >
               <Tabs.Trigger value="calculation">
-                {t("settings.tab.calculation", "Mosque & Astronomical Calculation")}
+                {t(
+                  "settings.tab.calculation",
+                  "Mosque & Astronomical Calculation"
+                )}
               </Tabs.Trigger>
               <Tabs.Trigger value="fiqh">
                 {t("settings.tab.fiqh", "Fiqh & Nisab Benchmarks (COP)")}
@@ -181,10 +204,26 @@ export const SettingsPage: React.FC = () => {
               </Tabs.Trigger>
             </Tabs.List>
 
-            <CalculationSettingsTab settings={settings} setSettings={setSettings} t={t} />
-            <FiqhRatesSettingsTab settings={settings} setSettings={setSettings} t={t} />
-            <QuranFoundationSettingsTab settings={settings} setSettings={setSettings} t={t} />
-            <EcosystemBridgesSettingsTab settings={settings} setSettings={setSettings} t={t} />
+            <CalculationSettingsTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
+            <FiqhRatesSettingsTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
+            <QuranFoundationSettingsTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
+            <EcosystemBridgesSettingsTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
           </Tabs.Root>
         </Box>
       </Box>

@@ -13,7 +13,11 @@ import {
   type SupportedLocale,
   type SurahMetadata,
 } from "../../../shared";
-import { fetchQuranFoundationV4Json, getCached, setCached } from "./upstreamCacheAndHttp";
+import {
+  fetchQuranFoundationV4Json,
+  getCached,
+  setCached,
+} from "./upstreamCacheAndHttp";
 
 const VERSE_FIELDS =
   "text_uthmani,text_uthmani_tajweed,text_uthmani_simple,text_imlaei,text_indopak_nastaleeq,chapter_id,verse_number,verse_key,juz_number,hizb_number,rub_el_hizb_number,page_number,sajdah_number";
@@ -22,7 +26,9 @@ const WORD_FIELDS = "text_uthmani,text_indopak,verse_key,location,audio_url";
 
 export function buildTranslationPolicy(qf: QuranFoundationConfig) {
   return {
-    disableBrowserAutoTranslate: Boolean(qf?.disableBrowserAutoTranslate ?? true),
+    disableBrowserAutoTranslate: Boolean(
+      qf?.disableBrowserAutoTranslate ?? true
+    ),
     htmlAttributes: { translate: "no", className: "notranslate" },
   };
 }
@@ -68,7 +74,10 @@ export function mapCuratedAyahToV4Verse(
   };
 }
 
-export function parseBoolParam(raw: boolean | string | undefined, fallback: boolean): boolean {
+export function parseBoolParam(
+  raw: boolean | string | undefined,
+  fallback: boolean
+): boolean {
   if (raw === undefined) return fallback;
   const s = String(raw);
   return s === "true" || s === "1";
@@ -79,7 +88,10 @@ function resolveTranslationsCsv(
   qf: QuranFoundationConfig,
   locale: SupportedLocale
 ): string {
-  const cleaned = sanitizePlainText(rawTranslations, 80).replace(/[^0-9,]/g, "");
+  const cleaned = sanitizePlainText(rawTranslations, 80).replace(
+    /[^0-9,]/g,
+    ""
+  );
   if (cleaned) return cleaned;
   const baseIds = qf.defaultTranslationIdsByLocale?.[locale] || [83];
   const ids = qf.includeTransliterationByDefault ? [...baseIds, 57] : baseIds;
@@ -99,7 +111,10 @@ function resolveTafsirsCsv(
 }
 
 export function findLocalSurah(chapterNumber: number): SurahMetadata {
-  return SURAH_DIRECTORY.find((s) => s.number === chapterNumber) || SURAH_DIRECTORY[0];
+  return (
+    SURAH_DIRECTORY.find((s) => s.number === chapterNumber) ||
+    SURAH_DIRECTORY[0]
+  );
 }
 
 export async function fetchQuranChaptersOperation(
@@ -112,7 +127,9 @@ export async function fetchQuranChaptersOperation(
   const cached = getCached<Record<string, unknown>>(cacheKey);
   if (cached) return cached;
 
-  const upstream = await fetchQuranFoundationV4Json(qf, "chapters", { language: locale });
+  const upstream = await fetchQuranFoundationV4Json(qf, "chapters", {
+    language: locale,
+  });
   const rawChapters = upstream?.data?.chapters;
   const chapters = Array.isArray(rawChapters)
     ? rawChapters
@@ -163,7 +180,8 @@ export async function fetchQuranChapterInfoOperation(
     locale,
     source: chapterRes?.source || infoRes?.source || "curated_corpus",
     surah: localSurah,
-    chapter: chapterRes?.data?.chapter || mapSurahToV4Chapter(localSurah, locale),
+    chapter:
+      chapterRes?.data?.chapter || mapSurahToV4Chapter(localSurah, locale),
     chapterInfo: infoRes?.data?.chapter_info || null,
   };
 
@@ -193,9 +211,21 @@ function normalizeChapterVersesOptions(
   const page = sanitizePositiveInt(params?.page, 1, 1, 300);
   const perPage = sanitizePositiveInt(params?.perPage, 20, 1, 50);
   const script = sanitizeQuranScript(params?.script, qf.defaultScript);
-  const includeWords = parseBoolParam(params?.words, qf.includeWordByWordByDefault);
-  const reciterId = sanitizePositiveInt(params?.reciterId, qf.defaultReciterId || 7, 1, 500);
-  const translationsParam = resolveTranslationsCsv(params?.translations, qf, locale);
+  const includeWords = parseBoolParam(
+    params?.words,
+    qf.includeWordByWordByDefault
+  );
+  const reciterId = sanitizePositiveInt(
+    params?.reciterId,
+    qf.defaultReciterId || 7,
+    1,
+    500
+  );
+  const translationsParam = resolveTranslationsCsv(
+    params?.translations,
+    qf,
+    locale
+  );
   const tafsirsParam = resolveTafsirsCsv(params?.tafsirs, qf, locale, false);
   return {
     chapterNumber,
@@ -242,8 +272,8 @@ export async function fetchQuranChapterVersesOperation(
   const rawVerses = upstream?.data?.verses;
   const verses = Array.isArray(rawVerses)
     ? rawVerses
-    : CURATED_AYAT.filter((a) => a.surahNumber === opts.chapterNumber).map((a) =>
-        mapCuratedAyahToV4Verse(a, opts.locale)
+    : CURATED_AYAT.filter((a) => a.surahNumber === opts.chapterNumber).map(
+        (a) => mapCuratedAyahToV4Verse(a, opts.locale)
       );
 
   const pagination = upstream?.data?.pagination || {
@@ -280,12 +310,16 @@ export interface VerseByKeyQueryParams {
   tafsirs?: string;
 }
 
-function findCuratedAyahForVerseKey(verseKey: string, surahNum: number): CuratedAyahItem {
+function findCuratedAyahForVerseKey(
+  verseKey: string,
+  surahNum: number
+): CuratedAyahItem {
   return (
     CURATED_AYAT.find(
       (a) =>
         a.referenceKey === verseKey ||
-        (a.surahNumber === surahNum && a.referenceKey.startsWith(`${surahNum}:`))
+        (a.surahNumber === surahNum &&
+          a.referenceKey.startsWith(`${surahNum}:`))
     ) || CURATED_AYAT[0]
   );
 }
@@ -299,8 +333,17 @@ export async function fetchQuranVerseByKeyOperation(
   const [surahNum] = verseKey.split(":").map(Number);
   const locale = sanitizeLocale(params?.locale, settings.defaultLocale);
   const includeWords = parseBoolParam(params?.words, true);
-  const reciterId = sanitizePositiveInt(params?.reciterId, qf.defaultReciterId || 7, 1, 500);
-  const translationsParam = resolveTranslationsCsv(params?.translations, qf, locale);
+  const reciterId = sanitizePositiveInt(
+    params?.reciterId,
+    qf.defaultReciterId || 7,
+    1,
+    500
+  );
+  const translationsParam = resolveTranslationsCsv(
+    params?.translations,
+    qf,
+    locale
+  );
   const tafsirsParam = resolveTafsirsCsv(params?.tafsirs, qf, locale, true);
 
   const cacheKey = `qf:verse:${verseKey}:${locale}:${includeWords}:${reciterId}:${translationsParam}:${tafsirsParam}`;
@@ -325,7 +368,9 @@ export async function fetchQuranVerseByKeyOperation(
 
   const localSurah = findLocalSurah(surahNum);
   const curatedMatch = findCuratedAyahForVerseKey(verseKey, surahNum);
-  const verse = upstream?.data?.verse || mapCuratedAyahToV4Verse(curatedMatch, locale, verseKey);
+  const verse =
+    upstream?.data?.verse ||
+    mapCuratedAyahToV4Verse(curatedMatch, locale, verseKey);
 
   const result = {
     verseKey,
@@ -333,7 +378,8 @@ export async function fetchQuranVerseByKeyOperation(
     locale,
     source: upstream?.source || "curated_corpus",
     verse,
-    curatedReflection: curatedMatch.referenceKey === verseKey ? curatedMatch.reflections : null,
+    curatedReflection:
+      curatedMatch.referenceKey === verseKey ? curatedMatch.reflections : null,
     translationPolicy: buildTranslationPolicy(qf),
   };
 

@@ -18,7 +18,9 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
         pluginName: PLUGIN_ID,
       },
     ];
-    await strapi.admin?.services?.permission?.actionProvider?.registerMany(actions);
+    await strapi.admin?.services?.permission?.actionProvider?.registerMany(
+      actions
+    );
   } catch {
     // Non-fatal in test environments
   }

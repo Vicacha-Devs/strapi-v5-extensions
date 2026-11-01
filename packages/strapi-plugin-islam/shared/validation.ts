@@ -25,9 +25,14 @@ export function sanitizeCoordinates(
   const latNum = typeof rawLat === "number" ? rawLat : Number(rawLat);
   const lonNum = typeof rawLon === "number" ? rawLon : Number(rawLon);
 
-  const validLat = Number.isFinite(latNum) && latNum >= -90 && latNum <= 90 ? latNum : fallbackLat;
+  const validLat =
+    Number.isFinite(latNum) && latNum >= -90 && latNum <= 90
+      ? latNum
+      : fallbackLat;
   const validLon =
-    Number.isFinite(lonNum) && lonNum >= -180 && lonNum <= 180 ? lonNum : fallbackLon;
+    Number.isFinite(lonNum) && lonNum >= -180 && lonNum <= 180
+      ? lonNum
+      : fallbackLon;
 
   return {
     lat: Math.round(validLat * 1_000_000) / 1_000_000,
@@ -41,7 +46,9 @@ export function sanitizeLocale(
 ): SupportedLocale {
   if (typeof rawLocale !== "string") return fallback;
   const clean = rawLocale.trim().toLowerCase().slice(0, 2) as SupportedLocale;
-  return (ALLOWED_LOCALES as readonly string[]).includes(clean) ? clean : fallback;
+  return (ALLOWED_LOCALES as readonly string[]).includes(clean)
+    ? clean
+    : fallback;
 }
 
 export function sanitizeCurrency(
@@ -50,7 +57,9 @@ export function sanitizeCurrency(
 ): SupportedCurrency {
   if (typeof rawCurrency !== "string") return fallback;
   const clean = rawCurrency.trim().toUpperCase() as SupportedCurrency;
-  return (ALLOWED_CURRENCIES as readonly string[]).includes(clean) ? clean : fallback;
+  return (ALLOWED_CURRENCIES as readonly string[]).includes(clean)
+    ? clean
+    : fallback;
 }
 
 export function sanitizeNisabStandard(
@@ -68,9 +77,14 @@ export function sanitizeMethodId(rawMethod: unknown, fallback = "3"): string {
   return ALLOWED_METHOD_IDS.includes(str) ? str : fallback;
 }
 
-export function sanitizeAsrSchool(rawSchool: unknown, fallback: AsrSchoolId = "1"): AsrSchoolId {
+export function sanitizeAsrSchool(
+  rawSchool: unknown,
+  fallback: AsrSchoolId = "1"
+): AsrSchoolId {
   const str = String(rawSchool ?? "").trim() as AsrSchoolId;
-  return (ALLOWED_ASR_SCHOOLS as readonly string[]).includes(str) ? str : fallback;
+  return (ALLOWED_ASR_SCHOOLS as readonly string[]).includes(str)
+    ? str
+    : fallback;
 }
 
 export function sanitizeCalendarMethod(
@@ -80,22 +94,38 @@ export function sanitizeCalendarMethod(
   const str = String(rawCal ?? "")
     .trim()
     .toUpperCase() as CalendarMethodId;
-  return (ALLOWED_CALENDAR_METHODS as readonly string[]).includes(str) ? str : fallback;
+  return (ALLOWED_CALENDAR_METHODS as readonly string[]).includes(str)
+    ? str
+    : fallback;
 }
 
-export function sanitizeHijriShift(rawShift: unknown, fallback: HijriShiftId = "0"): HijriShiftId {
+export function sanitizeHijriShift(
+  rawShift: unknown,
+  fallback: HijriShiftId = "0"
+): HijriShiftId {
   const str = String(rawShift ?? "").trim() as HijriShiftId;
-  return (ALLOWED_HIJRI_SHIFTS as readonly string[]).includes(str) ? str : fallback;
+  return (ALLOWED_HIJRI_SHIFTS as readonly string[]).includes(str)
+    ? str
+    : fallback;
 }
 
-export function sanitizeNonNegativeNumber(rawVal: unknown, maxAllowed = 1_000_000_000_000): number {
+export function sanitizeNonNegativeNumber(
+  rawVal: unknown,
+  maxAllowed = 1_000_000_000_000
+): number {
   const num = typeof rawVal === "number" ? rawVal : Number(rawVal);
   if (!Number.isFinite(num) || num < 0) return 0;
   return Math.min(num, maxAllowed);
 }
 
-export function sanitizeIsoDateYmd(rawDate: unknown, fallbackDate = new Date()): string {
-  if (typeof rawDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(rawDate.trim())) {
+export function sanitizeIsoDateYmd(
+  rawDate: unknown,
+  fallbackDate = new Date()
+): string {
+  if (
+    typeof rawDate === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(rawDate.trim())
+  ) {
     const parsed = new Date(`${rawDate.trim()}T12:00:00Z`);
     if (!Number.isNaN(parsed.getTime())) {
       return rawDate.trim();
@@ -104,7 +134,10 @@ export function sanitizeIsoDateYmd(rawDate: unknown, fallbackDate = new Date()):
   return fallbackDate.toISOString().slice(0, 10);
 }
 
-export function sanitizeIsoYearMonth(rawYm: unknown, fallbackDate = new Date()): string {
+export function sanitizeIsoYearMonth(
+  rawYm: unknown,
+  fallbackDate = new Date()
+): string {
   if (typeof rawYm === "string" && /^\d{4}-\d{2}$/.test(rawYm.trim())) {
     const [y, m] = rawYm.trim().split("-").map(Number);
     if (y >= 1900 && y <= 2200 && m >= 1 && m <= 12) {
@@ -152,7 +185,12 @@ export function sanitizeVerseKey(rawKey: unknown, fallback = "1:1"): string {
   return `${surah}:${ayah}`;
 }
 
-export function sanitizePositiveInt(rawVal: unknown, fallback: number, min = 1, max = 300): number {
+export function sanitizePositiveInt(
+  rawVal: unknown,
+  fallback: number,
+  min = 1,
+  max = 300
+): number {
   const num = typeof rawVal === "number" ? rawVal : Number(rawVal);
   if (!Number.isFinite(num)) return fallback;
   const intVal = Math.trunc(num);

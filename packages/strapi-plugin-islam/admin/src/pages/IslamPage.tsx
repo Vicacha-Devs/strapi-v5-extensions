@@ -56,11 +56,21 @@ const CockpitHeaderBar: React.FC<{
   loading: boolean;
   onRefresh: () => void;
   t: TranslateFn;
-}> = ({ settings, timetable, activeTab, setActiveTab, loading, onRefresh, t }) => {
+}> = ({
+  settings,
+  timetable,
+  activeTab,
+  setActiveTab,
+  loading,
+  onRefresh,
+  t,
+}) => {
   const mosqueLabel =
-    settings?.mosqueName || t("page.ui.mosque_control_center", "Mosque Control Center");
+    settings?.mosqueName ||
+    t("page.ui.mosque_control_center", "Mosque Control Center");
   const hijriLabel =
-    timetable?.hijri?.formatted || t("page.ui.hijri_calendar_label", "Hijri Calendar");
+    timetable?.hijri?.formatted ||
+    t("page.ui.hijri_calendar_label", "Hijri Calendar");
   const qiblaDegrees = timetable?.qibla?.direction?.degrees ?? 65.24;
   const qiblaCardinal = timetable?.qibla?.direction?.cardinal ?? "ENE";
 
@@ -138,19 +148,23 @@ export const IslamPage: React.FC = () => {
   const [settings, setSettings] = useState<IslamPluginSettings | null>(null);
   const [timetable, setTimetable] = useState<DailyPrayerTimetable | null>(null);
   const [observances, setObservances] = useState<IslamicObservanceItem[]>([]);
-  const [dailyInspiration, setDailyInspiration] = useState<DailyInspirationBundle | null>(null);
+  const [dailyInspiration, setDailyInspiration] =
+    useState<DailyInspirationBundle | null>(null);
   const [ayat, setAyat] = useState<CuratedAyahItem[]>([]);
   const [hadiths, setHadiths] = useState<CuratedHadithItem[]>([]);
   const [duas, setDuas] = useState<CuratedDuaItem[]>([]);
   const [nisabCop, setNisabCop] = useState<NisabThresholdResult | null>(null);
   const [nisabUsd, setNisabUsd] = useState<NisabThresholdResult | null>(null);
 
-  const [hilalOccasion, setHilalOccasion] = useState<HilalOccasionKey>("ramadan");
+  const [hilalOccasion, setHilalOccasion] =
+    useState<HilalOccasionKey>("ramadan");
   const [hilalGregorianDate, setHilalGregorianDate] = useState(
     new Date().toISOString().slice(0, 10)
   );
   const [hilalShifting, setHilalShifting] = useState("0");
-  const [hilalImamName, setHilalImamName] = useState("Sheikh Principal de la Mezquita");
+  const [hilalImamName, setHilalImamName] = useState(
+    "Sheikh Principal de la Mezquita"
+  );
   const [hilalActivateBanner, setHilalActivateBanner] = useState(true);
 
   const applyOverviewPayload = (payload: OverviewResponsePayload) => {
@@ -221,7 +235,9 @@ export const IslamPage: React.FC = () => {
         ...currentPins,
         ...patch,
       });
-      setStatusMessage(t("page.ui.daily_pin_updated_status", "Daily Inspiration pin updated."));
+      setStatusMessage(
+        t("page.ui.daily_pin_updated_status", "Daily Inspiration pin updated.")
+      );
       await loadOverview();
     } finally {
       setSavingAction(false);

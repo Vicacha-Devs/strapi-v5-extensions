@@ -2,7 +2,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
   en: {
     "content-manager.content-types.plugin::islam.hilal-announcement.occasion":
       "Islamic Occasion / Sighting Event",
-    "content-manager.content-types.plugin::islam.hilal-announcement.hijriYear": "Hijri Year (AH)",
+    "content-manager.content-types.plugin::islam.hilal-announcement.hijriYear":
+      "Hijri Year (AH)",
     "content-manager.content-types.plugin::islam.hilal-announcement.hijriMonth":
       "Hijri Month (1–12)",
     "content-manager.content-types.plugin::islam.hilal-announcement.confirmedGregorianDate":
@@ -11,13 +12,16 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Hijri Calendar Offset Days (-2 to +2)",
     "content-manager.content-types.plugin::islam.hilal-announcement.approvedByImam":
       "Approved by Imam / Scholarly Committee",
-    "content-manager.content-types.plugin::islam.hilal-announcement.notes": "Notes",
+    "content-manager.content-types.plugin::islam.hilal-announcement.notes":
+      "Notes",
     "content-manager.content-types.plugin::islam.hilal-announcement.broadcastDispatched":
       "Community Broadcast Dispatched",
-    "content-manager.content-types.plugin::islam.hilal-announcement.documentId": "Document ID",
+    "content-manager.content-types.plugin::islam.hilal-announcement.documentId":
+      "Document ID",
     "content-manager.content-types.plugin::islam.scripture-entry.entryKind":
       "Scripture / Supplication Type",
-    "content-manager.content-types.plugin::islam.scripture-entry.slug": "URL Slug",
+    "content-manager.content-types.plugin::islam.scripture-entry.slug":
+      "URL Slug",
     "content-manager.content-types.plugin::islam.scripture-entry.referenceKey":
       "Scriptural Reference / Citation",
     "content-manager.content-types.plugin::islam.scripture-entry.arabicText":
@@ -32,10 +36,14 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Hadith Grading or Thematic Category",
     "content-manager.content-types.plugin::islam.scripture-entry.recommendedRepetitions":
       "Recommended Repetitions (Adhkar)",
-    "content-manager.content-types.plugin::islam.scripture-entry.audioUrl": "Recitation Audio URL",
-    "content-manager.content-types.plugin::islam.scripture-entry.topicTags": "Thematic Tags",
-    "content-manager.content-types.plugin::islam.scripture-entry.active": "Active",
-    "content-manager.content-types.plugin::islam.scripture-entry.documentId": "Document ID",
+    "content-manager.content-types.plugin::islam.scripture-entry.audioUrl":
+      "Recitation Audio URL",
+    "content-manager.content-types.plugin::islam.scripture-entry.topicTags":
+      "Thematic Tags",
+    "content-manager.content-types.plugin::islam.scripture-entry.active":
+      "Active",
+    "content-manager.content-types.plugin::islam.scripture-entry.documentId":
+      "Document ID",
     "content-manager.enum.ramadan": "Ramadan",
     "content-manager.enum.eid_al_fitr": "Eid al-Fitr",
     "content-manager.enum.dhul_hijjah_eid_al_adha": "Dhul Hijjah & Eid al-Adha",
@@ -49,20 +57,24 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Ocasión Islámica / Avistamiento",
     "content-manager.content-types.plugin::islam.hilal-announcement.hijriYear":
       "Año Hijri (Hégira)",
-    "content-manager.content-types.plugin::islam.hilal-announcement.hijriMonth": "Mes Hijri (1–12)",
+    "content-manager.content-types.plugin::islam.hilal-announcement.hijriMonth":
+      "Mes Hijri (1–12)",
     "content-manager.content-types.plugin::islam.hilal-announcement.confirmedGregorianDate":
       "Fecha Gregoriana Confirmada de Inicio",
     "content-manager.content-types.plugin::islam.hilal-announcement.shiftingApplied":
       "Ajuste de Días Hijri (-2 a +2)",
     "content-manager.content-types.plugin::islam.hilal-announcement.approvedByImam":
       "Aprobado por el Imam / Comité Religioso",
-    "content-manager.content-types.plugin::islam.hilal-announcement.notes": "Notas",
+    "content-manager.content-types.plugin::islam.hilal-announcement.notes":
+      "Notas",
     "content-manager.content-types.plugin::islam.hilal-announcement.broadcastDispatched":
       "Comunicado Enviado a la Comunidad",
-    "content-manager.content-types.plugin::islam.hilal-announcement.documentId": "ID del Documento",
+    "content-manager.content-types.plugin::islam.hilal-announcement.documentId":
+      "ID del Documento",
     "content-manager.content-types.plugin::islam.scripture-entry.entryKind":
       "Tipo de Texto Sagrado (Aleya / Hadiz / Du’a)",
-    "content-manager.content-types.plugin::islam.scripture-entry.slug": "Slug (URL Amigable)",
+    "content-manager.content-types.plugin::islam.scripture-entry.slug":
+      "Slug (URL Amigable)",
     "content-manager.content-types.plugin::islam.scripture-entry.referenceKey":
       "Referencia o Cita (ej. Corán 2:255, Bujari)",
     "content-manager.content-types.plugin::islam.scripture-entry.arabicText":
@@ -79,9 +91,12 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Repeticiones Recomendadas (Dhikr)",
     "content-manager.content-types.plugin::islam.scripture-entry.audioUrl":
       "URL de Audio de Recitación",
-    "content-manager.content-types.plugin::islam.scripture-entry.topicTags": "Etiquetas Temáticas",
-    "content-manager.content-types.plugin::islam.scripture-entry.active": "Activo",
-    "content-manager.content-types.plugin::islam.scripture-entry.documentId": "ID del Documento",
+    "content-manager.content-types.plugin::islam.scripture-entry.topicTags":
+      "Etiquetas Temáticas",
+    "content-manager.content-types.plugin::islam.scripture-entry.active":
+      "Activo",
+    "content-manager.content-types.plugin::islam.scripture-entry.documentId":
+      "ID del Documento",
     "content-manager.enum.ramadan": "Ramadán",
     "content-manager.enum.eid_al_fitr": "Eid al-Fitr",
     "content-manager.enum.dhul_hijjah_eid_al_adha": "Dhul Hijjah y Eid al-Adha",
@@ -93,7 +108,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
   ar: {
     "content-manager.content-types.plugin::islam.hilal-announcement.occasion":
       "المناسبة الإسلامية / تحري الهلال",
-    "content-manager.content-types.plugin::islam.hilal-announcement.hijriYear": "السنة الهجرية",
+    "content-manager.content-types.plugin::islam.hilal-announcement.hijriYear":
+      "السنة الهجرية",
     "content-manager.content-types.plugin::islam.hilal-announcement.hijriMonth":
       "الشهر الهجري (1–12)",
     "content-manager.content-types.plugin::islam.hilal-announcement.confirmedGregorianDate":
@@ -102,18 +118,24 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "تعديل أيام التقويم الهجري (-2 إلى +2)",
     "content-manager.content-types.plugin::islam.hilal-announcement.approvedByImam":
       "معتمد من الإمام / اللجنة الشرعية",
-    "content-manager.content-types.plugin::islam.hilal-announcement.notes": "ملاحظات",
+    "content-manager.content-types.plugin::islam.hilal-announcement.notes":
+      "ملاحظات",
     "content-manager.content-types.plugin::islam.hilal-announcement.broadcastDispatched":
       "تم إرسال الإعلان للمجتمع",
-    "content-manager.content-types.plugin::islam.hilal-announcement.documentId": "معرف المستند",
+    "content-manager.content-types.plugin::islam.hilal-announcement.documentId":
+      "معرف المستند",
     "content-manager.content-types.plugin::islam.scripture-entry.entryKind":
       "نوع النص الشرعي (آية / حديث / دعاء)",
-    "content-manager.content-types.plugin::islam.scripture-entry.slug": "المسار المختصر (Slug)",
+    "content-manager.content-types.plugin::islam.scripture-entry.slug":
+      "المسار المختصر (Slug)",
     "content-manager.content-types.plugin::islam.scripture-entry.referenceKey":
       "المرجع الشرعي (مثال: البقرة ٢٥٥، صحيح البخاري)",
-    "content-manager.content-types.plugin::islam.scripture-entry.arabicText": "النص العربي المشكول",
-    "content-manager.content-types.plugin::islam.scripture-entry.transliteration": "النقل الصوتي",
-    "content-manager.content-types.plugin::islam.scripture-entry.translations": "الترجمات المحلية",
+    "content-manager.content-types.plugin::islam.scripture-entry.arabicText":
+      "النص العربي المشكول",
+    "content-manager.content-types.plugin::islam.scripture-entry.transliteration":
+      "النقل الصوتي",
+    "content-manager.content-types.plugin::islam.scripture-entry.translations":
+      "الترجمات المحلية",
     "content-manager.content-types.plugin::islam.scripture-entry.reflections":
       "التأملات والشرح المختصر",
     "content-manager.content-types.plugin::islam.scripture-entry.gradingOrCategory":
@@ -122,9 +144,11 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "عدد التكرار المستحب (الأذكار)",
     "content-manager.content-types.plugin::islam.scripture-entry.audioUrl":
       "رابط الملف الصوتي للتلاوة",
-    "content-manager.content-types.plugin::islam.scripture-entry.topicTags": "الوسوم الموضوعية",
+    "content-manager.content-types.plugin::islam.scripture-entry.topicTags":
+      "الوسوم الموضوعية",
     "content-manager.content-types.plugin::islam.scripture-entry.active": "نشط",
-    "content-manager.content-types.plugin::islam.scripture-entry.documentId": "معرف المستند",
+    "content-manager.content-types.plugin::islam.scripture-entry.documentId":
+      "معرف المستند",
     "content-manager.enum.ramadan": "رمضان",
     "content-manager.enum.eid_al_fitr": "عيد الفطر",
     "content-manager.enum.dhul_hijjah_eid_al_adha": "ذو الحجة وعيد الأضحى",
@@ -136,22 +160,26 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
   tr: {
     "content-manager.content-types.plugin::islam.hilal-announcement.occasion":
       "İslami Gün / Hilal Gözlemi",
-    "content-manager.content-types.plugin::islam.hilal-announcement.hijriYear": "Hicri Yıl",
-    "content-manager.content-types.plugin::islam.hilal-announcement.hijriMonth": "Hicri Ay (1–12)",
+    "content-manager.content-types.plugin::islam.hilal-announcement.hijriYear":
+      "Hicri Yıl",
+    "content-manager.content-types.plugin::islam.hilal-announcement.hijriMonth":
+      "Hicri Ay (1–12)",
     "content-manager.content-types.plugin::islam.hilal-announcement.confirmedGregorianDate":
       "Onaylanan Miladi Başlangıç Tarihi",
     "content-manager.content-types.plugin::islam.hilal-announcement.shiftingApplied":
       "Hicri Takvim Gün Farkı (-2 ile +2)",
     "content-manager.content-types.plugin::islam.hilal-announcement.approvedByImam":
       "İmam / Dini Kurul Tarafından Onaylandı",
-    "content-manager.content-types.plugin::islam.hilal-announcement.notes": "Notlar",
+    "content-manager.content-types.plugin::islam.hilal-announcement.notes":
+      "Notlar",
     "content-manager.content-types.plugin::islam.hilal-announcement.broadcastDispatched":
       "Topluluk Duyurusu Gönderildi",
     "content-manager.content-types.plugin::islam.hilal-announcement.documentId":
       "Belge Kimliği (ID)",
     "content-manager.content-types.plugin::islam.scripture-entry.entryKind":
       "Dini Metin Türü (Ayet / Hadis / Dua)",
-    "content-manager.content-types.plugin::islam.scripture-entry.slug": "Kısa Ad (URL Slug)",
+    "content-manager.content-types.plugin::islam.scripture-entry.slug":
+      "Kısa Ad (URL Slug)",
     "content-manager.content-types.plugin::islam.scripture-entry.referenceKey":
       "Kaynak Referansı (örn. Bakara 255, Buhari)",
     "content-manager.content-types.plugin::islam.scripture-entry.arabicText":
@@ -168,12 +196,16 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Önerilen Tekrar Sayısı (Zikir)",
     "content-manager.content-types.plugin::islam.scripture-entry.audioUrl":
       "Tilavet Ses Bağlantısı (URL)",
-    "content-manager.content-types.plugin::islam.scripture-entry.topicTags": "Konu Etiketleri",
-    "content-manager.content-types.plugin::islam.scripture-entry.active": "Aktif",
-    "content-manager.content-types.plugin::islam.scripture-entry.documentId": "Belge Kimliği (ID)",
+    "content-manager.content-types.plugin::islam.scripture-entry.topicTags":
+      "Konu Etiketleri",
+    "content-manager.content-types.plugin::islam.scripture-entry.active":
+      "Aktif",
+    "content-manager.content-types.plugin::islam.scripture-entry.documentId":
+      "Belge Kimliği (ID)",
     "content-manager.enum.ramadan": "Ramazan",
     "content-manager.enum.eid_al_fitr": "Ramazan Bayramı (İydü’l-Fıtr)",
-    "content-manager.enum.dhul_hijjah_eid_al_adha": "Zilhicce ve Kurban Bayramı",
+    "content-manager.enum.dhul_hijjah_eid_al_adha":
+      "Zilhicce ve Kurban Bayramı",
     "content-manager.enum.monthly_hilal": "Aylık Hilal Gözlemi",
     "content-manager.enum.ayah": "Kur’an Ayeti",
     "content-manager.enum.hadith": "Hadis-i Şerif",
