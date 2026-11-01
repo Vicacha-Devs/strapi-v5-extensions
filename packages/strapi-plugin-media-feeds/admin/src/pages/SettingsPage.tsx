@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@strapi/design-system";
 import { Layouts, useFetchClient, useNotification } from "@strapi/strapi/admin";
+import { LOCALE_OPTIONS } from "@vicacha-devs/plugin-shared";
 import React, { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 
@@ -24,21 +25,6 @@ import {
   type MediaFeedsSettings,
 } from "../../../shared";
 import { LiveStreamsSection } from "../components/LiveStreamsSection";
-
-const LOCALE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "es", label: "es — Español (Spanish)" },
-  { value: "en", label: "en — English" },
-  { value: "ar", label: "ar — العربية (Arabic)" },
-  { value: "tr", label: "tr — Türkçe (Turkish)" },
-  { value: "fr", label: "fr — Français (French)" },
-  { value: "de", label: "de — Deutsch (German)" },
-  { value: "pt", label: "pt — Português (Portuguese)" },
-  { value: "it", label: "it — Italiano (Italian)" },
-  { value: "ru", label: "ru — Русский (Russian)" },
-  { value: "id", label: "id — Bahasa Indonesia" },
-  { value: "ur", label: "ur — اردو (Urdu)" },
-  { value: "zh", label: "zh — 中文 (Chinese)" },
-];
 
 const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.18)",
@@ -251,7 +237,7 @@ export const SettingsPage: React.FC = () => {
               hasRadius
               style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
             >
-              <Typography variant="beta" as="h2">
+              <Typography variant="beta" tag="h2">
                 {t(
                   "settings.ui.1_multi_language_localization_3_languages",
                   "Multi-Language & Localization (3+ Languages)"
@@ -378,7 +364,7 @@ export const SettingsPage: React.FC = () => {
               hasRadius
               style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
             >
-              <Typography variant="beta" as="h2">
+              <Typography variant="beta" tag="h2">
                 {t(
                   "settings.ui.2_apple_podcasts_spotify_rss_2_0_feed",
                   "Apple Podcasts & Spotify RSS 2.0 Feed"
@@ -392,87 +378,64 @@ export const SettingsPage: React.FC = () => {
                   gap: 20,
                 }}
               >
-                <Field.Root
-                  hint={t(
-                    "settings.ui.channel_title_published_in_get_api_media_feeds_p",
-                    "Channel <title> published in GET /api/media-feeds/podcasts/rss.xml."
-                  )}
-                >
-                  <Field.Label>
-                    {t("field.podcast_feed_title", "Podcast Feed Title")}
-                  </Field.Label>
-                  <TextInput
-                    placeholder={t(
-                      "placeholder.e_g_mezquita_central_de_bogot_jumu_ah_lectures",
-                      "e.g., Mezquita Central de Bogotá — Jumu'ah & Lectures"
-                    )}
-                    value={settings.podcastFeed.title}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        podcastFeed: {
-                          ...prev.podcastFeed,
-                          title: e.target.value,
-                        },
-                      }))
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
-                <Field.Root
-                  hint={t(
-                    "settings.ui.populates_the_itunes_author_rss_tag",
-                    "Populates the <itunes:author> RSS tag."
-                  )}
-                >
-                  <Field.Label>
-                    {t("field.author_organization", "Author / Organization")}
-                  </Field.Label>
-                  <TextInput
-                    placeholder={t(
-                      "placeholder.e_g_mezquita_central_al_qurtubi_de_bogot",
-                      "e.g., Central Mosque of Bogotá"
-                    )}
-                    value={settings.podcastFeed.author}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        podcastFeed: {
-                          ...prev.podcastFeed,
-                          author: e.target.value,
-                        },
-                      }))
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
-                <Field.Root
-                  hint={t(
-                    "settings.ui.populates_the_itunes_category_rss_tag",
-                    "Populates the <itunes:category> RSS tag."
-                  )}
-                >
-                  <Field.Label>
-                    {t("field.primary_category", "Primary Category")}
-                  </Field.Label>
-                  <TextInput
-                    placeholder={t(
-                      "placeholder.e_g_religion_spirituality",
-                      "e.g., Religion & Spirituality"
-                    )}
-                    value={settings.podcastFeed.category}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        podcastFeed: {
-                          ...prev.podcastFeed,
-                          category: e.target.value,
-                        },
-                      }))
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
+                {(
+                  [
+                    [
+                      "title",
+                      t(
+                        "settings.ui.channel_title_published_in_get_api_media_feeds_p",
+                        "Channel <title> published in GET /api/media-feeds/podcasts/rss.xml."
+                      ),
+                      t("field.podcast_feed_title", "Podcast Feed Title"),
+                      t(
+                        "placeholder.e_g_mezquita_central_de_bogot_jumu_ah_lectures",
+                        "e.g., Mezquita Central de Bogotá — Jumu'ah & Lectures"
+                      ),
+                    ],
+                    [
+                      "author",
+                      t(
+                        "settings.ui.populates_the_itunes_author_rss_tag",
+                        "Populates the <itunes:author> RSS tag."
+                      ),
+                      t("field.author_organization", "Author / Organization"),
+                      t(
+                        "placeholder.e_g_mezquita_central_al_qurtubi_de_bogot",
+                        "e.g., Central Mosque of Bogotá"
+                      ),
+                    ],
+                    [
+                      "category",
+                      t(
+                        "settings.ui.populates_the_itunes_category_rss_tag",
+                        "Populates the <itunes:category> RSS tag."
+                      ),
+                      t("field.primary_category", "Primary Category"),
+                      t(
+                        "placeholder.e_g_religion_spirituality",
+                        "e.g., Religion & Spirituality"
+                      ),
+                    ],
+                  ] as const
+                ).map(([fieldKey, hint, label, placeholder]) => (
+                  <Field.Root key={fieldKey} hint={hint}>
+                    <Field.Label>{label}</Field.Label>
+                    <TextInput
+                      placeholder={placeholder}
+                      value={settings.podcastFeed[fieldKey]}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          podcastFeed: {
+                            ...prev.podcastFeed,
+                            [fieldKey]: e.target.value,
+                          },
+                        }))
+                      }
+                    />
+                    <Field.Hint />
+                  </Field.Root>
+                ))}
                 <Field.Root
                   hint={t(
                     "settings.ui.summary_shown_in_apple_podcasts_spotify_and_rss_",
