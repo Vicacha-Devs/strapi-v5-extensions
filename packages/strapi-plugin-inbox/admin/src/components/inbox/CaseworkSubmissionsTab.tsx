@@ -116,8 +116,8 @@ const SubmissionRow: React.FC<SubmissionRowProps> = ({
           </Typography>
           {totalChecklist > 0 ? (
             <Typography variant="pi" textColor="neutral500">
-              {t("page.ui.checklist", "Checklist")}: {verifiedChecklist}/{totalChecklist}{" "}
-              {t("page.ui.verified", "verified")}
+              {t("page.ui.checklist", "Checklist")}: {verifiedChecklist}/
+              {totalChecklist} {t("page.ui.verified", "verified")}
             </Typography>
           ) : null}
         </Flex>
@@ -143,15 +143,29 @@ const SubmissionRow: React.FC<SubmissionRowProps> = ({
             variant={isSelected ? "default" : "tertiary"}
             onClick={() => onToggleInspect(sub.referenceCode, isSelected)}
           >
-            {isSelected ? t("page.ui.hide_details", "Close") : t("page.ui.inspect", "Inspect")}
+            {isSelected
+              ? t("page.ui.hide_details", "Close")
+              : t("page.ui.inspect", "Inspect")}
           </Button>
-          <Button size="S" variant="secondary" onClick={() => onScheduleBooking(sub.documentId)}>
+          <Button
+            size="S"
+            variant="secondary"
+            onClick={() => onScheduleBooking(sub.documentId)}
+          >
             {t("page.ui.book_slot", "Book Slot")}
           </Button>
-          <Button size="S" variant="secondary" onClick={() => onIssueCertificate(sub.documentId)}>
+          <Button
+            size="S"
+            variant="secondary"
+            onClick={() => onIssueCertificate(sub.documentId)}
+          >
             {t("page.ui.issue_cert", "Issue Cert")}
           </Button>
-          <Button size="S" variant="tertiary" onClick={() => onMarkCompleted(sub.documentId)}>
+          <Button
+            size="S"
+            variant="tertiary"
+            onClick={() => onMarkCompleted(sub.documentId)}
+          >
             {t("page.ui.complete", "Complete")}
           </Button>
         </Flex>
@@ -172,7 +186,9 @@ export const CaseworkSubmissionsTab: React.FC<CaseworkSubmissionsTabProps> = ({
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [priorityFilter, setPriorityFilter] = React.useState<string>("all");
-  const [selectedRefCode, setSelectedRefCode] = React.useState<string | null>(null);
+  const [selectedRefCode, setSelectedRefCode] = React.useState<string | null>(
+    null
+  );
 
   const selectedSubmission = React.useMemo(
     () => submissions.find((s) => s.referenceCode === selectedRefCode) || null,
@@ -181,7 +197,9 @@ export const CaseworkSubmissionsTab: React.FC<CaseworkSubmissionsTabProps> = ({
 
   const selectedForm = React.useMemo(
     () =>
-      selectedSubmission ? forms.find((f) => f.slug === selectedSubmission.formSlug) || null : null,
+      selectedSubmission
+        ? forms.find((f) => f.slug === selectedSubmission.formSlug) || null
+        : null,
     [forms, selectedSubmission]
   );
 
@@ -239,7 +257,9 @@ export const CaseworkSubmissionsTab: React.FC<CaseworkSubmissionsTabProps> = ({
               "Search by reference code, applicant, or form..."
             )}
             value={searchQuery}
-            onChange={(e: { target: { value: string } }) => setSearchQuery(e.target.value)}
+            onChange={(e: { target: { value: string } }) =>
+              setSearchQuery(e.target.value)
+            }
           />
         </Box>
 
@@ -263,7 +283,9 @@ export const CaseworkSubmissionsTab: React.FC<CaseworkSubmissionsTabProps> = ({
           <Box style={{ minWidth: 170 }}>
             <SingleSelect
               value={priorityFilter}
-              onChange={(val: string | number) => setPriorityFilter(String(val))}
+              onChange={(val: string | number) =>
+                setPriorityFilter(String(val))
+              }
             >
               <SingleSelectOption value="all">
                 {t("page.ui.all_priorities", "Priority: All")}
@@ -295,16 +317,24 @@ export const CaseworkSubmissionsTab: React.FC<CaseworkSubmissionsTabProps> = ({
         <Thead>
           <Tr>
             <Th>
-              <Typography variant="sigma">{t("page.ui.ref_code", "Reference")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.ref_code", "Reference")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.applicant", "Applicant")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.applicant", "Applicant")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.form_dept", "Form & Dept")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.form_dept", "Form & Dept")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.status_priority", "Status")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.status_priority", "Status")}
+              </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
@@ -312,7 +342,9 @@ export const CaseworkSubmissionsTab: React.FC<CaseworkSubmissionsTabProps> = ({
               </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.actions", "Actions")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.actions", "Actions")}
+              </Typography>
             </Th>
           </Tr>
         </Thead>
@@ -323,7 +355,9 @@ export const CaseworkSubmissionsTab: React.FC<CaseworkSubmissionsTabProps> = ({
               t={t}
               sub={sub}
               isSelected={selectedRefCode === sub.referenceCode}
-              onToggleInspect={(refCode, selected) => setSelectedRefCode(selected ? null : refCode)}
+              onToggleInspect={(refCode, selected) =>
+                setSelectedRefCode(selected ? null : refCode)
+              }
               onScheduleBooking={handleScheduleBooking}
               onIssueCertificate={handleIssueCertificate}
               onMarkCompleted={handleMarkCompleted}

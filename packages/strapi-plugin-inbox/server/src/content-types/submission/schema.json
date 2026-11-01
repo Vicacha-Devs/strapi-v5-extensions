@@ -33,12 +33,27 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": ["contact", "service_desk", "inquiry", "application", "volunteer", "custom"],
+      "enum": [
+        "contact",
+        "service_desk",
+        "inquiry",
+        "application",
+        "volunteer",
+        "custom"
+      ],
       "default": "contact"
     },
     "status": {
       "type": "enumeration",
-      "enum": ["new", "read", "under_review", "scheduled", "completed", "rejected", "archived"],
+      "enum": [
+        "new",
+        "read",
+        "under_review",
+        "scheduled",
+        "completed",
+        "rejected",
+        "archived"
+      ],
       "default": "new",
       "required": true
     },

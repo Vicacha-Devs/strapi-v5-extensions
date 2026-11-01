@@ -27,7 +27,10 @@ export interface EmbeddedInboxMetadata {
   localizedSuccessMessages?: Record<string, string>;
 }
 
-export function sanitizePublicForm(form: FormRecord, locale?: string): FormRecord {
+export function sanitizePublicForm(
+  form: FormRecord,
+  locale?: string
+): FormRecord {
   const localized = locale ? localizeFormForLocale(form, locale) : { ...form };
   const safeSettings = { ...localized.settings };
   delete safeSettings.captchaSecretKey;
@@ -92,7 +95,8 @@ function mapFieldToCms(f: FormField, idx: number): Record<string, unknown> {
     ),
   };
   if (f.localizedLabels) mapped.localizedLabels = f.localizedLabels;
-  if (f.localizedPlaceholders) mapped.localizedPlaceholders = f.localizedPlaceholders;
+  if (f.localizedPlaceholders)
+    mapped.localizedPlaceholders = f.localizedPlaceholders;
   if (f.localizedHelpTexts) mapped.localizedHelpTexts = f.localizedHelpTexts;
   return mapped;
 }
@@ -105,15 +109,30 @@ function buildInboxMetadata(
   return {
     ...existingInbox,
     category: pick(form.category, existingInbox.category, "contact"),
-    checklistTemplate: pickDef(form.checklistTemplate, existingInbox.checklistTemplate, []),
+    checklistTemplate: pickDef(
+      form.checklistTemplate,
+      existingInbox.checklistTemplate,
+      []
+    ),
     translations: pickDef(form.translations, existingInbox.translations, {}),
     active: pickDef(form.active, existingInbox.active, true),
-    submissionCount: pickDef(form.submissionCount, existingInbox.submissionCount, 0),
+    submissionCount: pickDef(
+      form.submissionCount,
+      existingInbox.submissionCount,
+      0
+    ),
     department: pickDef(fs?.department, existingInbox.department, "general"),
-    defaultPriority: pickDef(fs?.defaultPriority, existingInbox.defaultPriority, "normal"),
+    defaultPriority: pickDef(
+      fs?.defaultPriority,
+      existingInbox.defaultPriority,
+      "normal"
+    ),
     honeypotField: pickDef(fs?.honeypotField, existingInbox.honeypotField),
     webhookUrl: pickDef(fs?.webhookUrl, existingInbox.webhookUrl),
-    enableBookingBridge: pickDef(fs?.enableBookingBridge, existingInbox.enableBookingBridge),
+    enableBookingBridge: pickDef(
+      fs?.enableBookingBridge,
+      existingInbox.enableBookingBridge
+    ),
     defaultBookingServiceSlug: pickDef(
       fs?.defaultBookingServiceSlug,
       existingInbox.defaultBookingServiceSlug
@@ -126,7 +145,10 @@ function buildInboxMetadata(
       fs?.defaultCertificateTemplateId,
       existingInbox.defaultCertificateTemplateId
     ),
-    localizedSubmitLabels: pickDef(fs?.localizedSubmitLabels, existingInbox.localizedSubmitLabels),
+    localizedSubmitLabels: pickDef(
+      fs?.localizedSubmitLabels,
+      existingInbox.localizedSubmitLabels
+    ),
     localizedSuccessMessages: pickDef(
       fs?.localizedSuccessMessages,
       existingInbox.localizedSuccessMessages
@@ -165,13 +187,29 @@ function buildCmsSettings(
       existingSettings.notificationEmails as string[],
       []
     ),
-    redirectUrl: pickDef(fs?.redirectUrl, existingSettings.redirectUrl as string, ""),
+    redirectUrl: pickDef(
+      fs?.redirectUrl,
+      existingSettings.redirectUrl as string,
+      ""
+    ),
     customCss: pickDef(existingSettings.customCss as string, ""),
     publicPage: pickDef(existingSettings.publicPage as boolean, true),
     captcha: {
-      provider: pick(fs?.captchaProvider, existingCaptcha.provider as string, "none"),
-      siteKey: pickDef(fs?.captchaSiteKey, existingCaptcha.siteKey as string, ""),
-      secretKey: pickDef(fs?.captchaSecretKey, existingCaptcha.secretKey as string, ""),
+      provider: pick(
+        fs?.captchaProvider,
+        existingCaptcha.provider as string,
+        "none"
+      ),
+      siteKey: pickDef(
+        fs?.captchaSiteKey,
+        existingCaptcha.siteKey as string,
+        ""
+      ),
+      secretKey: pickDef(
+        fs?.captchaSecretKey,
+        existingCaptcha.secretKey as string,
+        ""
+      ),
     },
     inbox: inboxMeta,
   };
@@ -193,8 +231,15 @@ export function toFormBuilderCmsPayload(
   const publishedAt =
     form.publishedAt !== undefined
       ? form.publishedAt
-      : pickDef(existingCms?.publishedAt as string | null, new Date().toISOString());
-  const description = pickDef(form.description, existingCms?.description as string, "");
+      : pickDef(
+          existingCms?.publishedAt as string | null,
+          new Date().toISOString()
+        );
+  const description = pickDef(
+    form.description,
+    existingCms?.description as string,
+    ""
+  );
 
   return {
     title: form.title,
@@ -220,17 +265,29 @@ function mapCmsOption(
 ): NonNullable<FormField["options"]>[number] {
   if (typeof opt === "string") {
     const value = opt.toLowerCase().replace(/[^a-z0-9]+/g, "_");
-    const prevLoc = prevOptions?.find((po) => po.value === value)?.localizedLabels;
-    return prevLoc ? { label: opt, value, localizedLabels: prevLoc } : { label: opt, value };
+    const prevLoc = prevOptions?.find(
+      (po) => po.value === value
+    )?.localizedLabels;
+    return prevLoc
+      ? { label: opt, value, localizedLabels: prevLoc }
+      : { label: opt, value };
   }
   const label = String(pick(opt.label, opt.value, ""));
   const value = String(pick(opt.value, opt.label, ""));
-  const prevLoc = prevOptions?.find((po) => po.value === value)?.localizedLabels;
-  const optLoc = pickDef(opt.localizedLabels as Record<string, string> | undefined, prevLoc);
+  const prevLoc = prevOptions?.find(
+    (po) => po.value === value
+  )?.localizedLabels;
+  const optLoc = pickDef(
+    opt.localizedLabels as Record<string, string> | undefined,
+    prevLoc
+  );
   return optLoc ? { label, value, localizedLabels: optLoc } : { label, value };
 }
 
-function resolveOptionalString(raw: unknown, fallback?: string): string | undefined {
+function resolveOptionalString(
+  raw: unknown,
+  fallback?: string
+): string | undefined {
   return raw !== undefined ? String(pickDef(raw, "")) : fallback;
 }
 
@@ -241,12 +298,16 @@ function mapCmsFieldToInbox(
 ): FormField {
   const fieldName = String(pick(cf.name, `field_${index + 1}`));
   const fieldId = String(pick(cf.id, `fld_${fieldName}`));
-  const prev = existingFields.find((ef) => ef.id === fieldId || ef.name === fieldName);
+  const prev = existingFields.find(
+    (ef) => ef.id === fieldId || ef.name === fieldName
+  );
   const rawOpts = Array.isArray(cf.options)
     ? (cf.options as Array<Record<string, unknown> | string>)
     : undefined;
   const mergedOptions = rawOpts?.map((opt) => mapCmsOption(opt, prev?.options));
-  const width = resolveFieldWidth(pick(cf.width as string | undefined, prev?.width));
+  const width = resolveFieldWidth(
+    pick(cf.width as string | undefined, prev?.width)
+  );
 
   return {
     ...prev,
@@ -263,7 +324,10 @@ function mapCmsFieldToInbox(
     validation: Array.isArray(cf.validation)
       ? (cf.validation as FormField["validation"])
       : prev?.validation,
-    localizedLabels: pick(cf.localizedLabels as Record<string, string>, prev?.localizedLabels),
+    localizedLabels: pick(
+      cf.localizedLabels as Record<string, string>,
+      prev?.localizedLabels
+    ),
     localizedPlaceholders: pick(
       cf.localizedPlaceholders as Record<string, string>,
       prev?.localizedPlaceholders
@@ -291,17 +355,26 @@ function buildInboxSettingsFromCms(
 
   return {
     ...prevSettings,
-    submitButtonLabel: pick(cmsSettings.submitButtonText as string, prevSettings.submitButtonLabel),
+    submitButtonLabel: pick(
+      cmsSettings.submitButtonText as string,
+      prevSettings.submitButtonLabel
+    ),
     localizedSubmitLabels: pick(
       inboxMeta.localizedSubmitLabels,
       prevSettings.localizedSubmitLabels
     ),
-    successMessage: pick(cmsSettings.successMessage as string, prevSettings.successMessage),
+    successMessage: pick(
+      cmsSettings.successMessage as string,
+      prevSettings.successMessage
+    ),
     localizedSuccessMessages: pick(
       inboxMeta.localizedSuccessMessages,
       prevSettings.localizedSuccessMessages
     ),
-    redirectUrl: pickDef(cmsSettings.redirectUrl as string, prevSettings.redirectUrl),
+    redirectUrl: pickDef(
+      cmsSettings.redirectUrl as string,
+      prevSettings.redirectUrl
+    ),
     honeypotField: pickDef(inboxMeta.honeypotField, prevSettings.honeypotField),
     rateLimitPerHour: rateLimit,
     notifyEmails,
@@ -310,11 +383,24 @@ function buildInboxSettingsFromCms(
       cmsCaptcha.provider as FormSettings["captchaProvider"],
       prevSettings.captchaProvider
     ),
-    captchaSiteKey: pickDef(cmsCaptcha.siteKey as string, prevSettings.captchaSiteKey),
-    captchaSecretKey: pickDef(cmsCaptcha.secretKey as string, prevSettings.captchaSecretKey),
+    captchaSiteKey: pickDef(
+      cmsCaptcha.siteKey as string,
+      prevSettings.captchaSiteKey
+    ),
+    captchaSecretKey: pickDef(
+      cmsCaptcha.secretKey as string,
+      prevSettings.captchaSecretKey
+    ),
     department: pick(inboxMeta.department, prevSettings.department, "general"),
-    defaultPriority: pick(inboxMeta.defaultPriority, prevSettings.defaultPriority, "normal"),
-    enableBookingBridge: pickDef(inboxMeta.enableBookingBridge, prevSettings.enableBookingBridge),
+    defaultPriority: pick(
+      inboxMeta.defaultPriority,
+      prevSettings.defaultPriority,
+      "normal"
+    ),
+    enableBookingBridge: pickDef(
+      inboxMeta.enableBookingBridge,
+      prevSettings.enableBookingBridge
+    ),
     defaultBookingServiceSlug: pickDef(
       inboxMeta.defaultBookingServiceSlug,
       prevSettings.defaultBookingServiceSlug
@@ -356,7 +442,9 @@ export function fromFormBuilderCmsRow(
     ? (cmsForm.fields as Array<Record<string, unknown>>)
     : [];
   const existingFields = pickDef(existing?.fields, []);
-  const mergedFields = rawFields.map((cf, index) => mapCmsFieldToInbox(cf, index, existingFields));
+  const mergedFields = rawFields.map((cf, index) =>
+    mapCmsFieldToInbox(cf, index, existingFields)
+  );
   const mergedSettings = buildInboxSettingsFromCms(
     cmsSettings,
     inboxMeta,
@@ -364,7 +452,9 @@ export function fromFormBuilderCmsRow(
   );
 
   const cmsSlug = String(pick(cmsForm.slug, existing?.slug, "form"));
-  const cmsId = cmsForm.id ? Number(cmsForm.id) : pickDef(existing?.formBuilderId, null);
+  const cmsId = cmsForm.id
+    ? Number(cmsForm.id)
+    : pickDef(existing?.formBuilderId, null);
   const submissionCount =
     typeof cmsForm.submissionCount === "number"
       ? cmsForm.submissionCount
@@ -374,10 +464,17 @@ export function fromFormBuilderCmsRow(
     documentId: resolveCmsDocId(cmsForm, existing, cmsId),
     title: String(pick(cmsForm.title, existing?.title, "Untitled Form")),
     slug: cmsSlug,
-    description: pickDef(resolveOptionalString(cmsForm.description, existing?.description), ""),
+    description: pickDef(
+      resolveOptionalString(cmsForm.description, existing?.description),
+      ""
+    ),
     category: pick(inboxMeta.category, existing?.category, "contact"),
     fields: mergedFields.length > 0 ? mergedFields : existingFields,
-    checklistTemplate: pick(inboxMeta.checklistTemplate, existing?.checklistTemplate, []),
+    checklistTemplate: pick(
+      inboxMeta.checklistTemplate,
+      existing?.checklistTemplate,
+      []
+    ),
     settings: mergedSettings,
     translations: pick(inboxMeta.translations, existing?.translations, {}),
     active: pickDef(inboxMeta.active, existing?.active, true),

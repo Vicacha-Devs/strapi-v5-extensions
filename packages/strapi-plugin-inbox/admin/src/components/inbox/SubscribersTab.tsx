@@ -20,7 +20,10 @@ import {
 import * as React from "react";
 
 import { PLUGIN_ID, type SubscriberRecord } from "../../../../shared";
-import { LOCALE_OPTIONS, TOPIC_OPTIONS } from "../settings/LocalizationRoutingTab";
+import {
+  LOCALE_OPTIONS,
+  TOPIC_OPTIONS,
+} from "../settings/LocalizationRoutingTab";
 
 const cardBorderStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.2)",
@@ -45,7 +48,10 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
   const [newSubEmail, setNewSubEmail] = React.useState<string>("");
   const [newSubName, setNewSubName] = React.useState<string>("");
   const [newSubLocale, setNewSubLocale] = React.useState<string>("es");
-  const [newSubTopics, setNewSubTopics] = React.useState<string[]>(["announcements", "events"]);
+  const [newSubTopics, setNewSubTopics] = React.useState<string[]>([
+    "announcements",
+    "events",
+  ]);
 
   const handleAddSubscriber = async () => {
     if (!newSubEmail.trim()) return;
@@ -107,9 +113,14 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
               <TextInput
                 name="newSubEmail"
                 type="email"
-                placeholder={t("placeholder.subscriber_email", "fatima@example.org")}
+                placeholder={t(
+                  "placeholder.subscriber_email",
+                  "fatima@example.org"
+                )}
                 value={newSubEmail}
-                onChange={(e: { target: { value: string } }) => setNewSubEmail(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  setNewSubEmail(e.target.value)
+                }
               />
             </Field.Root>
 
@@ -119,7 +130,9 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
                 name="newSubName"
                 placeholder={t("placeholder.subscriber_name", "Fatima Zahra")}
                 value={newSubName}
-                onChange={(e: { target: { value: string } }) => setNewSubName(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  setNewSubName(e.target.value)
+                }
               />
             </Field.Root>
 
@@ -127,7 +140,9 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
               <Field.Label>{t("field.preferred_locale", "Locale")}</Field.Label>
               <SingleSelect
                 value={newSubLocale}
-                onChange={(val: string | number) => setNewSubLocale(String(val))}
+                onChange={(val: string | number) =>
+                  setNewSubLocale(String(val))
+                }
               >
                 {LOCALE_OPTIONS.map((opt) => (
                   <SingleSelectOption key={opt.value} value={opt.value}>
@@ -142,10 +157,15 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
               <MultiSelect
                 name="newSubTopics"
                 withTags
-                placeholder={t("placeholder.subscriber_topics", "Select topics...")}
+                placeholder={t(
+                  "placeholder.subscriber_topics",
+                  "Select topics..."
+                )}
                 value={newSubTopics}
                 onChange={(nextValues: string[]) =>
-                  setNewSubTopics(nextValues.length > 0 ? nextValues : ["announcements"])
+                  setNewSubTopics(
+                    nextValues.length > 0 ? nextValues : ["announcements"]
+                  )
                 }
                 onClear={() => setNewSubTopics(["announcements"])}
               >
@@ -170,19 +190,29 @@ export const SubscribersTab: React.FC<SubscribersTabProps> = ({
         <Thead>
           <Tr>
             <Th>
-              <Typography variant="sigma">{t("page.ui.email", "Email")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.email", "Email")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.name", "Name")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.name", "Name")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.locale", "Locale")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.locale", "Locale")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.topics", "Topics")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.topics", "Topics")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.status", "Status")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.status", "Status")}
+              </Typography>
             </Th>
           </Tr>
         </Thead>

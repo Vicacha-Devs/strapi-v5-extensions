@@ -27,7 +27,12 @@ export interface DocumentServiceLike {
   }): Promise<Record<string, unknown> | null>;
 }
 
-export function getDocuments(strapi: Core.Strapi, uid: string): DocumentServiceLike {
-  const docsFn = strapi.documents as unknown as (targetUid: string) => DocumentServiceLike;
+export function getDocuments(
+  strapi: Core.Strapi,
+  uid: string
+): DocumentServiceLike {
+  const docsFn = strapi.documents as unknown as (
+    targetUid: string
+  ) => DocumentServiceLike;
   return docsFn(uid);
 }

@@ -64,8 +64,10 @@ export function convertIsoDateToCalendar(
       day: "numeric",
     });
     const parts = formatter.formatToParts(date);
-    const year = Number(parts.find((p) => p.type === "year")?.value) || undefined;
-    const month = Number(parts.find((p) => p.type === "month")?.value) || undefined;
+    const year =
+      Number(parts.find((p) => p.type === "year")?.value) || undefined;
+    const month =
+      Number(parts.find((p) => p.type === "month")?.value) || undefined;
     const day = Number(parts.find((p) => p.type === "day")?.value) || undefined;
 
     return {

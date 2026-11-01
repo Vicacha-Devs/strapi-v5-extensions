@@ -3,7 +3,12 @@
  * Adapted and extended from devCluna/strapi-plugin-form-builder-cms (MIT License).
  */
 import { CAPTCHA_ENDPOINTS, DECORATIVE_FIELD_TYPES } from "./constants";
-import type { CaptchaProvider, FormField, ValidationResult, ValidationRule } from "./types";
+import type {
+  CaptchaProvider,
+  FormField,
+  ValidationResult,
+  ValidationRule,
+} from "./types";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -52,7 +57,9 @@ function checkFieldOptions(
   if (!Array.isArray(field.options) || field.options.length === 0) return null;
   const allowed = new Set(field.options.map((o) => o.value));
   if (field.type === "select" || field.type === "radio") {
-    return allowed.has(strVal) ? null : `${fieldLabel} contains an invalid selection`;
+    return allowed.has(strVal)
+      ? null
+      : `${fieldLabel} contains an invalid selection`;
   }
   if (field.type === "checkbox-group") {
     const values = Array.isArray(rawValue) ? rawValue.map(String) : [strVal];
@@ -75,12 +82,18 @@ function validateFieldTypeAndOptions(
   if (field.type === "email" && !EMAIL_REGEX.test(strVal)) {
     const emailRule = rules.find((r) => r.type === "email");
     fieldErrors.push(
-      resolveRuleMessage(emailRule, locale, `${fieldLabel} must be a valid email address`)
+      resolveRuleMessage(
+        emailRule,
+        locale,
+        `${fieldLabel} must be a valid email address`
+      )
     );
   }
   if (field.type === "url" && !isValidHttpUrl(strVal)) {
     const urlRule = rules.find((r) => r.type === "url");
-    fieldErrors.push(resolveRuleMessage(urlRule, locale, `${fieldLabel} must be a valid URL`));
+    fieldErrors.push(
+      resolveRuleMessage(urlRule, locale, `${fieldLabel} must be a valid URL`)
+    );
   }
   const optError = checkFieldOptions(field, rawValue, strVal, fieldLabel);
   if (optError) fieldErrors.push(optError);
@@ -95,10 +108,18 @@ function checkLengthRule(
   locale: string
 ): string | null {
   if (rule.type === "minLength" && strVal.length < limit) {
-    return resolveRuleMessage(rule, locale, `${fieldLabel} must be at least ${limit} characters`);
+    return resolveRuleMessage(
+      rule,
+      locale,
+      `${fieldLabel} must be at least ${limit} characters`
+    );
   }
   if (rule.type === "maxLength" && strVal.length > limit) {
-    return resolveRuleMessage(rule, locale, `${fieldLabel} must be at most ${limit} characters`);
+    return resolveRuleMessage(
+      rule,
+      locale,
+      `${fieldLabel} must be at most ${limit} characters`
+    );
   }
   return null;
 }
@@ -112,10 +133,18 @@ function checkNumericBoundRule(
 ): string | null {
   const num = Number(rawValue);
   if (rule.type === "min" && (Number.isNaN(num) || num < limit)) {
-    return resolveRuleMessage(rule, locale, `${fieldLabel} must be at least ${limit}`);
+    return resolveRuleMessage(
+      rule,
+      locale,
+      `${fieldLabel} must be at least ${limit}`
+    );
   }
   if (rule.type === "max" && (Number.isNaN(num) || num > limit)) {
-    return resolveRuleMessage(rule, locale, `${fieldLabel} must be at most ${limit}`);
+    return resolveRuleMessage(
+      rule,
+      locale,
+      `${fieldLabel} must be at most ${limit}`
+    );
   }
   return null;
 }
@@ -145,14 +174,26 @@ function checkPatternOrEmailRule(
     try {
       const regex = new RegExp(rule.value);
       if (!regex.test(strVal)) {
-        return resolveRuleMessage(rule, locale, `${fieldLabel} format is invalid`);
+        return resolveRuleMessage(
+          rule,
+          locale,
+          `${fieldLabel} format is invalid`
+        );
       }
     } catch {
       // Ignore malformed regex pattern
     }
   }
-  if (rule.type === "email" && fieldType !== "email" && !EMAIL_REGEX.test(strVal)) {
-    return resolveRuleMessage(rule, locale, `${fieldLabel} must be a valid email address`);
+  if (
+    rule.type === "email" &&
+    fieldType !== "email" &&
+    !EMAIL_REGEX.test(strVal)
+  ) {
+    return resolveRuleMessage(
+      rule,
+      locale,
+      `${fieldLabel} must be a valid email address`
+    );
   }
   return null;
 }
@@ -168,9 +209,21 @@ function evaluateCustomRules(
   const errors: string[] = [];
   for (const rule of rules) {
     if (rule.type === "required") continue;
-    const lenOrNumErr = checkLengthOrNumberRule(rule, rawValue, strVal, fieldLabel, locale);
+    const lenOrNumErr = checkLengthOrNumberRule(
+      rule,
+      rawValue,
+      strVal,
+      fieldLabel,
+      locale
+    );
     if (lenOrNumErr) errors.push(lenOrNumErr);
-    const patOrEmailErr = checkPatternOrEmailRule(rule, field.type, strVal, fieldLabel, locale);
+    const patOrEmailErr = checkPatternOrEmailRule(
+      rule,
+      field.type,
+      strVal,
+      fieldLabel,
+      locale
+    );
     if (patOrEmailErr) errors.push(patOrEmailErr);
   }
   return errors;
@@ -180,9 +233,14 @@ function resolveFieldLabel(field: FormField, locale: string): string {
   return field.localizedLabels?.[locale] || field.label || field.name;
 }
 
-function buildRequiredError(rules: ValidationRule[], locale: string, fieldLabel: string): string {
+function buildRequiredError(
+  rules: ValidationRule[],
+  locale: string,
+  fieldLabel: string
+): string {
   const reqRule = rules.find((r) => r.type === "required");
-  const fallbackFn = LOCALIZED_REQUIRED_FALLBACK[locale] || LOCALIZED_REQUIRED_FALLBACK.en;
+  const fallbackFn =
+    LOCALIZED_REQUIRED_FALLBACK[locale] || LOCALIZED_REQUIRED_FALLBACK.en;
   return resolveRuleMessage(reqRule, locale, fallbackFn(fieldLabel));
 }
 
@@ -205,9 +263,17 @@ function validateSingleField(
     return { fieldErrors: [], cleanedValue: rawValue ?? null };
   }
 
-  const strVal = typeof rawValue === "string" ? rawValue.trim() : String(rawValue);
+  const strVal =
+    typeof rawValue === "string" ? rawValue.trim() : String(rawValue);
   const fieldErrors = [
-    ...validateFieldTypeAndOptions(field, rawValue, strVal, fieldLabel, locale, rules),
+    ...validateFieldTypeAndOptions(
+      field,
+      rawValue,
+      strVal,
+      fieldLabel,
+      locale,
+      rules
+    ),
     ...evaluateCustomRules(field, rawValue, strVal, fieldLabel, locale, rules),
   ];
   return {
@@ -226,7 +292,11 @@ export function validateFormSubmission(
 
   for (const field of fields) {
     if (DECORATIVE_FIELD_TYPES.includes(field.type)) continue;
-    const { fieldErrors, cleanedValue } = validateSingleField(field, data, locale);
+    const { fieldErrors, cleanedValue } = validateSingleField(
+      field,
+      data,
+      locale
+    );
     if (fieldErrors.length > 0) {
       errors[field.name] = fieldErrors;
     } else {
@@ -269,7 +339,10 @@ export class SlidingWindowRateLimiter {
 
     if (previous.length >= limitPerHour) {
       const oldest = previous[0] ?? nowMs;
-      const retryAfterSeconds = Math.max(1, Math.ceil((oldest + windowMs - nowMs) / 1000));
+      const retryAfterSeconds = Math.max(
+        1,
+        Math.ceil((oldest + windowMs - nowMs) / 1000)
+      );
       this.hits.set(key, previous);
       return {
         allowed: false,
@@ -372,7 +445,10 @@ export async function testCaptchaSecretKey(
     return { ok: false, reason: "Could not reach the CAPTCHA provider" };
   }
   const codes = (json["error-codes"] as string[] | undefined) || [];
-  if (codes.includes("invalid-input-secret") || codes.includes("missing-input-secret")) {
+  if (
+    codes.includes("invalid-input-secret") ||
+    codes.includes("missing-input-secret")
+  ) {
     return { ok: false, reason: "Secret key is invalid" };
   }
   return { ok: true };

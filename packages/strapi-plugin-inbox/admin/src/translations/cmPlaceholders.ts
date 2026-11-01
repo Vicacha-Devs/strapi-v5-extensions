@@ -1,15 +1,20 @@
-export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
   en: {
     "content-manager.content-types.plugin::inbox.alert-banner.code.placeholder":
       "Enter unique code...",
-    "content-manager.content-types.plugin::inbox.alert-banner.title.placeholder": "Enter title...",
+    "content-manager.content-types.plugin::inbox.alert-banner.title.placeholder":
+      "Enter title...",
     "content-manager.content-types.plugin::inbox.alert-banner.message.placeholder":
       "Enter banner / notification message...",
     "content-manager.content-types.plugin::inbox.alert-banner.severity.placeholder":
       "Enter alert severity level...",
     "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel.placeholder":
       "Enter call-to-action button label...",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::inbox.alert-banner.dismissible.placeholder":
       "Enter allow visitors to dismiss banner...",
     "content-manager.content-types.plugin::inbox.alert-banner.active.placeholder":
@@ -32,7 +37,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Enter form title...",
     "content-manager.content-types.plugin::inbox.submission.category.placeholder":
       "Enter category...",
-    "content-manager.content-types.plugin::inbox.submission.status.placeholder": "Enter status...",
+    "content-manager.content-types.plugin::inbox.submission.status.placeholder":
+      "Enter status...",
     "content-manager.content-types.plugin::inbox.submission.priority.placeholder":
       "Enter priority...",
     "content-manager.content-types.plugin::inbox.submission.department.placeholder":
@@ -69,10 +75,12 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "info@mezquitabogota.org",
     "content-manager.content-types.plugin::inbox.subscriber.fullName.placeholder":
       "Enter subscriber full name...",
-    "content-manager.content-types.plugin::inbox.subscriber.phone.placeholder": "+57 310 555 0199",
+    "content-manager.content-types.plugin::inbox.subscriber.phone.placeholder":
+      "+57 310 555 0199",
     "content-manager.content-types.plugin::inbox.subscriber.topics.placeholder":
       "Enter subscribed topics...",
-    "content-manager.content-types.plugin::inbox.subscriber.status.placeholder": "Enter status...",
+    "content-manager.content-types.plugin::inbox.subscriber.status.placeholder":
+      "Enter status...",
     "content-manager.content-types.plugin::inbox.subscriber.confirmToken.placeholder":
       "Enter double opt-in confirmation token...",
     "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken.placeholder":
@@ -97,7 +105,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Ingresa nivel de importancia / severidad...",
     "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel.placeholder":
       "Ingresa texto del botón de acción (cta)...",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::inbox.alert-banner.dismissible.placeholder":
       "Ingresa permitir cerrar el aviso...",
     "content-manager.content-types.plugin::inbox.alert-banner.active.placeholder":
@@ -158,7 +167,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "info@mezquitabogota.org",
     "content-manager.content-types.plugin::inbox.subscriber.fullName.placeholder":
       "Ingresa nombre completo del suscriptor...",
-    "content-manager.content-types.plugin::inbox.subscriber.phone.placeholder": "+57 310 555 0199",
+    "content-manager.content-types.plugin::inbox.subscriber.phone.placeholder":
+      "+57 310 555 0199",
     "content-manager.content-types.plugin::inbox.subscriber.topics.placeholder":
       "Ingresa temas de suscripción...",
     "content-manager.content-types.plugin::inbox.subscriber.status.placeholder":
@@ -179,17 +189,20 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
   ar: {
     "content-manager.content-types.plugin::inbox.alert-banner.code.placeholder":
       "أدخل الرمز الفريد...",
-    "content-manager.content-types.plugin::inbox.alert-banner.title.placeholder": "أدخل العنوان...",
+    "content-manager.content-types.plugin::inbox.alert-banner.title.placeholder":
+      "أدخل العنوان...",
     "content-manager.content-types.plugin::inbox.alert-banner.message.placeholder":
       "أدخل نص الإشعار / التنبيه...",
     "content-manager.content-types.plugin::inbox.alert-banner.severity.placeholder":
       "أدخل مستوى أهمية التنبيه...",
     "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel.placeholder":
       "أدخل نص زر الإجراء (CTA)...",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::inbox.alert-banner.dismissible.placeholder":
       "أدخل السماح بإغلاق التنبيه...",
-    "content-manager.content-types.plugin::inbox.alert-banner.active.placeholder": "أدخل نشط...",
+    "content-manager.content-types.plugin::inbox.alert-banner.active.placeholder":
+      "أدخل نشط...",
     "content-manager.content-types.plugin::inbox.alert-banner.priority.placeholder":
       "أدخل الأولوية...",
     "content-manager.content-types.plugin::inbox.alert-banner.startsAt.placeholder":
@@ -206,8 +219,10 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "معرف-الرابط-التلقائي",
     "content-manager.content-types.plugin::inbox.submission.formTitle.placeholder":
       "أدخل عنوان النموذج...",
-    "content-manager.content-types.plugin::inbox.submission.category.placeholder": "أدخل الفئة...",
-    "content-manager.content-types.plugin::inbox.submission.status.placeholder": "أدخل الحالة...",
+    "content-manager.content-types.plugin::inbox.submission.category.placeholder":
+      "أدخل الفئة...",
+    "content-manager.content-types.plugin::inbox.submission.status.placeholder":
+      "أدخل الحالة...",
     "content-manager.content-types.plugin::inbox.submission.priority.placeholder":
       "أدخل الأولوية...",
     "content-manager.content-types.plugin::inbox.submission.department.placeholder":
@@ -244,10 +259,12 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "info@mezquitabogota.org",
     "content-manager.content-types.plugin::inbox.subscriber.fullName.placeholder":
       "أدخل الاسم الكامل للمشترك...",
-    "content-manager.content-types.plugin::inbox.subscriber.phone.placeholder": "+57 310 555 0199",
+    "content-manager.content-types.plugin::inbox.subscriber.phone.placeholder":
+      "+57 310 555 0199",
     "content-manager.content-types.plugin::inbox.subscriber.topics.placeholder":
       "أدخل مواضيع الاشتراك...",
-    "content-manager.content-types.plugin::inbox.subscriber.status.placeholder": "أدخل الحالة...",
+    "content-manager.content-types.plugin::inbox.subscriber.status.placeholder":
+      "أدخل الحالة...",
     "content-manager.content-types.plugin::inbox.subscriber.confirmToken.placeholder":
       "أدخل رمز تأكيد الاشتراك...",
     "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken.placeholder":
@@ -264,17 +281,20 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
   tr: {
     "content-manager.content-types.plugin::inbox.alert-banner.code.placeholder":
       "Benzersiz Kod girin...",
-    "content-manager.content-types.plugin::inbox.alert-banner.title.placeholder": "Başlık girin...",
+    "content-manager.content-types.plugin::inbox.alert-banner.title.placeholder":
+      "Başlık girin...",
     "content-manager.content-types.plugin::inbox.alert-banner.message.placeholder":
       "Duyuru / Bildirim Mesajı girin...",
     "content-manager.content-types.plugin::inbox.alert-banner.severity.placeholder":
       "Uyarı Önem Derecesi girin...",
     "content-manager.content-types.plugin::inbox.alert-banner.ctaLabel.placeholder":
       "Eylem Çağrısı (CTA) Düğme Metni girin...",
-    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::inbox.alert-banner.ctaUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::inbox.alert-banner.dismissible.placeholder":
       "Ziyaretçilerin Kapatmasına İzin Ver girin...",
-    "content-manager.content-types.plugin::inbox.alert-banner.active.placeholder": "Aktif girin...",
+    "content-manager.content-types.plugin::inbox.alert-banner.active.placeholder":
+      "Aktif girin...",
     "content-manager.content-types.plugin::inbox.alert-banner.priority.placeholder":
       "Öncelik girin...",
     "content-manager.content-types.plugin::inbox.alert-banner.startsAt.placeholder":
@@ -293,7 +313,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Form Başlığı girin...",
     "content-manager.content-types.plugin::inbox.submission.category.placeholder":
       "Kategori girin...",
-    "content-manager.content-types.plugin::inbox.submission.status.placeholder": "Durum girin...",
+    "content-manager.content-types.plugin::inbox.submission.status.placeholder":
+      "Durum girin...",
     "content-manager.content-types.plugin::inbox.submission.priority.placeholder":
       "Öncelik girin...",
     "content-manager.content-types.plugin::inbox.submission.department.placeholder":
@@ -330,10 +351,12 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "info@mezquitabogota.org",
     "content-manager.content-types.plugin::inbox.subscriber.fullName.placeholder":
       "Abone Adı Soyadı girin...",
-    "content-manager.content-types.plugin::inbox.subscriber.phone.placeholder": "+57 310 555 0199",
+    "content-manager.content-types.plugin::inbox.subscriber.phone.placeholder":
+      "+57 310 555 0199",
     "content-manager.content-types.plugin::inbox.subscriber.topics.placeholder":
       "Abone Olunan Konular girin...",
-    "content-manager.content-types.plugin::inbox.subscriber.status.placeholder": "Durum girin...",
+    "content-manager.content-types.plugin::inbox.subscriber.status.placeholder":
+      "Durum girin...",
     "content-manager.content-types.plugin::inbox.subscriber.confirmToken.placeholder":
       "Abonelik Onay Jetonu girin...",
     "content-manager.content-types.plugin::inbox.subscriber.unsubscribeToken.placeholder":

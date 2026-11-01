@@ -41,7 +41,9 @@ async function tryCreatePluginBooking(
       requesterPhone: existing.applicantPhone ?? "",
       notes: bookingInput.notes ?? `Casework Ref: ${existing.referenceCode}`,
     });
-    return createdBooking?.referenceCode || createdBooking?.documentId || fallbackId;
+    return (
+      createdBooking?.referenceCode || createdBooking?.documentId || fallbackId
+    );
   } catch {
     return fallbackId;
   }
@@ -121,7 +123,8 @@ async function tryIssuePluginCertificate(
     if (!certSvc?.issueCertificate) return fallbackCertNumber;
     const issued = await certSvc.issueCertificate({
       templateSlug: certInput?.templateSlug || "official-service-certificate",
-      recipientName: certInput?.recipientName || existing.applicantName || "Applicant",
+      recipientName:
+        certInput?.recipientName || existing.applicantName || "Applicant",
       recipientEmail: existing.applicantEmail,
       metadata: {
         submissionReference: existing.referenceCode,
@@ -151,7 +154,10 @@ export async function issueCertificateFromSubmission(
     throw new Error(`Submission "${documentId}" not found`);
   }
 
-  assertRequiredChecklistVerified(existing, certInput?.requireChecklistVerified);
+  assertRequiredChecklistVerified(
+    existing,
+    certInput?.requireChecklistVerified
+  );
 
   const certificateNumber = await tryIssuePluginCertificate(
     strapi,

@@ -49,11 +49,22 @@ interface CaseworkHeaderBarProps {
   onClose: () => void;
 }
 
-const CaseworkHeaderBar: React.FC<CaseworkHeaderBarProps> = ({ t, submission, onClose }) => (
-  <Flex justifyContent="space-between" alignItems="center" paddingBottom={3} wrap="wrap" gap={2}>
+const CaseworkHeaderBar: React.FC<CaseworkHeaderBarProps> = ({
+  t,
+  submission,
+  onClose,
+}) => (
+  <Flex
+    justifyContent="space-between"
+    alignItems="center"
+    paddingBottom={3}
+    wrap="wrap"
+    gap={2}
+  >
     <Flex gap={3} alignItems="center" wrap="wrap">
       <Typography variant="delta" fontWeight="bold">
-        {t("page.ui.casework_inspector", "Casework Inspector")}: {submission.referenceCode}
+        {t("page.ui.casework_inspector", "Casework Inspector")}:{" "}
+        {submission.referenceCode}
       </Typography>
       <Badge>{submission.formSlug}</Badge>
       {submission.secondaryDate?.formatted ? (
@@ -66,7 +77,8 @@ const CaseworkHeaderBar: React.FC<CaseworkHeaderBarProps> = ({ t, submission, on
       ) : null}
       {submission.linkedCertificateNumber ? (
         <Badge active>
-          {t("page.ui.cert_badge", "Cert")}: {submission.linkedCertificateNumber}
+          {t("page.ui.cert_badge", "Cert")}:{" "}
+          {submission.linkedCertificateNumber}
         </Badge>
       ) : null}
     </Flex>
@@ -112,7 +124,12 @@ const CaseworkQuickBridges: React.FC<CaseworkQuickBridgesProps> = ({
   onIssueCert,
 }) => (
   <Flex gap={3} paddingTop={3} wrap="wrap" alignItems="stretch">
-    <Box background="neutral100" padding={3} hasRadius style={{ flex: "1 1 180px" }}>
+    <Box
+      background="neutral100"
+      padding={3}
+      hasRadius
+      style={{ flex: "1 1 180px" }}
+    >
       <Typography variant="sigma">
         {t("page.ui.schedule_appointment", "Schedule Appointment")}
       </Typography>
@@ -130,13 +147,17 @@ const CaseworkQuickBridges: React.FC<CaseworkQuickBridgesProps> = ({
             name="bookingDate"
             type="date"
             value={bookingDate}
-            onChange={(e: { target: { value: string } }) => onBookingDateChange(e.target.value)}
+            onChange={(e: { target: { value: string } }) =>
+              onBookingDateChange(e.target.value)
+            }
           />
           <TextInput
             name="bookingTime"
             placeholder="10:00"
             value={bookingTime}
-            onChange={(e: { target: { value: string } }) => onBookingTimeChange(e.target.value)}
+            onChange={(e: { target: { value: string } }) =>
+              onBookingTimeChange(e.target.value)
+            }
           />
         </Flex>
         <Button size="S" variant="secondary" onClick={onBookSlot}>
@@ -145,26 +166,45 @@ const CaseworkQuickBridges: React.FC<CaseworkQuickBridgesProps> = ({
       </Flex>
     </Box>
 
-    <Box background="neutral100" padding={3} hasRadius style={{ flex: "1 1 180px" }}>
-      <Typography variant="sigma">{t("page.ui.issue_certificate", "Issue Certificate")}</Typography>
+    <Box
+      background="neutral100"
+      padding={3}
+      hasRadius
+      style={{ flex: "1 1 180px" }}
+    >
+      <Typography variant="sigma">
+        {t("page.ui.issue_certificate", "Issue Certificate")}
+      </Typography>
       <Flex direction="column" alignItems="stretch" gap={2} paddingTop={2}>
         <TextInput
           name="certTemplateSlug"
           placeholder={t("placeholder.template_slug", "Template slug")}
           value={certTemplateSlug}
-          onChange={(e: { target: { value: string } }) => onCertTemplateSlugChange(e.target.value)}
+          onChange={(e: { target: { value: string } }) =>
+            onCertTemplateSlugChange(e.target.value)
+          }
         />
         <TextInput
           name="certRecipient"
-          placeholder={t("placeholder.recipient_full_name", "Recipient full name")}
+          placeholder={t(
+            "placeholder.recipient_full_name",
+            "Recipient full name"
+          )}
           value={certRecipient}
-          onChange={(e: { target: { value: string } }) => onCertRecipientChange(e.target.value)}
+          onChange={(e: { target: { value: string } }) =>
+            onCertRecipientChange(e.target.value)
+          }
         />
         <Checkbox
           checked={requireVerifiedChecklist}
-          onCheckedChange={(c: boolean) => onRequireVerifiedChecklistChange(Boolean(c))}
+          onCheckedChange={(c: boolean) =>
+            onRequireVerifiedChecklistChange(Boolean(c))
+          }
         >
-          {t("page.ui.require_verified_checklist", "Require verified checklist")}
+          {t(
+            "page.ui.require_verified_checklist",
+            "Require verified checklist"
+          )}
         </Checkbox>
         <Button size="S" variant="secondary" onClick={onIssueCert}>
           {t("page.ui.issue_cert", "Issue Cert")}
@@ -187,11 +227,21 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
   const { locale } = useIntl();
   const shortLocale = (locale || "es").split("-")[0].toLowerCase();
 
-  const [status, setStatus] = React.useState<SubmissionStatus>(submission.status);
-  const [priority, setPriority] = React.useState<SubmissionPriority>(submission.priority);
-  const [department, setDepartment] = React.useState<string>(submission.department || "general");
-  const [assignedTo, setAssignedTo] = React.useState<string>(submission.assignedTo || "");
-  const [staffNotes, setStaffNotes] = React.useState<string>(submission.staffNotes || "");
+  const [status, setStatus] = React.useState<SubmissionStatus>(
+    submission.status
+  );
+  const [priority, setPriority] = React.useState<SubmissionPriority>(
+    submission.priority
+  );
+  const [department, setDepartment] = React.useState<string>(
+    submission.department || "general"
+  );
+  const [assignedTo, setAssignedTo] = React.useState<string>(
+    submission.assignedTo || ""
+  );
+  const [staffNotes, setStaffNotes] = React.useState<string>(
+    submission.staffNotes || ""
+  );
   const [checklist, setChecklist] = React.useState<ChecklistItem[]>(
     submission.checklistItems || []
   );
@@ -205,10 +255,14 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
   const [bookingTime, setBookingTime] = React.useState<string>("10:00");
 
   const [certTemplateSlug, setCertTemplateSlug] = React.useState<string>(
-    form?.settings?.defaultCertificateTemplateId || "official-service-certificate"
+    form?.settings?.defaultCertificateTemplateId ||
+      "official-service-certificate"
   );
-  const [certRecipient, setCertRecipient] = React.useState<string>(submission.applicantName || "");
-  const [requireVerifiedChecklist, setRequireVerifiedChecklist] = React.useState<boolean>(true);
+  const [certRecipient, setCertRecipient] = React.useState<string>(
+    submission.applicantName || ""
+  );
+  const [requireVerifiedChecklist, setRequireVerifiedChecklist] =
+    React.useState<boolean>(true);
 
   React.useEffect(() => {
     setStatus(submission.status);
@@ -220,7 +274,10 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
     setCertRecipient(submission.applicantName || "");
   }, [submission]);
 
-  const handleToggleChecklistItem = async (itemId: string, verified: boolean) => {
+  const handleToggleChecklistItem = async (
+    itemId: string,
+    verified: boolean
+  ) => {
     const nextChecklist = checklist.map((item) =>
       item.id === itemId
         ? {
@@ -259,12 +316,15 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
 
   const handleCustomBooking = async () => {
     if (!submission.documentId) return;
-    await post(`/${PLUGIN_ID}/submissions/${submission.documentId}/schedule-booking`, {
-      serviceSlug: bookingServiceSlug,
-      date: bookingDate,
-      startTime: bookingTime,
-      notes: staffNotes || `Casework Ref: ${submission.referenceCode}`,
-    });
+    await post(
+      `/${PLUGIN_ID}/submissions/${submission.documentId}/schedule-booking`,
+      {
+        serviceSlug: bookingServiceSlug,
+        date: bookingDate,
+        startTime: bookingTime,
+        notes: staffNotes || `Casework Ref: ${submission.referenceCode}`,
+      }
+    );
     onStatusMessage(
       `${t("page.ui.appointment_scheduled", "Appointment scheduled")} (${bookingDate} ${bookingTime})`
     );
@@ -274,11 +334,14 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
   const handleCustomCertificate = async () => {
     if (!submission.documentId) return;
     try {
-      await post(`/${PLUGIN_ID}/submissions/${submission.documentId}/issue-certificate`, {
-        templateSlug: certTemplateSlug,
-        recipientName: certRecipient || submission.applicantName,
-        requireChecklistVerified: requireVerifiedChecklist,
-      });
+      await post(
+        `/${PLUGIN_ID}/submissions/${submission.documentId}/issue-certificate`,
+        {
+          templateSlug: certTemplateSlug,
+          recipientName: certRecipient || submission.applicantName,
+          requireChecklistVerified: requireVerifiedChecklist,
+        }
+      );
       onStatusMessage(
         `${t("page.ui.certificate_issued", "Certificate issued")}: ${submission.referenceCode}`
       );
@@ -295,7 +358,13 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
   const dataEntries = Object.entries(submission.data || {});
 
   return (
-    <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius marginBottom={5}>
+    <Box
+      background="neutral0"
+      padding={5}
+      shadow="filterShadow"
+      hasRadius
+      marginBottom={5}
+    >
       <CaseworkHeaderBar t={t} submission={submission} onClose={onClose} />
 
       <Divider />
@@ -317,7 +386,9 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
                 <Field.Label>{t("page.ui.status", "Status")}</Field.Label>
                 <SingleSelect
                   value={status}
-                  onChange={(v: string | number) => setStatus(v as SubmissionStatus)}
+                  onChange={(v: string | number) =>
+                    setStatus(v as SubmissionStatus)
+                  }
                 >
                   {SUBMISSION_STATUSES.map((st) => (
                     <SingleSelectOption key={st} value={st}>
@@ -332,7 +403,9 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
                 <Field.Label>{t("page.ui.priority", "Priority")}</Field.Label>
                 <SingleSelect
                   value={priority}
-                  onChange={(v: string | number) => setPriority(v as SubmissionPriority)}
+                  onChange={(v: string | number) =>
+                    setPriority(v as SubmissionPriority)
+                  }
                 >
                   {SUBMISSION_PRIORITIES.map((pr) => (
                     <SingleSelectOption key={pr} value={pr}>
@@ -347,9 +420,14 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
                 <Field.Label>{t("page.ui.assignee", "Assignee")}</Field.Label>
                 <TextInput
                   name="assignedTo"
-                  placeholder={t("placeholder.assignee_example", "e.g. Sheikh Ahmad")}
+                  placeholder={t(
+                    "placeholder.assignee_example",
+                    "e.g. Sheikh Ahmad"
+                  )}
                   value={assignedTo}
-                  onChange={(e: { target: { value: string } }) => setAssignedTo(e.target.value)}
+                  onChange={(e: { target: { value: string } }) =>
+                    setAssignedTo(e.target.value)
+                  }
                 />
               </Field.Root>
             </Box>
@@ -357,11 +435,15 @@ export const CaseworkDetailPanel: React.FC<CaseworkDetailPanelProps> = ({
 
           <Box paddingTop={3} paddingBottom={3}>
             <Field.Root>
-              <Field.Label>{t("page.ui.internal_staff_notes", "Internal Staff Notes")}</Field.Label>
+              <Field.Label>
+                {t("page.ui.internal_staff_notes", "Internal Staff Notes")}
+              </Field.Label>
               <Textarea
                 name="staffNotes"
                 value={staffNotes}
-                onChange={(e: { target: { value: string } }) => setStaffNotes(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  setStaffNotes(e.target.value)
+                }
               />
             </Field.Root>
             <Flex justifyContent="flex-end" paddingTop={2}>

@@ -1,4 +1,12 @@
-import { Badge, Box, Button, Field, Flex, TextInput, Typography } from "@strapi/design-system";
+import {
+  Badge,
+  Box,
+  Button,
+  Field,
+  Flex,
+  TextInput,
+  Typography,
+} from "@strapi/design-system";
 import * as React from "react";
 
 const subCardStyle: React.CSSProperties = {
@@ -78,7 +86,9 @@ export const CaptchaProviderCard: React.FC<CaptchaProviderCardProps> = ({
             name={siteKeyName}
             placeholder={siteKeyPlaceholder}
             value={siteKeyValue}
-            onChange={(e: { target: { value: string } }) => onSiteKeyChange(e.target.value)}
+            onChange={(e: { target: { value: string } }) =>
+              onSiteKeyChange(e.target.value)
+            }
           />
           <Field.Hint />
         </Field.Root>
@@ -90,7 +100,9 @@ export const CaptchaProviderCard: React.FC<CaptchaProviderCardProps> = ({
             type="password"
             placeholder={secretKeyPlaceholder}
             value={secretKeyValue}
-            onChange={(e: { target: { value: string } }) => onSecretKeyChange(e.target.value)}
+            onChange={(e: { target: { value: string } }) =>
+              onSecretKeyChange(e.target.value)
+            }
           />
           <Field.Hint />
         </Field.Root>

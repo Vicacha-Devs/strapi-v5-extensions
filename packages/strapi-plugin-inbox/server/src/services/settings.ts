@@ -1,6 +1,10 @@
 import type { Core } from "@strapi/strapi";
 
-import { DEFAULT_INBOX_SETTINGS, PLUGIN_ID, type InboxSettings } from "../../../shared";
+import {
+  DEFAULT_INBOX_SETTINGS,
+  PLUGIN_ID,
+  type InboxSettings,
+} from "../../../shared";
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async getSettings(): Promise<InboxSettings> {
@@ -9,7 +13,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       name: PLUGIN_ID,
     });
 
-    const configDefaults = strapi.config.get<Partial<InboxSettings>>(`plugin::${PLUGIN_ID}`, {});
+    const configDefaults = strapi.config.get<Partial<InboxSettings>>(
+      `plugin::${PLUGIN_ID}`,
+      {}
+    );
     const stored = (await pluginStore.get({
       key: "settings",
     })) as Partial<InboxSettings> | null;

@@ -15,7 +15,10 @@ import * as React from "react";
 import type { CaptchaProvider, InboxSettings } from "../../../../shared";
 import { CaptchaProviderCard } from "./CaptchaProviderCard";
 
-const CAPTCHA_PROVIDER_OPTIONS: Array<{ value: CaptchaProvider; label: string }> = [
+const CAPTCHA_PROVIDER_OPTIONS: Array<{
+  value: CaptchaProvider;
+  label: string;
+}> = [
   { value: "none", label: "None (Honeypot + IP Rate Limiting only)" },
   { value: "turnstile", label: "Cloudflare Turnstile (Recommended)" },
   { value: "recaptcha", label: "Google reCAPTCHA v2" },
@@ -86,11 +89,17 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
             )}
           >
             <Field.Label>
-              {t("field.default_honeypot_field_name", "Default Honeypot Field Name")}
+              {t(
+                "field.default_honeypot_field_name",
+                "Default Honeypot Field Name"
+              )}
             </Field.Label>
             <TextInput
               name="defaultHoneypotField"
-              placeholder={t("placeholder.e_g_website_url", "e.g., _website_url")}
+              placeholder={t(
+                "placeholder.e_g_website_url",
+                "e.g., _website_url"
+              )}
               value={settings.defaultHoneypotField || ""}
               onChange={(e: { target: { value: string } }) =>
                 setSettings({
@@ -110,7 +119,10 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
             )}
           >
             <Field.Label>
-              {t("field.default_hourly_rate_limit_per_ip", "Default Hourly Rate Limit per IP")}
+              {t(
+                "field.default_hourly_rate_limit_per_ip",
+                "Default Hourly Rate Limit per IP"
+              )}
             </Field.Label>
             <NumberInput
               name="defaultRateLimitPerHour"
@@ -119,7 +131,8 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
               onValueChange={(val: number | undefined) =>
                 setSettings({
                   ...settings,
-                  defaultRateLimitPerHour: typeof val === "number" && val > 0 ? val : 15,
+                  defaultRateLimitPerHour:
+                    typeof val === "number" && val > 0 ? val : 15,
                 })
               }
             />
@@ -137,7 +150,10 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
               {t("field.default_captcha_provider", "Default CAPTCHA Provider")}
             </Field.Label>
             <SingleSelect
-              placeholder={t("placeholder.select_captcha_provider", "Select CAPTCHA provider")}
+              placeholder={t(
+                "placeholder.select_captcha_provider",
+                "Select CAPTCHA provider"
+              )}
               value={settings.defaultCaptchaProvider || "none"}
               onChange={(val: string | number) =>
                 setSettings({
@@ -166,10 +182,18 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
         >
           <CaptchaProviderCard
             t={t}
-            title={t("settings.ui.cloudflare_turnstile", "Cloudflare Turnstile")}
+            title={t(
+              "settings.ui.cloudflare_turnstile",
+              "Cloudflare Turnstile"
+            )}
             isDefaultActive={settings.defaultCaptchaProvider === "turnstile"}
-            testButtonLabel={t("settings.ui.test_turnstile_secret", "Test Turnstile Secret")}
-            onTestSecret={() => onTestCaptcha("turnstile", settings.turnstileSecretKey)}
+            testButtonLabel={t(
+              "settings.ui.test_turnstile_secret",
+              "Test Turnstile Secret"
+            )}
+            onTestSecret={() =>
+              onTestCaptcha("turnstile", settings.turnstileSecretKey)
+            }
             siteKeyName="turnstileSiteKey"
             siteKeyLabel={t(
               "field.turnstile_site_key_public_widget_key",
@@ -184,7 +208,9 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
               "settings.ui.public_widget_key_rendered_by_the_frontend_form_",
               "Public widget key rendered by the frontend form component."
             )}
-            onSiteKeyChange={(val) => setSettings({ ...settings, turnstileSiteKey: val })}
+            onSiteKeyChange={(val) =>
+              setSettings({ ...settings, turnstileSiteKey: val })
+            }
             secretKeyName="turnstileSecretKey"
             secretKeyLabel={t(
               "field.turnstile_secret_key_server_verification",
@@ -199,15 +225,22 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
               "settings.ui.verified_against_challenges_cloudflare_com_turns",
               "Verified against challenges.cloudflare.com/turnstile/v0/siteverify."
             )}
-            onSecretKeyChange={(val) => setSettings({ ...settings, turnstileSecretKey: val })}
+            onSecretKeyChange={(val) =>
+              setSettings({ ...settings, turnstileSecretKey: val })
+            }
           />
 
           <CaptchaProviderCard
             t={t}
             title={t("settings.ui.google_recaptcha_v2", "Google reCAPTCHA v2")}
             isDefaultActive={settings.defaultCaptchaProvider === "recaptcha"}
-            testButtonLabel={t("settings.ui.test_recaptcha_secret", "Test reCAPTCHA Secret")}
-            onTestSecret={() => onTestCaptcha("recaptcha", settings.recaptchaSecretKey)}
+            testButtonLabel={t(
+              "settings.ui.test_recaptcha_secret",
+              "Test reCAPTCHA Secret"
+            )}
+            onTestSecret={() =>
+              onTestCaptcha("recaptcha", settings.recaptchaSecretKey)
+            }
             siteKeyName="recaptchaSiteKey"
             siteKeyLabel={t(
               "field.recaptcha_v2_site_key_public_widget_key",
@@ -222,7 +255,9 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
               "settings.ui.public_site_key_used_by_client_forms_when_recapt",
               "Public site key used by client forms when reCAPTCHA v2 is enabled."
             )}
-            onSiteKeyChange={(val) => setSettings({ ...settings, recaptchaSiteKey: val })}
+            onSiteKeyChange={(val) =>
+              setSettings({ ...settings, recaptchaSiteKey: val })
+            }
             secretKeyName="recaptchaSecretKey"
             secretKeyLabel={t(
               "field.recaptcha_v2_secret_key_server_verification",
@@ -237,7 +272,9 @@ export const AntiSpamCaptchaTab: React.FC<AntiSpamCaptchaTabProps> = ({
               "settings.ui.verified_against_www_google_com_recaptcha_api_si",
               "Verified against www.google.com/recaptcha/api/siteverify."
             )}
-            onSecretKeyChange={(val) => setSettings({ ...settings, recaptchaSecretKey: val })}
+            onSecretKeyChange={(val) =>
+              setSettings({ ...settings, recaptchaSecretKey: val })
+            }
           />
         </Box>
       </Box>

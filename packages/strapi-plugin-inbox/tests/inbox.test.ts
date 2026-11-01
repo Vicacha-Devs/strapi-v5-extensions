@@ -67,14 +67,22 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     assert.equal(trLocalized.settings.submitButtonLabel, "Gönder");
     assert.equal(trLocalized.fields[1].label, "Ad Soyad");
 
-    const arInvalid = validateFormSubmission(form.fields, { fullName: "", email: "bad" }, "ar");
+    const arInvalid = validateFormSubmission(
+      form.fields,
+      { fullName: "", email: "bad" },
+      "ar"
+    );
     assert.equal(arInvalid.valid, false);
     assert.ok(arInvalid.errors.fullName[0].includes("الاسم الكامل"));
     assert.ok(arInvalid.errors.email.length > 0);
 
     const validRes = validateFormSubmission(
       form.fields,
-      { fullName: "  Ahmad Al-Mansoor  ", email: "ahmad@example.org", header: "ignored" },
+      {
+        fullName: "  Ahmad Al-Mansoor  ",
+        email: "ahmad@example.org",
+        header: "ignored",
+      },
       "en"
     );
     assert.equal(validRes.valid, true);
@@ -83,19 +91,31 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
   });
 
   it("2. enforces Honeypot, Sliding-Window IP Rate Limiting, and fail-closed CAPTCHA verification", async () => {
-    assert.equal(isHoneypotTriggered({ _website_url: "" }, "_website_url"), false);
-    assert.equal(isHoneypotTriggered({ _website_url: "https://spam.bot" }, "_website_url"), true);
+    assert.equal(
+      isHoneypotTriggered({ _website_url: "" }, "_website_url"),
+      false
+    );
+    assert.equal(
+      isHoneypotTriggered({ _website_url: "https://spam.bot" }, "_website_url"),
+      true
+    );
 
     const limiter = new SlidingWindowRateLimiter();
     const t0 = 1_700_000_000_000;
     assert.equal(limiter.check("10.0.0.1", "contact", 2, t0).allowed, true);
-    assert.equal(limiter.check("10.0.0.1", "contact", 2, t0 + 1000).allowed, true);
+    assert.equal(
+      limiter.check("10.0.0.1", "contact", 2, t0 + 1000).allowed,
+      true
+    );
     const blocked = limiter.check("10.0.0.1", "contact", 2, t0 + 2000);
     assert.equal(blocked.allowed, false);
     assert.ok(blocked.retryAfterSeconds > 3500);
 
     // After 1 hour window expires, request is allowed again
-    assert.equal(limiter.check("10.0.0.1", "contact", 2, t0 + 3600 * 1000 + 5).allowed, true);
+    assert.equal(
+      limiter.check("10.0.0.1", "contact", 2, t0 + 3600 * 1000 + 5).allowed,
+      true
+    );
 
     // Fail-closed CAPTCHA check
     const okCaptcha = await verifyCaptchaToken(
@@ -118,19 +138,26 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     );
     assert.equal(networkFailureCaptcha, false);
 
-    const secretCheck = await testCaptchaSecretKey("turnstile", "bad_secret", async () => ({
-      json: async () => ({ "error-codes": ["invalid-input-secret"] }),
-    }));
+    const secretCheck = await testCaptchaSecretKey(
+      "turnstile",
+      "bad_secret",
+      async () => ({
+        json: async () => ({ "error-codes": ["invalid-input-secret"] }),
+      })
+    );
     assert.equal(secretCheck.ok, false);
   });
 
   it("3. handles Service-Desk Casework workflow, checklist verification, Bookings & Certificates bridges, and safe CSV export", async () => {
     const { services } = createMockStrapi();
 
-    const serviceForm = await services.formService.createFromTemplate("service-desk-application", {
-      slug: "nikah-application",
-      title: "Nikah Application",
-    });
+    const serviceForm = await services.formService.createFromTemplate(
+      "service-desk-application",
+      {
+        slug: "nikah-application",
+        title: "Nikah Application",
+      }
+    );
     assert.equal(serviceForm.slug, "nikah-application");
     assert.equal(serviceForm.checklistTemplate?.length, 2);
 
@@ -156,30 +183,39 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     assert.ok(sub.secondaryDate?.formatted);
 
     // 1-Click Booking Bridge
-    const booked = await services.submissionService.scheduleBookingFromSubmission(sub.documentId!, {
-      serviceSlug: "matrimonio",
-      date: "2026-05-15",
-      startTime: "10:00",
-    });
+    const booked =
+      await services.submissionService.scheduleBookingFromSubmission(
+        sub.documentId!,
+        {
+          serviceSlug: "matrimonio",
+          date: "2026-05-15",
+          startTime: "10:00",
+        }
+      );
     assert.equal(booked.submission.status, "scheduled");
     assert.equal(booked.bookingId, "BKG-MATRIMONIO-2026-05-15");
 
     // Attempt Certificate Bridge before checklist items are verified -> should fail
     await assert.rejects(
       () =>
-        services.submissionService.issueCertificateFromSubmission(sub.documentId!, {
-          templateSlug: "nikah-certificate",
-          requireChecklistVerified: true,
-        }),
+        services.submissionService.issueCertificateFromSubmission(
+          sub.documentId!,
+          {
+            templateSlug: "nikah-certificate",
+            requireChecklistVerified: true,
+          }
+        ),
       /required document\(s\) are not yet verified/
     );
 
     // Verify all checklist items
-    const verifiedChecklist = (booked.submission.checklistItems || []).map((item) => ({
-      ...item,
-      verified: true,
-      verifiedBy: "Sheikh Ahmad",
-    }));
+    const verifiedChecklist = (booked.submission.checklistItems || []).map(
+      (item) => ({
+        ...item,
+        verified: true,
+        verifiedBy: "Sheikh Ahmad",
+      })
+    );
     await services.submissionService.updateCasework(sub.documentId!, {
       status: "under_review",
       checklistItems: verifiedChecklist,
@@ -187,13 +223,14 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     });
 
     // Issue Certificate Bridge now succeeds
-    const certified = await services.submissionService.issueCertificateFromSubmission(
-      sub.documentId!,
-      {
-        templateSlug: "nikah-certificate",
-        requireChecklistVerified: true,
-      }
-    );
+    const certified =
+      await services.submissionService.issueCertificateFromSubmission(
+        sub.documentId!,
+        {
+          templateSlug: "nikah-certificate",
+          requireChecklistVerified: true,
+        }
+      );
     assert.equal(certified.submission.status, "completed");
     assert.equal(certified.certificateNumber, "CERT-2026-NIKAH-CERTIFICATE");
 
@@ -201,7 +238,10 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     const csv = await services.submissionService.exportCsv("nikah-application");
     assert.ok(csv.includes("'=SUM(1,2) Requesting Nikah ceremony"));
     assert.equal(escapeCsvCell("=cmd|"), "'=cmd|");
-    const manualCsv = submissionsToCsv([certified.submission], serviceForm.fields);
+    const manualCsv = submissionsToCsv(
+      [certified.submission],
+      serviceForm.fields
+    );
     assert.ok(manualCsv.includes("CERT-2026-NIKAH-CERTIFICATE"));
   });
 
@@ -219,12 +259,16 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     assert.ok(sub.confirmToken);
     assert.ok(sub.unsubscribeToken);
 
-    const confirmed = await services.subscriberService.confirmSubscription(sub.confirmToken!);
+    const confirmed = await services.subscriberService.confirmSubscription(
+      sub.confirmToken!
+    );
     assert.equal(confirmed.status, "confirmed");
     assert.equal(confirmed.confirmToken, null);
     assert.ok(confirmed.confirmedAt);
 
-    const unsubscribed = await services.subscriberService.unsubscribe(sub.unsubscribeToken);
+    const unsubscribed = await services.subscriberService.unsubscribe(
+      sub.unsubscribeToken
+    );
     assert.equal(unsubscribed.status, "unsubscribed");
     assert.ok(unsubscribed.unsubscribedAt);
   });
@@ -288,7 +332,8 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     const { strapi, services } = createMockStrapi();
 
     // 1. Creating a form in Inbox automatically syncs it to Form Builder CMS
-    const inboxForm = await services.formService.createFromTemplate("general-contact");
+    const inboxForm =
+      await services.formService.createFromTemplate("general-contact");
     assert.ok(inboxForm.formBuilderId);
     assert.equal(inboxForm.formBuilderSlug, "general-contact");
 
@@ -302,7 +347,9 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     const cmsQuery = (
       strapi.db as {
         query: (uid: string) => {
-          create: (arg: { data: Record<string, unknown> }) => Promise<Record<string, unknown>>;
+          create: (arg: {
+            data: Record<string, unknown>;
+          }) => Promise<Record<string, unknown>>;
         };
       }
     ).query(FORM_BUILDER_CMS_FORM_UID);
@@ -341,17 +388,24 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     assert.equal(syncResult.available, true);
     assert.equal(syncResult.forms.length, 2);
 
-    const syncedVolunteerForm = await services.formService.findBySlug("ramadan-volunteer-signup");
+    const syncedVolunteerForm = await services.formService.findBySlug(
+      "ramadan-volunteer-signup"
+    );
     assert.ok(syncedVolunteerForm);
     assert.equal(syncedVolunteerForm?.title, "Ramadan Volunteer Signup");
     assert.equal(syncedVolunteerForm?.fields.length, 2);
-    assert.equal(syncedVolunteerForm?.settings.submitButtonLabel, "Join Volunteer Team");
+    assert.equal(
+      syncedVolunteerForm?.settings.submitButtonLabel,
+      "Join Volunteer Team"
+    );
 
     // 3. Submitting through Form Builder CMS ingests into Casework Inbox with Hijri date & Reference Code
     const cmsSubQuery = (
       strapi.db as {
         query: (uid: string) => {
-          create: (arg: { data: Record<string, unknown> }) => Promise<Record<string, unknown>>;
+          create: (arg: {
+            data: Record<string, unknown>;
+          }) => Promise<Record<string, unknown>>;
         };
       }
     ).query(FORM_BUILDER_CMS_SUBMISSION_UID);
@@ -368,10 +422,11 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
       },
     });
 
-    const ingested = await services.submissionService.ingestFormBuilderSubmission(
-      rawCmsSubmission,
-      { formId: Number(createdVisualForm.id) }
-    );
+    const ingested =
+      await services.submissionService.ingestFormBuilderSubmission(
+        rawCmsSubmission,
+        { formId: Number(createdVisualForm.id) }
+      );
     assert.ok(ingested);
     assert.ok(ingested?.referenceCode.startsWith("INB-"));
     assert.equal(ingested?.formSlug, "ramadan-volunteer-signup");
@@ -380,10 +435,11 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     assert.ok(ingested?.secondaryDate?.formatted);
 
     // Idempotency check: ingesting the same CMS submission ID twice does not duplicate
-    const duplicateCheck = await services.submissionService.ingestFormBuilderSubmission(
-      rawCmsSubmission,
-      { formId: Number(createdVisualForm.id) }
-    );
+    const duplicateCheck =
+      await services.submissionService.ingestFormBuilderSubmission(
+        rawCmsSubmission,
+        { formId: Number(createdVisualForm.id) }
+      );
     assert.equal(duplicateCheck?.documentId, ingested?.documentId);
 
     // 4. Pre-existing Form Builder CMS submissions with numeric SQLite timestamps and { connect: [{ id }] } relations auto-sync on listSubmissions()
@@ -405,4 +461,3 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     assert.ok(allCasework.some((s) => s.applicantName === "Layla Hassan"));
   });
 });
-

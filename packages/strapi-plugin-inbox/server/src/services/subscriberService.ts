@@ -18,7 +18,9 @@ function normalizeSubscriberTopics(topics?: string[]): string[] {
     : ["announcements"];
 }
 
-function pickSubscriberStr(...values: Array<string | undefined | null>): string {
+function pickSubscriberStr(
+  ...values: Array<string | undefined | null>
+): string {
   for (const val of values) {
     if (val && val.trim().length > 0) return val;
   }
@@ -55,7 +57,11 @@ function buildSubscriberPayload(
     ),
     confirmedAt: doubleOptIn ? null : nowIso,
     unsubscribedAt: null,
-    sourceFormSlug: pickSubscriberStr(input.sourceFormSlug, existing?.sourceFormSlug, "newsletter"),
+    sourceFormSlug: pickSubscriberStr(
+      input.sourceFormSlug,
+      existing?.sourceFormSlug,
+      "newsletter"
+    ),
   };
 }
 
