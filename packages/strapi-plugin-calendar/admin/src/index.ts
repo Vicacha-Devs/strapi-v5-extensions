@@ -1,4 +1,5 @@
 import type { StrapiAdminApp } from "@strapi/strapi/admin";
+import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
 
 import { PLUGIN_ID } from "../../shared/pluginId";
 import { CalendarToolbar } from "./components/calendar/CalendarToolbar";
@@ -89,29 +90,9 @@ export default {
     }
   },
 
-  async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
-    const allLocales = Array.from(
-      new Set([...locales, "en", "es", "ar", "tr"])
-    );
-    return Promise.all(
-      allLocales.map(async (locale) => {
-        try {
-          const { default: data } = await import(
-            `./translations/${locale}.json`
-          );
-          const prefixed: Record<string, string> = {};
-          for (const [k, v] of Object.entries(data as Record<string, string>)) {
-            prefixed[k] = v;
-            const fullKey = k.startsWith(`${PLUGIN_ID}.`)
-              ? k
-              : `${PLUGIN_ID}.${k}`;
-            prefixed[fullKey] = v;
-          }
-          return { data: prefixed, locale };
-        } catch {
-          return { data: {}, locale };
-        }
-      })
-    );
-  },
+  registerTrads: createRegisterTrads({
+    pluginId: PLUGIN_ID,
+    defaultLocales: ["en", "es", "ar", "tr"],
+    loadTranslation: (locale) => import(`./translations/${locale}.json`),
+  }),
 };
