@@ -25,7 +25,9 @@ async function registerCalendarCompanion(strapi: Core.Strapi): Promise<void> {
   const calendarPlugin = strapi.plugin("calendar") as
     | {
         service?: (name: string) => {
-          registerSource?: (source: Record<string, unknown>) => Promise<unknown> | unknown;
+          registerSource?: (
+            source: Record<string, unknown>
+          ) => Promise<unknown> | unknown;
           registerCompanionSource?: (source: Record<string, unknown>) => void;
         };
       }
@@ -47,10 +49,13 @@ async function registerCalendarCompanion(strapi: Core.Strapi): Promise<void> {
 }
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
-  const pluginConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ?? {}) as BookingsPluginConfig;
+  const pluginConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
+    {}) as BookingsPluginConfig;
 
   if (pluginConfig.calendarSystems) {
-    for (const [systemId, formatter] of Object.entries(pluginConfig.calendarSystems)) {
+    for (const [systemId, formatter] of Object.entries(
+      pluginConfig.calendarSystems
+    )) {
       if (typeof formatter === "function") {
         registerCalendarSystemFormatter(systemId, formatter);
       }
@@ -80,7 +85,11 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
 
   const actionProvider = (
     strapi.admin?.services?.permission as
-      | { actionProvider?: { registerMany?: (items: unknown[]) => Promise<void> } }
+      | {
+          actionProvider?: {
+            registerMany?: (items: unknown[]) => Promise<void>;
+          };
+        }
       | undefined
   )?.actionProvider;
 

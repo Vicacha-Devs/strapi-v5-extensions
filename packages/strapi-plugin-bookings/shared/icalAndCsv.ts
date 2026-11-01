@@ -89,8 +89,14 @@ export function generateBookingsICalFeed(
     lines.push(`DTSTAMP:${nowStamp}`);
     lines.push(`DTSTART:${dtStart}`);
     lines.push(`DTEND:${dtEnd}`);
-    lines.push(foldICalLine(`SUMMARY:${escapeICalText(booking.title || booking.customerName)}`));
-    lines.push(foldICalLine(`DESCRIPTION:${escapeICalText(descriptionParts.join("\n"))}`));
+    lines.push(
+      foldICalLine(
+        `SUMMARY:${escapeICalText(booking.title || booking.customerName)}`
+      )
+    );
+    lines.push(
+      foldICalLine(`DESCRIPTION:${escapeICalText(descriptionParts.join("\n"))}`)
+    );
     lines.push(`STATUS:${statusMap[booking.status] || "TENTATIVE"}`);
     lines.push("END:VEVENT");
   }

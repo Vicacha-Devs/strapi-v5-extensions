@@ -7,7 +7,10 @@ import type {
 } from "@vicacha-devs/strapi-plugin-calendar/shared";
 import React from "react";
 
-import type { BookingRecord, SecondaryCalendarConfig } from "../../../../shared/types";
+import type {
+  BookingRecord,
+  SecondaryCalendarConfig,
+} from "../../../../shared/types";
 
 export type BookingsViewMode = "list";
 
@@ -30,7 +33,11 @@ export interface BookingsGridCanvasProps {
   bookings: BookingRecord[];
   activeSecondaryCalendars?: SecondaryCalendarConfig[];
   onSelectBooking: (booking: BookingRecord) => void;
-  onRescheduleBooking?: (booking: BookingRecord, newStartIso: string, newEndIso?: string) => void;
+  onRescheduleBooking?: (
+    booking: BookingRecord,
+    newStartIso: string,
+    newEndIso?: string
+  ) => void;
   onQuickCreateOnDate?: (dateIso: string) => void;
 }
 
@@ -51,8 +58,18 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
           </Typography>
         ) : (
           bookings.map((b) => (
-            <Box key={b.documentId} padding={3} background="neutral100" hasRadius>
-              <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
+            <Box
+              key={b.documentId}
+              padding={3}
+              background="neutral100"
+              hasRadius
+            >
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                wrap="wrap"
+                gap={2}
+              >
                 <Flex gap={3} alignItems="center" wrap="wrap">
                   <Badge>{b.bookingCode}</Badge>
                   <Typography variant="omega" fontWeight="bold">
@@ -69,7 +86,10 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
                     </Badge>
                   )}
                   {b.assignedHost && (
-                    <Badge backgroundColor="secondary100" textColor="secondary700">
+                    <Badge
+                      backgroundColor="secondary100"
+                      textColor="secondary700"
+                    >
                       {b.assignedHost}
                     </Badge>
                   )}
@@ -95,7 +115,11 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
                     {b.status.toUpperCase()} ({b.partySize})
                   </Badge>
                 </Flex>
-                <Button size="S" variant="secondary" onClick={() => onSelectBooking(b)}>
+                <Button
+                  size="S"
+                  variant="secondary"
+                  onClick={() => onSelectBooking(b)}
+                >
                   {t("bookings.inspect", "Inspect")}
                 </Button>
               </Flex>

@@ -55,8 +55,12 @@ export const CalendarPage: React.FC = () => {
   const [selectedResourceId, setSelectedResourceId] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [search, setSearch] = useState<string>("");
-  const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(null);
-  const [quickCreateStartIso, setQuickCreateStartIso] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(
+    null
+  );
+  const [quickCreateStartIso, setQuickCreateStartIso] = useState<string | null>(
+    null
+  );
 
   const fetchBookingsData = useCallback(async () => {
     try {
@@ -157,7 +161,10 @@ export const CalendarPage: React.FC = () => {
             >
               {t("actions.openUnifiedCalendar", "Open in Calendar")}
             </Button>
-            <Button variant="tertiary" onClick={() => navigate(`/settings/${PLUGIN_ID}`)}>
+            <Button
+              variant="tertiary"
+              onClick={() => navigate(`/settings/${PLUGIN_ID}`)}
+            >
               {t("actions.settings", "Settings")}
             </Button>
             <Button
@@ -168,7 +175,9 @@ export const CalendarPage: React.FC = () => {
             </Button>
             <Button
               variant="default"
-              onClick={() => setQuickCreateStartIso(new Date().toISOString().slice(0, 10))}
+              onClick={() =>
+                setQuickCreateStartIso(new Date().toISOString().slice(0, 10))
+              }
             >
               {t("actions.newBooking", "New Booking")}
             </Button>
@@ -235,19 +244,26 @@ export const CalendarPage: React.FC = () => {
               }}
             >
               <Field.Root>
-                <Field.Label>{t("filters.resource", "Bookable Resource")}</Field.Label>
+                <Field.Label>
+                  {t("filters.resource", "Bookable Resource")}
+                </Field.Label>
                 <SingleSelect
                   placeholder={t("placeholder.all_resources", "All Resources")}
                   value={selectedResourceId || "all"}
                   onChange={(val: string | number) =>
-                    setSelectedResourceId(String(val) === "all" ? "" : String(val))
+                    setSelectedResourceId(
+                      String(val) === "all" ? "" : String(val)
+                    )
                   }
                 >
                   <SingleSelectOption value="all">
                     {t("filters.allResources", "All Resources")}
                   </SingleSelectOption>
                   {resources.map((res) => (
-                    <SingleSelectOption key={res.documentId} value={res.documentId}>
+                    <SingleSelectOption
+                      key={res.documentId}
+                      value={res.documentId}
+                    >
                       {res.name}
                     </SingleSelectOption>
                   ))}
@@ -255,7 +271,9 @@ export const CalendarPage: React.FC = () => {
               </Field.Root>
 
               <Field.Root>
-                <Field.Label>{t("filters.status", "Booking Status")}</Field.Label>
+                <Field.Label>
+                  {t("filters.status", "Booking Status")}
+                </Field.Label>
                 <SingleSelect
                   placeholder={t("placeholder.all_statuses", "All Statuses")}
                   value={selectedStatus || "all"}
@@ -285,11 +303,18 @@ export const CalendarPage: React.FC = () => {
               </Field.Root>
 
               <Field.Root>
-                <Field.Label>{t("filters.search", "Search Reservations")}</Field.Label>
+                <Field.Label>
+                  {t("filters.search", "Search Reservations")}
+                </Field.Label>
                 <TextInput
-                  placeholder={t("filters.searchPlaceholder", "Code, customer, host, org...")}
+                  placeholder={t(
+                    "filters.searchPlaceholder",
+                    "Code, customer, host, org..."
+                  )}
                   value={search}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSearch(e.target.value)
+                  }
                 />
               </Field.Root>
             </div>
@@ -320,7 +345,9 @@ export const CalendarPage: React.FC = () => {
         <QuickCreateBookingModal
           t={t}
           isOpen={Boolean(quickCreateStartIso)}
-          initialStartIso={quickCreateStartIso || new Date().toISOString().slice(0, 10)}
+          initialStartIso={
+            quickCreateStartIso || new Date().toISOString().slice(0, 10)
+          }
           resources={resources}
           onClose={() => setQuickCreateStartIso(null)}
           onSubmit={handleCreateBooking}

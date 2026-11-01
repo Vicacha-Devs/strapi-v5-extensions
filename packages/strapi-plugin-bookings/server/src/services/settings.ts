@@ -1,7 +1,10 @@
 import type { Core } from "@strapi/strapi";
 
 import { PLUGIN_ID } from "../../../shared/pluginId";
-import type { BookingsPluginSettings, BookingSourceMapping } from "../../../shared/types";
+import type {
+  BookingsPluginSettings,
+  BookingSourceMapping,
+} from "../../../shared/types";
 import type {
   BookingsPluginConfig,
   DiscoveredCollectionField,
@@ -13,7 +16,13 @@ const STORE_KEY = "settings";
 
 const runtimeSources = new Map<string, BookingSourceMapping>();
 
-const VALID_THEMES = new Set(["breeze", "emerald", "sand", "midnight", "classic"]);
+const VALID_THEMES = new Set([
+  "breeze",
+  "emerald",
+  "sand",
+  "midnight",
+  "classic",
+]);
 const VALID_SECONDARY_LANGS = new Set(["local", "ar", "off"]);
 const IGNORED_SYSTEM_UIDS = new Set([
   "plugin::upload.file",
@@ -22,7 +31,12 @@ const IGNORED_SYSTEM_UIDS = new Set([
   "plugin::users-permissions.role",
 ]);
 const STRING_ATTR_TYPES = new Set(["string", "text", "email", "uid"]);
-const NUMBER_ATTR_TYPES = new Set(["integer", "biginteger", "float", "decimal"]);
+const NUMBER_ATTR_TYPES = new Set([
+  "integer",
+  "biginteger",
+  "float",
+  "decimal",
+]);
 
 function asArrayOr<T>(val: unknown, fallback?: T[]): T[] {
   if (Array.isArray(val)) return val as T[];
@@ -42,17 +56,22 @@ function buildDefaultSlotSettings(pluginConfig: BookingsPluginConfig) {
 }
 
 function buildDefaultSettings(strapi: Core.Strapi): BookingsPluginSettings {
-  const pluginConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ?? {}) as BookingsPluginConfig;
+  const pluginConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
+    {}) as BookingsPluginConfig;
 
   return {
     theme: pluginConfig.theme ?? "breeze",
     defaultLocale: pluginConfig.defaultLocale ?? "es",
-    secondaryCalendarLanguage: pluginConfig.secondaryCalendarLanguage ?? "local",
+    secondaryCalendarLanguage:
+      pluginConfig.secondaryCalendarLanguage ?? "local",
     ...buildDefaultSlotSettings(pluginConfig),
     defaultRequiresApproval: pluginConfig.defaultRequiresApproval ?? false,
     sendEmailNotifications: pluginConfig.sendEmailNotifications ?? true,
     secondaryCalendars: asArrayOr(pluginConfig.secondaryCalendars, []),
-    defaultSeasonalSchedules: asArrayOr(pluginConfig.defaultSeasonalSchedules, []),
+    defaultSeasonalSchedules: asArrayOr(
+      pluginConfig.defaultSeasonalSchedules,
+      []
+    ),
     holidays: asArrayOr(pluginConfig.holidays, []),
     sources: asArrayOr(pluginConfig.sources, []),
   };
@@ -87,9 +106,12 @@ function mergeSlotSettings(
       stored?.defaultBufferBeforeMinutes ?? defaults.defaultBufferBeforeMinutes,
     defaultBufferAfterMinutes:
       stored?.defaultBufferAfterMinutes ?? defaults.defaultBufferAfterMinutes,
-    defaultCapacityPerSlot: stored?.defaultCapacityPerSlot ?? defaults.defaultCapacityPerSlot,
-    defaultMinLeadTimeHours: stored?.defaultMinLeadTimeHours ?? defaults.defaultMinLeadTimeHours,
-    defaultMaxAdvanceDays: stored?.defaultMaxAdvanceDays ?? defaults.defaultMaxAdvanceDays,
+    defaultCapacityPerSlot:
+      stored?.defaultCapacityPerSlot ?? defaults.defaultCapacityPerSlot,
+    defaultMinLeadTimeHours:
+      stored?.defaultMinLeadTimeHours ?? defaults.defaultMinLeadTimeHours,
+    defaultMaxAdvanceDays:
+      stored?.defaultMaxAdvanceDays ?? defaults.defaultMaxAdvanceDays,
   };
 }
 
@@ -98,7 +120,9 @@ function resolveUpdatedAppearance(
   current: BookingsPluginSettings
 ) {
   const theme =
-    partial.theme && VALID_THEMES.has(partial.theme) ? partial.theme : (current.theme ?? "breeze");
+    partial.theme && VALID_THEMES.has(partial.theme)
+      ? partial.theme
+      : (current.theme ?? "breeze");
   const defaultLocale =
     typeof partial.defaultLocale === "string" && partial.defaultLocale.trim()
       ? partial.defaultLocale.trim()
@@ -119,15 +143,21 @@ function resolveUpdatedSlotNumbers(
     defaultTimezone: partial.defaultTimezone ?? current.defaultTimezone,
     defaultSlotDurationMinutes: Math.max(
       5,
-      Number(partial.defaultSlotDurationMinutes ?? current.defaultSlotDurationMinutes)
+      Number(
+        partial.defaultSlotDurationMinutes ?? current.defaultSlotDurationMinutes
+      )
     ),
     defaultBufferBeforeMinutes: Math.max(
       0,
-      Number(partial.defaultBufferBeforeMinutes ?? current.defaultBufferBeforeMinutes)
+      Number(
+        partial.defaultBufferBeforeMinutes ?? current.defaultBufferBeforeMinutes
+      )
     ),
     defaultBufferAfterMinutes: Math.max(
       0,
-      Number(partial.defaultBufferAfterMinutes ?? current.defaultBufferAfterMinutes)
+      Number(
+        partial.defaultBufferAfterMinutes ?? current.defaultBufferAfterMinutes
+      )
     ),
     defaultCapacityPerSlot: Math.max(
       1,
@@ -150,7 +180,9 @@ function isDiscoverableCollectionUid(uid: string, kind?: string): boolean {
   return !IGNORED_SYSTEM_UIDS.has(uid);
 }
 
-function classifySchemaAttributes(attributes: Record<string, { type?: string }>) {
+function classifySchemaAttributes(
+  attributes: Record<string, { type?: string }>
+) {
   const fields: DiscoveredCollectionField[] = [];
   const dateFields: string[] = [];
   const stringFields: string[] = [];
@@ -195,11 +227,18 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => ({
       theme: stored?.theme ?? defaults.theme ?? "breeze",
       defaultLocale: stored?.defaultLocale ?? defaults.defaultLocale ?? "es",
       secondaryCalendarLanguage:
-        stored?.secondaryCalendarLanguage ?? defaults.secondaryCalendarLanguage ?? "local",
+        stored?.secondaryCalendarLanguage ??
+        defaults.secondaryCalendarLanguage ??
+        "local",
       ...mergeSlotSettings(defaults, stored),
-      defaultRequiresApproval: stored?.defaultRequiresApproval ?? defaults.defaultRequiresApproval,
-      sendEmailNotifications: stored?.sendEmailNotifications ?? defaults.sendEmailNotifications,
-      secondaryCalendars: asArrayOr(stored?.secondaryCalendars, defaults.secondaryCalendars),
+      defaultRequiresApproval:
+        stored?.defaultRequiresApproval ?? defaults.defaultRequiresApproval,
+      sendEmailNotifications:
+        stored?.sendEmailNotifications ?? defaults.sendEmailNotifications,
+      secondaryCalendars: asArrayOr(
+        stored?.secondaryCalendars,
+        defaults.secondaryCalendars
+      ),
       defaultSeasonalSchedules: asArrayOr(
         stored?.defaultSeasonalSchedules,
         defaults.defaultSeasonalSchedules
@@ -209,7 +248,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => ({
     };
   },
 
-  async updateSettings(partial: Partial<BookingsPluginSettings>): Promise<BookingsPluginSettings> {
+  async updateSettings(
+    partial: Partial<BookingsPluginSettings>
+  ): Promise<BookingsPluginSettings> {
     const current = await this.getSettings();
     const updated: BookingsPluginSettings = {
       ...resolveUpdatedAppearance(partial, current),
@@ -222,7 +263,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): SettingsService => ({
         typeof partial.sendEmailNotifications === "boolean"
           ? partial.sendEmailNotifications
           : current.sendEmailNotifications,
-      secondaryCalendars: asArrayOr(partial.secondaryCalendars, current.secondaryCalendars),
+      secondaryCalendars: asArrayOr(
+        partial.secondaryCalendars,
+        current.secondaryCalendars
+      ),
       defaultSeasonalSchedules: asArrayOr(
         partial.defaultSeasonalSchedules,
         current.defaultSeasonalSchedules

@@ -1,6 +1,9 @@
 import type { Core } from "@strapi/strapi";
 
-import { generateBookingsCsv, generateBookingsICalFeed } from "../../../shared/icalAndCsv";
+import {
+  generateBookingsCsv,
+  generateBookingsICalFeed,
+} from "../../../shared/icalAndCsv";
 import { PLUGIN_ID } from "../../../shared/pluginId";
 import {
   doesBookingOverlapSlot,
@@ -19,7 +22,11 @@ import type {
   BookingsPluginSettings,
   BookingSourceMapping,
 } from "../../../shared/types";
-import type { AvailabilityService, ReservationService, SettingsService } from "../types";
+import type {
+  AvailabilityService,
+  ReservationService,
+  SettingsService,
+} from "../types";
 import {
   buildBookingCreatePayload,
   computeRescheduleWindow,
@@ -87,7 +94,8 @@ function validateResourceBlackoutAndLeadTime(
   }
   if (!options?.skipLeadTimeCheck && options?.referenceNow) {
     const minLeadMs =
-      options.referenceNow.getTime() + Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000;
+      options.referenceNow.getTime() +
+      Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000;
     if (startMs < minLeadMs) {
       throw new Error(
         `Bookings require at least ${resource.minLeadTimeHours} hours advance notice`
@@ -105,14 +113,20 @@ function verifySlotCapacityAndResolveHost(
   settings: BookingsPluginSettings,
   input: CreateReservationInput
 ): string | undefined {
-  const bufferBefore = resource?.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes ?? 0;
-  const bufferAfter = resource?.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes ?? 0;
+  const bufferBefore =
+    resource?.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes ?? 0;
+  const bufferAfter =
+    resource?.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes ?? 0;
   const overlapping = existing.filter((b) =>
     doesBookingOverlapSlot(b, startMs, endMs, bufferBefore, bufferAfter)
   );
 
-  const capacity = resource?.capacityPerSlot ?? settings.defaultCapacityPerSlot ?? 1;
-  const bookedCount = overlapping.reduce((sum, b) => sum + Math.max(1, b.partySize), 0);
+  const capacity =
+    resource?.capacityPerSlot ?? settings.defaultCapacityPerSlot ?? 1;
+  const bookedCount = overlapping.reduce(
+    (sum, b) => sum + Math.max(1, b.partySize),
+    0
+  );
 
   if (bookedCount + partySize > capacity) {
     throw new Error(
@@ -122,7 +136,11 @@ function verifySlotCapacityAndResolveHost(
 
   const explicitHost = trimOrUndefined(input.assignedHost);
   if (explicitHost || !resource) return explicitHost;
-  const candidates = selectAvailableHostsForSlot(resource, overlapping, input.preferredLanguage);
+  const candidates = selectAvailableHostsForSlot(
+    resource,
+    overlapping,
+    input.preferredLanguage
+  );
   return candidates[0]?.name;
 }
 
@@ -172,7 +190,10 @@ async function validateRescheduleResourceAvailability(
         resource.bufferAfterMinutes
       )
   );
-  const bookedCount = overlapping.reduce((sum, b) => sum + Math.max(1, b.partySize), 0);
+  const bookedCount = overlapping.reduce(
+    (sum, b) => sum + Math.max(1, b.partySize),
+    0
+  );
   if (bookedCount + partySize > resource.capacityPerSlot) {
     throw new Error("Insufficient capacity in the target slot");
   }
@@ -183,7 +204,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
     const availabilityService = strapi
       .plugin(PLUGIN_ID)
       .service("availability") as AvailabilityService;
-    const settingsService = strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
+    const settingsService = strapi
+      .plugin(PLUGIN_ID)
+      .service("settings") as SettingsService;
 
     const [resources, settings, rawRows] = await Promise.all([
       availabilityService.listResources(false),
@@ -196,8 +219,13 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
 
     const resourceMap = new Map(resources.map((res) => [res.documentId, res]));
     const rows = Array.isArray(rawRows) ? rawRows : [];
-    const allBookings = rows.map((row) => normalizeBookingRecord(row, resourceMap));
-    const extBookings = await loadExternalSourceBookings(strapi, settings.sources);
+    const allBookings = rows.map((row) =>
+      normalizeBookingRecord(row, resourceMap)
+    );
+    const extBookings = await loadExternalSourceBookings(
+      strapi,
+      settings.sources
+    );
     allBookings.push(...extBookings);
 
     return filterAndSortBookings(allBookings, resources, query);
@@ -207,8 +235,11 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
     if (!documentIdOrCode) return null;
     const all = await this.listBookings();
     return (
-      all.find((b) => b.documentId === documentIdOrCode || b.bookingCode === documentIdOrCode) ??
-      null
+      all.find(
+        (b) =>
+          b.documentId === documentIdOrCode ||
+          b.bookingCode === documentIdOrCode
+      ) ?? null
     );
   },
 
@@ -216,14 +247,20 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
     input: CreateReservationInput,
     options?: { skipLeadTimeCheck?: boolean; referenceNow?: Date }
   ): Promise<CreateReservationResult> {
-    const { customerName, customerEmail, startMs } = validateReservationCustomerAndStart(input);
+    const { customerName, customerEmail, startMs } =
+      validateReservationCustomerAndStart(input);
 
     const availabilityService = strapi
       .plugin(PLUGIN_ID)
       .service("availability") as AvailabilityService;
-    const settingsService = strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
+    const settingsService = strapi
+      .plugin(PLUGIN_ID)
+      .service("settings") as SettingsService;
     const settings = await settingsService.getSettings();
-    const resource = await resolveTargetBookingResource(availabilityService, input);
+    const resource = await resolveTargetBookingResource(
+      availabilityService,
+      input
+    );
 
     const { endMs, partySize } = computeReservationTimingAndParty(
       input,
@@ -327,7 +364,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
 
     if (
       !options?.isAdmin &&
-      !verifyCancelToken(input.cancelToken, String(targetRaw.cancelTokenHash ?? ""))
+      !verifyCancelToken(
+        input.cancelToken,
+        String(targetRaw.cancelTokenHash ?? "")
+      )
     ) {
       throw new Error("Invalid or missing cancelToken for rescheduling");
     }
@@ -344,7 +384,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
       ? resourceMap.get(currentBooking.resourceDocumentId)
       : undefined;
 
-    const partySize = Math.max(1, Number(input.partySize ?? currentBooking.partySize ?? 1));
+    const partySize = Math.max(
+      1,
+      Number(input.partySize ?? currentBooking.partySize ?? 1)
+    );
 
     await validateRescheduleResourceAvailability(
       this,
@@ -381,7 +424,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): ReservationService => ({
 
     if (
       !options?.isAdmin &&
-      !verifyCancelToken(input.cancelToken, String(targetRaw.cancelTokenHash ?? ""))
+      !verifyCancelToken(
+        input.cancelToken,
+        String(targetRaw.cancelTokenHash ?? "")
+      )
     ) {
       throw new Error("Invalid or missing cancelToken for cancellation");
     }

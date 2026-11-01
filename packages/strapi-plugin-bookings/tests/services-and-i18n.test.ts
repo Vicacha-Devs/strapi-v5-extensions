@@ -154,7 +154,13 @@ function createMockStrapi() {
           col.set(documentId, record);
           return record;
         },
-        async update({ documentId, data }: { documentId: string; data: Record<string, unknown> }) {
+        async update({
+          documentId,
+          data,
+        }: {
+          documentId: string;
+          data: Record<string, unknown>;
+        }) {
           const existing = col.get(documentId);
           if (!existing) {
             throw new Error(`Document ${documentId} not found`);
@@ -197,7 +203,9 @@ function createMockStrapi() {
 
   const servicesMap: Record<string, unknown> = {
     settings: serverPlugin.services.settings({ strapi: strapi as never }),
-    availability: serverPlugin.services.availability({ strapi: strapi as never }),
+    availability: serverPlugin.services.availability({
+      strapi: strapi as never,
+    }),
     reservation: serverPlugin.services.reservation({ strapi: strapi as never }),
   };
 
@@ -217,16 +225,20 @@ function createMockStrapi() {
 
 describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", () => {
   it("registers customFields, schemaExtensions, and companion source with @vicacha-devs/strapi-plugin-calendar", async () => {
-    const { strapi, registeredCustomFields, companionSources } = createMockStrapi();
+    const { strapi, registeredCustomFields, companionSources } =
+      createMockStrapi();
 
     serverPlugin.register({ strapi: strapi as never });
     await serverPlugin.bootstrap({ strapi: strapi as never });
 
     assert.equal(registeredCustomFields.length, 1);
     assert.equal(companionSources.length, 1);
-    const ct = (strapi.contentTypes as Record<string, { attributes: Record<string, unknown> }>)[
-      "plugin::bookings.booking"
-    ];
+    const ct = (
+      strapi.contentTypes as Record<
+        string,
+        { attributes: Record<string, unknown> }
+      >
+    )["plugin::bookings.booking"];
     assert.ok(ct.attributes.customDepartment);
   });
 
@@ -339,17 +351,22 @@ describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", 
         },
       ],
     });
-    ensureCollection("api::external-reservation.external-reservation").set("ext-1", {
-      documentId: "ext-1",
-      clientName: "External Partner",
-      clientEmail: "partner@example.com",
-      reservationDate: "2026-10-19",
-      slotWindow: "morning",
-      guests: 4,
-      status: "confirmed",
-    });
+    ensureCollection("api::external-reservation.external-reservation").set(
+      "ext-1",
+      {
+        documentId: "ext-1",
+        clientName: "External Partner",
+        clientEmail: "partner@example.com",
+        reservationDate: "2026-10-19",
+        slotWindow: "morning",
+        guests: 4,
+        status: "confirmed",
+      }
+    );
 
-    const calendarResult = await services.availability.getCalendarOccurrences({});
+    const calendarResult = await services.availability.getCalendarOccurrences(
+      {}
+    );
     assert.equal(calendarResult.bookings.length, 2);
     assert.equal(calendarResult.stats.totalGuests, 14);
 
@@ -382,8 +399,22 @@ describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", 
 
 describe("10-Locale Admin Translation Parity", () => {
   it("ensures all 10 locales contain identical keys and non-empty translations", () => {
-    const translationsDir = path.resolve(__dirname, "../admin/src/translations");
-    const locales = ["en", "es", "ar", "fr", "de", "pt", "tr", "id", "ur", "zh"];
+    const translationsDir = path.resolve(
+      __dirname,
+      "../admin/src/translations"
+    );
+    const locales = [
+      "en",
+      "es",
+      "ar",
+      "fr",
+      "de",
+      "pt",
+      "tr",
+      "id",
+      "ur",
+      "zh",
+    ];
     const enJson = JSON.parse(
       fs.readFileSync(path.join(translationsDir, "en.json"), "utf8")
     ) as Record<string, string>;
@@ -393,9 +424,16 @@ describe("10-Locale Admin Translation Parity", () => {
 
     for (const locale of locales) {
       const filePath = path.join(translationsDir, `${locale}.json`);
-      const data = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<string, string>;
+      const data = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<
+        string,
+        string
+      >;
       const actualKeys = Object.keys(data).sort();
-      assert.deepEqual(actualKeys, expectedKeys, `Locale ${locale} keys mismatch en.json`);
+      assert.deepEqual(
+        actualKeys,
+        expectedKeys,
+        `Locale ${locale} keys mismatch en.json`
+      );
       for (const [k, v] of Object.entries(data)) {
         assert.ok(
           typeof v === "string" && v.trim().length > 0,

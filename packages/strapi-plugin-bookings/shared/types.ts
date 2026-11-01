@@ -20,7 +20,12 @@ export type BookingResourceType =
   | "equipment"
   | "other";
 
-export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled" | "no_show";
+export type BookingStatus =
+  | "pending"
+  | "confirmed"
+  | "completed"
+  | "cancelled"
+  | "no_show";
 
 export interface DailyTimeWindow {
   /** Start time in HH:mm (24h), e.g. '09:00' */

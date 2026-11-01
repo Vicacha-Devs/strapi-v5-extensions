@@ -8,7 +8,11 @@ import type {
   BookingStatus,
   CreateReservationInput,
 } from "../../../shared/types";
-import type { AvailabilityService, ReservationService, SettingsService } from "../types";
+import type {
+  AvailabilityService,
+  ReservationService,
+  SettingsService,
+} from "../types";
 
 interface AdminContext {
   query: Record<string, string | undefined>;
@@ -23,7 +27,8 @@ interface AdminContext {
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getSettingsService = () => strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
+  const getSettingsService = () =>
+    strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
   const getAvailabilityService = () =>
     strapi.plugin(PLUGIN_ID).service("availability") as AvailabilityService;
   const getReservationService = () =>
@@ -36,7 +41,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async updateSettings(ctx: AdminContext) {
-      const payload = (ctx.request.body ?? {}) as Partial<BookingsPluginSettings>;
+      const payload = (ctx.request.body ??
+        {}) as Partial<BookingsPluginSettings>;
       const updated = await getSettingsService().updateSettings(payload);
       ctx.body = { data: updated };
     },
@@ -48,7 +54,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async listResources(ctx: AdminContext) {
       const activeOnly = ctx.query.activeOnly === "true";
-      const resources = await getAvailabilityService().listResources(activeOnly);
+      const resources =
+        await getAvailabilityService().listResources(activeOnly);
       ctx.body = { data: resources };
     },
 
@@ -95,13 +102,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async createBooking(ctx: AdminContext) {
       try {
-        const body = (ctx.request.body ?? {}) as unknown as CreateReservationInput;
+        const body = (ctx.request.body ??
+          {}) as unknown as CreateReservationInput;
         const result = await getReservationService().createReservation(body, {
           skipLeadTimeCheck: true,
         });
         ctx.body = { data: result };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : "Invalid booking payload");
+        ctx.badRequest(
+          err instanceof Error ? err.message : "Invalid booking payload"
+        );
       }
     },
 
@@ -121,13 +131,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           ctx.badRequest("status is required");
           return;
         }
-        const updated = await getReservationService().updateBookingStatus(documentId, body.status, {
-          assignedHost: body.assignedHost,
-          internalNotes: body.internalNotes,
-        });
+        const updated = await getReservationService().updateBookingStatus(
+          documentId,
+          body.status,
+          {
+            assignedHost: body.assignedHost,
+            internalNotes: body.internalNotes,
+          }
+        );
         ctx.body = { data: updated };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : "Status update failed");
+        ctx.badRequest(
+          err instanceof Error ? err.message : "Status update failed"
+        );
       }
     },
 
@@ -158,7 +174,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: updated };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : "Reschedule failed");
+        ctx.badRequest(
+          err instanceof Error ? err.message : "Reschedule failed"
+        );
       }
     },
 

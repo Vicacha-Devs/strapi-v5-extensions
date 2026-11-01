@@ -84,7 +84,9 @@ export interface DiscoveredCollectionSchema {
 
 export interface SettingsService {
   getSettings(): Promise<BookingsPluginSettings>;
-  updateSettings(partial: Partial<BookingsPluginSettings>): Promise<BookingsPluginSettings>;
+  updateSettings(
+    partial: Partial<BookingsPluginSettings>
+  ): Promise<BookingsPluginSettings>;
   discoverSchemas(): Promise<DiscoveredCollectionSchema[]>;
   registerSource(source: BookingSourceMapping): void;
 }
@@ -92,7 +94,9 @@ export interface SettingsService {
 export interface AvailabilityService {
   listResources(activeOnly?: boolean): Promise<BookingResource[]>;
   getResource(idOrSlug: string): Promise<BookingResource | null>;
-  saveResource(payload: Partial<BookingResource> & { name: string }): Promise<BookingResource>;
+  saveResource(
+    payload: Partial<BookingResource> & { name: string }
+  ): Promise<BookingResource>;
   getAvailableSlots(params: {
     resourceDocumentId?: string;
     resourceSlug?: string;
@@ -125,7 +129,10 @@ export interface ReservationService {
     input: RescheduleBookingInput,
     options?: { isAdmin?: boolean; referenceNow?: Date }
   ): Promise<BookingRecord>;
-  cancelBooking(input: CancelBookingInput, options?: { isAdmin?: boolean }): Promise<BookingRecord>;
+  cancelBooking(
+    input: CancelBookingInput,
+    options?: { isAdmin?: boolean }
+  ): Promise<BookingRecord>;
   exportCsv(query?: BookingFilterQuery): Promise<string>;
   exportICal(query?: BookingFilterQuery): Promise<string>;
 }

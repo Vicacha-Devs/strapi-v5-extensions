@@ -1,8 +1,12 @@
-export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
   en: {
     "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder":
       "Enter booking reference code...",
-    "content-manager.content-types.plugin::bookings.booking.title.placeholder": "Enter title...",
+    "content-manager.content-types.plugin::bookings.booking.title.placeholder":
+      "Enter title...",
     "content-manager.content-types.plugin::bookings.booking.resource.placeholder":
       "Enter booked resource / space...",
     "content-manager.content-types.plugin::bookings.booking.customerName.placeholder":
@@ -13,19 +17,24 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "+57 310 555 0199",
     "content-manager.content-types.plugin::bookings.booking.organization.placeholder":
       "Enter organization / institution...",
-    "content-manager.content-types.plugin::bookings.booking.startDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::bookings.booking.endDate.placeholder": "YYYY-MM-DD",
+    "content-manager.content-types.plugin::bookings.booking.startDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::bookings.booking.endDate.placeholder":
+      "YYYY-MM-DD",
     "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder":
       "e.g., 10:00 AM",
-    "content-manager.content-types.plugin::bookings.booking.timezone.placeholder": "America/Bogota",
+    "content-manager.content-types.plugin::bookings.booking.timezone.placeholder":
+      "America/Bogota",
     "content-manager.content-types.plugin::bookings.booking.partySize.placeholder":
       "Enter group / party size...",
-    "content-manager.content-types.plugin::bookings.booking.status.placeholder": "Enter status...",
+    "content-manager.content-types.plugin::bookings.booking.status.placeholder":
+      "Enter status...",
     "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder":
       "e.g., es, en, ar, tr",
     "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder":
       "Enter assigned host / guide...",
-    "content-manager.content-types.plugin::bookings.booking.notes.placeholder": "Enter notes...",
+    "content-manager.content-types.plugin::bookings.booking.notes.placeholder":
+      "Enter notes...",
     "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder":
       "Enter internal staff notes...",
     "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder":
@@ -40,14 +49,16 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "e.g., 15 Ramadan 1447 AH",
     "content-manager.content-types.plugin::bookings.booking.documentId.placeholder":
       "Enter document id...",
-    "content-manager.content-types.plugin::bookings.resource.name.placeholder": "Enter name...",
+    "content-manager.content-types.plugin::bookings.resource.name.placeholder":
+      "Enter name...",
     "content-manager.content-types.plugin::bookings.resource.slug.placeholder":
       "auto-generated-url-slug",
     "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder":
       "Enter resource type...",
     "content-manager.content-types.plugin::bookings.resource.description.placeholder":
       "Enter description...",
-    "content-manager.content-types.plugin::bookings.resource.color.placeholder": "#0F766E",
+    "content-manager.content-types.plugin::bookings.resource.color.placeholder":
+      "#0F766E",
     "content-manager.content-types.plugin::bookings.resource.timezone.placeholder":
       "America/Bogota",
     "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder":
@@ -98,7 +109,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
   es: {
     "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder":
       "Ingresa código de reserva...",
-    "content-manager.content-types.plugin::bookings.booking.title.placeholder": "Ingresa título...",
+    "content-manager.content-types.plugin::bookings.booking.title.placeholder":
+      "Ingresa título...",
     "content-manager.content-types.plugin::bookings.booking.resource.placeholder":
       "Ingresa recurso o espacio reservado...",
     "content-manager.content-types.plugin::bookings.booking.customerName.placeholder":
@@ -109,10 +121,14 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "+57 310 555 0199",
     "content-manager.content-types.plugin::bookings.booking.organization.placeholder":
       "Ingresa organización o institución...",
-    "content-manager.content-types.plugin::bookings.booking.startDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::bookings.booking.endDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder": "ej., 10:00 AM",
-    "content-manager.content-types.plugin::bookings.booking.timezone.placeholder": "America/Bogota",
+    "content-manager.content-types.plugin::bookings.booking.startDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::bookings.booking.endDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder":
+      "ej., 10:00 AM",
+    "content-manager.content-types.plugin::bookings.booking.timezone.placeholder":
+      "America/Bogota",
     "content-manager.content-types.plugin::bookings.booking.partySize.placeholder":
       "Ingresa número de personas (tamaño del grupo)...",
     "content-manager.content-types.plugin::bookings.booking.status.placeholder":
@@ -121,7 +137,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "ej., es, en, ar, tr",
     "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder":
       "Ingresa anfitrión o guía asignado...",
-    "content-manager.content-types.plugin::bookings.booking.notes.placeholder": "Ingresa notas...",
+    "content-manager.content-types.plugin::bookings.booking.notes.placeholder":
+      "Ingresa notas...",
     "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder":
       "Ingresa notas internas del personal...",
     "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder":
@@ -136,14 +153,16 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "ej., 15 Ramadán 1447 AH",
     "content-manager.content-types.plugin::bookings.booking.documentId.placeholder":
       "Ingresa id del documento...",
-    "content-manager.content-types.plugin::bookings.resource.name.placeholder": "Ingresa nombre...",
+    "content-manager.content-types.plugin::bookings.resource.name.placeholder":
+      "Ingresa nombre...",
     "content-manager.content-types.plugin::bookings.resource.slug.placeholder":
       "slug-generado-automaticamente",
     "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder":
       "Ingresa tipo de recurso...",
     "content-manager.content-types.plugin::bookings.resource.description.placeholder":
       "Ingresa descripción...",
-    "content-manager.content-types.plugin::bookings.resource.color.placeholder": "#0F766E",
+    "content-manager.content-types.plugin::bookings.resource.color.placeholder":
+      "#0F766E",
     "content-manager.content-types.plugin::bookings.resource.timezone.placeholder":
       "America/Bogota",
     "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder":
@@ -194,7 +213,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
   ar: {
     "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder":
       "أدخل رمز الحجز المرجعي...",
-    "content-manager.content-types.plugin::bookings.booking.title.placeholder": "أدخل العنوان...",
+    "content-manager.content-types.plugin::bookings.booking.title.placeholder":
+      "أدخل العنوان...",
     "content-manager.content-types.plugin::bookings.booking.resource.placeholder":
       "أدخل المورد أو القاعة المحجوزة...",
     "content-manager.content-types.plugin::bookings.booking.customerName.placeholder":
@@ -205,19 +225,24 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "+57 310 555 0199",
     "content-manager.content-types.plugin::bookings.booking.organization.placeholder":
       "أدخل المؤسسة أو الجهة...",
-    "content-manager.content-types.plugin::bookings.booking.startDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::bookings.booking.endDate.placeholder": "YYYY-MM-DD",
+    "content-manager.content-types.plugin::bookings.booking.startDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::bookings.booking.endDate.placeholder":
+      "YYYY-MM-DD",
     "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder":
       "مثال: 10:00 صباحاً",
-    "content-manager.content-types.plugin::bookings.booking.timezone.placeholder": "America/Bogota",
+    "content-manager.content-types.plugin::bookings.booking.timezone.placeholder":
+      "America/Bogota",
     "content-manager.content-types.plugin::bookings.booking.partySize.placeholder":
       "أدخل عدد الأفراد (حجم المجموعة)...",
-    "content-manager.content-types.plugin::bookings.booking.status.placeholder": "أدخل الحالة...",
+    "content-manager.content-types.plugin::bookings.booking.status.placeholder":
+      "أدخل الحالة...",
     "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder":
       "مثال: es, en, ar, tr",
     "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder":
       "أدخل المضيف أو المرشد المعين...",
-    "content-manager.content-types.plugin::bookings.booking.notes.placeholder": "أدخل ملاحظات...",
+    "content-manager.content-types.plugin::bookings.booking.notes.placeholder":
+      "أدخل ملاحظات...",
     "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder":
       "أدخل ملاحظات داخلية للموظفين...",
     "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder":
@@ -232,14 +257,16 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "مثال: ١٥ رمضان ١٤٤٧ هـ",
     "content-manager.content-types.plugin::bookings.booking.documentId.placeholder":
       "أدخل معرف المستند...",
-    "content-manager.content-types.plugin::bookings.resource.name.placeholder": "أدخل الاسم...",
+    "content-manager.content-types.plugin::bookings.resource.name.placeholder":
+      "أدخل الاسم...",
     "content-manager.content-types.plugin::bookings.resource.slug.placeholder":
       "معرف-الرابط-التلقائي",
     "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder":
       "أدخل نوع المورد...",
     "content-manager.content-types.plugin::bookings.resource.description.placeholder":
       "أدخل الوصف...",
-    "content-manager.content-types.plugin::bookings.resource.color.placeholder": "#0F766E",
+    "content-manager.content-types.plugin::bookings.resource.color.placeholder":
+      "#0F766E",
     "content-manager.content-types.plugin::bookings.resource.timezone.placeholder":
       "America/Bogota",
     "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder":
@@ -278,7 +305,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "أدخل السعر / الرسوم...",
     "content-manager.content-types.plugin::bookings.resource.currency.placeholder":
       "مثال: COP أو USD",
-    "content-manager.content-types.plugin::bookings.resource.isActive.placeholder": "أدخل نشط...",
+    "content-manager.content-types.plugin::bookings.resource.isActive.placeholder":
+      "أدخل نشط...",
     "content-manager.content-types.plugin::bookings.resource.metadata.placeholder":
       "أدخل بيانات وصفية إضافية (JSON)...",
     "content-manager.content-types.plugin::bookings.resource.bookings.placeholder":
@@ -289,7 +317,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
   tr: {
     "content-manager.content-types.plugin::bookings.booking.bookingCode.placeholder":
       "Rezervasyon Kodu girin...",
-    "content-manager.content-types.plugin::bookings.booking.title.placeholder": "Başlık girin...",
+    "content-manager.content-types.plugin::bookings.booking.title.placeholder":
+      "Başlık girin...",
     "content-manager.content-types.plugin::bookings.booking.resource.placeholder":
       "Rezerve Edilen Kaynak / Alan girin...",
     "content-manager.content-types.plugin::bookings.booking.customerName.placeholder":
@@ -300,18 +329,24 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "+57 310 555 0199",
     "content-manager.content-types.plugin::bookings.booking.organization.placeholder":
       "Kurum / Organizasyon girin...",
-    "content-manager.content-types.plugin::bookings.booking.startDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::bookings.booking.endDate.placeholder": "YYYY-MM-DD",
-    "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder": "örn., 10:00",
-    "content-manager.content-types.plugin::bookings.booking.timezone.placeholder": "America/Bogota",
+    "content-manager.content-types.plugin::bookings.booking.startDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::bookings.booking.endDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::bookings.booking.slotLabel.placeholder":
+      "örn., 10:00",
+    "content-manager.content-types.plugin::bookings.booking.timezone.placeholder":
+      "America/Bogota",
     "content-manager.content-types.plugin::bookings.booking.partySize.placeholder":
       "Kişi Sayısı (Grup Büyüklüğü) girin...",
-    "content-manager.content-types.plugin::bookings.booking.status.placeholder": "Durum girin...",
+    "content-manager.content-types.plugin::bookings.booking.status.placeholder":
+      "Durum girin...",
     "content-manager.content-types.plugin::bookings.booking.preferredLanguage.placeholder":
       "örn., es, en, ar, tr",
     "content-manager.content-types.plugin::bookings.booking.assignedHost.placeholder":
       "Atanan Rehber / Görevli girin...",
-    "content-manager.content-types.plugin::bookings.booking.notes.placeholder": "Notlar girin...",
+    "content-manager.content-types.plugin::bookings.booking.notes.placeholder":
+      "Notlar girin...",
     "content-manager.content-types.plugin::bookings.booking.internalNotes.placeholder":
       "Dahili Personel Notları girin...",
     "content-manager.content-types.plugin::bookings.booking.cancelTokenHash.placeholder":
@@ -326,14 +361,16 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "örn., 15 Ramazan 1447 H",
     "content-manager.content-types.plugin::bookings.booking.documentId.placeholder":
       "Belge Kimliği (ID) girin...",
-    "content-manager.content-types.plugin::bookings.resource.name.placeholder": "Ad girin...",
+    "content-manager.content-types.plugin::bookings.resource.name.placeholder":
+      "Ad girin...",
     "content-manager.content-types.plugin::bookings.resource.slug.placeholder":
       "otomatik-url-kisa-adi",
     "content-manager.content-types.plugin::bookings.resource.resourceType.placeholder":
       "Kaynak Türü girin...",
     "content-manager.content-types.plugin::bookings.resource.description.placeholder":
       "Açıklama girin...",
-    "content-manager.content-types.plugin::bookings.resource.color.placeholder": "#0F766E",
+    "content-manager.content-types.plugin::bookings.resource.color.placeholder":
+      "#0F766E",
     "content-manager.content-types.plugin::bookings.resource.timezone.placeholder":
       "America/Bogota",
     "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes.placeholder":

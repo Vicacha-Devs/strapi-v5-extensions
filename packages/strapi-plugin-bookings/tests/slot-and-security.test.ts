@@ -40,7 +40,9 @@ const baseResource: BookingResource = {
       "1": [{ start: "09:00", end: "12:00" }],
     },
   },
-  blackoutDates: [{ start: "2026-10-26", end: "2026-10-26", reason: "Maintenance" }],
+  blackoutDates: [
+    { start: "2026-10-26", end: "2026-10-26", reason: "Maintenance" },
+  ],
   supportedLanguages: ["en", "es", "ar"],
   assignedHosts: [
     { id: "host-1", name: "Alice", languages: ["en", "es"] },
@@ -160,8 +162,22 @@ describe("Slot Availability Engine (Interval, Window, Buffers, Blackouts & Hosts
           schedule: {
             mode: "window",
             days: {
-              "1": [{ start: "10:00", end: "12:00", label: "holiday-morning", capacity: 25 }],
-              "5": [{ start: "10:00", end: "12:00", label: "holiday-friday", capacity: 25 }],
+              "1": [
+                {
+                  start: "10:00",
+                  end: "12:00",
+                  label: "holiday-morning",
+                  capacity: 25,
+                },
+              ],
+              "5": [
+                {
+                  start: "10:00",
+                  end: "12:00",
+                  label: "holiday-friday",
+                  capacity: 25,
+                },
+              ],
             },
           },
         },
@@ -180,7 +196,9 @@ describe("Slot Availability Engine (Interval, Window, Buffers, Blackouts & Hosts
           date: "2026-12-28",
           isClosed: false,
           mode: "window",
-          windows: [{ start: "11:00", end: "12:00", label: "special-1h", capacity: 15 }],
+          windows: [
+            { start: "11:00", end: "12:00", label: "special-1h", capacity: 15 },
+          ],
         },
       ],
     };
@@ -242,7 +260,10 @@ describe("Security Primitives: Cancel Token Hashing, CSV Injection & iCal (.ics)
   });
 
   it("neutralizes CSV formula injection payloads and builds valid RFC 5545 iCal feed", () => {
-    assert.equal(sanitizeCsvCell("=cmd|'/C calc'!A0"), "\"'=cmd|'/C calc'!A0\"");
+    assert.equal(
+      sanitizeCsvCell("=cmd|'/C calc'!A0"),
+      "\"'=cmd|'/C calc'!A0\""
+    );
     assert.equal(sanitizeCsvCell("+SUM(A1:A2)"), '"\'+SUM(A1:A2)"');
     assert.equal(sanitizeCsvCell("@IMPORTXML()"), '"\'@IMPORTXML()"');
 

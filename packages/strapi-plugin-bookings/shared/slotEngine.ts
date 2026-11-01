@@ -47,12 +47,17 @@ export function extractMonthDay(dateOrMmDd: string): string {
   return "";
 }
 
-function matchesYearlessRange(dateStr: string, startStr: string, endStr: string): boolean {
+function matchesYearlessRange(
+  dateStr: string,
+  startStr: string,
+  endStr: string
+): boolean {
   const targetMmDd = extractMonthDay(dateStr);
   const startMmDd = extractMonthDay(startStr);
   const endMmDd = extractMonthDay(endStr);
   if (!targetMmDd || !startMmDd || !endMmDd) return false;
-  if (startMmDd <= endMmDd) return targetMmDd >= startMmDd && targetMmDd <= endMmDd;
+  if (startMmDd <= endMmDd)
+    return targetMmDd >= startMmDd && targetMmDd <= endMmDd;
   return targetMmDd >= startMmDd || targetMmDd <= endMmDd;
 }
 
@@ -75,13 +80,20 @@ export function matchesSingleDateOrYearless(
   ruleDateStr: string,
   yearless = false
 ): boolean {
-  return matchesDateOrYearlessRange(dateStr, ruleDateStr, ruleDateStr, yearless);
+  return matchesDateOrYearlessRange(
+    dateStr,
+    ruleDateStr,
+    ruleDateStr,
+    yearless
+  );
 }
 
 function parsePeriodTimestamp(raw: string, endOfDay: boolean): number {
   const trimmed = raw.trim();
   if (trimmed.length === 10) {
-    return Date.parse(`${trimmed}T${endOfDay ? "23:59:59.999Z" : "00:00:00.000Z"}`);
+    return Date.parse(
+      `${trimmed}T${endOfDay ? "23:59:59.999Z" : "00:00:00.000Z"}`
+    );
   }
   return Date.parse(trimmed);
 }
@@ -94,7 +106,12 @@ function doesPeriodBlackOutSlot(
 ): boolean {
   if (!period.start || !period.end) return false;
   if (period.yearless)
-    return matchesDateOrYearlessRange(slotDateStr, period.start, period.end, true);
+    return matchesDateOrYearlessRange(
+      slotDateStr,
+      period.start,
+      period.end,
+      true
+    );
   const startMs = parsePeriodTimestamp(period.start, false);
   const endMs = parsePeriodTimestamp(period.end, true);
   if (Number.isNaN(startMs) || Number.isNaN(endMs)) return false;
@@ -130,7 +147,10 @@ function findMatchingHoliday(
   ];
   let matched: HolidayScheduleRule | undefined;
   for (const rule of combined) {
-    if (rule?.date && matchesSingleDateOrYearless(dateStr, rule.date, Boolean(rule.yearless))) {
+    if (
+      rule?.date &&
+      matchesSingleDateOrYearless(dateStr, rule.date, Boolean(rule.yearless))
+    ) {
       matched = rule;
     }
   }
@@ -142,7 +162,8 @@ function buildHolidayDailySchedule(
   baseMode: "interval" | "window",
   baseDurationMins: number
 ): ResolvedDailySchedule {
-  const hasCustomWindows = Array.isArray(holiday.windows) && holiday.windows.length > 0;
+  const hasCustomWindows =
+    Array.isArray(holiday.windows) && holiday.windows.length > 0;
   const isClosed = (holiday.isClosed ?? !hasCustomWindows) || !hasCustomWindows;
   return {
     mode: isClosed ? baseMode : (holiday.mode ?? baseMode),
@@ -164,7 +185,12 @@ function findWinningSeasonalSchedule(
   const matching = combined.filter(
     (s) =>
       s?.schedule &&
-      matchesDateOrYearlessRange(dateStr, s.startDate, s.endDate, Boolean(s.yearless))
+      matchesDateOrYearlessRange(
+        dateStr,
+        s.startDate,
+        s.endDate,
+        Boolean(s.yearless)
+      )
   );
   if (matching.length === 0) return undefined;
   matching.sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
@@ -183,9 +209,17 @@ export function resolveDailyScheduleForDate(
     : DEFAULT_WEEKLY_SCHEDULE;
   const baseMode = baseSchedule.mode ?? "interval";
   const baseDurationMins = Math.max(5, resource.slotDurationMinutes || 60);
-  const matchedHoliday = findMatchingHoliday(dateStr, globalHolidays, resource.holidayRules);
+  const matchedHoliday = findMatchingHoliday(
+    dateStr,
+    globalHolidays,
+    resource.holidayRules
+  );
   if (matchedHoliday) {
-    return buildHolidayDailySchedule(matchedHoliday, baseMode, baseDurationMins);
+    return buildHolidayDailySchedule(
+      matchedHoliday,
+      baseMode,
+      baseDurationMins
+    );
   }
   const winningSeasonal = findWinningSeasonalSchedule(
     dateStr,
@@ -195,7 +229,10 @@ export function resolveDailyScheduleForDate(
   if (winningSeasonal) {
     return {
       mode: winningSeasonal.schedule.mode ?? baseMode,
-      durationMins: Math.max(5, winningSeasonal.slotDurationMinutes ?? baseDurationMins),
+      durationMins: Math.max(
+        5,
+        winningSeasonal.slotDurationMinutes ?? baseDurationMins
+      ),
       windows: winningSeasonal.schedule.days?.[dayKey] ?? [],
       scheduleLabel: winningSeasonal.label,
     };
@@ -207,7 +244,9 @@ export function resolveDailyScheduleForDate(
   };
 }
 
-export function isActiveBookingStatus(status: BookingRecord["status"]): boolean {
+export function isActiveBookingStatus(
+  status: BookingRecord["status"]
+): boolean {
   return status === "pending" || status === "confirmed";
 }
 
@@ -232,7 +271,9 @@ export function selectAvailableHostsForSlot(
   overlappingBookings: BookingRecord[],
   preferredLanguage?: string
 ): AssignableHost[] {
-  const hosts = Array.isArray(resource.assignedHosts) ? resource.assignedHosts : [];
+  const hosts = Array.isArray(resource.assignedHosts)
+    ? resource.assignedHosts
+    : [];
   if (hosts.length === 0) return [];
   const busyHostNamesOrIds = new Set(
     overlappingBookings
@@ -304,11 +345,18 @@ function buildWindowCandidateBlocks(
     cursorMins += stepMins
   ) {
     const blockEndMins = cursorMins + durationMins;
-    const isExactMatch = Boolean(win.label && winStartMins + durationMins === winEndMins);
+    const isExactMatch = Boolean(
+      win.label && winStartMins + durationMins === winEndMins
+    );
     const label = isExactMatch
       ? String(win.label)
       : `${formatTimeMinutes(cursorMins)}-${formatTimeMinutes(blockEndMins)}`;
-    blocks.push({ startMins: cursorMins, endMins: blockEndMins, label, capacity: cap });
+    blocks.push({
+      startMins: cursorMins,
+      endMins: blockEndMins,
+      label,
+      capacity: cap,
+    });
   }
   return blocks;
 }
@@ -337,7 +385,12 @@ function evaluateCandidateBlockToSlot(
   params: ComputeAvailableSlotsParams,
   resourceBookings: BookingRecord[]
 ): AvailableSlot {
-  const { resource, partySize = 1, preferredLanguage, secondaryCalendars = [] } = params;
+  const {
+    resource,
+    partySize = 1,
+    preferredLanguage,
+    secondaryCalendars = [],
+  } = params;
   const bufferBefore = Math.max(0, resource.bufferBeforeMinutes || 0);
   const bufferAfter = Math.max(0, resource.bufferAfterMinutes || 0);
   const overlapping = resourceBookings.filter((b) =>
@@ -364,8 +417,13 @@ function evaluateCandidateBlockToSlot(
     capacity,
     bookedCount,
     remainingCapacity,
-    isAvailable: remainingCapacity >= Math.max(1, partySize) && partySize <= maxParty,
-    availableHosts: selectAvailableHostsForSlot(resource, overlapping, preferredLanguage),
+    isAvailable:
+      remainingCapacity >= Math.max(1, partySize) && partySize <= maxParty,
+    availableHosts: selectAvailableHostsForSlot(
+      resource,
+      overlapping,
+      preferredLanguage
+    ),
     secondaryDates:
       secondaryCalendars.length > 0
         ? formatSecondaryCalendars(new Date(slotStartMs), secondaryCalendars)
@@ -379,13 +437,18 @@ function resolveLeadAndAdvanceBounds(
 ): { minAllowedMs: number | null; maxAllowedMs: number | null } {
   if (!referenceNow) return { minAllowedMs: null, maxAllowedMs: null };
   const nowMs = referenceNow.getTime();
-  const minAllowedMs = nowMs + Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000;
+  const minAllowedMs =
+    nowMs + Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000;
   const maxAllowedMs =
-    resource.maxAdvanceDays > 0 ? nowMs + resource.maxAdvanceDays * 86_400_000 : null;
+    resource.maxAdvanceDays > 0
+      ? nowMs + resource.maxAdvanceDays * 86_400_000
+      : null;
   return { minAllowedMs, maxAllowedMs };
 }
 
-export function computeAvailableSlots(params: ComputeAvailableSlotsParams): AvailableSlot[] {
+export function computeAvailableSlots(
+  params: ComputeAvailableSlotsParams
+): AvailableSlot[] {
   const {
     resource,
     from,
@@ -414,7 +477,10 @@ export function computeAvailableSlots(params: ComputeAvailableSlotsParams): Avai
       (!b.resourceDocumentId || b.resourceDocumentId === resource.documentId) &&
       isActiveBookingStatus(b.status)
   );
-  const { minAllowedMs, maxAllowedMs } = resolveLeadAndAdvanceBounds(resource, referenceNow);
+  const { minAllowedMs, maxAllowedMs } = resolveLeadAndAdvanceBounds(
+    resource,
+    referenceNow
+  );
   const blackoutDates = resource.blackoutDates ?? [];
   const slots: AvailableSlot[] = [];
   const startDayUtc = new Date(rangeStartMs);
@@ -428,13 +494,14 @@ export function computeAvailableSlots(params: ComputeAvailableSlotsParams): Avai
     const dayDate = new Date(dayCursorMs);
     const dayKey = String(dayDate.getUTCDay()) as DayOfWeekKey;
     const dateStr = dayDate.toISOString().slice(0, 10);
-    const { mode, durationMins, windows, scheduleLabel } = resolveDailyScheduleForDate(
-      dateStr,
-      dayKey,
-      resource,
-      globalSeasonalSchedules,
-      globalHolidays
-    );
+    const { mode, durationMins, windows, scheduleLabel } =
+      resolveDailyScheduleForDate(
+        dateStr,
+        dayKey,
+        resource,
+        globalSeasonalSchedules,
+        globalHolidays
+      );
     const dayBlocks = windows.flatMap((win) =>
       buildWindowCandidateBlocks(
         win,

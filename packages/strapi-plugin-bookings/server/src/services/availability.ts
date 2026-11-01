@@ -3,7 +3,10 @@ import type { ExpandedCalendarOccurrence as CalendarOccurrence } from "@vicacha-
 
 import { formatSecondaryCalendars } from "../../../shared/calendarSystems";
 import { PLUGIN_ID } from "../../../shared/pluginId";
-import { computeAvailableSlots, DEFAULT_WEEKLY_SCHEDULE } from "../../../shared/slotEngine";
+import {
+  computeAvailableSlots,
+  DEFAULT_WEEKLY_SCHEDULE,
+} from "../../../shared/slotEngine";
 import type {
   AssignableHost,
   AvailableSlot,
@@ -19,7 +22,11 @@ import type {
   WeeklyScheduleConfig,
   BookingsPluginSettings,
 } from "../../../shared/types";
-import type { AvailabilityService, ReservationService, SettingsService } from "../types";
+import type {
+  AvailabilityService,
+  ReservationService,
+  SettingsService,
+} from "../types";
 
 const RESOURCE_UID = "plugin::bookings.resource";
 
@@ -52,7 +59,11 @@ function clampNumber(val: unknown, fallback: number, min: number): number {
 }
 
 function resolveWeeklySchedule(val: unknown): WeeklyScheduleConfig {
-  if (val && typeof val === "object" && "days" in (val as Record<string, unknown>)) {
+  if (
+    val &&
+    typeof val === "object" &&
+    "days" in (val as Record<string, unknown>)
+  ) {
     return val as WeeklyScheduleConfig;
   }
   return DEFAULT_WEEKLY_SCHEDULE;
@@ -72,7 +83,9 @@ function normalizeResourceLimits(raw: Record<string, unknown>) {
 }
 
 function normalizeResourceDetails(raw: Record<string, unknown>) {
-  const supportedLanguages = asArray<unknown>(raw.supportedLanguages).map((l) => String(l));
+  const supportedLanguages = asArray<unknown>(raw.supportedLanguages).map((l) =>
+    String(l)
+  );
   const metadata =
     raw.metadata && typeof raw.metadata === "object"
       ? (raw.metadata as Record<string, unknown>)
@@ -90,7 +103,9 @@ function normalizeResourceDetails(raw: Record<string, unknown>) {
   };
 }
 
-export function normalizeResourceRecord(raw: Record<string, unknown>): BookingResource {
+export function normalizeResourceRecord(
+  raw: Record<string, unknown>
+): BookingResource {
   const name = String(raw.name ?? "Unnamed Resource");
   return {
     documentId: String(raw.documentId ?? raw.id ?? ""),
@@ -114,14 +129,19 @@ function buildResourceScheduleData(
 ): Record<string, unknown> {
   return {
     timezone: payload.timezone ?? settings.defaultTimezone,
-    slotDurationMinutes: payload.slotDurationMinutes ?? settings.defaultSlotDurationMinutes,
-    bufferBeforeMinutes: payload.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes,
-    bufferAfterMinutes: payload.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes,
+    slotDurationMinutes:
+      payload.slotDurationMinutes ?? settings.defaultSlotDurationMinutes,
+    bufferBeforeMinutes:
+      payload.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes,
+    bufferAfterMinutes:
+      payload.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes,
     capacityPerSlot: payload.capacityPerSlot ?? settings.defaultCapacityPerSlot,
     maxPartySize: payload.maxPartySize ?? 50,
-    minLeadTimeHours: payload.minLeadTimeHours ?? settings.defaultMinLeadTimeHours,
+    minLeadTimeHours:
+      payload.minLeadTimeHours ?? settings.defaultMinLeadTimeHours,
     maxAdvanceDays: payload.maxAdvanceDays ?? settings.defaultMaxAdvanceDays,
-    requiresApproval: payload.requiresApproval ?? settings.defaultRequiresApproval,
+    requiresApproval:
+      payload.requiresApproval ?? settings.defaultRequiresApproval,
   };
 }
 
@@ -141,7 +161,9 @@ function buildResourceMetaData(
   };
 }
 
-function buildResourceExtrasData(payload: Partial<BookingResource>): Record<string, unknown> {
+function buildResourceExtrasData(
+  payload: Partial<BookingResource>
+): Record<string, unknown> {
   return {
     recurrenceRule: payload.recurrenceRule ?? undefined,
     supportedLanguages: payload.supportedLanguages ?? [],
@@ -160,8 +182,12 @@ function resolveOccurrenceTitle(booking: BookingRecord): string {
   return `${booking.customerName}${suffix}`;
 }
 
-function resolveOccurrenceStatus(status: BookingStatus): "cancelled" | "scheduled" {
-  return status === "cancelled" || status === "no_show" ? "cancelled" : "scheduled";
+function resolveOccurrenceStatus(
+  status: BookingStatus
+): "cancelled" | "scheduled" {
+  return status === "cancelled" || status === "no_show"
+    ? "cancelled"
+    : "scheduled";
 }
 
 function mapBookingToOccurrence(
@@ -170,7 +196,10 @@ function mapBookingToOccurrence(
 ): CalendarOccurrence {
   const secondaryDates =
     settings.secondaryCalendars.length > 0
-      ? formatSecondaryCalendars(new Date(booking.startDate), settings.secondaryCalendars)
+      ? formatSecondaryCalendars(
+          new Date(booking.startDate),
+          settings.secondaryCalendars
+        )
       : undefined;
   const uid = booking.sourceCollection || "plugin::bookings.booking";
   const datePart = booking.startDate.slice(0, 10);
@@ -190,7 +219,9 @@ function mapBookingToOccurrence(
     color: STATUS_COLORS[booking.status] || booking.resourceColor || "#0d9488",
     category: booking.status,
     status: resolveOccurrenceStatus(booking.status),
-    location: booking.assignedHost ? `Host: ${booking.assignedHost}` : booking.organization,
+    location: booking.assignedHost
+      ? `Host: ${booking.assignedHost}`
+      : booking.organization,
     summary: booking.notes,
     isRecurring: false,
     calendarLinks: {
@@ -231,14 +262,18 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
   async getResource(idOrSlug: string): Promise<BookingResource | null> {
     if (!idOrSlug) return null;
     const all = await this.listResources(false);
-    const match = all.find((r) => r.documentId === idOrSlug || r.slug === idOrSlug);
+    const match = all.find(
+      (r) => r.documentId === idOrSlug || r.slug === idOrSlug
+    );
     return match ?? null;
   },
 
   async saveResource(
     payload: Partial<BookingResource> & { name: string }
   ): Promise<BookingResource> {
-    const settingsService = strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
+    const settingsService = strapi
+      .plugin(PLUGIN_ID)
+      .service("settings") as SettingsService;
     const settings = await settingsService.getSettings();
 
     const data: Record<string, unknown> = {
@@ -272,7 +307,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
       referenceNow,
     } = params;
 
-    const settingsService = strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
+    const settingsService = strapi
+      .plugin(PLUGIN_ID)
+      .service("settings") as SettingsService;
     const reservationService = strapi
       .plugin(PLUGIN_ID)
       .service("reservation") as ReservationService;
@@ -281,7 +318,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
     let targetResources: BookingResource[] = [];
 
     if (resourceDocumentId || resourceSlug) {
-      const single = await this.getResource((resourceDocumentId || resourceSlug) as string);
+      const single = await this.getResource(
+        (resourceDocumentId || resourceSlug) as string
+      );
       if (single && single.isActive) {
         targetResources = [single];
       }
@@ -319,7 +358,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
   },
 
   async getCalendarOccurrences(query: BookingFilterQuery) {
-    const settingsService = strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
+    const settingsService = strapi
+      .plugin(PLUGIN_ID)
+      .service("settings") as SettingsService;
     const reservationService = strapi
       .plugin(PLUGIN_ID)
       .service("reservation") as ReservationService;
@@ -336,11 +377,14 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
 
     const stats: BookingStats = {
       totalBookings: bookings.length,
-      confirmedBookings: bookings.filter((b) => b.status === "confirmed").length,
-      pendingBookings: bookings.filter((b) => b.status === "pending").length,
-      cancelledBookings: bookings.filter((b) => b.status === "cancelled" || b.status === "no_show")
+      confirmedBookings: bookings.filter((b) => b.status === "confirmed")
         .length,
-      completedBookings: bookings.filter((b) => b.status === "completed").length,
+      pendingBookings: bookings.filter((b) => b.status === "pending").length,
+      cancelledBookings: bookings.filter(
+        (b) => b.status === "cancelled" || b.status === "no_show"
+      ).length,
+      completedBookings: bookings.filter((b) => b.status === "completed")
+        .length,
       totalGuests: bookings
         .filter((b) => b.status !== "cancelled" && b.status !== "no_show")
         .reduce((sum, b) => sum + Math.max(1, b.partySize), 0),
