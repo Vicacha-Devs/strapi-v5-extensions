@@ -179,10 +179,9 @@ export function getDocumentsClient(
   strapi: Core.Strapi,
   uid: string
 ): StrapiDocumentServiceClient {
-  const docsFn = strapi.documents as unknown as (
-    targetUid: string
-  ) => StrapiDocumentServiceClient;
-  return docsFn(uid);
+  return strapi.documents(
+    uid as never
+  ) as unknown as StrapiDocumentServiceClient;
 }
 
 export function getSettingsService(strapi: Core.Strapi): EventsSettingsService {

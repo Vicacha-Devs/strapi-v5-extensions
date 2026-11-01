@@ -79,31 +79,18 @@ function createMockStrapi() {
       },
       findMany: async ({ filters }: { filters?: Record<string, any> } = {}) => {
         let items = [...(db[uid] ?? [])];
-        if (filters?.documentId?.$eq) {
-          items = items.filter((d) => d.documentId === filters.documentId.$eq);
-        }
-        if (filters?.eventDocumentId?.$eq) {
-          items = items.filter(
-            (d) => d.eventDocumentId === filters.eventDocumentId.$eq
-          );
-        }
-        if (filters?.occurrenceDate?.$eq) {
-          items = items.filter(
-            (d) => d.occurrenceDate === filters.occurrenceDate.$eq
-          );
-        }
-        if (filters?.attendeeEmail?.$eq) {
-          items = items.filter(
-            (d) => d.attendeeEmail === filters.attendeeEmail.$eq
-          );
-        }
-        if (filters?.checkInToken?.$eq) {
-          items = items.filter(
-            (d) => d.checkInToken === filters.checkInToken.$eq
-          );
-        }
-        if (filters?.status?.$eq) {
-          items = items.filter((d) => d.status === filters.status.$eq);
+        const eqKeys = [
+          "documentId",
+          "eventDocumentId",
+          "occurrenceDate",
+          "attendeeEmail",
+          "checkInToken",
+          "status",
+        ];
+        for (const k of eqKeys) {
+          if (filters?.[k]?.$eq) {
+            items = items.filter((d) => d[k] === filters[k].$eq);
+          }
         }
         if (filters?.status?.$in) {
           items = items.filter((d) => filters.status.$in.includes(d.status));
