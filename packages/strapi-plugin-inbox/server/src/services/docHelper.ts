@@ -31,8 +31,5 @@ export function getDocuments(
   strapi: Core.Strapi,
   uid: string
 ): DocumentServiceLike {
-  const docsFn = strapi.documents as unknown as (
-    targetUid: string
-  ) => DocumentServiceLike;
-  return docsFn(uid);
+  return strapi.documents(uid as never) as unknown as DocumentServiceLike;
 }
