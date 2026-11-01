@@ -11,7 +11,10 @@ import icalFactory from "../server/src/services/ical";
 import occurrenceFactory from "../server/src/services/occurrence";
 import rsvpFactory from "../server/src/services/rsvp";
 import settingsFactory from "../server/src/services/settings";
-import { EVENT_CONTENT_TYPE_UID, REGISTRATION_CONTENT_TYPE_UID } from "../shared/pluginId";
+import {
+  EVENT_CONTENT_TYPE_UID,
+  REGISTRATION_CONTENT_TYPE_UID,
+} from "../shared/pluginId";
 
 const currentTestDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -80,16 +83,24 @@ function createMockStrapi() {
           items = items.filter((d) => d.documentId === filters.documentId.$eq);
         }
         if (filters?.eventDocumentId?.$eq) {
-          items = items.filter((d) => d.eventDocumentId === filters.eventDocumentId.$eq);
+          items = items.filter(
+            (d) => d.eventDocumentId === filters.eventDocumentId.$eq
+          );
         }
         if (filters?.occurrenceDate?.$eq) {
-          items = items.filter((d) => d.occurrenceDate === filters.occurrenceDate.$eq);
+          items = items.filter(
+            (d) => d.occurrenceDate === filters.occurrenceDate.$eq
+          );
         }
         if (filters?.attendeeEmail?.$eq) {
-          items = items.filter((d) => d.attendeeEmail === filters.attendeeEmail.$eq);
+          items = items.filter(
+            (d) => d.attendeeEmail === filters.attendeeEmail.$eq
+          );
         }
         if (filters?.checkInToken?.$eq) {
-          items = items.filter((d) => d.checkInToken === filters.checkInToken.$eq);
+          items = items.filter(
+            (d) => d.checkInToken === filters.checkInToken.$eq
+          );
         }
         if (filters?.status?.$eq) {
           items = items.filter((d) => d.status === filters.status.$eq);
@@ -109,7 +120,13 @@ function createMockStrapi() {
         db[uid].push(record);
         return record;
       },
-      update: async ({ documentId, data }: { documentId: string; data: Record<string, any> }) => {
+      update: async ({
+        documentId,
+        data,
+      }: {
+        documentId: string;
+        data: Record<string, any>;
+      }) => {
         const list = db[uid] ?? [];
         const idx = list.findIndex((d) => d.documentId === documentId);
         if (idx < 0) throw new Error("Not found");
@@ -191,7 +208,9 @@ describe("RSVP Capacity, Waitlist Auto-Promotion & Multi-Source Calendar Service
     expect(reg2.status).toBe("waitlisted");
 
     // 3. Cancel first attendee by token -> Carlos (2 seats) fits into the 3 available seats -> auto-promoted!
-    const cancelResult = await services.rsvp.cancelByToken(reg1.cancellationToken);
+    const cancelResult = await services.rsvp.cancelByToken(
+      reg1.cancellationToken
+    );
     expect(cancelResult.cancelled.status).toBe("cancelled");
     expect(cancelResult.promotedCount).toBe(1);
 
@@ -205,7 +224,9 @@ describe("RSVP Capacity, Waitlist Auto-Promotion & Multi-Source Calendar Service
     expect(statsAfter.remainingSeats).toBe(1);
 
     // 4. Check in Carlos
-    const checkedIn = await services.rsvp.checkInAttendee({ documentId: reg2.documentId });
+    const checkedIn = await services.rsvp.checkInAttendee({
+      documentId: reg2.documentId,
+    });
     expect(checkedIn.status).toBe("checked_in");
     expect(checkedIn.checkedInAt).toBeTruthy();
   });
@@ -392,17 +413,26 @@ describe("RSVP Capacity, Waitlist Auto-Promotion & Multi-Source Calendar Service
     };
 
     register({ strapi });
-    expect(strapi.contentTypes[EVENT_CONTENT_TYPE_UID].attributes.hijriDate).toBeTruthy();
-    expect(strapi.contentTypes[EVENT_CONTENT_TYPE_UID].attributes.hijriDate.type).toBe("string");
+    expect(
+      strapi.contentTypes[EVENT_CONTENT_TYPE_UID].attributes.hijriDate
+    ).toBeTruthy();
+    expect(
+      strapi.contentTypes[EVENT_CONTENT_TYPE_UID].attributes.hijriDate.type
+    ).toBe("string");
 
     // 2. Register a custom programmatic calendar formatter ("custom-fiscal")
-    services.occurrence.registerCalendarFormatter("custom-fiscal", (date: Date) => {
-      const quarter = Math.floor(date.getUTCMonth() / 3) + 1;
-      return `FY${date.getUTCFullYear()}-Q${quarter}`;
-    });
+    services.occurrence.registerCalendarFormatter(
+      "custom-fiscal",
+      (date: Date) => {
+        const quarter = Math.floor(date.getUTCMonth() / 3) + 1;
+        return `FY${date.getUTCFullYear()}-Q${quarter}`;
+      }
+    );
 
     await bootstrap({ strapi });
-    expect(bridgedCalendarSources.some((s) => s.id === "public-events")).toBe(true);
+    expect(bridgedCalendarSources.some((s) => s.id === "public-events")).toBe(
+      true
+    );
 
     db["api::event.event"].push({
       documentId: "evt-hijri-1",
@@ -436,7 +466,9 @@ describe("RSVP Capacity, Waitlist Auto-Promotion & Multi-Source Calendar Service
 
     // Second recurring occurrence (2026-11-13) automatically computes its Hijri date via Intl
     expect(occurrences[1].alternateDates?.hijri?.isOverridden).toBe(false);
-    expect(occurrences[1].alternateDates?.hijri?.formatted.length).toBeGreaterThan(4);
+    expect(
+      occurrences[1].alternateDates?.hijri?.formatted.length
+    ).toBeGreaterThan(4);
     expect(occurrences[1].alternateDates?.fiscal?.formatted).toBe("FY2026-Q4");
 
     services.occurrence.unregisterCalendarFormatter("custom-fiscal");
@@ -445,10 +477,16 @@ describe("RSVP Capacity, Waitlist Auto-Promotion & Multi-Source Calendar Service
 
 describe("10-Locale Admin Translation Parity", () => {
   const locales = ["en", "es", "fr", "de", "pt", "it", "nl", "pl", "tr", "ar"];
-  const translationsDir = path.resolve(currentTestDir, "../admin/src/translations");
+  const translationsDir = path.resolve(
+    currentTestDir,
+    "../admin/src/translations"
+  );
 
   it("has complete, non-empty translation keys across all 10 locales", () => {
-    const enRaw = fs.readFileSync(path.join(translationsDir, "en.json"), "utf8");
+    const enRaw = fs.readFileSync(
+      path.join(translationsDir, "en.json"),
+      "utf8"
+    );
     const enMap = JSON.parse(enRaw) as Record<string, string>;
     const enKeys = Object.keys(enMap);
     expect(enKeys.length).toBeGreaterThan(65);
@@ -456,7 +494,10 @@ describe("10-Locale Admin Translation Parity", () => {
     for (const locale of locales) {
       const filePath = path.join(translationsDir, `${locale}.json`);
       expect(fs.existsSync(filePath)).toBe(true);
-      const map = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<string, string>;
+      const map = JSON.parse(fs.readFileSync(filePath, "utf8")) as Record<
+        string,
+        string
+      >;
       for (const k of enKeys) {
         expect(map[k], `Missing key "${k}" in ${locale}.json`).toBeTruthy();
       }

@@ -5,7 +5,11 @@ import { useIntl } from "react-intl";
 
 import { formatDateInCalendarSystem } from "../../../shared/calendarSystems";
 import { EVENT_CONTENT_TYPE_UID, PLUGIN_ID } from "../../../shared/pluginId";
-import type { CalendarSystemConfig, EventsPluginSettings, RsvpStats } from "../../../shared/types";
+import type {
+  CalendarSystemConfig,
+  EventsPluginSettings,
+  RsvpStats,
+} from "../../../shared/types";
 
 interface SidePanelProps {
   activeTab?: string;
@@ -23,12 +27,17 @@ interface ComputedAltDate {
   isOverridden: boolean;
 }
 
-function getStringProp(doc: Record<string, unknown> | undefined, key: string): string {
+function getStringProp(
+  doc: Record<string, unknown> | undefined,
+  key: string
+): string {
   const val = doc?.[key];
   return typeof val === "string" ? val : "";
 }
 
-function resolveDocumentStartDate(doc: Record<string, unknown> | undefined): string {
+function resolveDocumentStartDate(
+  doc: Record<string, unknown> | undefined
+): string {
   return getStringProp(doc, "startDate") || getStringProp(doc, "preferredDate");
 }
 
@@ -38,7 +47,9 @@ function isDocumentEventLike(
   rawStartDate: string
 ): boolean {
   if (model === EVENT_CONTENT_TYPE_UID) return true;
-  return Boolean(rawStartDate || doc?.recurrence || doc?.rsvpEnabled !== undefined);
+  return Boolean(
+    rawStartDate || doc?.recurrence || doc?.rsvpEnabled !== undefined
+  );
 }
 
 function formatSingleCalendarSystem(
@@ -47,9 +58,12 @@ function formatSingleCalendarSystem(
   doc: Record<string, unknown> | undefined,
   locale: string
 ): ComputedAltDate {
-  const overrideVal = sys.overrideField ? getStringProp(doc, sys.overrideField).trim() : "";
+  const overrideVal = sys.overrideField
+    ? getStringProp(doc, sys.overrideField).trim()
+    : "";
   const formatted =
-    overrideVal || formatDateInCalendarSystem(rawStartDate, sys, locale, { compact: false });
+    overrideVal ||
+    formatDateInCalendarSystem(rawStartDate, sys, locale, { compact: false });
   return {
     id: sys.id,
     label: sys.label,
@@ -64,8 +78,13 @@ function computeCapacityPercent(stats: RsvpStats | null): number {
   return Math.min(100, Math.round((stats.confirmedSeats / cap) * 100));
 }
 
-function resolveRsvpEnabled(doc: Record<string, unknown> | undefined, stats: RsvpStats): boolean {
-  return typeof doc?.rsvpEnabled === "boolean" ? doc.rsvpEnabled : stats.rsvpEnabled;
+function resolveRsvpEnabled(
+  doc: Record<string, unknown> | undefined,
+  stats: RsvpStats
+): boolean {
+  return typeof doc?.rsvpEnabled === "boolean"
+    ? doc.rsvpEnabled
+    : stats.rsvpEnabled;
 }
 
 interface SidePanelRsvpCardProps {
@@ -105,7 +124,9 @@ const SidePanelRsvpCard: React.FC<SidePanelRsvpCardProps> = ({
       </Flex>
 
       <Flex justifyContent="space-between" paddingTop={2}>
-        <Typography variant="pi">{t("sidePanel.confirmedSeats", "Confirmed Seats")}:</Typography>
+        <Typography variant="pi">
+          {t("sidePanel.confirmedSeats", "Confirmed Seats")}:
+        </Typography>
         <Typography variant="pi" fontWeight="bold">
           {stats.confirmedSeats}
           {stats.capacity ? ` / ${stats.capacity}` : ""}
@@ -134,14 +155,18 @@ const SidePanelRsvpCard: React.FC<SidePanelRsvpCardProps> = ({
       )}
 
       <Flex justifyContent="space-between" paddingTop={1}>
-        <Typography variant="pi">{t("sidePanel.checkedIn", "Checked In")}:</Typography>
+        <Typography variant="pi">
+          {t("sidePanel.checkedIn", "Checked In")}:
+        </Typography>
         <Typography variant="pi" fontWeight="bold">
           {stats.checkedInSeats}
         </Typography>
       </Flex>
 
       <Flex justifyContent="space-between" paddingTop={1}>
-        <Typography variant="pi">{t("sidePanel.waitlisted", "Waitlisted Seats")}:</Typography>
+        <Typography variant="pi">
+          {t("sidePanel.waitlisted", "Waitlisted Seats")}:
+        </Typography>
         <Typography variant="pi" fontWeight="bold">
           {stats.waitlistedSeats}
         </Typography>
@@ -156,7 +181,9 @@ interface GlobalCmI18nWindow {
 
 function resolveActiveContentLocale(fallbackLocale?: string): string {
   if (typeof window !== "undefined") {
-    const urlLoc = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
+    const urlLoc = new URLSearchParams(window.location.search).get(
+      "plugins[i18n][locale]"
+    );
     if (urlLoc) return urlLoc;
   }
   return fallbackLocale || "en";
@@ -170,8 +197,11 @@ function formatPluginMessageWithUrlLocale(
 ): string {
   const fullKey = `${pluginId}.${id}`;
   if (typeof window !== "undefined") {
-    const urlLoc = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
-    const globalMessages = (globalThis as unknown as GlobalCmI18nWindow).__CM_I18N_MESSAGES__;
+    const urlLoc = new URLSearchParams(window.location.search).get(
+      "plugins[i18n][locale]"
+    );
+    const globalMessages = (globalThis as unknown as GlobalCmI18nWindow)
+      .__CM_I18N_MESSAGES__;
     const override = urlLoc ? globalMessages?.[urlLoc]?.[fullKey] : undefined;
     if (override) return override;
   }
@@ -185,7 +215,8 @@ export const EventSidePanel = (props: SidePanelProps) => {
   const [settings, setSettings] = useState<EventsPluginSettings | null>(null);
 
   const model = props.model ?? "";
-  const documentId = props.documentId || getStringProp(props.document, "documentId");
+  const documentId =
+    props.documentId || getStringProp(props.document, "documentId");
   const rawStartDate = resolveDocumentStartDate(props.document);
   const isEventLike = isDocumentEventLike(model, props.document, rawStartDate);
   const activeLocale = resolveActiveContentLocale(locale);
@@ -221,16 +252,33 @@ export const EventSidePanel = (props: SidePanelProps) => {
     if (!rawStartDate || !systems) return [];
     return systems
       .filter((sys) => sys.enabled)
-      .map((sys) => formatSingleCalendarSystem(sys, rawStartDate, props.document, activeLocale))
+      .map((sys) =>
+        formatSingleCalendarSystem(
+          sys,
+          rawStartDate,
+          props.document,
+          activeLocale
+        )
+      )
       .filter((item) => Boolean(item.formatted));
-  }, [rawStartDate, settings?.secondaryCalendars, props.document, activeLocale]);
+  }, [
+    rawStartDate,
+    settings?.secondaryCalendars,
+    props.document,
+    activeLocale,
+  ]);
 
   if (!isEventLike || !documentId) {
     return null;
   }
 
   const t = (id: string, defaultMessage: string) =>
-    formatPluginMessageWithUrlLocale(PLUGIN_ID, id, defaultMessage, formatMessage);
+    formatPluginMessageWithUrlLocale(
+      PLUGIN_ID,
+      id,
+      defaultMessage,
+      formatMessage
+    );
 
   const icsUrl = `/api/events/${encodeURIComponent(documentId)}/invite.ics`;
   const capacityPercent = computeCapacityPercent(stats);
@@ -243,11 +291,23 @@ export const EventSidePanel = (props: SidePanelProps) => {
           {computedAlternateDates.length > 0 && (
             <Box padding={3} background="neutral100" hasRadius>
               <Typography variant="sigma" textColor="neutral600">
-                {t("sidePanel.secondaryCalendars", "Alternative Calendar Dates")}
+                {t(
+                  "sidePanel.secondaryCalendars",
+                  "Alternative Calendar Dates"
+                )}
               </Typography>
-              <Flex direction="column" alignItems="stretch" gap={1} paddingTop={2}>
+              <Flex
+                direction="column"
+                alignItems="stretch"
+                gap={1}
+                paddingTop={2}
+              >
                 {computedAlternateDates.map((alt) => (
-                  <Flex key={alt.id} justifyContent="space-between" alignItems="center">
+                  <Flex
+                    key={alt.id}
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
                     <Typography variant="pi" textColor="neutral600">
                       {alt.label}:
                     </Typography>
@@ -286,7 +346,10 @@ export const EventSidePanel = (props: SidePanelProps) => {
               tag="a"
               href={`/admin/plugins/${PLUGIN_ID}?eventDocumentId=${encodeURIComponent(documentId)}`}
             >
-              {t("sidePanel.openCalendar", "Open in Events & Attendees Manager")}
+              {t(
+                "sidePanel.openCalendar",
+                "Open in Events & Attendees Manager"
+              )}
             </Button>
           </Flex>
         </Flex>

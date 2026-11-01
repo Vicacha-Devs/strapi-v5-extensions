@@ -19,7 +19,8 @@ import type { ExpandedOccurrence } from "../shared/types";
 
 describe("RRULE Engine (RFC 5545)", () => {
   it("parses and rebuilds weekly RRULE with BYDAY, INTERVAL, and UNTIL", () => {
-    const raw = "RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR;UNTIL=20261231T235959Z";
+    const raw =
+      "RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR;UNTIL=20261231T235959Z";
     const parsed = parseRRule(raw);
 
     expect(parsed.freq).toBe("WEEKLY");
@@ -28,8 +29,12 @@ describe("RRULE Engine (RFC 5545)", () => {
     expect(parsed.until).toBe("2026-12-31");
 
     const rebuilt = buildRRule(parsed);
-    expect(rebuilt).toBe("FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR;UNTIL=20261231T235959Z");
-    expect(describeRRule(rebuilt)).toContain("Every 2 weeks on MO, FR until 2026-12-31");
+    expect(rebuilt).toBe(
+      "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR;UNTIL=20261231T235959Z"
+    );
+    expect(describeRRule(rebuilt)).toContain(
+      "Every 2 weeks on MO, FR until 2026-12-31"
+    );
   });
 
   it("expands weekly Friday occurrences and respects exdates and single-instance overrides", () => {
@@ -61,7 +66,11 @@ describe("RRULE Engine (RFC 5545)", () => {
     });
 
     // Oct 2026 Fridays: Oct 2, Oct 9 (excluded), Oct 16 (overridden), Oct 23 (cancelled), Oct 30
-    expect(slots.map((s) => s.occurrenceDate)).toEqual(["2026-10-02", "2026-10-16", "2026-10-30"]);
+    expect(slots.map((s) => s.occurrenceDate)).toEqual([
+      "2026-10-02",
+      "2026-10-16",
+      "2026-10-30",
+    ]);
 
     expect(slots[1].isOverridden).toBe(true);
     expect(slots[1].startDate).toBe("2026-10-16T18:00:00.000Z");
@@ -82,7 +91,11 @@ describe("RRULE Engine (RFC 5545)", () => {
       windowEnd: "2026-12-31T23:59:59.000Z",
     });
 
-    expect(slots.map((s) => s.occurrenceDate)).toEqual(["2026-01-15", "2026-02-15", "2026-03-15"]);
+    expect(slots.map((s) => s.occurrenceDate)).toEqual([
+      "2026-01-15",
+      "2026-02-15",
+      "2026-03-15",
+    ]);
   });
 });
 
@@ -100,7 +113,9 @@ describe("iCal (.ics) & CSV Security Utilities", () => {
 
     expect(links.google).toContain("calendar.google.com");
     expect(links.outlook).toContain("outlook.live.com");
-    expect(links.icsPath).toBe("/api/events/doc-123/invite.ics?occurrenceDate=2026-10-18");
+    expect(links.icsPath).toBe(
+      "/api/events/doc-123/invite.ics?occurrenceDate=2026-10-18"
+    );
 
     const occ: ExpandedOccurrence = {
       occurrenceId: "events:doc-123:2026-10-18",
@@ -125,7 +140,9 @@ describe("iCal (.ics) & CSV Security Utilities", () => {
 
     const ics = generateIcsCalendar([occ], "Organization Events Calendar");
     expect(ics).toContain("BEGIN:VCALENDAR");
-    expect(ics).toContain("SUMMARY:Annual Developer Conference\\; Special Edition");
+    expect(ics).toContain(
+      "SUMMARY:Annual Developer Conference\\; Special Edition"
+    );
     expect(ics).toContain("RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR");
     expect(ics).toContain("END:VCALENDAR");
   });

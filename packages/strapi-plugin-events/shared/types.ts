@@ -2,11 +2,19 @@ export type RRuleFrequency = "NONE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY";
 
 export type RRuleWeekday = "MO" | "TU" | "WE" | "TH" | "FR" | "SA" | "SU";
 
-export type EventLifecycleStatus = "scheduled" | "cancelled" | "postponed" | "rescheduled";
+export type EventLifecycleStatus =
+  | "scheduled"
+  | "cancelled"
+  | "postponed"
+  | "rescheduled";
 
 export type EventLocationType = "in_person" | "online" | "hybrid";
 
-export type RsvpStatus = "confirmed" | "waitlisted" | "cancelled" | "checked_in";
+export type RsvpStatus =
+  | "confirmed"
+  | "waitlisted"
+  | "cancelled"
+  | "checked_in";
 
 export interface OccurrenceOverride {
   /** Original occurrence ISO date (YYYY-MM-DD) */

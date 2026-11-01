@@ -9,7 +9,10 @@ declare module "node:crypto" {
 }
 
 declare module "node:fs" {
-  export function readFileSync(path: string, encoding: "utf8" | "utf-8"): string;
+  export function readFileSync(
+    path: string,
+    encoding: "utf8" | "utf-8"
+  ): string;
   export function existsSync(path: string): boolean;
   const fsDefault: {
     readFileSync: typeof readFileSync;
@@ -66,7 +69,9 @@ declare module "@strapi/strapi" {
     }
 
     export interface DocumentServiceInstance {
-      findMany(params?: DocumentQueryOptions): Promise<Array<Record<string, unknown>>>;
+      findMany(
+        params?: DocumentQueryOptions
+      ): Promise<Array<Record<string, unknown>>>;
       findOne(params: {
         documentId: string;
         locale?: string;
@@ -138,7 +143,10 @@ declare module "vitest" {
     toBeGreaterThanOrEqual(expected: number): void;
     toBeTruthy(): void;
   }
-  export function expect<T = unknown>(actual: T, message?: string): Assertion<T>;
+  export function expect<T = unknown>(
+    actual: T,
+    message?: string
+  ): Assertion<T>;
 }
 
 declare module "*.json" {

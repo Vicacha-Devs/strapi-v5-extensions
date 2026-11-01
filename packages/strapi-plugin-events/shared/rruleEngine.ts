@@ -92,7 +92,9 @@ export function expandRuleSlots(options: {
       ? options.windowStart
       : options.windowStart.toISOString();
   const windowEndIso =
-    typeof options.windowEnd === "string" ? options.windowEnd : options.windowEnd.toISOString();
+    typeof options.windowEnd === "string"
+      ? options.windowEnd
+      : options.windowEnd.toISOString();
 
   return calendarExpandRuleSlots({
     baseStartDate: options.baseStartDate,

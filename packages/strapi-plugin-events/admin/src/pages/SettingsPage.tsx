@@ -53,7 +53,9 @@ export const SettingsPage: React.FC = () => {
       if (res?.data?.data) {
         setSettings(res.data.data as EventsPluginSettings);
       }
-      setSavedBanner(t("settings.saved", "Events plugin settings saved successfully."));
+      setSavedBanner(
+        t("settings.saved", "Events plugin settings saved successfully.")
+      );
     } catch {
       setSavedBanner(t("settings.error", "Could not save settings."));
     } finally {
@@ -74,7 +76,12 @@ export const SettingsPage: React.FC = () => {
   return (
     <Box padding={6} background="neutral100">
       <Flex direction="column" alignItems="stretch" gap={5}>
-        <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="center"
+          wrap="wrap"
+          gap={3}
+        >
           <Box>
             <Typography variant="alpha" fontWeight="bold">
               {t("settings.title", "Events & RSVP Settings")}
@@ -95,7 +102,11 @@ export const SettingsPage: React.FC = () => {
 
         {savedBanner && (
           <Box padding={3} background="success100" hasRadius>
-            <Typography variant="omega" fontWeight="bold" textColor="success700">
+            <Typography
+              variant="omega"
+              fontWeight="bold"
+              textColor="success700"
+            >
               {savedBanner}
             </Typography>
           </Box>
@@ -104,7 +115,10 @@ export const SettingsPage: React.FC = () => {
         <Tabs.Root defaultValue="rsvp">
           <Tabs.List aria-label={t("settings.title", "Events & RSVP Settings")}>
             <Tabs.Trigger value="rsvp">
-              {t("settings.section.rsvp", "RSVP, Capacity & Waitlist Automation")}
+              {t(
+                "settings.section.rsvp",
+                "RSVP, Capacity & Waitlist Automation"
+              )}
             </Tabs.Trigger>
             <Tabs.Trigger value="feed">
               {t("settings.section.general", "iCal (.ics) Feed & Timezone")}
@@ -122,7 +136,10 @@ export const SettingsPage: React.FC = () => {
             >
               <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" fontWeight="bold">
-                  {t("settings.section.rsvp", "RSVP, Capacity & Waitlist Automation")}
+                  {t(
+                    "settings.section.rsvp",
+                    "RSVP, Capacity & Waitlist Automation"
+                  )}
                 </Typography>
 
                 <Box
@@ -142,7 +159,10 @@ export const SettingsPage: React.FC = () => {
                       {t("settings.defaultCapacity", "Default Event Capacity")}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t("settings.defaultCapacity.placeholder", "e.g., 100")}
+                      placeholder={t(
+                        "settings.defaultCapacity.placeholder",
+                        "e.g., 100"
+                      )}
                       value={settings.defaultCapacity || 100}
                       onValueChange={(val: number | undefined) =>
                         setSettings({
@@ -164,12 +184,16 @@ export const SettingsPage: React.FC = () => {
                       {t("settings.maxGuests", "Max Guests per Registration")}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t("settings.maxGuests.placeholder", "e.g., 5")}
+                      placeholder={t(
+                        "settings.maxGuests.placeholder",
+                        "e.g., 5"
+                      )}
                       value={settings.defaultMaxGuestsPerRegistration || 5}
                       onValueChange={(val: number | undefined) =>
                         setSettings({
                           ...settings,
-                          defaultMaxGuestsPerRegistration: val && val >= 1 ? val : 5,
+                          defaultMaxGuestsPerRegistration:
+                            val && val >= 1 ? val : 5,
                         })
                       }
                     />
@@ -184,11 +208,19 @@ export const SettingsPage: React.FC = () => {
                     gap: 16,
                   }}
                 >
-                  <Box padding={4} background="neutral100" hasRadius style={SUB_CARD_BORDER_STYLE}>
+                  <Box
+                    padding={4}
+                    background="neutral100"
+                    hasRadius
+                    style={SUB_CARD_BORDER_STYLE}
+                  >
                     <Checkbox
                       checked={settings.waitlistEnabledByDefault}
                       onCheckedChange={(checked: boolean) =>
-                        setSettings({ ...settings, waitlistEnabledByDefault: Boolean(checked) })
+                        setSettings({
+                          ...settings,
+                          waitlistEnabledByDefault: Boolean(checked),
+                        })
                       }
                     >
                       {t(
@@ -206,11 +238,19 @@ export const SettingsPage: React.FC = () => {
                     </Box>
                   </Box>
 
-                  <Box padding={4} background="neutral100" hasRadius style={SUB_CARD_BORDER_STYLE}>
+                  <Box
+                    padding={4}
+                    background="neutral100"
+                    hasRadius
+                    style={SUB_CARD_BORDER_STYLE}
+                  >
                     <Checkbox
                       checked={settings.sendRsvpEmails}
                       onCheckedChange={(checked: boolean) =>
-                        setSettings({ ...settings, sendRsvpEmails: Boolean(checked) })
+                        setSettings({
+                          ...settings,
+                          sendRsvpEmails: Boolean(checked),
+                        })
                       }
                     >
                       {t(
@@ -242,10 +282,18 @@ export const SettingsPage: React.FC = () => {
               style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
             >
               <Flex direction="column" alignItems="stretch" gap={4}>
-                <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
+                <Flex
+                  justifyContent="space-between"
+                  alignItems="center"
+                  wrap="wrap"
+                  gap={2}
+                >
                   <Box>
                     <Typography variant="delta" fontWeight="bold">
-                      {t("settings.section.general", "iCal (.ics) Feed & Timezone")}
+                      {t(
+                        "settings.section.general",
+                        "iCal (.ics) Feed & Timezone"
+                      )}
                     </Typography>
                     <Typography variant="pi" textColor="neutral600">
                       {t(
@@ -283,7 +331,10 @@ export const SettingsPage: React.FC = () => {
                       )}
                       value={settings.defaultTimezone || "America/Bogota"}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSettings({ ...settings, defaultTimezone: e.target.value })
+                        setSettings({
+                          ...settings,
+                          defaultTimezone: e.target.value,
+                        })
                       }
                     />
                     <Field.Hint />

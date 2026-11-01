@@ -53,7 +53,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async updateSettings(ctx: StrapiKoaContext) {
-      const payload = (ctx.request?.body ?? {}) as Partial<EventsPluginSettings>;
+      const payload = (ctx.request?.body ??
+        {}) as Partial<EventsPluginSettings>;
       const data = await getSettingsService(strapi).updateSettings(payload);
       ctx.body = { data };
     },
@@ -86,7 +87,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: updated };
       } catch (err: unknown) {
-        ctx.badRequest(getErrorMessage(err, "Unable to reschedule event occurrence."));
+        ctx.badRequest(
+          getErrorMessage(err, "Unable to reschedule event occurrence.")
+        );
       }
     },
 
@@ -135,7 +138,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: result };
       } catch (err: unknown) {
-        ctx.badRequest(getErrorMessage(err, "Failed to update registration status."));
+        ctx.badRequest(
+          getErrorMessage(err, "Failed to update registration status.")
+        );
       }
     },
 
@@ -162,7 +167,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       ctx.set("Content-Type", "text/csv; charset=utf-8");
-      ctx.set("Content-Disposition", 'attachment; filename="event-registrations.csv"');
+      ctx.set(
+        "Content-Disposition",
+        'attachment; filename="event-registrations.csv"'
+      );
       ctx.set("X-Content-Type-Options", "nosniff");
       ctx.body = csv;
     },

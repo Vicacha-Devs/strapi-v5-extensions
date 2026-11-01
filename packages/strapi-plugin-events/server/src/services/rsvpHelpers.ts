@@ -52,7 +52,8 @@ function buildResolvedTargetEvent(
   const startDate = String(doc[src.fields.startDate] ?? doc.startDate ?? "");
   const rsvpField = src.fields.rsvpEnabled ?? "rsvpEnabled";
   const capField = src.fields.capacity ?? "capacity";
-  const rsvpEnabled = doc[rsvpField] !== undefined ? Boolean(doc[rsvpField]) : true;
+  const rsvpEnabled =
+    doc[rsvpField] !== undefined ? Boolean(doc[rsvpField]) : true;
 
   return {
     uid: src.uid,
@@ -61,13 +62,18 @@ function buildResolvedTargetEvent(
     startDate,
     rsvpEnabled,
     capacity: readNullablePositiveInt(doc[capField]),
-    waitlistEnabled: readBooleanWithDefault(doc.waitlistEnabled, settings.waitlistEnabledByDefault),
+    waitlistEnabled: readBooleanWithDefault(
+      doc.waitlistEnabled,
+      settings.waitlistEnabledByDefault
+    ),
     maxGuestsPerRegistration: readMaxGuestsWithDefault(
       doc.maxGuestsPerRegistration,
       settings.defaultMaxGuestsPerRegistration
     ),
     registrationDeadline:
-      typeof doc.registrationDeadline === "string" ? doc.registrationDeadline : null,
+      typeof doc.registrationDeadline === "string"
+        ? doc.registrationDeadline
+        : null,
   };
 }
 
@@ -110,7 +116,9 @@ function readPositiveGuestsCount(val: unknown): number {
   return typeof val === "number" && val > 0 ? Math.floor(val) : 1;
 }
 
-export function formatRegistrationRecord(raw: Record<string, unknown>): RsvpRegistrationRecord {
+export function formatRegistrationRecord(
+  raw: Record<string, unknown>
+): RsvpRegistrationRecord {
   return {
     documentId: String(raw.documentId ?? ""),
     eventUid: String(raw.eventUid ?? EVENT_CONTENT_TYPE_UID),
@@ -176,9 +184,14 @@ export function aggregateRsvpCounts(
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function assertValidAttendeeIdentity(attendeeName: string, attendeeEmail: string): void {
+function assertValidAttendeeIdentity(
+  attendeeName: string,
+  attendeeEmail: string
+): void {
   if (!attendeeName || attendeeName.length > 160) {
-    throw new Error("Invalid attendeeName: must be between 1 and 160 characters.");
+    throw new Error(
+      "Invalid attendeeName: must be between 1 and 160 characters."
+    );
   }
   if (!attendeeEmail || !EMAIL_REGEX.test(attendeeEmail)) {
     throw new Error("Invalid attendeeEmail: must be a valid email address.");
@@ -200,7 +213,9 @@ export function validateRegistrationInputAndEvent(
 
   const guestsCount = readPositiveGuestsCount(input.guestsCount);
   if (guestsCount > targetEvent.maxGuestsPerRegistration) {
-    throw new Error(`Maximum guests per registration is ${targetEvent.maxGuestsPerRegistration}.`);
+    throw new Error(
+      `Maximum guests per registration is ${targetEvent.maxGuestsPerRegistration}.`
+    );
   }
 
   return { attendeeName, attendeeEmail, guestsCount };
@@ -219,7 +234,10 @@ export function resolveAssignedRsvpStatus(
   confirmedSeats: number,
   guestsCount: number
 ): RsvpStatus {
-  if (targetEvent.capacity !== null && confirmedSeats + guestsCount > targetEvent.capacity) {
+  if (
+    targetEvent.capacity !== null &&
+    confirmedSeats + guestsCount > targetEvent.capacity
+  ) {
     if (targetEvent.waitlistEnabled) {
       return "waitlisted";
     }
@@ -246,7 +264,13 @@ export async function trySendNotificationEmail(
 
     const emailPlugin = strapi.plugin("email");
     const emailService = emailPlugin?.service("email") as
-      | { send?: (msg: { to: string; subject: string; text: string }) => Promise<void> }
+      | {
+          send?: (msg: {
+            to: string;
+            subject: string;
+            text: string;
+          }) => Promise<void>;
+        }
       | undefined;
     if (!emailService || typeof emailService.send !== "function") return;
 
@@ -270,6 +294,8 @@ export async function trySendNotificationEmail(
       ].join("\n"),
     });
   } catch {
-    strapi.log.debug(`[events] Could not send RSVP notification email to ${maskEmail(payload.to)}`);
+    strapi.log.debug(
+      `[events] Could not send RSVP notification email to ${maskEmail(payload.to)}`
+    );
   }
 }

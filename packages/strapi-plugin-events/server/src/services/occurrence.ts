@@ -78,7 +78,10 @@ function buildSingleOccurrenceOverridePatch(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
-    registerCalendarFormatter(calendarId: string, formatter: CalendarSystemFormatterFn): void {
+    registerCalendarFormatter(
+      calendarId: string,
+      formatter: CalendarSystemFormatterFn
+    ): void {
       registerCalendarSystemFormatter(calendarId, formatter);
     },
 
@@ -95,19 +98,29 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return formatDateInCalendarSystem(isoOrDateKey, system, locale, options);
     },
 
-    async getOccurrences(params: GetOccurrencesParams): Promise<ExpandedOccurrence[]> {
+    async getOccurrences(
+      params: GetOccurrencesParams
+    ): Promise<ExpandedOccurrence[]> {
       const settings = await getSettingsService(strapi).getSettings();
       const { windowStart, windowEnd } = resolveOccurrenceWindow(params);
 
       const activeSources = (settings.sources ?? []).filter(
         (s: EventSourceMapping) =>
-          s.enabled && (!params.sourceId || s.id === params.sourceId || s.uid === params.sourceId)
+          s.enabled &&
+          (!params.sourceId ||
+            s.id === params.sourceId ||
+            s.uid === params.sourceId)
       );
 
       const allOccurrences: ExpandedOccurrence[] = [];
 
       for (const source of activeSources) {
-        const docs = await fetchDocumentsForSource(strapi, source, params, settings);
+        const docs = await fetchDocumentsForSource(
+          strapi,
+          source,
+          params,
+          settings
+        );
         for (const doc of docs) {
           const docOccurrences = await expandDocumentOccurrences(
             strapi,
@@ -123,7 +136,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       allOccurrences.sort(
-        (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        (a, b) =>
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
 
       return allOccurrences;
@@ -141,8 +155,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           ? new Date(params.date)
           : new Date();
 
-      const fromWindow = new Date(refDate.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString();
-      const toWindow = new Date(refDate.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString();
+      const fromWindow = new Date(
+        refDate.getTime() - 60 * 24 * 60 * 60 * 1000
+      ).toISOString();
+      const toWindow = new Date(
+        refDate.getTime() + 180 * 24 * 60 * 60 * 1000
+      ).toISOString();
 
       const occurrences = await this.getOccurrences({
         from: fromWindow,
@@ -176,7 +194,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       cancelOccurrence?: boolean;
     }): Promise<Record<string, unknown>> {
       const settings = await getSettingsService(strapi).getSettings();
-      const source = resolveRescheduleSource(settings.sources, params.sourceId, params.uid);
+      const source = resolveRescheduleSource(
+        settings.sources,
+        params.sourceId,
+        params.uid
+      );
 
       if (!source) {
         throw new Error("Target event source is not configured.");
@@ -185,7 +207,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const client = getDocumentsClient(strapi, source.uid);
       const existing = await client.findOne({ documentId: params.documentId });
       if (!existing) {
-        throw new Error(`Document ${params.documentId} not found in ${source.uid}.`);
+        throw new Error(
+          `Document ${params.documentId} not found in ${source.uid}.`
+        );
       }
 
       const rruleField = source.fields.rrule;
@@ -196,7 +220,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (recurrence?.rrule && !params.applyToSeries && rruleField) {
         return client.update({
           documentId: params.documentId,
-          data: buildSingleOccurrenceOverridePatch(rruleField, recurrence, params),
+          data: buildSingleOccurrenceOverridePatch(
+            rruleField,
+            recurrence,
+            params
+          ),
         });
       }
 
@@ -224,7 +252,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
       const settings = await getSettingsService(strapi).getSettings();
       const source = resolveQuickCreateSource(settings, params.sourceId);
-      const data = buildQuickCreatePayload(source, settings, { ...params, title });
+      const data = buildQuickCreatePayload(source, settings, {
+        ...params,
+        title,
+      });
 
       return getDocumentsClient(strapi, source.uid).create({
         data,

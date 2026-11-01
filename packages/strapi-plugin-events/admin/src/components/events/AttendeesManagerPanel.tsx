@@ -12,7 +12,10 @@ import {
 import React from "react";
 
 import { PLUGIN_ID } from "../../../../shared/pluginId";
-import type { RsvpRegistrationRecord, RsvpStatus } from "../../../../shared/types";
+import type {
+  RsvpRegistrationRecord,
+  RsvpStatus,
+} from "../../../../shared/types";
 
 export interface AttendeesManagerPanelProps {
   t: (id: string, defaultMessage: string) => string;
@@ -62,7 +65,12 @@ const AttendeeRegistrationRow: React.FC<AttendeeRowProps> = ({
 
   return (
     <Box padding={3} background="neutral100" hasRadius>
-      <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+      <Flex
+        justifyContent="space-between"
+        alignItems="center"
+        wrap="wrap"
+        gap={3}
+      >
         <Box>
           <Flex gap={2} alignItems="center" wrap="wrap">
             <Typography variant="omega" fontWeight="bold">
@@ -89,18 +97,26 @@ const AttendeeRegistrationRow: React.FC<AttendeeRowProps> = ({
 
         <Flex gap={2} alignItems="flex-end">
           {canCheckIn && (
-            <Button size="S" variant="default" onClick={() => onCheckIn(reg.documentId)}>
+            <Button
+              size="S"
+              variant="default"
+              onClick={() => onCheckIn(reg.documentId)}
+            >
               ✓ {t("attendees.checkIn", "Check In")}
             </Button>
           )}
 
           <Box style={{ minWidth: 155 }}>
             <Field.Root>
-              <Field.Label>{t("attendees.rowStatus", "Registration Status")}</Field.Label>
+              <Field.Label>
+                {t("attendees.rowStatus", "Registration Status")}
+              </Field.Label>
               <SingleSelect
                 placeholder={t("placeholder.select_status", "Select status")}
                 value={reg.status}
-                onChange={(nextSt: string) => onStatusChange(reg.documentId, nextSt as RsvpStatus)}
+                onChange={(nextSt: string) =>
+                  onStatusChange(reg.documentId, nextSt as RsvpStatus)
+                }
               >
                 <SingleSelectOption value="confirmed">
                   {t("status.confirmed", "Confirmed")}
@@ -142,11 +158,18 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
   return (
     <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Flex justifyContent="space-between" alignItems="flex-end" wrap="wrap" gap={3}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="flex-end"
+          wrap="wrap"
+          gap={3}
+        >
           <Flex gap={3} wrap="wrap" alignItems="flex-end">
             <Box style={{ minWidth: 240 }}>
               <Field.Root>
-                <Field.Label>{t("attendees.search", "Search Attendee or Event")}</Field.Label>
+                <Field.Label>
+                  {t("attendees.search", "Search Attendee or Event")}
+                </Field.Label>
                 <TextInput
                   value={rsvpSearch}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -162,7 +185,9 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
 
             <Box style={{ minWidth: 160 }}>
               <Field.Root>
-                <Field.Label>{t("attendees.statusFilter", "Status")}</Field.Label>
+                <Field.Label>
+                  {t("attendees.statusFilter", "Status")}
+                </Field.Label>
                 <SingleSelect
                   placeholder={t("placeholder.all_statuses", "All Statuses")}
                   value={rsvpStatusFilter}
@@ -188,8 +213,13 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
             </Box>
 
             {rsvpEventFilter && (
-              <Button size="S" variant="tertiary" onClick={onClearRsvpEventFilter}>
-                {t("attendees.clearEventFilter", "Clear Event Filter")} ({rsvpEventFilter})
+              <Button
+                size="S"
+                variant="tertiary"
+                onClick={onClearRsvpEventFilter}
+              >
+                {t("attendees.clearEventFilter", "Clear Event Filter")} (
+                {rsvpEventFilter})
               </Button>
             )}
           </Flex>
@@ -208,7 +238,10 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
 
         {registrations.length === 0 ? (
           <Typography variant="omega" textColor="neutral600">
-            {t("attendees.empty", "No registrations found matching current filters.")}
+            {t(
+              "attendees.empty",
+              "No registrations found matching current filters."
+            )}
           </Typography>
         ) : (
           <Flex direction="column" alignItems="stretch" gap={2}>

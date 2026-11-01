@@ -1,5 +1,9 @@
 import { normalizeRRuleString } from "./rruleEngine";
-import type { CalendarLinkSet, ExpandedOccurrence, RsvpRegistrationRecord } from "./types";
+import type {
+  CalendarLinkSet,
+  ExpandedOccurrence,
+  RsvpRegistrationRecord,
+} from "./types";
 
 export function toIcsTimestamp(isoString: string, allDay = false): string {
   const d = new Date(isoString);
@@ -89,7 +93,9 @@ export function buildCalendarLinks(params: {
     in_loc: location,
   });
 
-  const querySuffix = occurrenceDate ? `?occurrenceDate=${encodeURIComponent(occurrenceDate)}` : "";
+  const querySuffix = occurrenceDate
+    ? `?occurrenceDate=${encodeURIComponent(occurrenceDate)}`
+    : "";
 
   return {
     google: `https://calendar.google.com/calendar/render?${googleParams.toString()}`,
@@ -115,10 +121,16 @@ function appendVEventDateLines(lines: string[], occ: ExpandedOccurrence): void {
   lines.push(`DTEND${prefix}:${toIcsTimestamp(occ.endDate, isAllDay)}`);
 }
 
-function appendVEventOptionalLines(lines: string[], occ: ExpandedOccurrence): void {
-  if (occ.summary) lines.push(foldIcsLine(`DESCRIPTION:${escapeIcsText(occ.summary)}`));
-  if (occ.location) lines.push(foldIcsLine(`LOCATION:${escapeIcsText(occ.location)}`));
-  if (occ.virtualUrl) lines.push(foldIcsLine(`URL:${escapeIcsText(occ.virtualUrl)}`));
+function appendVEventOptionalLines(
+  lines: string[],
+  occ: ExpandedOccurrence
+): void {
+  if (occ.summary)
+    lines.push(foldIcsLine(`DESCRIPTION:${escapeIcsText(occ.summary)}`));
+  if (occ.location)
+    lines.push(foldIcsLine(`LOCATION:${escapeIcsText(occ.location)}`));
+  if (occ.virtualUrl)
+    lines.push(foldIcsLine(`URL:${escapeIcsText(occ.virtualUrl)}`));
   if (occ.isRecurring && occ.rrule) {
     const normalized = normalizeRRuleString(occ.rrule);
     if (normalized) lines.push(foldIcsLine(`RRULE:${normalized}`));
@@ -170,7 +182,9 @@ export function sanitizeCsvCell(raw: unknown): string {
   return `"${escaped}"`;
 }
 
-export function generateRegistrationsCsv(records: RsvpRegistrationRecord[]): string {
+export function generateRegistrationsCsv(
+  records: RsvpRegistrationRecord[]
+): string {
   const headers = [
     "Document ID",
     "Event UID",
