@@ -40,7 +40,7 @@ interface DocuSignServiceContract {
   }>;
 }
 
-interface KoaContext {
+export interface KoaContext {
   ip?: string;
   query: Record<string, string | undefined>;
   params: Record<string, string | undefined>;
