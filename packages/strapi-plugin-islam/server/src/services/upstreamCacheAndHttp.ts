@@ -1,6 +1,9 @@
 import type {
+  IslamPluginSettings,
+  NisabStandardId,
   QuranFoundationConfig,
   QuranFoundationEnvironment,
+  SupportedCurrency,
 } from "../../../shared";
 
 interface CacheEntry<T> {
@@ -331,4 +334,99 @@ export async function tryFetchUpstreamJson(
   } catch {
     return null;
   }
+}
+
+function extractUpstreamPrayerTimes(
+  upstream: Record<string, unknown> | null
+): Record<string, string> | undefined {
+  const dataObj = upstream?.data;
+  if (!dataObj || typeof dataObj !== "object") return undefined;
+  const times = (dataObj as Record<string, unknown>).times;
+  if (!times || typeof times !== "object") return undefined;
+  return times as Record<string, string>;
+}
+
+export async function resolveExternalPrayerTimesOverride(
+  settings: IslamPluginSettings,
+  date: string,
+  lat: number,
+  lon: number
+): Promise<Partial<Record<string, string>> | undefined> {
+  if (!settings.externalApiEnabled || !process.env.ISLAMIC_API_KEY) {
+    return undefined;
+  }
+  const cacheKey = `prayer:${date}:${lat}:${lon}:${settings.method}:${settings.school}:${settings.shifting}`;
+  const cached = getCached<Record<string, string>>(cacheKey);
+  if (cached) return cached;
+
+  const upstream = await tryFetchUpstreamJson(
+    settings.externalApiBaseUrl,
+    "prayer-time/",
+    {
+      lat,
+      lon,
+      method: settings.method,
+      school: settings.school,
+      calender: settings.calender,
+      shifting: settings.shifting,
+      date,
+    }
+  );
+
+  const times = extractUpstreamPrayerTimes(upstream);
+  if (times) {
+    setCached(cacheKey, times, settings.cacheTtlSeconds || 3600);
+  }
+  return times;
+}
+
+function extractUpstreamNisabSpotPrices(
+  upstream: Record<string, unknown> | null
+): { goldUnit: number; silverUnit: number } | null {
+  const dataObj = upstream?.data as Record<string, unknown> | undefined;
+  const thresholds = dataObj?.nisab_thresholds as
+    | Record<string, unknown>
+    | undefined;
+  const goldObj = thresholds?.gold as Record<string, unknown> | undefined;
+  const silverObj = thresholds?.silver as Record<string, unknown> | undefined;
+  const gPrice = Number(goldObj?.unit_price);
+  const sPrice = Number(silverObj?.unit_price);
+  if (
+    Number.isFinite(gPrice) &&
+    gPrice > 0 &&
+    Number.isFinite(sPrice) &&
+    sPrice > 0
+  ) {
+    return { goldUnit: gPrice, silverUnit: sPrice };
+  }
+  return null;
+}
+
+export async function resolveExternalNisabSpotPrices(
+  settings: IslamPluginSettings,
+  currency: SupportedCurrency,
+  standard: NisabStandardId
+): Promise<{ goldUnit: number; silverUnit: number } | null> {
+  if (!settings.externalApiEnabled || !process.env.ISLAMIC_API_KEY) {
+    return null;
+  }
+  const cacheKey = `nisab:${currency}:${standard}`;
+  const cached = getCached<{ goldUnit: number; silverUnit: number }>(cacheKey);
+  if (cached) return cached;
+
+  const upstream = await tryFetchUpstreamJson(
+    settings.externalApiBaseUrl,
+    "zakat-nisab/",
+    {
+      standard,
+      currency: currency.toLowerCase(),
+      unit: "g",
+    }
+  );
+
+  const prices = extractUpstreamNisabSpotPrices(upstream);
+  if (prices) {
+    setCached(cacheKey, prices, settings.cacheTtlSeconds || 3600);
+  }
+  return prices;
 }
