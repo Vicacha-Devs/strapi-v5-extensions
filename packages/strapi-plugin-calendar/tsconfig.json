@@ -16,9 +16,9 @@
   "include": [
     "shared/**/*",
     "server/src/**/*",
-    "server/custom.d.ts",
+    "server/src/custom.d.ts",
     "admin/src/**/*",
-    "admin/custom.d.ts",
+    "admin/src/custom.d.ts",
     "tests/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]
