@@ -2,7 +2,7 @@ import type { Core } from "@strapi/strapi";
 
 import type { SeoSettingsMap } from "../../../shared";
 
-interface SettingsControllerContext {
+export interface SettingsControllerContext {
   request: {
     body?: unknown;
   };

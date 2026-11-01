@@ -1,6 +1,6 @@
 import type { Core } from "@strapi/strapi";
 
-interface SeoControllerContext {
+export interface SeoControllerContext {
   body?: unknown;
 }
 

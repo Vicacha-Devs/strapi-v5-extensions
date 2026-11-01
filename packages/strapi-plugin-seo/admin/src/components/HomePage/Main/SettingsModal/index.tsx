@@ -136,7 +136,7 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
           <Typography
             fontWeight="bold"
             textColor="neutral800"
-            as="h2"
+            tag="h2"
             id="title"
           >
             {formatMessage({
