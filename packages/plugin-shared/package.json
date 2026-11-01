@@ -1,0 +1,36 @@
+{
+  "name": "@vicacha-devs/plugin-shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared build-time constants, i18n registration helpers, and utilities across @vicacha-devs Strapi v5 plugins",
+  "license": "MIT",
+  "author": "Vicacha Devs",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "source": "./src/index.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "node --test tests/*.test.ts",
+    "test:ts": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  }
+}
