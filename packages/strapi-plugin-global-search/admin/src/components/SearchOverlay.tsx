@@ -17,7 +17,7 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
 } from "react";
-import styled from "styled-components";
+import { styled } from "styled-components";
 
 import useGlobalSearch from "../hooks/useGlobalSearch";
 import useSearchableTypes from "../hooks/useSearchableTypes";

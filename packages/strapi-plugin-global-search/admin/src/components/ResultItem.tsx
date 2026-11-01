@@ -1,5 +1,5 @@
 import { Badge, Box, Flex, Typography } from "@strapi/design-system";
-import styled from "styled-components";
+import { styled } from "styled-components";
 
 import type { SearchHit } from "../types";
 import { Highlight } from "./Highlight";

@@ -22,18 +22,13 @@ import {
 import { Layouts } from "@strapi/strapi/admin";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import { styled } from "styled-components";
 
 import { fetchLocales } from "../api/searchApi";
 import { Highlight } from "../components/Highlight";
 import useGlobalSearch from "../hooks/useGlobalSearch";
 import useSearchableTypes from "../hooks/useSearchableTypes";
-import type {
-  ContentTypeSummary,
-  LocaleOption,
-  SearchHit,
-  SearchResponse,
-} from "../types";
+import type { ContentTypeSummary, LocaleOption, SearchHit } from "../types";
 import { t } from "../utils/getTrad";
 
 const ClickableRow = styled(Tr)`
@@ -46,6 +41,16 @@ const ClickableRow = styled(Tr)`
 `;
 
 const PAGE_SIZES = [10, 20, 50];
+
+const TABLE_HEADERS: Array<[string, string]> = [
+  ["table.type", "Type"],
+  ["table.id", "Id"],
+  ["table.name", "Name"],
+  ["table.matched", "Matched"],
+  ["table.locale", "Locale"],
+  ["table.status", "Status"],
+  ["table.updated", "Updated"],
+];
 
 interface ResultsTableProps {
   results: SearchHit[];
@@ -61,31 +66,11 @@ const ResultsTable = ({
   <Table colCount={7} rowCount={results.length}>
     <Thead>
       <Tr>
-        <Th>
-          <Typography variant="sigma">{t("table.type", "Type")}</Typography>
-        </Th>
-        <Th>
-          <Typography variant="sigma">{t("table.id", "Id")}</Typography>
-        </Th>
-        <Th>
-          <Typography variant="sigma">{t("table.name", "Name")}</Typography>
-        </Th>
-        <Th>
-          <Typography variant="sigma">
-            {t("table.matched", "Matched")}
-          </Typography>
-        </Th>
-        <Th>
-          <Typography variant="sigma">{t("table.locale", "Locale")}</Typography>
-        </Th>
-        <Th>
-          <Typography variant="sigma">{t("table.status", "Status")}</Typography>
-        </Th>
-        <Th>
-          <Typography variant="sigma">
-            {t("table.updated", "Updated")}
-          </Typography>
-        </Th>
+        {TABLE_HEADERS.map(([key, label]) => (
+          <Th key={key}>
+            <Typography variant="sigma">{t(key, label)}</Typography>
+          </Th>
+        ))}
       </Tr>
     </Thead>
     <Tbody>
@@ -155,6 +140,17 @@ const ResultsTable = ({
   </Table>
 );
 
+const renderMessageCard = (heading: string, subtitle: string) => (
+  <Box padding={8} background="neutral0" hasRadius>
+    <Typography variant="delta" textColor="neutral600">
+      {heading}
+    </Typography>
+    <Box paddingTop={2}>
+      <Typography textColor="neutral500">{subtitle}</Typography>
+    </Box>
+  </Box>
+);
+
 interface SearchResultsSectionProps {
   status: string;
   isBelowMinChars: boolean;
@@ -196,21 +192,12 @@ const SearchResultsSection = ({
           "page.idle_title",
           "Search every collection type and single type in this project."
         );
-
-    return (
-      <Box padding={8} background="neutral0" hasRadius>
-        <Typography variant="delta" textColor="neutral600">
-          {headingText}
-        </Typography>
-        <Box paddingTop={2}>
-          <Typography textColor="neutral500">
-            {t(
-              "page.idle_subtitle",
-              "Results are ordered by id, then name, then any other field — including fields nested inside components. Press Ctrl/Cmd + K anywhere in the admin to open the quick palette."
-            )}
-          </Typography>
-        </Box>
-      </Box>
+    return renderMessageCard(
+      headingText,
+      t(
+        "page.idle_subtitle",
+        "Results are ordered by id, then name, then any other field — including fields nested inside components. Press Ctrl/Cmd + K anywhere in the admin to open the quick palette."
+      )
     );
   }
 
@@ -229,18 +216,11 @@ const SearchResultsSection = ({
           "Try clearing the content type filters."
         )
       : t("page.no_results_try_different", "Try a shorter or different term.");
-
-    return (
-      <Box padding={8} background="neutral0" hasRadius>
-        <Typography variant="delta" textColor="neutral600">
-          {t("common.no_results", "No results for “{query}”.", {
-            query: trimmedQuery,
-          })}
-        </Typography>
-        <Box paddingTop={2}>
-          <Typography textColor="neutral500">{emptyHint}</Typography>
-        </Box>
-      </Box>
+    return renderMessageCard(
+      t("common.no_results", "No results for “{query}”.", {
+        query: trimmedQuery,
+      }),
+      emptyHint
     );
   }
 
@@ -254,130 +234,112 @@ const SearchResultsSection = ({
 };
 
 interface SearchFiltersBarProps {
-  query: string;
-  onQueryChange: (value: string) => void;
+  search: ReturnType<typeof useGlobalSearch>;
   contentTypes: ContentTypeSummary[];
-  groups: SearchResponse["groups"];
-  selectedTypes: string[];
-  onSelectedTypesChange: (value: string[]) => void;
-  onClearTypes: () => void;
   locales: LocaleOption[];
-  locale: string;
-  onLocaleChange: (value: string) => void;
 }
 
 const SearchFiltersBar = ({
-  query,
-  onQueryChange,
+  search,
   contentTypes,
-  groups,
-  selectedTypes,
-  onSelectedTypesChange,
-  onClearTypes,
   locales,
-  locale,
-  onLocaleChange,
-}: SearchFiltersBarProps) => (
-  <Flex gap={2} alignItems="flex-end" wrap="wrap">
-    <Box grow={1} minWidth="16rem">
-      <SearchForm>
-        <Searchbar
-          name="global-search"
-          value={query}
-          onChange={(event: ChangeEvent<HTMLInputElement>) =>
-            onQueryChange(event.target.value)
-          }
-          onClear={() => onQueryChange("")}
-          clearLabel={t("page.clear_search", "Clear search")}
-          placeholder={t(
-            "page.search_placeholder",
-            "Search by id, name, or any text field…"
-          )}
-        >
-          {t("page.search_label", "Search all content")}
-        </Searchbar>
-      </SearchForm>
-    </Box>
-
-    {contentTypes.length ? (
-      <Box minWidth="18rem" maxWidth="28rem">
-        <MultiSelect
-          aria-label={t("page.content_types_aria", "Content types")}
-          placeholder={t("page.all_content_types", "All content types")}
-          value={selectedTypes}
-          onChange={(value: string[]) => onSelectedTypesChange(value)}
-          onClear={onClearTypes}
-          clearLabel={t(
-            "page.clear_type_filters",
-            "Clear content type filters"
-          )}
-          withTags
-          size="S"
-        >
-          {contentTypes.map((type) => {
-            const group = groups.find((item) => item.uid === type.uid);
-            const countLabel = group
-              ? ` (${group.count}${group.truncated ? "+" : ""})`
-              : "";
-
-            return (
-              <MultiSelectOption key={type.uid} value={type.uid}>
-                {type.displayName}
-                {countLabel}
-              </MultiSelectOption>
-            );
-          })}
-        </MultiSelect>
+}: SearchFiltersBarProps) => {
+  const { groups } = search.data;
+  return (
+    <Flex gap={2} alignItems="flex-end" wrap="wrap">
+      <Box grow={1} minWidth="16rem">
+        <SearchForm>
+          <Searchbar
+            name="global-search"
+            value={search.query}
+            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+              search.setQuery(event.target.value)
+            }
+            onClear={() => search.setQuery("")}
+            clearLabel={t("page.clear_search", "Clear search")}
+            placeholder={t(
+              "page.search_placeholder",
+              "Search by id, name, or any text field…"
+            )}
+          >
+            {t("page.search_label", "Search all content")}
+          </Searchbar>
+        </SearchForm>
       </Box>
-    ) : null}
 
-    {locales.length > 1 ? (
-      <Box minWidth="16rem">
-        <SingleSelect
-          aria-label={t("table.locale", "Locale")}
-          value={locale}
-          onChange={(val: string | number) => onLocaleChange(String(val))}
-          size="S"
-        >
-          <SingleSelectOption value="all">
-            {t("page.all_locales", "All locales")}
-          </SingleSelectOption>
-          {locales.map((loc) => (
-            <SingleSelectOption key={loc.code} value={loc.code}>
-              {loc.name || loc.code}
+      {contentTypes.length ? (
+        <Box minWidth="18rem" maxWidth="28rem">
+          <MultiSelect
+            aria-label={t("page.content_types_aria", "Content types")}
+            placeholder={t("page.all_content_types", "All content types")}
+            value={search.selectedTypes}
+            onChange={search.setSelectedTypes}
+            onClear={search.clearTypes}
+            clearLabel={t(
+              "page.clear_type_filters",
+              "Clear content type filters"
+            )}
+            withTags
+            size="S"
+          >
+            {contentTypes.map((type) => {
+              const group = groups.find((item) => item.uid === type.uid);
+              const countLabel = group
+                ? ` (${group.count}${group.truncated ? "+" : ""})`
+                : "";
+              return (
+                <MultiSelectOption key={type.uid} value={type.uid}>
+                  {type.displayName}
+                  {countLabel}
+                </MultiSelectOption>
+              );
+            })}
+          </MultiSelect>
+        </Box>
+      ) : null}
+
+      {locales.length > 1 ? (
+        <Box minWidth="16rem">
+          <SingleSelect
+            aria-label={t("table.locale", "Locale")}
+            value={search.locale}
+            onChange={(val: string | number) => search.setLocale(String(val))}
+            size="S"
+          >
+            <SingleSelectOption value="all">
+              {t("page.all_locales", "All locales")}
             </SingleSelectOption>
-          ))}
-        </SingleSelect>
-      </Box>
-    ) : null}
-  </Flex>
-);
+            {locales.map((loc) => (
+              <SingleSelectOption key={loc.code} value={loc.code}>
+                {loc.name || loc.code}
+              </SingleSelectOption>
+            ))}
+          </SingleSelect>
+        </Box>
+      ) : null}
+    </Flex>
+  );
+};
 
 interface SearchPaginationBarProps {
-  pagination: SearchResponse["pagination"];
-  groupsCount: number;
-  meta: SearchResponse["meta"];
+  search: ReturnType<typeof useGlobalSearch>;
   pageSize: number;
   onPageSizeChange: (size: number) => void;
-  onPageChange: (page: number) => void;
 }
 
 const SearchPaginationBar = ({
-  pagination,
-  groupsCount,
-  meta,
+  search,
   pageSize,
   onPageSizeChange,
-  onPageChange,
 }: SearchPaginationBarProps) => {
+  const { pagination, groups, meta } = search.data;
   const totalLabel = `${pagination.total}${meta.capped ? "+" : ""}`;
-  const truncatedNotice =
-    meta.truncatedTypes && meta.truncatedTypes.length
-      ? t(
-          "page.truncated_notice",
-          " · some types returned more than the per-type limit"
-        )
-      : "";
+  const truncatedNotice = meta.truncatedTypes?.length
+    ? t(
+        "page.truncated_notice",
+        " · some types returned more than the per-type limit"
+      )
+    : "";
 
   return (
     <Flex justifyContent="space-between" alignItems="center">
@@ -386,10 +348,7 @@ const SearchPaginationBar = ({
           {t(
             "page.results_summary",
             "{total} results across {groups} content types",
-            {
-              total: totalLabel,
-              groups: groupsCount,
-            }
+            { total: totalLabel, groups: groups.length }
           )}
           {truncatedNotice}
         </Typography>
@@ -415,7 +374,7 @@ const SearchPaginationBar = ({
         <Button
           variant="tertiary"
           disabled={pagination.page <= 1}
-          onClick={() => onPageChange(pagination.page - 1)}
+          onClick={() => search.setPage(pagination.page - 1)}
         >
           {t("page.previous", "Previous")}
         </Button>
@@ -428,7 +387,7 @@ const SearchPaginationBar = ({
         <Button
           variant="tertiary"
           disabled={pagination.page >= pagination.pageCount}
-          onClick={() => onPageChange(pagination.page + 1)}
+          onClick={() => search.setPage(pagination.page + 1)}
         >
           {t("page.next", "Next")}
         </Button>
@@ -460,15 +419,13 @@ const HomePage = () => {
     };
   }, []);
 
-  const { results, groups, pagination, meta } = search.data;
+  const { results } = search.data;
   const headerSubtitle =
     schemaStatus === "success"
       ? t(
           "page.subtitle_ready",
           "Searching {count} content types · press Ctrl/Cmd + K anywhere",
-          {
-            count: contentTypes.length,
-          }
+          { count: contentTypes.length }
         )
       : t("page.subtitle_loading", "Discovering content types…");
 
@@ -492,16 +449,9 @@ const HomePage = () => {
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={4}>
           <SearchFiltersBar
-            query={search.query}
-            onQueryChange={search.setQuery}
+            search={search}
             contentTypes={contentTypes}
-            groups={groups}
-            selectedTypes={search.selectedTypes}
-            onSelectedTypesChange={search.setSelectedTypes}
-            onClearTypes={search.clearTypes}
             locales={locales}
-            locale={search.locale}
-            onLocaleChange={search.setLocale}
           />
 
           <SearchResultsSection
@@ -516,12 +466,9 @@ const HomePage = () => {
 
           {results.length ? (
             <SearchPaginationBar
-              pagination={pagination}
-              groupsCount={groups.length}
-              meta={meta}
+              search={search}
               pageSize={pageSize}
               onPageSizeChange={setPageSize}
-              onPageChange={search.setPage}
             />
           ) : null}
         </Flex>

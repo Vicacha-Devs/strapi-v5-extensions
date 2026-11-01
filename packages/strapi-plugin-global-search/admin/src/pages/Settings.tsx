@@ -90,6 +90,37 @@ const extractSaveErrorMessage = (error: unknown): string => {
   );
 };
 
+const getToggleFields = (
+  settings: PluginSettings
+): Array<{
+  name: "deep" | "includeDrafts" | "includePluginContentTypes";
+  label: string;
+  hint: string;
+  checked: boolean;
+}> => [
+  {
+    name: "deep",
+    label: t("settings.deep_label", "Search inside components"),
+    hint: t("settings.deep_hint", "Also match fields nested in components."),
+    checked: Boolean(settings.deep),
+  },
+  {
+    name: "includeDrafts",
+    label: t("settings.drafts_label", "Include drafts"),
+    hint: t("settings.drafts_hint", "Search unpublished entries too."),
+    checked: Boolean(settings.includeDrafts),
+  },
+  {
+    name: "includePluginContentTypes",
+    label: t("settings.plugins_label", "Include plugin content types"),
+    hint: t(
+      "settings.plugins_hint",
+      "Also search visible content types registered by plugins."
+    ),
+    checked: settings.includePluginContentTypes !== false,
+  },
+];
+
 interface SearchBehaviourPanelProps {
   settings: PluginSettings;
   canEdit: boolean;
@@ -106,12 +137,6 @@ const SearchBehaviourPanel = ({
 }: SearchBehaviourPanelProps) => {
   const onText = t("common.on", "On");
   const offText = t("common.off", "Off");
-  const deepLabel = t("settings.deep_label", "Search inside components");
-  const draftsLabel = t("settings.drafts_label", "Include drafts");
-  const pluginsLabel = t(
-    "settings.plugins_label",
-    "Include plugin content types"
-  );
 
   return (
     <Box background="neutral0" padding={6} hasRadius shadow="tableShadow">
@@ -142,82 +167,38 @@ const SearchBehaviourPanel = ({
             </Grid.Item>
           ))}
 
-          <Grid.Item col={4} s={12}>
-            <Field.Root
-              name="deep"
-              hint={t(
-                "settings.deep_hint",
-                "Also match fields nested in components."
-              )}
-            >
-              <Field.Label>{deepLabel}</Field.Label>
-              <Toggle
-                name="deep"
-                aria-label={deepLabel}
-                onLabel={onText}
-                offLabel={offText}
-                checked={Boolean(settings.deep)}
-                onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                  onSetField("deep", event.target.checked)
-                }
-                disabled={!canEdit}
-              />
-              <Field.Hint />
-            </Field.Root>
-          </Grid.Item>
-
-          <Grid.Item col={4} s={12}>
-            <Field.Root
-              name="includeDrafts"
-              hint={t(
-                "settings.drafts_hint",
-                "Search unpublished entries too."
-              )}
-            >
-              <Field.Label>{draftsLabel}</Field.Label>
-              <Toggle
-                name="includeDrafts"
-                aria-label={draftsLabel}
-                onLabel={onText}
-                offLabel={offText}
-                checked={Boolean(settings.includeDrafts)}
-                onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                  onSetField("includeDrafts", event.target.checked)
-                }
-                disabled={!canEdit}
-              />
-              <Field.Hint />
-            </Field.Root>
-          </Grid.Item>
-
-          <Grid.Item col={4} s={12}>
-            <Field.Root
-              name="includePluginContentTypes"
-              hint={t(
-                "settings.plugins_hint",
-                "Also search visible content types registered by plugins."
-              )}
-            >
-              <Field.Label>{pluginsLabel}</Field.Label>
-              <Toggle
-                name="includePluginContentTypes"
-                aria-label={pluginsLabel}
-                onLabel={onText}
-                offLabel={offText}
-                checked={settings.includePluginContentTypes !== false}
-                onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                  onSetField("includePluginContentTypes", event.target.checked)
-                }
-                disabled={!canEdit}
-              />
-              <Field.Hint />
-            </Field.Root>
-          </Grid.Item>
+          {getToggleFields(settings).map((field) => (
+            <Grid.Item key={field.name} col={4} s={12}>
+              <Field.Root name={field.name} hint={field.hint}>
+                <Field.Label>{field.label}</Field.Label>
+                <Toggle
+                  name={field.name}
+                  aria-label={field.label}
+                  onLabel={onText}
+                  offLabel={offText}
+                  checked={field.checked}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    onSetField(field.name, event.target.checked)
+                  }
+                  disabled={!canEdit}
+                />
+                <Field.Hint />
+              </Field.Root>
+            </Grid.Item>
+          ))}
         </Grid.Root>
       </Box>
     </Box>
   );
 };
+
+const CONTENT_TYPE_COLS: Array<[string, string]> = [
+  ["settings.col_content_type", "Content type"],
+  ["settings.col_kind", "Kind"],
+  ["settings.col_main_field", "Main field"],
+  ["settings.col_searchable_fields", "Searchable fields"],
+  ["settings.col_enabled", "Enabled"],
+];
 
 interface ContentTypesTablePanelProps {
   contentTypes: ContentTypeSummary[];
@@ -248,31 +229,11 @@ const ContentTypesTablePanel = ({
     <Table colCount={5} rowCount={contentTypes.length}>
       <Thead>
         <Tr>
-          <Th>
-            <Typography variant="sigma">
-              {t("settings.col_content_type", "Content type")}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {t("settings.col_kind", "Kind")}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {t("settings.col_main_field", "Main field")}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {t("settings.col_searchable_fields", "Searchable fields")}
-            </Typography>
-          </Th>
-          <Th>
-            <Typography variant="sigma">
-              {t("settings.col_enabled", "Enabled")}
-            </Typography>
-          </Th>
+          {CONTENT_TYPE_COLS.map(([key, label]) => (
+            <Th key={key}>
+              <Typography variant="sigma">{t(key, label)}</Typography>
+            </Th>
+          ))}
         </Tr>
       </Thead>
       <Tbody>
@@ -313,9 +274,7 @@ const ContentTypesTablePanel = ({
                 aria-label={t(
                   "settings.enable_for_type",
                   "Enable search for {name}",
-                  {
-                    name: type.displayName,
-                  }
+                  { name: type.displayName }
                 )}
                 onLabel={t("common.on", "On")}
                 offLabel={t("common.off", "Off")}

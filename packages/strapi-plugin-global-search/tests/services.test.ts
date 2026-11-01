@@ -67,54 +67,35 @@ const components = {
   "shared.tag": { attributes: { label: { type: "string" } } },
 };
 
+const makeArticle = (
+  id: number,
+  title: string,
+  slug: string,
+  updatedAt: string,
+  extra: Record<string, unknown> = {}
+) => ({ id, title, slug, body: "z", updatedAt, locale: "en", ...extra });
+
 const rows: Record<string, unknown> = {
   "api::article.article": [
-    {
-      id: 7,
-      documentId: "doc-careers",
-      title: "Careers",
-      slug: "careers",
+    makeArticle(7, "Careers", "careers", "2026-01-01", {
       body: "x",
-      updatedAt: "2026-01-01",
+      documentId: "doc-careers",
       publishedAt: "2026-01-01",
-      locale: "en",
-    },
-    {
-      id: 12,
-      title: "Career advice",
-      slug: "career-advice",
+    }),
+    makeArticle(12, "Career advice", "career-advice", "2026-02-01", {
       body: "y",
-      updatedAt: "2026-02-01",
       publishedAt: null,
-      locale: "en",
-    },
-    {
-      id: 3,
-      title: "Random",
-      slug: "random",
+    }),
+    makeArticle(3, "Random", "random", "2026-03-01", {
       body: "we are hiring for careers now",
-      updatedAt: "2026-03-01",
       publishedAt: "2026-03-01",
-      locale: "en",
-    },
-    {
-      id: 9,
-      title: "Nested",
-      slug: "nested",
-      body: "z",
-      updatedAt: "2026-04-01",
-      locale: "en",
+    }),
+    makeArticle(9, "Nested", "nested", "2026-04-01", {
       seo: { metaTitle: "careers page" },
-    },
-    {
-      id: 55,
-      title: "Repeatable",
-      slug: "rep",
-      body: "z",
-      updatedAt: "2026-05-01",
-      locale: "en",
+    }),
+    makeArticle(55, "Repeatable", "rep", "2026-05-01", {
       tags: [{ label: "other" }, { label: "careers team" }],
-    },
+    }),
   ],
   "api::homepage.homepage": {
     id: 1,
@@ -133,12 +114,8 @@ const strapi: StrapiLike = {
   store: () => ({ get: async () => ({}), set: async () => {} }),
   log: {
     debug() {},
-    warn(msg: string) {
-      console.log("  [warn]", msg);
-    },
-    error(msg: string) {
-      console.log("  [error]", msg);
-    },
+    warn: (msg: string) => console.log("  [warn]", msg),
+    error: (msg: string) => console.log("  [error]", msg),
   },
   plugin: (id: string) => {
     if (id === "content-manager") {
@@ -174,6 +151,17 @@ services.permissions = permissionsFactory();
 services.settings = settingsFactory({ strapi });
 services.search = searchFactory({ strapi });
 
+const isHomepageOnly = (res: { results: Array<{ contentTypeUid: string }> }) =>
+  res.results.every((h) => h.contentTypeUid === "api::homepage.homepage");
+
+const mkCt = (uid: string, displayName: string, extra?: object) => ({
+  uid,
+  kind: "collectionType",
+  info: { displayName },
+  attributes: { name: { type: "string" } },
+  ...extra,
+});
+
 const run = async () => {
   let failures = 0;
   const check = (label: string, fn: () => void) => {
@@ -185,30 +173,26 @@ const run = async () => {
       console.log(`  FAIL  ${label}\n        ${(error as Error).message}`);
     }
   };
+  const checkEq = (label: string, actual: unknown, expected: unknown) =>
+    check(label, () => assert.strictEqual(actual, expected));
 
   console.log("\n== schema introspection ==");
   const types = await services.schema.getSearchableContentTypes();
-  const article = types.find(
-    (t: { uid: string }) => t.uid === "api::article.article"
-  );
-  const homepage = types.find(
-    (t: { uid: string }) => t.uid === "api::homepage.homepage"
-  );
+  const findType = (uid: string) =>
+    types.find((t: { uid: string }) => t.uid === uid);
+  const article = findType("api::article.article");
+  const homepage = findType("api::homepage.homepage");
 
-  check("discovers collection + single types", () =>
-    assert.strictEqual(types.length, 3)
-  );
+  checkEq("discovers collection + single types", types.length, 3);
   check("types with no text fields remain searchable by documentId", () =>
-    assert.ok(
-      types.find((t: { uid: string }) => t.uid === "api::secret.secret")
-    )
+    assert.ok(findType("api::secret.secret"))
   );
-  check("resolves mainField from content-manager config", () =>
-    assert.strictEqual(article.mainField, "title")
+  checkEq(
+    "resolves mainField from content-manager config",
+    article.mainField,
+    "title"
   );
-  check("detects single type kind", () =>
-    assert.strictEqual(homepage.kind, "singleType")
-  );
+  checkEq("detects single type kind", homepage.kind, "singleType");
   check("detects i18n + draft&publish", () =>
     assert.ok(article.localized && article.draftAndPublish)
   );
@@ -220,17 +204,11 @@ const run = async () => {
   );
   check("skips media/relation/json/dynamiczone/private/password", () => {
     const all = [...article.topLevelFields, ...article.nestedFields].join(",");
-    [
-      "cover",
-      "author",
-      "payload",
-      "secret",
-      "password",
-      "zone",
-      "views",
-    ].forEach((name) =>
-      assert.ok(!all.includes(name), `${name} should not be searchable`)
-    );
+    for (const name of "cover,author,payload,secret,password,zone,views".split(
+      ","
+    )) {
+      assert.ok(!all.includes(name), `${name} should not be searchable`);
+    }
   });
   check("walks into components (depth 1 + 2)", () => {
     assert.ok(article.nestedFields.includes("seo.metaTitle"));
@@ -256,16 +234,12 @@ const run = async () => {
     assert.ok(!JSON.stringify(filtersText).includes('"$eq"'))
   );
   check("adds id $eq for a numeric query", () =>
-    assert.ok(filtersNumeric.$or.some((c: any) => c.id && c.id.$eq === 42))
+    assert.ok(filtersNumeric.$or.some((c: any) => c.id?.$eq === 42))
   );
   check("nests component paths", () =>
     assert.ok(
       filtersText.$or.some(
-        (c: any) =>
-          c.seo &&
-          c.seo.social &&
-          c.seo.social.handle &&
-          c.seo.social.handle.$containsi === "careers"
+        (c: any) => c.seo?.social?.handle?.$containsi === "careers"
       )
     )
   );
@@ -309,40 +283,28 @@ const run = async () => {
   console.log("\n== ranking ==");
   const tier = (entry: unknown) =>
     services.ranking.score(entry, article, "careers").tier;
-  check("id exact beats everything", () =>
-    assert.strictEqual(
-      services.ranking.score({ id: 7, slug: "careers" }, article, "careers")
-        .tier,
-      0
-    )
+  checkEq("id exact beats everything", tier({ id: 7, slug: "careers" }), 0);
+  checkEq("name exact -> tier 2", tier({ id: 1, title: "Careers" }), 2);
+  checkEq(
+    "name starts-with -> tier 3",
+    tier({ id: 1, title: "Careers page" }),
+    3
   );
-  check("name exact -> tier 2", () =>
-    assert.strictEqual(tier({ id: 1, title: "Careers" }), 2)
+  checkEq("name contains -> tier 4", tier({ id: 1, title: "Our careers" }), 4);
+  checkEq(
+    "other field -> tier 5",
+    tier({ id: 1, title: "x", body: "see careers" }),
+    5
   );
-  check("name starts-with -> tier 3", () =>
-    assert.strictEqual(tier({ id: 1, title: "Careers page" }), 3)
+  checkEq(
+    "nested component field -> tier 6",
+    tier({ id: 1, title: "x", seo: { metaTitle: "careers" } }),
+    6
   );
-  check("name contains -> tier 4", () =>
-    assert.strictEqual(tier({ id: 1, title: "Our careers" }), 4)
-  );
-  check("other field -> tier 5", () =>
-    assert.strictEqual(tier({ id: 1, title: "x", body: "see careers" }), 5)
-  );
-  check("nested component field -> tier 6", () =>
-    assert.strictEqual(
-      tier({ id: 1, title: "x", seo: { metaTitle: "careers" } }),
-      6
-    )
-  );
-  check("repeatable component values are reachable", () =>
-    assert.strictEqual(
-      tier({
-        id: 1,
-        title: "x",
-        tags: [{ label: "no" }, { label: "careers" }],
-      }),
-      6
-    )
+  checkEq(
+    "repeatable component values are reachable",
+    tier({ id: 1, title: "x", tags: [{ label: "no" }, { label: "careers" }] }),
+    6
   );
   check("snippet is extracted and de-marked-up", () => {
     const scored = services.ranking.score(
@@ -373,9 +335,7 @@ const run = async () => {
         .sort((a: number, b: number) => a - b)
     )
   );
-  check('slug "careers" wins the top spot', () =>
-    assert.strictEqual(result.results[0].id, 7)
-  );
+  checkEq('slug "careers" wins the top spot', result.results[0].id, 7);
   check("single type is included and linked correctly", () => {
     const single = result.results.find((h: any) => h.kind === "singleType");
     assert.ok(single, "homepage single type missing");
@@ -384,31 +344,30 @@ const run = async () => {
       "/content-manager/single-types/api::homepage.homepage"
     );
   });
-  check("collection links use documentId and locale", () =>
-    assert.strictEqual(
-      result.results.find((h: any) => h.id === 7).adminUrl,
-      "/content-manager/collection-types/api::article.article/doc-careers?locale=en"
-    )
+  checkEq(
+    "collection links use documentId and locale",
+    result.results.find((h: any) => h.id === 7).adminUrl,
+    "/content-manager/collection-types/api::article.article/doc-careers?locale=en"
   );
-  check("draft/published status is reported", () => {
-    const draft = result.results.find((h: any) => h.id === 12);
-    assert.strictEqual(draft.status, "draft");
-  });
-  check("groups summarise per content type", () =>
-    assert.strictEqual(
-      result.groups.reduce((sum: number, g: any) => sum + g.count, 0),
-      result.pagination.total
-    )
+  checkEq(
+    "draft/published status is reported",
+    result.results.find((h: any) => h.id === 12).status,
+    "draft"
+  );
+  checkEq(
+    "groups summarise per content type",
+    result.groups.reduce((sum: number, g: any) => sum + g.count, 0),
+    result.pagination.total
   );
 
   const short = await services.search.search({ query: "a" });
-  check("queries below minChars return nothing", () =>
-    assert.strictEqual(short.results.length, 0)
-  );
+  checkEq("queries below minChars return nothing", short.results.length, 0);
 
   const wildcard = await services.search.search({ query: "%%%%" });
-  check("a bare wildcard query cannot match everything", () =>
-    assert.strictEqual(wildcard.results.length, 0)
+  checkEq(
+    "a bare wildcard query cannot match everything",
+    wildcard.results.length,
+    0
   );
 
   const denied = await services.search.search({
@@ -418,24 +377,14 @@ const run = async () => {
     },
   });
   check("RBAC filter hides content types the user cannot read", () =>
-    assert.ok(
-      denied.results.every(
-        (h: any) => h.contentTypeUid === "api::homepage.homepage"
-      )
-    )
+    assert.ok(isHomepageOnly(denied))
   );
 
   const filtered = await services.search.search({
     query: "careers",
     types: ["api::homepage.homepage"],
   });
-  check("type filter is honoured", () =>
-    assert.ok(
-      filtered.results.every(
-        (h: any) => h.contentTypeUid === "api::homepage.homepage"
-      )
-    )
-  );
+  check("type filter is honoured", () => assert.ok(isHomepageOnly(filtered)));
 
   const paged = await services.search.search({
     query: "careers",
@@ -451,9 +400,9 @@ const run = async () => {
   console.log("\n== resilience ==");
   const originalDocuments = strapi.documents;
   strapi.documents = (uid: string) => ({
-    findMany: async (params: unknown) => {
+    findMany: async (queryParams: unknown) => {
       if (uid === "api::article.article") throw new Error("boom");
-      return originalDocuments(uid).findMany(params);
+      return originalDocuments(uid).findMany(queryParams);
     },
   });
   const partial = await services.search.search({ query: "careers" });
@@ -465,98 +414,64 @@ const run = async () => {
   });
 
   console.log("\n== plugin content types & structured rich text ==");
-  (contentTypes as Record<string, unknown>)["plugin::events.event"] = {
-    uid: "plugin::events.event",
-    kind: "collectionType",
-    info: { displayName: "Event" },
-    options: { draftAndPublish: true },
-    attributes: {
-      title: { type: "string" },
-      content: {
-        type: "customField",
-        customField: "plugin::tiptap-editor.RichText",
+  Object.assign(contentTypes, {
+    "plugin::events.event": mkCt("plugin::events.event", "Event", {
+      options: { draftAndPublish: true },
+      attributes: {
+        title: { type: "string" },
+        content: {
+          type: "customField",
+          customField: "plugin::tiptap-editor.RichText",
+        },
       },
-    },
-  };
-  (contentTypes as Record<string, unknown>)["plugin::upload.file"] = {
-    uid: "plugin::upload.file",
-    kind: "collectionType",
-    info: { displayName: "File" },
-    attributes: { name: { type: "string" } },
-  };
-  (contentTypes as Record<string, unknown>)["plugin::custom.hidden"] = {
-    uid: "plugin::custom.hidden",
-    kind: "collectionType",
-    info: { displayName: "Hidden" },
-    pluginOptions: { "content-manager": { visible: false } },
-    attributes: { name: { type: "string" } },
-  };
+    }),
+    "plugin::upload.file": mkCt("plugin::upload.file", "File"),
+    "plugin::custom.hidden": mkCt("plugin::custom.hidden", "Hidden", {
+      pluginOptions: { "content-manager": { visible: false } },
+    }),
+  });
 
   services.schema.clearCache();
   const withPlugins = await services.schema.getSearchableContentTypes({
     force: true,
   });
-  const eventDescriptor = withPlugins.find(
-    (t: { uid: string }) => t.uid === "plugin::events.event"
-  );
+  const findPlugin = (uid: string) =>
+    withPlugins.find((t: { uid: string }) => t.uid === uid);
+  const eventDescriptor = findPlugin("plugin::events.event");
 
   check(
     "discovers visible plugin::* content types while skipping system/hidden plugins",
     () => {
       assert.ok(eventDescriptor, "plugin::events.event should be discovered");
-      assert.ok(
-        !withPlugins.some(
-          (t: { uid: string }) => t.uid === "plugin::upload.file"
-        )
-      );
-      assert.ok(
-        !withPlugins.some(
-          (t: { uid: string }) => t.uid === "plugin::custom.hidden"
-        )
-      );
+      assert.ok(!findPlugin("plugin::upload.file"));
+      assert.ok(!findPlugin("plugin::custom.hidden"));
     }
   );
-  check("indexes customField attributes as searchable top-level fields", () => {
-    assert.ok(eventDescriptor.topLevelFields.includes("content"));
-  });
+  check("indexes customField attributes as searchable top-level fields", () =>
+    assert.ok(eventDescriptor.topLevelFields.includes("content"))
+  );
   check(
     "extracts plain text from ProseMirror/Tiptap JSON without matching JSON keys",
     () => {
-      const tiptapPayload = JSON.stringify({
+      const text = "Join our Friday community lecture on careers";
+      const content = JSON.stringify({
         doc: {
           type: "doc",
-          content: [
-            {
-              type: "paragraph",
-              content: [
-                {
-                  type: "text",
-                  text: "Join our Friday community lecture on careers",
-                },
-              ],
-            },
-          ],
+          content: [{ type: "paragraph", content: [{ type: "text", text }] }],
         },
         metrics: { words: 7, readingTimeMinutes: 1 },
       });
 
-      const hitScore = services.ranking.score(
-        { id: 101, title: "Weekly Gathering", content: tiptapPayload },
-        eventDescriptor,
-        "careers"
-      );
+      const entry = { id: 101, title: "Weekly Gathering", content };
+      const score = (q: string) =>
+        services.ranking.score(entry, eventDescriptor, q);
+      const hitScore = score("careers");
       assert.strictEqual(hitScore.tier, 5);
       assert.ok(
         hitScore.matchedSnippet.includes("Friday community lecture on careers")
       );
       assert.ok(!hitScore.matchedSnippet.includes("readingTimeMinutes"));
-
-      const jsonKeyScore = services.ranking.score(
-        { id: 101, title: "Weekly Gathering", content: tiptapPayload },
-        eventDescriptor,
-        "readingTimeMinutes"
-      );
-      assert.strictEqual(jsonKeyScore.tier, 7);
+      assert.strictEqual(score("readingTimeMinutes").tier, 7);
     }
   );
 
