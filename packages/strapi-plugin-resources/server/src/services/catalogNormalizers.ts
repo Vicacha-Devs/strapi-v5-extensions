@@ -41,7 +41,9 @@ function asOptNumber(val: unknown): number | undefined {
 }
 
 function resolveDocId(row: Record<string, unknown>): string {
-  return typeof row.documentId === "string" ? row.documentId : String(row.id ?? "");
+  return typeof row.documentId === "string"
+    ? row.documentId
+    : String(row.id ?? "");
 }
 
 function resolveSecondaryDateFormatted(
@@ -100,7 +102,10 @@ export function normalizePublicationRow(
     allowPublicDownload: row.allowPublicDownload !== false,
     externalDownloadUrl: asOptString(row.externalDownloadUrl),
     file: normalizeUploadFile(row.file, settings.enableCloudinaryOptimization),
-    coverImage: normalizeUploadFile(row.coverImage, settings.enableCloudinaryOptimization),
+    coverImage: normalizeUploadFile(
+      row.coverImage,
+      settings.enableCloudinaryOptimization
+    ),
     locale,
   };
 }
@@ -112,9 +117,17 @@ export function normalizeGalleryAlbumRow(
   const locale = asNonEmptyString(row.locale, settings.defaultLocale);
   const eventDate = asOptString(row.eventDate);
   const secondaryDateOverride = asTrimmedOptString(row.secondaryDateOverride);
-  const photos = normalizePhotoArray(row.photos, settings.enableCloudinaryOptimization);
+  const photos = normalizePhotoArray(
+    row.photos,
+    settings.enableCloudinaryOptimization
+  );
   const coverPhoto =
-    normalizeUploadFile(row.coverPhoto, settings.enableCloudinaryOptimization) ?? photos[0] ?? null;
+    normalizeUploadFile(
+      row.coverPhoto,
+      settings.enableCloudinaryOptimization
+    ) ??
+    photos[0] ??
+    null;
   const storedPhotoCount = Math.max(0, asNumber(row.photoCount, 0));
 
   return {
@@ -131,7 +144,8 @@ export function normalizeGalleryAlbumRow(
       settings,
       locale
     ),
-    mediaFolderId: typeof row.mediaFolderId === "number" ? row.mediaFolderId : null,
+    mediaFolderId:
+      typeof row.mediaFolderId === "number" ? row.mediaFolderId : null,
     mediaFolderPath: asOptString(row.mediaFolderPath),
     photographerCredit: asOptString(row.photographerCredit),
     framingNotes: asOptString(row.framingNotes),
@@ -195,7 +209,10 @@ export function assertPublicationDownloadable(
   }
 }
 
-export function resolvePublicationDownloadUrl(record: PublicationRecord, slug: string): string {
+export function resolvePublicationDownloadUrl(
+  record: PublicationRecord,
+  slug: string
+): string {
   const downloadUrl = record.file?.url || record.externalDownloadUrl || "";
   if (!downloadUrl) {
     throw new Error(`Publication "${slug}" has no downloadable file attached`);
@@ -269,7 +286,10 @@ export function buildGalleryAlbumUpdateData(
   const photoIds = validatedData.photos;
   const hasPhotos = Array.isArray(photoIds);
   const shouldDefaultCover =
-    hasPhotos && photoIds.length > 0 && !validatedData.coverPhoto && !existing.coverPhoto;
+    hasPhotos &&
+    photoIds.length > 0 &&
+    !validatedData.coverPhoto &&
+    !existing.coverPhoto;
 
   return {
     ...validatedData,

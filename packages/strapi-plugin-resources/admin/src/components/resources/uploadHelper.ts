@@ -8,17 +8,26 @@ export const CARD_BORDER_STYLE: React.CSSProperties = {
 
 export function useResourcesTranslation() {
   const { formatMessage, locale } = useIntl();
-  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
-    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
+  const t = (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
   return { t, locale };
 }
 
-export function getContentManagerUrl(uid: string, documentId?: string, locale?: string): string {
+export function getContentManagerUrl(
+  uid: string,
+  documentId?: string,
+  locale?: string
+): string {
   if (!documentId) {
     return `/admin/content-manager/collection-types/${uid}`;
   }
   const base = `/admin/content-manager/collection-types/${uid}/${encodeURIComponent(documentId)}`;
-  return locale ? `${base}?plugins[i18n][locale]=${encodeURIComponent(locale)}` : base;
+  return locale
+    ? `${base}?plugins[i18n][locale]=${encodeURIComponent(locale)}`
+    : base;
 }
 
 function strVal(val: unknown, fallback = ""): string {
@@ -41,7 +50,9 @@ function mapUploadedAsset(raw: Record<string, unknown>): MediaLibraryAsset {
     ext: strVal(raw.ext),
     sizeInKB: sizeKB,
     formattedSize:
-      sizeKB >= 1024 ? `${(sizeKB / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(sizeKB))} KB`,
+      sizeKB >= 1024
+        ? `${(sizeKB / 1024).toFixed(1)} MB`
+        : `${Math.max(1, Math.round(sizeKB))} KB`,
   };
 }
 

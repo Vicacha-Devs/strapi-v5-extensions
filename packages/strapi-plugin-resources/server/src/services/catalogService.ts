@@ -47,16 +47,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const settings = await getSettings();
       const filters: Record<string, unknown> = {};
       if (params?.category) filters.category = params.category;
-      if (typeof params?.featured === "boolean") filters.featured = params.featured;
+      if (typeof params?.featured === "boolean")
+        filters.featured = params.featured;
 
-      const rows = (await strapi.documents(CONTENT_TYPE_UIDS.publication).findMany({
-        ...(params?.locale ? { locale: params.locale } : {}),
-        filters: filters as never,
-        populate: ["file", "coverImage"],
-        sort: { featured: "desc", publishedAtDate: "desc" },
-      })) as Record<string, unknown>[];
+      const rows = (await strapi
+        .documents(CONTENT_TYPE_UIDS.publication)
+        .findMany({
+          ...(params?.locale ? { locale: params.locale } : {}),
+          filters: filters as never,
+          populate: ["file", "coverImage"],
+          sort: { featured: "desc", publishedAtDate: "desc" },
+        })) as Record<string, unknown>[];
 
-      let normalized = (rows || []).map((row) => normalizePublicationRow(row, settings));
+      let normalized = (rows || []).map((row) =>
+        normalizePublicationRow(row, settings)
+      );
       if (params?.q && params.q.trim()) {
         const needle = params.q.trim().toLowerCase();
         normalized = normalized.filter(
@@ -69,25 +74,33 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return normalized;
     },
 
-    async getPublicationBySlug(slug: string, locale?: string): Promise<PublicationRecord | null> {
+    async getPublicationBySlug(
+      slug: string,
+      locale?: string
+    ): Promise<PublicationRecord | null> {
       const list = await this.listPublications({ locale });
       return list.find((item) => item.slug === slug) || null;
     },
 
-    async createPublication(payload: unknown, locale?: string): Promise<PublicationRecord> {
+    async createPublication(
+      payload: unknown,
+      locale?: string
+    ): Promise<PublicationRecord> {
       const validation = validatePublicationInput(payload);
       if (!validation.valid || !validation.data) {
         throw new Error(validation.errors.join("; "));
       }
       const settings = await getSettings();
-      const created = (await strapi.documents(CONTENT_TYPE_UIDS.publication).create({
-        ...(locale ? { locale } : {}),
-        data: {
-          ...validation.data,
-          downloadCount: 0,
-        } as never,
-        populate: ["file", "coverImage"],
-      })) as Record<string, unknown>;
+      const created = (await strapi
+        .documents(CONTENT_TYPE_UIDS.publication)
+        .create({
+          ...(locale ? { locale } : {}),
+          data: {
+            ...validation.data,
+            downloadCount: 0,
+          } as never,
+          populate: ["file", "coverImage"],
+        })) as Record<string, unknown>;
       return normalizePublicationRow(created, settings);
     },
 
@@ -132,7 +145,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (!documentId) {
         throw new Error("Publication documentId is required");
       }
-      const docs = strapi.documents(CONTENT_TYPE_UIDS.publication) as unknown as {
+      const docs = strapi.documents(
+        CONTENT_TYPE_UIDS.publication
+      ) as unknown as {
         delete?: (opts: { documentId: string }) => Promise<unknown>;
       };
       if (typeof docs.delete === "function") {
@@ -141,13 +156,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return { deleted: true };
     },
 
-    async recordPublicationDownload(slug: string, locale?: string): Promise<DownloadTicketResult> {
+    async recordPublicationDownload(
+      slug: string,
+      locale?: string
+    ): Promise<DownloadTicketResult> {
       const settings = await getSettings();
-      const rows = (await strapi.documents(CONTENT_TYPE_UIDS.publication).findMany({
-        ...(locale ? { locale } : {}),
-        filters: { slug },
-        populate: ["file", "coverImage"],
-      })) as Record<string, unknown>[];
+      const rows = (await strapi
+        .documents(CONTENT_TYPE_UIDS.publication)
+        .findMany({
+          ...(locale ? { locale } : {}),
+          filters: { slug },
+          populate: ["file", "coverImage"],
+        })) as Record<string, unknown>[];
 
       const row = rows?.[0];
       if (!row) {
@@ -178,41 +198,52 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const settings = await getSettings();
       const filters: Record<string, unknown> = {};
       if (params?.category) filters.category = params.category;
-      if (typeof params?.featured === "boolean") filters.featured = params.featured;
+      if (typeof params?.featured === "boolean")
+        filters.featured = params.featured;
 
-      const rows = (await strapi.documents(CONTENT_TYPE_UIDS.galleryAlbum).findMany({
-        ...(params?.locale ? { locale: params.locale } : {}),
-        filters: filters as never,
-        populate: ["coverPhoto", "photos"],
-        sort: { sortOrder: "asc", eventDate: "desc" },
-      })) as Record<string, unknown>[];
+      const rows = (await strapi
+        .documents(CONTENT_TYPE_UIDS.galleryAlbum)
+        .findMany({
+          ...(params?.locale ? { locale: params.locale } : {}),
+          filters: filters as never,
+          populate: ["coverPhoto", "photos"],
+          sort: { sortOrder: "asc", eventDate: "desc" },
+        })) as Record<string, unknown>[];
 
       return (rows || []).map((row) => normalizeGalleryAlbumRow(row, settings));
     },
 
-    async getGalleryAlbumBySlug(slug: string, locale?: string): Promise<GalleryAlbumRecord | null> {
+    async getGalleryAlbumBySlug(
+      slug: string,
+      locale?: string
+    ): Promise<GalleryAlbumRecord | null> {
       const list = await this.listGalleryAlbums({ locale });
       return list.find((item) => item.slug === slug) || null;
     },
 
-    async createGalleryAlbum(payload: unknown, locale?: string): Promise<GalleryAlbumRecord> {
+    async createGalleryAlbum(
+      payload: unknown,
+      locale?: string
+    ): Promise<GalleryAlbumRecord> {
       const validation = validateGalleryAlbumInput(payload);
       if (!validation.valid || !validation.data) {
         throw new Error(validation.errors.join("; "));
       }
       const settings = await getSettings();
       const photoIds = validation.data.photos || [];
-      const created = (await strapi.documents(CONTENT_TYPE_UIDS.galleryAlbum).create({
-        ...(locale ? { locale } : {}),
-        data: {
-          ...validation.data,
-          ...(photoIds.length > 0 && !validation.data.coverPhoto
-            ? { coverPhoto: photoIds[0] }
-            : {}),
-          photoCount: photoIds.length,
-        } as never,
-        populate: ["coverPhoto", "photos"],
-      })) as Record<string, unknown>;
+      const created = (await strapi
+        .documents(CONTENT_TYPE_UIDS.galleryAlbum)
+        .create({
+          ...(locale ? { locale } : {}),
+          data: {
+            ...validation.data,
+            ...(photoIds.length > 0 && !validation.data.coverPhoto
+              ? { coverPhoto: photoIds[0] }
+              : {}),
+            photoCount: photoIds.length,
+          } as never,
+          populate: ["coverPhoto", "photos"],
+        })) as Record<string, unknown>;
       return normalizeGalleryAlbumRow(created, settings);
     },
 
@@ -249,11 +280,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return normalizeGalleryAlbumRow(updated || merged, settings);
     },
 
-    async deleteGalleryAlbum(documentId: string): Promise<{ deleted: boolean }> {
+    async deleteGalleryAlbum(
+      documentId: string
+    ): Promise<{ deleted: boolean }> {
       if (!documentId) {
         throw new Error("Gallery album documentId is required");
       }
-      const docs = strapi.documents(CONTENT_TYPE_UIDS.galleryAlbum) as unknown as {
+      const docs = strapi.documents(
+        CONTENT_TYPE_UIDS.galleryAlbum
+      ) as unknown as {
         delete?: (opts: { documentId: string }) => Promise<unknown>;
       };
       if (typeof docs.delete === "function") {
@@ -275,37 +310,47 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         filters.letterGroup = params.letterGroup.toUpperCase();
       }
 
-      const rows = (await strapi.documents(CONTENT_TYPE_UIDS.glossaryTerm).findMany({
-        ...(params?.locale ? { locale: params.locale } : {}),
-        filters: filters as never,
-        populate: ["pronunciationAudio"],
-        sort: { letterGroup: "asc", term: "asc" },
-      })) as Record<string, unknown>[];
+      const rows = (await strapi
+        .documents(CONTENT_TYPE_UIDS.glossaryTerm)
+        .findMany({
+          ...(params?.locale ? { locale: params.locale } : {}),
+          filters: filters as never,
+          populate: ["pronunciationAudio"],
+          sort: { letterGroup: "asc", term: "asc" },
+        })) as Record<string, unknown>[];
 
-      let normalized = (rows || []).map((row) => normalizeGlossaryTermRow(row, settings));
+      let normalized = (rows || []).map((row) =>
+        normalizeGlossaryTermRow(row, settings)
+      );
       if (params?.q && params.q.trim()) {
         const needle = params.q.trim().toLowerCase();
         normalized = normalized.filter(
           (item) =>
             item.term.toLowerCase().includes(needle) ||
             item.definition.toLowerCase().includes(needle) ||
-            (item.transliteration && item.transliteration.toLowerCase().includes(needle))
+            (item.transliteration &&
+              item.transliteration.toLowerCase().includes(needle))
         );
       }
       return normalized;
     },
 
-    async createGlossaryTerm(payload: unknown, locale?: string): Promise<GlossaryTermRecord> {
+    async createGlossaryTerm(
+      payload: unknown,
+      locale?: string
+    ): Promise<GlossaryTermRecord> {
       const validation = validateGlossaryTermInput(payload);
       if (!validation.valid || !validation.data) {
         throw new Error(validation.errors.join("; "));
       }
       const settings = await getSettings();
-      const created = (await strapi.documents(CONTENT_TYPE_UIDS.glossaryTerm).create({
-        ...(locale ? { locale } : {}),
-        data: validation.data as never,
-        populate: ["pronunciationAudio"],
-      })) as Record<string, unknown>;
+      const created = (await strapi
+        .documents(CONTENT_TYPE_UIDS.glossaryTerm)
+        .create({
+          ...(locale ? { locale } : {}),
+          data: validation.data as never,
+          populate: ["pronunciationAudio"],
+        })) as Record<string, unknown>;
       return normalizeGlossaryTermRow(created, settings);
     },
 
@@ -346,11 +391,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return normalizeGlossaryTermRow(updated || merged, settings);
     },
 
-    async deleteGlossaryTerm(documentId: string): Promise<{ deleted: boolean }> {
+    async deleteGlossaryTerm(
+      documentId: string
+    ): Promise<{ deleted: boolean }> {
       if (!documentId) {
         throw new Error("Glossary term documentId is required");
       }
-      const docs = strapi.documents(CONTENT_TYPE_UIDS.glossaryTerm) as unknown as {
+      const docs = strapi.documents(
+        CONTENT_TYPE_UIDS.glossaryTerm
+      ) as unknown as {
         delete?: (opts: { documentId: string }) => Promise<unknown>;
       };
       if (typeof docs.delete === "function") {

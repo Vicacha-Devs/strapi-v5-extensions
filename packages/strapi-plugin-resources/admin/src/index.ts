@@ -55,10 +55,14 @@ function resolveActiveLocale(query?: EditViewQuery): string {
     return fromQuery;
   }
   if (typeof window !== "undefined") {
-    const urlLoc = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
+    const urlLoc = new URLSearchParams(window.location.search).get(
+      "plugins[i18n][locale]"
+    );
     if (urlLoc) return urlLoc;
     try {
-      const stored = window.localStorage?.getItem("strapi-admin-language")?.replace(/^"|"$/g, "");
+      const stored = window.localStorage
+        ?.getItem("strapi-admin-language")
+        ?.replace(/^"|"$/g, "");
       if (stored) return stored;
     } catch {
       // Ignore storage access errors
@@ -159,42 +163,62 @@ export default {
     ) => void;
   }) {
     if (typeof app.registerHook === "function") {
-      app.registerHook("Admin/CM/pages/EditView/mutate-edit-view-layout", ({ layout, query }) => {
-        const uid = detectPluginUidFromLocation();
-        if (!uid || !Array.isArray(layout?.layout)) {
-          return { layout, query };
+      app.registerHook(
+        "Admin/CM/pages/EditView/mutate-edit-view-layout",
+        ({ layout, query }) => {
+          const uid = detectPluginUidFromLocation();
+          if (!uid || !Array.isArray(layout?.layout)) {
+            return { layout, query };
+          }
+          const locale = resolveActiveLocale(query);
+          const globalMap = getGlobalI18nMap();
+          const dict =
+            LOADED_TRADS[locale] || globalMap[locale] || LOADED_TRADS.en || {};
+
+          const nextPanels = layout.layout.map((panel) =>
+            Array.isArray(panel)
+              ? panel.map((row) =>
+                  Array.isArray(row)
+                    ? row.map((field) => localizeField(field, uid, dict))
+                    : row
+                )
+              : panel
+          );
+
+          return {
+            query,
+            layout: {
+              ...layout,
+              layout: nextPanels,
+            },
+          };
         }
-        const locale = resolveActiveLocale(query);
-        const globalMap = getGlobalI18nMap();
-        const dict = LOADED_TRADS[locale] || globalMap[locale] || LOADED_TRADS.en || {};
-
-        const nextPanels = layout.layout.map((panel) =>
-          Array.isArray(panel)
-            ? panel.map((row) =>
-                Array.isArray(row) ? row.map((field) => localizeField(field, uid, dict)) : row
-              )
-            : panel
-        );
-
-        return {
-          query,
-          layout: {
-            ...layout,
-            layout: nextPanels,
-          },
-        };
-      });
+      );
     }
   },
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
     const allLocales = Array.from(
-      new Set([...locales, "en", "es", "ar", "tr", "fr", "de", "it", "pt", "ru", "zh"])
+      new Set([
+        ...locales,
+        "en",
+        "es",
+        "ar",
+        "tr",
+        "fr",
+        "de",
+        "it",
+        "pt",
+        "ru",
+        "zh",
+      ])
     );
     return Promise.all(
       allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(
+            `./translations/${locale}.json`
+          );
           const prefixed: Record<string, string> = {
             ...CM_LABEL_TRANSLATIONS.en,
             ...CM_PLACEHOLDER_TRANSLATIONS.en,
@@ -205,7 +229,9 @@ export default {
           };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
-            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`)
+              ? k
+              : `${PLUGIN_ID}.${k}`;
             prefixed[fullKey] = v;
           }
           LOADED_TRADS[locale] = prefixed;

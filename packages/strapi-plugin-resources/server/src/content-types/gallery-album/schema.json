@@ -53,7 +53,14 @@
     },
     "category": {
       "type": "enumeration",
-      "enum": ["architecture", "community", "events", "ramadan_eid", "heritage", "press"],
+      "enum": [
+        "architecture",
+        "community",
+        "events",
+        "ramadan_eid",
+        "heritage",
+        "press"
+      ],
       "default": "community",
       "required": true,
       "pluginOptions": {

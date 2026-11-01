@@ -69,7 +69,9 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
 
   const formFileInputRef = React.useRef<HTMLInputElement | null>(null);
   const rowFileInputRef = React.useRef<HTMLInputElement | null>(null);
-  const [uploadingRowDocId, setUploadingRowDocId] = React.useState<string | null>(null);
+  const [uploadingRowDocId, setUploadingRowDocId] = React.useState<
+    string | null
+  >(null);
 
   const [selectedFileName, setSelectedFileName] = React.useState<string>("");
 
@@ -87,7 +89,9 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
     setExternalUrl("");
   };
 
-  const handleUploadForForm = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadForForm = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     setUploading(true);
@@ -97,9 +101,13 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         setSelectedFileId(String(uploaded[0].id));
         setSelectedFileName(uploaded[0].name || files[0].name);
         onStatusMessage(
-          t("pub.msg.uploaded_attached", 'Uploaded "{name}" and attached it to this publication.', {
-            name: uploaded[0].name,
-          })
+          t(
+            "pub.msg.uploaded_attached",
+            'Uploaded "{name}" and attached it to this publication.',
+            {
+              name: uploaded[0].name,
+            }
+          )
         );
         await onReload();
       }
@@ -123,10 +131,14 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           fileId: Number(uploaded[0].id) || uploaded[0].id,
         });
         onStatusMessage(
-          t("pub.msg.attached_row", 'Attached "{name}" ({size}) to publication.', {
-            name: uploaded[0].name,
-            size: uploaded[0].formattedSize,
-          })
+          t(
+            "pub.msg.attached_row",
+            'Attached "{name}" ({size}) to publication.',
+            {
+              name: uploaded[0].name,
+              size: uploaded[0].formattedSize,
+            }
+          )
         );
         await onReload();
       }
@@ -141,7 +153,9 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
 
   const handleSave = async () => {
     if (!title.trim()) {
-      onStatusMessage(t("pub.msg.title_required", "Please enter a Publication Title."));
+      onStatusMessage(
+        t("pub.msg.title_required", "Please enter a Publication Title.")
+      );
       return;
     }
     try {
@@ -156,7 +170,10 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         allowPublicDownload: true,
       };
       if (editingDocId) {
-        await put(`/${PLUGIN_ID}/publications/${encodeURIComponent(editingDocId)}`, payload);
+        await put(
+          `/${PLUGIN_ID}/publications/${encodeURIComponent(editingDocId)}`,
+          payload
+        );
         onStatusMessage(`Updated publication "${title.trim()}".`);
       } else {
         await post(`/${PLUGIN_ID}/publications`, payload);
@@ -172,7 +189,9 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
   const handleDelete = async (pub: PublicationRecord) => {
     if (!pub.documentId) return;
     try {
-      await del(`/${PLUGIN_ID}/publications/${encodeURIComponent(pub.documentId)}`);
+      await del(
+        `/${PLUGIN_ID}/publications/${encodeURIComponent(pub.documentId)}`
+      );
       onStatusMessage(`Removed publication "${pub.title}".`);
       if (editingDocId === pub.documentId) resetForm();
       await onReload();
@@ -257,14 +276,18 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
                 "Title shown in the public Digital Library"
               )}
             >
-              <Field.Label>{t("field.publication_title", "Publication Title")}</Field.Label>
+              <Field.Label>
+                {t("field.publication_title", "Publication Title")}
+              </Field.Label>
               <TextInput
                 placeholder={t(
                   "placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf",
                   "e.g., Mosque Visitor & Prayer Guide"
                 )}
                 value={title}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setTitle(e.target.value)
+                }
               />
               <Field.Hint />
             </Field.Root>
@@ -280,9 +303,15 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
               <Field.Label>{t("page.ui.category", "Category")}</Field.Label>
               <SingleSelect
                 value={category}
-                onChange={(val: string | number) => setCategory(String(val) as PublicationCategory)}
+                onChange={(val: string | number) =>
+                  setCategory(String(val) as PublicationCategory)
+                }
               >
-                {(Object.keys(PUBLICATION_CATEGORY_LABELS) as PublicationCategory[]).map((val) => (
+                {(
+                  Object.keys(
+                    PUBLICATION_CATEGORY_LABELS
+                  ) as PublicationCategory[]
+                ).map((val) => (
                   <SingleSelectOption key={val} value={val}>
                     {getCategoryLabel(val)}
                   </SingleSelectOption>
@@ -293,12 +322,24 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           </Box>
 
           <Box style={{ minWidth: 0 }}>
-            <Field.Root hint={t("pub.field.author_hint", "Author or committee name (optional)")}>
-              <Field.Label>{t("pub.field.author_label", "Author (Optional)")}</Field.Label>
+            <Field.Root
+              hint={t(
+                "pub.field.author_hint",
+                "Author or committee name (optional)"
+              )}
+            >
+              <Field.Label>
+                {t("pub.field.author_label", "Author (Optional)")}
+              </Field.Label>
               <TextInput
-                placeholder={t("pub.field.author_placeholder", "e.g., Department of Education")}
+                placeholder={t(
+                  "pub.field.author_placeholder",
+                  "e.g., Department of Education"
+                )}
                 value={authorName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAuthorName(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setAuthorName(e.target.value)
+                }
               />
               <Field.Hint />
             </Field.Root>
@@ -331,7 +372,9 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
                   "Brief summary of this guide, book, or brochure..."
                 )}
                 value={summary}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSummary(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSummary(e.target.value)
+                }
               />
               <Field.Hint />
             </Field.Root>
@@ -345,7 +388,10 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
               )}
             >
               <Field.Label>
-                {t("pub.field.external_url_label", "External Download URL (Optional)")}
+                {t(
+                  "pub.field.external_url_label",
+                  "External Download URL (Optional)"
+                )}
               </Field.Label>
               <TextInput
                 placeholder="https://..."
@@ -364,7 +410,13 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         </Box>
 
         {/* Footer Action Bar */}
-        <Flex paddingTop={4} justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+        <Flex
+          paddingTop={4}
+          justifyContent="space-between"
+          alignItems="center"
+          wrap="wrap"
+          gap={3}
+        >
           <Flex gap={3} alignItems="center" wrap="wrap">
             <Button
               variant="secondary"
@@ -376,7 +428,8 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
             {selectedFileId !== "none" && (
               <Flex gap={2} alignItems="center">
                 <Badge active>
-                  {t("common.attached", "Attached")}: {selectedFileName || `#${selectedFileId}`}
+                  {t("common.attached", "Attached")}:{" "}
+                  {selectedFileName || `#${selectedFileId}`}
                 </Badge>
                 <Button
                   variant="tertiary"

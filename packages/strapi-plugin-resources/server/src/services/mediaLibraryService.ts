@@ -10,10 +10,15 @@ import {
 } from "../../../shared";
 
 type UploadQueryFn = (uid: string) => {
-  findMany: (opts?: Record<string, unknown>) => Promise<Record<string, unknown>[]>;
+  findMany: (
+    opts?: Record<string, unknown>
+  ) => Promise<Record<string, unknown>[]>;
 };
 
-function getUploadQuery(strapi: Core.Strapi, uid: string): ReturnType<UploadQueryFn> | undefined {
+function getUploadQuery(
+  strapi: Core.Strapi,
+  uid: string
+): ReturnType<UploadQueryFn> | undefined {
   return (
     strapi as unknown as {
       db?: { query?: UploadQueryFn };
@@ -58,7 +63,8 @@ function extractFolderCoordinates(existing: Record<string, unknown>): {
   folderId: number | null;
 } {
   const folderPath =
-    typeof existing.mediaFolderPath === "string" && existing.mediaFolderPath.trim()
+    typeof existing.mediaFolderPath === "string" &&
+    existing.mediaFolderPath.trim()
       ? existing.mediaFolderPath.trim()
       : undefined;
   const folderId =
@@ -67,7 +73,9 @@ function extractFolderCoordinates(existing: Record<string, unknown>): {
       : null;
 
   if (!folderPath && !folderId) {
-    throw new Error("Album does not have a mediaFolderPath or mediaFolderId configured");
+    throw new Error(
+      "Album does not have a mediaFolderPath or mediaFolderId configured"
+    );
   }
   return { folderPath, folderId };
 }
@@ -108,7 +116,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
       return (rawFolders || []).map((folder) => ({
         id: (folder.id as number | string) ?? 0,
-        documentId: typeof folder.documentId === "string" ? folder.documentId : undefined,
+        documentId:
+          typeof folder.documentId === "string" ? folder.documentId : undefined,
         name: typeof folder.name === "string" ? folder.name : "Folder",
         path: typeof folder.path === "string" ? folder.path : "/",
         pathId: typeof folder.pathId === "number" ? folder.pathId : undefined,
@@ -141,7 +150,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       if (!fileQuery) return [];
 
       const where = buildFolderWhereFilter(safeFolderPath, params.folderId);
-      const maxLimit = Math.min(params.limit || settings.maxPhotosPerAlbum || 120, 500);
+      const maxLimit = Math.min(
+        params.limit || settings.maxPhotosPerAlbum || 120,
+        500
+      );
 
       const rawFiles = await fileQuery.findMany({
         where,
@@ -207,7 +219,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       mimePrefix: "image/",
     });
 
-    const updateData = buildSyncedAlbumUpdateData(syncedPhotos, existing.coverPhoto);
+    const updateData = buildSyncedAlbumUpdateData(
+      syncedPhotos,
+      existing.coverPhoto
+    );
 
     await docService.update({
       documentId: albumDocumentId,

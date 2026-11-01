@@ -4,7 +4,11 @@ import {
   ALLOWED_PUBLICATION_CATEGORIES,
 } from "./constants";
 import { computeLetterGroup } from "./mediaUtils";
-import type { GalleryAlbumCategory, GlossaryCategory, PublicationCategory } from "./types";
+import type {
+  GalleryAlbumCategory,
+  GlossaryCategory,
+  PublicationCategory,
+} from "./types";
 
 export interface ValidationResult<T> {
   valid: boolean;
@@ -29,7 +33,9 @@ export function toSlug(input: string): string {
  * Strictly validates a Strapi v5 Media Library folder path (`plugin::upload.folder.path`),
  * rejecting directory traversal (`..`) or backslashes.
  */
-export function validateMediaFolderPath(rawPath: unknown): ValidationResult<string> {
+export function validateMediaFolderPath(
+  rawPath: unknown
+): ValidationResult<string> {
   if (typeof rawPath !== "string" || !rawPath.trim()) {
     return { valid: false, errors: ["Media folder path is required"] };
   }
@@ -63,12 +69,19 @@ function resolveSlug(rawSlug: unknown, fallbackSource: string): string {
   return custom || toSlug(fallbackSource);
 }
 
-function pickCategory<T extends string>(rawVal: unknown, allowed: readonly T[], fallback: T): T {
+function pickCategory<T extends string>(
+  rawVal: unknown,
+  allowed: readonly T[],
+  fallback: T
+): T {
   const candidate = asTrimmed(rawVal) as T;
   return allowed.includes(candidate) ? candidate : fallback;
 }
 
-function checkOptionalFolderPath(rawPath: unknown, errors: string[]): string | undefined {
+function checkOptionalFolderPath(
+  rawPath: unknown,
+  errors: string[]
+): string | undefined {
   const trimmed = asTrimmed(rawPath);
   if (!trimmed) return undefined;
   const folderCheck = validateMediaFolderPath(trimmed);
@@ -79,7 +92,10 @@ function checkOptionalFolderPath(rawPath: unknown, errors: string[]): string | u
   return folderCheck.data;
 }
 
-function checkOptionalExternalUrl(rawUrl: unknown, errors: string[]): string | undefined {
+function checkOptionalExternalUrl(
+  rawUrl: unknown,
+  errors: string[]
+): string | undefined {
   const trimmedUrl = asTrimmed(rawUrl);
   if (!trimmedUrl) return undefined;
   if (trimmedUrl.startsWith("/") && !trimmedUrl.startsWith("//")) {
@@ -132,7 +148,11 @@ export interface ValidatedPublicationInput {
   coverImage?: number | string | null;
 }
 
-function collectPublicationErrors(title: string, slug: string, summary: string): string[] {
+function collectPublicationErrors(
+  title: string,
+  slug: string,
+  summary: string
+): string[] {
   const errors: string[] = [];
   if (title.length < 2 || title.length > 200) {
     errors.push("Title must be between 2 and 200 characters");
@@ -159,7 +179,10 @@ export function validatePublicationInput(
   const errors = collectPublicationErrors(title, slug, summary);
 
   const mediaFolderPath = checkOptionalFolderPath(raw.mediaFolderPath, errors);
-  const externalDownloadUrl = checkOptionalExternalUrl(raw.externalDownloadUrl, errors);
+  const externalDownloadUrl = checkOptionalExternalUrl(
+    raw.externalDownloadUrl,
+    errors
+  );
 
   if (errors.length > 0) {
     return { valid: false, errors };
@@ -172,7 +195,11 @@ export function validatePublicationInput(
       title,
       slug,
       summary,
-      category: pickCategory(raw.category, ALLOWED_PUBLICATION_CATEGORIES, "guide"),
+      category: pickCategory(
+        raw.category,
+        ALLOWED_PUBLICATION_CATEGORIES,
+        "guide"
+      ),
       authorName: asSlicedOptString(raw.authorName, 140),
       isbnOrReference: asSlicedOptString(raw.isbnOrReference, 80),
       pageCount: parsePositiveInt(raw.pageCount),
@@ -184,7 +211,10 @@ export function validatePublicationInput(
       allowPublicDownload: raw.allowPublicDownload !== false,
       externalDownloadUrl,
       ...normalizeOptionalMediaId("file", raw.file ?? raw.fileId),
-      ...normalizeOptionalMediaId("coverImage", raw.coverImage ?? raw.coverImageId),
+      ...normalizeOptionalMediaId(
+        "coverImage",
+        raw.coverImage ?? raw.coverImageId
+      ),
     },
   };
 }
@@ -206,7 +236,11 @@ export interface ValidatedGalleryAlbumInput {
   photos?: Array<number | string>;
 }
 
-function collectAlbumErrors(title: string, slug: string, description: string): string[] {
+function collectAlbumErrors(
+  title: string,
+  slug: string,
+  description: string
+): string[] {
   const errors: string[] = [];
   if (title.length < 2 || title.length > 200) {
     errors.push("Album title must be between 2 and 200 characters");
@@ -226,7 +260,8 @@ function normalizePhotoIdList(
   if (!Array.isArray(rawPhotos)) return {};
   return {
     photos: rawPhotos.filter(
-      (id): id is number | string => typeof id === "number" || typeof id === "string"
+      (id): id is number | string =>
+        typeof id === "number" || typeof id === "string"
     ),
   };
 }
@@ -240,7 +275,10 @@ export function validateGalleryAlbumInput(
   input: unknown
 ): ValidationResult<ValidatedGalleryAlbumInput> {
   if (!input || typeof input !== "object") {
-    return { valid: false, errors: ["Gallery album payload must be an object"] };
+    return {
+      valid: false,
+      errors: ["Gallery album payload must be an object"],
+    };
   }
   const raw = input as Record<string, unknown>;
   const title = asTrimmed(raw.title);
@@ -260,7 +298,11 @@ export function validateGalleryAlbumInput(
       title,
       slug,
       description,
-      category: pickCategory(raw.category, ALLOWED_GALLERY_CATEGORIES, "community"),
+      category: pickCategory(
+        raw.category,
+        ALLOWED_GALLERY_CATEGORIES,
+        "community"
+      ),
       eventDate: asSlicedOptString(raw.eventDate, 32),
       secondaryDateOverride: asSlicedOptString(raw.secondaryDateOverride, 80),
       mediaFolderId: parsePositiveInt(raw.mediaFolderId) ?? null,
@@ -269,7 +311,10 @@ export function validateGalleryAlbumInput(
       framingNotes: asSlicedOptString(raw.framingNotes, 500),
       featured: Boolean(raw.featured),
       sortOrder: parseFiniteInt(raw.sortOrder, 0),
-      ...normalizeOptionalMediaId("coverPhoto", raw.coverPhoto ?? raw.coverPhotoId),
+      ...normalizeOptionalMediaId(
+        "coverPhoto",
+        raw.coverPhoto ?? raw.coverPhotoId
+      ),
       ...normalizePhotoIdList(raw.photos ?? raw.photoIds),
     },
   };
@@ -288,7 +333,11 @@ export interface ValidatedGlossaryTermInput {
   pronunciationAudio?: number | string | null;
 }
 
-function collectGlossaryErrors(term: string, slug: string, definition: string): string[] {
+function collectGlossaryErrors(
+  term: string,
+  slug: string,
+  definition: string
+): string[] {
   const errors: string[] = [];
   if (term.length < 2 || term.length > 120) {
     errors.push("Term must be between 2 and 120 characters");
@@ -305,7 +354,10 @@ function collectGlossaryErrors(term: string, slug: string, definition: string): 
 function parseRelatedTerms(rawTerms: unknown): string[] {
   if (!Array.isArray(rawTerms)) return [];
   return rawTerms
-    .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    .filter(
+      (item): item is string =>
+        typeof item === "string" && item.trim().length > 0
+    )
     .map((item) => item.trim().slice(0, 80));
 }
 
@@ -313,7 +365,10 @@ export function validateGlossaryTermInput(
   input: unknown
 ): ValidationResult<ValidatedGlossaryTermInput> {
   if (!input || typeof input !== "object") {
-    return { valid: false, errors: ["Glossary term payload must be an object"] };
+    return {
+      valid: false,
+      errors: ["Glossary term payload must be an object"],
+    };
   }
   const raw = input as Record<string, unknown>;
   const term = asTrimmed(raw.term);
@@ -334,7 +389,11 @@ export function validateGlossaryTermInput(
       nativeScript: asSlicedOptString(raw.nativeScript, 200),
       transliteration: asSlicedOptString(raw.transliteration, 200),
       definition,
-      category: pickCategory(raw.category, ALLOWED_GLOSSARY_CATEGORIES, "general"),
+      category: pickCategory(
+        raw.category,
+        ALLOWED_GLOSSARY_CATEGORIES,
+        "general"
+      ),
       letterGroup: computeLetterGroup(term),
       relatedTerms: parseRelatedTerms(raw.relatedTerms),
       featured: Boolean(raw.featured),

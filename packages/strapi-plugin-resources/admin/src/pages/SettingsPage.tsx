@@ -54,7 +54,8 @@ export const SettingsPage: React.FC = () => {
   const t = (id: string, defaultMessage: string) =>
     formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
   const { get, put } = useFetchClient();
-  const [settings, setSettings] = React.useState<ResourcesPluginSettings | null>(null);
+  const [settings, setSettings] =
+    React.useState<ResourcesPluginSettings | null>(null);
   const [savedNotice, setSavedNotice] = React.useState<string>("");
 
   React.useEffect(() => {
@@ -77,7 +78,12 @@ export const SettingsPage: React.FC = () => {
       const res = await put(`/${PLUGIN_ID}/settings`, settings);
       if (res?.data?.data) {
         setSettings(res.data.data);
-        setSavedNotice(t("settings.ui.saved_notice", "Resources & Media Library settings saved."));
+        setSavedNotice(
+          t(
+            "settings.ui.saved_notice",
+            "Resources & Media Library settings saved."
+          )
+        );
       }
     } catch (err) {
       setSavedNotice(`Error saving settings: ${(err as Error).message}`);
@@ -123,7 +129,9 @@ export const SettingsPage: React.FC = () => {
               )}
             </Typography>
           </Box>
-          <Button onClick={handleSave}>{t("settings.ui.save_settings", "Save Settings")}</Button>
+          <Button onClick={handleSave}>
+            {t("settings.ui.save_settings", "Save Settings")}
+          </Button>
         </Flex>
 
         {savedNotice && (
@@ -139,13 +147,22 @@ export const SettingsPage: React.FC = () => {
         <Box paddingTop={6}>
           <Tabs.Root defaultValue="folders" variant="simple">
             <Tabs.List
-              aria-label={t("settings.ui.resources_media_library_settings", "Resources Settings")}
+              aria-label={t(
+                "settings.ui.resources_media_library_settings",
+                "Resources Settings"
+              )}
             >
               <Tabs.Trigger value="folders">
-                {t("settings.tab.folders", "Media Library Folders & Organization")}
+                {t(
+                  "settings.tab.folders",
+                  "Media Library Folders & Organization"
+                )}
               </Tabs.Trigger>
               <Tabs.Trigger value="optimization">
-                {t("settings.tab.optimization", "CDN Optimization & Folder Sync")}
+                {t(
+                  "settings.tab.optimization",
+                  "CDN Optimization & Folder Sync"
+                )}
               </Tabs.Trigger>
               <Tabs.Trigger value="security">
                 {t("settings.tab.security", "Download Security & Allow-Lists")}
@@ -154,7 +171,12 @@ export const SettingsPage: React.FC = () => {
 
             <Tabs.Content value="folders">
               <Box paddingTop={4}>
-                <Box padding={6} background="neutral0" hasRadius shadow="filterShadow">
+                <Box
+                  padding={6}
+                  background="neutral0"
+                  hasRadius
+                  shadow="filterShadow"
+                >
                   <Box marginBottom={4}>
                     <Typography variant="delta" tag="h2" fontWeight="bold">
                       {t(
@@ -167,8 +189,11 @@ export const SettingsPage: React.FC = () => {
                         "settings.ui.default_folder_hierarchy",
                         "Default folder hierarchy in Strapi Media Library"
                       )}{" "}
-                      (<code style={INLINE_CODE_STYLE}>plugin::upload.folder</code>), secondary
-                      calendar dates, and catalog locales.
+                      (
+                      <code style={INLINE_CODE_STYLE}>
+                        plugin::upload.folder
+                      </code>
+                      ), secondary calendar dates, and catalog locales.
                     </Typography>
                   </Box>
 
@@ -186,7 +211,9 @@ export const SettingsPage: React.FC = () => {
                         "Displayed on downloadable PDF covers, press kits, and gallery metadata."
                       )}
                     >
-                      <Field.Label>{t("field.organization_name", "Organization Name")}</Field.Label>
+                      <Field.Label>
+                        {t("field.organization_name", "Organization Name")}
+                      </Field.Label>
                       <TextInput
                         name="organizationName"
                         placeholder={t(
@@ -195,7 +222,10 @@ export const SettingsPage: React.FC = () => {
                         )}
                         value={settings.organizationName}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setSettings({ ...settings, organizationName: e.target.value })
+                          setSettings({
+                            ...settings,
+                            organizationName: e.target.value,
+                          })
                         }
                       />
                       <Field.Hint />
@@ -269,7 +299,10 @@ export const SettingsPage: React.FC = () => {
                       )}
                     >
                       <Field.Label>
-                        {t("field.secondary_liturgical_calendar", "Secondary Liturgical Calendar")}
+                        {t(
+                          "field.secondary_liturgical_calendar",
+                          "Secondary Liturgical Calendar"
+                        )}
                       </Field.Label>
                       <SingleSelect
                         placeholder={t(
@@ -278,7 +311,10 @@ export const SettingsPage: React.FC = () => {
                         )}
                         value={settings.secondaryCalendar || "islamic-umalqura"}
                         onChange={(val: string | number) =>
-                          setSettings({ ...settings, secondaryCalendar: String(val) })
+                          setSettings({
+                            ...settings,
+                            secondaryCalendar: String(val),
+                          })
                         }
                       >
                         {SECONDARY_CALENDAR_OPTIONS.map((opt) => (
@@ -303,7 +339,10 @@ export const SettingsPage: React.FC = () => {
                       <SingleSelect
                         value={settings.defaultLocale || "es"}
                         onChange={(val: string | number) =>
-                          setSettings({ ...settings, defaultLocale: String(val) })
+                          setSettings({
+                            ...settings,
+                            defaultLocale: String(val),
+                          })
                         }
                       >
                         {LOCALE_OPTIONS.map((opt) => (
@@ -323,7 +362,10 @@ export const SettingsPage: React.FC = () => {
                       )}
                     >
                       <Field.Label>
-                        {t("field.supported_locales", "Supported Catalog Locales")}
+                        {t(
+                          "field.supported_locales",
+                          "Supported Catalog Locales"
+                        )}
                       </Field.Label>
                       <MultiSelect
                         name="supportedLocales"
@@ -332,7 +374,9 @@ export const SettingsPage: React.FC = () => {
                           "placeholder.select_supported_locales",
                           "Select supported locales..."
                         )}
-                        value={settings.supportedLocales || ["es", "en", "ar", "tr"]}
+                        value={
+                          settings.supportedLocales || ["es", "en", "ar", "tr"]
+                        }
                         onChange={(nextValues: string[]) =>
                           setSettings({
                             ...settings,
@@ -359,8 +403,16 @@ export const SettingsPage: React.FC = () => {
               </Box>
             </Tabs.Content>
 
-            <ResourcesOptimizationTab settings={settings} setSettings={setSettings} t={t} />
-            <ResourcesSecurityTab settings={settings} setSettings={setSettings} t={t} />
+            <ResourcesOptimizationTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
+            <ResourcesSecurityTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
           </Tabs.Root>
         </Box>
       </Box>

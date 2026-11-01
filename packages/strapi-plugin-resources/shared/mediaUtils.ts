@@ -8,7 +8,10 @@ import type { MediaLibraryAsset, MediaLibraryFormatVariant } from "./types";
  * Strips path traversal sequences (`../`, `..\\`), directory separators,
  * quotes, and control characters from a filename before use in HTTP headers.
  */
-export function sanitizeFilename(rawName: unknown, fallbackExt = ".pdf"): string {
+export function sanitizeFilename(
+  rawName: unknown,
+  fallbackExt = ".pdf"
+): string {
   const input = typeof rawName === "string" ? rawName.trim() : "";
   const base = input.replace(/\\/g, "/").split("/").pop() || "";
   const cleaned = base
@@ -35,9 +38,13 @@ export function isAllowedDownloadAsset(
 ): boolean {
   const normalizedExt =
     typeof ext === "string" && ext.trim()
-      ? (ext.trim().startsWith(".") ? ext.trim() : `.${ext.trim()}`).toLowerCase()
+      ? (ext.trim().startsWith(".")
+          ? ext.trim()
+          : `.${ext.trim()}`
+        ).toLowerCase()
       : "";
-  const normalizedMime = typeof mime === "string" ? mime.trim().toLowerCase() : "";
+  const normalizedMime =
+    typeof mime === "string" ? mime.trim().toLowerCase() : "";
 
   const extAllowed =
     normalizedExt.length > 0 &&
@@ -58,7 +65,8 @@ export function buildAttachmentHeaders(
 ): Record<string, string> {
   const safeName = sanitizeFilename(fileName);
   const safeMime =
-    typeof mime === "string" && /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(mime.trim())
+    typeof mime === "string" &&
+    /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(mime.trim())
       ? mime.trim()
       : "application/octet-stream";
 
@@ -81,7 +89,11 @@ export function optimizeCloudinaryMediaUrl(
 ): string {
   if (typeof rawUrl !== "string" || !rawUrl.trim()) return "";
   const url = rawUrl.trim();
-  if (!enableOptimization || !url.includes("res.cloudinary.com") || !url.includes("/upload/")) {
+  if (
+    !enableOptimization ||
+    !url.includes("res.cloudinary.com") ||
+    !url.includes("/upload/")
+  ) {
     return url;
   }
 
@@ -128,7 +140,10 @@ function normalizeFormatVariants(
   )) {
     if (variant && typeof variant.url === "string" && variant.url.trim()) {
       formats[key] = {
-        url: optimizeCloudinaryMediaUrl(variant.url, enableCloudinaryOptimization),
+        url: optimizeCloudinaryMediaUrl(
+          variant.url,
+          enableCloudinaryOptimization
+        ),
         width: optNumber(variant.width),
         height: optNumber(variant.height),
         mime: optString(variant.mime),
@@ -144,8 +159,12 @@ function resolveThumbnailUrl(
   rawUrl: string,
   enableCloudinaryOptimization: boolean
 ): string {
-  const candidate = formats.medium?.url ?? formats.small?.url ?? formats.thumbnail?.url;
-  return candidate ?? optimizeCloudinaryMediaUrl(rawUrl, enableCloudinaryOptimization, 640);
+  const candidate =
+    formats.medium?.url ?? formats.small?.url ?? formats.thumbnail?.url;
+  return (
+    candidate ??
+    optimizeCloudinaryMediaUrl(rawUrl, enableCloudinaryOptimization, 640)
+  );
 }
 
 function resolveAssetId(val: unknown): number | string | undefined {
@@ -172,7 +191,10 @@ export function normalizeUploadFile(
   const rawUrl = typeof f.url === "string" ? f.url.trim() : "";
   if (!rawUrl) return null;
 
-  const formats = normalizeFormatVariants(f.formats, enableCloudinaryOptimization);
+  const formats = normalizeFormatVariants(
+    f.formats,
+    enableCloudinaryOptimization
+  );
   const sizeInKB = resolveFiniteSizeKB(f.size);
   const ext = optString(f.ext) ?? "";
   const name = sanitizeFilename(f.name || rawUrl, ext || ".bin");
@@ -184,8 +206,15 @@ export function normalizeUploadFile(
     alternativeText: resolveAltText(f.alternativeText, name),
     caption: typeof f.caption === "string" ? f.caption.trim() : "",
     url: rawUrl,
-    optimizedUrl: optimizeCloudinaryMediaUrl(rawUrl, enableCloudinaryOptimization),
-    thumbnailUrl: resolveThumbnailUrl(formats, rawUrl, enableCloudinaryOptimization),
+    optimizedUrl: optimizeCloudinaryMediaUrl(
+      rawUrl,
+      enableCloudinaryOptimization
+    ),
+    thumbnailUrl: resolveThumbnailUrl(
+      formats,
+      rawUrl,
+      enableCloudinaryOptimization
+    ),
     mime: optString(f.mime) ?? "application/octet-stream",
     ext,
     sizeInKB,

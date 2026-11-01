@@ -126,9 +126,16 @@ function createMockStrapi() {
       const list = docsByUid.get(uid)!;
 
       return {
-        findMany: async (params?: { locale?: string; filters?: Record<string, unknown> }) => {
+        findMany: async (params?: {
+          locale?: string;
+          filters?: Record<string, unknown>;
+        }) => {
           return list.filter((item) => {
-            if (params?.locale && item.locale && item.locale !== params.locale) {
+            if (
+              params?.locale &&
+              item.locale &&
+              item.locale !== params.locale
+            ) {
               return false;
             }
             if (params?.filters) {
@@ -142,7 +149,13 @@ function createMockStrapi() {
         findOne: async ({ documentId }: { documentId: string }) => {
           return list.find((item) => item.documentId === documentId) || null;
         },
-        create: async ({ locale, data }: { locale?: string; data: Record<string, unknown> }) => {
+        create: async ({
+          locale,
+          data,
+        }: {
+          locale?: string;
+          data: Record<string, unknown>;
+        }) => {
           idCounter += 1;
           const record: Record<string, unknown> = {
             id: idCounter,
@@ -202,7 +215,10 @@ describe("@vicacha-devs/strapi-plugin-resources", () => {
     assert.equal(clean, "visitor_guide-2026-.pdf");
 
     const headers = buildAttachmentHeaders(dirty, "application/pdf");
-    assert.equal(headers["Content-Disposition"], 'attachment; filename="visitor_guide-2026-.pdf"');
+    assert.equal(
+      headers["Content-Disposition"],
+      'attachment; filename="visitor_guide-2026-.pdf"'
+    );
     assert.equal(headers["X-Content-Type-Options"], "nosniff");
     assert.equal(headers["Cache-Control"], "private, no-store");
   });
@@ -210,13 +226,17 @@ describe("@vicacha-devs/strapi-plugin-resources", () => {
   it("enforces download extension and MIME allow-lists", () => {
     assert.equal(isAllowedDownloadAsset(".pdf", "application/pdf"), true);
     assert.equal(isAllowedDownloadAsset("epub", "application/epub+zip"), true);
-    assert.equal(isAllowedDownloadAsset(".exe", "application/x-msdownload"), false);
+    assert.equal(
+      isAllowedDownloadAsset(".exe", "application/x-msdownload"),
+      false
+    );
     assert.equal(isAllowedDownloadAsset(".html", "text/html"), false);
     assert.equal(isAllowedDownloadAsset(".pdf", "text/html"), false);
   });
 
   it("optimizes Cloudinary Media Library URLs and normalizes plugin::upload.file records", () => {
-    const rawUrl = "https://res.cloudinary.com/demo/image/upload/v1700000000/mosque.jpg";
+    const rawUrl =
+      "https://res.cloudinary.com/demo/image/upload/v1700000000/mosque.jpg";
     assert.equal(
       optimizeCloudinaryMediaUrl(rawUrl, true),
       "https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/v1700000000/mosque.jpg"
@@ -279,7 +299,11 @@ describe("@vicacha-devs/strapi-plugin-resources", () => {
   });
 
   it("formats secondary liturgical dates across calendar systems", () => {
-    const hijri = formatSecondaryCalendarDate("2026-03-01", "islamic-umalqura", "es");
+    const hijri = formatSecondaryCalendarDate(
+      "2026-03-01",
+      "islamic-umalqura",
+      "es"
+    );
     assert.ok(hijri.length > 0);
     assert.equal(formatSecondaryCalendarDate("2026-03-01", "none", "es"), "");
   });
@@ -302,7 +326,10 @@ describe("@vicacha-devs/strapi-plugin-resources", () => {
     assert.ok(createdAlbum.documentId);
     assert.equal(createdAlbum.photoCount, 0);
 
-    const syncResult = await mediaSvc.syncAlbumFromMediaFolder(createdAlbum.documentId!, "es");
+    const syncResult = await mediaSvc.syncAlbumFromMediaFolder(
+      createdAlbum.documentId!,
+      "es"
+    );
     assert.equal(syncResult.photoCount, 2);
     assert.equal(syncResult.photos[0].name, "central-dome-calligraphy.jpg");
     assert.ok(syncResult.photos[0].optimizedUrl.includes("f_auto,q_auto"));
@@ -325,7 +352,9 @@ describe("@vicacha-devs/strapi-plugin-resources", () => {
     );
     assert.equal(ticket.downloadCount, 1);
     assert.equal(ticket.headers["X-Content-Type-Options"], "nosniff");
-    assert.ok(ticket.headers["Content-Disposition"].startsWith("attachment; filename="));
+    assert.ok(
+      ticket.headers["Content-Disposition"].startsWith("attachment; filename=")
+    );
 
     const terms = await catalogSvc.listGlossaryTerms({
       locale: "es",
@@ -337,7 +366,18 @@ describe("@vicacha-devs/strapi-plugin-resources", () => {
   });
 
   it("verifies all 10 Admin UI locales and server entry point exports", async () => {
-    const locales = ["en", "es", "ar", "fr", "de", "pt", "it", "tr", "ru", "zh"];
+    const locales = [
+      "en",
+      "es",
+      "ar",
+      "fr",
+      "de",
+      "pt",
+      "it",
+      "tr",
+      "ru",
+      "zh",
+    ];
     const enMod = await import("../admin/src/translations/en.json");
     const enKeys = Object.keys(enMod.default).sort();
     assert.ok(enKeys.length >= 4);
