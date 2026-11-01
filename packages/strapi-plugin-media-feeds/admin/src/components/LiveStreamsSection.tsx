@@ -47,7 +47,7 @@ export const LiveStreamsSection: React.FC<LiveStreamsSectionProps> = ({
         gap={3}
       >
         <Box>
-          <Typography variant="beta" as="h2">
+          <Typography variant="beta" tag="h2">
             {t(
               "settings.tab.livestreams_heading",
               "Live Broadcasts & Event Streams"

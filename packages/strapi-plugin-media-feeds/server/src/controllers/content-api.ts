@@ -8,7 +8,7 @@ import {
 } from "../../../shared";
 import type { QueryMediaFeedOptions } from "../services/feedService";
 
-interface StrapiContext {
+export interface StrapiContext {
   query?: Record<string, string | undefined>;
   params?: Record<string, string | undefined>;
   request?: { body?: Record<string, unknown> };

@@ -9,7 +9,7 @@ import {
 } from "../../../shared";
 import type { EnrichedMediaMetadata } from "../services/syncService";
 
-interface StrapiContext {
+export interface StrapiContext {
   query?: Record<string, string | undefined>;
   request?: { body?: Record<string, unknown> };
   body?: unknown;

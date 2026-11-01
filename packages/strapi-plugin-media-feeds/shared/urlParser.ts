@@ -182,6 +182,8 @@ export function parseDurationToSeconds(
   return minMatch?.[1] ? Number(minMatch[1]) * 60 : null;
 }
 
+const pad = (n: number) => String(n).padStart(2, "0");
+
 export function formatSecondsToDuration(
   seconds?: number | null
 ): string | null {
@@ -196,7 +198,6 @@ export function formatSecondsToDuration(
   const hrs = Math.floor(total / 3600);
   const mins = Math.floor((total % 3600) / 60);
   const secs = total % 60;
-  const pad = (n: number) => String(n).padStart(2, "0");
   return hrs > 0
     ? `${hrs}:${pad(mins)}:${pad(secs)}`
     : `${pad(mins)}:${pad(secs)}`;
