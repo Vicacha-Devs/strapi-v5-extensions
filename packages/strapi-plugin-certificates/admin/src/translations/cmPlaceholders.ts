@@ -1,4 +1,7 @@
-export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
   en: {
     "content-manager.content-types.plugin::certificates.certificate.serialNumber.placeholder":
       "Enter certificate serial number...",
@@ -62,7 +65,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Enter notes...",
     "content-manager.content-types.plugin::certificates.certificate.documentId.placeholder":
       "Enter document id...",
-    "content-manager.content-types.plugin::certificates.template.name.placeholder": "Enter name...",
+    "content-manager.content-types.plugin::certificates.template.name.placeholder":
+      "Enter name...",
     "content-manager.content-types.plugin::certificates.template.slug.placeholder":
       "auto-generated-url-slug",
     "content-manager.content-types.plugin::certificates.template.description.placeholder":
@@ -277,7 +281,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "أدخل ملاحظات...",
     "content-manager.content-types.plugin::certificates.certificate.documentId.placeholder":
       "أدخل معرف المستند...",
-    "content-manager.content-types.plugin::certificates.template.name.placeholder": "أدخل الاسم...",
+    "content-manager.content-types.plugin::certificates.template.name.placeholder":
+      "أدخل الاسم...",
     "content-manager.content-types.plugin::certificates.template.slug.placeholder":
       "معرف-الرابط-التلقائي",
     "content-manager.content-types.plugin::certificates.template.description.placeholder":
@@ -316,7 +321,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "أدخل إعدادات التقاويم الإضافية...",
     "content-manager.content-types.plugin::certificates.template.accentColor.placeholder":
       "#0F766E",
-    "content-manager.content-types.plugin::certificates.template.active.placeholder": "أدخل نشط...",
+    "content-manager.content-types.plugin::certificates.template.active.placeholder":
+      "أدخل نشط...",
     "content-manager.content-types.plugin::certificates.template.documentId.placeholder":
       "أدخل معرف المستند...",
   },
@@ -383,7 +389,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Notlar girin...",
     "content-manager.content-types.plugin::certificates.certificate.documentId.placeholder":
       "Belge Kimliği (ID) girin...",
-    "content-manager.content-types.plugin::certificates.template.name.placeholder": "Ad girin...",
+    "content-manager.content-types.plugin::certificates.template.name.placeholder":
+      "Ad girin...",
     "content-manager.content-types.plugin::certificates.template.slug.placeholder":
       "otomatik-url-kisa-adi",
     "content-manager.content-types.plugin::certificates.template.description.placeholder":

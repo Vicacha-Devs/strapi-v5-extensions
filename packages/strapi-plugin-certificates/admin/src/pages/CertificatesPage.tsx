@@ -24,8 +24,11 @@ import { IssueCertificateModal } from "../components/IssueCertificateModal";
 
 export const CertificatesPage: React.FC = () => {
   const { formatMessage } = useIntl();
-  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
-    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
+  const t = (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
   const { get, post, put } = useFetchClient();
   const { toggleNotification } = useNotification();
 
@@ -115,7 +118,9 @@ export const CertificatesPage: React.FC = () => {
     } catch (err) {
       toggleNotification({
         type: "danger",
-        message: (err as Error).message || "Failed to send DocuSign eSignature envelope",
+        message:
+          (err as Error).message ||
+          "Failed to send DocuSign eSignature envelope",
       });
     }
   };
@@ -152,15 +157,21 @@ export const CertificatesPage: React.FC = () => {
     } catch {
       toggleNotification({
         type: "danger",
-        message: t("page.ui.msg_failed_to_revoke_certificate", "Failed to revoke certificate"),
+        message: t(
+          "page.ui.msg_failed_to_revoke_certificate",
+          "Failed to revoke certificate"
+        ),
       });
     }
   };
 
   const handleOpenPrintable = async (documentId: string) => {
     try {
-      const res = await get<string>(`/${PLUGIN_ID}/certificates/${documentId}/print`);
-      const htmlContent = typeof res.data === "string" ? res.data : String(res.data || "");
+      const res = await get<string>(
+        `/${PLUGIN_ID}/certificates/${documentId}/print`
+      );
+      const htmlContent =
+        typeof res.data === "string" ? res.data : String(res.data || "");
       const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
       const blobUrl = URL.createObjectURL(blob);
       window.open(blobUrl, "_blank", "noopener,noreferrer");
@@ -188,7 +199,10 @@ export const CertificatesPage: React.FC = () => {
         )}
         primaryAction={
           <Button onClick={() => setShowIssueModal(true)}>
-            {t("page.ui.issue_signed_certificate", "+ Issue Signed Certificate")}
+            {t(
+              "page.ui.issue_signed_certificate",
+              "+ Issue Signed Certificate"
+            )}
           </Button>
         }
       />
@@ -268,11 +282,19 @@ export const CertificatesPage: React.FC = () => {
           />
         )}
 
-        <Box padding={4} background="neutral0" hasRadius shadow="filterShadow" marginBottom={4}>
+        <Box
+          padding={4}
+          background="neutral0"
+          hasRadius
+          shadow="filterShadow"
+          marginBottom={4}
+        >
           <Flex gap={4} alignItems="flex-end" wrap="wrap">
             <Box style={{ minWidth: 260, flex: 1 }}>
               <Field.Root>
-                <Field.Label>{t("field.search_certificates", "Search Certificates")}</Field.Label>
+                <Field.Label>
+                  {t("field.search_certificates", "Search Certificates")}
+                </Field.Label>
                 <TextInput
                   placeholder={t(
                     "placeholder.search_by_serial_number_recipient_name_chosen_na",
@@ -287,7 +309,9 @@ export const CertificatesPage: React.FC = () => {
             </Box>
             <Box style={{ minWidth: 200 }}>
               <Field.Root>
-                <Field.Label>{t("field.certificate_status", "Certificate Status")}</Field.Label>
+                <Field.Label>
+                  {t("field.certificate_status", "Certificate Status")}
+                </Field.Label>
                 <SingleSelect
                   placeholder={t("placeholder.all_statuses", "All Statuses")}
                   value={statusFilter}
@@ -346,7 +370,12 @@ export const CertificatesPage: React.FC = () => {
                     hasRadius
                     borderColor="neutral200"
                   >
-                    <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+                    <Flex
+                      justifyContent="space-between"
+                      alignItems="center"
+                      wrap="wrap"
+                      gap={3}
+                    >
                       <Box>
                         <Flex gap={2} alignItems="center" wrap="wrap">
                           <Typography fontWeight="bold" variant="omega">
@@ -355,9 +384,15 @@ export const CertificatesPage: React.FC = () => {
                           <Badge>{rec.status.toUpperCase()}</Badge>
                           {rec.esignEnvelopeId && (
                             <Badge>
-                              {t("page.ui.docusign_badge", "DOCUSIGN: {status}", {
-                                status: (rec.esignEnvelopeStatus || "sent").toUpperCase(),
-                              })}
+                              {t(
+                                "page.ui.docusign_badge",
+                                "DOCUSIGN: {status}",
+                                {
+                                  status: (
+                                    rec.esignEnvelopeStatus || "sent"
+                                  ).toUpperCase(),
+                                }
+                              )}
                             </Badge>
                           )}
                           <Typography variant="pi" textColor="neutral600">
@@ -367,7 +402,9 @@ export const CertificatesPage: React.FC = () => {
                         <Box marginTop={1}>
                           <Typography fontWeight="semiBold">
                             {rec.recipientFullName}
-                            {rec.recipientChosenName ? ` (${rec.recipientChosenName})` : ""}
+                            {rec.recipientChosenName
+                              ? ` (${rec.recipientChosenName})`
+                              : ""}
                           </Typography>
                         </Box>
                         <Box marginTop={1}>
@@ -382,9 +419,13 @@ export const CertificatesPage: React.FC = () => {
                                 })}`
                               : ""}
                             {" • "}
-                            {t("page.ui.witnesses_count", "Witnesses: {count}", {
-                              count: (rec.witnesses || []).length,
-                            })}
+                            {t(
+                              "page.ui.witnesses_count",
+                              "Witnesses: {count}",
+                              {
+                                count: (rec.witnesses || []).length,
+                              }
+                            )}
                           </Typography>
                         </Box>
                       </Box>
@@ -392,7 +433,9 @@ export const CertificatesPage: React.FC = () => {
                       <Flex gap={2}>
                         <Button
                           variant="secondary"
-                          onClick={() => void handleOpenPrintable(rec.documentId)}
+                          onClick={() =>
+                            void handleOpenPrintable(rec.documentId)
+                          }
                         >
                           {t("page.ui.print_pdf", "Print / PDF")}
                         </Button>
@@ -400,11 +443,15 @@ export const CertificatesPage: React.FC = () => {
                           <>
                             <Button
                               variant="tertiary"
-                              onClick={() => void handleSendDocuSign(rec.documentId)}
+                              onClick={() =>
+                                void handleSendDocuSign(rec.documentId)
+                              }
                             >
                               {t("page.ui.send_docusign", "Send DocuSign")}
                             </Button>
-                            <Button onClick={() => void handleApprove(rec.documentId)}>
+                            <Button
+                              onClick={() => void handleApprove(rec.documentId)}
+                            >
                               {t("page.ui.approve_sign", "Approve & Sign")}
                             </Button>
                           </>

@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import docusignFactory, { validateDocuSignBaseUrl } from "../server/src/services/docusign";
+import docusignFactory, {
+  validateDocuSignBaseUrl,
+} from "../server/src/services/docusign";
 import issuanceFactory from "../server/src/services/issuance";
 import settingsFactory from "../server/src/services/settings";
 import { computeDocuSignWebhookHmac } from "../shared";
@@ -35,7 +37,8 @@ function createMockStrapi() {
       },
     }),
     documents: (uid: string) => {
-      const map = uid === "plugin::certificates.template" ? templates : certificates;
+      const map =
+        uid === "plugin::certificates.template" ? templates : certificates;
       return {
         findMany: async (params?: { filters?: Record<string, unknown> }) => {
           const all = Array.from(map.values());
@@ -44,7 +47,8 @@ function createMockStrapi() {
             Object.entries(params.filters!).every(([k, v]) => item[k] === v)
           );
         },
-        findOne: async ({ documentId }: { documentId: string }) => map.get(documentId) || null,
+        findOne: async ({ documentId }: { documentId: string }) =>
+          map.get(documentId) || null,
         create: async ({ data }: { data: Record<string, unknown> }) => {
           const documentId = `doc_${docCounter++}`;
           const rec = { ...data, id: docCounter, documentId };
@@ -96,7 +100,9 @@ describe("Strapi Certificates Service Lifecycle & Optional DocuSign E-Signature"
       titleText: "Certificado Oficial de Profesión de Fe Islámica (Shahada)",
       bodyTemplate:
         "Certificamos que {{recipientFullName}} (Nombre Islámico: {{chosenName}}) pronunció la Shahada el {{issuedDateFormatted}} ({{secondaryDateFormatted}}).",
-      defaultSignatories: [{ name: "Sheikh Ahmad Al-Mansoor", title: "Imam Principal" }],
+      defaultSignatories: [
+        { name: "Sheikh Ahmad Al-Mansoor", title: "Imam Principal" },
+      ],
     });
 
     await assert.rejects(async () => {
@@ -120,12 +126,23 @@ describe("Strapi Certificates Service Lifecycle & Optional DocuSign E-Signature"
     assert.equal(pendingCert.status, "pending_approval");
     assert.equal(pendingCert.nationalIdMasked, "***-***-2198");
 
-    const approvedCert = await services.issuance.approveCertificate(pendingCert.documentId, {
-      witnesses: [
-        { fullName: "Omar Farooq", documentIdRaw: "CC 79112233", role: "Testigo 1" },
-        { fullName: "Khalid Tariq", documentIdRaw: "CC 80223344", role: "Testigo 2" },
-      ],
-    });
+    const approvedCert = await services.issuance.approveCertificate(
+      pendingCert.documentId,
+      {
+        witnesses: [
+          {
+            fullName: "Omar Farooq",
+            documentIdRaw: "CC 79112233",
+            role: "Testigo 1",
+          },
+          {
+            fullName: "Khalid Tariq",
+            documentIdRaw: "CC 80223344",
+            role: "Testigo 2",
+          },
+        ],
+      }
+    );
     assert.equal(approvedCert.status, "issued");
     assert.equal(approvedCert.witnesses.length, 2);
     assert.equal(approvedCert.witnesses[0].documentIdMasked, "***-***-2233");
@@ -173,7 +190,10 @@ describe("Strapi Certificates Service Lifecycle & Optional DocuSign E-Signature"
       validateDocuSignBaseUrl("https://demo.docusign.net/restapi/"),
       "https://demo.docusign.net/restapi"
     );
-    assert.throws(() => validateDocuSignBaseUrl("http://demo.docusign.net/restapi"), /HTTPS/);
+    assert.throws(
+      () => validateDocuSignBaseUrl("http://demo.docusign.net/restapi"),
+      /HTTPS/
+    );
     assert.throws(
       () => validateDocuSignBaseUrl("https://127.0.0.1/restapi"),
       /private or loopback/
@@ -255,18 +275,27 @@ describe("Strapi Certificates Service Lifecycle & Optional DocuSign E-Signature"
       };
     };
 
-    const sentResult = await services.docusign.sendEnvelopeForCertificate(pendingCert.documentId, {
-      fetchImpl: mockFetch,
-      accessToken: "test-oauth-token",
-    });
+    const sentResult = await services.docusign.sendEnvelopeForCertificate(
+      pendingCert.documentId,
+      {
+        fetchImpl: mockFetch,
+        accessToken: "test-oauth-token",
+      }
+    );
 
     assert.equal(
       capturedUrl,
       "https://demo.docusign.net/restapi/v2.1/accounts/acc-bogota-mosque-01/envelopes"
     );
     assert.equal(capturedBody.recipients.signers.length, 3);
-    assert.equal(capturedBody.recipients.signers[0].tabs.signHereTabs[0].anchorString, "/wit_1/");
-    assert.equal(capturedBody.recipients.signers[2].tabs.signHereTabs[0].anchorString, "/sig_1/");
+    assert.equal(
+      capturedBody.recipients.signers[0].tabs.signHereTabs[0].anchorString,
+      "/wit_1/"
+    );
+    assert.equal(
+      capturedBody.recipients.signers[2].tabs.signHereTabs[0].anchorString,
+      "/sig_1/"
+    );
     assert.equal(sentResult.envelopeId, "env-docusign-998877");
     assert.equal(sentResult.certificate.esignEnvelopeStatus, "sent");
 
@@ -282,7 +311,10 @@ describe("Strapi Certificates Service Lifecycle & Optional DocuSign E-Signature"
     };
     const rawWebhookBody = JSON.stringify(webhookPayload);
     const testWebhookSecret = "test-hmac-secret-key-from-env";
-    const validSignature = computeDocuSignWebhookHmac(rawWebhookBody, testWebhookSecret);
+    const validSignature = computeDocuSignWebhookHmac(
+      rawWebhookBody,
+      testWebhookSecret
+    );
 
     // Forged signature must be rejected
     await assert.rejects(async () => {
@@ -316,6 +348,8 @@ describe("Strapi Certificates Service Lifecycle & Optional DocuSign E-Signature"
     assert.equal(verification.esignProvider, "docusign");
     assert.equal(verification.esignEnvelopeId, "env-docusign-998877");
     assert.equal(verification.esignEnvelopeStatus, "completed");
-    assert.ok(emittedEvents.some((e) => e.event === "certificates.docusign.completed"));
+    assert.ok(
+      emittedEvents.some((e) => e.event === "certificates.docusign.completed")
+    );
   });
 });

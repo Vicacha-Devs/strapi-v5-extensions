@@ -35,13 +35,19 @@ export function interpolateBodyTemplate(
   variables: Record<string, string>
 ): string {
   const safeTemplate = escapeHtml(templateText);
-  return safeTemplate.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_match, key: string) => {
-    const rawVal = variables[key] ?? "";
-    return `<strong>${escapeHtml(rawVal)}</strong>`;
-  });
+  return safeTemplate.replace(
+    /\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,
+    (_match, key: string) => {
+      const rawVal = variables[key] ?? "";
+      return `<strong>${escapeHtml(rawVal)}</strong>`;
+    }
+  );
 }
 
-export function renderVerificationMatrixSvg(seedText: string, accentColor = "#14532d"): string {
+export function renderVerificationMatrixSvg(
+  seedText: string,
+  accentColor = "#14532d"
+): string {
   const safeColor = sanitizeHexColor(accentColor);
   const hashHex = computeDeterministicHex(seedText);
   const size = 9;
@@ -50,7 +56,9 @@ export function renderVerificationMatrixSvg(seedText: string, accentColor = "#14
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
       const isCornerFinder =
-        (row < 3 && col < 3) || (row < 3 && col >= size - 3) || (row >= size - 3 && col < 3);
+        (row < 3 && col < 3) ||
+        (row < 3 && col >= size - 3) ||
+        (row >= size - 3 && col < 3);
       const hexIdx = (row * size + col) % hashHex.length;
       const nibble = parseInt(hashHex[hexIdx], 16);
       const filled = isCornerFinder || nibble % 2 === 0;
@@ -80,7 +88,8 @@ function buildTemplateVariables(
 ): Record<string, string> {
   return {
     recipientFullName: certificate.recipientFullName,
-    recipientChosenName: certificate.recipientChosenName || certificate.recipientFullName,
+    recipientChosenName:
+      certificate.recipientChosenName || certificate.recipientFullName,
     chosenName: certificate.recipientChosenName || "",
     nationalIdMasked: certificate.nationalIdMasked || "N/A",
     recipientNationality: certificate.recipientNationality || "",
@@ -92,7 +101,9 @@ function buildTemplateVariables(
   };
 }
 
-function renderSignatoriesHtml(signatories: CertificateRecord["signatories"]): string {
+function renderSignatoriesHtml(
+  signatories: CertificateRecord["signatories"]
+): string {
   return (signatories || [])
     .map(
       (sig, idx) => `
@@ -106,7 +117,9 @@ function renderSignatoriesHtml(signatories: CertificateRecord["signatories"]): s
     .join("");
 }
 
-function renderWitnessesHtml(witnesses: CertificateRecord["witnesses"]): string {
+function renderWitnessesHtml(
+  witnesses: CertificateRecord["witnesses"]
+): string {
   const list = witnesses || [];
   if (list.length === 0) return "";
   const cards = list
@@ -179,14 +192,21 @@ export function renderPrintableCertificateHtml(params: {
     issuedDateFormatted,
     secondaryFormattedList
   );
-  const renderedBody = interpolateBodyTemplate(template.bodyTemplate, variables);
+  const renderedBody = interpolateBodyTemplate(
+    template.bodyTemplate,
+    variables
+  );
   const matrixSvg = renderVerificationMatrixSvg(
     `${certificate.serialNumber}:${certificate.cryptographicSignature}`,
     accent
   );
   const signatoriesHtml = renderSignatoriesHtml(certificate.signatories);
   const witnessesHtml = renderWitnessesHtml(certificate.witnesses);
-  const fragments = renderOptionalHtmlFragments(certificate, template, secondaryFormattedList);
+  const fragments = renderOptionalHtmlFragments(
+    certificate,
+    template,
+    secondaryFormattedList
+  );
 
   return `<!DOCTYPE html>
 <html lang="en">

@@ -28,7 +28,11 @@ function applyExtraAttributesToSchema(
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
     if (!attrName || !attrDef || typeof attrDef !== "object") continue;
     mergeAttributesIntoTarget(schema?.attributes, attrName, attrDef);
-    mergeAttributesIntoTarget(schema?.__schema__?.attributes, attrName, attrDef);
+    mergeAttributesIntoTarget(
+      schema?.__schema__?.attributes,
+      attrName,
+      attrDef
+    );
   }
 }
 
@@ -37,13 +41,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     schemaExtensions?: Record<string, AttributeMap>;
   };
 
-  for (const [targetKey, extraAttributes] of Object.entries(config.schemaExtensions ?? {})) {
+  for (const [targetKey, extraAttributes] of Object.entries(
+    config.schemaExtensions ?? {}
+  )) {
     if (!extraAttributes || typeof extraAttributes !== "object") continue;
     const resolvedUid = targetKey.startsWith("plugin::")
       ? targetKey
       : `plugin::${PLUGIN_ID}.${targetKey}`;
 
-    const schema = strapi.contentTypes?.[resolvedUid] as ContentTypeSchema | undefined;
+    const schema = strapi.contentTypes?.[resolvedUid] as
+      | ContentTypeSchema
+      | undefined;
     applyExtraAttributesToSchema(schema, extraAttributes);
   }
 

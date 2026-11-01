@@ -32,12 +32,18 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
     },
   ];
 
-  await strapi.admin?.services?.permission?.actionProvider?.registerMany(actions);
+  await strapi.admin?.services?.permission?.actionProvider?.registerMany(
+    actions
+  );
 
-  const settingsService = strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>("settings");
+  const settingsService = strapi
+    .plugin(PLUGIN_ID)
+    .service<SettingsServiceContract>("settings");
   const keyPair = await settingsService.getSigningKeyPair();
 
-  const issuanceService = strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>("issuance");
+  const issuanceService = strapi
+    .plugin(PLUGIN_ID)
+    .service<IssuanceServiceContract>("issuance");
   const seeded = await issuanceService.seedDefaultTemplates();
 
   strapi.log.info(
