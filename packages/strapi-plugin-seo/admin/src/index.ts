@@ -1,4 +1,5 @@
 import { Search } from "@strapi/icons";
+import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
 
 import pluginPkg from "../../package.json";
 import { SeoChecker } from "./components/CMEditView/RightLinksCompo";
@@ -23,7 +24,6 @@ import es from "./translations/es.json";
 import fr from "./translations/fr.json";
 import ptBR from "./translations/pt-BR.json";
 import tr from "./translations/tr.json";
-import { prefixPluginTranslations } from "./utils/prefixPluginTranslations";
 
 const name = pluginPkg.strapi.name;
 
@@ -63,17 +63,10 @@ export default {
         Component: SeoChecker,
       });
   },
-  async registerTrads(app: { locales: string[] }) {
-    const { locales } = app;
-
-    const importedTrads = locales.map((locale) => {
-      const data = TRAD_MAP[locale];
-      return {
-        data: data ? prefixPluginTranslations(data, pluginId) : {},
-        locale,
-      };
-    });
-
-    return Promise.resolve(importedTrads);
-  },
+  registerTrads: createRegisterTrads({
+    pluginId,
+    defaultLocales: [],
+    keepUnprefixed: false,
+    translations: TRAD_MAP,
+  }),
 };
