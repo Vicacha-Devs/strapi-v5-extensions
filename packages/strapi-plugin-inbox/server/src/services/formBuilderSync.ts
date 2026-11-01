@@ -8,16 +8,24 @@ import {
   type FormBuilderCmsFormSummary,
   type FormRecord,
 } from "../../../shared";
-import { fromFormBuilderCmsRow, toFormBuilderCmsPayload } from "./formBuilderMapper";
+import {
+  fromFormBuilderCmsRow,
+  toFormBuilderCmsPayload,
+} from "./formBuilderMapper";
 
 export function isFormBuilderCmsAvailable(strapi: Core.Strapi): boolean {
   const hasContentType = Boolean(
-    strapi.contentTypes?.[FORM_BUILDER_CMS_FORM_UID as keyof typeof strapi.contentTypes]
+    strapi.contentTypes?.[
+      FORM_BUILDER_CMS_FORM_UID as keyof typeof strapi.contentTypes
+    ]
   );
   const hasDbQuery = typeof strapi.db?.query === "function";
   return (
     hasDbQuery &&
-    (hasContentType || Boolean((strapi as unknown as Record<string, unknown>).__hasFormBuilderCms))
+    (hasContentType ||
+      Boolean(
+        (strapi as unknown as Record<string, unknown>).__hasFormBuilderCms
+      ))
   );
 }
 
@@ -57,7 +65,9 @@ export async function listFormBuilderForms(strapi: Core.Strapi): Promise<{
 
   const cmsForms = (await strapi.db
     .query(FORM_BUILDER_CMS_FORM_UID)
-    .findMany({ orderBy: { createdAt: "desc" } })) as Array<Record<string, unknown>>;
+    .findMany({ orderBy: { createdAt: "desc" } })) as Array<
+    Record<string, unknown>
+  >;
 
   const summaries: FormBuilderCmsFormSummary[] = await Promise.all(
     (cmsForms || []).map(async (cf) => {
@@ -96,7 +106,9 @@ export async function syncFormToBuilderCms(
     existingCms = await query.findOne({ where: { id: form.formBuilderId } });
   }
   if (!existingCms && form.formBuilderSlug) {
-    existingCms = await query.findOne({ where: { slug: form.formBuilderSlug } });
+    existingCms = await query.findOne({
+      where: { slug: form.formBuilderSlug },
+    });
   }
   if (!existingCms) {
     existingCms = await query.findOne({ where: { slug: form.slug } });
@@ -124,14 +136,23 @@ export async function syncFormToBuilderCms(
   };
 }
 
-function shouldBackfillStarterTemplate(parsed: FormRecord, starterTpl?: FormRecord): boolean {
+function shouldBackfillStarterTemplate(
+  parsed: FormRecord,
+  starterTpl?: FormRecord
+): boolean {
   if (!starterTpl) return false;
   const hasTranslations = Object.keys(parsed.translations || {}).length > 0;
   if (hasTranslations) return false;
-  return !parsed.checklistTemplate?.length || !starterTpl.checklistTemplate?.length;
+  return (
+    !parsed.checklistTemplate?.length || !starterTpl.checklistTemplate?.length
+  );
 }
 
-function pickNonDefaultSetting<T>(val: T | undefined, fallback: T | undefined, defaultVal: T): T {
+function pickNonDefaultSetting<T>(
+  val: T | undefined,
+  fallback: T | undefined,
+  defaultVal: T
+): T {
   if (val && val !== defaultVal) return val;
   return fallback || defaultVal;
 }
@@ -145,22 +166,32 @@ function mergeStarterSettings(
   return {
     ...baseStarter,
     ...baseParsed,
-    department: pickNonDefaultSetting(baseParsed.department, baseStarter.department, "general"),
+    department: pickNonDefaultSetting(
+      baseParsed.department,
+      baseStarter.department,
+      "general"
+    ),
     defaultPriority: pickNonDefaultSetting(
       baseParsed.defaultPriority,
       baseStarter.defaultPriority,
       "normal"
     ),
-    enableBookingBridge: baseParsed.enableBookingBridge ?? baseStarter.enableBookingBridge,
+    enableBookingBridge:
+      baseParsed.enableBookingBridge ?? baseStarter.enableBookingBridge,
     enableCertificateBridge:
       baseParsed.enableCertificateBridge ?? baseStarter.enableCertificateBridge,
   };
 }
 
-function enrichFormWithStarterTemplate(parsed: FormRecord, starterTpl?: FormRecord): FormRecord {
+function enrichFormWithStarterTemplate(
+  parsed: FormRecord,
+  starterTpl?: FormRecord
+): FormRecord {
   if (!starterTpl) return parsed;
   const category =
-    parsed.category && parsed.category !== "contact" ? parsed.category : starterTpl.category;
+    parsed.category && parsed.category !== "contact"
+      ? parsed.category
+      : starterTpl.category;
   const checklistTemplate = parsed.checklistTemplate?.length
     ? parsed.checklistTemplate
     : starterTpl.checklistTemplate || [];
@@ -188,7 +219,8 @@ export async function syncFormFromBuilderCms(
     (t) => t.form.slug === parsed.slug || t.id === parsed.slug
   )?.form;
 
-  const needsBackfill = !rawSettings.inbox || shouldBackfillStarterTemplate(parsed, starterTpl);
+  const needsBackfill =
+    !rawSettings.inbox || shouldBackfillStarterTemplate(parsed, starterTpl);
 
   if (needsBackfill && cmsForm.id && isFormBuilderCmsAvailable(strapi)) {
     const enriched = enrichFormWithStarterTemplate(parsed, starterTpl);

@@ -32,29 +32,77 @@ export const LOCALE_OPTIONS: Array<{ value: string; label: string }> = [
 export const DEPARTMENT_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "general", label: "general — General Inquiries & Info" },
   { value: "imamate", label: "imamate — Imamate & Religious Guidance (Fatwa)" },
-  { value: "nikah_family", label: "nikah_family — Nikah, Marriage & Family Counseling" },
-  { value: "new_muslims", label: "new_muslims — New Muslims (Shahada & Revert Care)" },
-  { value: "halal_certification", label: "halal_certification — Halal Certification & Audits" },
-  { value: "janazah_urgent", label: "janazah_urgent — Urgent Janazah & Funeral Services" },
-  { value: "education", label: "education — Islamic Education, Madrasah & Courses" },
-  { value: "zakat_charity", label: "zakat_charity — Zakat, Sadaqah & Social Welfare" },
-  { value: "administration", label: "administration — Mosque Administration & Board" },
+  {
+    value: "nikah_family",
+    label: "nikah_family — Nikah, Marriage & Family Counseling",
+  },
+  {
+    value: "new_muslims",
+    label: "new_muslims — New Muslims (Shahada & Revert Care)",
+  },
+  {
+    value: "halal_certification",
+    label: "halal_certification — Halal Certification & Audits",
+  },
+  {
+    value: "janazah_urgent",
+    label: "janazah_urgent — Urgent Janazah & Funeral Services",
+  },
+  {
+    value: "education",
+    label: "education — Islamic Education, Madrasah & Courses",
+  },
+  {
+    value: "zakat_charity",
+    label: "zakat_charity — Zakat, Sadaqah & Social Welfare",
+  },
+  {
+    value: "administration",
+    label: "administration — Mosque Administration & Board",
+  },
   { value: "services", label: "services — Community & Facility Services" },
   { value: "social_aid", label: "social_aid — Humanitarian & Social Aid" },
-  { value: "visits_tours", label: "visits_tours — Guided Mosque Visits & School Tours" },
+  {
+    value: "visits_tours",
+    label: "visits_tours — Guided Mosque Visits & School Tours",
+  },
 ];
 
 export const TOPIC_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "announcements", label: "announcements — General Mosque Announcements" },
+  {
+    value: "announcements",
+    label: "announcements — General Mosque Announcements",
+  },
   { value: "events", label: "events — Community Events & Conferences" },
-  { value: "courses", label: "courses — Arabic, Quran & Islamic Studies Courses" },
-  { value: "ramadan_eid", label: "ramadan_eid — Ramadan, Suhoor/Iftar & Eid Bulletins" },
-  { value: "newsletter", label: "newsletter — Weekly Jumu'ah & Community Newsletter" },
+  {
+    value: "courses",
+    label: "courses — Arabic, Quran & Islamic Studies Courses",
+  },
+  {
+    value: "ramadan_eid",
+    label: "ramadan_eid — Ramadan, Suhoor/Iftar & Eid Bulletins",
+  },
+  {
+    value: "newsletter",
+    label: "newsletter — Weekly Jumu'ah & Community Newsletter",
+  },
   { value: "khutbahs", label: "khutbahs — Friday Khutbah Summaries & Audio" },
-  { value: "urgent_janazah", label: "urgent_janazah — Urgent Janazah & Funeral Alerts" },
-  { value: "charity_campaigns", label: "charity_campaigns — Zakat & Relief Campaigns" },
-  { value: "youth_programs", label: "youth_programs — Youth, Sisters & Family Programs" },
-  { value: "new_muslims", label: "new_muslims — New Muslim Circle & Mentorship" },
+  {
+    value: "urgent_janazah",
+    label: "urgent_janazah — Urgent Janazah & Funeral Alerts",
+  },
+  {
+    value: "charity_campaigns",
+    label: "charity_campaigns — Zakat & Relief Campaigns",
+  },
+  {
+    value: "youth_programs",
+    label: "youth_programs — Youth, Sisters & Family Programs",
+  },
+  {
+    value: "new_muslims",
+    label: "new_muslims — New Muslim Circle & Mentorship",
+  },
 ];
 
 export function mergeSelectOptions(
@@ -86,8 +134,14 @@ export const LocalizationRoutingTab: React.FC<LocalizationRoutingTabProps> = ({
   settings,
   setSettings,
 }) => {
-  const localeOpts = mergeSelectOptions(LOCALE_OPTIONS, settings.supportedLocales);
-  const departmentOpts = mergeSelectOptions(DEPARTMENT_OPTIONS, settings.availableDepartments);
+  const localeOpts = mergeSelectOptions(
+    LOCALE_OPTIONS,
+    settings.supportedLocales
+  );
+  const departmentOpts = mergeSelectOptions(
+    DEPARTMENT_OPTIONS,
+    settings.availableDepartments
+  );
   const topicOpts = mergeSelectOptions(TOPIC_OPTIONS, settings.availableTopics);
 
   return (
@@ -141,7 +195,9 @@ export const LocalizationRoutingTab: React.FC<LocalizationRoutingTabProps> = ({
               "Fallback language when a public form request or alert query omits a locale parameter."
             )}
           >
-            <Field.Label>{t("field.default_locale", "Default Locale")}</Field.Label>
+            <Field.Label>
+              {t("field.default_locale", "Default Locale")}
+            </Field.Label>
             <SingleSelect
               placeholder={t(
                 "placeholder.select_default_locale_e_g_es",
@@ -168,11 +224,16 @@ export const LocalizationRoutingTab: React.FC<LocalizationRoutingTabProps> = ({
               "ISO language codes enabled for localized form labels, validation errors, and alert banners."
             )}
           >
-            <Field.Label>{t("field.supported_locales", "Supported Locales")}</Field.Label>
+            <Field.Label>
+              {t("field.supported_locales", "Supported Locales")}
+            </Field.Label>
             <MultiSelect
               name="supportedLocales"
               withTags
-              placeholder={t("placeholder.select_supported_locales", "Select supported locales...")}
+              placeholder={t(
+                "placeholder.select_supported_locales",
+                "Select supported locales..."
+              )}
               value={settings.supportedLocales || ["es", "en", "ar", "tr"]}
               onChange={(nextValues: string[]) =>
                 setSettings({
@@ -217,7 +278,8 @@ export const LocalizationRoutingTab: React.FC<LocalizationRoutingTabProps> = ({
               onChange={(nextValues: string[]) =>
                 setSettings({
                   ...settings,
-                  availableDepartments: nextValues.length > 0 ? nextValues : ["general"],
+                  availableDepartments:
+                    nextValues.length > 0 ? nextValues : ["general"],
                 })
               }
               onClear={() =>
@@ -244,7 +306,10 @@ export const LocalizationRoutingTab: React.FC<LocalizationRoutingTabProps> = ({
             )}
           >
             <Field.Label>
-              {t("field.subscriber_interest_topics", "Subscriber Interest Topics")}
+              {t(
+                "field.subscriber_interest_topics",
+                "Subscriber Interest Topics"
+              )}
             </Field.Label>
             <MultiSelect
               name="availableTopics"
@@ -257,7 +322,8 @@ export const LocalizationRoutingTab: React.FC<LocalizationRoutingTabProps> = ({
               onChange={(nextValues: string[]) =>
                 setSettings({
                   ...settings,
-                  availableTopics: nextValues.length > 0 ? nextValues : ["announcements"],
+                  availableTopics:
+                    nextValues.length > 0 ? nextValues : ["announcements"],
                 })
               }
               onClear={() =>

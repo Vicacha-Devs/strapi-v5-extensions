@@ -16,13 +16,18 @@ function extractPlainObject(val: unknown): Record<string, unknown> | null {
     : null;
 }
 
-function normalizeSubmitPayload(rawBody: Record<string, unknown>): Record<string, unknown> {
-  const nestedData = extractPlainObject(rawBody.data) || extractPlainObject(rawBody.payload);
+function normalizeSubmitPayload(
+  rawBody: Record<string, unknown>
+): Record<string, unknown> {
+  const nestedData =
+    extractPlainObject(rawBody.data) || extractPlainObject(rawBody.payload);
   return nestedData ? { ...rawBody, ...nestedData } : rawBody;
 }
 
 function resolveClientIp(ctx: ControllerCtx): string {
-  const forwarded = ctx.request.headers?.["x-forwarded-for"]?.split(",")[0]?.trim();
+  const forwarded = ctx.request.headers?.["x-forwarded-for"]
+    ?.split(",")[0]
+    ?.trim();
   return forwarded || ctx.request.ip || "127.0.0.1";
 }
 
@@ -45,7 +50,9 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
     const svc = strapi.plugin(PLUGIN_ID).service<{
       updateSettings(patch: Partial<InboxSettings>): Promise<InboxSettings>;
     }>("settings");
-    const data = await svc.updateSettings((ctx.request.body || {}) as Partial<InboxSettings>);
+    const data = await svc.updateSettings(
+      (ctx.request.body || {}) as Partial<InboxSettings>
+    );
     ctx.body = { data };
   },
 
@@ -119,7 +126,9 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
 
   async saveForm(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      saveForm(input: Partial<FormRecord> & { slug: string; title: string }): Promise<FormRecord>;
+      saveForm(
+        input: Partial<FormRecord> & { slug: string; title: string }
+      ): Promise<FormRecord>;
     }>("formService");
     const body = (ctx.request.body || {}) as Partial<FormRecord> & {
       slug: string;
@@ -131,7 +140,10 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
 
   async createFromTemplate(ctx: ControllerCtx) {
     const svc = strapi.plugin(PLUGIN_ID).service<{
-      createFromTemplate(templateId: string, overrides?: Partial<FormRecord>): Promise<FormRecord>;
+      createFromTemplate(
+        templateId: string,
+        overrides?: Partial<FormRecord>
+      ): Promise<FormRecord>;
     }>("formService");
     const body = (ctx.request.body || {}) as {
       templateId: string;
@@ -164,7 +176,8 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
         userAgent: ctx.request.headers?.["user-agent"] || "",
         locale: (rawBody.locale as string) || ctx.query?.locale,
         captchaToken:
-          (rawBody.captchaToken as string) || (payload.captchaToken as string | undefined),
+          (rawBody.captchaToken as string) ||
+          (payload.captchaToken as string | undefined),
       });
       ctx.status = 201;
       ctx.body = { data };

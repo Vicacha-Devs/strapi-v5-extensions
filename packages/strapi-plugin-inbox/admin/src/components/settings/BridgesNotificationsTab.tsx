@@ -26,11 +26,9 @@ export interface BridgesNotificationsTabProps {
   setSettings: (next: InboxSettings) => void;
 }
 
-export const BridgesNotificationsTab: React.FC<BridgesNotificationsTabProps> = ({
-  t,
-  settings,
-  setSettings,
-}) => {
+export const BridgesNotificationsTab: React.FC<
+  BridgesNotificationsTabProps
+> = ({ t, settings, setSettings }) => {
   return (
     <Tabs.Content value="bridges">
       <Box
@@ -64,15 +62,25 @@ export const BridgesNotificationsTab: React.FC<BridgesNotificationsTabProps> = (
           <Flex gap={2} wrap="wrap">
             <Badge>
               {t("settings.ui.double_opt_in_label", "Double Opt-In")}:{" "}
-              {settings.enableDoubleOptIn ? t("common.on", "On") : t("common.off", "Off")}
+              {settings.enableDoubleOptIn
+                ? t("common.on", "On")
+                : t("common.off", "Off")}
             </Badge>
             <Badge>
               {t("settings.ui.bookings_bridge_label", "Bookings Bridge")}:{" "}
-              {settings.enableBookingBridge ? t("common.on", "On") : t("common.off", "Off")}
+              {settings.enableBookingBridge
+                ? t("common.on", "On")
+                : t("common.off", "Off")}
             </Badge>
             <Badge>
-              {t("settings.ui.certificates_bridge_label", "Certificates Bridge")}:{" "}
-              {settings.enableCertificateBridge ? t("common.on", "On") : t("common.off", "Off")}
+              {t(
+                "settings.ui.certificates_bridge_label",
+                "Certificates Bridge"
+              )}
+              :{" "}
+              {settings.enableCertificateBridge
+                ? t("common.on", "On")
+                : t("common.off", "Off")}
             </Badge>
           </Flex>
         </Flex>
@@ -85,11 +93,23 @@ export const BridgesNotificationsTab: React.FC<BridgesNotificationsTabProps> = (
             gap: 16,
           }}
         >
-          <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={subCardStyle}
+          >
             <Box>
-              <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                paddingBottom={2}
+              >
                 <Typography fontWeight="bold">
-                  {t("settings.ui.subscriber_double_opt_in", "Subscriber Double Opt-In")}
+                  {t(
+                    "settings.ui.subscriber_double_opt_in",
+                    "Subscriber Double Opt-In"
+                  )}
                 </Typography>
                 <Badge>
                   {settings.enableDoubleOptIn
@@ -122,11 +142,23 @@ export const BridgesNotificationsTab: React.FC<BridgesNotificationsTabProps> = (
             </Box>
           </Box>
 
-          <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={subCardStyle}
+          >
             <Box>
-              <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                paddingBottom={2}
+              >
                 <Typography fontWeight="bold">
-                  {t("settings.ui.bookings_plugin_bridge", "Bookings Plugin Bridge")}
+                  {t(
+                    "settings.ui.bookings_plugin_bridge",
+                    "Bookings Plugin Bridge"
+                  )}
                 </Typography>
                 <Badge>
                   {settings.enableBookingBridge
@@ -159,11 +191,23 @@ export const BridgesNotificationsTab: React.FC<BridgesNotificationsTabProps> = (
             </Box>
           </Box>
 
-          <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
+          <Box
+            padding={4}
+            background="neutral100"
+            hasRadius
+            style={subCardStyle}
+          >
             <Box>
-              <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                paddingBottom={2}
+              >
                 <Typography fontWeight="bold">
-                  {t("settings.ui.certificates_plugin_bridge", "Certificates Plugin Bridge")}
+                  {t(
+                    "settings.ui.certificates_plugin_bridge",
+                    "Certificates Plugin Bridge"
+                  )}
                 </Typography>
                 <Badge>
                   {settings.enableCertificateBridge
@@ -243,7 +287,10 @@ export const BridgesNotificationsTab: React.FC<BridgesNotificationsTabProps> = (
             )}
           >
             <Field.Label>
-              {t("field.outbound_webhook_url_optional", "Outbound Webhook URL (Optional)")}
+              {t(
+                "field.outbound_webhook_url_optional",
+                "Outbound Webhook URL (Optional)"
+              )}
             </Field.Label>
             <TextInput
               name="outboundWebhookUrl"

@@ -3,7 +3,9 @@ declare const Buffer: {
     input: string,
     encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
   ): Uint8Array & {
-    toString(encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"): string;
+    toString(
+      encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
+    ): string;
   };
   byteLength(input: string, encoding?: "utf8" | "utf-8"): number;
 };
@@ -80,7 +82,9 @@ declare module "@strapi/strapi" {
     }
 
     export interface DocumentServiceInstance {
-      findMany(params?: DocumentQueryOptions): Promise<Array<Record<string, unknown>>>;
+      findMany(
+        params?: DocumentQueryOptions
+      ): Promise<Array<Record<string, unknown>>>;
       findOne(params: {
         documentId: string;
         locale?: string;
@@ -122,9 +126,15 @@ declare module "@strapi/strapi" {
       plugin(name: string): PluginInstance;
       db: {
         query(uid: string): {
-          findMany(params?: Record<string, unknown>): Promise<Array<Record<string, unknown>>>;
-          findOne(params?: Record<string, unknown>): Promise<Record<string, unknown> | null>;
-          create(params: { data: Record<string, unknown> }): Promise<Record<string, unknown>>;
+          findMany(
+            params?: Record<string, unknown>
+          ): Promise<Array<Record<string, unknown>>>;
+          findOne(
+            params?: Record<string, unknown>
+          ): Promise<Record<string, unknown> | null>;
+          create(params: {
+            data: Record<string, unknown>;
+          }): Promise<Record<string, unknown>>;
           update(params: {
             where: Record<string, unknown>;
             data: Record<string, unknown>;

@@ -1,5 +1,12 @@
 declare module "react" {
-  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
+  export type ReactNode =
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | ReactElement
+    | ReactNode[];
 
   export interface ReactElement<P = Record<string, unknown>> {
     type: unknown;
@@ -18,7 +25,10 @@ declare module "react" {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
+  export function useEffect(
+    effect: () => void | (() => void),
+    deps?: readonly unknown[]
+  ): void;
   export function useMemo<T>(factory: () => T, deps?: readonly unknown[]): T;
   export function createElement(...args: unknown[]): ReactElement;
   export const Fragment: unknown;
@@ -68,7 +78,10 @@ declare module "node:crypto" {
     algorithm: string,
     key: string
   ): {
-    update(data: string, encoding?: string): { digest(encoding: string): string };
+    update(
+      data: string,
+      encoding?: string
+    ): { digest(encoding: string): string };
   };
   export function timingSafeEqual(a: unknown, b: unknown): boolean;
 }
@@ -79,7 +92,9 @@ declare const Buffer: {
 
 declare module "@strapi/design-system" {
   import type { FC, ReactNode } from "react";
-  export type DesignComponentProps = Record<string, unknown> & { children?: ReactNode };
+  export type DesignComponentProps = Record<string, unknown> & {
+    children?: ReactNode;
+  };
 
   export const Tabs: {
     Root: FC<DesignComponentProps>;
@@ -126,8 +141,14 @@ declare module "@strapi/strapi/admin" {
 
   export const useFetchClient: () => {
     get: <T = DefaultApiData>(url: string) => Promise<{ data?: { data?: T } }>;
-    post: <T = DefaultApiData>(url: string, data?: unknown) => Promise<{ data?: { data?: T } }>;
-    put: <T = DefaultApiData>(url: string, data?: unknown) => Promise<{ data?: { data?: T } }>;
+    post: <T = DefaultApiData>(
+      url: string,
+      data?: unknown
+    ) => Promise<{ data?: { data?: T } }>;
+    put: <T = DefaultApiData>(
+      url: string,
+      data?: unknown
+    ) => Promise<{ data?: { data?: T } }>;
   };
 }
 

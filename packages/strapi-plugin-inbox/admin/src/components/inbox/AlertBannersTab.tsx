@@ -46,7 +46,8 @@ export const AlertBannersTab: React.FC<AlertBannersTabProps> = ({
 }) => {
   const [showCreateForm, setShowCreateForm] = React.useState<boolean>(false);
   const [newAlertCode, setNewAlertCode] = React.useState<string>("");
-  const [newAlertSeverity, setNewAlertSeverity] = React.useState<AlertSeverity>("urgent");
+  const [newAlertSeverity, setNewAlertSeverity] =
+    React.useState<AlertSeverity>("urgent");
   const [newAlertPriority, setNewAlertPriority] = React.useState<number>(100);
   const [newAlertTitle, setNewAlertTitle] = React.useState<string>("");
   const [newAlertMessage, setNewAlertMessage] = React.useState<string>("");
@@ -115,7 +116,10 @@ export const AlertBannersTab: React.FC<AlertBannersTabProps> = ({
             gap={2}
           >
             <Typography variant="delta" tag="h3" fontWeight="bold">
-              {t("page.ui.publish_urgent_site_wide_alert_banner", "Publish Site-Wide Alert Banner")}
+              {t(
+                "page.ui.publish_urgent_site_wide_alert_banner",
+                "Publish Site-Wide Alert Banner"
+              )}
             </Typography>
             <Button size="S" onClick={handleCreateAlert}>
               {t("page.ui.save_alert_banner", "Save Alert Banner")}
@@ -135,7 +139,9 @@ export const AlertBannersTab: React.FC<AlertBannersTabProps> = ({
                 name="code"
                 placeholder={t("placeholder.alert_code", "RAMADAN-1448-HILAL")}
                 value={newAlertCode}
-                onChange={(e: { target: { value: string } }) => setNewAlertCode(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  setNewAlertCode(e.target.value)
+                }
               />
             </Field.Root>
 
@@ -156,7 +162,9 @@ export const AlertBannersTab: React.FC<AlertBannersTabProps> = ({
             </Field.Root>
 
             <Field.Root name="priority">
-              <Field.Label>{t("field.display_priority", "Priority")}</Field.Label>
+              <Field.Label>
+                {t("field.display_priority", "Priority")}
+              </Field.Label>
               <NumberInput
                 name="priority"
                 value={newAlertPriority}
@@ -170,9 +178,14 @@ export const AlertBannersTab: React.FC<AlertBannersTabProps> = ({
               <Field.Label>{t("field.headline_title", "Headline")}</Field.Label>
               <TextInput
                 name="title"
-                placeholder={t("placeholder.alert_headline", "Moon-Sighting Announcement")}
+                placeholder={t(
+                  "placeholder.alert_headline",
+                  "Moon-Sighting Announcement"
+                )}
                 value={newAlertTitle}
-                onChange={(e: { target: { value: string } }) => setNewAlertTitle(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  setNewAlertTitle(e.target.value)
+                }
               />
             </Field.Root>
 
@@ -180,29 +193,42 @@ export const AlertBannersTab: React.FC<AlertBannersTabProps> = ({
               <Field.Label>{t("field.ticker_message", "Message")}</Field.Label>
               <TextInput
                 name="message"
-                placeholder={t("placeholder.alert_message", "The first day of Ramadan will be...")}
+                placeholder={t(
+                  "placeholder.alert_message",
+                  "The first day of Ramadan will be..."
+                )}
                 value={newAlertMessage}
-                onChange={(e: { target: { value: string } }) => setNewAlertMessage(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  setNewAlertMessage(e.target.value)
+                }
               />
             </Field.Root>
 
             <Field.Root name="ctaLabel">
-              <Field.Label>{t("field.cta_button_label_optional", "CTA Label")}</Field.Label>
+              <Field.Label>
+                {t("field.cta_button_label_optional", "CTA Label")}
+              </Field.Label>
               <TextInput
                 name="ctaLabel"
                 placeholder={t("placeholder.alert_cta_label", "View Schedule")}
                 value={newAlertCtaLabel}
-                onChange={(e: { target: { value: string } }) => setNewAlertCtaLabel(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  setNewAlertCtaLabel(e.target.value)
+                }
               />
             </Field.Root>
 
             <Field.Root name="ctaUrl">
-              <Field.Label>{t("field.cta_target_url_optional", "CTA URL")}</Field.Label>
+              <Field.Label>
+                {t("field.cta_target_url_optional", "CTA URL")}
+              </Field.Label>
               <TextInput
                 name="ctaUrl"
                 placeholder={t("placeholder.alert_cta_url", "/es/ramadan")}
                 value={newAlertCtaUrl}
-                onChange={(e: { target: { value: string } }) => setNewAlertCtaUrl(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  setNewAlertCtaUrl(e.target.value)
+                }
               />
             </Field.Root>
           </Box>
@@ -213,16 +239,24 @@ export const AlertBannersTab: React.FC<AlertBannersTabProps> = ({
         <Thead>
           <Tr>
             <Th>
-              <Typography variant="sigma">{t("page.ui.code", "Code")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.code", "Code")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.severity", "Severity")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.severity", "Severity")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.title", "Headline")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.title", "Headline")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("page.ui.message", "Message")}</Typography>
+              <Typography variant="sigma">
+                {t("page.ui.message", "Message")}
+              </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">

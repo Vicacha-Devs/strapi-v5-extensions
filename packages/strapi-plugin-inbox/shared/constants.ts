@@ -20,7 +20,11 @@ export const SUBMISSION_UID = `plugin::${PLUGIN_ID}.submission`;
 export const SUBSCRIBER_UID = `plugin::${PLUGIN_ID}.subscriber`;
 export const ALERT_BANNER_UID = `plugin::${PLUGIN_ID}.alert-banner`;
 
-export const DECORATIVE_FIELD_TYPES: readonly FormFieldType[] = ["heading", "paragraph", "divider"];
+export const DECORATIVE_FIELD_TYPES: readonly FormFieldType[] = [
+  "heading",
+  "paragraph",
+  "divider",
+];
 
 export const FORM_FIELD_TYPES: readonly FormFieldType[] = [
   "text",
@@ -82,9 +86,16 @@ export const ALERT_SEVERITIES: readonly AlertSeverity[] = [
   "celebration",
 ];
 
-export const CAPTCHA_PROVIDERS: readonly CaptchaProvider[] = ["none", "turnstile", "recaptcha"];
+export const CAPTCHA_PROVIDERS: readonly CaptchaProvider[] = [
+  "none",
+  "turnstile",
+  "recaptcha",
+];
 
-export const CAPTCHA_ENDPOINTS: Record<Exclude<CaptchaProvider, "none">, string> = {
+export const CAPTCHA_ENDPOINTS: Record<
+  Exclude<CaptchaProvider, "none">,
+  string
+> = {
   turnstile: "https://challenges.cloudflare.com/turnstile/v0/siteverify",
   recaptcha: "https://www.google.com/recaptcha/api/siteverify",
 };
@@ -103,7 +114,13 @@ export const DEFAULT_INBOX_SETTINGS: InboxSettings = {
   recaptchaSecretKey: "",
   enableDoubleOptIn: true,
   availableTopics: ["announcements", "events", "courses", "newsletter"],
-  availableDepartments: ["general", "administration", "services", "education", "social_aid"],
+  availableDepartments: [
+    "general",
+    "administration",
+    "services",
+    "education",
+    "social_aid",
+  ],
   enableFormBuilderBridge: true,
   autoSyncFormBuilderForms: true,
   enableBookingBridge: true,

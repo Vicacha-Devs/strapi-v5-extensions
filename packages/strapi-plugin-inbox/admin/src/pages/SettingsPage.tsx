@@ -1,4 +1,13 @@
-import { Badge, Box, Button, Divider, Flex, Main, Tabs, Typography } from "@strapi/design-system";
+import {
+  Badge,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Main,
+  Tabs,
+  Typography,
+} from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
 import * as React from "react";
 import { useIntl } from "react-intl";
@@ -18,7 +27,9 @@ export const SettingsPage: React.FC = () => {
   const t = (id: string, defaultMessage: string) =>
     formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
   const { get, put, post } = useFetchClient();
-  const [settings, setSettings] = React.useState<InboxSettings>(DEFAULT_INBOX_SETTINGS);
+  const [settings, setSettings] = React.useState<InboxSettings>(
+    DEFAULT_INBOX_SETTINGS
+  );
   const [savedNotice, setSavedNotice] = React.useState<string>("");
   const [captchaTestResult, setCaptchaTestResult] = React.useState<{
     ok: boolean;
@@ -49,16 +60,23 @@ export const SettingsPage: React.FC = () => {
         ...DEFAULT_INBOX_SETTINGS,
         ...res.data.data,
       });
-      setSavedNotice("Inbox, Anti-Spam & Casework settings saved successfully.");
+      setSavedNotice(
+        "Inbox, Anti-Spam & Casework settings saved successfully."
+      );
     }
   };
 
   const handleResetDefaults = () => {
     setSettings(DEFAULT_INBOX_SETTINGS);
-    setSavedNotice('Settings reset to defaults in editor. Click "Save Settings" to persist.');
+    setSavedNotice(
+      'Settings reset to defaults in editor. Click "Save Settings" to persist.'
+    );
   };
 
-  const handleTestCaptcha = async (provider: CaptchaProvider, secret?: string) => {
+  const handleTestCaptcha = async (
+    provider: CaptchaProvider,
+    secret?: string
+  ) => {
     const res = await post(`/${PLUGIN_ID}/captcha/test`, {
       provider,
       secret: secret || "",
@@ -109,7 +127,11 @@ export const SettingsPage: React.FC = () => {
                 {settings.defaultCaptchaProvider || "none"}
               </Badge>
               <Badge>
-                {t("settings.ui.form_builder_bridge_badge", "Form Builder Bridge")}:{" "}
+                {t(
+                  "settings.ui.form_builder_bridge_badge",
+                  "Form Builder Bridge"
+                )}
+                :{" "}
                 {settings.enableFormBuilderBridge !== false
                   ? t("common.enabled", "Enabled")
                   : t("common.disabled", "Disabled")}
@@ -126,7 +148,9 @@ export const SettingsPage: React.FC = () => {
             <Button variant="tertiary" onClick={handleResetDefaults}>
               {t("settings.ui.reset_to_defaults", "Reset to Defaults")}
             </Button>
-            <Button onClick={handleSave}>{t("settings.ui.save_settings", "Save Settings")}</Button>
+            <Button onClick={handleSave}>
+              {t("settings.ui.save_settings", "Save Settings")}
+            </Button>
           </Flex>
         </Flex>
 
@@ -159,7 +183,10 @@ export const SettingsPage: React.FC = () => {
         <Box paddingTop={6}>
           <Tabs.Root defaultValue="routing">
             <Tabs.List
-              aria-label={t("settings.ui.inbox_anti_spam_casework_settings", "Inbox Settings")}
+              aria-label={t(
+                "settings.ui.inbox_anti_spam_casework_settings",
+                "Inbox Settings"
+              )}
             >
               <Tabs.Trigger value="routing">
                 {t("settings.tab.routing", "Localization & Routing")}
@@ -172,14 +199,22 @@ export const SettingsPage: React.FC = () => {
               </Tabs.Trigger>
             </Tabs.List>
 
-            <LocalizationRoutingTab t={t} settings={settings} setSettings={setSettings} />
+            <LocalizationRoutingTab
+              t={t}
+              settings={settings}
+              setSettings={setSettings}
+            />
             <AntiSpamCaptchaTab
               t={t}
               settings={settings}
               setSettings={setSettings}
               onTestCaptcha={handleTestCaptcha}
             />
-            <BridgesNotificationsTab t={t} settings={settings} setSettings={setSettings} />
+            <BridgesNotificationsTab
+              t={t}
+              settings={settings}
+              setSettings={setSettings}
+            />
           </Tabs.Root>
         </Box>
       </Box>

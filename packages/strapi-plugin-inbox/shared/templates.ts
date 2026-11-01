@@ -11,7 +11,8 @@ export const STARTER_FORM_TEMPLATES: readonly FormStarterTemplate[] = [
   {
     id: "general-contact",
     name: "General Contact & Inquiry",
-    description: "Multi-language contact form with subject routing and anti-spam protection.",
+    description:
+      "Multi-language contact form with subject routing and anti-spam protection.",
     form: {
       title: "General Contact",
       slug: "general-contact",
@@ -22,15 +23,18 @@ export const STARTER_FORM_TEMPLATES: readonly FormStarterTemplate[] = [
       translations: {
         es: {
           title: "Contacto General",
-          description: "Envíanos un mensaje y nuestro equipo te responderá pronto.",
+          description:
+            "Envíanos un mensaje y nuestro equipo te responderá pronto.",
           submitButtonLabel: "Enviar mensaje",
-          successMessage: "Gracias por contactarnos. Hemos recibido tu mensaje.",
+          successMessage:
+            "Gracias por contactarnos. Hemos recibido tu mensaje.",
         },
         en: {
           title: "General Contact",
           description: "Send us a message and our team will respond promptly.",
           submitButtonLabel: "Send message",
-          successMessage: "Thank you for reaching out. We have received your message.",
+          successMessage:
+            "Thank you for reaching out. We have received your message.",
         },
         ar: {
           title: "الاتصال العام",
@@ -96,12 +100,20 @@ export const STARTER_FORM_TEMPLATES: readonly FormStarterTemplate[] = [
             {
               value: "general",
               label: "General Inquiry",
-              localizedLabels: { es: "Consulta general", en: "General Inquiry", ar: "استفسار عام" },
+              localizedLabels: {
+                es: "Consulta general",
+                en: "General Inquiry",
+                ar: "استفسار عام",
+              },
             },
             {
               value: "visit",
               label: "Guided Visit",
-              localizedLabels: { es: "Visita guiada", en: "Guided Visit", ar: "زيارة إرشادية" },
+              localizedLabels: {
+                es: "Visita guiada",
+                en: "Guided Visit",
+                ar: "زيارة إرشادية",
+              },
             },
             {
               value: "support",
@@ -149,20 +161,23 @@ export const STARTER_FORM_TEMPLATES: readonly FormStarterTemplate[] = [
     form: {
       title: "Formal Service Request",
       slug: "service-request",
-      description: "Submit an official service application and required supporting documents.",
+      description:
+        "Submit an official service application and required supporting documents.",
       category: "service_desk",
       active: true,
       publishedAt: "2026-01-01T00:00:00.000Z",
       translations: {
         es: {
           title: "Solicitud Formal de Servicio",
-          description: "Envía una solicitud oficial de servicio con los documentos requeridos.",
+          description:
+            "Envía una solicitud oficial de servicio con los documentos requeridos.",
           submitButtonLabel: "Radicar solicitud",
           successMessage: "Tu solicitud ha sido radicada con éxito.",
         },
         en: {
           title: "Formal Service Request",
-          description: "Submit an official service application and required supporting documents.",
+          description:
+            "Submit an official service application and required supporting documents.",
           submitButtonLabel: "Submit application",
           successMessage: "Your application has been registered.",
         },
@@ -277,7 +292,10 @@ export const STARTER_FORM_TEMPLATES: readonly FormStarterTemplate[] = [
   },
 ];
 
-export function localizeFormForLocale(form: FormRecord, locale: string): FormRecord {
+export function localizeFormForLocale(
+  form: FormRecord,
+  locale: string
+): FormRecord {
   const tr = form.translations?.[locale];
   const localizedFields: FormField[] = (form.fields || []).map((field) => ({
     ...field,
@@ -290,10 +308,11 @@ export function localizeFormForLocale(form: FormRecord, locale: string): FormRec
     })),
   }));
 
-  const localizedChecklist: ChecklistItem[] | undefined = form.checklistTemplate?.map((item) => ({
-    ...item,
-    label: item.localizedLabels?.[locale] || item.label,
-  }));
+  const localizedChecklist: ChecklistItem[] | undefined =
+    form.checklistTemplate?.map((item) => ({
+      ...item,
+      label: item.localizedLabels?.[locale] || item.label,
+    }));
 
   return {
     ...form,

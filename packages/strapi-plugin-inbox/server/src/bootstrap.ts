@@ -14,8 +14,12 @@ import { resolveCmsSubmissionFormRef } from "./services/submissionFormBuilderBri
 
 type FormServiceApi = {
   findBySlug(slug: string): Promise<FormRecord | null>;
-  saveForm(input: Partial<FormRecord> & { slug: string; title: string }): Promise<FormRecord>;
-  syncFormFromBuilderCms(cmsForm: Record<string, unknown>): Promise<FormRecord | null>;
+  saveForm(
+    input: Partial<FormRecord> & { slug: string; title: string }
+  ): Promise<FormRecord>;
+  syncFormFromBuilderCms(
+    cmsForm: Record<string, unknown>
+  ): Promise<FormRecord | null>;
   syncWithFormBuilderCms(): Promise<{
     available: boolean;
     syncedToBuilder: number;
@@ -73,7 +77,10 @@ function mergePresetFieldOptions(
   });
 }
 
-function mergePresetField(ef: FormField, presetFields?: FormField[]): FormField {
+function mergePresetField(
+  ef: FormField,
+  presetFields?: FormField[]
+): FormField {
   const pf = presetFields?.find((f) => f.id === ef.id || f.name === ef.name);
   if (!pf) return ef;
   return {
@@ -93,7 +100,11 @@ function pickFirst<T>(...vals: Array<T | undefined | null>): T {
   return vals[vals.length - 1] as T;
 }
 
-function pickNonDefault<T>(val: T | undefined, fallback: T | undefined, defaultVal: T): T {
+function pickNonDefault<T>(
+  val: T | undefined,
+  fallback: T | undefined,
+  defaultVal: T
+): T {
   if (val && val !== defaultVal) return val;
   return fallback || defaultVal;
 }
@@ -105,7 +116,11 @@ function mergePresetSettings(
   return {
     ...pickFirst(presetSettings, {}),
     ...pickFirst(existingSettings, {}),
-    department: pickNonDefault(existingSettings?.department, presetSettings?.department, "general"),
+    department: pickNonDefault(
+      existingSettings?.department,
+      presetSettings?.department,
+      "general"
+    ),
     defaultPriority: pickNonDefault(
       existingSettings?.defaultPriority,
       presetSettings?.defaultPriority,
@@ -130,14 +145,20 @@ function mergePresetSettings(
   };
 }
 
-function needsPresetBackfill(existing: FormRecord, preset: Partial<FormRecord>): boolean {
+function needsPresetBackfill(
+  existing: FormRecord,
+  preset: Partial<FormRecord>
+): boolean {
   const missingChecklist =
-    Boolean(preset.checklistTemplate?.length) && !existing.checklistTemplate?.length;
+    Boolean(preset.checklistTemplate?.length) &&
+    !existing.checklistTemplate?.length;
   const missingTranslations =
-    Boolean(preset.translations && Object.keys(preset.translations).length > 0) &&
-    !Object.keys(existing.translations || {}).length;
+    Boolean(
+      preset.translations && Object.keys(preset.translations).length > 0
+    ) && !Object.keys(existing.translations || {}).length;
   const missingCategory =
-    Boolean(preset.category && preset.category !== "contact") && existing.category === "contact";
+    Boolean(preset.category && preset.category !== "contact") &&
+    existing.category === "contact";
   return missingChecklist || missingTranslations || missingCategory;
 }
 
@@ -145,8 +166,12 @@ function buildMergedPresetForm(
   existing: FormRecord,
   preset: Partial<FormRecord> & { slug: string; title: string }
 ): Partial<FormRecord> & { slug: string; title: string } {
-  const baseFields = existing.fields?.length ? existing.fields : pickFirst(preset.fields, []);
-  const mergedFields = baseFields.map((ef) => mergePresetField(ef, preset.fields));
+  const baseFields = existing.fields?.length
+    ? existing.fields
+    : pickFirst(preset.fields, []);
+  const mergedFields = baseFields.map((ef) =>
+    mergePresetField(ef, preset.fields)
+  );
   const checklistTemplate = existing.checklistTemplate?.length
     ? existing.checklistTemplate
     : pickFirst(preset.checklistTemplate, []);
@@ -182,17 +207,27 @@ async function seedSinglePresetForm(
   }
 }
 
-async function seedPresetForms(strapi: Core.Strapi, formService: FormServiceApi): Promise<void> {
+async function seedPresetForms(
+  strapi: Core.Strapi,
+  formService: FormServiceApi
+): Promise<void> {
   try {
-    const rawConfig = strapi.config.get<Record<string, unknown>>(`plugin::${PLUGIN_ID}`, {});
+    const rawConfig = strapi.config.get<Record<string, unknown>>(
+      `plugin::${PLUGIN_ID}`,
+      {}
+    );
     const presetForms = Array.isArray(rawConfig?.presetForms)
-      ? (rawConfig.presetForms as Array<Partial<FormRecord> & { slug: string; title: string }>)
+      ? (rawConfig.presetForms as Array<
+          Partial<FormRecord> & { slug: string; title: string }
+        >)
       : [];
     for (const preset of presetForms) {
       await seedSinglePresetForm(formService, preset);
     }
   } catch (err) {
-    strapi.log?.warn?.(`[${PLUGIN_ID}] Could not seed presetForms: ${(err as Error).message}`);
+    strapi.log?.warn?.(
+      `[${PLUGIN_ID}] Could not seed presetForms: ${(err as Error).message}`
+    );
   }
 }
 
@@ -211,11 +246,11 @@ async function preserveCmsFormInboxSettings(
   const incomingSettings = data.settings as Record<string, unknown> | undefined;
   if (!incomingSettings || incomingSettings.inbox) return;
 
-  const existing = (await strapi.db.query(FORM_BUILDER_CMS_FORM_UID).findOne({ where })) as Record<
-    string,
-    unknown
-  > | null;
-  const prevInbox = (existing?.settings as Record<string, unknown> | undefined)?.inbox;
+  const existing = (await strapi.db
+    .query(FORM_BUILDER_CMS_FORM_UID)
+    .findOne({ where })) as Record<string, unknown> | null;
+  const prevInbox = (existing?.settings as Record<string, unknown> | undefined)
+    ?.inbox;
   if (!prevInbox) return;
 
   incomingSettings.inbox = prevInbox;
@@ -235,10 +270,14 @@ function extractLifecycleFormId(event: {
   const dataForm = event.params?.data?.form;
   const resultForm = event.result?.form;
   const fromData =
-    dataForm !== undefined ? resolveCmsSubmissionFormRef({ form: dataForm }).formId : null;
+    dataForm !== undefined
+      ? resolveCmsSubmissionFormRef({ form: dataForm }).formId
+      : null;
   if (fromData !== null) return fromData;
   const fromResult =
-    resultForm !== undefined ? resolveCmsSubmissionFormRef({ form: resultForm }).formId : null;
+    resultForm !== undefined
+      ? resolveCmsSubmissionFormRef({ form: resultForm }).formId
+      : null;
   return fromResult ?? undefined;
 }
 
@@ -249,7 +288,11 @@ function subscribeFormBuilderLifecycles(
 ): void {
   if (!strapi.db?.lifecycles?.subscribe) return;
 
-  if (strapi.contentTypes?.[FORM_BUILDER_CMS_FORM_UID as keyof typeof strapi.contentTypes]) {
+  if (
+    strapi.contentTypes?.[
+      FORM_BUILDER_CMS_FORM_UID as keyof typeof strapi.contentTypes
+    ]
+  ) {
     strapi.db.lifecycles.subscribe({
       models: [FORM_BUILDER_CMS_FORM_UID],
       async beforeUpdate(event) {
@@ -263,7 +306,11 @@ function subscribeFormBuilderLifecycles(
     });
   }
 
-  if (strapi.contentTypes?.[FORM_BUILDER_CMS_SUBMISSION_UID as keyof typeof strapi.contentTypes]) {
+  if (
+    strapi.contentTypes?.[
+      FORM_BUILDER_CMS_SUBMISSION_UID as keyof typeof strapi.contentTypes
+    ]
+  ) {
     strapi.db.lifecycles.subscribe({
       models: [FORM_BUILDER_CMS_SUBMISSION_UID],
       async afterCreate(event: {
@@ -284,7 +331,9 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   const settingsService = strapi.plugin(PLUGIN_ID).service<{
     getSettings(): Promise<InboxSettings>;
   }>("settings");
-  const formService = strapi.plugin(PLUGIN_ID).service<FormServiceApi>("formService");
+  const formService = strapi
+    .plugin(PLUGIN_ID)
+    .service<FormServiceApi>("formService");
   const submissionService = strapi
     .plugin(PLUGIN_ID)
     .service<SubmissionServiceApi>("submissionService");
@@ -295,7 +344,10 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   // Sync with strapi-plugin-form-builder-cms and register lifecycle hooks
   try {
-    if (settings.enableFormBuilderBridge !== false && settings.autoSyncFormBuilderForms !== false) {
+    if (
+      settings.enableFormBuilderBridge !== false &&
+      settings.autoSyncFormBuilderForms !== false
+    ) {
       await formService.syncWithFormBuilderCms();
     }
     subscribeFormBuilderLifecycles(strapi, formService, submissionService);

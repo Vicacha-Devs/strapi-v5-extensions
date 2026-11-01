@@ -7,7 +7,8 @@ export function escapeCsvCell(value: unknown): string {
   if (value === null || value === undefined) return "";
   const raw = typeof value === "object" ? JSON.stringify(value) : String(value);
 
-  const sanitized = raw.length > 0 && FORMULA_PREFIXES.includes(raw[0]) ? `'${raw}` : raw;
+  const sanitized =
+    raw.length > 0 && FORMULA_PREFIXES.includes(raw[0]) ? `'${raw}` : raw;
 
   if (
     sanitized.includes('"') ||
@@ -20,7 +21,10 @@ export function escapeCsvCell(value: unknown): string {
   return sanitized;
 }
 
-function collectDataFieldNames(submissions: SubmissionRecord[], fields: FormField[]): string[] {
+function collectDataFieldNames(
+  submissions: SubmissionRecord[],
+  fields: FormField[]
+): string[] {
   const dataFieldNames: string[] = [];
   const seen = new Set<string>();
 

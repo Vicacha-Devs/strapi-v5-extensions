@@ -20,7 +20,9 @@ export interface CaseworkPayloadChecklistColumnProps {
   onToggleChecklistItem: (itemId: string, verified: boolean) => Promise<void>;
 }
 
-export const CaseworkPayloadChecklistColumn: React.FC<CaseworkPayloadChecklistColumnProps> = ({
+export const CaseworkPayloadChecklistColumn: React.FC<
+  CaseworkPayloadChecklistColumnProps
+> = ({
   t,
   shortLocale,
   dataEntries,
@@ -45,9 +47,13 @@ export const CaseworkPayloadChecklistColumn: React.FC<CaseworkPayloadChecklistCo
     if (typeof val === "object") return JSON.stringify(val);
     const strVal = String(val);
     const matchedField = form?.fields?.find((f) => f.name === key);
-    const matchedOption = matchedField?.options?.find((o) => o.value === strVal);
+    const matchedOption = matchedField?.options?.find(
+      (o) => o.value === strVal
+    );
     if (matchedOption) {
-      return matchedOption.localizedLabels?.[shortLocale] || matchedOption.label;
+      return (
+        matchedOption.localizedLabels?.[shortLocale] || matchedOption.label
+      );
     }
     return strVal;
   };
@@ -61,7 +67,10 @@ export const CaseworkPayloadChecklistColumn: React.FC<CaseworkPayloadChecklistCo
         <Box background="neutral100" padding={3} hasRadius marginTop={2}>
           {dataEntries.length === 0 ? (
             <Typography variant="pi" textColor="neutral500">
-              {t("page.ui.no_payload_fields", "No custom payload fields recorded.")}
+              {t(
+                "page.ui.no_payload_fields",
+                "No custom payload fields recorded."
+              )}
             </Typography>
           ) : (
             <Flex direction="column" alignItems="stretch" gap={0}>
@@ -75,7 +84,9 @@ export const CaseworkPayloadChecklistColumn: React.FC<CaseworkPayloadChecklistCo
                   paddingBottom={2}
                   style={{
                     borderBottom:
-                      idx < dataEntries.length - 1 ? "1px solid rgba(128, 128, 128, 0.14)" : "none",
+                      idx < dataEntries.length - 1
+                        ? "1px solid rgba(128, 128, 128, 0.14)"
+                        : "none",
                   }}
                 >
                   <Typography
@@ -103,18 +114,29 @@ export const CaseworkPayloadChecklistColumn: React.FC<CaseworkPayloadChecklistCo
 
       <Box>
         <Typography variant="sigma" textColor="neutral600">
-          {t("page.ui.document_verification_checklist", "Document Verification Checklist")} (
-          {checklist.filter((c) => c.verified).length}/{checklist.length})
+          {t(
+            "page.ui.document_verification_checklist",
+            "Document Verification Checklist"
+          )}{" "}
+          ({checklist.filter((c) => c.verified).length}/{checklist.length})
         </Typography>
         <Box background="neutral100" padding={3} hasRadius marginTop={2}>
           {checklist.length === 0 ? (
             <Typography variant="pi" textColor="neutral500">
-              {t("page.ui.no_checklist", "No verification checklist attached to this form.")}
+              {t(
+                "page.ui.no_checklist",
+                "No verification checklist attached to this form."
+              )}
             </Typography>
           ) : (
             <Flex direction="column" alignItems="stretch" gap={2}>
               {checklist.map((item) => (
-                <Flex key={item.id} justifyContent="space-between" alignItems="center" gap={2}>
+                <Flex
+                  key={item.id}
+                  justifyContent="space-between"
+                  alignItems="center"
+                  gap={2}
+                >
                   <Checkbox
                     checked={Boolean(item.verified)}
                     onCheckedChange={(checked: boolean) =>

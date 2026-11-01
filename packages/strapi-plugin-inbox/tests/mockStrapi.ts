@@ -56,20 +56,25 @@ export function createMockStrapi() {
         findMany: async (params?: { where?: Record<string, unknown> }) => {
           const list = collections[uid] || [];
           const where = params?.where || {};
-          return list.filter((item) => Object.entries(where).every(([k, v]) => item[k] === v));
+          return list.filter((item) =>
+            Object.entries(where).every(([k, v]) => item[k] === v)
+          );
         },
         findOne: async (params?: { where?: Record<string, unknown> }) => {
           const list = collections[uid] || [];
           const where = params?.where || {};
           return (
-            list.find((item) => Object.entries(where).every(([k, v]) => item[k] === v)) ?? null
+            list.find((item) =>
+              Object.entries(where).every(([k, v]) => item[k] === v)
+            ) ?? null
           );
         },
         count: async (params?: { where?: Record<string, unknown> }) => {
           const list = collections[uid] || [];
           const where = params?.where || {};
-          return list.filter((item) => Object.entries(where).every(([k, v]) => item[k] === v))
-            .length;
+          return list.filter((item) =>
+            Object.entries(where).every(([k, v]) => item[k] === v)
+          ).length;
         },
         create: async ({ data }: { data: Record<string, unknown> }) => {
           const numId = idCounter++;
@@ -101,10 +106,15 @@ export function createMockStrapi() {
       }),
     },
     documents: (uid: string) => ({
-      findMany: async (params?: { filters?: Record<string, unknown>; limit?: number }) => {
+      findMany: async (params?: {
+        filters?: Record<string, unknown>;
+        limit?: number;
+      }) => {
         const list = collections[uid] || [];
         const filters = params?.filters || {};
-        return list.filter((item) => Object.entries(filters).every(([k, v]) => item[k] === v));
+        return list.filter((item) =>
+          Object.entries(filters).every(([k, v]) => item[k] === v)
+        );
       },
       findOne: async ({ documentId }: { documentId: string }) => {
         const list = collections[uid] || [];
@@ -148,7 +158,10 @@ export function createMockStrapi() {
     if (name === "bookings") {
       return {
         service: () => ({
-          createBooking: async (input: { serviceSlug: string; date: string }) => ({
+          createBooking: async (input: {
+            serviceSlug: string;
+            date: string;
+          }) => ({
             documentId: "bkg_doc_1",
             referenceCode: `BKG-${input.serviceSlug.toUpperCase()}-${input.date}`,
           }),
@@ -170,8 +183,12 @@ export function createMockStrapi() {
   };
 
   services.formService = formServiceFactory({ strapi: strapi as never });
-  services.submissionService = submissionServiceFactory({ strapi: strapi as never });
-  services.subscriberService = subscriberServiceFactory({ strapi: strapi as never });
+  services.submissionService = submissionServiceFactory({
+    strapi: strapi as never,
+  });
+  services.subscriberService = subscriberServiceFactory({
+    strapi: strapi as never,
+  });
   services.alertService = alertServiceFactory({ strapi: strapi as never });
 
   return {

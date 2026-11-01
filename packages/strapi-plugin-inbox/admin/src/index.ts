@@ -21,7 +21,10 @@ export default {
   register(app: {
     addMenuLink: (link: Record<string, unknown>) => void;
     createSettingSection: (
-      section: { id: string; intlLabel: { id: string; defaultMessage: string } },
+      section: {
+        id: string;
+        intlLabel: { id: string; defaultMessage: string };
+      },
       links: Array<Record<string, unknown>>
     ) => void;
     registerPlugin: (plugin: Record<string, unknown>) => void;
@@ -74,18 +77,25 @@ export default {
   },
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
-    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    const allLocales = Array.from(
+      new Set([...locales, "en", "es", "ar", "tr"])
+    );
     return Promise.all(
       allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(
+            `./translations/${locale}.json`
+          );
           const prefixed: Record<string, string> = {
             ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en),
-            ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en),
+            ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ??
+              CM_PLACEHOLDER_TRANSLATIONS.en),
           };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
-            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`)
+              ? k
+              : `${PLUGIN_ID}.${k}`;
             prefixed[fullKey] = v;
           }
           return { data: prefixed, locale };

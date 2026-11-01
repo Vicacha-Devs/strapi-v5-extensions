@@ -45,17 +45,21 @@ function enforceHoneypotAndRateLimit(
   nowMs?: number
 ): void {
   const honeypotField =
-    firstStr(form.settings?.honeypotField, settings.defaultHoneypotField) || "_website_url";
+    firstStr(form.settings?.honeypotField, settings.defaultHoneypotField) ||
+    "_website_url";
   if (isHoneypotTriggered(payload, honeypotField)) {
     const err = new Error("Bot submission rejected by honeypot");
     err.name = "ForbiddenError";
     throw err;
   }
 
-  const rateLimit = form.settings?.rateLimitPerHour ?? settings.defaultRateLimitPerHour ?? 15;
+  const rateLimit =
+    form.settings?.rateLimitPerHour ?? settings.defaultRateLimitPerHour ?? 15;
   const limitCheck = defaultRateLimiter.check(ip, form.slug, rateLimit, nowMs);
   if (!limitCheck.allowed) {
-    const err = new Error(`Rate limit exceeded. Try again in ${limitCheck.retryAfterSeconds}s`);
+    const err = new Error(
+      `Rate limit exceeded. Try again in ${limitCheck.retryAfterSeconds}s`
+    );
     err.name = "TooManyRequestsError";
     throw err;
   }
@@ -73,7 +77,9 @@ async function enforceCaptchaVerification(
   if (captchaProvider === "none") return;
 
   const providerSecret =
-    captchaProvider === "turnstile" ? settings.turnstileSecretKey : settings.recaptchaSecretKey;
+    captchaProvider === "turnstile"
+      ? settings.turnstileSecretKey
+      : settings.recaptchaSecretKey;
   const secret = firstStr(form.settings?.captchaSecretKey, providerSecret);
   const token = firstStr(
     meta?.captchaToken,
@@ -82,7 +88,13 @@ async function enforceCaptchaVerification(
     payload["g-recaptcha-response"]
   );
 
-  const verified = await verifyCaptchaToken(captchaProvider, secret, token, ip, meta?.fetchImpl);
+  const verified = await verifyCaptchaToken(
+    captchaProvider,
+    secret,
+    token,
+    ip,
+    meta?.fetchImpl
+  );
   if (!verified) {
     const err = new Error("CAPTCHA verification failed");
     err.name = "ValidationError";
@@ -98,7 +110,8 @@ function validateOrThrow(
   const validation = validateFormSubmission(form.fields || [], payload, locale);
   if (!validation.valid) {
     const firstField = Object.keys(validation.errors)[0];
-    const firstError = validation.errors[firstField]?.[0] || "Validation failed";
+    const firstError =
+      validation.errors[firstField]?.[0] || "Validation failed";
     const err = new Error(firstError) as Error & {
       details?: Record<string, string[]>;
     };
@@ -137,17 +150,31 @@ function buildSubmissionDataRecord(params: {
     cleaned.name,
     payload.applicantName
   );
-  const applicantEmail = firstStr(cleaned.applicantEmail, cleaned.email, payload.applicantEmail);
-  const applicantPhone = firstStr(cleaned.applicantPhone, cleaned.phone, payload.applicantPhone);
+  const applicantEmail = firstStr(
+    cleaned.applicantEmail,
+    cleaned.email,
+    payload.applicantEmail
+  );
+  const applicantPhone = firstStr(
+    cleaned.applicantPhone,
+    cleaned.phone,
+    payload.applicantPhone
+  );
 
   const timestamp = nowMs ?? Date.now();
   const nowIso = new Date(timestamp).toISOString();
   const secondaryCal = settings.secondaryCalendars?.[0] ?? "islamic-umalqura";
-  const converted = convertIsoDateToCalendar(nowIso.slice(0, 10), secondaryCal, locale);
-  const checklistItems: ChecklistItem[] = (form.checklistTemplate ?? []).map((item) => ({
-    ...item,
-    verified: false,
-  }));
+  const converted = convertIsoDateToCalendar(
+    nowIso.slice(0, 10),
+    secondaryCal,
+    locale
+  );
+  const checklistItems: ChecklistItem[] = (form.checklistTemplate ?? []).map(
+    (item) => ({
+      ...item,
+      verified: false,
+    })
+  );
 
   return {
     referenceCode: generateReferenceCode(new Date(timestamp)),
@@ -213,7 +240,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       throw err;
     }
 
-    const locale = firstStr(meta?.locale, payload.locale, settings.defaultLocale) || "es";
+    const locale =
+      firstStr(meta?.locale, payload.locale, settings.defaultLocale) || "es";
     const ip = firstStr(meta?.ip) || "127.0.0.1";
     const userAgent = firstStr(meta?.userAgent);
 
@@ -221,13 +249,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     await enforceCaptchaVerification(form, settings, payload, ip, meta);
     const cleaned = validateOrThrow(form, payload, locale);
 
-    const mirroredCmsSubmissionId = await mirrorSubmissionToFormBuilderCms(strapi, {
-      settings,
-      form,
-      cleanedData: cleaned,
-      ip,
-      userAgent,
-    });
+    const mirroredCmsSubmissionId = await mirrorSubmissionToFormBuilderCms(
+      strapi,
+      {
+        settings,
+        form,
+        cleanedData: cleaned,
+        ip,
+        userAgent,
+      }
+    );
 
     const submissionData = buildSubmissionDataRecord({
       form,
@@ -311,10 +342,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       data: {
         ...(patch.status ? { status: patch.status } : {}),
         ...(patch.priority ? { priority: patch.priority } : {}),
-        ...(patch.department !== undefined ? { department: patch.department } : {}),
-        ...(patch.staffNotes !== undefined ? { staffNotes: patch.staffNotes } : {}),
-        ...(patch.assignedTo !== undefined ? { assignedTo: patch.assignedTo } : {}),
-        ...(patch.checklistItems ? { checklistItems: patch.checklistItems } : {}),
+        ...(patch.department !== undefined
+          ? { department: patch.department }
+          : {}),
+        ...(patch.staffNotes !== undefined
+          ? { staffNotes: patch.staffNotes }
+          : {}),
+        ...(patch.assignedTo !== undefined
+          ? { assignedTo: patch.assignedTo }
+          : {}),
+        ...(patch.checklistItems
+          ? { checklistItems: patch.checklistItems }
+          : {}),
       },
     })) as unknown as SubmissionRecord;
 

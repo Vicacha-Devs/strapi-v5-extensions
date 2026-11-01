@@ -1,4 +1,11 @@
-import { Badge, Box, Button, Flex, TextInput, Typography } from "@strapi/design-system";
+import {
+  Badge,
+  Box,
+  Button,
+  Flex,
+  TextInput,
+  Typography,
+} from "@strapi/design-system";
 import * as React from "react";
 
 import type { ChecklistItem, FormTranslation } from "../../../../shared";
@@ -19,7 +26,9 @@ export interface FormChecklistAndLocalePanelsProps {
   onUpdateTranslationField: (key: keyof FormTranslation, value: string) => void;
 }
 
-export const FormChecklistAndLocalePanels: React.FC<FormChecklistAndLocalePanelsProps> = ({
+export const FormChecklistAndLocalePanels: React.FC<
+  FormChecklistAndLocalePanelsProps
+> = ({
   t,
   checklistItems,
   newChecklistLabel,
@@ -36,17 +45,26 @@ export const FormChecklistAndLocalePanels: React.FC<FormChecklistAndLocalePanels
 
   return (
     <Flex gap={5} paddingTop={4} wrap="wrap" alignItems="flex-start">
-      <Box padding={4} background="neutral100" hasRadius style={{ flex: "1 1 340px" }}>
+      <Box
+        padding={4}
+        background="neutral100"
+        hasRadius
+        style={{ flex: "1 1 340px" }}
+      >
         <Flex justifyContent="space-between" alignItems="center">
           <Typography variant="sigma" textColor="neutral600">
-            {t("page.ui.required_verification_documents", "Required Verification Documents")} (
-            {checklistItems.length})
+            {t(
+              "page.ui.required_verification_documents",
+              "Required Verification Documents"
+            )}{" "}
+            ({checklistItems.length})
           </Typography>
           <Badge>{activeLocale.toUpperCase()}</Badge>
         </Flex>
         <Flex direction="column" alignItems="stretch" gap={2} paddingTop={2}>
           {checklistItems.map((item) => {
-            const displayLabel = item.localizedLabels?.[activeLocale] ?? item.label;
+            const displayLabel =
+              item.localizedLabels?.[activeLocale] ?? item.label;
             return (
               <Flex
                 key={item.id}
@@ -101,10 +119,22 @@ export const FormChecklistAndLocalePanels: React.FC<FormChecklistAndLocalePanels
         </Flex>
       </Box>
 
-      <Box padding={4} background="neutral100" hasRadius style={{ flex: "1 1 360px" }}>
-        <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+      <Box
+        padding={4}
+        background="neutral100"
+        hasRadius
+        style={{ flex: "1 1 360px" }}
+      >
+        <Flex
+          justifyContent="space-between"
+          alignItems="center"
+          paddingBottom={2}
+        >
           <Typography variant="sigma" textColor="neutral600">
-            {t("page.ui.form_localization_header", "Form Localization (es / en / ar)")}
+            {t(
+              "page.ui.form_localization_header",
+              "Form Localization (es / en / ar)"
+            )}
           </Typography>
           <Flex gap={1}>
             {SUPPORTED_FORM_LOCALES.map((loc) => (

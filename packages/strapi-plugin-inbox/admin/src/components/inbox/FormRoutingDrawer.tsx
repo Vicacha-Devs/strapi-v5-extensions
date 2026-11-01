@@ -41,7 +41,9 @@ export const FormRoutingDrawer: React.FC<FormRoutingDrawerProps> = ({
   onReload,
   onClose,
 }) => {
-  const [editCategory, setEditCategory] = React.useState<FormCategory>(form.category || "contact");
+  const [editCategory, setEditCategory] = React.useState<FormCategory>(
+    form.category || "contact"
+  );
   const [editDepartment, setEditDepartment] = React.useState<string>(
     form.settings?.department || "general"
   );
@@ -54,15 +56,15 @@ export const FormRoutingDrawer: React.FC<FormRoutingDrawerProps> = ({
   const [editCertBridge, setEditCertBridge] = React.useState<boolean>(
     Boolean(form.settings?.enableCertificateBridge)
   );
-  const [editChecklistItems, setEditChecklistItems] = React.useState<ChecklistItem[]>(
-    form.checklistTemplate || []
-  );
+  const [editChecklistItems, setEditChecklistItems] = React.useState<
+    ChecklistItem[]
+  >(form.checklistTemplate || []);
   const [newChecklistLabel, setNewChecklistLabel] = React.useState<string>("");
 
   const [activeLocale, setActiveLocale] = React.useState<string>("es");
-  const [translations, setTranslations] = React.useState<Record<string, FormTranslation>>(
-    form.translations || {}
-  );
+  const [translations, setTranslations] = React.useState<
+    Record<string, FormTranslation>
+  >(form.translations || {});
 
   React.useEffect(() => {
     setEditCategory(form.category || "contact");
@@ -75,7 +77,10 @@ export const FormRoutingDrawer: React.FC<FormRoutingDrawerProps> = ({
     setNewChecklistLabel("");
   }, [form]);
 
-  const updateTranslationField = (key: keyof FormTranslation, value: string) => {
+  const updateTranslationField = (
+    key: keyof FormTranslation,
+    value: string
+  ) => {
     setTranslations((prev) => ({
       ...prev,
       [activeLocale]: {
@@ -162,8 +167,11 @@ export const FormRoutingDrawer: React.FC<FormRoutingDrawerProps> = ({
       >
         <Box>
           <Typography variant="delta" tag="h3" fontWeight="bold">
-            {t("page.ui.routing_checklist_localization", "Routing, Checklist & Localization")} —{" "}
-            {form.slug}
+            {t(
+              "page.ui.routing_checklist_localization",
+              "Routing, Checklist & Localization"
+            )}{" "}
+            — {form.slug}
           </Typography>
           <Typography variant="pi" textColor="neutral600">
             {t(
@@ -185,10 +193,14 @@ export const FormRoutingDrawer: React.FC<FormRoutingDrawerProps> = ({
       <Flex gap={4} wrap="wrap">
         <Box style={{ flex: "1 1 200px" }}>
           <Field.Root name="editCategory">
-            <Field.Label>{t("field.workflow_category", "Workflow Category")}</Field.Label>
+            <Field.Label>
+              {t("field.workflow_category", "Workflow Category")}
+            </Field.Label>
             <SingleSelect
               value={editCategory}
-              onChange={(val: string | number) => setEditCategory(String(val) as FormCategory)}
+              onChange={(val: string | number) =>
+                setEditCategory(String(val) as FormCategory)
+              }
             >
               {FORM_CATEGORIES.map((cat) => (
                 <SingleSelectOption key={cat} value={cat}>
@@ -201,11 +213,15 @@ export const FormRoutingDrawer: React.FC<FormRoutingDrawerProps> = ({
 
         <Box style={{ flex: "1 1 200px" }}>
           <Field.Root name="editDepartment">
-            <Field.Label>{t("field.target_department", "Target Department")}</Field.Label>
+            <Field.Label>
+              {t("field.target_department", "Target Department")}
+            </Field.Label>
             <TextInput
               name="editDepartment"
               value={editDepartment}
-              onChange={(e: { target: { value: string } }) => setEditDepartment(e.target.value)}
+              onChange={(e: { target: { value: string } }) =>
+                setEditDepartment(e.target.value)
+              }
               placeholder={t(
                 "placeholder.target_department",
                 "e.g., imamate, nikah_family, general"
@@ -216,7 +232,9 @@ export const FormRoutingDrawer: React.FC<FormRoutingDrawerProps> = ({
 
         <Box style={{ flex: "1 1 200px" }}>
           <Field.Root name="editPriority">
-            <Field.Label>{t("field.default_priority", "Default Priority")}</Field.Label>
+            <Field.Label>
+              {t("field.default_priority", "Default Priority")}
+            </Field.Label>
             <SingleSelect
               value={editPriority}
               onChange={(val: string | number) =>
@@ -236,15 +254,25 @@ export const FormRoutingDrawer: React.FC<FormRoutingDrawerProps> = ({
       <Flex gap={6} paddingTop={4} paddingBottom={4} wrap="wrap">
         <Checkbox
           checked={editBookingBridge}
-          onCheckedChange={(checked: boolean) => setEditBookingBridge(Boolean(checked))}
+          onCheckedChange={(checked: boolean) =>
+            setEditBookingBridge(Boolean(checked))
+          }
         >
-          {t("checkbox.enable_1_click_booking", "Enable 1-Click Appointment Booking")}
+          {t(
+            "checkbox.enable_1_click_booking",
+            "Enable 1-Click Appointment Booking"
+          )}
         </Checkbox>
         <Checkbox
           checked={editCertBridge}
-          onCheckedChange={(checked: boolean) => setEditCertBridge(Boolean(checked))}
+          onCheckedChange={(checked: boolean) =>
+            setEditCertBridge(Boolean(checked))
+          }
         >
-          {t("checkbox.enable_1_click_certificate", "Enable 1-Click Certificate Issuance")}
+          {t(
+            "checkbox.enable_1_click_certificate",
+            "Enable 1-Click Certificate Issuance"
+          )}
         </Checkbox>
       </Flex>
 

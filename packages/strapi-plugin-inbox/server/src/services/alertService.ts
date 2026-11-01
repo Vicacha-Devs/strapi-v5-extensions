@@ -66,7 +66,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const secondaryCal = settings.secondaryCalendars?.[0] || "islamic-umalqura";
     const refDateIso = new Date(nowMs).toISOString().slice(0, 10);
-    const secondaryDate = convertIsoDateToCalendar(refDateIso, secondaryCal, locale);
+    const secondaryDate = convertIsoDateToCalendar(
+      refDateIso,
+      secondaryCal,
+      locale
+    );
 
     return activeInWindow.map((banner) => {
       const tr = banner.translations?.[locale];
@@ -88,10 +92,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       message: string;
     }
   ): Promise<AlertBannerRecord> {
-    const existingDocs = (await getDocuments(strapi, ALERT_BANNER_UID).findMany({
-      filters: { code: input.code },
-      limit: 1,
-    })) as unknown as AlertBannerRecord[];
+    const existingDocs = (await getDocuments(strapi, ALERT_BANNER_UID).findMany(
+      {
+        filters: { code: input.code },
+        limit: 1,
+      }
+    )) as unknown as AlertBannerRecord[];
 
     const existing = existingDocs[0] || null;
     const payload = buildAlertBannerPayload(input);

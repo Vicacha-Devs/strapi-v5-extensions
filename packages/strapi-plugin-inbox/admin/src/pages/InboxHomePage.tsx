@@ -1,4 +1,11 @@
-import { Box, Button, Divider, Flex, Main, Typography } from "@strapi/design-system";
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Main,
+  Typography,
+} from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
 import * as React from "react";
 import { useIntl } from "react-intl";
@@ -76,7 +83,8 @@ export const InboxHomePage: React.FC = () => {
               variant={activeTab === "submissions" ? "default" : "tertiary"}
               onClick={() => setActiveTab("submissions")}
             >
-              {t("page.ui.casework_inbox", "Casework Inbox")} ({submissions.length})
+              {t("page.ui.casework_inbox", "Casework Inbox")} (
+              {submissions.length})
             </Button>
             <Button
               variant={activeTab === "forms" ? "default" : "tertiary"}
