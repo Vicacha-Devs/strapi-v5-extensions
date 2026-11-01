@@ -137,7 +137,14 @@
     },
     "esignEnvelopeStatus": {
       "type": "enumeration",
-      "enum": ["not_sent", "sent", "delivered", "completed", "declined", "voided"],
+      "enum": [
+        "not_sent",
+        "sent",
+        "delivered",
+        "completed",
+        "declined",
+        "voided"
+      ],
       "default": "not_sent"
     },
     "esignCompletedAt": {

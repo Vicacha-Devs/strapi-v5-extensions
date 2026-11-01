@@ -37,7 +37,9 @@ export interface DocuSignEnvelopePayload {
     documentId: "1";
   }>;
   recipients: { signers: DocuSignSignerRecipient[] };
-  customFields: { textCustomFields: Array<{ name: string; value: string; show: "false" }> };
+  customFields: {
+    textCustomFields: Array<{ name: string; value: string; show: "false" }>;
+  };
 }
 
 const PRIVATE_HOST_PREFIXES = ["127.", "10.", "192.168.", "169.254."];
@@ -64,9 +66,12 @@ export function validateDocuSignBaseUrl(rawUrl: string): string {
     throw new Error("DocuSign baseUrl cannot target private or loopback hosts");
   }
 
-  const isOfficialDocuSign = host.endsWith(".docusign.net") || host.endsWith(".docusign.com");
+  const isOfficialDocuSign =
+    host.endsWith(".docusign.net") || host.endsWith(".docusign.com");
   if (!isOfficialDocuSign) {
-    throw new Error("DocuSign baseUrl must belong to *.docusign.net or *.docusign.com");
+    throw new Error(
+      "DocuSign baseUrl must belong to *.docusign.net or *.docusign.com"
+    );
   }
 
   return cleaned;
@@ -131,7 +136,8 @@ export function buildDocuSignEnvelopePayload(params: {
     );
   }
 
-  const subjectPrefix = emailSubjectPrefix || "Official Certificate Signature Request";
+  const subjectPrefix =
+    emailSubjectPrefix || "Official Certificate Signature Request";
   const documentBase64 = Buffer.from(htmlDocument, "utf8").toString("base64");
 
   return {
@@ -201,20 +207,30 @@ function resolveDocuSignCredentials(
   fetchFn: FetchLikeFn;
 } {
   if (!settings.esign?.enabled || settings.esign.provider !== "docusign") {
-    throw new Error("DocuSign eSignature provider is not enabled in Certificates settings");
+    throw new Error(
+      "DocuSign eSignature provider is not enabled in Certificates settings"
+    );
   }
   const safeBaseUrl = validateDocuSignBaseUrl(settings.esign.baseUrl);
-  const accountId = firstNonEmptyString(settings.esign.accountId, process.env.DOCUSIGN_ACCOUNT_ID);
+  const accountId = firstNonEmptyString(
+    settings.esign.accountId,
+    process.env.DOCUSIGN_ACCOUNT_ID
+  );
   if (!accountId) {
     throw new Error("DocuSign accountId is required");
   }
-  const accessToken = firstNonEmptyString(options?.accessToken, process.env.DOCUSIGN_ACCESS_TOKEN);
+  const accessToken = firstNonEmptyString(
+    options?.accessToken,
+    process.env.DOCUSIGN_ACCESS_TOKEN
+  );
   if (!accessToken) {
     throw new Error(
       "DOCUSIGN_ACCESS_TOKEN environment variable is required to dispatch DocuSign envelopes"
     );
   }
-  const fetchFn = options?.fetchImpl ?? (globalThis as unknown as { fetch?: FetchLikeFn }).fetch;
+  const fetchFn =
+    options?.fetchImpl ??
+    (globalThis as unknown as { fetch?: FetchLikeFn }).fetch;
   if (!fetchFn) {
     throw new Error("Fetch implementation unavailable");
   }
@@ -237,7 +253,9 @@ async function dispatchDocuSignEnvelopeRequest(
     body: JSON.stringify(envelopePayload),
   });
   if (!response.ok) {
-    throw new Error(`DocuSign API returned HTTP ${response.status} when creating envelope`);
+    throw new Error(
+      `DocuSign API returned HTTP ${response.status} when creating envelope`
+    );
   }
   const responseJson = await response.json();
   const envelopeId = String(responseJson.envelopeId || "").trim();
@@ -247,8 +265,13 @@ async function dispatchDocuSignEnvelopeRequest(
   return envelopeId;
 }
 
-function asRecord(val: unknown, fallback: Record<string, unknown>): Record<string, unknown> {
-  return val && typeof val === "object" ? (val as Record<string, unknown>) : fallback;
+function asRecord(
+  val: unknown,
+  fallback: Record<string, unknown>
+): Record<string, unknown> {
+  return val && typeof val === "object"
+    ? (val as Record<string, unknown>)
+    : fallback;
 }
 
 const ALLOWED_ENVELOPE_STATUSES: ESignEnvelopeStatus[] = [
@@ -287,7 +310,9 @@ function parseWebhookEnvelopeInfo(payload: Record<string, unknown>): {
     payload.status,
     "sent"
   ).toLowerCase() as ESignEnvelopeStatus;
-  const envelopeStatus = ALLOWED_ENVELOPE_STATUSES.includes(rawStatus) ? rawStatus : "sent";
+  const envelopeStatus = ALLOWED_ENVELOPE_STATUSES.includes(rawStatus)
+    ? rawStatus
+    : "sent";
   return { envelopeId, envelopeStatus };
 }
 
@@ -326,7 +351,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       },
     });
 
-    const finalRecord = normalizeCertificateRecord(updatedCompleted || fallbackDoc, true);
+    const finalRecord = normalizeCertificateRecord(
+      updatedCompleted || fallbackDoc,
+      true
+    );
     strapi.eventHub?.emit("certificates.docusign.completed", {
       serialNumber: finalRecord.serialNumber,
       envelopeId,
@@ -352,12 +380,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       certificate: CertificateRecord;
     }> {
       const settings = await getSettingsService().getSettings();
-      const { safeBaseUrl, accountId, accessToken, fetchFn } = resolveDocuSignCredentials(
-        settings,
-        options
-      );
+      const { safeBaseUrl, accountId, accessToken, fetchFn } =
+        resolveDocuSignCredentials(settings, options);
 
-      const rawDoc = await strapi.documents(CERTIFICATE_UID).findOne({ documentId });
+      const rawDoc = await strapi
+        .documents(CERTIFICATE_UID)
+        .findOne({ documentId });
       if (!rawDoc) {
         throw new Error("Certificate record not found");
       }
@@ -368,7 +396,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         { isAdmin: true }
       );
       if (!rendered) {
-        throw new Error("Failed to render certificate HTML for DocuSign envelope");
+        throw new Error(
+          "Failed to render certificate HTML for DocuSign envelope"
+        );
       }
 
       const envelopePayload = buildDocuSignEnvelopePayload({
@@ -417,23 +447,36 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       envelopeStatus: ESignEnvelopeStatus;
       certificate: CertificateRecord;
     }> {
-      const secret = firstNonEmptyString(params.webhookSecret, process.env.DOCUSIGN_WEBHOOK_SECRET);
+      const secret = firstNonEmptyString(
+        params.webhookSecret,
+        process.env.DOCUSIGN_WEBHOOK_SECRET
+      );
       if (!secret) {
         throw new Error("DOCUSIGN_WEBHOOK_SECRET is not configured");
       }
 
-      if (!verifyDocuSignWebhookHmac(params.rawBody, params.signatureHeader, secret)) {
+      if (
+        !verifyDocuSignWebhookHmac(
+          params.rawBody,
+          params.signatureHeader,
+          secret
+        )
+      ) {
         throw new Error("Invalid DocuSign webhook HMAC-SHA256 signature");
       }
 
-      const { envelopeId, envelopeStatus } = parseWebhookEnvelopeInfo(params.payload);
+      const { envelopeId, envelopeStatus } = parseWebhookEnvelopeInfo(
+        params.payload
+      );
 
       const matches = await strapi.documents(CERTIFICATE_UID).findMany({
         filters: { esignEnvelopeId: envelopeId },
         limit: 1,
       });
       if (matches.length === 0) {
-        throw new Error(`No certificate found for DocuSign envelopeId ${envelopeId}`);
+        throw new Error(
+          `No certificate found for DocuSign envelopeId ${envelopeId}`
+        );
       }
 
       const existing = normalizeCertificateRecord(matches[0], true);

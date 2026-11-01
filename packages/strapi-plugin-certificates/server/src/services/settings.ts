@@ -51,7 +51,9 @@ export const DEFAULT_SETTINGS: Omit<
 function sanitizeCalendarSystems(raw: unknown): CalendarSystemConfig[] {
   if (!Array.isArray(raw)) return DEFAULT_SECONDARY_CALENDARS;
   return raw
-    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+    .filter((item): item is Record<string, unknown> =>
+      Boolean(item && typeof item === "object")
+    )
     .map((item) => ({
       id: String(item.id || "islamic-umalqura").trim(),
       label: String(item.label || item.id || "Hijri").trim(),
@@ -84,7 +86,9 @@ function normalizeEsignProvider(
 }
 
 function toRecordObject(raw: unknown): Partial<DocuSignProviderConfig> {
-  return raw && typeof raw === "object" ? (raw as Partial<DocuSignProviderConfig>) : {};
+  return raw && typeof raw === "object"
+    ? (raw as Partial<DocuSignProviderConfig>)
+    : {};
 }
 
 function sanitizeESignConfig(
@@ -96,7 +100,9 @@ function sanitizeESignConfig(
   const envBaseUrl = process.env.DOCUSIGN_BASE_URL?.trim();
   const envIntegrationKey = process.env.DOCUSIGN_INTEGRATION_KEY?.trim();
 
-  const enabled = Boolean(obj.enabled ?? fallback.enabled ?? Boolean(envAccountId));
+  const enabled = Boolean(
+    obj.enabled ?? fallback.enabled ?? Boolean(envAccountId)
+  );
   const providerRaw = pickFirstString(obj.provider, fallback.provider, "none");
 
   return {
@@ -109,7 +115,11 @@ function sanitizeESignConfig(
       DEFAULT_ESIGN_CONFIG.baseUrl
     ).replace(/\/+$/, ""),
     accountId: pickFirstString(obj.accountId, envAccountId, fallback.accountId),
-    integrationKey: pickFirstString(obj.integrationKey, envIntegrationKey, fallback.integrationKey),
+    integrationKey: pickFirstString(
+      obj.integrationKey,
+      envIntegrationKey,
+      fallback.integrationKey
+    ),
     emailSubjectPrefix: pickFirstString(
       obj.emailSubjectPrefix,
       fallback.emailSubjectPrefix,
@@ -134,7 +144,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return {
           privateKeyPem: envPrivate.replace(/\\n/g, "\n"),
           publicKeyPem: envPublic.replace(/\\n/g, "\n"),
-          fingerprint: computePublicKeyFingerprint(envPublic.replace(/\\n/g, "\n")),
+          fingerprint: computePublicKeyFingerprint(
+            envPublic.replace(/\\n/g, "\n")
+          ),
         };
       }
 
@@ -147,7 +159,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return {
           privateKeyPem: stored.privateKeyPem,
           publicKeyPem: stored.publicKeyPem,
-          fingerprint: stored.fingerprint || computePublicKeyFingerprint(stored.publicKeyPem),
+          fingerprint:
+            stored.fingerprint ||
+            computePublicKeyFingerprint(stored.publicKeyPem),
         };
       }
 
@@ -172,7 +186,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         key: KEYPAIR_STORE_KEY,
         value: generated,
       });
-      strapi.log.warn(`[${PLUGIN_ID}] Rotated Ed25519 signing keypair to ${generated.fingerprint}`);
+      strapi.log.warn(
+        `[${PLUGIN_ID}] Rotated Ed25519 signing keypair to ${generated.fingerprint}`
+      );
       return {
         publicKeyPem: generated.publicKeyPem,
         publicKeyFingerprint: generated.fingerprint,
@@ -182,7 +198,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async getSettings(): Promise<CertificatesPluginSettings> {
       const store = getPluginStore();
       const configDefaults =
-        strapi.config.get<Partial<CertificatesPluginSettings>>(`plugin::${PLUGIN_ID}`, {}) || {};
+        strapi.config.get<Partial<CertificatesPluginSettings>>(
+          `plugin::${PLUGIN_ID}`,
+          {}
+        ) || {};
       const stored = ((await store.get({ key: SETTINGS_STORE_KEY })) ||
         {}) as Partial<CertificatesPluginSettings>;
       const keyPair = await this.getSigningKeyPair();
@@ -193,7 +212,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ...stored,
       };
 
-      const defaultEsign = sanitizeESignConfig(configDefaults.esign, DEFAULT_ESIGN_CONFIG);
+      const defaultEsign = sanitizeESignConfig(
+        configDefaults.esign,
+        DEFAULT_ESIGN_CONFIG
+      );
 
       return {
         organizationName: String(
@@ -207,15 +229,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         )
           .trim()
           .replace(/\/+$/, ""),
-        defaultTimezone: String(merged.defaultTimezone || DEFAULT_SETTINGS.defaultTimezone).trim(),
-        defaultLocale: String(merged.defaultLocale || DEFAULT_SETTINGS.defaultLocale).trim(),
+        defaultTimezone: String(
+          merged.defaultTimezone || DEFAULT_SETTINGS.defaultTimezone
+        ).trim(),
+        defaultLocale: String(
+          merged.defaultLocale || DEFAULT_SETTINGS.defaultLocale
+        ).trim(),
         maskPublicRecipientName: merged.maskPublicRecipientName !== false,
         allowPublicApplications: merged.allowPublicApplications !== false,
         publicKeyPem: keyPair.publicKeyPem,
         publicKeyFingerprint: keyPair.fingerprint,
         secondaryCalendars: sanitizeCalendarSystems(merged.secondaryCalendars),
         esign: sanitizeESignConfig(stored.esign, defaultEsign),
-        defaultTemplates: Array.isArray(merged.defaultTemplates) ? merged.defaultTemplates : [],
+        defaultTemplates: Array.isArray(merged.defaultTemplates)
+          ? merged.defaultTemplates
+          : [],
       };
     },
 

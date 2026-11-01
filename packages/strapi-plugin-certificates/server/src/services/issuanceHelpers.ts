@@ -20,7 +20,11 @@ import {
 
 const rateLimitStore = new Map<string, number[]>();
 
-export function checkRateLimit(key: string, maxRequests = 20, windowMs = 60_000): boolean {
+export function checkRateLimit(
+  key: string,
+  maxRequests = 20,
+  windowMs = 60_000
+): boolean {
   const now = Date.now();
   const existing = rateLimitStore.get(key) || [];
   const recent = existing.filter((ts) => now - ts < windowMs);
@@ -36,17 +40,22 @@ export function checkRateLimit(key: string, maxRequests = 20, windowMs = 60_000)
 export function normalizeSignatories(raw: unknown): CertificateSignatory[] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+    .filter((item): item is Record<string, unknown> =>
+      Boolean(item && typeof item === "object")
+    )
     .map((item) => ({
       name: String(item.name || "").trim(),
       title: String(item.title || "").trim(),
       role: item.role ? String(item.role).trim() : undefined,
       email: item.email ? String(item.email).trim() : undefined,
       routingOrder:
-        typeof item.routingOrder === "number" && Number.isFinite(item.routingOrder)
+        typeof item.routingOrder === "number" &&
+        Number.isFinite(item.routingOrder)
           ? Math.max(1, Math.trunc(item.routingOrder))
           : undefined,
-      signatureImageUrl: item.signatureImageUrl ? String(item.signatureImageUrl).trim() : undefined,
+      signatureImageUrl: item.signatureImageUrl
+        ? String(item.signatureImageUrl).trim()
+        : undefined,
       signedAt: item.signedAt ? String(item.signedAt).trim() : undefined,
     }))
     .filter((s) => Boolean(s.name && s.title));
@@ -55,9 +64,13 @@ export function normalizeSignatories(raw: unknown): CertificateSignatory[] {
 export function normalizeWitnesses(raw: unknown): CertificateWitness[] {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((item): item is Record<string, unknown> => Boolean(item && typeof item === "object"))
+    .filter((item): item is Record<string, unknown> =>
+      Boolean(item && typeof item === "object")
+    )
     .map((item) => {
-      const rawDocId = item.documentIdRaw ? String(item.documentIdRaw) : undefined;
+      const rawDocId = item.documentIdRaw
+        ? String(item.documentIdRaw)
+        : undefined;
       const maskedDocId = item.documentIdMasked
         ? String(item.documentIdMasked).trim()
         : rawDocId
@@ -69,7 +82,8 @@ export function normalizeWitnesses(raw: unknown): CertificateWitness[] {
         role: item.role ? String(item.role).trim() : undefined,
         email: item.email ? String(item.email).trim() : undefined,
         routingOrder:
-          typeof item.routingOrder === "number" && Number.isFinite(item.routingOrder)
+          typeof item.routingOrder === "number" &&
+          Number.isFinite(item.routingOrder)
             ? Math.max(1, Math.trunc(item.routingOrder))
             : undefined,
         signedAt: item.signedAt ? String(item.signedAt).trim() : undefined,
@@ -104,10 +118,14 @@ function asEsignProvider(val: unknown): ESignProviderType {
 }
 
 function asNonNegativeInt(val: unknown, fallback = 0): number {
-  return typeof val === "number" && Number.isFinite(val) ? Math.max(0, Math.trunc(val)) : fallback;
+  return typeof val === "number" && Number.isFinite(val)
+    ? Math.max(0, Math.trunc(val))
+    : fallback;
 }
 
-export function normalizeTemplateRecord(doc: Record<string, unknown>): CertificateTemplate {
+export function normalizeTemplateRecord(
+  doc: Record<string, unknown>
+): CertificateTemplate {
   return {
     id: doc.id as number | string | undefined,
     documentId: asStr(doc.documentId, asStr(doc.id)),
@@ -116,7 +134,9 @@ export function normalizeTemplateRecord(doc: Record<string, unknown>): Certifica
     description: asOptStr(doc.description),
     serialPrefix: asStr(doc.serialPrefix, "CERT"),
     defaultValidityDays:
-      typeof doc.defaultValidityDays === "number" ? doc.defaultValidityDays : null,
+      typeof doc.defaultValidityDays === "number"
+        ? doc.defaultValidityDays
+        : null,
     requiresWitnesses: Boolean(doc.requiresWitnesses),
     minWitnesses: asNonNegativeInt(doc.minWitnesses, 0),
     requiresApproval: doc.requiresApproval !== false,
@@ -161,13 +181,18 @@ export function normalizeCertificateRecord(
     signatories: normalizeSignatories(doc.signatories),
     witnesses: normalizeWitnesses(doc.witnesses),
     customData: asObj<Record<string, string>>(doc.customData),
-    secondaryDates: asObj<CertificateRecord["secondaryDates"]>(doc.secondaryDates),
+    secondaryDates: asObj<CertificateRecord["secondaryDates"]>(
+      doc.secondaryDates
+    ),
     canonicalPayloadHash: asStr(doc.canonicalPayloadHash),
     cryptographicSignature: asStr(doc.cryptographicSignature),
     publicKeyFingerprint: asStr(doc.publicKeyFingerprint),
     esignProvider: asEsignProvider(doc.esignProvider),
     esignEnvelopeId: asOptStr(doc.esignEnvelopeId),
-    esignEnvelopeStatus: asStr(doc.esignEnvelopeStatus, "not_sent") as ESignEnvelopeStatus,
+    esignEnvelopeStatus: asStr(
+      doc.esignEnvelopeStatus,
+      "not_sent"
+    ) as ESignEnvelopeStatus,
     esignCompletedAt: asNullStr(doc.esignCompletedAt),
     linkedBookingCode: asOptStr(doc.linkedBookingCode),
     notes: asOptStr(doc.notes),
@@ -221,7 +246,8 @@ export function evaluateCertificateVerification(params: {
   options?: { token?: string; nationalId?: string };
 }): CertificateVerificationResult {
   const { cert, template, settings, options } = params;
-  const organizationName = template?.organizationName || settings.organizationName;
+  const organizationName =
+    template?.organizationName || settings.organizationName;
 
   const canonicalPayload = buildCanonicalPayload({
     serialNumber: cert.serialNumber,
@@ -251,11 +277,18 @@ export function evaluateCertificateVerification(params: {
     effectiveStatus = "expired";
   }
 
-  const isTokenValid = verifyTokenConstantTime(options?.token, cert.verificationToken);
+  const isTokenValid = verifyTokenConstantTime(
+    options?.token,
+    cert.verificationToken
+  );
   const isUnmasked = isTokenValid || !settings.maskPublicRecipientName;
 
   const nationalIdMatches = options?.nationalId
-    ? verifyNationalIdHash(options.nationalId, cert.serialNumber, cert.nationalIdHash)
+    ? verifyNationalIdHash(
+        options.nationalId,
+        cert.serialNumber,
+        cert.nationalIdHash
+      )
     : undefined;
 
   return {
@@ -303,7 +336,10 @@ export function renderPrintableFromRecord(params: {
 }): { html: string; serialNumber: string } {
   const { cert, template, settings, options } = params;
   if (!options?.isAdmin) {
-    const tokenOk = verifyTokenConstantTime(options?.token, cert.verificationToken);
+    const tokenOk = verifyTokenConstantTime(
+      options?.token,
+      cert.verificationToken
+    );
     if (!tokenOk) {
       throw new Error("Valid verificationToken required to print certificate");
     }
@@ -345,7 +381,8 @@ export function filterAndComputeCertificateStats(
   const stats: CertificateStats = {
     total: allRecords.length,
     issued: allRecords.filter((r) => r.status === "issued").length,
-    pending_approval: allRecords.filter((r) => r.status === "pending_approval").length,
+    pending_approval: allRecords.filter((r) => r.status === "pending_approval")
+      .length,
     revoked: allRecords.filter((r) => r.status === "revoked").length,
     expired: allRecords.filter((r) => r.status === "expired").length,
   };

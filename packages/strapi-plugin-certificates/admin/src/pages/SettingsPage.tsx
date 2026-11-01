@@ -26,7 +26,8 @@ const TAB_PANEL_STYLE: React.CSSProperties = {
 };
 
 const INLINE_CODE_STYLE: React.CSSProperties = {
-  fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+  fontFamily:
+    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   fontSize: "0.88em",
   padding: "2px 6px",
   borderRadius: 4,
@@ -41,13 +42,17 @@ export const SettingsPage: React.FC = () => {
   const { get, put, post } = useFetchClient();
   const { toggleNotification } = useNotification();
 
-  const [settings, setSettings] = useState<CertificatesPluginSettings | null>(null);
+  const [settings, setSettings] = useState<CertificatesPluginSettings | null>(
+    null
+  );
   const [saving, setSaving] = useState(false);
   const [rotating, setRotating] = useState(false);
 
   const loadSettings = useCallback(async () => {
     try {
-      const res = await get<{ data: CertificatesPluginSettings }>(`/${PLUGIN_ID}/settings`);
+      const res = await get<{ data: CertificatesPluginSettings }>(
+        `/${PLUGIN_ID}/settings`
+      );
       if (res.data?.data) setSettings(res.data.data);
     } catch {
       toggleNotification({
@@ -83,7 +88,10 @@ export const SettingsPage: React.FC = () => {
     } catch {
       toggleNotification({
         type: "danger",
-        message: t("settings.ui.msg_failed_to_save_settings", "Failed to save settings"),
+        message: t(
+          "settings.ui.msg_failed_to_save_settings",
+          "Failed to save settings"
+        ),
       });
     } finally {
       setSaving(false);
@@ -117,7 +125,10 @@ export const SettingsPage: React.FC = () => {
 
   const handleSeedDefaults = async () => {
     try {
-      const res = await post<{ data: { seededCount: number } }>(`/${PLUGIN_ID}/templates/seed`, {});
+      const res = await post<{ data: { seededCount: number } }>(
+        `/${PLUGIN_ID}/templates/seed`,
+        {}
+      );
       toggleNotification({
         type: "success",
         message: `Seeded ${res.data?.data?.seededCount ?? 0} default template(s)`,
@@ -138,7 +149,9 @@ export const SettingsPage: React.FC = () => {
       <Layouts.Root>
         <Layouts.Content>
           <Box padding={6}>
-            <Typography>{t("settings.ui.loading_settings", "Loading settings...")}</Typography>
+            <Typography>
+              {t("settings.ui.loading_settings", "Loading settings...")}
+            </Typography>
           </Box>
         </Layouts.Content>
       </Layouts.Root>
@@ -171,7 +184,10 @@ export const SettingsPage: React.FC = () => {
             )}
           >
             <Tabs.Trigger value="organization">
-              {t("settings.tab.organization", "Issuing Organization & Verification")}
+              {t(
+                "settings.tab.organization",
+                "Issuing Organization & Verification"
+              )}
             </Tabs.Trigger>
             <Tabs.Trigger value="docusign">
               {t("settings.tab.docusign", "DocuSign E-Signature")}
@@ -209,7 +225,9 @@ export const SettingsPage: React.FC = () => {
                     "Official issuing authority name printed on signed certificates and verification payloads."
                   )}
                 >
-                  <Field.Label>{t("field.organization_name", "Organization Name")}</Field.Label>
+                  <Field.Label>
+                    {t("field.organization_name", "Organization Name")}
+                  </Field.Label>
                   <TextInput
                     placeholder={t(
                       "placeholder.e_g_mezquita_central_abu_bakr_as_siddiq",
@@ -217,7 +235,10 @@ export const SettingsPage: React.FC = () => {
                     )}
                     value={settings.organizationName}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings({ ...settings, organizationName: e.target.value })
+                      setSettings({
+                        ...settings,
+                        organizationName: e.target.value,
+                      })
                     }
                   />
                   <Field.Hint />
@@ -241,7 +262,10 @@ export const SettingsPage: React.FC = () => {
                     )}
                     value={settings.organizationSubheader}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings({ ...settings, organizationSubheader: e.target.value })
+                      setSettings({
+                        ...settings,
+                        organizationSubheader: e.target.value,
+                      })
                     }
                   />
                   <Field.Hint />
@@ -253,7 +277,10 @@ export const SettingsPage: React.FC = () => {
                   )}
                 >
                   <Field.Label>
-                    {t("field.public_verification_base_url", "Public Verification Base URL")}
+                    {t(
+                      "field.public_verification_base_url",
+                      "Public Verification Base URL"
+                    )}
                   </Field.Label>
                   <TextInput
                     placeholder={t(
@@ -262,7 +289,10 @@ export const SettingsPage: React.FC = () => {
                     )}
                     value={settings.verificationBaseUrl}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSettings({ ...settings, verificationBaseUrl: e.target.value })
+                      setSettings({
+                        ...settings,
+                        verificationBaseUrl: e.target.value,
+                      })
                     }
                   />
                   <Field.Hint />
@@ -279,7 +309,10 @@ export const SettingsPage: React.FC = () => {
                   <Checkbox
                     checked={settings.maskPublicRecipientName}
                     onCheckedChange={(val: boolean) =>
-                      setSettings({ ...settings, maskPublicRecipientName: Boolean(val) })
+                      setSettings({
+                        ...settings,
+                        maskPublicRecipientName: Boolean(val),
+                      })
                     }
                   >
                     {t(
@@ -290,7 +323,10 @@ export const SettingsPage: React.FC = () => {
                   <Checkbox
                     checked={settings.allowPublicApplications}
                     onCheckedChange={(val: boolean) =>
-                      setSettings({ ...settings, allowPublicApplications: Boolean(val) })
+                      setSettings({
+                        ...settings,
+                        allowPublicApplications: Boolean(val),
+                      })
                     }
                   >
                     {t(
@@ -299,7 +335,10 @@ export const SettingsPage: React.FC = () => {
                     )}{" "}
                     (
                     <code style={INLINE_CODE_STYLE}>
-                      {t("settings.ui.endpoint_apply", "POST /api/certificates/apply")}
+                      {t(
+                        "settings.ui.endpoint_apply",
+                        "POST /api/certificates/apply"
+                      )}
                     </code>
                     )
                   </Checkbox>
@@ -327,7 +366,8 @@ export const SettingsPage: React.FC = () => {
                   {t("settings.ui.secrets_prefix", "Secrets")} (
                   <code style={INLINE_CODE_STYLE}>DOCUSIGN_ACCESS_TOKEN</code>{" "}
                   {t("settings.ui.and_conjunction", "&")}{" "}
-                  <code style={INLINE_CODE_STYLE}>DOCUSIGN_WEBHOOK_SECRET</code>){" "}
+                  <code style={INLINE_CODE_STYLE}>DOCUSIGN_WEBHOOK_SECRET</code>
+                  ){" "}
                   {t(
                     "settings.ui.secrets_loaded_from_env",
                     "are loaded from environment variables. Connect webhook endpoint:"
@@ -340,8 +380,18 @@ export const SettingsPage: React.FC = () => {
                   </code>
                 </Typography>
               </Box>
-              <Flex direction="column" gap={4} marginTop={4} alignItems="stretch">
-                <Box padding={4} background="neutral100" hasRadius style={SUB_CARD_BORDER_STYLE}>
+              <Flex
+                direction="column"
+                gap={4}
+                marginTop={4}
+                alignItems="stretch"
+              >
+                <Box
+                  padding={4}
+                  background="neutral100"
+                  hasRadius
+                  style={SUB_CARD_BORDER_STYLE}
+                >
                   <Checkbox
                     checked={settings.esign?.enabled ?? false}
                     onCheckedChange={(val: boolean) =>
@@ -385,7 +435,10 @@ export const SettingsPage: React.FC = () => {
                       )}
                     </Field.Label>
                     <TextInput
-                      value={settings.esign?.baseUrl || "https://demo.docusign.net/restapi"}
+                      value={
+                        settings.esign?.baseUrl ||
+                        "https://demo.docusign.net/restapi"
+                      }
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setSettings({
                           ...settings,
@@ -409,14 +462,22 @@ export const SettingsPage: React.FC = () => {
                       {t("field.docusign_account_id", "DocuSign Account ID")}
                     </Field.Label>
                     <TextInput
-                      value={settings.esign?.accountId || "ds-account-bogota-central"}
+                      value={
+                        settings.esign?.accountId || "ds-account-bogota-central"
+                      }
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setSettings({
                           ...settings,
-                          esign: { ...settings.esign, accountId: e.target.value },
+                          esign: {
+                            ...settings.esign,
+                            accountId: e.target.value,
+                          },
                         })
                       }
-                      placeholder={t("placeholder.e_g_a1b2c3d4", "e.g., a1b2c3d4-...")}
+                      placeholder={t(
+                        "placeholder.e_g_a1b2c3d4",
+                        "e.g., a1b2c3d4-..."
+                      )}
                     />
                     <Field.Hint />
                   </Field.Root>
@@ -433,7 +494,12 @@ export const SettingsPage: React.FC = () => {
               shadow="filterShadow"
               style={TAB_PANEL_STYLE}
             >
-              <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={2}>
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                wrap="wrap"
+                gap={2}
+              >
                 <Box>
                   <Typography variant="beta" fontWeight="bold">
                     {t(
@@ -443,17 +509,32 @@ export const SettingsPage: React.FC = () => {
                   </Typography>
                   <Box marginTop={1}>
                     <Typography variant="pi" textColor="neutral600">
-                      {t("settings.ui.active_key_fingerprint", "Active Key Fingerprint:")}{" "}
-                      <code style={INLINE_CODE_STYLE}>{settings.publicKeyFingerprint}</code>
+                      {t(
+                        "settings.ui.active_key_fingerprint",
+                        "Active Key Fingerprint:"
+                      )}{" "}
+                      <code style={INLINE_CODE_STYLE}>
+                        {settings.publicKeyFingerprint}
+                      </code>
                     </Typography>
                   </Box>
                 </Box>
                 <Flex gap={2}>
                   <Button variant="secondary" onClick={handleSeedDefaults}>
-                    {t("settings.ui.seed_default_templates", "Seed Default Templates")}
+                    {t(
+                      "settings.ui.seed_default_templates",
+                      "Seed Default Templates"
+                    )}
                   </Button>
-                  <Button variant="danger-light" onClick={handleRotateKeys} loading={rotating}>
-                    {t("settings.ui.rotate_ed25519_keypair", "Rotate Ed25519 Keypair")}
+                  <Button
+                    variant="danger-light"
+                    onClick={handleRotateKeys}
+                    loading={rotating}
+                  >
+                    {t(
+                      "settings.ui.rotate_ed25519_keypair",
+                      "Rotate Ed25519 Keypair"
+                    )}
                   </Button>
                 </Flex>
               </Flex>
@@ -465,9 +546,15 @@ export const SettingsPage: React.FC = () => {
                   )}
                 >
                   <Field.Label>
-                    {t("field.public_key_pem_published_at", "Public Key PEM (Published at")}{" "}
+                    {t(
+                      "field.public_key_pem_published_at",
+                      "Public Key PEM (Published at"
+                    )}{" "}
                     <code style={INLINE_CODE_STYLE}>
-                      {t("settings.ui.endpoint_public_key", "GET /api/certificates/public-key")}
+                      {t(
+                        "settings.ui.endpoint_public_key",
+                        "GET /api/certificates/public-key"
+                      )}
                     </code>{" "}
                     {t(
                       "field.for_offline_embassy_verification",
@@ -475,7 +562,10 @@ export const SettingsPage: React.FC = () => {
                     )}
                   </Field.Label>
                   <Textarea
-                    placeholder={t("placeholder.begin_public_key", "-----BEGIN PUBLIC KEY-----")}
+                    placeholder={t(
+                      "placeholder.begin_public_key",
+                      "-----BEGIN PUBLIC KEY-----"
+                    )}
                     value={settings.publicKeyPem}
                     disabled
                   />

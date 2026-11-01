@@ -64,14 +64,22 @@ describe("Cryptographic Ed25519 Signing, Verification & Tamper Detection", () =>
       recipientFullName: "Mallory Attacker",
     };
     assert.equal(
-      verifyCanonicalPayloadSignature(tamperedPayload, signed.signature, keyPair.publicKeyPem),
+      verifyCanonicalPayloadSignature(
+        tamperedPayload,
+        signed.signature,
+        keyPair.publicKeyPem
+      ),
       false
     );
 
     // Wrong public key must fail verification
     const otherKeyPair = generateEd25519KeyPair();
     assert.equal(
-      verifyCanonicalPayloadSignature(payload, signed.signature, otherKeyPair.publicKeyPem),
+      verifyCanonicalPayloadSignature(
+        payload,
+        signed.signature,
+        otherKeyPair.publicKeyPem
+      ),
       false
     );
   });

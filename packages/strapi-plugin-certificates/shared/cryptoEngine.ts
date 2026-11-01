@@ -46,7 +46,9 @@ export function sanitizeSerialPrefix(prefix?: string): string {
 export function generateSerialNumber(prefix = "CERT", year?: number): string {
   const safePrefix = sanitizeSerialPrefix(prefix);
   const targetYear =
-    typeof year === "number" && Number.isFinite(year) ? year : new Date().getUTCFullYear();
+    typeof year === "number" && Number.isFinite(year)
+      ? year
+      : new Date().getUTCFullYear();
   const entropy = randomBytes(4).toString("hex").toUpperCase();
   return `${safePrefix}-${targetYear}-${entropy}`;
 }
@@ -77,7 +79,9 @@ export function hashNationalId(rawId: string, serialNumber: string): string {
   const cleanSerial = String(serialNumber || "")
     .trim()
     .toUpperCase();
-  return createHash("sha256").update(`${cleanSerial}:${normalized}`, "utf8").digest("hex");
+  return createHash("sha256")
+    .update(`${cleanSerial}:${normalized}`, "utf8")
+    .digest("hex");
 }
 
 export function verifyNationalIdHash(
@@ -113,7 +117,9 @@ function cleanStr(val?: string): string {
   return String(val ?? "").trim();
 }
 
-export function serializeCanonicalPayload(payload: CanonicalCertificatePayload): string {
+export function serializeCanonicalPayload(
+  payload: CanonicalCertificatePayload
+): string {
   const signatories = payload.signatories ?? [];
   const witnesses = payload.witnesses ?? [];
   const ordered = {
@@ -138,7 +144,9 @@ export function serializeCanonicalPayload(payload: CanonicalCertificatePayload):
   return JSON.stringify(ordered);
 }
 
-export function computeCanonicalPayloadHash(payload: CanonicalCertificatePayload): string {
+export function computeCanonicalPayloadHash(
+  payload: CanonicalCertificatePayload
+): string {
   const canonicalJson = serializeCanonicalPayload(payload);
   return createHash("sha256").update(canonicalJson, "utf8").digest("hex");
 }
@@ -152,7 +160,9 @@ export function signCanonicalPayload(
   signature: string;
 } {
   const canonicalJson = serializeCanonicalPayload(payload);
-  const payloadHash = createHash("sha256").update(canonicalJson, "utf8").digest("hex");
+  const payloadHash = createHash("sha256")
+    .update(canonicalJson, "utf8")
+    .digest("hex");
   const dataBuffer = Buffer.from(canonicalJson, "utf8");
   const signature = sign(null, dataBuffer, privateKeyPem).toString("base64url");
   return {
@@ -178,7 +188,10 @@ export function verifyCanonicalPayloadSignature(
   }
 }
 
-export function verifyTokenConstantTime(providedToken?: string, expectedToken?: string): boolean {
+export function verifyTokenConstantTime(
+  providedToken?: string,
+  expectedToken?: string
+): boolean {
   if (!providedToken || !expectedToken) return false;
   const a = Buffer.from(String(providedToken), "utf8");
   const b = Buffer.from(String(expectedToken), "utf8");
@@ -188,8 +201,13 @@ export function verifyTokenConstantTime(providedToken?: string, expectedToken?: 
   return timingSafeEqual(a, b);
 }
 
-export function computeDocuSignWebhookHmac(rawPayload: string, webhookSecret: string): string {
-  return createHmac("sha256", webhookSecret).update(rawPayload, "utf8").digest("base64");
+export function computeDocuSignWebhookHmac(
+  rawPayload: string,
+  webhookSecret: string
+): string {
+  return createHmac("sha256", webhookSecret)
+    .update(rawPayload, "utf8")
+    .digest("base64");
 }
 
 export function verifyDocuSignWebhookHmac(
@@ -201,5 +219,8 @@ export function verifyDocuSignWebhookHmac(
     return false;
   }
   const computedBase64 = computeDocuSignWebhookHmac(rawPayload, webhookSecret);
-  return verifyTokenConstantTime(String(signatureHeaderBase64).trim(), computedBase64);
+  return verifyTokenConstantTime(
+    String(signatureHeaderBase64).trim(),
+    computedBase64
+  );
 }

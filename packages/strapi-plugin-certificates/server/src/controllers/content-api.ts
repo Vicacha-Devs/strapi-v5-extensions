@@ -58,9 +58,12 @@ interface KoaContext {
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const getSettings = () => strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>("settings");
-  const getIssuance = () => strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>("issuance");
-  const getDocuSign = () => strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>("docusign");
+  const getSettings = () =>
+    strapi.plugin(PLUGIN_ID).service<SettingsServiceContract>("settings");
+  const getIssuance = () =>
+    strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>("issuance");
+  const getDocuSign = () =>
+    strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>("docusign");
 
   return {
     async listPublicTemplates(ctx: KoaContext) {
@@ -95,7 +98,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const ipKey = `apply:${ctx.ip || "unknown"}`;
       if (!checkRateLimit(ipKey, 10, 60_000)) {
         ctx.status = 429;
-        ctx.body = { error: { message: "Too many certificate requests. Please wait." } };
+        ctx.body = {
+          error: { message: "Too many certificate requests. Please wait." },
+        };
         return;
       }
 
@@ -105,7 +110,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       try {
-        const body = (ctx.request.body || {}) as unknown as CertificateIssueInput;
+        const body = (ctx.request.body ||
+          {}) as unknown as CertificateIssueInput;
         const created = await getIssuance().issueCertificate({
           ...body,
           autoApprove: false,
@@ -123,7 +129,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           },
         };
       } catch (err) {
-        return ctx.badRequest((err as Error).message || "Invalid certificate application");
+        return ctx.badRequest(
+          (err as Error).message || "Invalid certificate application"
+        );
       }
     },
 
@@ -131,7 +139,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const ipKey = `verify:${ctx.ip || "unknown"}`;
       if (!checkRateLimit(ipKey, 30, 60_000)) {
         ctx.status = 429;
-        ctx.body = { error: { message: "Rate limit exceeded for verification." } };
+        ctx.body = {
+          error: { message: "Rate limit exceeded for verification." },
+        };
         return;
       }
 
@@ -146,7 +156,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       if (!result) {
-        return ctx.notFound("Certificate serial number not found in official registry");
+        return ctx.notFound(
+          "Certificate serial number not found in official registry"
+        );
       }
 
       ctx.set("Cache-Control", "no-store");
@@ -157,7 +169,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const serial = ctx.params.serial;
       const token = ctx.query.token;
       if (!serial || !token) {
-        return ctx.badRequest("Both serial and verification token are required");
+        return ctx.badRequest(
+          "Both serial and verification token are required"
+        );
       }
 
       try {
@@ -178,7 +192,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.set("Cache-Control", "no-store");
         ctx.body = rendered.html;
       } catch (err) {
-        return ctx.forbidden((err as Error).message || "Invalid verification token");
+        return ctx.forbidden(
+          (err as Error).message || "Invalid verification token"
+        );
       }
     },
 
@@ -196,7 +212,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           ? ctx.request.rawBody
           : JSON.stringify(payload);
       const signatureHeader =
-        ctx.headers?.["x-docusign-signature-1"] || ctx.headers?.["X-DocuSign-Signature-1"];
+        ctx.headers?.["x-docusign-signature-1"] ||
+        ctx.headers?.["X-DocuSign-Signature-1"];
 
       try {
         const result = await getDocuSign().handleWebhookEvent({
@@ -213,7 +230,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           },
         };
       } catch (err) {
-        return ctx.forbidden((err as Error).message || "DocuSign webhook verification failed");
+        return ctx.forbidden(
+          (err as Error).message || "DocuSign webhook verification failed"
+        );
       }
     },
   };

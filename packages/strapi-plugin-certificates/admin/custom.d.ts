@@ -1,5 +1,12 @@
 declare module "react" {
-  export type ReactNode = string | number | boolean | null | undefined | ReactElement | ReactNode[];
+  export type ReactNode =
+    | string
+    | number
+    | boolean
+    | null
+    | undefined
+    | ReactElement
+    | ReactNode[];
 
   export interface ReactElement<P = unknown> {
     type: unknown;
@@ -35,7 +42,10 @@ declare module "react" {
   export function useState<T>(
     initialState: T | (() => T)
   ): [T, (next: T | ((prev: T) => T)) => void];
-  export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
+  export function useEffect(
+    effect: () => void | (() => void),
+    deps?: readonly unknown[]
+  ): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
   export function useCallback<T extends (...args: never[]) => unknown>(
     callback: T,
@@ -58,8 +68,16 @@ declare module "react" {
 declare module "react/jsx-runtime" {
   import type { ReactElement } from "react";
   export const Fragment: unknown;
-  export function jsx(type: unknown, props: unknown, key?: unknown): ReactElement;
-  export function jsxs(type: unknown, props: unknown, key?: unknown): ReactElement;
+  export function jsx(
+    type: unknown,
+    props: unknown,
+    key?: unknown
+  ): ReactElement;
+  export function jsxs(
+    type: unknown,
+    props: unknown,
+    key?: unknown
+  ): ReactElement;
 
   export namespace JSX {
     interface Element extends ReactElement {}
@@ -86,7 +104,9 @@ declare module "react-intl" {
 
 declare module "@strapi/strapi/admin" {
   import type { FC, ReactNode } from "react";
-  export type AdminLayoutProps = Record<string, unknown> & { children?: ReactNode };
+  export type AdminLayoutProps = Record<string, unknown> & {
+    children?: ReactNode;
+  };
 
   export const Layouts: {
     Root: FC<AdminLayoutProps>;
@@ -100,8 +120,14 @@ declare module "@strapi/strapi/admin" {
 
   export interface FetchClient {
     get<T = Record<string, unknown>>(url: string): Promise<FetchResponse<T>>;
-    post<T = Record<string, unknown>>(url: string, body?: unknown): Promise<FetchResponse<T>>;
-    put<T = Record<string, unknown>>(url: string, body?: unknown): Promise<FetchResponse<T>>;
+    post<T = Record<string, unknown>>(
+      url: string,
+      body?: unknown
+    ): Promise<FetchResponse<T>>;
+    put<T = Record<string, unknown>>(
+      url: string,
+      body?: unknown
+    ): Promise<FetchResponse<T>>;
     del<T = Record<string, unknown>>(url: string): Promise<FetchResponse<T>>;
   }
 
@@ -203,7 +229,9 @@ declare const Buffer: {
     input: string,
     encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
   ): Uint8Array & {
-    toString(encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"): string;
+    toString(
+      encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
+    ): string;
   };
 };
 

@@ -1,6 +1,13 @@
-import type { AlternateDateValue, CalendarSystemConfig } from "./calendarSystems";
+import type {
+  AlternateDateValue,
+  CalendarSystemConfig,
+} from "./calendarSystems";
 
-export type CertificateStatus = "pending_approval" | "issued" | "revoked" | "expired";
+export type CertificateStatus =
+  | "pending_approval"
+  | "issued"
+  | "revoked"
+  | "expired";
 
 export type ESignProviderType = "none" | "docusign" | "webhook";
 

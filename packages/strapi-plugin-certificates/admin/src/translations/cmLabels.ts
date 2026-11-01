@@ -4,9 +4,12 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Certificate Serial Number",
     "content-manager.content-types.plugin::certificates.certificate.templateDocumentId":
       "Template Document ID",
-    "content-manager.content-types.plugin::certificates.certificate.templateSlug": "Template Slug",
-    "content-manager.content-types.plugin::certificates.certificate.templateName": "Template Name",
-    "content-manager.content-types.plugin::certificates.certificate.status": "Status",
+    "content-manager.content-types.plugin::certificates.certificate.templateSlug":
+      "Template Slug",
+    "content-manager.content-types.plugin::certificates.certificate.templateName":
+      "Template Name",
+    "content-manager.content-types.plugin::certificates.certificate.status":
+      "Status",
     "content-manager.content-types.plugin::certificates.certificate.recipientFullName":
       "Recipient Legal Full Name",
     "content-manager.content-types.plugin::certificates.certificate.recipientChosenName":
@@ -21,7 +24,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Masked National ID / Passport",
     "content-manager.content-types.plugin::certificates.certificate.nationalIdHash":
       "National ID Cryptographic Hash",
-    "content-manager.content-types.plugin::certificates.certificate.issuedAt": "Issued Date & Time",
+    "content-manager.content-types.plugin::certificates.certificate.issuedAt":
+      "Issued Date & Time",
     "content-manager.content-types.plugin::certificates.certificate.expiresAt":
       "Expiration Date & Time",
     "content-manager.content-types.plugin::certificates.certificate.revokedAt":
@@ -54,11 +58,15 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "eSign Completed Date & Time",
     "content-manager.content-types.plugin::certificates.certificate.linkedBookingCode":
       "Linked Booking Reference Code",
-    "content-manager.content-types.plugin::certificates.certificate.notes": "Notes",
-    "content-manager.content-types.plugin::certificates.certificate.documentId": "Document ID",
+    "content-manager.content-types.plugin::certificates.certificate.notes":
+      "Notes",
+    "content-manager.content-types.plugin::certificates.certificate.documentId":
+      "Document ID",
     "content-manager.content-types.plugin::certificates.template.name": "Name",
-    "content-manager.content-types.plugin::certificates.template.slug": "URL Slug",
-    "content-manager.content-types.plugin::certificates.template.description": "Description",
+    "content-manager.content-types.plugin::certificates.template.slug":
+      "URL Slug",
+    "content-manager.content-types.plugin::certificates.template.description":
+      "Description",
     "content-manager.content-types.plugin::certificates.template.serialPrefix":
       "Serial Number Prefix",
     "content-manager.content-types.plugin::certificates.template.defaultValidityDays":
@@ -91,9 +99,12 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Custom Fields Schema (JSON)",
     "content-manager.content-types.plugin::certificates.template.secondaryCalendars":
       "Secondary Calendars Configuration",
-    "content-manager.content-types.plugin::certificates.template.accentColor": "Accent Color",
-    "content-manager.content-types.plugin::certificates.template.active": "Active",
-    "content-manager.content-types.plugin::certificates.template.documentId": "Document ID",
+    "content-manager.content-types.plugin::certificates.template.accentColor":
+      "Accent Color",
+    "content-manager.content-types.plugin::certificates.template.active":
+      "Active",
+    "content-manager.content-types.plugin::certificates.template.documentId":
+      "Document ID",
     "content-manager.enum.completed": "Completed",
     "content-manager.enum.pending_approval": "Pending Approval",
     "content-manager.enum.issued": "Issued",
@@ -117,7 +128,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Slug de la Plantilla",
     "content-manager.content-types.plugin::certificates.certificate.templateName":
       "Nombre de la Plantilla",
-    "content-manager.content-types.plugin::certificates.certificate.status": "Estado",
+    "content-manager.content-types.plugin::certificates.certificate.status":
+      "Estado",
     "content-manager.content-types.plugin::certificates.certificate.recipientFullName":
       "Nombre Completo Legal del Titular",
     "content-manager.content-types.plugin::certificates.certificate.recipientChosenName":
@@ -166,11 +178,16 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Fecha de Finalización de Firma Electrónica",
     "content-manager.content-types.plugin::certificates.certificate.linkedBookingCode":
       "Código de Reserva Vinculada",
-    "content-manager.content-types.plugin::certificates.certificate.notes": "Notas",
-    "content-manager.content-types.plugin::certificates.certificate.documentId": "ID del Documento",
-    "content-manager.content-types.plugin::certificates.template.name": "Nombre",
-    "content-manager.content-types.plugin::certificates.template.slug": "Slug (URL Amigable)",
-    "content-manager.content-types.plugin::certificates.template.description": "Descripción",
+    "content-manager.content-types.plugin::certificates.certificate.notes":
+      "Notas",
+    "content-manager.content-types.plugin::certificates.certificate.documentId":
+      "ID del Documento",
+    "content-manager.content-types.plugin::certificates.template.name":
+      "Nombre",
+    "content-manager.content-types.plugin::certificates.template.slug":
+      "Slug (URL Amigable)",
+    "content-manager.content-types.plugin::certificates.template.description":
+      "Descripción",
     "content-manager.content-types.plugin::certificates.template.serialPrefix":
       "Prefijo del Número de Serie",
     "content-manager.content-types.plugin::certificates.template.defaultValidityDays":
@@ -203,9 +220,12 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Esquema de Campos Personalizados (JSON)",
     "content-manager.content-types.plugin::certificates.template.secondaryCalendars":
       "Configuración de Calendarios Secundarios",
-    "content-manager.content-types.plugin::certificates.template.accentColor": "Color de Acento",
-    "content-manager.content-types.plugin::certificates.template.active": "Activo",
-    "content-manager.content-types.plugin::certificates.template.documentId": "ID del Documento",
+    "content-manager.content-types.plugin::certificates.template.accentColor":
+      "Color de Acento",
+    "content-manager.content-types.plugin::certificates.template.active":
+      "Activo",
+    "content-manager.content-types.plugin::certificates.template.documentId":
+      "ID del Documento",
     "content-manager.enum.completed": "Completado",
     "content-manager.enum.pending_approval": "Pendiente de Aprobación",
     "content-manager.enum.issued": "Emitido",
@@ -227,8 +247,10 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "معرف مستند القالب",
     "content-manager.content-types.plugin::certificates.certificate.templateSlug":
       "معرف القالب (Slug)",
-    "content-manager.content-types.plugin::certificates.certificate.templateName": "اسم القالب",
-    "content-manager.content-types.plugin::certificates.certificate.status": "الحالة",
+    "content-manager.content-types.plugin::certificates.certificate.templateName":
+      "اسم القالب",
+    "content-manager.content-types.plugin::certificates.certificate.status":
+      "الحالة",
     "content-manager.content-types.plugin::certificates.certificate.recipientFullName":
       "الاسم القانوني الكامل للمستلم",
     "content-manager.content-types.plugin::certificates.certificate.recipientChosenName":
@@ -243,15 +265,18 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "رقم الهوية أو الجواز (مخفي جزئياً)",
     "content-manager.content-types.plugin::certificates.certificate.nationalIdHash":
       "التجزئة المشفرة لرقم الهوية",
-    "content-manager.content-types.plugin::certificates.certificate.issuedAt": "تاريخ ووقت الإصدار",
+    "content-manager.content-types.plugin::certificates.certificate.issuedAt":
+      "تاريخ ووقت الإصدار",
     "content-manager.content-types.plugin::certificates.certificate.expiresAt":
       "تاريخ ووقت انتهاء الصلاحية",
-    "content-manager.content-types.plugin::certificates.certificate.revokedAt": "تاريخ ووقت الإلغاء",
+    "content-manager.content-types.plugin::certificates.certificate.revokedAt":
+      "تاريخ ووقت الإلغاء",
     "content-manager.content-types.plugin::certificates.certificate.revocationReason":
       "سبب الإلغاء أو السحب",
     "content-manager.content-types.plugin::certificates.certificate.signatories":
       "الموقعون المعتمدون",
-    "content-manager.content-types.plugin::certificates.certificate.witnesses": "الشهود الرسميون",
+    "content-manager.content-types.plugin::certificates.certificate.witnesses":
+      "الشهود الرسميون",
     "content-manager.content-types.plugin::certificates.certificate.customData":
       "بيانات الحقول المخصصة للشهادة",
     "content-manager.content-types.plugin::certificates.certificate.secondaryDates":
@@ -274,11 +299,15 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "تاريخ اكتمال التوقيع الإلكتروني",
     "content-manager.content-types.plugin::certificates.certificate.linkedBookingCode":
       "رمز الحجز المرتبط",
-    "content-manager.content-types.plugin::certificates.certificate.notes": "ملاحظات",
-    "content-manager.content-types.plugin::certificates.certificate.documentId": "معرف المستند",
+    "content-manager.content-types.plugin::certificates.certificate.notes":
+      "ملاحظات",
+    "content-manager.content-types.plugin::certificates.certificate.documentId":
+      "معرف المستند",
     "content-manager.content-types.plugin::certificates.template.name": "الاسم",
-    "content-manager.content-types.plugin::certificates.template.slug": "المسار المختصر (Slug)",
-    "content-manager.content-types.plugin::certificates.template.description": "الوصف",
+    "content-manager.content-types.plugin::certificates.template.slug":
+      "المسار المختصر (Slug)",
+    "content-manager.content-types.plugin::certificates.template.description":
+      "الوصف",
     "content-manager.content-types.plugin::certificates.template.serialPrefix":
       "بادئة الرقم التسلسلي",
     "content-manager.content-types.plugin::certificates.template.defaultValidityDays":
@@ -301,17 +330,21 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "نص الترويسة / البسملة",
     "content-manager.content-types.plugin::certificates.template.titleText":
       "العنوان الرسمي للشهادة",
-    "content-manager.content-types.plugin::certificates.template.bodyTemplate": "قالب نص الشهادة",
-    "content-manager.content-types.plugin::certificates.template.footerText": "نص تذييل الشهادة",
+    "content-manager.content-types.plugin::certificates.template.bodyTemplate":
+      "قالب نص الشهادة",
+    "content-manager.content-types.plugin::certificates.template.footerText":
+      "نص تذييل الشهادة",
     "content-manager.content-types.plugin::certificates.template.defaultSignatories":
       "الموقعون الافتراضيون",
     "content-manager.content-types.plugin::certificates.template.customFieldsSchema":
       "مخطط الحقول المخصصة (JSON)",
     "content-manager.content-types.plugin::certificates.template.secondaryCalendars":
       "إعدادات التقاويم الإضافية",
-    "content-manager.content-types.plugin::certificates.template.accentColor": "لون التمييز",
+    "content-manager.content-types.plugin::certificates.template.accentColor":
+      "لون التمييز",
     "content-manager.content-types.plugin::certificates.template.active": "نشط",
-    "content-manager.content-types.plugin::certificates.template.documentId": "معرف المستند",
+    "content-manager.content-types.plugin::certificates.template.documentId":
+      "معرف المستند",
     "content-manager.enum.completed": "مكتمل",
     "content-manager.enum.pending_approval": "بانتظار الموافقة",
     "content-manager.enum.issued": "صادر",
@@ -333,8 +366,10 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Şablon Belge Kimliği",
     "content-manager.content-types.plugin::certificates.certificate.templateSlug":
       "Şablon Kısa Adı (Slug)",
-    "content-manager.content-types.plugin::certificates.certificate.templateName": "Şablon Adı",
-    "content-manager.content-types.plugin::certificates.certificate.status": "Durum",
+    "content-manager.content-types.plugin::certificates.certificate.templateName":
+      "Şablon Adı",
+    "content-manager.content-types.plugin::certificates.certificate.status":
+      "Durum",
     "content-manager.content-types.plugin::certificates.certificate.recipientFullName":
       "Alıcının Yasal Tam Adı",
     "content-manager.content-types.plugin::certificates.certificate.recipientChosenName":
@@ -359,7 +394,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "İptal Gerekçesi",
     "content-manager.content-types.plugin::certificates.certificate.signatories":
       "Yetkili İmzacılar",
-    "content-manager.content-types.plugin::certificates.certificate.witnesses": "Resmi Şahitler",
+    "content-manager.content-types.plugin::certificates.certificate.witnesses":
+      "Resmi Şahitler",
     "content-manager.content-types.plugin::certificates.certificate.customData":
       "Sertifika Özel Alan Verileri",
     "content-manager.content-types.plugin::certificates.certificate.secondaryDates":
@@ -382,12 +418,15 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "e-İmza Tamamlanma Tarihi",
     "content-manager.content-types.plugin::certificates.certificate.linkedBookingCode":
       "Bağlı Rezervasyon Kodu",
-    "content-manager.content-types.plugin::certificates.certificate.notes": "Notlar",
+    "content-manager.content-types.plugin::certificates.certificate.notes":
+      "Notlar",
     "content-manager.content-types.plugin::certificates.certificate.documentId":
       "Belge Kimliği (ID)",
     "content-manager.content-types.plugin::certificates.template.name": "Ad",
-    "content-manager.content-types.plugin::certificates.template.slug": "Kısa Ad (URL Slug)",
-    "content-manager.content-types.plugin::certificates.template.description": "Açıklama",
+    "content-manager.content-types.plugin::certificates.template.slug":
+      "Kısa Ad (URL Slug)",
+    "content-manager.content-types.plugin::certificates.template.description":
+      "Açıklama",
     "content-manager.content-types.plugin::certificates.template.serialPrefix":
       "Seri Numarası Öneki",
     "content-manager.content-types.plugin::certificates.template.defaultValidityDays":
@@ -420,9 +459,12 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Özel Alan Şeması (JSON)",
     "content-manager.content-types.plugin::certificates.template.secondaryCalendars":
       "İkincil Takvim Yapılandırması",
-    "content-manager.content-types.plugin::certificates.template.accentColor": "Vurgu Rengi",
-    "content-manager.content-types.plugin::certificates.template.active": "Aktif",
-    "content-manager.content-types.plugin::certificates.template.documentId": "Belge Kimliği (ID)",
+    "content-manager.content-types.plugin::certificates.template.accentColor":
+      "Vurgu Rengi",
+    "content-manager.content-types.plugin::certificates.template.active":
+      "Aktif",
+    "content-manager.content-types.plugin::certificates.template.documentId":
+      "Belge Kimliği (ID)",
     "content-manager.enum.completed": "Tamamlandı",
     "content-manager.enum.pending_approval": "Onay Bekliyor",
     "content-manager.enum.issued": "Düzenlendi",
