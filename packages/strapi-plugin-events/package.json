@@ -76,6 +76,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/plugin-shared": "workspace:*",
     "@vicacha-devs/typescript-config": "workspace:*",
     "react": "18.3.1",
     "react-dom": "18.3.1",
