@@ -11,6 +11,7 @@ import {
   TextInput,
   Typography,
 } from "@strapi/design-system";
+import { LOCALE_OPTIONS } from "@vicacha-devs/plugin-shared";
 import React from "react";
 
 import {
@@ -20,21 +21,6 @@ import {
 } from "../../../../shared";
 import { CurrencySelectField } from "../CurrencyCountryInput";
 import type { InputChangeEvent, TranslateFn } from "./donationsHelpers";
-
-const LOCALE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "es", label: "es — Español (Spanish)" },
-  { value: "en", label: "en — English" },
-  { value: "ar", label: "ar — العربية (Arabic)" },
-  { value: "tr", label: "tr — Türkçe (Turkish)" },
-  { value: "fr", label: "fr — Français (French)" },
-  { value: "de", label: "de — Deutsch (German)" },
-  { value: "pt", label: "pt — Português (Portuguese)" },
-  { value: "it", label: "it — Italiano (Italian)" },
-  { value: "ru", label: "ru — Русский (Russian)" },
-  { value: "id", label: "id — Bahasa Indonesia" },
-  { value: "ur", label: "ur — اردو (Urdu)" },
-  { value: "zh", label: "zh — 中文 (Chinese)" },
-];
 
 const subCardStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.22)",
@@ -149,7 +135,7 @@ export const SettingsCurrencyTab: React.FC<{
       shadow="filterShadow"
       style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
     >
-      <Typography variant="beta" as="h2">
+      <Typography variant="beta" tag="h2">
         {t("settings.section1.title", "Currency, Multi-Language & Rich Text")}
       </Typography>
       <Typography variant="pi" textColor="neutral600">
@@ -327,7 +313,7 @@ export const SettingsCertificatesTab: React.FC<{
       shadow="filterShadow"
       style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
     >
-      <Typography variant="beta" as="h2">
+      <Typography variant="beta" tag="h2">
         {t(
           "settings.section2.title",
           "Cryptographic Tax Certificate Bridge & Verification Automation"

@@ -159,7 +159,7 @@ export const CampaignComposerSection: React.FC<
         gap={2}
       >
         <Box>
-          <Typography variant="beta" as="h2">
+          <Typography variant="beta" tag="h2">
             {t(
               "composer.title",
               "Open New Donation Campaign, Utility Bill or Micro-Need"

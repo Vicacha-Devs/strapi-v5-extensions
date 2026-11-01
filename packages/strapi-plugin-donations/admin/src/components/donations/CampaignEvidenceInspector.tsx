@@ -202,7 +202,7 @@ export const CampaignEvidenceInspector: React.FC<
             <Badge>{selectedCampaign.progressPercent}%</Badge>
           </Flex>
           <Box paddingTop={2}>
-            <Typography variant="beta" as="h2">
+            <Typography variant="beta" tag="h2">
               {selectedCampaign.title} —{" "}
               {t(
                 "inspector.header_suffix",

@@ -73,26 +73,10 @@ function resolveCampaignListFromPayload(
   payload: OverviewPayload
 ): DonationCampaignItem[] {
   if (Array.isArray(payload.campaigns)) return payload.campaigns;
-  const majors = Array.isArray(payload.majorCampaigns)
-    ? payload.majorCampaigns
-    : [];
-  const invoices = Array.isArray(payload.utilityInvoices)
-    ? payload.utilityInvoices
-    : [];
-  return [...majors, ...invoices];
-}
-
-function filterVisibleCampaigns(
-  activeTab: ActiveTab,
-  all: DonationCampaignItem[],
-  major: DonationCampaignItem[],
-  utility: DonationCampaignItem[],
-  micro: DonationCampaignItem[]
-): DonationCampaignItem[] {
-  if (activeTab === "major_campaign") return major;
-  if (activeTab === "utility_invoice") return utility;
-  if (activeTab === "micro_need") return micro;
-  return all;
+  return [
+    ...(Array.isArray(payload.majorCampaigns) ? payload.majorCampaigns : []),
+    ...(Array.isArray(payload.utilityInvoices) ? payload.utilityInvoices : []),
+  ];
 }
 
 function trimmedOrNull(raw: string): string | null {
@@ -103,13 +87,10 @@ function trimmedOrNull(raw: string): string | null {
 function buildCreateCampaignPayloadData(
   form: CampaignFormState
 ): Record<string, unknown> {
-  const trimmedTitle = form.title.trim();
-  const trimmedSlug = form.slug.trim();
-  const trimmedDesc = form.description.trim();
-
+  const title = form.title.trim();
   return {
-    title: trimmedTitle,
-    slug: trimmedSlug || undefined,
+    title,
+    slug: form.slug.trim() || undefined,
     campaignKind: form.kind,
     categoryKey: form.category || "general_fund",
     goalAmount: Number(form.goalAmount) || 0,
@@ -119,7 +100,7 @@ function buildCreateCampaignPayloadData(
     dueDate: trimmedOrNull(form.dueDate),
     invoiceProvider: trimmedOrNull(form.invoiceProvider),
     invoiceReference: trimmedOrNull(form.invoiceReference),
-    description: trimmedDesc || trimmedTitle,
+    description: form.description.trim() || title,
     body: form.body,
   };
 }
@@ -165,9 +146,7 @@ export const DonationsPage: React.FC = () => {
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creatingCampaign, setCreatingCampaign] = useState(false);
-  const [campaignForm, setCampaignForm] = useState<CampaignFormState>(
-    INITIAL_CAMPAIGN_FORM
-  );
+  const [campaignForm, setCampaignForm] = useState(INITIAL_CAMPAIGN_FORM);
 
   const [selectedCampaignSlug, setSelectedCampaignSlug] = useState<
     string | null
@@ -176,9 +155,7 @@ export const DonationsPage: React.FC = () => {
   const [editingDescriptionText, setEditingDescriptionText] = useState("");
   const [savingBody, setSavingBody] = useState(false);
 
-  const [evForm, setEvForm] = useState<EvidenceFormState>(
-    createInitialEvidenceForm
-  );
+  const [evForm, setEvForm] = useState(createInitialEvidenceForm);
   const [savingEvidence, setSavingEvidence] = useState(false);
 
   const patchCampaignForm = (patch: Partial<CampaignFormState>) => {
@@ -236,9 +213,8 @@ export const DonationsPage: React.FC = () => {
       setPledges(Array.isArray(payload.pledges) ? payload.pledges : []);
       if (payload.settings) {
         setSettings(payload.settings);
-        const baseCurr = payload.settings.baseCurrency;
-        if (baseCurr) {
-          patchCampaignForm({ currency: baseCurr });
+        if (payload.settings.baseCurrency) {
+          patchCampaignForm({ currency: payload.settings.baseCurrency });
         }
       }
     } finally {
@@ -283,17 +259,12 @@ export const DonationsPage: React.FC = () => {
     () => campaigns.filter((c) => c.campaignKind === "micro_need"),
     [campaigns]
   );
-
   const visibleCampaigns = useMemo(
     () =>
-      filterVisibleCampaigns(
-        activeTab,
-        campaigns,
-        majorCampaigns,
-        utilityInvoices,
-        microNeeds
-      ),
-    [activeTab, campaigns, majorCampaigns, utilityInvoices, microNeeds]
+      activeTab === "all" || activeTab === "pledges"
+        ? campaigns
+        : campaigns.filter((c) => c.campaignKind === activeTab),
+    [activeTab, campaigns]
   );
 
   const summarizeFunds = useMemo(() => {
@@ -336,18 +307,16 @@ export const DonationsPage: React.FC = () => {
         data: buildCreateCampaignPayloadData(campaignForm),
       });
       const created = res?.data?.data;
-      const createdTitle = created ? created.title : campaignForm.title;
+      const title = created ? created.title : campaignForm.title;
       patchCampaignForm({ title: "", slug: "", description: "", body: "" });
       setShowCreateForm(false);
       setNotice(
         t("notice.campaign_created", 'Created "{title}" successfully.', {
-          title: createdTitle,
+          title,
         })
       );
       await loadData();
-      if (created?.slug) {
-        setSelectedCampaignSlug(created.slug);
-      }
+      if (created?.slug) setSelectedCampaignSlug(created.slug);
     } finally {
       setCreatingCampaign(false);
     }
@@ -357,20 +326,15 @@ export const DonationsPage: React.FC = () => {
     if (!selectedCampaign) return;
     setSavingBody(true);
     try {
-      const identifier = selectedCampaign.documentId || selectedCampaign.slug;
-      await put(`/${PLUGIN_ID}/campaigns/${identifier}`, {
-        data: {
-          description: editingDescriptionText,
-          body: editingBodyText,
-        },
+      const id = selectedCampaign.documentId || selectedCampaign.slug;
+      await put(`/${PLUGIN_ID}/campaigns/${id}`, {
+        data: { description: editingDescriptionText, body: editingBodyText },
       });
       setNotice(
         t(
           "notice.richtext_updated",
           'Updated Rich Text body & description for "{title}".',
-          {
-            title: selectedCampaign.title,
-          }
+          { title: selectedCampaign.title }
         )
       );
       await loadData();
@@ -427,10 +391,7 @@ export const DonationsPage: React.FC = () => {
         t(
           "notice.pledge_updated",
           "Pledge {referenceCode} marked as {decision}.",
-          {
-            referenceCode,
-            decision,
-          }
+          { referenceCode, decision }
         )
       );
       await loadData();

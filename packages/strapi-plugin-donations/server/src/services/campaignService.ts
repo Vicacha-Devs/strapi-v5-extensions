@@ -11,6 +11,7 @@ import {
   type InvoiceStatus,
 } from "../../../shared";
 import {
+  buildCreateCampaignData,
   createFieldMapper,
   normalizeCampaignRecord,
   normalizeEvidenceItem,
@@ -18,7 +19,6 @@ import {
   persistCreatedRecord,
   persistUpdatedRecord,
   queryRecords,
-  slugifyTitle,
   strOrNull,
   strVal,
 } from "./campaignNormalizers";
@@ -95,96 +95,6 @@ function matchesIdentifier(
   if (doc.documentId === identifier) return true;
   if (String(doc.id) === identifier) return true;
   return doc[slugField] === identifier;
-}
-
-function resolveCampaignKind(raw: unknown): CampaignKind {
-  if (raw === "utility_invoice" || raw === "micro_need") return raw;
-  return "major_campaign";
-}
-
-function buildCreateCampaignData(
-  input: Record<string, unknown>,
-  settings: DonationsSettings
-): { data: Record<string, unknown>; locale: string } {
-  const mapField = createFieldMapper(settings.campaignMapping);
-  const title = strVal(input.title).trim();
-  if (!title) {
-    throw new Error("Campaign title is required");
-  }
-
-  const slug = strVal(input.slug, slugifyTitle(title)).trim();
-  const campaignKind = resolveCampaignKind(input.campaignKind);
-  const currency = strVal(
-    input.currency,
-    strVal(settings.baseCurrency, "COP")
-  ).toUpperCase();
-  const goalAmount = Math.max(0, numVal(input.goalAmount, 0));
-  const raisedAmount = Math.max(0, numVal(input.raisedAmount, 0));
-  const dueDate = strOrNull(input.dueDate);
-  const rawStatus = strVal(input.invoiceStatus, "open") as InvoiceStatus;
-
-  const progress = computeCampaignProgress({
-    goalAmount,
-    raisedAmount,
-    campaignKind,
-    dueDate,
-    currentStatus: rawStatus,
-  });
-
-  const locale = strVal(input.locale, strVal(settings.defaultLocale, "en"));
-  const rawEvidences = Array.isArray(input.evidences)
-    ? (input.evidences as Array<Record<string, unknown>>)
-    : [];
-  const evidences = rawEvidences.map((ev, idx) =>
-    normalizeEvidenceItem(
-      ev,
-      idx,
-      currency,
-      settings.secondaryCalendars,
-      locale
-    )
-  );
-  const defaultSuggested = settings.defaultSuggestedAmounts?.[currency] || [
-    20000, 50000, 100000,
-  ];
-
-  const data: Record<string, unknown> = {
-    [mapField("title")]: title,
-    [mapField("slug")]: slug,
-    [mapField("description")]: normalizeRichTextValue(
-      strVal(input.description, title)
-    ),
-    [mapField("body")]: normalizeRichTextValue(strVal(input.body)),
-    [mapField("campaignKind")]: campaignKind,
-    [mapField("categoryKey")]: strVal(input.categoryKey, "general_fund"),
-    [mapField("goalAmount")]: goalAmount,
-    [mapField("raisedAmount")]: raisedAmount,
-    [mapField("currency")]: currency,
-    [mapField("donorCount")]: Math.max(0, numVal(input.donorCount, 0)),
-    [mapField("isUrgent")]: Boolean(input.isUrgent),
-    [mapField("isActive")]: input.isActive !== false,
-    [mapField("startDate")]: strOrNull(input.startDate),
-    [mapField("endDate")]: strOrNull(input.endDate),
-    [mapField("dueDate")]: dueDate,
-    [mapField("billingPeriod")]: strOrNull(input.billingPeriod),
-    [mapField("invoiceReference")]: strOrNull(input.invoiceReference),
-    [mapField("invoiceProvider")]: strOrNull(input.invoiceProvider),
-    [mapField("invoiceStatus")]:
-      rawStatus === "paid" ? "paid" : progress.invoiceStatus,
-    [mapField("suggestedAmounts")]: Array.isArray(input.suggestedAmounts)
-      ? input.suggestedAmounts
-      : defaultSuggested,
-    [mapField("allowCustomAmount")]: input.allowCustomAmount !== false,
-    [mapField("allowFullBalancePayoff")]:
-      input.allowFullBalancePayoff !== false,
-    [mapField("coverUrl")]: strOrNull(input.coverUrl),
-    [mapField("invoiceDocumentUrl")]: strOrNull(input.invoiceDocumentUrl),
-    [mapField("paymentGatewayUrl")]: strOrNull(input.paymentGatewayUrl),
-    [mapField("icon")]: strOrNull(input.icon),
-    [mapField("evidences")]: evidences,
-  };
-
-  return { data, locale };
 }
 
 const DIRECT_CAMPAIGN_FIELDS = [

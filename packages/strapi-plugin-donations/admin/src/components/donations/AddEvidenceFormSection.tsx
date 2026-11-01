@@ -50,7 +50,7 @@ export const AddEvidenceFormSection: React.FC<{
       gap={2}
     >
       <Box>
-        <Typography variant="delta" as="h3">
+        <Typography variant="delta" tag="h3">
           {t(
             "inspector.section3.title",
             "3. Add New Evidence of Donation Effectiveness"
