@@ -16,14 +16,20 @@ export interface CampaignProgressSummary {
   invoiceStatus: InvoiceStatus;
 }
 
-function computeProgressPercent(goalAmount: number, raisedAmount: number): number {
+function computeProgressPercent(
+  goalAmount: number,
+  raisedAmount: number
+): number {
   if (goalAmount > 0) {
     return Math.min(100, Math.round((raisedAmount / goalAmount) * 1000) / 10);
   }
   return raisedAmount > 0 ? 100 : 0;
 }
 
-function isPastDueDate(dueDate: string | null | undefined, referenceDate?: Date): boolean {
+function isPastDueDate(
+  dueDate: string | null | undefined,
+  referenceDate?: Date
+): boolean {
   if (!dueDate) return false;
   const dueTime = new Date(dueDate).getTime();
   const nowTime = (referenceDate || new Date()).getTime();
@@ -59,7 +65,10 @@ export function computeCampaignProgress(params: {
 }): CampaignProgressSummary {
   const goalAmount = Math.max(0, Number(params.goalAmount) || 0);
   const raisedAmount = Math.max(0, Number(params.raisedAmount) || 0);
-  const remainingAmount = Math.max(0, Number((goalAmount - raisedAmount).toFixed(2)));
+  const remainingAmount = Math.max(
+    0,
+    Number((goalAmount - raisedAmount).toFixed(2))
+  );
   const progressPercent = computeProgressPercent(goalAmount, raisedAmount);
   const invoiceStatus = resolveInvoiceStatus(
     goalAmount,
@@ -87,7 +96,9 @@ function resolveBenchmark(
     profile.benchmarks[0];
 
   if (!benchmark) {
-    throw new Error(`No benchmark configured for assessment profile "${profile.key}"`);
+    throw new Error(
+      `No benchmark configured for assessment profile "${profile.key}"`
+    );
   }
   return benchmark;
 }
@@ -111,9 +122,13 @@ function sumAssessmentFields(
   return { totalAssets, totalLiabilities };
 }
 
-function computeBenchmarkThreshold(benchmark: AssessmentBenchmark, currency: string): number {
+function computeBenchmarkThreshold(
+  benchmark: AssessmentBenchmark,
+  currency: string
+): number {
   const unitPrice = Number(benchmark.unitPricesByCurrency[currency] ?? 0);
-  const effectivePrice = benchmark.unitType === "gram_weight" ? unitPrice : unitPrice || 1;
+  const effectivePrice =
+    benchmark.unitType === "gram_weight" ? unitPrice : unitPrice || 1;
   return Number((benchmark.thresholdUnits * effectivePrice).toFixed(2));
 }
 
@@ -127,12 +142,20 @@ export function evaluateAssessmentCalculation(
 ): AssessmentCalculationResult {
   const currency = (input.currency || "COP").toUpperCase();
   const benchmark = resolveBenchmark(profile, input.benchmarkKey);
-  const { totalAssets, totalLiabilities } = sumAssessmentFields(profile.fields, input.values);
+  const { totalAssets, totalLiabilities } = sumAssessmentFields(
+    profile.fields,
+    input.values
+  );
 
-  const netAssessableWealth = Math.max(0, Number((totalAssets - totalLiabilities).toFixed(2)));
+  const netAssessableWealth = Math.max(
+    0,
+    Number((totalAssets - totalLiabilities).toFixed(2))
+  );
   const thresholdAmount = computeBenchmarkThreshold(benchmark, currency);
   const meetsThreshold =
-    thresholdAmount > 0 ? netAssessableWealth >= thresholdAmount : netAssessableWealth > 0;
+    thresholdAmount > 0
+      ? netAssessableWealth >= thresholdAmount
+      : netAssessableWealth > 0;
   const rateFraction = (Number(profile.ratePercent) || 0) / 100;
   const payableAmount = meetsThreshold
     ? Number((netAssessableWealth * rateFraction).toFixed(2))
@@ -249,7 +272,8 @@ export function extractRichTextPlainText(value: unknown): string {
       const parsed = JSON.parse(raw) as Record<string, unknown> | unknown[];
       if (
         parsed &&
-        (Array.isArray(parsed) || (typeof parsed === "object" && parsed.type === "doc"))
+        (Array.isArray(parsed) ||
+          (typeof parsed === "object" && parsed.type === "doc"))
       ) {
         return extractNodeText(parsed).trim();
       }

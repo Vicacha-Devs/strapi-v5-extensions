@@ -14,37 +14,217 @@ export interface IsoCountryInfo {
 }
 
 export const ISO_4217_CURRENCIES: IsoCurrencyInfo[] = [
-  { code: "COP", symbol: "$", name: "Colombian Peso", countryCode: "CO", flag: "🇨🇴" },
-  { code: "USD", symbol: "$", name: "US Dollar", countryCode: "US", flag: "🇺🇸" },
+  {
+    code: "COP",
+    symbol: "$",
+    name: "Colombian Peso",
+    countryCode: "CO",
+    flag: "🇨🇴",
+  },
+  {
+    code: "USD",
+    symbol: "$",
+    name: "US Dollar",
+    countryCode: "US",
+    flag: "🇺🇸",
+  },
   { code: "EUR", symbol: "€", name: "Euro", countryCode: "EU", flag: "🇪🇺" },
-  { code: "TRY", symbol: "₺", name: "Turkish Lira", countryCode: "TR", flag: "🇹🇷" },
-  { code: "SAR", symbol: "﷼", name: "Saudi Riyal", countryCode: "SA", flag: "🇸🇦" },
-  { code: "AED", symbol: "د.إ", name: "UAE Dirham", countryCode: "AE", flag: "🇦🇪" },
-  { code: "GBP", symbol: "£", name: "British Pound", countryCode: "GB", flag: "🇬🇧" },
-  { code: "CAD", symbol: "$", name: "Canadian Dollar", countryCode: "CA", flag: "🇨🇦" },
-  { code: "MXN", symbol: "$", name: "Mexican Peso", countryCode: "MX", flag: "🇲🇽" },
-  { code: "BRL", symbol: "R$", name: "Brazilian Real", countryCode: "BR", flag: "🇧🇷" },
-  { code: "ARS", symbol: "$", name: "Argentine Peso", countryCode: "AR", flag: "🇦🇷" },
-  { code: "CLP", symbol: "$", name: "Chilean Peso", countryCode: "CL", flag: "🇨🇱" },
-  { code: "PEN", symbol: "S/", name: "Peruvian Sol", countryCode: "PE", flag: "🇵🇪" },
-  { code: "UYU", symbol: "$U", name: "Uruguayan Peso", countryCode: "UY", flag: "🇺🇾" },
-  { code: "CRC", symbol: "₡", name: "Costa Rican Colón", countryCode: "CR", flag: "🇨🇷" },
-  { code: "DOP", symbol: "RD$", name: "Dominican Peso", countryCode: "DO", flag: "🇩🇴" },
-  { code: "GTQ", symbol: "Q", name: "Guatemalan Quetzal", countryCode: "GT", flag: "🇬🇹" },
-  { code: "CHF", symbol: "CHF", name: "Swiss Franc", countryCode: "CH", flag: "🇨🇭" },
-  { code: "QAR", symbol: "ر.ق", name: "Qatari Riyal", countryCode: "QA", flag: "🇶🇦" },
-  { code: "KWD", symbol: "د.ك", name: "Kuwaiti Dinar", countryCode: "KW", flag: "🇰🇼" },
-  { code: "BHD", symbol: ".د.ب", name: "Bahraini Dinar", countryCode: "BH", flag: "🇧🇭" },
-  { code: "OMR", symbol: "ر.ع.", name: "Omani Rial", countryCode: "OM", flag: "🇴🇲" },
-  { code: "JOD", symbol: "د.أ", name: "Jordanian Dinar", countryCode: "JO", flag: "🇯🇴" },
-  { code: "EGP", symbol: "E£", name: "Egyptian Pound", countryCode: "EG", flag: "🇪🇬" },
-  { code: "MAD", symbol: "د.م.", name: "Moroccan Dirham", countryCode: "MA", flag: "🇲🇦" },
-  { code: "MYR", symbol: "RM", name: "Malaysian Ringgit", countryCode: "MY", flag: "🇲🇾" },
-  { code: "IDR", symbol: "Rp", name: "Indonesian Rupiah", countryCode: "ID", flag: "🇮🇩" },
-  { code: "PKR", symbol: "₨", name: "Pakistani Rupee", countryCode: "PK", flag: "🇵🇰" },
-  { code: "AUD", symbol: "A$", name: "Australian Dollar", countryCode: "AU", flag: "🇦🇺" },
-  { code: "JPY", symbol: "¥", name: "Japanese Yen", countryCode: "JP", flag: "🇯🇵" },
-  { code: "CNY", symbol: "¥", name: "Chinese Yuan", countryCode: "CN", flag: "🇨🇳" },
+  {
+    code: "TRY",
+    symbol: "₺",
+    name: "Turkish Lira",
+    countryCode: "TR",
+    flag: "🇹🇷",
+  },
+  {
+    code: "SAR",
+    symbol: "﷼",
+    name: "Saudi Riyal",
+    countryCode: "SA",
+    flag: "🇸🇦",
+  },
+  {
+    code: "AED",
+    symbol: "د.إ",
+    name: "UAE Dirham",
+    countryCode: "AE",
+    flag: "🇦🇪",
+  },
+  {
+    code: "GBP",
+    symbol: "£",
+    name: "British Pound",
+    countryCode: "GB",
+    flag: "🇬🇧",
+  },
+  {
+    code: "CAD",
+    symbol: "$",
+    name: "Canadian Dollar",
+    countryCode: "CA",
+    flag: "🇨🇦",
+  },
+  {
+    code: "MXN",
+    symbol: "$",
+    name: "Mexican Peso",
+    countryCode: "MX",
+    flag: "🇲🇽",
+  },
+  {
+    code: "BRL",
+    symbol: "R$",
+    name: "Brazilian Real",
+    countryCode: "BR",
+    flag: "🇧🇷",
+  },
+  {
+    code: "ARS",
+    symbol: "$",
+    name: "Argentine Peso",
+    countryCode: "AR",
+    flag: "🇦🇷",
+  },
+  {
+    code: "CLP",
+    symbol: "$",
+    name: "Chilean Peso",
+    countryCode: "CL",
+    flag: "🇨🇱",
+  },
+  {
+    code: "PEN",
+    symbol: "S/",
+    name: "Peruvian Sol",
+    countryCode: "PE",
+    flag: "🇵🇪",
+  },
+  {
+    code: "UYU",
+    symbol: "$U",
+    name: "Uruguayan Peso",
+    countryCode: "UY",
+    flag: "🇺🇾",
+  },
+  {
+    code: "CRC",
+    symbol: "₡",
+    name: "Costa Rican Colón",
+    countryCode: "CR",
+    flag: "🇨🇷",
+  },
+  {
+    code: "DOP",
+    symbol: "RD$",
+    name: "Dominican Peso",
+    countryCode: "DO",
+    flag: "🇩🇴",
+  },
+  {
+    code: "GTQ",
+    symbol: "Q",
+    name: "Guatemalan Quetzal",
+    countryCode: "GT",
+    flag: "🇬🇹",
+  },
+  {
+    code: "CHF",
+    symbol: "CHF",
+    name: "Swiss Franc",
+    countryCode: "CH",
+    flag: "🇨🇭",
+  },
+  {
+    code: "QAR",
+    symbol: "ر.ق",
+    name: "Qatari Riyal",
+    countryCode: "QA",
+    flag: "🇶🇦",
+  },
+  {
+    code: "KWD",
+    symbol: "د.ك",
+    name: "Kuwaiti Dinar",
+    countryCode: "KW",
+    flag: "🇰🇼",
+  },
+  {
+    code: "BHD",
+    symbol: ".د.ب",
+    name: "Bahraini Dinar",
+    countryCode: "BH",
+    flag: "🇧🇭",
+  },
+  {
+    code: "OMR",
+    symbol: "ر.ع.",
+    name: "Omani Rial",
+    countryCode: "OM",
+    flag: "🇴🇲",
+  },
+  {
+    code: "JOD",
+    symbol: "د.أ",
+    name: "Jordanian Dinar",
+    countryCode: "JO",
+    flag: "🇯🇴",
+  },
+  {
+    code: "EGP",
+    symbol: "E£",
+    name: "Egyptian Pound",
+    countryCode: "EG",
+    flag: "🇪🇬",
+  },
+  {
+    code: "MAD",
+    symbol: "د.م.",
+    name: "Moroccan Dirham",
+    countryCode: "MA",
+    flag: "🇲🇦",
+  },
+  {
+    code: "MYR",
+    symbol: "RM",
+    name: "Malaysian Ringgit",
+    countryCode: "MY",
+    flag: "🇲🇾",
+  },
+  {
+    code: "IDR",
+    symbol: "Rp",
+    name: "Indonesian Rupiah",
+    countryCode: "ID",
+    flag: "🇮🇩",
+  },
+  {
+    code: "PKR",
+    symbol: "₨",
+    name: "Pakistani Rupee",
+    countryCode: "PK",
+    flag: "🇵🇰",
+  },
+  {
+    code: "AUD",
+    symbol: "A$",
+    name: "Australian Dollar",
+    countryCode: "AU",
+    flag: "🇦🇺",
+  },
+  {
+    code: "JPY",
+    symbol: "¥",
+    name: "Japanese Yen",
+    countryCode: "JP",
+    flag: "🇯🇵",
+  },
+  {
+    code: "CNY",
+    symbol: "¥",
+    name: "Chinese Yuan",
+    countryCode: "CN",
+    flag: "🇨🇳",
+  },
 ];
 
 export const ISO_3166_COUNTRIES: IsoCountryInfo[] = [
@@ -53,7 +233,12 @@ export const ISO_3166_COUNTRIES: IsoCountryInfo[] = [
   { code: "ES", name: "Spain", flag: "🇪🇸", defaultCurrency: "EUR" },
   { code: "TR", name: "Türkiye", flag: "🇹🇷", defaultCurrency: "TRY" },
   { code: "SA", name: "Saudi Arabia", flag: "🇸🇦", defaultCurrency: "SAR" },
-  { code: "AE", name: "United Arab Emirates", flag: "🇦🇪", defaultCurrency: "AED" },
+  {
+    code: "AE",
+    name: "United Arab Emirates",
+    flag: "🇦🇪",
+    defaultCurrency: "AED",
+  },
   { code: "MX", name: "Mexico", flag: "🇲🇽", defaultCurrency: "MXN" },
   { code: "BR", name: "Brazil", flag: "🇧🇷", defaultCurrency: "BRL" },
   { code: "AR", name: "Argentina", flag: "🇦🇷", defaultCurrency: "ARS" },
@@ -78,13 +263,19 @@ export const ISO_3166_COUNTRIES: IsoCountryInfo[] = [
   { code: "PK", name: "Pakistan", flag: "🇵🇰", defaultCurrency: "PKR" },
 ];
 
-export function resolveLocalizedCurrencyName(code: string, locale = "en"): string {
+export function resolveLocalizedCurrencyName(
+  code: string,
+  locale = "en"
+): string {
   const upper = String(code || "")
     .trim()
     .toUpperCase();
   const entry = ISO_4217_CURRENCIES.find((c) => c.code === upper);
   try {
-    if (typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function") {
+    if (
+      typeof Intl !== "undefined" &&
+      typeof Intl.DisplayNames === "function"
+    ) {
       const dn = new Intl.DisplayNames([locale, "en"], { type: "currency" });
       const localized = dn.of(upper);
       if (localized && localized.toUpperCase() !== upper) {
@@ -97,13 +288,19 @@ export function resolveLocalizedCurrencyName(code: string, locale = "en"): strin
   return entry?.name || upper;
 }
 
-export function resolveLocalizedCountryName(code: string, locale = "en"): string {
+export function resolveLocalizedCountryName(
+  code: string,
+  locale = "en"
+): string {
   const upper = String(code || "")
     .trim()
     .toUpperCase();
   const entry = ISO_3166_COUNTRIES.find((c) => c.code === upper);
   try {
-    if (typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function") {
+    if (
+      typeof Intl !== "undefined" &&
+      typeof Intl.DisplayNames === "function"
+    ) {
       const dn = new Intl.DisplayNames([locale, "en"], { type: "region" });
       const localized = dn.of(upper);
       if (localized && localized.toUpperCase() !== upper) {
@@ -134,7 +331,9 @@ export function formatCountryOptionLabel(code: string, locale = "en"): string {
   const entry = ISO_3166_COUNTRIES.find((c) => c.code === upper);
   const name = resolveLocalizedCountryName(upper, locale);
   const flag = entry?.flag || "🌐";
-  const currencySuffix = entry?.defaultCurrency ? ` · ${entry.defaultCurrency}` : "";
+  const currencySuffix = entry?.defaultCurrency
+    ? ` · ${entry.defaultCurrency}`
+    : "";
   return `${flag} ${upper} — ${name}${currencySuffix}`;
 }
 
@@ -153,7 +352,8 @@ export function getOrderedCurrencyOptions(
       .filter(Boolean)
   );
   const seen = new Set<string>();
-  const options: Array<{ code: string; label: string; isConfigured: boolean }> = [];
+  const options: Array<{ code: string; label: string; isConfigured: boolean }> =
+    [];
 
   const pushCode = (rawCode: string) => {
     const code = String(rawCode || "")

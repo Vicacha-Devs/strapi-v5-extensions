@@ -69,7 +69,8 @@ function resolveCampaignOverrides(
   resolvedCurrency: string;
 } {
   let resolvedAmount = numVal(input.amount, 0);
-  let resolvedCampaignKind: CampaignKind = input.campaignKind || "major_campaign";
+  let resolvedCampaignKind: CampaignKind =
+    input.campaignKind || "major_campaign";
   let resolvedCurrency = strVal(input.currency, defaultCurrency).toUpperCase();
 
   if (!targetCampaign) {
@@ -139,7 +140,10 @@ async function tryIssueTaxCertificate(
     if (typeof certService?.issueCertificate !== "function") return null;
 
     const issued = await certService.issueCertificate({
-      templateSlug: strVal(settings.taxCertificateTemplateSlug, "tax-donation-certificate"),
+      templateSlug: strVal(
+        settings.taxCertificateTemplateSlug,
+        "tax-donation-certificate"
+      ),
       recipientFullName: currentPledge.donorName,
       recipientName: currentPledge.donorName,
       recipientEmail: currentPledge.donorEmail,
@@ -204,7 +208,8 @@ function buildVerifyPledgeUpdateData(
     updateData[mapField("transactionReference")] = params.transactionReference;
   }
   if (params.certificateSerialNumber) {
-    updateData[mapField("certificateSerialNumber")] = params.certificateSerialNumber;
+    updateData[mapField("certificateSerialNumber")] =
+      params.certificateSerialNumber;
   }
   if (params.certificateVerifyUrl) {
     updateData[mapField("certificateVerifyUrl")] = params.certificateVerifyUrl;
@@ -214,9 +219,13 @@ function buildVerifyPledgeUpdateData(
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<typeof settingsServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<
+      typeof settingsServiceFactory
+    >;
   const getCampaignSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("campaign") as ReturnType<typeof campaignServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("campaign") as ReturnType<
+      typeof campaignServiceFactory
+    >;
 
   return {
     getTargetUid(settings: DonationsSettings): string {
@@ -226,11 +235,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return `plugin::${PLUGIN_ID}.pledge`;
     },
 
-    normalizePledge(raw: Record<string, unknown>, settings: DonationsSettings): DonationPledgeItem {
+    normalizePledge(
+      raw: Record<string, unknown>,
+      settings: DonationsSettings
+    ): DonationPledgeItem {
       const get = createFieldGetter(raw, settings.pledgeMapping);
       const locale = strVal(raw.locale, strVal(settings.defaultLocale, "en"));
       const createdAt = strVal(raw.createdAt, new Date().toISOString());
-      const secondaryDates = computeSecondaryDates(createdAt, settings.secondaryCalendars, locale);
+      const secondaryDates = computeSecondaryDates(
+        createdAt,
+        settings.secondaryCalendars,
+        locale
+      );
       const ids = resolveDocIdentifiers(raw);
       const defaultCurr = strVal(settings.baseCurrency, "COP");
 
@@ -249,9 +265,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         convertedBaseAmount: numVal(get("convertedBaseAmount"), 0),
         categoryKey: strVal(get("categoryKey"), "general_fund"),
         campaignSlug: strOrNull(get("campaignSlug")),
-        campaignKind: strVal(get("campaignKind"), "major_campaign") as CampaignKind,
+        campaignKind: strVal(
+          get("campaignKind"),
+          "major_campaign"
+        ) as CampaignKind,
         coversRemainingBalance: Boolean(get("coversRemainingBalance", false)),
-        paymentChannel: strVal(get("paymentChannel"), "bank_transfer") as PaymentChannel,
+        paymentChannel: strVal(
+          get("paymentChannel"),
+          "bank_transfer"
+        ) as PaymentChannel,
         paymentProvider: strOrNull(get("paymentProvider")),
         transactionReference: strOrNull(get("transactionReference")),
         receiptProofUrl: strOrNull(get("receiptProofUrl")),
@@ -276,11 +298,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           )
         : null;
 
-      const { resolvedAmount, resolvedCampaignKind, resolvedCurrency } = resolveCampaignOverrides(
-        input,
-        targetCampaign,
-        strVal(settings.baseCurrency, "COP")
-      );
+      const { resolvedAmount, resolvedCampaignKind, resolvedCurrency } =
+        resolveCampaignOverrides(
+          input,
+          targetCampaign,
+          strVal(settings.baseCurrency, "COP")
+        );
 
       if (!(resolvedAmount > 0)) {
         throw new Error("Contribution amount must be greater than zero.");
@@ -318,12 +341,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         sort: { createdAt: "desc" },
       });
 
-      let normalized = rawList.map((item) => this.normalizePledge(item, settings));
+      let normalized = rawList.map((item) =>
+        this.normalizePledge(item, settings)
+      );
       if (filters.status) {
         normalized = normalized.filter((p) => p.status === filters.status);
       }
       if (filters.campaignSlug) {
-        normalized = normalized.filter((p) => p.campaignSlug === filters.campaignSlug);
+        normalized = normalized.filter(
+          (p) => p.campaignSlug === filters.campaignSlug
+        );
       }
       return normalized;
     },
@@ -348,7 +375,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const currentPledge = this.normalizePledge(existing, settings);
       const wasAlreadyVerified =
-        currentPledge.status === "verified" || currentPledge.status === "certificate_issued";
+        currentPledge.status === "verified" ||
+        currentPledge.status === "certificate_issued";
 
       let nextStatus: PledgeStatus = params.decision;
       let certificateSerialNumber = currentPledge.certificateSerialNumber;
@@ -383,7 +411,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         certificateVerifyUrl,
       });
 
-      const updated = await persistUpdatedRecord(strapi, uid, existing, updateData);
+      const updated = await persistUpdatedRecord(
+        strapi,
+        uid,
+        existing,
+        updateData
+      );
       return this.normalizePledge(updated, settings);
     },
 

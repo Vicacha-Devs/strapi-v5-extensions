@@ -6,7 +6,12 @@ import type {
   DonationsSettings,
 } from "../../../../shared";
 
-export type ActiveTab = "all" | "major_campaign" | "utility_invoice" | "micro_need" | "pledges";
+export type ActiveTab =
+  | "all"
+  | "major_campaign"
+  | "utility_invoice"
+  | "micro_need"
+  | "pledges";
 
 export type TranslateFn = (
   id: string,
@@ -133,10 +138,14 @@ export function computeFundSummaryForList(
   const entries = Object.entries(byCurrency);
   const hasEntries = entries.length > 0;
   const raisedBreakdown = hasEntries
-    ? entries.map(([curr, val]) => `${val.raised.toLocaleString()} ${curr}`).join(" + ")
+    ? entries
+        .map(([curr, val]) => `${val.raised.toLocaleString()} ${curr}`)
+        .join(" + ")
     : `0 ${baseCurrency}`;
   const goalBreakdown = hasEntries
-    ? entries.map(([curr, val]) => `${val.goal.toLocaleString()} ${curr}`).join(" + ")
+    ? entries
+        .map(([curr, val]) => `${val.goal.toLocaleString()} ${curr}`)
+        .join(" + ")
     : `0 ${baseCurrency}`;
 
   return {
@@ -155,14 +164,23 @@ export function computeKpiStats(
   campaigns: DonationCampaignItem[],
   pledges: DonationPledgeItem[]
 ): KpiStats {
-  const totalEvidences = campaigns.reduce((acc, c) => acc + numOrZero(c.evidenceCount), 0);
+  const totalEvidences = campaigns.reduce(
+    (acc, c) => acc + numOrZero(c.evidenceCount),
+    0
+  );
   const paidOrCompleted = campaigns.filter(
     (c) => c.invoiceStatus === "paid" || c.progressPercent >= 100
   ).length;
-  const totalProgress = campaigns.reduce((acc, c) => acc + numOrZero(c.progressPercent), 0);
-  const avgProgress = campaigns.length > 0 ? Math.round(totalProgress / campaigns.length) : 0;
+  const totalProgress = campaigns.reduce(
+    (acc, c) => acc + numOrZero(c.progressPercent),
+    0
+  );
+  const avgProgress =
+    campaigns.length > 0 ? Math.round(totalProgress / campaigns.length) : 0;
   const pendingPledges = pledges.filter((p) => p.status === "pending").length;
-  const issuedCerts = pledges.filter((p) => Boolean(p.certificateSerialNumber)).length;
+  const issuedCerts = pledges.filter((p) =>
+    Boolean(p.certificateSerialNumber)
+  ).length;
 
   return {
     totalEvidences,
@@ -176,7 +194,10 @@ export function computeKpiStats(
 const FALLBACK_CATEGORY_PRESETS: Array<{ key: string; label: string }> = [
   { key: "general_fund", label: "General Fund (general_fund)" },
   { key: "utility_bills", label: "Utility Invoices (utility_bills)" },
-  { key: "equipment_donation", label: "Equipment / Computers (equipment_donation)" },
+  {
+    key: "equipment_donation",
+    label: "Equipment / Computers (equipment_donation)",
+  },
   { key: "seasonal_gifts", label: "Kurban / Ramadan Gifts (seasonal_gifts)" },
   { key: "waqf", label: "Waqf & Infrastructure (waqf)" },
   { key: "sadaqah", label: "Sadaqah & Social Welfare (sadaqah)" },
@@ -204,7 +225,11 @@ function collectConfiguredCategoryOptions(
   for (const cat of categories) {
     if (cat.key && !seen.has(cat.key)) {
       seen.add(cat.key);
-      const label = resolveCategoryDisplayLabel(cat.labels, defaultLoc, cat.key);
+      const label = resolveCategoryDisplayLabel(
+        cat.labels,
+        defaultLoc,
+        cat.key
+      );
       options.push({ key: cat.key, label: `${label} (${cat.key})` });
     }
   }
@@ -234,7 +259,11 @@ export function buildCategoryOptions(
 }
 
 export function buildCampaignPresetState(
-  preset: "crowdfunding" | "utility_bill" | "computer_donation" | "seasonal_gift",
+  preset:
+    | "crowdfunding"
+    | "utility_bill"
+    | "computer_donation"
+    | "seasonal_gift",
   baseCurrency: string,
   t: TranslateFn
 ): Partial<CampaignFormState> {
@@ -242,7 +271,10 @@ export function buildCampaignPresetState(
     return {
       kind: "major_campaign",
       category: "endowment",
-      title: t("preset.crowdfunding.title", "Community Education & Infrastructure Fund"),
+      title: t(
+        "preset.crowdfunding.title",
+        "Community Education & Infrastructure Fund"
+      ),
       description: t(
         "preset.crowdfunding.desc",
         "Crowdfunding campaign for classrooms, scholarships, and community social programs."
@@ -259,7 +291,10 @@ export function buildCampaignPresetState(
     return {
       kind: "utility_invoice",
       category: "utility_bills",
-      title: t("preset.utility_bill.title", "Monthly Electricity & Facility Services Bill"),
+      title: t(
+        "preset.utility_bill.title",
+        "Monthly Electricity & Facility Services Bill"
+      ),
       billingPeriod: "March 2026",
       invoiceProvider: "Enel / Public Utility Provider",
       invoiceReference: "INV-2026-03",
@@ -279,7 +314,10 @@ export function buildCampaignPresetState(
     return {
       kind: "micro_need",
       category: "general_fund",
-      title: t("preset.computer_donation.title", "Computers & Study Lab Equipment Drive"),
+      title: t(
+        "preset.computer_donation.title",
+        "Computers & Study Lab Equipment Drive"
+      ),
       description: t(
         "preset.computer_donation.desc",
         "Micro-need campaign to equip classrooms and students with laptops, monitors, and study workstations."
@@ -295,7 +333,10 @@ export function buildCampaignPresetState(
   return {
     kind: "micro_need",
     category: "general_fund",
-    title: t("preset.seasonal_gift.title", "Seasonal Food Baskets, Ramadan & Kurban Gift Drive"),
+    title: t(
+      "preset.seasonal_gift.title",
+      "Seasonal Food Baskets, Ramadan & Kurban Gift Drive"
+    ),
     description: t(
       "preset.seasonal_gift.desc",
       "Solidarity campaign for seasonal food packages, Ramadan Iftar baskets, and Kurban gift distributions."
@@ -313,13 +354,22 @@ export function buildEvidencePresetState(
   preset: CampaignEvidenceType,
   billingPeriod: string | null | undefined,
   t: TranslateFn
-): { type: CampaignEvidenceType; title: string; body: string; markPaid: boolean } {
+): {
+  type: CampaignEvidenceType;
+  title: string;
+  body: string;
+  markPaid: boolean;
+} {
   if (preset === "paid_receipt") {
     return {
       type: preset,
-      title: t("evidence.preset.paid_receipt.title", "Paid Utility Service Receipt — {period}", {
-        period: billingPeriod || "Official Voucher",
-      }),
+      title: t(
+        "evidence.preset.paid_receipt.title",
+        "Paid Utility Service Receipt — {period}",
+        {
+          period: billingPeriod || "Official Voucher",
+        }
+      ),
       body: t(
         "evidence.preset.paid_receipt.body",
         "Official utility provider payment receipt confirming 100% settlement of the service bill."
@@ -371,7 +421,10 @@ export function buildEvidencePresetState(
   }
   return {
     type: preset,
-    title: t("evidence.preset.beneficiary_update.title", "Beneficiary Impact Update"),
+    title: t(
+      "evidence.preset.beneficiary_update.title",
+      "Beneficiary Impact Update"
+    ),
     body: t(
       "evidence.preset.beneficiary_update.body",
       "Direct impact testimony and progress update from community beneficiaries."
@@ -381,6 +434,7 @@ export function buildEvidencePresetState(
 }
 
 export function openInContentManager(documentId?: string): void {
-  const base = "/admin/content-manager/collection-types/plugin::donations.campaign";
+  const base =
+    "/admin/content-manager/collection-types/plugin::donations.campaign";
   window.location.href = documentId ? `${base}/${documentId}` : base;
 }

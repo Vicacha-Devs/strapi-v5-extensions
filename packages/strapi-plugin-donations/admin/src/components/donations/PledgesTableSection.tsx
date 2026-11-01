@@ -19,11 +19,15 @@ import type { TranslateFn } from "./donationsHelpers";
 const PledgeTableRow: React.FC<{
   pledge: DonationPledgeItem;
   processingRef: string | null;
-  onDecision: (referenceCode: string, decision: "verified" | "rejected") => void;
+  onDecision: (
+    referenceCode: string,
+    decision: "verified" | "rejected"
+  ) => void;
   t: TranslateFn;
 }> = ({ pledge, processingRef, onDecision, t }) => {
   const isProcessing = processingRef === pledge.referenceCode;
-  const certLabel = pledge.certificateSerialNumber || t("pledge.cert.not_issued", "Not issued");
+  const certLabel =
+    pledge.certificateSerialNumber || t("pledge.cert.not_issued", "Not issued");
 
   return (
     <Tr>
@@ -81,7 +85,10 @@ const PledgeTableRow: React.FC<{
 export interface PledgesTableSectionProps {
   pledges: DonationPledgeItem[];
   processingRef: string | null;
-  onDecision: (referenceCode: string, decision: "verified" | "rejected") => void;
+  onDecision: (
+    referenceCode: string,
+    decision: "verified" | "rejected"
+  ) => void;
   t: TranslateFn;
 }
 
@@ -105,25 +112,39 @@ export const PledgesTableSection: React.FC<PledgesTableSectionProps> = ({
       <Thead>
         <Tr>
           <Th>
-            <Typography variant="sigma">{t("pledge.col.ref", "Ref")}</Typography>
+            <Typography variant="sigma">
+              {t("pledge.col.ref", "Ref")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("pledge.col.donor", "Donor")}</Typography>
+            <Typography variant="sigma">
+              {t("pledge.col.donor", "Donor")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("pledge.col.amount", "Amount")}</Typography>
+            <Typography variant="sigma">
+              {t("pledge.col.amount", "Amount")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("pledge.col.target", "Target / Category")}</Typography>
+            <Typography variant="sigma">
+              {t("pledge.col.target", "Target / Category")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("pledge.col.status", "Status")}</Typography>
+            <Typography variant="sigma">
+              {t("pledge.col.status", "Status")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("pledge.col.certificate", "Certificate")}</Typography>
+            <Typography variant="sigma">
+              {t("pledge.col.certificate", "Certificate")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("pledge.col.actions", "Actions")}</Typography>
+            <Typography variant="sigma">
+              {t("pledge.col.actions", "Actions")}
+            </Typography>
           </Th>
         </Tr>
       </Thead>

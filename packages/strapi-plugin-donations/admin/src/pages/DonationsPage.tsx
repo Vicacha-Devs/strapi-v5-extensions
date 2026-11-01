@@ -69,10 +69,16 @@ function createInitialEvidenceForm(): EvidenceFormState {
   };
 }
 
-function resolveCampaignListFromPayload(payload: OverviewPayload): DonationCampaignItem[] {
+function resolveCampaignListFromPayload(
+  payload: OverviewPayload
+): DonationCampaignItem[] {
   if (Array.isArray(payload.campaigns)) return payload.campaigns;
-  const majors = Array.isArray(payload.majorCampaigns) ? payload.majorCampaigns : [];
-  const invoices = Array.isArray(payload.utilityInvoices) ? payload.utilityInvoices : [];
+  const majors = Array.isArray(payload.majorCampaigns)
+    ? payload.majorCampaigns
+    : [];
+  const invoices = Array.isArray(payload.utilityInvoices)
+    ? payload.utilityInvoices
+    : [];
   return [...majors, ...invoices];
 }
 
@@ -94,7 +100,9 @@ function trimmedOrNull(raw: string): string | null {
   return trimmed ? trimmed : null;
 }
 
-function buildCreateCampaignPayloadData(form: CampaignFormState): Record<string, unknown> {
+function buildCreateCampaignPayloadData(
+  form: CampaignFormState
+): Record<string, unknown> {
   const trimmedTitle = form.title.trim();
   const trimmedSlug = form.slug.trim();
   const trimmedDesc = form.description.trim();
@@ -157,14 +165,20 @@ export const DonationsPage: React.FC = () => {
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [creatingCampaign, setCreatingCampaign] = useState(false);
-  const [campaignForm, setCampaignForm] = useState<CampaignFormState>(INITIAL_CAMPAIGN_FORM);
+  const [campaignForm, setCampaignForm] = useState<CampaignFormState>(
+    INITIAL_CAMPAIGN_FORM
+  );
 
-  const [selectedCampaignSlug, setSelectedCampaignSlug] = useState<string | null>(null);
+  const [selectedCampaignSlug, setSelectedCampaignSlug] = useState<
+    string | null
+  >(null);
   const [editingBodyText, setEditingBodyText] = useState("");
   const [editingDescriptionText, setEditingDescriptionText] = useState("");
   const [savingBody, setSavingBody] = useState(false);
 
-  const [evForm, setEvForm] = useState<EvidenceFormState>(createInitialEvidenceForm);
+  const [evForm, setEvForm] = useState<EvidenceFormState>(
+    createInitialEvidenceForm
+  );
   const [savingEvidence, setSavingEvidence] = useState(false);
 
   const patchCampaignForm = (patch: Partial<CampaignFormState>) => {
@@ -176,10 +190,22 @@ export const DonationsPage: React.FC = () => {
   };
 
   const evidenceTypeLabels: Record<CampaignEvidenceType, string> = {
-    paid_receipt: t("evidence.type.paid_receipt", "Paid Utility / Service Bill Receipt"),
-    photo_gallery: t("evidence.type.photo_gallery", "Equipment & Donated Assets Photo Gallery"),
-    delivery_report: t("evidence.type.delivery_report", "Seasonal / Aid Gift Distribution Report"),
-    audit_document: t("evidence.type.audit_document", "Financial Audit & Official Voucher"),
+    paid_receipt: t(
+      "evidence.type.paid_receipt",
+      "Paid Utility / Service Bill Receipt"
+    ),
+    photo_gallery: t(
+      "evidence.type.photo_gallery",
+      "Equipment & Donated Assets Photo Gallery"
+    ),
+    delivery_report: t(
+      "evidence.type.delivery_report",
+      "Seasonal / Aid Gift Distribution Report"
+    ),
+    audit_document: t(
+      "evidence.type.audit_document",
+      "Financial Audit & Official Voucher"
+    ),
     beneficiary_update: t(
       "evidence.type.beneficiary_update",
       "Beneficiary Impact & Progress Story"
@@ -187,9 +213,18 @@ export const DonationsPage: React.FC = () => {
   };
 
   const campaignKindLabels: Record<CampaignKind, string> = {
-    major_campaign: t("campaign.kind.major_campaign", "Major Crowdfunding Campaign"),
-    utility_invoice: t("campaign.kind.utility_invoice", "Utility & Operational Service Bill"),
-    micro_need: t("campaign.kind.micro_need", "Micro-Need / Equipment / Gift Drive"),
+    major_campaign: t(
+      "campaign.kind.major_campaign",
+      "Major Crowdfunding Campaign"
+    ),
+    utility_invoice: t(
+      "campaign.kind.utility_invoice",
+      "Utility & Operational Service Bill"
+    ),
+    micro_need: t(
+      "campaign.kind.micro_need",
+      "Micro-Need / Equipment / Gift Drive"
+    ),
   };
 
   const loadData = async () => {
@@ -218,7 +253,9 @@ export const DonationsPage: React.FC = () => {
   const selectedCampaign = useMemo(
     () =>
       campaigns.find(
-        (c) => c.slug === selectedCampaignSlug || c.documentId === selectedCampaignSlug
+        (c) =>
+          c.slug === selectedCampaignSlug ||
+          c.documentId === selectedCampaignSlug
       ) || null,
     [campaigns, selectedCampaignSlug]
   );
@@ -248,7 +285,14 @@ export const DonationsPage: React.FC = () => {
   );
 
   const visibleCampaigns = useMemo(
-    () => filterVisibleCampaigns(activeTab, campaigns, majorCampaigns, utilityInvoices, microNeeds),
+    () =>
+      filterVisibleCampaigns(
+        activeTab,
+        campaigns,
+        majorCampaigns,
+        utilityInvoices,
+        microNeeds
+      ),
     [activeTab, campaigns, majorCampaigns, utilityInvoices, microNeeds]
   );
 
@@ -267,10 +311,17 @@ export const DonationsPage: React.FC = () => {
     };
   }, [campaigns, visibleCampaigns, settings]);
 
-  const kpiStats = useMemo(() => computeKpiStats(campaigns, pledges), [campaigns, pledges]);
+  const kpiStats = useMemo(
+    () => computeKpiStats(campaigns, pledges),
+    [campaigns, pledges]
+  );
 
   const handleApplyCampaignPreset = (
-    preset: "crowdfunding" | "utility_bill" | "computer_donation" | "seasonal_gift"
+    preset:
+      | "crowdfunding"
+      | "utility_bill"
+      | "computer_donation"
+      | "seasonal_gift"
   ) => {
     setShowCreateForm(true);
     const baseCurr = settings?.baseCurrency || "COP";
@@ -314,9 +365,13 @@ export const DonationsPage: React.FC = () => {
         },
       });
       setNotice(
-        t("notice.richtext_updated", 'Updated Rich Text body & description for "{title}".', {
-          title: selectedCampaign.title,
-        })
+        t(
+          "notice.richtext_updated",
+          'Updated Rich Text body & description for "{title}".',
+          {
+            title: selectedCampaign.title,
+          }
+        )
       );
       await loadData();
     } finally {
@@ -325,7 +380,9 @@ export const DonationsPage: React.FC = () => {
   };
 
   const handleApplyEvidencePreset = (preset: CampaignEvidenceType) => {
-    patchEvForm(buildEvidencePresetState(preset, selectedCampaign?.billingPeriod, t));
+    patchEvForm(
+      buildEvidencePresetState(preset, selectedCampaign?.billingPeriod, t)
+    );
   };
 
   const handleAddEvidence = async () => {
@@ -356,7 +413,10 @@ export const DonationsPage: React.FC = () => {
     await loadData();
   };
 
-  const handleDecision = async (referenceCode: string, decision: "verified" | "rejected") => {
+  const handleDecision = async (
+    referenceCode: string,
+    decision: "verified" | "rejected"
+  ) => {
     setProcessingRef(referenceCode);
     try {
       await post(`/${PLUGIN_ID}/pledges/${referenceCode}/verify`, {
@@ -364,10 +424,14 @@ export const DonationsPage: React.FC = () => {
         issueTaxCertificate: decision === "verified",
       });
       setNotice(
-        t("notice.pledge_updated", "Pledge {referenceCode} marked as {decision}.", {
-          referenceCode,
-          decision,
-        })
+        t(
+          "notice.pledge_updated",
+          "Pledge {referenceCode} marked as {decision}.",
+          {
+            referenceCode,
+            decision,
+          }
+        )
       );
       await loadData();
     } finally {

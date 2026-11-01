@@ -44,7 +44,10 @@ const CampaignTableRow: React.FC<{
   onSelectCampaignSlug: (slug: string | null) => void;
   t: TranslateFn;
 }> = ({ camp, isSelected, onSelectCampaignSlug, t }) => {
-  const barColor = getProgressBarColor(camp.invoiceStatus, camp.progressPercent);
+  const barColor = getProgressBarColor(
+    camp.invoiceStatus,
+    camp.progressPercent
+  );
   const snippet = truncatePlainText(camp.description);
   const providerSubtitle = formatProviderSubtitle(camp);
   const evidenceCount = camp.evidenceCount || 0;
@@ -82,7 +85,8 @@ const CampaignTableRow: React.FC<{
       </Td>
       <Td>
         <Typography fontWeight="bold">
-          {camp.raisedAmount.toLocaleString()} / {camp.goalAmount.toLocaleString()} {camp.currency}
+          {camp.raisedAmount.toLocaleString()} /{" "}
+          {camp.goalAmount.toLocaleString()} {camp.currency}
         </Typography>
         <Box paddingTop={1}>
           <Typography variant="pi" textColor="neutral600">
@@ -100,7 +104,11 @@ const CampaignTableRow: React.FC<{
       </Td>
       <Td>
         <Box style={{ minWidth: 130 }}>
-          <Flex justifyContent="space-between" alignItems="center" marginBottom={1}>
+          <Flex
+            justifyContent="space-between"
+            alignItems="center"
+            marginBottom={1}
+          >
             <Typography variant="pi" fontWeight="bold">
               {camp.progressPercent}%
             </Typography>
@@ -132,7 +140,9 @@ const CampaignTableRow: React.FC<{
         </Box>
       </Td>
       <Td>
-        <Badge active={camp.invoiceStatus === "paid"}>{camp.invoiceStatus.toUpperCase()}</Badge>
+        <Badge active={camp.invoiceStatus === "paid"}>
+          {camp.invoiceStatus.toUpperCase()}
+        </Badge>
       </Td>
       <Td>
         <Badge active={evidenceCount > 0}>
@@ -201,18 +211,34 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
       : `${campaignKindLabels[activeTab]} (${visibleCampaigns.length})`;
 
   return (
-    <Box marginBottom={6} background="neutral0" padding={5} hasRadius shadow="filterShadow">
-      <Flex justifyContent="space-between" alignItems="center" marginBottom={4} wrap="wrap" gap={2}>
+    <Box
+      marginBottom={6}
+      background="neutral0"
+      padding={5}
+      hasRadius
+      shadow="filterShadow"
+    >
+      <Flex
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom={4}
+        wrap="wrap"
+        gap={2}
+      >
         <Flex alignItems="center" gap={3} wrap="wrap">
           <Typography variant="delta" as="h2">
             {tableTitle}
           </Typography>
           <Badge active>
-            {t("table.campaigns.gathered_badge", "Gathered: {raised} / {goal} ({donors} donors)", {
-              raised: visibleSummary.raisedBreakdown,
-              goal: visibleSummary.goalBreakdown,
-              donors: visibleSummary.totalDonors,
-            })}
+            {t(
+              "table.campaigns.gathered_badge",
+              "Gathered: {raised} / {goal} ({donors} donors)",
+              {
+                raised: visibleSummary.raisedBreakdown,
+                goal: visibleSummary.goalBreakdown,
+                donors: visibleSummary.totalDonors,
+              }
+            )}
           </Badge>
         </Flex>
         <Typography variant="pi" textColor="neutral600">
@@ -232,22 +258,34 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
               </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("table.col.kind", "Kind & Category")}</Typography>
+              <Typography variant="sigma">
+                {t("table.col.kind", "Kind & Category")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("table.col.raised_goal", "Raised / Goal")}</Typography>
+              <Typography variant="sigma">
+                {t("table.col.raised_goal", "Raised / Goal")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("table.col.progress", "Progress")}</Typography>
+              <Typography variant="sigma">
+                {t("table.col.progress", "Progress")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("table.col.status", "Status")}</Typography>
+              <Typography variant="sigma">
+                {t("table.col.status", "Status")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("table.col.evidences", "Evidences")}</Typography>
+              <Typography variant="sigma">
+                {t("table.col.evidences", "Evidences")}
+              </Typography>
             </Th>
             <Th>
-              <Typography variant="sigma">{t("table.col.actions", "Actions")}</Typography>
+              <Typography variant="sigma">
+                {t("table.col.actions", "Actions")}
+              </Typography>
             </Th>
           </Tr>
         </Thead>
@@ -256,7 +294,10 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
             <CampaignTableRow
               key={camp.documentId || camp.slug}
               camp={camp}
-              isSelected={Boolean(selectedCampaign) && selectedCampaign?.slug === camp.slug}
+              isSelected={
+                Boolean(selectedCampaign) &&
+                selectedCampaign?.slug === camp.slug
+              }
               onSelectCampaignSlug={onSelectCampaignSlug}
               t={t}
             />

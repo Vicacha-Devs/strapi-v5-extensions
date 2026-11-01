@@ -40,11 +40,17 @@ function extractBody(ctx: AdminControllerContext): Record<string, unknown> {
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<typeof settingsServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("settings") as ReturnType<
+      typeof settingsServiceFactory
+    >;
   const getCampaignSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("campaign") as ReturnType<typeof campaignServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("campaign") as ReturnType<
+      typeof campaignServiceFactory
+    >;
   const getPledgeSvc = () =>
-    strapi.plugin(PLUGIN_ID).service("pledge") as ReturnType<typeof pledgeServiceFactory>;
+    strapi.plugin(PLUGIN_ID).service("pledge") as ReturnType<
+      typeof pledgeServiceFactory
+    >;
 
   return {
     async getSettings(ctx: AdminControllerContext) {
@@ -101,14 +107,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
-        return ctx.badRequest((err as Error)?.message || "Unable to create campaign");
+        return ctx.badRequest(
+          (err as Error)?.message || "Unable to create campaign"
+        );
       }
     },
 
     async updateCampaign(ctx: AdminControllerContext) {
       const { identifier } = ctx.params || {};
       const body = extractBody(ctx);
-      const updated = await getCampaignSvc().updateCampaign(String(identifier || ""), body);
+      const updated = await getCampaignSvc().updateCampaign(
+        String(identifier || ""),
+        body
+      );
       if (!updated) {
         return ctx.notFound("Campaign not found");
       }
@@ -122,10 +133,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         (typeof body.verifiedBy === "string" && body.verifiedBy) ||
         ctx.state?.user?.email ||
         "admin";
-      const updated = await getCampaignSvc().addCampaignEvidence(String(identifier || ""), {
-        ...body,
-        verifiedBy,
-      });
+      const updated = await getCampaignSvc().addCampaignEvidence(
+        String(identifier || ""),
+        {
+          ...body,
+          verifiedBy,
+        }
+      );
       if (!updated) {
         return ctx.notFound("Campaign not found");
       }
@@ -158,9 +172,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         decision,
         verifiedBy,
         transactionReference:
-          typeof body.transactionReference === "string" ? body.transactionReference : undefined,
+          typeof body.transactionReference === "string"
+            ? body.transactionReference
+            : undefined,
         issueTaxCertificate:
-          typeof body.issueTaxCertificate === "boolean" ? body.issueTaxCertificate : undefined,
+          typeof body.issueTaxCertificate === "boolean"
+            ? body.issueTaxCertificate
+            : undefined,
       });
 
       if (!updated) {

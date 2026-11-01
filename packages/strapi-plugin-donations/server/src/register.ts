@@ -56,13 +56,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     schemaExtensions?: Record<string, Record<string, Record<string, unknown>>>;
   };
 
-  for (const [targetKey, extraAttributes] of Object.entries(config.schemaExtensions ?? {})) {
+  for (const [targetKey, extraAttributes] of Object.entries(
+    config.schemaExtensions ?? {}
+  )) {
     if (!extraAttributes || typeof extraAttributes !== "object") continue;
     const resolvedUid = targetKey.startsWith("plugin::")
       ? targetKey
       : `plugin::${PLUGIN_ID}.${targetKey}`;
 
-    const schema = strapi.contentTypes?.[resolvedUid] as MutableSchema | undefined;
+    const schema = strapi.contentTypes?.[resolvedUid] as
+      | MutableSchema
+      | undefined;
     applyExtensionToSchema(schema, extraAttributes);
   }
 

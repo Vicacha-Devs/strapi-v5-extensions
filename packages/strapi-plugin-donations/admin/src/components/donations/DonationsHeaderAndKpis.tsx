@@ -1,4 +1,11 @@
-import { Badge, Box, Button, Flex, Tabs, Typography } from "@strapi/design-system";
+import {
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Tabs,
+  Typography,
+} from "@strapi/design-system";
 import React from "react";
 
 import {
@@ -42,10 +49,14 @@ export const DonationsTopHeader: React.FC<DonationsTopHeaderProps> = ({
             donors: allSummary.totalDonors,
           }
         )
-      : t("dashboard.total_gathered.single_currency", "Goal: {goal} • {donors} donors", {
-          goal: allSummary.goalBreakdown,
-          donors: allSummary.totalDonors,
-        });
+      : t(
+          "dashboard.total_gathered.single_currency",
+          "Goal: {goal} • {donors} donors",
+          {
+            goal: allSummary.goalBreakdown,
+            donors: allSummary.totalDonors,
+          }
+        );
 
   const toggleBtnLabel = showCreateForm
     ? t("dashboard.action.close_composer", "Close Campaign Composer")
@@ -63,7 +74,10 @@ export const DonationsTopHeader: React.FC<DonationsTopHeaderProps> = ({
         <Box style={{ flex: "1 1 480px" }}>
           <Flex alignItems="center" gap={3} wrap="wrap">
             <Typography variant="alpha" as="h1">
-              {t("dashboard.title", "Donations, Crowdfunding, Utility Bills & Impact Evidences")}
+              {t(
+                "dashboard.title",
+                "Donations, Crowdfunding, Utility Bills & Impact Evidences"
+              )}
             </Typography>
             <Badge active>
               {t("dashboard.badge.gathered", "Gathered: {amount}", {
@@ -95,7 +109,11 @@ export const DonationsTopHeader: React.FC<DonationsTopHeaderProps> = ({
               <Typography variant="sigma" textColor="success700">
                 {t("dashboard.total_gathered_label", "TOTAL GATHERED MONEY")}
               </Typography>
-              <Typography variant="beta" fontWeight="bold" textColor="success700">
+              <Typography
+                variant="beta"
+                fontWeight="bold"
+                textColor="success700"
+              >
                 {allSummary.raisedBreakdown}
               </Typography>
               <Typography variant="pi" textColor="neutral600">
@@ -104,11 +122,17 @@ export const DonationsTopHeader: React.FC<DonationsTopHeaderProps> = ({
             </Flex>
           </Box>
           <Flex gap={2} wrap="wrap">
-            <Button variant={showCreateForm ? "secondary" : "default"} onClick={onToggleCreateForm}>
+            <Button
+              variant={showCreateForm ? "secondary" : "default"}
+              onClick={onToggleCreateForm}
+            >
               {toggleBtnLabel}
             </Button>
             <Button variant="secondary" onClick={() => openInContentManager()}>
-              {t("dashboard.action.open_cm", "Open in Content Manager (Rich Text / Tiptap)")}
+              {t(
+                "dashboard.action.open_cm",
+                "Open in Content Manager (Rich Text / Tiptap)"
+              )}
             </Button>
             <Button variant="tertiary" onClick={onRefresh} loading={loading}>
               {t("dashboard.action.refresh", "Refresh")}
@@ -160,11 +184,15 @@ export const DonationsKpiGrid: React.FC<DonationsKpiGridProps> = ({
 }) => {
   const kpiGatheredDetail =
     allSummary.currenciesCount > 1
-      ? t("kpi.gathered.multi_currency", "≈ {consolidated} {currency} • {donors} donors", {
-          consolidated: allSummary.raisedInBase.toLocaleString(),
-          currency: allSummary.baseCurrency,
-          donors: allSummary.totalDonors,
-        })
+      ? t(
+          "kpi.gathered.multi_currency",
+          "≈ {consolidated} {currency} • {donors} donors",
+          {
+            consolidated: allSummary.raisedInBase.toLocaleString(),
+            currency: allSummary.baseCurrency,
+            donors: allSummary.totalDonors,
+          }
+        )
       : t("kpi.gathered.single_currency", "Of {goal} goal • {donors} donors", {
           goal: allSummary.goalBreakdown,
           donors: allSummary.totalDonors,
@@ -236,7 +264,10 @@ export const DonationsKpiGrid: React.FC<DonationsKpiGridProps> = ({
             <Typography variant="alpha">{kpiStats.totalEvidences}</Typography>
           </Box>
           <Typography variant="pi" textColor="neutral600">
-            {t("kpi.evidences.detail", "Paid bills, donated asset photos & delivery reports")}
+            {t(
+              "kpi.evidences.detail",
+              "Paid bills, donated asset photos & delivery reports"
+            )}
           </Typography>
         </Box>
 
@@ -248,16 +279,23 @@ export const DonationsKpiGrid: React.FC<DonationsKpiGridProps> = ({
             <Typography variant="alpha">{pledgesCount}</Typography>
           </Box>
           <Typography variant="pi" textColor="neutral600">
-            {t("kpi.pledges.detail", "{pending} pending • {certs} certificates issued", {
-              pending: kpiStats.pendingPledges,
-              certs: kpiStats.issuedCerts,
-            })}
+            {t(
+              "kpi.pledges.detail",
+              "{pending} pending • {certs} certificates issued",
+              {
+                pending: kpiStats.pendingPledges,
+                certs: kpiStats.issuedCerts,
+              }
+            )}
           </Typography>
         </Box>
       </Box>
 
       <Box marginBottom={5}>
-        <Tabs.Root value={activeTab} onValueChange={(val: string) => onSelectTab(val as ActiveTab)}>
+        <Tabs.Root
+          value={activeTab}
+          onValueChange={(val: string) => onSelectTab(val as ActiveTab)}
+        >
           <Tabs.List aria-label={t("dashboard.title", "Donations tabs")}>
             <Tabs.Trigger value="all">
               {t("tab.all", "All Campaigns & Bills")} ({campaignsCount})
@@ -266,7 +304,8 @@ export const DonationsKpiGrid: React.FC<DonationsKpiGridProps> = ({
               {t("tab.major_campaigns", "Major Campaigns")} ({majorCount})
             </Tabs.Trigger>
             <Tabs.Trigger value="utility_invoice">
-              {t("tab.utility_invoices", "Utility & Service Bills")} ({utilityCount})
+              {t("tab.utility_invoices", "Utility & Service Bills")} (
+              {utilityCount})
             </Tabs.Trigger>
             <Tabs.Trigger value="micro_need">
               {t("tab.micro_needs", "Micro-Needs & Gift Drives")} ({microCount})

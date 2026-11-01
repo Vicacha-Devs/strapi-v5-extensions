@@ -4,7 +4,11 @@ export type CampaignKind = "major_campaign" | "utility_invoice" | "micro_need";
 
 export type InvoiceStatus = "open" | "partially_funded" | "paid" | "overdue";
 
-export type PledgeStatus = "pending" | "verified" | "rejected" | "certificate_issued";
+export type PledgeStatus =
+  | "pending"
+  | "verified"
+  | "rejected"
+  | "certificate_issued";
 
 export type PaymentChannel =
   | "bank_transfer"

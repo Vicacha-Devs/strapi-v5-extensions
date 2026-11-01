@@ -101,7 +101,10 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
   });
 
   it("converts multi-currency donations to base currency and generates reference codes", () => {
-    const converted = convertToBaseCurrency(100, "USD", "COP", { COP: 1, USD: 4150 });
+    const converted = convertToBaseCurrency(100, "USD", "COP", {
+      COP: 1,
+      USD: 4150,
+    });
     assert.equal(converted, 415000);
 
     const refInv = generateDonationReferenceCode("INV");
@@ -122,9 +125,17 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
       },
     });
 
-    const sig = createHmac("sha256", secret).update(rawPayload, "utf8").digest("hex");
-    assert.equal(verifyWebhookSignature(rawPayload, `sha256=${sig}`, secret), true);
-    assert.equal(verifyWebhookSignature(rawPayload, "sha256=deadbeef", secret), false);
+    const sig = createHmac("sha256", secret)
+      .update(rawPayload, "utf8")
+      .digest("hex");
+    assert.equal(
+      verifyWebhookSignature(rawPayload, `sha256=${sig}`, secret),
+      true
+    );
+    assert.equal(
+      verifyWebhookSignature(rawPayload, "sha256=deadbeef", secret),
+      false
+    );
 
     const parsed = parseGatewayWebhookPayload(JSON.parse(rawPayload));
     assert.ok(parsed);
@@ -171,7 +182,9 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
         findMany: async ({ filters }: any = {}) => {
           const list = uid.includes("campaign") ? campaignsStore : pledgesStore;
           if (!filters) return list;
-          return list.filter((item) => Object.entries(filters).every(([k, v]) => item[k] === v));
+          return list.filter((item) =>
+            Object.entries(filters).every(([k, v]) => item[k] === v)
+          );
         },
         create: async ({ data }: any) => {
           const item = {
@@ -241,7 +254,10 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
 
     assert.ok(verifiedPledge);
     assert.equal(verifiedPledge.status, "certificate_issued");
-    assert.equal(verifiedPledge.certificateSerialNumber, `CERT-TAX-${createdPledge.referenceCode}`);
+    assert.equal(
+      verifiedPledge.certificateSerialNumber,
+      `CERT-TAX-${createdPledge.referenceCode}`
+    );
 
     const updatedInvoice = await servicesMap.campaign.findCampaignBySlug(
       "electricity-bill-feb-2026",
@@ -284,7 +300,9 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
           return item;
         },
         update: async ({ documentId, data }: any) => {
-          const idx = campaignsStore.findIndex((i) => i.documentId === documentId);
+          const idx = campaignsStore.findIndex(
+            (i) => i.documentId === documentId
+          );
           if (idx >= 0) {
             campaignsStore[idx] = { ...campaignsStore[idx], ...data };
             return campaignsStore[idx];
@@ -308,7 +326,12 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
       content: [
         {
           type: "paragraph",
-          content: [{ type: "text", text: "10 classroom computers donated and installed." }],
+          content: [
+            {
+              type: "text",
+              text: "10 classroom computers donated and installed.",
+            },
+          ],
         },
       ],
     };
@@ -317,7 +340,9 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
       "10 classroom computers donated and installed."
     );
     assert.equal(
-      extractRichTextPlainText("<p><strong>Paid utility bill</strong> receipt attached.</p>"),
+      extractRichTextPlainText(
+        "<p><strong>Paid utility bill</strong> receipt attached.</p>"
+      ),
       "Paid utility bill receipt attached."
     );
 
@@ -329,7 +354,8 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
       goalAmount: 15000000,
       raisedAmount: 9000000,
       currency: "COP",
-      description: "Equipping study labs with computers and delivering seasonal gift packages.",
+      description:
+        "Equipping study labs with computers and delivering seasonal gift packages.",
       body: "## Campaign Story\n\nSupporting student education and seasonal family gifts.",
     });
 
@@ -339,38 +365,48 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
     assert.equal(created.evidenceCount, 0);
 
     // 3. Attach photo evidence of donated computers
-    const withComputers = await servicesMap.campaign.addCampaignEvidence(created.documentId, {
-      id: "ev-computers-1",
-      title: "10 Donated Computers Installed in Study Lab",
-      evidenceType: "photo_gallery",
-      date: "2026-03-10",
-      amountSpent: 8500000,
-      mediaUrls: [
-        "https://example.org/uploads/donated-computers-1.jpg",
-        "https://example.org/uploads/donated-computers-2.jpg",
-      ],
-      body: "Delivered 10 desktop workstations for community students.",
-      appendToCampaignBody: true,
-    });
+    const withComputers = await servicesMap.campaign.addCampaignEvidence(
+      created.documentId,
+      {
+        id: "ev-computers-1",
+        title: "10 Donated Computers Installed in Study Lab",
+        evidenceType: "photo_gallery",
+        date: "2026-03-10",
+        amountSpent: 8500000,
+        mediaUrls: [
+          "https://example.org/uploads/donated-computers-1.jpg",
+          "https://example.org/uploads/donated-computers-2.jpg",
+        ],
+        body: "Delivered 10 desktop workstations for community students.",
+        appendToCampaignBody: true,
+      }
+    );
 
     assert.ok(withComputers);
     assert.equal(withComputers.evidenceCount, 1);
     assert.equal(withComputers.accountedAmount, 8500000);
     assert.equal(withComputers.evidences[0].mediaUrls.length, 2);
-    assert.match(withComputers.body, /10 Donated Computers Installed in Study Lab/);
+    assert.match(
+      withComputers.body,
+      /10 Donated Computers Installed in Study Lab/
+    );
 
     // 4. Attach Kurban & Ramadan gift distribution report + Paid service bill receipt
-    const withGifts = await servicesMap.campaign.addCampaignEvidence(created.documentId, {
-      id: "ev-kurban-ramadan-2",
-      title: "Kurban & Ramadan Gift Baskets Distribution + Paid Service Bill",
-      evidenceType: "delivery_report",
-      date: "2026-03-20",
-      amountSpent: 6500000,
-      documentUrl: "https://example.org/uploads/paid-bill-and-distribution-voucher.pdf",
-      mediaUrls: ["https://example.org/uploads/kurban-ramadan-gifts.jpg"],
-      body: "Distributed 120 Kurban and Ramadan food gift packages and settled logistics bill.",
-      markCampaignPaid: true,
-    });
+    const withGifts = await servicesMap.campaign.addCampaignEvidence(
+      created.documentId,
+      {
+        id: "ev-kurban-ramadan-2",
+        title: "Kurban & Ramadan Gift Baskets Distribution + Paid Service Bill",
+        evidenceType: "delivery_report",
+        date: "2026-03-20",
+        amountSpent: 6500000,
+        documentUrl:
+          "https://example.org/uploads/paid-bill-and-distribution-voucher.pdf",
+        mediaUrls: ["https://example.org/uploads/kurban-ramadan-gifts.jpg"],
+        body: "Distributed 120 Kurban and Ramadan food gift packages and settled logistics bill.",
+        markCampaignPaid: true,
+      }
+    );
 
     assert.ok(withGifts);
     assert.equal(withGifts.evidenceCount, 2);
@@ -389,7 +425,11 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
   });
 
   it("registers ISO 4217 currency and ISO 3166-1 country custom fields and orders configured currencies first", () => {
-    const registeredFields: Array<{ name: string; plugin: string; type: string }> = [];
+    const registeredFields: Array<{
+      name: string;
+      plugin: string;
+      type: string;
+    }> = [];
     registerPlugin({
       strapi: {
         customFields: {
@@ -408,8 +448,14 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
       ["donations.currency:string", "donations.country:string"]
     );
 
-    assert.ok(ISO_4217_CURRENCIES.some((c) => c.code === "COP" && c.flag === "🇨🇴"));
-    assert.ok(ISO_3166_COUNTRIES.some((c) => c.code === "CO" && c.defaultCurrency === "COP"));
+    assert.ok(
+      ISO_4217_CURRENCIES.some((c) => c.code === "COP" && c.flag === "🇨🇴")
+    );
+    assert.ok(
+      ISO_3166_COUNTRIES.some(
+        (c) => c.code === "CO" && c.defaultCurrency === "COP"
+      )
+    );
     assert.match(formatCurrencyOptionLabel("COP", "es"), /COP/);
     assert.match(formatCountryOptionLabel("CO", "es"), /CO/);
 
@@ -427,11 +473,17 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
     };
     const campaignSchema = {
       attributes: {
-        body: { type: "richtext" as string, customField: undefined as string | undefined },
+        body: {
+          type: "richtext" as string,
+          customField: undefined as string | undefined,
+        },
       },
       __schema__: {
         attributes: {
-          body: { type: "richtext" as string, customField: undefined as string | undefined },
+          body: {
+            type: "richtext" as string,
+            customField: undefined as string | undefined,
+          },
         },
       },
     };
@@ -470,7 +522,9 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
 
     const settingsSvc = settingsServiceFactory({ strapi: mockStrapi });
     const loaded = await settingsSvc.getSettings();
-    assert.deepEqual(loaded.availableRichTextCustomFields, ["plugin::tiptap-editor.RichText"]);
+    assert.deepEqual(loaded.availableRichTextCustomFields, [
+      "plugin::tiptap-editor.RichText",
+    ]);
 
     // Uninstalled plugin (ckeditor5) in storedSettings must NOT be applied to campaign schema
     await bootstrapPlugin({ strapi: mockStrapi });
@@ -479,7 +533,10 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
     // Installed plugin (tiptap-editor) IS applied to campaign schema
     storedSettings = { richTextCustomField: "plugin::tiptap-editor.RichText" };
     await bootstrapPlugin({ strapi: mockStrapi });
-    assert.equal(campaignSchema.attributes.body.customField, "plugin::tiptap-editor.RichText");
+    assert.equal(
+      campaignSchema.attributes.body.customField,
+      "plugin::tiptap-editor.RichText"
+    );
     assert.equal(
       campaignSchema.__schema__.attributes.body.customField,
       "plugin::tiptap-editor.RichText"
