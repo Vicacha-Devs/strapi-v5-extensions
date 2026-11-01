@@ -7,8 +7,7 @@ const nest = (
 ): Record<string, unknown> =>
   path
     .split(".")
-    .reverse()
-    .reduce(
+    .reduceRight(
       (acc, segment) => ({ [segment]: acc }),
       condition as Record<string, unknown>
     );
