@@ -5,7 +5,7 @@ import {
   Field,
   Checkbox,
   Box,
-  Typography
+  Typography,
 } from "@strapi/design-system";
 import React, { useState, useEffect } from "react";
 import { useIntl } from "react-intl";
@@ -114,7 +114,9 @@ const SitemapDefinitionModal: React.FC<SitemapDefinitionModalProps> = ({
                 defaultMessage: "e.g. articles or pages",
               })}
               value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setName(e.target.value)
+              }
             />
             <Field.Hint />
           </Field.Root>
@@ -153,7 +155,9 @@ const SitemapDefinitionModal: React.FC<SitemapDefinitionModalProps> = ({
           <Field.Root id="include_custom" style={{ marginBottom: 16 }}>
             <Checkbox
               checked={includeCustomUrls}
-              onCheckedChange={(checked: boolean) => setIncludeCustomUrls(checked === true)}
+              onCheckedChange={(checked: boolean) =>
+                setIncludeCustomUrls(checked === true)
+              }
             >
               {formatMessage({
                 id: getTrad("modal.sitemapDef.includeCustomUrls"),
@@ -164,10 +168,20 @@ const SitemapDefinitionModal: React.FC<SitemapDefinitionModalProps> = ({
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: getTrad("action.cancel"), defaultMessage: "Cancel" })}
+            {formatMessage({
+              id: getTrad("action.cancel"),
+              defaultMessage: "Cancel",
+            })}
           </Button>
-          <Button onClick={handleSave} variant="default" disabled={!isValidSlug}>
-            {formatMessage({ id: getTrad("action.save"), defaultMessage: "Save" })}
+          <Button
+            onClick={handleSave}
+            variant="default"
+            disabled={!isValidSlug}
+          >
+            {formatMessage({
+              id: getTrad("action.save"),
+              defaultMessage: "Save",
+            })}
           </Button>
         </Modal.Footer>
       </Modal.Content>

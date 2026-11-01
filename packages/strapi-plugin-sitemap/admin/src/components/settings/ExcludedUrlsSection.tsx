@@ -39,7 +39,13 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+    <Box
+      padding={6}
+      background="neutral0"
+      shadow="filterShadow"
+      hasRadius
+      marginBottom={6}
+    >
       <Typography variant="delta" tag="h2">
         {formatMessage({
           id: getTrad("settings.excludedUrls.title"),
@@ -80,7 +86,10 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
           onClick={onAddExcludedUrl}
           disabled={!newExcludedPath.trim()}
         >
-          {formatMessage({ id: getTrad("settings.excludedUrls.add"), defaultMessage: "Add" })}
+          {formatMessage({
+            id: getTrad("settings.excludedUrls.add"),
+            defaultMessage: "Add",
+          })}
         </Button>
       </Flex>
       {excludedUrls.length > 0 && (
@@ -89,7 +98,10 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
             <Tr>
               <Th>
                 <Typography variant="sigma">
-                  {formatMessage({ id: getTrad("table.id"), defaultMessage: "ID" })}
+                  {formatMessage({
+                    id: getTrad("table.id"),
+                    defaultMessage: "ID",
+                  })}
                 </Typography>
               </Th>
               <Th>
@@ -102,7 +114,10 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
               </Th>
               <Th>
                 <Typography variant="sigma">
-                  {formatMessage({ id: getTrad("table.actions"), defaultMessage: "Actions" })}
+                  {formatMessage({
+                    id: getTrad("table.actions"),
+                    defaultMessage: "Actions",
+                  })}
                 </Typography>
               </Th>
             </Tr>
@@ -122,7 +137,10 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
                     startIcon={<Trash />}
                     onClick={() => onDeleteExcludedUrl(index)}
                   >
-                    {formatMessage({ id: getTrad("action.delete"), defaultMessage: "Delete" })}
+                    {formatMessage({
+                      id: getTrad("action.delete"),
+                      defaultMessage: "Delete",
+                    })}
                   </Button>
                 </Td>
               </Tr>
@@ -137,7 +155,10 @@ export const ExcludedUrlsSection: React.FC<ExcludedUrlsSectionProps> = ({
           disabled={!isExcludedUrlsModified}
           variant={isExcludedUrlsModified ? "default" : "tertiary"}
         >
-          {formatMessage({ id: getTrad("settings.save"), defaultMessage: "Save" })}
+          {formatMessage({
+            id: getTrad("settings.save"),
+            defaultMessage: "Save",
+          })}
         </Button>
       </Box>
     </Box>

@@ -25,8 +25,9 @@ export interface CollectionTypeConfig {
 
 interface AdminContentTypeItem {
   uid: string;
-  info: {
-    singularName: string;
+  singularName?: string;
+  info?: {
+    singularName?: string;
   };
 }
 
@@ -48,7 +49,9 @@ const DEFAULT_CONFIG: CollectionTypeConfig = {
   populateLinkedModels: false,
 };
 
-const getInitialConfig = (existingData?: CollectionTypeConfig | null): CollectionTypeConfig => {
+const getInitialConfig = (
+  existingData?: CollectionTypeConfig | null
+): CollectionTypeConfig => {
   if (!existingData) {
     return DEFAULT_CONFIG;
   }
@@ -70,7 +73,9 @@ interface BooleanAndMediaFieldsSectionProps {
   mediaFields: string[];
 }
 
-const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> = ({
+const BooleanAndMediaFieldsSection: React.FC<
+  BooleanAndMediaFieldsSectionProps
+> = ({
   type,
   lastModified,
   setLastModified,
@@ -95,14 +100,19 @@ const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> 
         </Field.Label>
         <SingleSelect
           value={lastModified.toString()}
-          onChange={(value: string | number) => setLastModified(String(value) === "true")}
+          onChange={(value: string | number) =>
+            setLastModified(String(value) === "true")
+          }
           disabled={isTypeEmpty}
         >
           <SingleSelectOption value="false">
             {formatMessage({ id: getTrad("common.no"), defaultMessage: "No" })}
           </SingleSelectOption>
           <SingleSelectOption value="true">
-            {formatMessage({ id: getTrad("common.yes"), defaultMessage: "Yes" })}
+            {formatMessage({
+              id: getTrad("common.yes"),
+              defaultMessage: "Yes",
+            })}
           </SingleSelectOption>
         </SingleSelect>
       </Field.Root>
@@ -111,19 +121,25 @@ const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> 
         <Field.Label>
           {formatMessage({
             id: getTrad("modal.collectionType.populateLinkedModels"),
-            defaultMessage: "Populate linked models? (Only checks one level deep)",
+            defaultMessage:
+              "Populate linked models? (Only checks one level deep)",
           })}
         </Field.Label>
         <SingleSelect
           value={populateLinkedModels.toString()}
-          onChange={(value: string | number) => setPopulateLinkedModels(String(value) === "true")}
+          onChange={(value: string | number) =>
+            setPopulateLinkedModels(String(value) === "true")
+          }
           disabled={isTypeEmpty}
         >
           <SingleSelectOption value="false">
             {formatMessage({ id: getTrad("common.no"), defaultMessage: "No" })}
           </SingleSelectOption>
           <SingleSelectOption value="true">
-            {formatMessage({ id: getTrad("common.yes"), defaultMessage: "Yes" })}
+            {formatMessage({
+              id: getTrad("common.yes"),
+              defaultMessage: "Yes",
+            })}
           </SingleSelectOption>
         </SingleSelect>
       </Field.Root>
@@ -141,7 +157,10 @@ const BooleanAndMediaFieldsSection: React.FC<BooleanAndMediaFieldsSectionProps> 
           disabled={isThumbnailDisabled}
         >
           <SingleSelectOption value="">
-            {formatMessage({ id: getTrad("common.none"), defaultMessage: "None" })}
+            {formatMessage({
+              id: getTrad("common.none"),
+              defaultMessage: "None",
+            })}
           </SingleSelectOption>
           {mediaFields.map((field) => (
             <SingleSelectOption key={field} value={field}>
@@ -181,7 +200,9 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
   const [pattern, setPattern] = useState<string>(initial.pattern);
   const [priority, setPriority] = useState<number>(initial.priority);
   const [frequency, setFrequency] = useState<string>(initial.frequency);
-  const [lastModified, setLastModified] = useState<boolean>(initial.lastModified);
+  const [lastModified, setLastModified] = useState<boolean>(
+    initial.lastModified
+  );
   const [thumbnail, setThumbnail] = useState<string>(initial.thumbnail);
   const [populateLinkedModels, setPopulateLinkedModels] = useState<boolean>(
     Boolean(initial.populateLinkedModels)
@@ -190,13 +211,13 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
   useEffect(() => {
     const fetchCollectionTypes = async () => {
       try {
-        const response = await get<{ collectionTypes?: AdminContentTypeItem[] }>(
-          "/sitemap/admin-get-content-types"
-        );
+        const response = await get<{
+          collectionTypes?: AdminContentTypeItem[];
+        }>("/sitemap/content-types");
         const list = response?.data?.collectionTypes ?? [];
         const types = list
-          .filter((ct) => ct.uid.startsWith("api::"))
-          .map((ct) => ct.info.singularName);
+          .map((ct) => ct.singularName ?? ct.info?.singularName ?? "")
+          .filter((name): name is string => Boolean(name));
         setCollectionTypes(types);
       } catch (err) {
         console.error("Failed to fetch collection types:", err);
@@ -208,7 +229,7 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
   useEffect(() => {
     const fetchLocales = async () => {
       try {
-        const response = await get<{ locales?: string[] }>("/sitemap/admin-get-locales");
+        const response = await get<{ locales?: string[] }>("/sitemap/locales");
         setLocales(response?.data?.locales ?? []);
       } catch (err) {
         console.error("Failed to fetch locales:", err);
@@ -222,8 +243,11 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
 
     const fetchFields = async () => {
       try {
-        const response = await get<{ allowedFields?: string[]; mediaFields?: string[] }>(
-          `/sitemap/admin-allowed-fields?singularName=${type}&populateLinkedModels=${populateLinkedModels}`
+        const response = await get<{
+          allowedFields?: string[];
+          mediaFields?: string[];
+        }>(
+          `/sitemap/allowed-fields?singularName=${encodeURIComponent(type)}&populateLinkedModels=${populateLinkedModels}`
         );
         setFields(response?.data?.allowedFields ?? []);
         setMediaFields(response?.data?.mediaFields ?? []);
@@ -327,7 +351,8 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
             style={{ marginBottom: 16 }}
             hint={`${formatMessage({
               id: getTrad("modal.collectionType.patternHint"),
-              defaultMessage: "How will the URL formatted look like? Available fields:",
+              defaultMessage:
+                "How will the URL formatted look like? Available fields:",
             })} ${fields.map((field) => `[${field}]`).join(", ")}`}
           >
             <Field.Label>
@@ -339,7 +364,9 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
             <TextInput
               placeholder="/articles/[slug]"
               value={pattern}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPattern(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPattern(e.target.value)
+              }
               disabled={!type}
             />
             <Field.Hint />
@@ -354,7 +381,9 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
             </Field.Label>
             <SingleSelect
               value={priority.toString()}
-              onChange={(value: string | number) => setPriority(parseFloat(String(value)))}
+              onChange={(value: string | number) =>
+                setPriority(parseFloat(String(value)))
+              }
               disabled={!type}
             >
               {[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1].map((p) => (
@@ -377,7 +406,15 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
               onChange={(value: string | number) => setFrequency(String(value))}
               disabled={!type}
             >
-              {["always", "hourly", "daily", "weekly", "monthly", "yearly", "never"].map((freq) => (
+              {[
+                "always",
+                "hourly",
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly",
+                "never",
+              ].map((freq) => (
                 <SingleSelectOption key={freq} value={freq}>
                   {freq}
                 </SingleSelectOption>
@@ -398,10 +435,16 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
         </Modal.Body>
         <Modal.Footer>
           <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: getTrad("action.cancel"), defaultMessage: "Cancel" })}
+            {formatMessage({
+              id: getTrad("action.cancel"),
+              defaultMessage: "Cancel",
+            })}
           </Button>
           <Button onClick={handleSave} variant="default" disabled={!canSave}>
-            {formatMessage({ id: getTrad("action.save"), defaultMessage: "Save" })}
+            {formatMessage({
+              id: getTrad("action.save"),
+              defaultMessage: "Save",
+            })}
           </Button>
         </Modal.Footer>
       </Modal.Content>

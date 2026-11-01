@@ -42,7 +42,13 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+    <Box
+      padding={6}
+      background="neutral0"
+      shadow="filterShadow"
+      hasRadius
+      marginBottom={6}
+    >
       <Typography variant="delta" tag="h2">
         {formatMessage({
           id: getTrad("settings.index.title"),
@@ -53,14 +59,17 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
         <Typography variant="pi" textColor="neutral600">
           {formatMessage({
             id: getTrad("settings.index.description"),
-            defaultMessage: "Use a single sitemap or a sitemap index with multiple sitemaps",
+            defaultMessage:
+              "Use a single sitemap or a sitemap index with multiple sitemaps",
           })}
         </Typography>
       </Box>
-      <Box paddingBottom={4}>
+      <Box paddingBottom={2}>
         <Checkbox
           checked={useSitemapIndex}
-          onCheckedChange={(checked: boolean) => setUseSitemapIndex(checked === true)}
+          onCheckedChange={(checked: boolean) =>
+            setUseSitemapIndex(checked === true)
+          }
         >
           {formatMessage({
             id: getTrad("settings.index.checkbox"),
@@ -68,17 +77,56 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
           })}
         </Checkbox>
       </Box>
+      <Typography variant="epsilon" tag="p" textColor="neutral600">
+        {formatMessage(
+          {
+            id: getTrad("settings.index.checkboxHint"),
+            defaultMessage:
+              "When enabled, sitemap.xml becomes the index; each entry below generates sitemap-{name}.xml.",
+          },
+          { name: "{name}" }
+        )}
+      </Typography>
+      <Box
+        marginTop={3}
+        marginBottom={4}
+        padding={3}
+        style={{ borderRadius: 4, border: "1px solid #eaeaef" }}
+      >
+        <Typography variant="epsilon" tag="p" textColor="neutral600">
+          {formatMessage(
+            {
+              id: getTrad("settings.index.permissionLabel"),
+              defaultMessage:
+                "For public access to individual sitemaps (sitemap-{name}.xml), enable the permission:",
+            },
+            { name: "{name}" }
+          )}
+        </Typography>
+        <Typography
+          variant="epsilon"
+          tag="p"
+          textColor="neutral700"
+          marginTop={1}
+        >
+          <code
+            style={{
+              fontFamily: "monospace",
+              fontSize: "13px",
+              padding: "2px 6px",
+              borderRadius: 4,
+            }}
+          >
+            getSitemapBySlug
+          </code>{" "}
+          {formatMessage({
+            id: getTrad("settings.index.permissionPath"),
+            defaultMessage: "in Users & Permissions → Public → Sitemap",
+          })}
+        </Typography>
+      </Box>
       {useSitemapIndex && (
         <>
-          <Box paddingBottom={2}>
-            <Typography variant="pi" textColor="neutral600">
-              {formatMessage({
-                id: getTrad("settings.index.info"),
-                defaultMessage:
-                  "Each sitemap is available at /api/sitemap/sitemap-[name].xml. The index at /api/sitemap/sitemap.xml lists all of them.",
-              })}
-            </Typography>
-          </Box>
           <Table colCount={5} rowCount={sitemaps.length + 1}>
             <Thead>
               <Tr>
@@ -116,7 +164,10 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                 </Th>
                 <Th>
                   <Typography variant="sigma">
-                    {formatMessage({ id: getTrad("table.actions"), defaultMessage: "Actions" })}
+                    {formatMessage({
+                      id: getTrad("table.actions"),
+                      defaultMessage: "Actions",
+                    })}
                   </Typography>
                 </Th>
               </Tr>
@@ -146,8 +197,14 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                   <Td>
                     <Typography textColor="neutral800">
                       {def.includeCustomUrls
-                        ? formatMessage({ id: getTrad("common.yes"), defaultMessage: "Yes" })
-                        : formatMessage({ id: getTrad("common.no"), defaultMessage: "No" })}
+                        ? formatMessage({
+                            id: getTrad("common.yes"),
+                            defaultMessage: "Yes",
+                          })
+                        : formatMessage({
+                            id: getTrad("common.no"),
+                            defaultMessage: "No",
+                          })}
                     </Typography>
                   </Td>
                   <Td>
@@ -157,7 +214,10 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
                         startIcon={<Pencil />}
                         onClick={() => onEditSitemap(idx)}
                       >
-                        {formatMessage({ id: getTrad("action.edit"), defaultMessage: "Edit" })}
+                        {formatMessage({
+                          id: getTrad("action.edit"),
+                          defaultMessage: "Edit",
+                        })}
                       </Button>
                       <Button
                         variant="danger-light"
@@ -176,7 +236,11 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
             </Tbody>
           </Table>
           <Box paddingTop={4} paddingBottom={2}>
-            <Button startIcon={<Plus />} variant="secondary" onClick={onAddSitemap}>
+            <Button
+              startIcon={<Plus />}
+              variant="secondary"
+              onClick={onAddSitemap}
+            >
               {formatMessage({
                 id: getTrad("settings.index.add"),
                 defaultMessage: "Add sitemap",
@@ -192,7 +256,10 @@ export const SitemapIndexSection: React.FC<SitemapIndexSectionProps> = ({
           disabled={!isSitemapSettingsModified}
           variant={isSitemapSettingsModified ? "default" : "tertiary"}
         >
-          {formatMessage({ id: getTrad("settings.save"), defaultMessage: "Save" })}
+          {formatMessage({
+            id: getTrad("settings.save"),
+            defaultMessage: "Save",
+          })}
         </Button>
       </Box>
     </Box>
