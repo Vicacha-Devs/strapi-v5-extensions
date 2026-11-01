@@ -1,4 +1,7 @@
-export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
   en: {
     "content-manager.content-types.plugin::broadcasts.automation-rule.name.placeholder":
       "Enter name...",
@@ -34,7 +37,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Enter total trigger count...",
     "content-manager.content-types.plugin::broadcasts.automation-rule.documentId.placeholder":
       "Enter document id...",
-    "content-manager.content-types.plugin::broadcasts.campaign.title.placeholder": "Enter title...",
+    "content-manager.content-types.plugin::broadcasts.campaign.title.placeholder":
+      "Enter title...",
     "content-manager.content-types.plugin::broadcasts.campaign.slug.placeholder":
       "auto-generated-url-slug",
     "content-manager.content-types.plugin::broadcasts.campaign.topic.placeholder":
@@ -57,8 +61,10 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Enter html message content...",
     "content-manager.content-types.plugin::broadcasts.campaign.ctaLabel.placeholder":
       "Enter call-to-action button label...",
-    "content-manager.content-types.plugin::broadcasts.campaign.ctaUrl.placeholder": "https://...",
-    "content-manager.content-types.plugin::broadcasts.campaign.mediaUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::broadcasts.campaign.ctaUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::broadcasts.campaign.mediaUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::broadcasts.campaign.emailTemplateRef.placeholder":
       "Enter email designer template reference...",
     "content-manager.content-types.plugin::broadcasts.campaign.whatsappTemplateName.placeholder":
@@ -159,8 +165,10 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Ingresa contenido html del mensaje...",
     "content-manager.content-types.plugin::broadcasts.campaign.ctaLabel.placeholder":
       "Ingresa texto del botón de acción (cta)...",
-    "content-manager.content-types.plugin::broadcasts.campaign.ctaUrl.placeholder": "https://...",
-    "content-manager.content-types.plugin::broadcasts.campaign.mediaUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::broadcasts.campaign.ctaUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::broadcasts.campaign.mediaUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::broadcasts.campaign.emailTemplateRef.placeholder":
       "Ingresa referencia de plantilla de correo...",
     "content-manager.content-types.plugin::broadcasts.campaign.whatsappTemplateName.placeholder":
@@ -261,8 +269,10 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "أدخل محتوى الرسالة بصيغة HTML...",
     "content-manager.content-types.plugin::broadcasts.campaign.ctaLabel.placeholder":
       "أدخل نص زر الإجراء (CTA)...",
-    "content-manager.content-types.plugin::broadcasts.campaign.ctaUrl.placeholder": "https://...",
-    "content-manager.content-types.plugin::broadcasts.campaign.mediaUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::broadcasts.campaign.ctaUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::broadcasts.campaign.mediaUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::broadcasts.campaign.emailTemplateRef.placeholder":
       "أدخل مرجع قالب البريد الإلكتروني...",
     "content-manager.content-types.plugin::broadcasts.campaign.whatsappTemplateName.placeholder":
@@ -363,8 +373,10 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "HTML Mesaj İçeriği girin...",
     "content-manager.content-types.plugin::broadcasts.campaign.ctaLabel.placeholder":
       "Eylem Çağrısı (CTA) Düğme Metni girin...",
-    "content-manager.content-types.plugin::broadcasts.campaign.ctaUrl.placeholder": "https://...",
-    "content-manager.content-types.plugin::broadcasts.campaign.mediaUrl.placeholder": "https://...",
+    "content-manager.content-types.plugin::broadcasts.campaign.ctaUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::broadcasts.campaign.mediaUrl.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::broadcasts.campaign.emailTemplateRef.placeholder":
       "E-posta Şablonu Referansı girin...",
     "content-manager.content-types.plugin::broadcasts.campaign.whatsappTemplateName.placeholder":

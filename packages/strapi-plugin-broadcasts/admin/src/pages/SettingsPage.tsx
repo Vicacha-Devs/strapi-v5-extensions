@@ -14,7 +14,10 @@ import { useFetchClient } from "@strapi/strapi/admin";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
-import { DEFAULT_BROADCAST_SETTINGS, PLUGIN_ID } from "../../../shared/constants";
+import {
+  DEFAULT_BROADCAST_SETTINGS,
+  PLUGIN_ID,
+} from "../../../shared/constants";
 import type { BroadcastSettings } from "../../../shared/types";
 import { BridgesSandboxTab } from "../components/BridgesSandboxTab";
 import type { TranslateFn } from "../components/DeliveryLedgerSection";
@@ -35,8 +38,20 @@ const TelegramTransportTab: React.FC<WhatsAppTransportTabProps> = ({
   setSettings,
   t,
 }) => (
-  <Box padding={6} background="neutral0" hasRadius shadow="filterShadow" style={cardBorderStyle}>
-    <Flex justifyContent="space-between" alignItems="center" paddingBottom={2} wrap="wrap" gap={2}>
+  <Box
+    padding={6}
+    background="neutral0"
+    hasRadius
+    shadow="filterShadow"
+    style={cardBorderStyle}
+  >
+    <Flex
+      justifyContent="space-between"
+      alignItems="center"
+      paddingBottom={2}
+      wrap="wrap"
+      gap={2}
+    >
       <Box>
         <Typography variant="beta" tag="h2">
           {t(
@@ -135,13 +150,17 @@ export const SettingsPage: React.FC = () => {
   const t: TranslateFn = (id: string, defaultMessage: string) =>
     formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
   const { get, put } = useFetchClient();
-  const [settings, setSettings] = React.useState<BroadcastSettings>(DEFAULT_BROADCAST_SETTINGS);
+  const [settings, setSettings] = React.useState<BroadcastSettings>(
+    DEFAULT_BROADCAST_SETTINGS
+  );
   const [savedNotice, setSavedNotice] = React.useState<string>("");
 
   React.useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await get<{ data?: Partial<BroadcastSettings> }>(`/${PLUGIN_ID}/settings`);
+        const res = await get<{ data?: Partial<BroadcastSettings> }>(
+          `/${PLUGIN_ID}/settings`
+        );
         if (res?.data?.data) {
           setSettings({
             ...DEFAULT_BROADCAST_SETTINGS,
@@ -187,7 +206,9 @@ export const SettingsPage: React.FC = () => {
   const enabledText = t("common.enabled", "Enabled");
   const disabledText = t("common.disabled", "Disabled");
   const tgStatus = settings.telegramEnabled ? enabledText : disabledText;
-  const waStatus = settings.whatsappEnabled ? settings.whatsappDriver : disabledText;
+  const waStatus = settings.whatsappEnabled
+    ? settings.whatsappDriver
+    : disabledText;
   const modeStatus = settings.dryRun
     ? t("settings.ui.dry_run_sandbox", "Dry-Run Sandbox")
     : t("settings.ui.live_dispatch", "Live Dispatch");
@@ -237,7 +258,9 @@ export const SettingsPage: React.FC = () => {
             <Button variant="tertiary" onClick={handleResetDefaults}>
               {t("settings.ui.reset_to_defaults", "Reset to Defaults")}
             </Button>
-            <Button onClick={handleSave}>{t("settings.ui.save_settings", "Save Settings")}</Button>
+            <Button onClick={handleSave}>
+              {t("settings.ui.save_settings", "Save Settings")}
+            </Button>
           </Flex>
         </Flex>
 
@@ -271,19 +294,35 @@ export const SettingsPage: React.FC = () => {
           </Tabs.List>
 
           <Tabs.Content value="organization">
-            <OrganizationEmailTab settings={settings} setSettings={setSettings} t={t} />
+            <OrganizationEmailTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
           </Tabs.Content>
 
           <Tabs.Content value="telegram">
-            <TelegramTransportTab settings={settings} setSettings={setSettings} t={t} />
+            <TelegramTransportTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
           </Tabs.Content>
 
           <Tabs.Content value="whatsapp">
-            <WhatsAppTransportTab settings={settings} setSettings={setSettings} t={t} />
+            <WhatsAppTransportTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
           </Tabs.Content>
 
           <Tabs.Content value="bridges">
-            <BridgesSandboxTab settings={settings} setSettings={setSettings} t={t} />
+            <BridgesSandboxTab
+              settings={settings}
+              setSettings={setSettings}
+              t={t}
+            />
           </Tabs.Content>
         </Tabs.Root>
       </Box>

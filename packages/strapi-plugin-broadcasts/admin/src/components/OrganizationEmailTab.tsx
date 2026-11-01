@@ -12,7 +12,10 @@ import {
 } from "@strapi/design-system";
 import * as React from "react";
 
-import type { BroadcastChannel, BroadcastSettings } from "../../../shared/types";
+import type {
+  BroadcastChannel,
+  BroadcastSettings,
+} from "../../../shared/types";
 
 export const LOCALE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "es", label: "es — Español (Spanish)" },
@@ -29,20 +32,48 @@ export const LOCALE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: "zh", label: "zh — 中文 (Chinese)" },
 ];
 
-export const BROADCAST_TOPIC_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "announcements", label: "announcements — General Mosque Announcements" },
-  { value: "events", label: "events — Community Events & Conferences" },
-  { value: "courses", label: "courses — Arabic, Quran & Islamic Studies Courses" },
-  { value: "ramadan_eid", label: "ramadan_eid — Ramadan, Suhoor/Iftar & Eid Bulletins" },
-  { value: "urgent_janazah", label: "urgent_janazah — Urgent Janazah & Funeral Alerts" },
-  { value: "newsletter", label: "newsletter — Weekly Jumu'ah & Community Newsletter" },
-  { value: "khutbahs", label: "khutbahs — Friday Khutbah Summaries & Audio" },
-  { value: "charity_campaigns", label: "charity_campaigns — Zakat & Relief Campaigns" },
-  { value: "youth_programs", label: "youth_programs — Youth, Sisters & Family Programs" },
-  { value: "new_muslims", label: "new_muslims — New Muslim Circle & Mentorship" },
-];
+export const BROADCAST_TOPIC_OPTIONS: Array<{ value: string; label: string }> =
+  [
+    {
+      value: "announcements",
+      label: "announcements — General Mosque Announcements",
+    },
+    { value: "events", label: "events — Community Events & Conferences" },
+    {
+      value: "courses",
+      label: "courses — Arabic, Quran & Islamic Studies Courses",
+    },
+    {
+      value: "ramadan_eid",
+      label: "ramadan_eid — Ramadan, Suhoor/Iftar & Eid Bulletins",
+    },
+    {
+      value: "urgent_janazah",
+      label: "urgent_janazah — Urgent Janazah & Funeral Alerts",
+    },
+    {
+      value: "newsletter",
+      label: "newsletter — Weekly Jumu'ah & Community Newsletter",
+    },
+    { value: "khutbahs", label: "khutbahs — Friday Khutbah Summaries & Audio" },
+    {
+      value: "charity_campaigns",
+      label: "charity_campaigns — Zakat & Relief Campaigns",
+    },
+    {
+      value: "youth_programs",
+      label: "youth_programs — Youth, Sisters & Family Programs",
+    },
+    {
+      value: "new_muslims",
+      label: "new_muslims — New Muslim Circle & Mentorship",
+    },
+  ];
 
-export const BROADCAST_CHANNEL_OPTIONS: Array<{ value: BroadcastChannel; label: string }> = [
+export const BROADCAST_CHANNEL_OPTIONS: Array<{
+  value: BroadcastChannel;
+  label: string;
+}> = [
   { value: "email", label: "email — Email Newsletter & Bulletins" },
   { value: "telegram", label: "telegram — Telegram Bot & Forum Topics" },
   { value: "whatsapp", label: "whatsapp — WhatsApp Cloud API / Gateway" },
@@ -67,7 +98,9 @@ const orgEmailCardBorderStyle: React.CSSProperties = {
 
 export interface OrganizationEmailTabProps {
   settings: BroadcastSettings;
-  setSettings: (next: BroadcastSettings | ((prev: BroadcastSettings) => BroadcastSettings)) => void;
+  setSettings: (
+    next: BroadcastSettings | ((prev: BroadcastSettings) => BroadcastSettings)
+  ) => void;
   t: (id: string, defaultMessage: string) => string;
 }
 
@@ -76,8 +109,14 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
   setSettings,
   t,
 }) => {
-  const localeOpts = mergeSelectOptions(LOCALE_OPTIONS, settings.supportedLocales);
-  const topicOpts = mergeSelectOptions(BROADCAST_TOPIC_OPTIONS, settings.availableTopics);
+  const localeOpts = mergeSelectOptions(
+    LOCALE_OPTIONS,
+    settings.supportedLocales
+  );
+  const topicOpts = mergeSelectOptions(
+    BROADCAST_TOPIC_OPTIONS,
+    settings.availableTopics
+  );
 
   return (
     <Box
@@ -129,7 +168,9 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
             "Injected into broadcast templates via the {{organizationName}} variable."
           )}
         >
-          <Field.Label>{t("field.organization_name", "Organization Name")}</Field.Label>
+          <Field.Label>
+            {t("field.organization_name", "Organization Name")}
+          </Field.Label>
           <TextInput
             name="organizationName"
             placeholder={t(
@@ -151,7 +192,9 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
             "Base URL used for CTA links, 1-click unsubscribe links, and {{siteBaseUrl}} placeholders."
           )}
         >
-          <Field.Label>{t("field.public_site_base_url", "Public Site Base URL")}</Field.Label>
+          <Field.Label>
+            {t("field.public_site_base_url", "Public Site Base URL")}
+          </Field.Label>
           <TextInput
             name="siteBaseUrl"
             placeholder={t(
@@ -174,7 +217,10 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
           )}
         >
           <Field.Label>
-            {t("field.email_sender_from_address", "Email Sender (From Address)")}
+            {t(
+              "field.email_sender_from_address",
+              "Email Sender (From Address)"
+            )}
           </Field.Label>
           <TextInput
             name="emailFromAddress"
@@ -197,7 +243,9 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
             "Reply-to inbox where community members can respond to email broadcasts."
           )}
         >
-          <Field.Label>{t("field.email_reply_to_address", "Email Reply-To Address")}</Field.Label>
+          <Field.Label>
+            {t("field.email_reply_to_address", "Email Reply-To Address")}
+          </Field.Label>
           <TextInput
             name="emailReplyToAddress"
             placeholder={t(
@@ -223,7 +271,10 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
             {t("field.default_broadcast_locale", "Default Broadcast Locale")}
           </Field.Label>
           <SingleSelect
-            placeholder={t("placeholder.select_default_locale", "Select default locale")}
+            placeholder={t(
+              "placeholder.select_default_locale",
+              "Select default locale"
+            )}
             value={settings.defaultLocale || "es"}
             onChange={(val: string | number) =>
               setSettings({ ...settings, defaultLocale: String(val) })
@@ -245,11 +296,16 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
             "Languages enabled for localized campaign subject/body templates."
           )}
         >
-          <Field.Label>{t("field.supported_locales", "Supported Locales")}</Field.Label>
+          <Field.Label>
+            {t("field.supported_locales", "Supported Locales")}
+          </Field.Label>
           <MultiSelect
             name="supportedLocales"
             withTags
-            placeholder={t("placeholder.select_supported_locales", "Select supported locales...")}
+            placeholder={t(
+              "placeholder.select_supported_locales",
+              "Select supported locales..."
+            )}
             value={settings.supportedLocales || ["es", "en", "ar", "tr"]}
             onChange={(nextValues: string[]) =>
               setSettings({
@@ -295,7 +351,8 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
               onChange={(nextValues: string[]) =>
                 setSettings({
                   ...settings,
-                  availableTopics: nextValues.length > 0 ? nextValues : ["announcements"],
+                  availableTopics:
+                    nextValues.length > 0 ? nextValues : ["announcements"],
                 })
               }
               onClear={() =>

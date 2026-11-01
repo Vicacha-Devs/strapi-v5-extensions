@@ -14,7 +14,10 @@ import {
 import * as React from "react";
 
 import { AUTOMATION_RULE_UID } from "../../../shared/constants";
-import type { AutomationRuleRecord, DeliveryLogRecord } from "../../../shared/types";
+import type {
+  AutomationRuleRecord,
+  DeliveryLogRecord,
+} from "../../../shared/types";
 
 export type TranslateFn = (id: string, defaultMessage: string) => string;
 
@@ -23,7 +26,10 @@ export interface DeliveryLedgerSectionProps {
   logs: DeliveryLogRecord[];
 }
 
-export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({ t, logs }) => (
+export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({
+  t,
+  logs,
+}) => (
   <Box paddingTop={6}>
     <Box
       padding={4}
@@ -33,7 +39,10 @@ export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({ t,
       style={{ border: "1px solid rgba(128, 128, 128, 0.18)" }}
     >
       <Typography variant="delta" tag="h2" fontWeight="bold">
-        {t("page.ui.what_is_the_delivery_ledger", "What is the Delivery Ledger?")}
+        {t(
+          "page.ui.what_is_the_delivery_ledger",
+          "What is the Delivery Ledger?"
+        )}
       </Typography>
       <Box paddingTop={1}>
         <Typography variant="omega" textColor="neutral600">
@@ -49,7 +58,9 @@ export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({ t,
       <Thead>
         <Tr>
           <Th>
-            <Typography variant="sigma">{t("page.ui.campaign", "Campaign")}</Typography>
+            <Typography variant="sigma">
+              {t("page.ui.campaign", "Campaign")}
+            </Typography>
           </Th>
           <Th>
             <Typography variant="sigma">
@@ -62,13 +73,19 @@ export const DeliveryLedgerSection: React.FC<DeliveryLedgerSectionProps> = ({ t,
             </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("page.ui.locale", "Locale")}</Typography>
+            <Typography variant="sigma">
+              {t("page.ui.locale", "Locale")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("page.ui.status", "Status")}</Typography>
+            <Typography variant="sigma">
+              {t("page.ui.status", "Status")}
+            </Typography>
           </Th>
           <Th>
-            <Typography variant="sigma">{t("page.ui.sent_at", "Sent At")}</Typography>
+            <Typography variant="sigma">
+              {t("page.ui.sent_at", "Sent At")}
+            </Typography>
           </Th>
         </Tr>
       </Thead>
@@ -136,7 +153,9 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
     <Thead>
       <Tr>
         <Th>
-          <Typography variant="sigma">{t("page.ui.rule_slug", "Rule Slug")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.rule_slug", "Rule Slug")}
+          </Typography>
         </Th>
         <Th>
           <Typography variant="sigma">
@@ -147,16 +166,24 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
           <Typography variant="sigma">{t("page.ui.topic", "Topic")}</Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t("page.ui.channels", "Channels")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.channels", "Channels")}
+          </Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t("page.ui.trigger_count", "Trigger Count")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.trigger_count", "Trigger Count")}
+          </Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t("page.ui.status", "Status")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.status", "Status")}
+          </Typography>
         </Th>
         <Th>
-          <Typography variant="sigma">{t("page.ui.actions", "Actions")}</Typography>
+          <Typography variant="sigma">
+            {t("page.ui.actions", "Actions")}
+          </Typography>
         </Th>
       </Tr>
     </Thead>
@@ -185,7 +212,9 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
           </Td>
           <Td>
             <Badge active={rule.active}>
-              {rule.active ? t("common.active", "active") : t("common.paused", "paused")}
+              {rule.active
+                ? t("common.active", "active")
+                : t("common.paused", "paused")}
             </Badge>
           </Td>
           <Td>
@@ -193,8 +222,14 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
               <Button variant="tertiary" size="S" onClick={() => onEdit(rule)}>
                 {t("common.edit", "Edit")}
               </Button>
-              <Button variant="secondary" size="S" onClick={() => onToggleActive(rule)}>
-                {rule.active ? t("common.pause", "Pause") : t("common.activate", "Activate")}
+              <Button
+                variant="secondary"
+                size="S"
+                onClick={() => onToggleActive(rule)}
+              >
+                {rule.active
+                  ? t("common.pause", "Pause")
+                  : t("common.activate", "Activate")}
               </Button>
               {rule.documentId && (
                 <Button

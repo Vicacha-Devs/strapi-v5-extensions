@@ -4,9 +4,19 @@ export type BroadcastChannel = "email" | "telegram" | "whatsapp";
 
 export type WhatsAppDriver = "meta-cloud" | "openwa" | "evolution";
 
-export type CampaignStatus = "draft" | "scheduled" | "sending" | "sent" | "failed" | "cancelled";
+export type CampaignStatus =
+  | "draft"
+  | "scheduled"
+  | "sending"
+  | "sent"
+  | "failed"
+  | "cancelled";
 
-export type DeliveryStatus = "sent" | "simulated" | "skipped_duplicate" | "failed";
+export type DeliveryStatus =
+  | "sent"
+  | "simulated"
+  | "skipped_duplicate"
+  | "failed";
 
 export type BroadcastPriority = "low" | "normal" | "high" | "urgent";
 
@@ -158,9 +168,15 @@ export interface BroadcastSettings {
   whatsappTopicGroupMap?: Record<string, string | string[]>;
   allowLocalhostGateways?: boolean;
   publicChannelLinks: PublicChannelLink[];
-  presetCampaigns?: Array<Partial<CampaignRecord> & { slug: string; title: string }>;
+  presetCampaigns?: Array<
+    Partial<CampaignRecord> & { slug: string; title: string }
+  >;
   presetAutomationRules?: Array<
-    Partial<AutomationRuleRecord> & { slug: string; name: string; eventName: string }
+    Partial<AutomationRuleRecord> & {
+      slug: string;
+      name: string;
+      eventName: string;
+    }
   >;
 }
 

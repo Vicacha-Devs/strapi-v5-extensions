@@ -11,7 +11,10 @@ const HTML_ESCAPE_MAP: Record<string, string> = {
 };
 
 export function escapeHtml(raw: string): string {
-  return String(raw).replace(/[&<>"']/g, (char) => HTML_ESCAPE_MAP[char] || char);
+  return String(raw).replace(
+    /[&<>"']/g,
+    (char) => HTML_ESCAPE_MAP[char] || char
+  );
 }
 
 export function interpolateBroadcastTemplate(
@@ -21,14 +24,17 @@ export function interpolateBroadcastTemplate(
 ): string {
   if (!template) return "";
   const shouldEscape = Boolean(options.escapeHtmlValues);
-  return template.replace(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g, (_match, key: string) => {
-    const rawValue = variables[key];
-    if (rawValue === undefined || rawValue === null) {
-      return "";
+  return template.replace(
+    /\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g,
+    (_match, key: string) => {
+      const rawValue = variables[key];
+      if (rawValue === undefined || rawValue === null) {
+        return "";
+      }
+      const strValue = String(rawValue);
+      return shouldEscape ? escapeHtml(strValue) : strValue;
     }
-    const strValue = String(rawValue);
-    return shouldEscape ? escapeHtml(strValue) : strValue;
-  });
+  );
 }
 
 export function maskEmail(email: string): string {
@@ -53,7 +59,9 @@ export function maskPhone(phone: string): string {
   if (normalized.length <= 4) {
     return "***";
   }
-  const prefix = normalized.startsWith("+") ? normalized.slice(0, 3) : normalized.slice(0, 2);
+  const prefix = normalized.startsWith("+")
+    ? normalized.slice(0, 3)
+    : normalized.slice(0, 2);
   const suffix = normalized.slice(-4);
   return `${prefix}***${suffix}`;
 }
@@ -140,7 +148,10 @@ export function maskRecipientIdentifier(identifier: string): string {
   return maskPhone(trimmed);
 }
 
-export function normalizeE164Phone(phone: string, defaultCountryCode = "57"): string {
+export function normalizeE164Phone(
+  phone: string,
+  defaultCountryCode = "57"
+): string {
   const raw = String(phone || "").trim();
   if (!raw) return "";
   if (isWhatsAppGroupOrChannelJid(raw)) {

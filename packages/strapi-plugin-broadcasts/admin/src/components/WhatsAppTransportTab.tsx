@@ -13,17 +13,18 @@ import * as React from "react";
 import type { BroadcastSettings, WhatsAppDriver } from "../../../shared/types";
 import type { TranslateFn } from "./DeliveryLedgerSection";
 
-const WHATSAPP_DRIVER_OPTIONS: Array<{ value: WhatsAppDriver; label: string }> = [
-  {
-    value: "meta-cloud",
-    label: "Meta WhatsApp Cloud API (Official WABA — meta-cloud)",
-  },
-  {
-    value: "evolution",
-    label: "Evolution API v2 Self-Hosted Gateway (evolution)",
-  },
-  { value: "openwa", label: "OpenWA Self-Hosted Gateway (openwa)" },
-];
+const WHATSAPP_DRIVER_OPTIONS: Array<{ value: WhatsAppDriver; label: string }> =
+  [
+    {
+      value: "meta-cloud",
+      label: "Meta WhatsApp Cloud API (Official WABA — meta-cloud)",
+    },
+    {
+      value: "evolution",
+      label: "Evolution API v2 Self-Hosted Gateway (evolution)",
+    },
+    { value: "openwa", label: "OpenWA Self-Hosted Gateway (openwa)" },
+  ];
 
 const cardBorderStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.22)",
@@ -40,7 +41,9 @@ function parseCsvList(raw: string): string[] {
 
 export interface WhatsAppTransportTabProps {
   settings: BroadcastSettings;
-  setSettings: (next: BroadcastSettings | ((prev: BroadcastSettings) => BroadcastSettings)) => void;
+  setSettings: (
+    next: BroadcastSettings | ((prev: BroadcastSettings) => BroadcastSettings)
+  ) => void;
   t: TranslateFn;
 }
 
@@ -49,8 +52,20 @@ export const WhatsAppTransportTab: React.FC<WhatsAppTransportTabProps> = ({
   setSettings,
   t,
 }) => (
-  <Box padding={6} background="neutral0" hasRadius shadow="filterShadow" style={cardBorderStyle}>
-    <Flex justifyContent="space-between" alignItems="center" paddingBottom={2} wrap="wrap" gap={2}>
+  <Box
+    padding={6}
+    background="neutral0"
+    hasRadius
+    shadow="filterShadow"
+    style={cardBorderStyle}
+  >
+    <Flex
+      justifyContent="space-between"
+      alignItems="center"
+      paddingBottom={2}
+      wrap="wrap"
+      gap={2}
+    >
       <Box>
         <Typography variant="beta" tag="h2">
           {t(
@@ -94,7 +109,10 @@ export const WhatsAppTransportTab: React.FC<WhatsAppTransportTabProps> = ({
           {t("field.whatsapp_transport_driver", "WhatsApp Transport Driver")}
         </Field.Label>
         <SingleSelect
-          placeholder={t("placeholder.select_whatsapp_driver", "Select WhatsApp driver")}
+          placeholder={t(
+            "placeholder.select_whatsapp_driver",
+            "Select WhatsApp driver"
+          )}
           value={settings.whatsappDriver || "meta-cloud"}
           onChange={(val: string | number) =>
             setSettings({
@@ -124,7 +142,10 @@ export const WhatsAppTransportTab: React.FC<WhatsAppTransportTabProps> = ({
         </Field.Label>
         <TextInput
           name="whatsappPhoneNumberId"
-          placeholder={t("placeholder.e_g_109876543210123", "e.g., 109876543210123")}
+          placeholder={t(
+            "placeholder.e_g_109876543210123",
+            "e.g., 109876543210123"
+          )}
           value={settings.whatsappPhoneNumberId || ""}
           onChange={(e: { target: { value: string } }) =>
             setSettings({
@@ -152,7 +173,10 @@ export const WhatsAppTransportTab: React.FC<WhatsAppTransportTabProps> = ({
         <TextInput
           name="whatsappAccessToken"
           type="password"
-          placeholder={t("placeholder.e_g_eaagm0px4zcpsba", "e.g., EAAGm0PX4ZCpsBA...")}
+          placeholder={t(
+            "placeholder.e_g_eaagm0px4zcpsba",
+            "e.g., EAAGm0PX4ZCpsBA..."
+          )}
           value={settings.whatsappAccessToken || ""}
           onChange={(e: { target: { value: string } }) =>
             setSettings({
@@ -199,7 +223,10 @@ export const WhatsAppTransportTab: React.FC<WhatsAppTransportTabProps> = ({
         )}
       >
         <Field.Label>
-          {t("field.gateway_instance_session_name", "Gateway Instance / Session Name")}
+          {t(
+            "field.gateway_instance_session_name",
+            "Gateway Instance / Session Name"
+          )}
         </Field.Label>
         <TextInput
           name="whatsappGatewaySession"
@@ -226,12 +253,18 @@ export const WhatsAppTransportTab: React.FC<WhatsAppTransportTabProps> = ({
         )}
       >
         <Field.Label>
-          {t("field.gateway_api_key_evolution_openwa", "Gateway API Key (Evolution / OpenWA)")}
+          {t(
+            "field.gateway_api_key_evolution_openwa",
+            "Gateway API Key (Evolution / OpenWA)"
+          )}
         </Field.Label>
         <TextInput
           name="whatsappGatewayApiKey"
           type="password"
-          placeholder={t("placeholder.e_g_evo_live_key", "e.g., evo_live_key_...")}
+          placeholder={t(
+            "placeholder.e_g_evo_live_key",
+            "e.g., evo_live_key_..."
+          )}
           value={settings.whatsappGatewayApiKey || ""}
           onChange={(e: { target: { value: string } }) =>
             setSettings({

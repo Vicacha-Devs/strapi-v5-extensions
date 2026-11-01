@@ -18,7 +18,10 @@ function maskSecret(val?: string): string {
   return MASKED_SECRET;
 }
 
-function resolveSecretValue(incoming: string | undefined, current: string | undefined): string {
+function resolveSecretValue(
+  incoming: string | undefined,
+  current: string | undefined
+): string {
   if (incoming === undefined || incoming === MASKED_SECRET) {
     return current ?? "";
   }
@@ -30,7 +33,9 @@ function resolveSecondaryCalendars(
   fallback: CalendarSystemId[]
 ): CalendarSystemId[] {
   if (!Array.isArray(incoming)) return fallback;
-  return incoming.filter((cal): cal is CalendarSystemId => isSupportedCalendar(cal));
+  return incoming.filter((cal): cal is CalendarSystemId =>
+    isSupportedCalendar(cal)
+  );
 }
 
 const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -42,9 +47,14 @@ const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   getConfigDefaults(): BroadcastSettings {
-    const rawConfig = strapi.config.get<Partial<BroadcastSettings>>(`plugin::${PLUGIN_ID}`, {});
+    const rawConfig = strapi.config.get<Partial<BroadcastSettings>>(
+      `plugin::${PLUGIN_ID}`,
+      {}
+    );
 
-    const primaryCalendar: CalendarSystemId = isSupportedCalendar(rawConfig.primaryCalendar)
+    const primaryCalendar: CalendarSystemId = isSupportedCalendar(
+      rawConfig.primaryCalendar
+    )
       ? rawConfig.primaryCalendar
       : DEFAULT_BROADCAST_SETTINGS.primaryCalendar;
 
@@ -91,12 +101,16 @@ const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => ({
     };
   },
 
-  async updateSettings(partial: Partial<BroadcastSettings>): Promise<BroadcastSettings> {
+  async updateSettings(
+    partial: Partial<BroadcastSettings>
+  ): Promise<BroadcastSettings> {
     const current = await this.getSettings();
 
     if (partial.whatsappGatewayUrl) {
       const check = validateGatewayUrl(partial.whatsappGatewayUrl, {
-        allowLocalhost: Boolean(partial.allowLocalhostGateways ?? current.allowLocalhostGateways),
+        allowLocalhost: Boolean(
+          partial.allowLocalhostGateways ?? current.allowLocalhostGateways
+        ),
       });
       if (!check.valid) {
         throw new Error(check.errors.join("; "));
@@ -116,7 +130,10 @@ const createSettingsService = ({ strapi }: { strapi: Core.Strapi }) => ({
       whatsappDriver: isSupportedWhatsAppDriver(partial.whatsappDriver)
         ? partial.whatsappDriver
         : current.whatsappDriver,
-      telegramBotToken: resolveSecretValue(partial.telegramBotToken, current.telegramBotToken),
+      telegramBotToken: resolveSecretValue(
+        partial.telegramBotToken,
+        current.telegramBotToken
+      ),
       whatsappAccessToken: resolveSecretValue(
         partial.whatsappAccessToken,
         current.whatsappAccessToken

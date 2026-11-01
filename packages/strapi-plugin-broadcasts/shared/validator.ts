@@ -55,10 +55,16 @@ export function validateGatewayUrl(
 
   const hostname = parsed.hostname.toLowerCase();
   if (BLOCKED_PRIVATE_HOSTS.has(hostname) || hostname.startsWith("169.254.")) {
-    errors.push("Cloud metadata and link-local hosts are forbidden (SSRF protection)");
+    errors.push(
+      "Cloud metadata and link-local hosts are forbidden (SSRF protection)"
+    );
   }
 
-  const protoErr = checkGatewayProtocol(parsed.protocol, hostname, options.allowLocalhost);
+  const protoErr = checkGatewayProtocol(
+    parsed.protocol,
+    hostname,
+    options.allowLocalhost
+  );
   if (protoErr) errors.push(protoErr);
 
   return {
@@ -73,15 +79,24 @@ export function normalizeChannels(rawChannels: unknown): BroadcastChannel[] {
   }
   const filtered = rawChannels
     .map((c) => String(c).trim().toLowerCase() as BroadcastChannel)
-    .filter((c): c is BroadcastChannel => (SUPPORTED_CHANNELS as readonly string[]).includes(c));
+    .filter((c): c is BroadcastChannel =>
+      (SUPPORTED_CHANNELS as readonly string[]).includes(c)
+    );
   return filtered.length > 0 ? Array.from(new Set(filtered)) : ["email"];
 }
 
-export function isSupportedWhatsAppDriver(driver: unknown): driver is WhatsAppDriver {
-  return (SUPPORTED_WHATSAPP_DRIVERS as readonly string[]).includes(String(driver || "").trim());
+export function isSupportedWhatsAppDriver(
+  driver: unknown
+): driver is WhatsAppDriver {
+  return (SUPPORTED_WHATSAPP_DRIVERS as readonly string[]).includes(
+    String(driver || "").trim()
+  );
 }
 
-function validateCampaignChannelsList(rawChannels: unknown, errors: string[]): void {
+function validateCampaignChannelsList(
+  rawChannels: unknown,
+  errors: string[]
+): void {
   const channels = Array.isArray(rawChannels) ? rawChannels : [];
   if (channels.length === 0) {
     errors.push("At least one broadcast channel is required");
@@ -94,7 +109,10 @@ function validateCampaignChannelsList(rawChannels: unknown, errors: string[]): v
   }
 }
 
-function validateOptionalCtaUrl(ctaUrl: string | undefined, errors: string[]): void {
+function validateOptionalCtaUrl(
+  ctaUrl: string | undefined,
+  errors: string[]
+): void {
   if (!ctaUrl) return;
   try {
     const parsed = new URL(ctaUrl);
@@ -106,7 +124,9 @@ function validateOptionalCtaUrl(ctaUrl: string | undefined, errors: string[]): v
   }
 }
 
-export function validateCampaignInput(input: Partial<CampaignRecord>): ValidationOutcome {
+export function validateCampaignInput(
+  input: Partial<CampaignRecord>
+): ValidationOutcome {
   const errors: string[] = [];
   const slug = String(input.slug || "").trim();
   const title = String(input.title || "").trim();

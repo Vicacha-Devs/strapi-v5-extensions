@@ -18,7 +18,9 @@ const subCardStyle: React.CSSProperties = {
 
 export interface BridgesSandboxTabProps {
   settings: BroadcastSettings;
-  setSettings: (next: BroadcastSettings | ((prev: BroadcastSettings) => BroadcastSettings)) => void;
+  setSettings: (
+    next: BroadcastSettings | ((prev: BroadcastSettings) => BroadcastSettings)
+  ) => void;
   t: (id: string, defaultMessage: string) => string;
 }
 
@@ -31,7 +33,13 @@ export const BridgesSandboxTab: React.FC<BridgesSandboxTabProps> = ({
   const disabledText = t("common.disabled", "Disabled");
 
   return (
-    <Box padding={6} background="neutral0" hasRadius shadow="filterShadow" style={cardBorderStyle}>
+    <Box
+      padding={6}
+      background="neutral0"
+      hasRadius
+      shadow="filterShadow"
+      style={cardBorderStyle}
+    >
       <Flex
         justifyContent="space-between"
         alignItems="center"
@@ -41,7 +49,10 @@ export const BridgesSandboxTab: React.FC<BridgesSandboxTabProps> = ({
       >
         <Box>
           <Typography variant="beta" tag="h2">
-            {t("settings.ui.4_ecosystem_bridges_sandbox_mode", "Ecosystem Bridges & Sandbox Mode")}
+            {t(
+              "settings.ui.4_ecosystem_bridges_sandbox_mode",
+              "Ecosystem Bridges & Sandbox Mode"
+            )}
           </Typography>
           <Typography variant="pi" textColor="neutral600">
             {t(
@@ -67,7 +78,11 @@ export const BridgesSandboxTab: React.FC<BridgesSandboxTabProps> = ({
       >
         <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
           <Box>
-            <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              paddingBottom={2}
+            >
               <Typography fontWeight="bold">
                 {t("settings.ui.dry_run_sandbox_mode", "Dry-Run Sandbox Mode")}
               </Typography>
@@ -91,18 +106,32 @@ export const BridgesSandboxTab: React.FC<BridgesSandboxTabProps> = ({
                 setSettings({ ...settings, dryRun: Boolean(checked) })
               }
             >
-              {t("checkbox.enable_dry_run_sandbox_mode", "Enable Dry-Run Sandbox Mode")}
+              {t(
+                "checkbox.enable_dry_run_sandbox_mode",
+                "Enable Dry-Run Sandbox Mode"
+              )}
             </Checkbox>
           </Box>
         </Box>
 
         <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
           <Box>
-            <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              paddingBottom={2}
+            >
               <Typography fontWeight="bold">
-                {t("settings.ui.inbox_subscriber_bridge", "Inbox Subscriber Bridge")}
+                {t(
+                  "settings.ui.inbox_subscriber_bridge",
+                  "Inbox Subscriber Bridge"
+                )}
               </Typography>
-              <Badge>{settings.enableInboxSubscriberBridge ? enabledText : disabledText}</Badge>
+              <Badge>
+                {settings.enableInboxSubscriberBridge
+                  ? enabledText
+                  : disabledText}
+              </Badge>
             </Flex>
             <Typography variant="pi" textColor="neutral600">
               {t(
@@ -131,11 +160,22 @@ export const BridgesSandboxTab: React.FC<BridgesSandboxTabProps> = ({
 
         <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
           <Box>
-            <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              paddingBottom={2}
+            >
               <Typography fontWeight="bold">
-                {t("settings.ui.eventhub_auto_broadcasts", "EventHub Auto-Broadcasts")}
+                {t(
+                  "settings.ui.eventhub_auto_broadcasts",
+                  "EventHub Auto-Broadcasts"
+                )}
               </Typography>
-              <Badge>{settings.enableEventHubAutomations ? enabledText : disabledText}</Badge>
+              <Badge>
+                {settings.enableEventHubAutomations
+                  ? enabledText
+                  : disabledText}
+              </Badge>
             </Flex>
             <Typography variant="pi" textColor="neutral600">
               {t(
@@ -164,12 +204,21 @@ export const BridgesSandboxTab: React.FC<BridgesSandboxTabProps> = ({
 
         <Box padding={4} background="neutral100" hasRadius style={subCardStyle}>
           <Box>
-            <Flex justifyContent="space-between" alignItems="center" paddingBottom={2}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              paddingBottom={2}
+            >
               <Typography fontWeight="bold">
-                {t("settings.ui.email_designer_html_templates", "Email Designer 5 HTML Templates")}
+                {t(
+                  "settings.ui.email_designer_html_templates",
+                  "Email Designer 5 HTML Templates"
+                )}
               </Typography>
               <Badge>
-                {settings.enableEmailDesignerBridge !== false ? enabledText : disabledText}
+                {settings.enableEmailDesignerBridge !== false
+                  ? enabledText
+                  : disabledText}
               </Badge>
             </Flex>
             <Typography variant="pi" textColor="neutral600">

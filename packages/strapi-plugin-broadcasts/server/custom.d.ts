@@ -3,7 +3,9 @@ declare const Buffer: {
     input: string,
     encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
   ): Uint8Array & {
-    toString(encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"): string;
+    toString(
+      encoding?: "utf8" | "utf-8" | "hex" | "base64" | "base64url"
+    ): string;
   };
   byteLength(input: string, encoding?: "utf8" | "utf-8"): number;
 };
@@ -80,7 +82,9 @@ declare module "@strapi/strapi" {
     }
 
     export interface DocumentServiceInstance {
-      findMany(params?: DocumentQueryOptions): Promise<Array<Record<string, unknown>>>;
+      findMany(
+        params?: DocumentQueryOptions
+      ): Promise<Array<Record<string, unknown>>>;
       findOne(params: {
         documentId: string;
         locale?: string;
@@ -114,7 +118,10 @@ declare module "@strapi/strapi" {
       };
       eventHub?: {
         emit(event: string, payload?: unknown): void;
-        on?(event: string, listener: (payload: unknown) => void | Promise<void>): void;
+        on?(
+          event: string,
+          listener: (payload: unknown) => void | Promise<void>
+        ): void;
       };
       contentTypes: Record<string, ContentTypeSchema>;
       store(params: { type: string; name: string }): PluginStore;

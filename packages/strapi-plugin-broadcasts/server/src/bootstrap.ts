@@ -22,7 +22,10 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   const automationService = strapi.plugin(PLUGIN_ID).service<{
     seedStarterRules(): Promise<number>;
-    handleEventTrigger(eventName: string, payload?: Record<string, unknown>): Promise<unknown>;
+    handleEventTrigger(
+      eventName: string,
+      payload?: Record<string, unknown>
+    ): Promise<unknown>;
   }>("automationService");
   await automationService.seedStarterRules();
 

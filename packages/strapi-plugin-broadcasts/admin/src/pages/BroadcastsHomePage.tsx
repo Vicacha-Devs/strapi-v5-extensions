@@ -18,7 +18,10 @@ import * as React from "react";
 import { useIntl } from "react-intl";
 import { useNavigate } from "react-router-dom";
 
-import { PLUGIN_ID, STARTER_CAMPAIGN_TEMPLATES } from "../../../shared/constants";
+import {
+  PLUGIN_ID,
+  STARTER_CAMPAIGN_TEMPLATES,
+} from "../../../shared/constants";
 import type {
   AutomationRuleRecord,
   BroadcastChannel,
@@ -26,7 +29,10 @@ import type {
   DeliveryLogRecord,
   EmailDesignerTemplateSummary,
 } from "../../../shared/types";
-import { AutomationAndLogsTabs, parseChannelsInput } from "../components/AutomationAndLogsTabs";
+import {
+  AutomationAndLogsTabs,
+  parseChannelsInput,
+} from "../components/AutomationAndLogsTabs";
 import {
   CampaignsTableSection,
   EmailTemplateSelectorField,
@@ -50,10 +56,14 @@ export const BroadcastsHomePage: React.FC = () => {
   const [campaigns, setCampaigns] = React.useState<CampaignRecord[]>([]);
   const [rules, setRules] = React.useState<AutomationRuleRecord[]>([]);
   const [logs, setLogs] = React.useState<DeliveryLogRecord[]>([]);
-  const [emailTemplates, setEmailTemplates] = React.useState<EmailDesignerTemplateSummary[]>([]);
+  const [emailTemplates, setEmailTemplates] = React.useState<
+    EmailDesignerTemplateSummary[]
+  >([]);
   const [statusMessage, setStatusMessage] = React.useState<string>("");
 
-  const [editingCampaignId, setEditingCampaignId] = React.useState<string | null>(null);
+  const [editingCampaignId, setEditingCampaignId] = React.useState<
+    string | null
+  >(null);
   const [newSlug, setNewSlug] = React.useState<string>("");
   const [newTitle, setNewTitle] = React.useState<string>("");
   const [newTopic, setNewTopic] = React.useState<string>("announcements");
@@ -62,7 +72,8 @@ export const BroadcastsHomePage: React.FC = () => {
     "telegram",
     "whatsapp",
   ]);
-  const [newEmailTemplateRef, setNewEmailTemplateRef] = React.useState<string>("");
+  const [newEmailTemplateRef, setNewEmailTemplateRef] =
+    React.useState<string>("");
   const [newSubject, setNewSubject] = React.useState<string>("");
   const [newBodyText, setNewBodyText] = React.useState<string>("");
 
@@ -70,7 +81,9 @@ export const BroadcastsHomePage: React.FC = () => {
     try {
       const [campRes, rulesRes, logsRes] = await Promise.all([
         get<{ data?: CampaignRecord[] }>(`/${PLUGIN_ID}/campaigns`),
-        get<{ data?: AutomationRuleRecord[] }>(`/${PLUGIN_ID}/automation-rules`),
+        get<{ data?: AutomationRuleRecord[] }>(
+          `/${PLUGIN_ID}/automation-rules`
+        ),
         get<{ data?: DeliveryLogRecord[] }>(`/${PLUGIN_ID}/delivery-logs`),
       ]);
       setCampaigns(campRes?.data?.data || []);
@@ -120,7 +133,9 @@ export const BroadcastsHomePage: React.FC = () => {
     setNewEmailTemplateRef(camp.emailTemplateRef || "");
     setNewSubject(camp.subject || "");
     setNewBodyText(camp.bodyText || "");
-    setStatusMessage(`${t("page.ui.editing_campaign", "Editing campaign")}: ${camp.title}`);
+    setStatusMessage(
+      `${t("page.ui.editing_campaign", "Editing campaign")}: ${camp.title}`
+    );
   };
 
   const handleSeedTemplate = async (templateId: string) => {
@@ -141,14 +156,20 @@ export const BroadcastsHomePage: React.FC = () => {
   };
 
   const handleSaveCampaign = async () => {
-    const isComplete = Boolean(newSlug && newTitle && newSubject && newBodyText);
+    const isComplete = Boolean(
+      newSlug && newTitle && newSubject && newBodyText
+    );
     if (!isComplete) return;
 
     const payload = {
       slug: newSlug.trim(),
       title: newTitle.trim(),
       topic: newTopic.trim() || "announcements",
-      channels: parseChannelsInput(newChannels, ["email", "telegram", "whatsapp"]),
+      channels: parseChannelsInput(newChannels, [
+        "email",
+        "telegram",
+        "whatsapp",
+      ]),
       priority: "normal",
       emailTemplateRef: newEmailTemplateRef.trim() || undefined,
       subject: newSubject.trim(),
@@ -163,7 +184,10 @@ export const BroadcastsHomePage: React.FC = () => {
     } else {
       await post(`/${PLUGIN_ID}/campaigns`, payload);
       setStatusMessage(
-        t("page.ui.created_omnichannel_campaign", "Created omnichannel broadcast campaign")
+        t(
+          "page.ui.created_omnichannel_campaign",
+          "Created omnichannel broadcast campaign"
+        )
       );
     }
     resetCampaignForm();
@@ -172,7 +196,10 @@ export const BroadcastsHomePage: React.FC = () => {
 
   const campaignFormTitle = editingCampaignId
     ? `${t("page.ui.edit_broadcast_campaign", "Edit Broadcast Campaign")} (${newSlug})`
-    : t("page.ui.compose_new_omnichannel_broadcast", "Compose New Omnichannel Broadcast");
+    : t(
+        "page.ui.compose_new_omnichannel_broadcast",
+        "Compose New Omnichannel Broadcast"
+      );
   const topicOpts = mergeSelectOptions(BROADCAST_TOPIC_OPTIONS, [newTopic]);
 
   return (
@@ -210,13 +237,15 @@ export const BroadcastsHomePage: React.FC = () => {
               variant={activeTab === "automations" ? "default" : "tertiary"}
               onClick={() => setActiveTab("automations")}
             >
-              {t("page.ui.automation_rules_tab", "Automation Rules")} ({rules.length})
+              {t("page.ui.automation_rules_tab", "Automation Rules")} (
+              {rules.length})
             </Button>
             <Button
               variant={activeTab === "logs" ? "default" : "tertiary"}
               onClick={() => setActiveTab("logs")}
             >
-              {t("page.ui.delivery_ledger_tab", "Delivery Ledger")} ({logs.length})
+              {t("page.ui.delivery_ledger_tab", "Delivery Ledger")} (
+              {logs.length})
             </Button>
           </Flex>
         </Flex>
@@ -245,9 +274,12 @@ export const BroadcastsHomePage: React.FC = () => {
                 )}
               </Typography>
               <Flex gap={2} wrap="wrap">
-                <Button variant="tertiary" onClick={() => navigate("/plugins/email-designer-5")}>
-                  {t("page.ui.open_email_designer", "Open Email Designer")} ({emailTemplates.length}
-                  )
+                <Button
+                  variant="tertiary"
+                  onClick={() => navigate("/plugins/email-designer-5")}
+                >
+                  {t("page.ui.open_email_designer", "Open Email Designer")} (
+                  {emailTemplates.length})
                 </Button>
                 {STARTER_CAMPAIGN_TEMPLATES.map((tpl) => (
                   <Button
@@ -274,7 +306,9 @@ export const BroadcastsHomePage: React.FC = () => {
                   {campaignFormTitle}
                 </Typography>
                 {editingCampaignId && (
-                  <Badge active>{t("common.editing_mode", "Editing Mode")}</Badge>
+                  <Badge active>
+                    {t("common.editing_mode", "Editing Mode")}
+                  </Badge>
                 )}
               </Flex>
               <Box
@@ -294,7 +328,9 @@ export const BroadcastsHomePage: React.FC = () => {
                     "Unique URL-safe identifier for idempotency tracking."
                   )}
                 >
-                  <Field.Label>{t("field.campaign_slug", "Campaign Slug")}</Field.Label>
+                  <Field.Label>
+                    {t("field.campaign_slug", "Campaign Slug")}
+                  </Field.Label>
                   <TextInput
                     name="slug"
                     placeholder={t(
@@ -302,7 +338,9 @@ export const BroadcastsHomePage: React.FC = () => {
                       "e.g., friday-khutbah-bulletin"
                     )}
                     value={newSlug}
-                    onChange={(e: { target: { value: string } }) => setNewSlug(e.target.value)}
+                    onChange={(e: { target: { value: string } }) =>
+                      setNewSlug(e.target.value)
+                    }
                   />
                   <Field.Hint />
                 </Field.Root>
@@ -314,7 +352,9 @@ export const BroadcastsHomePage: React.FC = () => {
                     "Internal display name in the campaign table."
                   )}
                 >
-                  <Field.Label>{t("field.campaign_title", "Campaign Title")}</Field.Label>
+                  <Field.Label>
+                    {t("field.campaign_title", "Campaign Title")}
+                  </Field.Label>
                   <TextInput
                     name="title"
                     placeholder={t(
@@ -322,7 +362,9 @@ export const BroadcastsHomePage: React.FC = () => {
                       "e.g., Boletín Semanal de Jumu'ah"
                     )}
                     value={newTitle}
-                    onChange={(e: { target: { value: string } }) => setNewTitle(e.target.value)}
+                    onChange={(e: { target: { value: string } }) =>
+                      setNewTitle(e.target.value)
+                    }
                   />
                   <Field.Hint />
                 </Field.Root>
@@ -333,11 +375,15 @@ export const BroadcastsHomePage: React.FC = () => {
                     "Target subscriber segment and Telegram forum thread."
                   )}
                 >
-                  <Field.Label>{t("field.topic_segment", "Topic Segment")}</Field.Label>
+                  <Field.Label>
+                    {t("field.topic_segment", "Topic Segment")}
+                  </Field.Label>
                   <SingleSelect
                     name="topic"
                     value={newTopic || "announcements"}
-                    onChange={(val: string | number) => setNewTopic(String(val))}
+                    onChange={(val: string | number) =>
+                      setNewTopic(String(val))
+                    }
                   >
                     {topicOpts.map((opt) => (
                       <SingleSelectOption key={opt.value} value={opt.value}>
@@ -358,11 +404,16 @@ export const BroadcastsHomePage: React.FC = () => {
                   <MultiSelect
                     name="channels"
                     withTags
-                    placeholder={t("placeholder.select_channels", "Select channels...")}
+                    placeholder={t(
+                      "placeholder.select_channels",
+                      "Select channels..."
+                    )}
                     value={newChannels}
                     onChange={(nextValues: string[]) =>
                       setNewChannels(
-                        nextValues.length > 0 ? (nextValues as BroadcastChannel[]) : ["email"]
+                        nextValues.length > 0
+                          ? (nextValues as BroadcastChannel[])
+                          : ["email"]
                       )
                     }
                     onClear={() => setNewChannels(["email"])}
@@ -391,7 +442,9 @@ export const BroadcastsHomePage: React.FC = () => {
                     "Email subject line and bold header on Telegram/WhatsApp."
                   )}
                 >
-                  <Field.Label>{t("field.subject_headline", "Subject / Headline")}</Field.Label>
+                  <Field.Label>
+                    {t("field.subject_headline", "Subject / Headline")}
+                  </Field.Label>
                   <TextInput
                     name="subject"
                     placeholder={t(
@@ -399,7 +452,9 @@ export const BroadcastsHomePage: React.FC = () => {
                       "e.g., As-salamu alaykum — Prayer Times & Announcements"
                     )}
                     value={newSubject}
-                    onChange={(e: { target: { value: string } }) => setNewSubject(e.target.value)}
+                    onChange={(e: { target: { value: string } }) =>
+                      setNewSubject(e.target.value)
+                    }
                   />
                   <Field.Hint />
                 </Field.Root>
@@ -441,7 +496,10 @@ export const BroadcastsHomePage: React.FC = () => {
                 )}
                 <Button onClick={handleSaveCampaign}>
                   {editingCampaignId
-                    ? t("page.ui.save_campaign_changes", "Save Campaign Changes")
+                    ? t(
+                        "page.ui.save_campaign_changes",
+                        "Save Campaign Changes"
+                      )
                     : t("page.ui.create_campaign", "Create Campaign")}
                 </Button>
               </Flex>
