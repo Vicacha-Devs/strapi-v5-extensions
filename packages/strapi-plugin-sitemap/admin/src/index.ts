@@ -15,7 +15,9 @@ const prefixPluginTranslations = (
   trad: Record<string, string>,
   pluginId: string
 ): Record<string, string> =>
-  Object.fromEntries(Object.entries(trad).map(([key, value]) => [`${pluginId}.${key}`, value]));
+  Object.fromEntries(
+    Object.entries(trad).map(([key, value]) => [`${pluginId}.${key}`, value])
+  );
 
 export default {
   register(app: StrapiAdminApp) {
@@ -54,7 +56,9 @@ export default {
           return { data: {}, locale };
         }
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(
+            `./translations/${locale}.json`
+          );
           return { data: prefixPluginTranslations(data, PLUGIN_ID), locale };
         } catch {
           return { data: {}, locale };
