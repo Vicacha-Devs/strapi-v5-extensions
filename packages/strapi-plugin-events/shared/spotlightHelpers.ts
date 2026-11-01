@@ -16,7 +16,10 @@ const ALLOWED_ACTION_VARIANTS = new Set<EventActionLinkVariant>([
   "outline",
 ]);
 
-const ALLOWED_SPOTLIGHT_POSITIONS = new Set<EventSpotlightPosition>(["bottom-end", "bottom-start"]);
+const ALLOWED_SPOTLIGHT_POSITIONS = new Set<EventSpotlightPosition>([
+  "bottom-end",
+  "bottom-start",
+]);
 
 const ALLOWED_PROTOCOLS = new Set(["https:", "http:", "mailto:"]);
 
@@ -40,7 +43,11 @@ function isAllowedAbsoluteUrl(trimmed: string): boolean {
 export function sanitizeEventUrl(rawUrl: unknown): string | null {
   if (typeof rawUrl !== "string") return null;
   const trimmed = rawUrl.trim();
-  if (!trimmed || trimmed.length > 2048 || /[\u0000-\u001F\u007F]/.test(trimmed)) {
+  if (
+    !trimmed ||
+    trimmed.length > 2048 ||
+    /[\u0000-\u001F\u007F]/.test(trimmed)
+  ) {
     return null;
   }
   if (isSafeRelativeUrl(trimmed) || isAllowedAbsoluteUrl(trimmed)) {
@@ -71,15 +78,22 @@ function getTrimmedString(val: unknown, maxLen?: number): string | undefined {
 }
 
 function getPositiveInteger(val: unknown): number | undefined {
-  if (typeof val !== "number" || !Number.isFinite(val) || val <= 0) return undefined;
+  if (typeof val !== "number" || !Number.isFinite(val) || val <= 0)
+    return undefined;
   return Math.round(val);
 }
 
-function unwrapPosterRecord(obj: Record<string, unknown>): Record<string, unknown> {
+function unwrapPosterRecord(
+  obj: Record<string, unknown>
+): Record<string, unknown> {
   if (obj.data && typeof obj.data === "object" && !Array.isArray(obj.data)) {
     return unwrapPosterRecord(obj.data as Record<string, unknown>);
   }
-  if (obj.attributes && typeof obj.attributes === "object" && !Array.isArray(obj.attributes)) {
+  if (
+    obj.attributes &&
+    typeof obj.attributes === "object" &&
+    !Array.isArray(obj.attributes)
+  ) {
     return unwrapPosterRecord(obj.attributes as Record<string, unknown>);
   }
   return obj;
@@ -110,11 +124,15 @@ export function normalizeEventPoster(
 
   if (typeof rawPoster === "string") {
     const safeUrl = sanitizeEventUrl(rawPoster);
-    return safeUrl ? { url: safeUrl, alt: fallbackAlt || undefined } : undefined;
+    return safeUrl
+      ? { url: safeUrl, alt: fallbackAlt || undefined }
+      : undefined;
   }
 
   if (Array.isArray(rawPoster)) {
-    return rawPoster.length > 0 ? normalizeEventPoster(rawPoster[0], fallbackAlt) : undefined;
+    return rawPoster.length > 0
+      ? normalizeEventPoster(rawPoster[0], fallbackAlt)
+      : undefined;
   }
 
   if (typeof rawPoster !== "object") return undefined;
@@ -132,22 +150,33 @@ export function normalizeEventPoster(
   };
 }
 
-function resolveActionVariant(rawVariant: unknown, index: number): EventActionLinkVariant {
-  const candidate = getTrimmedString(rawVariant) as EventActionLinkVariant | undefined;
+function resolveActionVariant(
+  rawVariant: unknown,
+  index: number
+): EventActionLinkVariant {
+  const candidate = getTrimmedString(rawVariant) as
+    | EventActionLinkVariant
+    | undefined;
   if (candidate && ALLOWED_ACTION_VARIANTS.has(candidate)) {
     return candidate;
   }
   return index === 0 ? "primary" : "outline";
 }
 
-function normalizeSingleActionLink(item: unknown, index: number): EventActionLink | null {
+function normalizeSingleActionLink(
+  item: unknown,
+  index: number
+): EventActionLink | null {
   if (!item || typeof item !== "object") return null;
   const rec = item as Record<string, unknown>;
   const label = getTrimmedString(rec.label, 120);
   const safeUrl = sanitizeEventUrl(rec.url);
   if (!label || !safeUrl) return null;
 
-  const external = typeof rec.external === "boolean" ? rec.external : /^https?:\/\//i.test(safeUrl);
+  const external =
+    typeof rec.external === "boolean"
+      ? rec.external
+      : /^https?:\/\//i.test(safeUrl);
   const icon = getTrimmedString(rec.icon, 60);
 
   return {
@@ -162,7 +191,9 @@ function normalizeSingleActionLink(item: unknown, index: number): EventActionLin
 /**
  * Normalizes a JSON array of action links, validating URLs and variants.
  */
-export function normalizeEventActionLinks(rawLinks: unknown): EventActionLink[] | undefined {
+export function normalizeEventActionLinks(
+  rawLinks: unknown
+): EventActionLink[] | undefined {
   const parsed = parseJsonIfNeeded(rawLinks);
   if (!Array.isArray(parsed) || parsed.length === 0) {
     return undefined;
@@ -175,13 +206,21 @@ export function normalizeEventActionLinks(rawLinks: unknown): EventActionLink[] 
   return normalized.length > 0 ? normalized : undefined;
 }
 
-function resolveSpotlightPosition(rawPos: unknown): EventSpotlightPosition | undefined {
-  const candidate = getTrimmedString(rawPos) as EventSpotlightPosition | undefined;
-  return candidate && ALLOWED_SPOTLIGHT_POSITIONS.has(candidate) ? candidate : undefined;
+function resolveSpotlightPosition(
+  rawPos: unknown
+): EventSpotlightPosition | undefined {
+  const candidate = getTrimmedString(rawPos) as
+    | EventSpotlightPosition
+    | undefined;
+  return candidate && ALLOWED_SPOTLIGHT_POSITIONS.has(candidate)
+    ? candidate
+    : undefined;
 }
 
 function resolveFiniteRoundNumber(val: unknown): number | undefined {
-  return typeof val === "number" && Number.isFinite(val) ? Math.round(val) : undefined;
+  return typeof val === "number" && Number.isFinite(val)
+    ? Math.round(val)
+    : undefined;
 }
 
 /**
@@ -222,7 +261,10 @@ export function normalizeEventSpotlightConfig(
   return config;
 }
 
-function toBoundaryTimestamp(rawIsoOrDate: string, isEndBoundary: boolean): number | null {
+function toBoundaryTimestamp(
+  rawIsoOrDate: string,
+  isEndBoundary: boolean
+): number | null {
   const trimmed = rawIsoOrDate.trim();
   const isoString = /^\d{4}-\d{2}-\d{2}$/.test(trimmed)
     ? `${trimmed}${isEndBoundary ? "T23:59:59.999Z" : "T00:00:00.000Z"}`
@@ -251,14 +293,21 @@ export function isEventSpotlightActiveOnDate(params: {
   eventEndDate?: string | null;
   referenceDate?: string | Date;
 }): boolean {
-  const { spotlightConfig, eventStartDate, eventEndDate, referenceDate } = params;
+  const { spotlightConfig, eventStartDate, eventEndDate, referenceDate } =
+    params;
   if (!spotlightConfig?.enabled) return false;
 
   const refTs = toReferenceTimestamp(referenceDate);
   if (refTs === null) return false;
 
-  const startTs = toBoundaryTimestamp(spotlightConfig.startAt || eventStartDate, false);
-  const endTs = toBoundaryTimestamp(spotlightConfig.endAt || eventEndDate || eventStartDate, true);
+  const startTs = toBoundaryTimestamp(
+    spotlightConfig.startAt || eventStartDate,
+    false
+  );
+  const endTs = toBoundaryTimestamp(
+    spotlightConfig.endAt || eventEndDate || eventStartDate,
+    true
+  );
 
   const afterStart = startTs === null || refTs >= startTs;
   const beforeEnd = endTs === null || refTs <= endTs;
@@ -331,12 +380,17 @@ function resolveDateOnlySlotWindow(
 
 function resolveDateOnlyEnd(rawStart: string, rawEnd: unknown): string {
   if (typeof rawEnd === "string" && rawEnd) {
-    return /^\d{4}-\d{2}-\d{2}$/.test(rawEnd) ? `${rawEnd}T23:59:59.000Z` : rawEnd;
+    return /^\d{4}-\d{2}-\d{2}$/.test(rawEnd)
+      ? `${rawEnd}T23:59:59.000Z`
+      : rawEnd;
   }
   return `${rawStart}T23:59:59.000Z`;
 }
 
-function readOptionalDocField(doc: Record<string, unknown>, fieldName?: string): unknown {
+function readOptionalDocField(
+  doc: Record<string, unknown>,
+  fieldName?: string
+): unknown {
   return fieldName ? doc[fieldName] : null;
 }
 
@@ -366,7 +420,10 @@ export function resolveStartEndFromDocument(
     };
   }
 
-  const allDay = typeof doc.allDay === "boolean" ? doc.allDay : Boolean(source.defaultAllDay);
+  const allDay =
+    typeof doc.allDay === "boolean"
+      ? doc.allDay
+      : Boolean(source.defaultAllDay);
   return {
     startDate: rawStart,
     endDate: resolveNonEmptyEnd(rawEnd),

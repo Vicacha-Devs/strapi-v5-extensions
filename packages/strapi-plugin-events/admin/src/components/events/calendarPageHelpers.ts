@@ -64,7 +64,11 @@ export function buildMonthGridDays(year: number, month: number): Date[] {
 export function buildWeekDays(anchor: Date): Date[] {
   const dayOfWeek = anchor.getUTCDay();
   const start = new Date(
-    Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), anchor.getUTCDate() - dayOfWeek)
+    Date.UTC(
+      anchor.getUTCFullYear(),
+      anchor.getUTCMonth(),
+      anchor.getUTCDate() - dayOfWeek
+    )
   );
   const days: Date[] = [];
   for (let i = 0; i < 7; i++) {
@@ -86,7 +90,9 @@ export function groupOccurrencesByDate(
   return map;
 }
 
-export function extractAvailableCategories(occurrences: ExpandedOccurrence[]): string[] {
+export function extractAvailableCategories(
+  occurrences: ExpandedOccurrence[]
+): string[] {
   const cats = new Set<string>();
   for (const occ of occurrences) {
     if (occ.category) cats.add(occ.category);
@@ -135,9 +141,14 @@ export function formatSecondaryHeaderLabel(
   const anchorIso = anchorDate.toISOString().slice(0, 10);
   return activeSecondaryCalendars
     .map((sys) => {
-      const formatted = formatDateInCalendarSystem(anchorIso, sys, locale || "en", {
-        compact: false,
-      });
+      const formatted = formatDateInCalendarSystem(
+        anchorIso,
+        sys,
+        locale || "en",
+        {
+          compact: false,
+        }
+      );
       return formatted ? `${sys.label}: ${formatted}` : "";
     })
     .filter(Boolean)

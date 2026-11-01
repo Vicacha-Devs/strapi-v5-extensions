@@ -46,7 +46,10 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Ensure settings store is initialized with config defaults
   const settingsService = getSettingsService(strapi);
   let settings = null;
-  if (settingsService && typeof settingsService.ensureInitialized === "function") {
+  if (
+    settingsService &&
+    typeof settingsService.ensureInitialized === "function"
+  ) {
     settings = await settingsService.ensureInitialized();
   }
 
@@ -55,7 +58,11 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const calendarRegistry = calendarPlugin?.service("registry") as
     | CalendarRegistryService
     | undefined;
-  if (calendarRegistry && typeof calendarRegistry.registerSource === "function" && settings) {
+  if (
+    calendarRegistry &&
+    typeof calendarRegistry.registerSource === "function" &&
+    settings
+  ) {
     for (const source of settings.sources ?? []) {
       try {
         await calendarRegistry.registerSource({

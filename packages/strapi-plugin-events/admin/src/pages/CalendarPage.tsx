@@ -59,12 +59,16 @@ export const CalendarPage: React.FC = () => {
   const [quickCapacity, setQuickCapacity] = useState<number>(50);
 
   // Attendees & RSVP Ledger state
-  const [registrations, setRegistrations] = useState<RsvpRegistrationRecord[]>([]);
+  const [registrations, setRegistrations] = useState<RsvpRegistrationRecord[]>(
+    []
+  );
   const [rsvpSearch, setRsvpSearch] = useState<string>("");
   const [rsvpStatusFilter, setRsvpStatusFilter] = useState<string>("all");
   const [rsvpEventFilter, setRsvpEventFilter] = useState<string>(() => {
     if (typeof window === "undefined") return "";
-    return new URLSearchParams(window.location.search).get("eventDocumentId") || "";
+    return (
+      new URLSearchParams(window.location.search).get("eventDocumentId") || ""
+    );
   });
 
   const todayKey = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -78,7 +82,10 @@ export const CalendarPage: React.FC = () => {
         `/${PLUGIN_ID}/calendar?from=${encodeURIComponent(fromIso)}&to=${encodeURIComponent(toIso)}`
       );
       const payload = res?.data?.data as
-        | { occurrences?: ExpandedOccurrence[]; settings?: EventsPluginSettings }
+        | {
+            occurrences?: ExpandedOccurrence[];
+            settings?: EventsPluginSettings;
+          }
         | undefined;
       if (payload?.settings) {
         setSettings(payload.settings);
@@ -104,7 +111,8 @@ export const CalendarPage: React.FC = () => {
       const params = new URLSearchParams();
       if (rsvpSearch.trim()) params.set("search", rsvpSearch.trim());
       if (rsvpStatusFilter !== "all") params.set("status", rsvpStatusFilter);
-      if (rsvpEventFilter.trim()) params.set("eventDocumentId", rsvpEventFilter.trim());
+      if (rsvpEventFilter.trim())
+        params.set("eventDocumentId", rsvpEventFilter.trim());
 
       const res = await get(`/${PLUGIN_ID}/registrations?${params.toString()}`);
       const data = res?.data?.data;
@@ -112,7 +120,9 @@ export const CalendarPage: React.FC = () => {
         setRegistrations(data as RsvpRegistrationRecord[]);
       }
     } catch {
-      setBannerMessage(t("attendees.error.load", "Could not load registrations."));
+      setBannerMessage(
+        t("attendees.error.load", "Could not load registrations.")
+      );
     }
   }, [get, rsvpSearch, rsvpStatusFilter, rsvpEventFilter, t]);
 
@@ -129,7 +139,10 @@ export const CalendarPage: React.FC = () => {
     for (const occ of occurrences) {
       const key = `${occ.uid}:${occ.documentId}`;
       const existing = byDoc.get(key);
-      if (!existing || shouldReplaceRepresentativeOccurrence(existing, occ, todayKey)) {
+      if (
+        !existing ||
+        shouldReplaceRepresentativeOccurrence(existing, occ, todayKey)
+      ) {
         byDoc.set(key, occ);
       }
     }
@@ -182,7 +195,9 @@ export const CalendarPage: React.FC = () => {
       const startIso = quickStart.includes("T")
         ? new Date(quickStart).toISOString()
         : `${quickStart}T10:00:00.000Z`;
-      const endIso = new Date(new Date(startIso).getTime() + 3600000).toISOString();
+      const endIso = new Date(
+        new Date(startIso).getTime() + 3600000
+      ).toISOString();
 
       await post(`/${PLUGIN_ID}/calendar/quick-create`, {
         title: quickTitle.trim(),
@@ -221,8 +236,13 @@ export const CalendarPage: React.FC = () => {
   const handleCheckIn = useCallback(
     async (regDocId: string) => {
       try {
-        await post(`/${PLUGIN_ID}/registrations/${encodeURIComponent(regDocId)}/check-in`, {});
-        setBannerMessage(t("attendees.checkedInSuccess", "Attendee checked in."));
+        await post(
+          `/${PLUGIN_ID}/registrations/${encodeURIComponent(regDocId)}/check-in`,
+          {}
+        );
+        setBannerMessage(
+          t("attendees.checkedInSuccess", "Attendee checked in.")
+        );
         await Promise.all([fetchCalendarData(), fetchRegistrations()]);
       } catch {
         setBannerMessage(t("attendees.error.checkIn", "Check-in failed."));
@@ -239,7 +259,8 @@ export const CalendarPage: React.FC = () => {
           { status }
         );
         const promotedCount =
-          (res?.data?.data as { promotedCount?: number } | undefined)?.promotedCount ?? 0;
+          (res?.data?.data as { promotedCount?: number } | undefined)
+            ?.promotedCount ?? 0;
         setBannerMessage(
           promotedCount > 0
             ? `${t("attendees.statusUpdated", "Status updated.")} ${promotedCount} ${t(
@@ -250,7 +271,9 @@ export const CalendarPage: React.FC = () => {
         );
         await Promise.all([fetchCalendarData(), fetchRegistrations()]);
       } catch {
-        setBannerMessage(t("attendees.error.status", "Could not update status."));
+        setBannerMessage(
+          t("attendees.error.status", "Could not update status.")
+        );
       }
     },
     [post, t, fetchCalendarData, fetchRegistrations]
@@ -259,7 +282,12 @@ export const CalendarPage: React.FC = () => {
   return (
     <Box padding={6} background="neutral100">
       <Flex direction="column" alignItems="stretch" gap={5}>
-        <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="center"
+          wrap="wrap"
+          gap={3}
+        >
           <Box>
             <Typography variant="alpha" fontWeight="bold">
               {t("calendar.title", "Events, RSVPs & Check-In")}
@@ -302,7 +330,11 @@ export const CalendarPage: React.FC = () => {
             >
               {t("calendar.downloadIcsFeed", "iCal Feed (.ics)")}
             </Button>
-            <Button variant="tertiary" size="S" onClick={() => navigate(`/settings/${PLUGIN_ID}`)}>
+            <Button
+              variant="tertiary"
+              size="S"
+              onClick={() => navigate(`/settings/${PLUGIN_ID}`)}
+            >
               {t("calendar.settings", "Settings")}
             </Button>
           </Flex>
@@ -368,10 +400,18 @@ export const CalendarPage: React.FC = () => {
             style={{ border: "1px solid #0284C7" }}
           >
             <Flex justifyContent="space-between" alignItems="center">
-              <Typography variant="omega" fontWeight="bold" textColor="primary700">
+              <Typography
+                variant="omega"
+                fontWeight="bold"
+                textColor="primary700"
+              >
                 {bannerMessage}
               </Typography>
-              <Button variant="tertiary" size="S" onClick={() => setBannerMessage(null)}>
+              <Button
+                variant="tertiary"
+                size="S"
+                onClick={() => setBannerMessage(null)}
+              >
                 ×
               </Button>
             </Flex>
@@ -405,8 +445,12 @@ export const CalendarPage: React.FC = () => {
           selectedEventDocId={rsvpEventFilter}
           onSelectEventDocId={setRsvpEventFilter}
           onEditInContentManager={(uid, docId, locale) => {
-            const query = locale ? `?plugins[i18n][locale]=${encodeURIComponent(locale)}` : "";
-            navigate(`/content-manager/collection-types/${uid}/${docId}${query}`);
+            const query = locale
+              ? `?plugins[i18n][locale]=${encodeURIComponent(locale)}`
+              : "";
+            navigate(
+              `/content-manager/collection-types/${uid}/${docId}${query}`
+            );
           }}
           onOpenInCalendar={(docId) =>
             navigate(

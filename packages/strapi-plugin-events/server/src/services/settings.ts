@@ -20,7 +20,9 @@ function mergeSourcesList(
 
   for (const src of userSources) {
     if (!src?.id || !src.uid) continue;
-    const existingIdx = merged.findIndex((s) => s.id === src.id || s.uid === src.uid);
+    const existingIdx = merged.findIndex(
+      (s) => s.id === src.id || s.uid === src.uid
+    );
     if (existingIdx >= 0) {
       merged[existingIdx] = {
         ...merged[existingIdx],
@@ -62,7 +64,9 @@ function mergePresetLists(
 
   for (const item of stored) {
     if (!item?.id || !item.rrule) continue;
-    const idx = result.findIndex((p) => p.id === item.id || p.rrule === item.rrule);
+    const idx = result.findIndex(
+      (p) => p.id === item.id || p.rrule === item.rrule
+    );
     if (idx >= 0) {
       result[idx] = { ...result[idx], ...item };
     } else {
@@ -72,7 +76,11 @@ function mergePresetLists(
   return result;
 }
 
-function resolveNonEmptyString(patchVal: unknown, fallback: string, maxLen?: number): string {
+function resolveNonEmptyString(
+  patchVal: unknown,
+  fallback: string,
+  maxLen?: number
+): string {
   if (typeof patchVal === "string" && patchVal.trim()) {
     const trimmed = patchVal.trim();
     return maxLen ? trimmed.slice(0, maxLen) : trimmed;
@@ -80,7 +88,11 @@ function resolveNonEmptyString(patchVal: unknown, fallback: string, maxLen?: num
   return fallback;
 }
 
-function resolvePositiveInt(patchVal: unknown, fallback: number, maxLimit?: number): number {
+function resolvePositiveInt(
+  patchVal: unknown,
+  fallback: number,
+  maxLimit?: number
+): number {
   if (typeof patchVal === "number" && patchVal >= 1) {
     const floored = Math.floor(patchVal);
     return maxLimit ? Math.min(maxLimit, floored) : floored;
@@ -110,7 +122,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return {
       ...DEFAULT_PLUGIN_SETTINGS,
       ...userConfig,
-      sources: mergeSourcesList(DEFAULT_PLUGIN_SETTINGS.sources, userConfig.sources),
+      sources: mergeSourcesList(
+        DEFAULT_PLUGIN_SETTINGS.sources,
+        userConfig.sources
+      ),
       secondaryCalendars: mergeCalendarsList(
         DEFAULT_PLUGIN_SETTINGS.secondaryCalendars,
         userConfig.secondaryCalendars
@@ -135,9 +150,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return defaults;
       }
 
-      const storedSources = Array.isArray(existing.sources) ? [...existing.sources] : [];
+      const storedSources = Array.isArray(existing.sources)
+        ? [...existing.sources]
+        : [];
       for (const defSource of defaults.sources) {
-        if (!storedSources.some((s) => s.id === defSource.id || s.uid === defSource.uid)) {
+        if (
+          !storedSources.some(
+            (s) => s.id === defSource.id || s.uid === defSource.uid
+          )
+        ) {
           storedSources.push(defSource);
         }
       }
@@ -156,7 +177,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ...existing,
         sources: storedSources,
         secondaryCalendars: storedCalendars,
-        recurrencePresets: mergePresetLists(defaults.recurrencePresets, existing.recurrencePresets),
+        recurrencePresets: mergePresetLists(
+          defaults.recurrencePresets,
+          existing.recurrencePresets
+        ),
       };
       await store.set({ key: STORE_KEY, value: merged });
       return merged;
@@ -164,7 +188,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async getSettings(): Promise<EventsPluginSettings> {
       const store = getStore();
-      const stored = (await store.get({ key: STORE_KEY })) as Partial<EventsPluginSettings> | null;
+      const stored = (await store.get({
+        key: STORE_KEY,
+      })) as Partial<EventsPluginSettings> | null;
       const defaults = getConfigDefaults();
       if (!stored) {
         return defaults;
@@ -177,19 +203,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             ? stored.sources
             : defaults.sources,
         secondaryCalendars:
-          Array.isArray(stored.secondaryCalendars) && stored.secondaryCalendars.length > 0
+          Array.isArray(stored.secondaryCalendars) &&
+          stored.secondaryCalendars.length > 0
             ? stored.secondaryCalendars
             : (defaults.secondaryCalendars ?? []),
-        recurrencePresets: mergePresetLists(defaults.recurrencePresets, stored.recurrencePresets),
+        recurrencePresets: mergePresetLists(
+          defaults.recurrencePresets,
+          stored.recurrencePresets
+        ),
       };
     },
 
-    async updateSettings(patch: Partial<EventsPluginSettings>): Promise<EventsPluginSettings> {
+    async updateSettings(
+      patch: Partial<EventsPluginSettings>
+    ): Promise<EventsPluginSettings> {
       const current = await this.getSettings();
       const next: EventsPluginSettings = {
         ...current,
-        defaultTimezone: resolveNonEmptyString(patch.defaultTimezone, current.defaultTimezone),
-        defaultCapacity: resolvePositiveInt(patch.defaultCapacity, current.defaultCapacity),
+        defaultTimezone: resolveNonEmptyString(
+          patch.defaultTimezone,
+          current.defaultTimezone
+        ),
+        defaultCapacity: resolvePositiveInt(
+          patch.defaultCapacity,
+          current.defaultCapacity
+        ),
         waitlistEnabledByDefault: resolveBoolean(
           patch.waitlistEnabledByDefault,
           current.waitlistEnabledByDefault
@@ -199,14 +237,24 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           current.defaultMaxGuestsPerRegistration,
           50
         ),
-        sendRsvpEmails: resolveBoolean(patch.sendRsvpEmails, current.sendRsvpEmails),
-        feedTitle: resolveNonEmptyString(patch.feedTitle, current.feedTitle, 140),
+        sendRsvpEmails: resolveBoolean(
+          patch.sendRsvpEmails,
+          current.sendRsvpEmails
+        ),
+        feedTitle: resolveNonEmptyString(
+          patch.feedTitle,
+          current.feedTitle,
+          140
+        ),
         sources: resolveArray(patch.sources, current.sources),
         secondaryCalendars: resolveArray(
           patch.secondaryCalendars,
           current.secondaryCalendars ?? []
         ),
-        recurrencePresets: resolveArray(patch.recurrencePresets, current.recurrencePresets ?? []),
+        recurrencePresets: resolveArray(
+          patch.recurrencePresets,
+          current.recurrencePresets ?? []
+        ),
       };
 
       const store = getStore();

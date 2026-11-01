@@ -3,7 +3,10 @@ import type { Core } from "@strapi/strapi";
 import { resolveOccurrenceAlternateDates } from "../../../shared/calendarSystems";
 import { buildCalendarLinks } from "../../../shared/icalGenerator";
 import { EVENT_CONTENT_TYPE_UID } from "../../../shared/pluginId";
-import { expandRuleSlots, parseRRuleFieldValue } from "../../../shared/rruleEngine";
+import {
+  expandRuleSlots,
+  parseRRuleFieldValue,
+} from "../../../shared/rruleEngine";
 import {
   mapEventStatus,
   normalizeEventActionLinks,
@@ -16,7 +19,11 @@ import type {
   EventsPluginSettings,
   ExpandedOccurrence,
 } from "../../../shared/types";
-import { type StrapiDocumentQueryOptions, getDocumentsClient, getRsvpService } from "../types";
+import {
+  type StrapiDocumentQueryOptions,
+  getDocumentsClient,
+  getRsvpService,
+} from "../types";
 
 export interface GetOccurrencesParams {
   from?: string;
@@ -33,9 +40,21 @@ export function resolveOccurrenceWindow(params: GetOccurrencesParams): {
   windowEnd: string;
 } {
   const now = new Date();
-  const defaultFrom = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
-  const defaultTo = new Date(now.getFullYear(), now.getMonth() + 3, 0, 23, 59, 59).toISOString();
-  const isValidIso = (val?: string) => Boolean(val && !Number.isNaN(new Date(val).getTime()));
+  const defaultFrom = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    1
+  ).toISOString();
+  const defaultTo = new Date(
+    now.getFullYear(),
+    now.getMonth() + 3,
+    0,
+    23,
+    59,
+    59
+  ).toISOString();
+  const isValidIso = (val?: string) =>
+    Boolean(val && !Number.isNaN(new Date(val).getTime()));
   return {
     windowStart: isValidIso(params.from) ? String(params.from) : defaultFrom,
     windowEnd: isValidIso(params.to) ? String(params.to) : defaultTo,
@@ -64,7 +83,10 @@ function buildSourceQueryOptions(
   if (params.documentId) {
     queryOpts.filters = { documentId: { $eq: params.documentId } };
   }
-  const effectiveLocale = resolveEffectiveQueryLocale(params.locale, settings.defaultLocale);
+  const effectiveLocale = resolveEffectiveQueryLocale(
+    params.locale,
+    settings.defaultLocale
+  );
   if (effectiveLocale) {
     queryOpts.locale = effectiveLocale;
   }
@@ -130,13 +152,19 @@ function resolveDocColor(
   source: EventSourceMapping,
   categoryVal: string
 ): string {
-  const categoryColor = categoryVal ? source.categoryColors?.[categoryVal] : undefined;
+  const categoryColor = categoryVal
+    ? source.categoryColors?.[categoryVal]
+    : undefined;
   if (categoryColor) return categoryColor;
-  if (typeof doc.color === "string" && doc.color.startsWith("#")) return doc.color;
+  if (typeof doc.color === "string" && doc.color.startsWith("#"))
+    return doc.color;
   return source.color;
 }
 
-function readOptionalFieldString(doc: Record<string, unknown>, fieldName?: string): string {
+function readOptionalFieldString(
+  doc: Record<string, unknown>,
+  fieldName?: string
+): string {
   if (!fieldName) return "";
   return String(doc[fieldName] ?? "");
 }
@@ -184,11 +212,17 @@ function extractDocMetadata(
   );
   const color = resolveDocColor(doc, source, categoryVal);
   const rsvpField = source.fields.rsvpEnabled ?? "rsvpEnabled";
-  const rsvpEnabled = doc[rsvpField] !== undefined ? Boolean(doc[rsvpField]) : false;
+  const rsvpEnabled =
+    doc[rsvpField] !== undefined ? Boolean(doc[rsvpField]) : false;
   const capacity = resolveDocCapacity(doc, source);
   const posterField = source.fields.poster;
-  const poster = normalizeEventPoster(posterField ? doc[posterField] : doc.poster, baseTitle);
-  const actionLinks = normalizeEventActionLinks(doc[source.fields.actionLinks ?? "actionLinks"]);
+  const poster = normalizeEventPoster(
+    posterField ? doc[posterField] : doc.poster,
+    baseTitle
+  );
+  const actionLinks = normalizeEventActionLinks(
+    doc[source.fields.actionLinks ?? "actionLinks"]
+  );
   const spotlightConfig = normalizeEventSpotlightConfig(
     doc[source.fields.spotlightConfig ?? "spotlightConfig"]
   );
@@ -212,7 +246,10 @@ function extractDocMetadata(
   };
 }
 
-function matchesCategoryFilter(categoryVal: string, filterCategory?: string): boolean {
+function matchesCategoryFilter(
+  categoryVal: string,
+  filterCategory?: string
+): boolean {
   if (!filterCategory || filterCategory === "all") return true;
   return categoryVal.toLowerCase() === filterCategory.toLowerCase();
 }
@@ -224,7 +261,10 @@ function resolveDocumentRecurrence(
   allDay: boolean
 ) {
   const rawRecurrence = source.fields.rrule ? doc[source.fields.rrule] : null;
-  const docTz = typeof doc.timezone === "string" && doc.timezone ? doc.timezone : defaultTimezone;
+  const docTz =
+    typeof doc.timezone === "string" && doc.timezone
+      ? doc.timezone
+      : defaultTimezone;
   const recurrence = parseRRuleFieldValue(rawRecurrence, docTz);
   if (allDay) {
     recurrence.allDay = true;
@@ -246,7 +286,12 @@ export async function expandDocumentOccurrences(
   const startEnd = resolveStartEndFromDocument(doc, source);
   if (!startEnd) return [];
 
-  const meta = extractDocMetadata(doc, source, docId, startEnd.startDate.slice(0, 10));
+  const meta = extractDocMetadata(
+    doc,
+    source,
+    docId,
+    startEnd.startDate.slice(0, 10)
+  );
   if (!matchesCategoryFilter(meta.categoryVal, params.category)) {
     return [];
   }
@@ -310,7 +355,10 @@ function toUndefinedIfEmpty(val: string): string | undefined {
   return val ? val : undefined;
 }
 
-function readOptionalDocString(doc: Record<string, unknown>, key: string): string | undefined {
+function readOptionalDocString(
+  doc: Record<string, unknown>,
+  key: string
+): string | undefined {
   const val = doc[key];
   return typeof val === "string" && val ? val : undefined;
 }
@@ -325,7 +373,8 @@ async function buildSingleExpandedOccurrence(args: {
   settings: EventsPluginSettings;
   paramLocale?: string;
 }): Promise<ExpandedOccurrence> {
-  const { strapi, doc, source, meta, slot, recurrence, settings, paramLocale } = args;
+  const { strapi, doc, source, meta, slot, recurrence, settings, paramLocale } =
+    args;
   const effectiveTitle = slot.override?.title || meta.baseTitle;
   const effectiveLocation = slot.override?.location || meta.baseLocation;
   const rsvpStats = await fetchSlotRsvpStats(
@@ -383,7 +432,8 @@ async function buildSingleExpandedOccurrence(args: {
     isOverridden: slot.isOverridden,
     rsvp: rsvpStats,
     calendarLinks,
-    alternateDates: Object.keys(alternateDates).length > 0 ? alternateDates : undefined,
+    alternateDates:
+      Object.keys(alternateDates).length > 0 ? alternateDates : undefined,
     poster: meta.poster,
     actionLinks: meta.actionLinks,
     spotlightConfig: meta.spotlightConfig,
@@ -470,7 +520,11 @@ function applyQuickCreateRRuleAndRsvp(
   if (source.fields.rsvpEnabled && typeof params.rsvpEnabled === "boolean") {
     data[source.fields.rsvpEnabled] = params.rsvpEnabled;
   }
-  if (source.fields.capacity && typeof params.capacity === "number" && params.capacity > 0) {
+  if (
+    source.fields.capacity &&
+    typeof params.capacity === "number" &&
+    params.capacity > 0
+  ) {
     data[source.fields.capacity] = Math.floor(params.capacity);
   }
 }

@@ -5,7 +5,10 @@ import icalFactory from "../server/src/services/ical";
 import occurrenceFactory from "../server/src/services/occurrence";
 import rsvpFactory from "../server/src/services/rsvp";
 import settingsFactory from "../server/src/services/settings";
-import { EVENT_CONTENT_TYPE_UID, REGISTRATION_CONTENT_TYPE_UID } from "../shared/pluginId";
+import {
+  EVENT_CONTENT_TYPE_UID,
+  REGISTRATION_CONTENT_TYPE_UID,
+} from "../shared/pluginId";
 import {
   isEventSpotlightActiveOnDate,
   normalizeEventActionLinks,
@@ -88,9 +91,13 @@ describe("Generic Event Poster, Action Links & Spotlight Corner Popup Service", 
     expect(sanitizeEventUrl("https://turkiyeburslari.gov.tr")).toBe(
       "https://turkiyeburslari.gov.tr"
     );
-    expect(sanitizeEventUrl("/uploads/ytb_poster_2026.webp")).toBe("/uploads/ytb_poster_2026.webp");
+    expect(sanitizeEventUrl("/uploads/ytb_poster_2026.webp")).toBe(
+      "/uploads/ytb_poster_2026.webp"
+    );
     expect(sanitizeEventUrl("javascript:alert(1)")).toBeNull();
-    expect(sanitizeEventUrl("data:text/html,<script>alert(1)</script>")).toBeNull();
+    expect(
+      sanitizeEventUrl("data:text/html,<script>alert(1)</script>")
+    ).toBeNull();
     expect(sanitizeEventUrl("//evil.example.com/payload")).toBeNull();
 
     const mediaPoster = normalizeEventPoster({
@@ -164,7 +171,8 @@ describe("Generic Event Poster, Action Links & Spotlight Corner Popup Service", 
       date: "2026-02-01",
       endDate: "2026-02-28",
       category: "education",
-      description: "Convocatoria anual de becas de la Fundación Diyanet de Turquía.",
+      description:
+        "Convocatoria anual de becas de la Fundación Diyanet de Turquía.",
       poster: {
         url: "/images/events/diyanet-scholarship-poster.svg",
         alternativeText: "Afiche Becas Diyanet",
@@ -197,7 +205,8 @@ describe("Generic Event Poster, Action Links & Spotlight Corner Popup Service", 
       date: "2026-01-10",
       endDate: "2026-02-20",
       category: "education",
-      description: "Becas completas del Gobierno de Turquía para pregrado y posgrado.",
+      description:
+        "Becas completas del Gobierno de Turquía para pregrado y posgrado.",
       poster: {
         url: "/images/events/ytb-scholarship-poster.svg",
         alternativeText: "Afiche Türkiye Bursları YTB",
@@ -251,9 +260,13 @@ describe("Generic Event Poster, Action Links & Spotlight Corner Popup Service", 
     const activeFeb12 = ctx.body.data;
     expect(activeFeb12).toHaveLength(2);
     expect(activeFeb12[0].documentId).toBe("evt-ytb-2026");
-    expect(activeFeb12[0].poster?.url).toBe("/images/events/ytb-scholarship-poster.svg");
+    expect(activeFeb12[0].poster?.url).toBe(
+      "/images/events/ytb-scholarship-poster.svg"
+    );
     expect(activeFeb12[0].actionLinks).toHaveLength(2);
-    expect(activeFeb12[0].spotlightConfig?.badgeText).toBe("Inscripciones Febrero");
+    expect(activeFeb12[0].spotlightConfig?.badgeText).toBe(
+      "Inscripciones Febrero"
+    );
 
     expect(activeFeb12[1].documentId).toBe("evt-diyanet-2026");
     expect(activeFeb12[1].spotlightConfig?.priority).toBe(10);

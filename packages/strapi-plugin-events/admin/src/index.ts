@@ -17,7 +17,8 @@ export default {
         id: `${PLUGIN_ID}.plugin.name`,
         defaultMessage: "Events & RSVPs",
       },
-      Component: () => import("./pages/CalendarPage").then((m) => ({ default: m.default })),
+      Component: () =>
+        import("./pages/CalendarPage").then((m) => ({ default: m.default })),
       permissions: [
         {
           action: `plugin::${PLUGIN_ID}.read`,
@@ -51,7 +52,8 @@ export default {
       },
       id: `${PLUGIN_ID}-settings`,
       to: `${PLUGIN_ID}`,
-      Component: () => import("./pages/SettingsPage").then((m) => ({ default: m.default })),
+      Component: () =>
+        import("./pages/SettingsPage").then((m) => ({ default: m.default })),
       permissions: [
         {
           action: `plugin::${PLUGIN_ID}.settings.update`,
@@ -67,10 +69,14 @@ export default {
       if (typeof maybeApp.addSettingsLink === "function") {
         maybeApp.addSettingsLink(calendarSuiteSection.id, eventsSettingsLink);
       } else if (typeof maybeApp.createSettingSection === "function") {
-        maybeApp.createSettingSection(calendarSuiteSection, [eventsSettingsLink]);
+        maybeApp.createSettingSection(calendarSuiteSection, [
+          eventsSettingsLink,
+        ]);
       }
     } catch {
-      maybeApp.createSettingSection?.(calendarSuiteSection, [eventsSettingsLink]);
+      maybeApp.createSettingSection?.(calendarSuiteSection, [
+        eventsSettingsLink,
+      ]);
     }
   },
 
@@ -78,7 +84,9 @@ export default {
     const cmPlugin = app.getPlugin("content-manager") as
       | {
           apis?: {
-            addEditViewSidePanel?: (panels: Array<typeof EventSidePanel>) => void;
+            addEditViewSidePanel?: (
+              panels: Array<typeof EventSidePanel>
+            ) => void;
           };
         }
       | undefined;
@@ -89,18 +97,25 @@ export default {
   },
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
-    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    const allLocales = Array.from(
+      new Set([...locales, "en", "es", "ar", "tr"])
+    );
     return Promise.all(
       allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(
+            `./translations/${locale}.json`
+          );
           const prefixed: Record<string, string> = {
             ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en),
-            ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ?? CM_PLACEHOLDER_TRANSLATIONS.en),
+            ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ??
+              CM_PLACEHOLDER_TRANSLATIONS.en),
           };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
-            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`)
+              ? k
+              : `${PLUGIN_ID}.${k}`;
             prefixed[fullKey] = v;
           }
           return { data: prefixed, locale };

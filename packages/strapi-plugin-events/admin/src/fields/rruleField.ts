@@ -18,7 +18,8 @@ export const rruleField = {
   },
   icon: Calendar as ComponentType<Record<string, unknown>>,
   components: {
-    Input: async () => import("../components/RRuleInput").then((m) => ({ default: m.default })),
+    Input: async () =>
+      import("../components/RRuleInput").then((m) => ({ default: m.default })),
   },
   options: {
     base: [],
@@ -38,7 +39,8 @@ export const rruleField = {
             },
             description: {
               id: `${PLUGIN_ID}.rrule.options.required.description`,
-              defaultMessage: "Require editors to specify recurrence or schedule settings.",
+              defaultMessage:
+                "Require editors to specify recurrence or schedule settings.",
             },
           },
         ],

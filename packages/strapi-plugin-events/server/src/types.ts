@@ -34,7 +34,9 @@ export interface StrapiDocumentQueryOptions {
 }
 
 export interface StrapiDocumentServiceClient {
-  findMany: (options?: StrapiDocumentQueryOptions) => Promise<Array<Record<string, unknown>>>;
+  findMany: (
+    options?: StrapiDocumentQueryOptions
+  ) => Promise<Array<Record<string, unknown>>>;
   findOne: (options: {
     documentId: string;
     locale?: string;
@@ -55,11 +57,16 @@ export interface StrapiDocumentServiceClient {
 export interface EventsSettingsService {
   ensureInitialized: () => Promise<EventsPluginSettings>;
   getSettings: () => Promise<EventsPluginSettings>;
-  updateSettings: (patch: Partial<EventsPluginSettings>) => Promise<EventsPluginSettings>;
+  updateSettings: (
+    patch: Partial<EventsPluginSettings>
+  ) => Promise<EventsPluginSettings>;
 }
 
 export interface EventsOccurrenceService {
-  registerCalendarFormatter: (calendarId: string, formatter: CalendarSystemFormatterFn) => void;
+  registerCalendarFormatter: (
+    calendarId: string,
+    formatter: CalendarSystemFormatterFn
+  ) => void;
   unregisterCalendarFormatter: (calendarId: string) => void;
   formatDateInCalendarSystem: (
     isoOrDateKey: string,
@@ -168,25 +175,40 @@ export interface EventsIcalService {
   }) => Promise<string>;
 }
 
-export function getDocumentsClient(strapi: Core.Strapi, uid: string): StrapiDocumentServiceClient {
-  const docsFn = strapi.documents as unknown as (targetUid: string) => StrapiDocumentServiceClient;
+export function getDocumentsClient(
+  strapi: Core.Strapi,
+  uid: string
+): StrapiDocumentServiceClient {
+  const docsFn = strapi.documents as unknown as (
+    targetUid: string
+  ) => StrapiDocumentServiceClient;
   return docsFn(uid);
 }
 
 export function getSettingsService(strapi: Core.Strapi): EventsSettingsService {
-  return strapi.plugin(PLUGIN_ID).service("settings") as unknown as EventsSettingsService;
+  return strapi
+    .plugin(PLUGIN_ID)
+    .service("settings") as unknown as EventsSettingsService;
 }
 
-export function getOccurrenceService(strapi: Core.Strapi): EventsOccurrenceService {
-  return strapi.plugin(PLUGIN_ID).service("occurrence") as unknown as EventsOccurrenceService;
+export function getOccurrenceService(
+  strapi: Core.Strapi
+): EventsOccurrenceService {
+  return strapi
+    .plugin(PLUGIN_ID)
+    .service("occurrence") as unknown as EventsOccurrenceService;
 }
 
 export function getRsvpService(strapi: Core.Strapi): EventsRsvpService {
-  return strapi.plugin(PLUGIN_ID).service("rsvp") as unknown as EventsRsvpService;
+  return strapi
+    .plugin(PLUGIN_ID)
+    .service("rsvp") as unknown as EventsRsvpService;
 }
 
 export function getIcalService(strapi: Core.Strapi): EventsIcalService {
-  return strapi.plugin(PLUGIN_ID).service("ical") as unknown as EventsIcalService;
+  return strapi
+    .plugin(PLUGIN_ID)
+    .service("ical") as unknown as EventsIcalService;
 }
 
 export function getErrorMessage(err: unknown, fallback: string): string {

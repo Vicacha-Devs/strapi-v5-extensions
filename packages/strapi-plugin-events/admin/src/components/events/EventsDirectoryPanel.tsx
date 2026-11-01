@@ -34,15 +34,23 @@ const EVENT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 function getEventStatusColors(status: string): { bg: string; text: string } {
-  return EVENT_STATUS_COLORS[status] ?? { bg: "warning100", text: "warning700" };
+  return (
+    EVENT_STATUS_COLORS[status] ?? { bg: "warning100", text: "warning700" }
+  );
 }
 
-function matchesCategoryFilter(ev: ExpandedOccurrence, categoryFilter: string): boolean {
+function matchesCategoryFilter(
+  ev: ExpandedOccurrence,
+  categoryFilter: string
+): boolean {
   if (categoryFilter === "all") return true;
   return (ev.category ?? "").toLowerCase() === categoryFilter.toLowerCase();
 }
 
-function matchesRsvpModeFilter(ev: ExpandedOccurrence, rsvpModeFilter: string): boolean {
+function matchesRsvpModeFilter(
+  ev: ExpandedOccurrence,
+  rsvpModeFilter: string
+): boolean {
   const enabled = Boolean(ev.rsvp?.rsvpEnabled);
   if (rsvpModeFilter === "rsvp") return enabled;
   if (rsvpModeFilter === "info") return !enabled;
@@ -172,7 +180,10 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
           <Typography variant="omega" fontWeight="semiBold">
             {dateLabel}
           </Typography>
-          <Badge backgroundColor={statusColors.bg} textColor={statusColors.text}>
+          <Badge
+            backgroundColor={statusColors.bg}
+            textColor={statusColors.text}
+          >
             {t(`status.${ev.status}`, ev.status.toUpperCase())}
           </Badge>
         </Flex>
@@ -191,7 +202,9 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
             <Button
               size="S"
               variant={rsvpBtnVariant}
-              onClick={() => onSelectEventDocId(isSelectedForRsvp ? "" : ev.documentId)}
+              onClick={() =>
+                onSelectEventDocId(isSelectedForRsvp ? "" : ev.documentId)
+              }
             >
               {rsvpBtnLabel}
             </Button>
@@ -199,11 +212,17 @@ const EventDirectoryRow: React.FC<EventDirectoryRowProps> = ({
           <Button
             size="S"
             variant="tertiary"
-            onClick={() => onEditInContentManager(ev.uid, ev.documentId, ev.locale)}
+            onClick={() =>
+              onEditInContentManager(ev.uid, ev.documentId, ev.locale)
+            }
           >
             {t("events.directory.editEvent", "Edit Event")}
           </Button>
-          <Button size="S" variant="tertiary" onClick={() => onOpenInCalendar(ev.documentId)}>
+          <Button
+            size="S"
+            variant="tertiary"
+            onClick={() => onOpenInCalendar(ev.documentId)}
+          >
             {t("calendar.openUnifiedCalendar", "Calendar")}
           </Button>
         </Flex>
@@ -254,7 +273,12 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
   return (
     <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Flex justifyContent="space-between" alignItems="flex-end" wrap="wrap" gap={3}>
+        <Flex
+          justifyContent="space-between"
+          alignItems="flex-end"
+          wrap="wrap"
+          gap={3}
+        >
           <Box>
             <Flex gap={2} alignItems="center">
               <Typography variant="delta" tag="h2" fontWeight="bold">
@@ -277,7 +301,9 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
           <Flex gap={3} wrap="wrap" alignItems="flex-end">
             <Box style={{ minWidth: 220 }}>
               <Field.Root>
-                <Field.Label>{t("events.directory.search", "Search Events")}</Field.Label>
+                <Field.Label>
+                  {t("events.directory.search", "Search Events")}
+                </Field.Label>
                 <TextInput
                   value={eventSearch}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -293,10 +319,14 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
 
             <Box style={{ minWidth: 160 }}>
               <Field.Root>
-                <Field.Label>{t("calendar.categoryFilter", "Category")}</Field.Label>
+                <Field.Label>
+                  {t("calendar.categoryFilter", "Category")}
+                </Field.Label>
                 <SingleSelect
                   value={categoryFilter}
-                  onChange={(val: string | number) => setCategoryFilter(String(val))}
+                  onChange={(val: string | number) =>
+                    setCategoryFilter(String(val))
+                  }
                 >
                   <SingleSelectOption value="all">
                     {t("calendar.allCategories", "All Categories")}
@@ -312,10 +342,14 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
 
             <Box style={{ minWidth: 160 }}>
               <Field.Root>
-                <Field.Label>{t("events.directory.rsvpFilter", "RSVP Mode")}</Field.Label>
+                <Field.Label>
+                  {t("events.directory.rsvpFilter", "RSVP Mode")}
+                </Field.Label>
                 <SingleSelect
                   value={rsvpModeFilter}
-                  onChange={(val: string | number) => setRsvpModeFilter(String(val))}
+                  onChange={(val: string | number) =>
+                    setRsvpModeFilter(String(val))
+                  }
                 >
                   <SingleSelectOption value="all">
                     {t("events.directory.allEvents", "All Events")}
@@ -335,7 +369,10 @@ export const EventsDirectoryPanel: React.FC<EventsDirectoryPanelProps> = ({
         {filteredEvents.length === 0 ? (
           <Box padding={4} background="neutral100" hasRadius>
             <Typography variant="omega" textColor="neutral600">
-              {t("events.directory.empty", "No events found matching the current filters.")}
+              {t(
+                "events.directory.empty",
+                "No events found matching the current filters."
+              )}
             </Typography>
           </Box>
         ) : (

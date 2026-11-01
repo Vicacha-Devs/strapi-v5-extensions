@@ -37,7 +37,11 @@ function applyAttributeExtensions(
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
     if (!attrName || !attrDef || typeof attrDef !== "object") continue;
     mergeAttributeIntoTarget(contentType.attributes, attrName, attrDef);
-    mergeAttributeIntoTarget(contentType.__schema__?.attributes, attrName, attrDef);
+    mergeAttributeIntoTarget(
+      contentType.__schema__?.attributes,
+      attrName,
+      attrDef
+    );
   }
 }
 
@@ -90,7 +94,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   if (eventSourceWithCategories?.categoryColors && !eventExtensions.category) {
-    eventExtensions.category = buildCategoryEnumAttribute(eventSourceWithCategories.categoryColors);
+    eventExtensions.category = buildCategoryEnumAttribute(
+      eventSourceWithCategories.categoryColors
+    );
   }
 
   if (Object.keys(eventExtensions).length > 0) {
