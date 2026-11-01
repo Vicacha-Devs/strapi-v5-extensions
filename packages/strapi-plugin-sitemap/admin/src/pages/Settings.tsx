@@ -6,15 +6,19 @@ import {
   Flex,
   Typography,
   TextInput,
-  Tabs
+  Tabs,
 } from "@strapi/design-system";
 import { Check } from "@strapi/icons";
 import { useFetchClient } from "@strapi/strapi/admin";
 import React, { useState, useEffect } from "react";
 import { useIntl } from "react-intl";
 
-import CollectionTypeModal, { type CollectionTypeConfig } from "../components/CollectionTypeModal";
-import CustomURLModal, { type CustomURLConfig } from "../components/CustomURLModal";
+import CollectionTypeModal, {
+  type CollectionTypeConfig,
+} from "../components/CollectionTypeModal";
+import CustomURLModal, {
+  type CustomURLConfig,
+} from "../components/CustomURLModal";
 import { CollectionTypesSection } from "../components/settings/CollectionTypesSection";
 import { CustomUrlsSection } from "../components/settings/CustomUrlsSection";
 import { ExcludedUrlsSection } from "../components/settings/ExcludedUrlsSection";
@@ -42,7 +46,9 @@ interface NormalizedSitemapSettings {
   sitemaps: SitemapDefinition[];
 }
 
-const normalizeFetchedSettings = (data?: SitemapSettingsPayload): NormalizedSitemapSettings => ({
+const normalizeFetchedSettings = (
+  data?: SitemapSettingsPayload
+): NormalizedSitemapSettings => ({
   baseUrl: data?.baseUrl || "",
   collectionTypes: data?.collectionTypes || [],
   customURLs: data?.customURLs || [],
@@ -51,7 +57,11 @@ const normalizeFetchedSettings = (data?: SitemapSettingsPayload): NormalizedSite
   sitemaps: data?.sitemaps || [],
 });
 
-const upsertAtIndex = <T,>(items: T[], index: number | null, nextItem: T): T[] => {
+const upsertAtIndex = <T,>(
+  items: T[],
+  index: number | null,
+  nextItem: T
+): T[] => {
   if (index === null) {
     return [...items, nextItem];
   }
@@ -64,7 +74,9 @@ const Settings: React.FC = () => {
 
   const [baseUrl, setBaseUrl] = useState<string>("");
   const [initialBaseUrl, setInitialBaseUrl] = useState<string>("");
-  const [collectionTypes, setCollectionTypes] = useState<CollectionTypeConfig[]>([]);
+  const [collectionTypes, setCollectionTypes] = useState<
+    CollectionTypeConfig[]
+  >([]);
   const [customURLs, setCustomURLs] = useState<CustomURLConfig[]>([]);
   const [excludedUrls, setExcludedUrls] = useState<string[]>([]);
   const [initialExcludedUrls, setInitialExcludedUrls] = useState<string[]>([]);
@@ -72,16 +84,27 @@ const Settings: React.FC = () => {
 
   const [useSitemapIndex, setUseSitemapIndex] = useState<boolean>(false);
   const [sitemaps, setSitemaps] = useState<SitemapDefinition[]>([]);
-  const [initialUseSitemapIndex, setInitialUseSitemapIndex] = useState<boolean>(false);
-  const [initialSitemaps, setInitialSitemaps] = useState<SitemapDefinition[]>([]);
+  const [initialUseSitemapIndex, setInitialUseSitemapIndex] =
+    useState<boolean>(false);
+  const [initialSitemaps, setInitialSitemaps] = useState<SitemapDefinition[]>(
+    []
+  );
   const [isSitemapModalOpen, setIsSitemapModalOpen] = useState<boolean>(false);
-  const [editingSitemapIndex, setEditingSitemapIndex] = useState<number | null>(null);
+  const [editingSitemapIndex, setEditingSitemapIndex] = useState<number | null>(
+    null
+  );
 
-  const [isCollectionModalOpen, setIsCollectionModalOpen] = useState<boolean>(false);
-  const [editingCollectionIndex, setEditingCollectionIndex] = useState<number | null>(null);
+  const [isCollectionModalOpen, setIsCollectionModalOpen] =
+    useState<boolean>(false);
+  const [editingCollectionIndex, setEditingCollectionIndex] = useState<
+    number | null
+  >(null);
 
-  const [isCustomURLModalOpen, setIsCustomURLModalOpen] = useState<boolean>(false);
-  const [editingCustomIndex, setEditingCustomIndex] = useState<number | null>(null);
+  const [isCustomURLModalOpen, setIsCustomURLModalOpen] =
+    useState<boolean>(false);
+  const [editingCustomIndex, setEditingCustomIndex] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -112,7 +135,9 @@ const Settings: React.FC = () => {
   const isExcludedUrlsModified =
     JSON.stringify(excludedUrls) !== JSON.stringify(initialExcludedUrls);
 
-  const persistSettings = async (overrides: Partial<NormalizedSitemapSettings> = {}) => {
+  const persistSettings = async (
+    overrides: Partial<NormalizedSitemapSettings> = {}
+  ) => {
     await put("/sitemap/settings", {
       baseUrl,
       collectionTypes,
@@ -191,7 +216,11 @@ const Settings: React.FC = () => {
   };
 
   const handleSaveCollectionType = async (data: CollectionTypeConfig) => {
-    const updatedCollectionTypes = upsertAtIndex(collectionTypes, editingCollectionIndex, data);
+    const updatedCollectionTypes = upsertAtIndex(
+      collectionTypes,
+      editingCollectionIndex,
+      data
+    );
     setCollectionTypes(updatedCollectionTypes);
     setIsCollectionModalOpen(false);
     setEditingCollectionIndex(null);
@@ -204,7 +233,9 @@ const Settings: React.FC = () => {
   };
 
   const handleDeleteCollectionType = async (index: number) => {
-    const updatedCollectionTypes = collectionTypes.filter((_, i) => i !== index);
+    const updatedCollectionTypes = collectionTypes.filter(
+      (_, i) => i !== index
+    );
     setCollectionTypes(updatedCollectionTypes);
 
     try {
@@ -215,7 +246,11 @@ const Settings: React.FC = () => {
   };
 
   const handleSaveCustomURL = async (data: CustomURLConfig) => {
-    const updatedCustomURLs = upsertAtIndex(customURLs, editingCustomIndex, data);
+    const updatedCustomURLs = upsertAtIndex(
+      customURLs,
+      editingCustomIndex,
+      data
+    );
     setCustomURLs(updatedCustomURLs);
     setIsCustomURLModalOpen(false);
     setEditingCustomIndex(null);
@@ -238,61 +273,52 @@ const Settings: React.FC = () => {
     }
   };
 
+  const tr = (id: string, defaultMessage: string) =>
+    formatMessage({ id: getTrad(id), defaultMessage });
+
   return (
     <Main>
       <Box padding={8} background="neutral100">
         <Box paddingBottom={4}>
-          <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={4}>
+          <Flex
+            justifyContent="space-between"
+            alignItems="center"
+            wrap="wrap"
+            gap={4}
+          >
             <Box>
               <Typography variant="alpha" tag="h1">
-                {formatMessage({ id: getTrad("settings.title"), defaultMessage: "Sitemap" })}
+                {tr("settings.title", "Sitemap")}
               </Typography>
               <Typography variant="epsilon" textColor="neutral600" tag="p">
-                {formatMessage({
-                  id: getTrad("settings.subtitle"),
-                  defaultMessage: "Settings for the XML sitemap and sitemap index",
-                })}
+                {tr(
+                  "settings.subtitle",
+                  "Settings for the XML sitemap and sitemap index"
+                )}
               </Typography>
             </Box>
             <Button
               variant="secondary"
               onClick={() => window.open("/api/sitemap/sitemap.xml", "_blank")}
             >
-              {formatMessage({
-                id: getTrad("settings.showSitemap"),
-                defaultMessage: "Show Sitemap",
-              })}
+              {tr("settings.showSitemap", "Show Sitemap")}
             </Button>
           </Flex>
         </Box>
 
         <Tabs.Root defaultValue="general">
-          <Tabs.List
-            aria-label={formatMessage({ id: getTrad("settings.title"), defaultMessage: "Sitemap" })}
-          >
+          <Tabs.List aria-label={tr("settings.title", "Sitemap")}>
             <Tabs.Trigger value="general">
-              {formatMessage({
-                id: getTrad("settings.tabs.general"),
-                defaultMessage: "General & Sitemap Index",
-              })}
+              {tr("settings.tabs.general", "General & Sitemap Index")}
             </Tabs.Trigger>
             <Tabs.Trigger value="collection-types">
-              {`${formatMessage({
-                id: getTrad("settings.collectionTypes.title"),
-                defaultMessage: "Collection Types",
-              })} (${collectionTypes.length})`}
+              {`${tr("settings.collectionTypes.title", "Collection Types")} (${collectionTypes.length})`}
             </Tabs.Trigger>
             <Tabs.Trigger value="custom-urls">
-              {`${formatMessage({
-                id: getTrad("settings.customUrls.title"),
-                defaultMessage: "Custom URLs",
-              })} (${customURLs.length})`}
+              {`${tr("settings.customUrls.title", "Custom URLs")} (${customURLs.length})`}
             </Tabs.Trigger>
             <Tabs.Trigger value="excluded-urls">
-              {`${formatMessage({
-                id: getTrad("settings.excludedUrls.title"),
-                defaultMessage: "Excluded URLs",
-              })} (${excludedUrls.length})`}
+              {`${tr("settings.excludedUrls.title", "Excluded URLs")} (${excludedUrls.length})`}
             </Tabs.Trigger>
           </Tabs.List>
 
@@ -306,27 +332,24 @@ const Settings: React.FC = () => {
                 marginBottom={6}
               >
                 <Typography variant="delta" tag="h2">
-                  {formatMessage({
-                    id: getTrad("settings.baseUrl.title"),
-                    defaultMessage: "Base URL",
-                  })}
+                  {tr("settings.baseUrl.title", "Base URL")}
                 </Typography>
                 <Box paddingBottom={4}>
                   <Typography variant="pi" textColor="neutral600">
-                    {formatMessage({
-                      id: getTrad("settings.baseUrl.description"),
-                      defaultMessage: "Enter the base URL used for all sitemap entries",
-                    })}
+                    {tr(
+                      "settings.baseUrl.description",
+                      "Enter the base URL used for all sitemap entries"
+                    )}
                   </Typography>
                 </Box>
                 <Grid.Root gap={4}>
                   <Grid.Item col={6} s={12}>
                     <Box style={{ width: "100%" }}>
                       <TextInput
-                        placeholder={formatMessage({
-                          id: getTrad("settings.baseUrl.placeholder"),
-                          defaultMessage: "https://example.com",
-                        })}
+                        placeholder={tr(
+                          "settings.baseUrl.placeholder",
+                          "https://example.com"
+                        )}
                         value={baseUrl}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           setBaseUrl(e.target.value)
@@ -342,7 +365,7 @@ const Settings: React.FC = () => {
                     disabled={!isUrlModified}
                     variant={isUrlModified ? "default" : "tertiary"}
                   >
-                    {formatMessage({ id: getTrad("settings.save"), defaultMessage: "Save" })}
+                    {tr("settings.save", "Save")}
                   </Button>
                 </Box>
               </Box>
@@ -424,7 +447,9 @@ const Settings: React.FC = () => {
         }}
         onSave={handleSaveCollectionType}
         existingData={
-          editingCollectionIndex !== null ? collectionTypes[editingCollectionIndex] : null
+          editingCollectionIndex !== null
+            ? collectionTypes[editingCollectionIndex]
+            : null
         }
       />
 
@@ -435,7 +460,9 @@ const Settings: React.FC = () => {
           setEditingCustomIndex(null);
         }}
         onSave={handleSaveCustomURL}
-        existingData={editingCustomIndex !== null ? customURLs[editingCustomIndex] : null}
+        existingData={
+          editingCustomIndex !== null ? customURLs[editingCustomIndex] : null
+        }
       />
 
       <SitemapDefinitionModal
@@ -445,7 +472,9 @@ const Settings: React.FC = () => {
           setEditingSitemapIndex(null);
         }}
         onSave={handleSaveSitemapDef}
-        existingDef={editingSitemapIndex !== null ? sitemaps[editingSitemapIndex] : null}
+        existingDef={
+          editingSitemapIndex !== null ? sitemaps[editingSitemapIndex] : null
+        }
         collectionTypes={collectionTypes}
       />
     </Main>

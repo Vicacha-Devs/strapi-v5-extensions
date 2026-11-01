@@ -33,7 +33,13 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+    <Box
+      padding={6}
+      background="neutral0"
+      shadow="filterShadow"
+      hasRadius
+      marginBottom={6}
+    >
       <Typography variant="delta" tag="h2">
         {formatMessage({
           id: getTrad("settings.collectionTypes.title"),
@@ -44,7 +50,8 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
         <Typography variant="pi" textColor="neutral600">
           {formatMessage({
             id: getTrad("settings.collectionTypes.description"),
-            defaultMessage: "Configure how your collection types are included in the sitemap",
+            defaultMessage:
+              "Configure how your collection types are included in the sitemap",
           })}
         </Typography>
       </Box>
@@ -53,32 +60,50 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
           <Tr>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.id"), defaultMessage: "ID" })}
+                {formatMessage({
+                  id: getTrad("table.id"),
+                  defaultMessage: "ID",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.type"), defaultMessage: "Type" })}
+                {formatMessage({
+                  id: getTrad("table.type"),
+                  defaultMessage: "Type",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.langcode"), defaultMessage: "Langcode" })}
+                {formatMessage({
+                  id: getTrad("table.langcode"),
+                  defaultMessage: "Langcode",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.pattern"), defaultMessage: "Pattern" })}
+                {formatMessage({
+                  id: getTrad("table.pattern"),
+                  defaultMessage: "Pattern",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.priority"), defaultMessage: "Priority" })}
+                {formatMessage({
+                  id: getTrad("table.priority"),
+                  defaultMessage: "Priority",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.frequency"), defaultMessage: "Frequency" })}
+                {formatMessage({
+                  id: getTrad("table.frequency"),
+                  defaultMessage: "Frequency",
+                })}
               </Typography>
             </Th>
             <Th>
@@ -91,12 +116,18 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.thumbnail"), defaultMessage: "Thumbnail" })}
+                {formatMessage({
+                  id: getTrad("table.thumbnail"),
+                  defaultMessage: "Thumbnail",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.actions"), defaultMessage: "Actions" })}
+                {formatMessage({
+                  id: getTrad("table.actions"),
+                  defaultMessage: "Actions",
+                })}
               </Typography>
             </Th>
           </Tr>
@@ -125,12 +156,20 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
               <Td>
                 <Typography textColor="neutral800">
                   {item.lastModified
-                    ? formatMessage({ id: getTrad("common.yes"), defaultMessage: "Yes" })
-                    : formatMessage({ id: getTrad("common.no"), defaultMessage: "No" })}
+                    ? formatMessage({
+                        id: getTrad("common.yes"),
+                        defaultMessage: "Yes",
+                      })
+                    : formatMessage({
+                        id: getTrad("common.no"),
+                        defaultMessage: "No",
+                      })}
                 </Typography>
               </Td>
               <Td>
-                <Typography textColor="neutral800">{item.thumbnail || "-"}</Typography>
+                <Typography textColor="neutral800">
+                  {item.thumbnail || "-"}
+                </Typography>
               </Td>
               <Td>
                 <Flex gap={2}>
@@ -139,14 +178,20 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
                     startIcon={<Pencil />}
                     onClick={() => onEditCollectionType(index)}
                   >
-                    {formatMessage({ id: getTrad("action.edit"), defaultMessage: "Edit" })}
+                    {formatMessage({
+                      id: getTrad("action.edit"),
+                      defaultMessage: "Edit",
+                    })}
                   </Button>
                   <Button
                     variant="danger-light"
                     startIcon={<Trash />}
                     onClick={() => onDeleteCollectionType(index)}
                   >
-                    {formatMessage({ id: getTrad("action.delete"), defaultMessage: "Delete" })}
+                    {formatMessage({
+                      id: getTrad("action.delete"),
+                      defaultMessage: "Delete",
+                    })}
                   </Button>
                 </Flex>
               </Td>
@@ -155,7 +200,11 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
         </Tbody>
       </Table>
       <Box paddingTop={4}>
-        <Button startIcon={<Plus />} variant="secondary" onClick={onAddCollectionType}>
+        <Button
+          startIcon={<Plus />}
+          variant="secondary"
+          onClick={onAddCollectionType}
+        >
           {formatMessage({
             id: getTrad("settings.collectionTypes.add"),
             defaultMessage: "Add another collection type",

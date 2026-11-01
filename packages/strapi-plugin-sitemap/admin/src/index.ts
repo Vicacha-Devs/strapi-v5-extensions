@@ -14,12 +14,8 @@ const SUPPORTED_LOCALES = ["en", "es", "ar", "tr", "fr", "pt-BR"] as const;
 const prefixPluginTranslations = (
   trad: Record<string, string>,
   pluginId: string
-): Record<string, string> => {
-  return Object.entries(trad).reduce<Record<string, string>>((acc, [key, value]) => {
-    acc[`${pluginId}.${key}`] = value;
-    return acc;
-  }, {});
-};
+): Record<string, string> =>
+  Object.fromEntries(Object.entries(trad).map(([key, value]) => [`${pluginId}.${key}`, value]));
 
 export default {
   register(app: StrapiAdminApp) {
@@ -38,11 +34,8 @@ export default {
             defaultMessage: "Configuration",
           },
           id: `${PLUGIN_ID}.configuration`,
-          to: `/settings/${PLUGIN_ID}`,
-          Component: async () => {
-            const { default: Settings } = await import("./pages/Settings");
-            return Settings;
-          },
+          to: PLUGIN_ID,
+          Component: () => import("./pages/Settings"),
           permissions: [],
         },
       ]
@@ -55,23 +48,18 @@ export default {
   },
 
   async registerTrads({ locales }: { locales: string[] }) {
-    const importedTrads = await Promise.all(
+    return Promise.all(
       locales.map(async (locale) => {
-        if ((SUPPORTED_LOCALES as readonly string[]).includes(locale)) {
-          try {
-            const { default: data } = await import(`./translations/${locale}.json`);
-            return {
-              data: prefixPluginTranslations(data, PLUGIN_ID),
-              locale,
-            };
-          } catch {
-            return { data: {}, locale };
-          }
+        if (!(SUPPORTED_LOCALES as readonly string[]).includes(locale)) {
+          return { data: {}, locale };
         }
-        return { data: {}, locale };
+        try {
+          const { default: data } = await import(`./translations/${locale}.json`);
+          return { data: prefixPluginTranslations(data, PLUGIN_ID), locale };
+        } catch {
+          return { data: {}, locale };
+        }
       })
     );
-
-    return importedTrads;
   },
 };

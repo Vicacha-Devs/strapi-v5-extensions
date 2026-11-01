@@ -33,7 +33,13 @@ export const CustomUrlsSection: React.FC<CustomUrlsSectionProps> = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+    <Box
+      padding={6}
+      background="neutral0"
+      shadow="filterShadow"
+      hasRadius
+      marginBottom={6}
+    >
       <Typography variant="delta" tag="h2">
         {formatMessage({
           id: getTrad("settings.customUrls.title"),
@@ -53,27 +59,42 @@ export const CustomUrlsSection: React.FC<CustomUrlsSectionProps> = ({
           <Tr>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.id"), defaultMessage: "ID" })}
+                {formatMessage({
+                  id: getTrad("table.id"),
+                  defaultMessage: "ID",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.url"), defaultMessage: "URL" })}
+                {formatMessage({
+                  id: getTrad("table.url"),
+                  defaultMessage: "URL",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.priority"), defaultMessage: "Priority" })}
+                {formatMessage({
+                  id: getTrad("table.priority"),
+                  defaultMessage: "Priority",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.frequency"), defaultMessage: "Frequency" })}
+                {formatMessage({
+                  id: getTrad("table.frequency"),
+                  defaultMessage: "Frequency",
+                })}
               </Typography>
             </Th>
             <Th>
               <Typography variant="sigma">
-                {formatMessage({ id: getTrad("table.actions"), defaultMessage: "Actions" })}
+                {formatMessage({
+                  id: getTrad("table.actions"),
+                  defaultMessage: "Actions",
+                })}
               </Typography>
             </Th>
           </Tr>
@@ -100,14 +121,20 @@ export const CustomUrlsSection: React.FC<CustomUrlsSectionProps> = ({
                     startIcon={<Pencil />}
                     onClick={() => onEditCustomUrl(index)}
                   >
-                    {formatMessage({ id: getTrad("action.edit"), defaultMessage: "Edit" })}
+                    {formatMessage({
+                      id: getTrad("action.edit"),
+                      defaultMessage: "Edit",
+                    })}
                   </Button>
                   <Button
                     variant="danger-light"
                     startIcon={<Trash />}
                     onClick={() => onDeleteCustomUrl(index)}
                   >
-                    {formatMessage({ id: getTrad("action.delete"), defaultMessage: "Delete" })}
+                    {formatMessage({
+                      id: getTrad("action.delete"),
+                      defaultMessage: "Delete",
+                    })}
                   </Button>
                 </Flex>
               </Td>
@@ -116,7 +143,11 @@ export const CustomUrlsSection: React.FC<CustomUrlsSectionProps> = ({
         </Tbody>
       </Table>
       <Box paddingTop={4}>
-        <Button startIcon={<Plus />} variant="secondary" onClick={onAddCustomUrl}>
+        <Button
+          startIcon={<Plus />}
+          variant="secondary"
+          onClick={onAddCustomUrl}
+        >
           {formatMessage({
             id: getTrad("settings.customUrls.add"),
             defaultMessage: "Add another URL",
