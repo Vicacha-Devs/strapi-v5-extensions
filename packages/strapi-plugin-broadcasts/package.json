@@ -80,6 +80,7 @@
     "@strapi/sdk-plugin": "6.1.1",
     "@strapi/strapi": "^5.39.0",
     "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/plugin-shared": "workspace:*",
     "@vicacha-devs/typescript-config": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
