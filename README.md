@@ -39,7 +39,7 @@ strapi-v5-extensions/
 ├── .oxlintrc.json                      # Oxlint fast static analysis configuration
 ├── .releaserc.json                     # Semantic Release configuration
 ├── package.json                        # Monorepo root scripts (format, lint, check, build, publint, verify, release)
-├── pnpm-workspace.yaml                 # Workspace globs + hoistPattern: ["*", "!@strapi/*"]
+├── pnpm-workspace.yaml                 # Workspace globs, linkWorkspacePackages, onlyBuiltDependencies & peerDependencyRules
 └── turbo.json                          # Turborepo task pipeline & dependency graph
 ```
 
@@ -68,8 +68,8 @@ strapi-v5-extensions/
 
 ## Key Architectural Conventions
 
-1. **Strapi Peer Isolation (`pnpm-workspace.yaml`)**:
-   Uses `hoistPattern: ["*", "!@strapi/*"]` and `linkWorkspacePackages: true` so `@strapi/*` packages are never hoisted across workspace boundaries while inter-plugin `@vicacha-devs/*` peer dependencies link locally.
+1. **Workspace Linking & Peer Rules (`pnpm-workspace.yaml`)**:
+   Uses `linkWorkspacePackages: true`, `hoistPattern: ["*"]`, `onlyBuiltDependencies`, and `peerDependencyRules` so inter-plugin `@vicacha-devs/*` peer dependencies link locally with consistent `@strapi/*` singleton resolution.
 2. **Strict Modularity (`<= 500` lines per file)**:
    Every file in the monorepo is strictly `<= 500` lines, enforced via `eslint.config.ts` and `@vicacha-devs/eslint-config`.
 3. **Strict TypeScript (`tsc --noEmit`)**:
