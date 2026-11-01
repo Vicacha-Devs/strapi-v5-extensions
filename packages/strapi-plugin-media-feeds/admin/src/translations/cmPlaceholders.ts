@@ -1,4 +1,7 @@
-export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>> = {
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
   en: {
     "content-manager.content-types.plugin::media-feeds.media-item.title.placeholder":
       "Enter title...",
@@ -52,7 +55,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Enter active live broadcast...",
     "content-manager.content-types.plugin::media-feeds.media-item.hijriDate.placeholder":
       "e.g., 15 Ramadan 1447 AH",
-    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder": "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::media-feeds.media-item.documentId.placeholder":
       "Enter document id...",
     "content-manager.content-types.plugin::media-feeds.media-series.title.placeholder":
@@ -137,7 +141,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Ingresa transmisión en vivo activa...",
     "content-manager.content-types.plugin::media-feeds.media-item.hijriDate.placeholder":
       "ej., 15 Ramadán 1447 AH",
-    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder": "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::media-feeds.media-item.documentId.placeholder":
       "Ingresa id del documento...",
     "content-manager.content-types.plugin::media-feeds.media-series.title.placeholder":
@@ -222,7 +227,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "أدخل بث مباشر نشط...",
     "content-manager.content-types.plugin::media-feeds.media-item.hijriDate.placeholder":
       "مثال: ١٥ رمضان ١٤٤٧ هـ",
-    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder": "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::media-feeds.media-item.documentId.placeholder":
       "أدخل معرف المستند...",
     "content-manager.content-types.plugin::media-feeds.media-series.title.placeholder":
@@ -263,7 +269,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Açıklama girin...",
     "content-manager.content-types.plugin::media-feeds.media-item.transcript.placeholder":
       "Bu dilde hutbe tam metnini veya yazılı transkripti buraya yazın...",
-    "content-manager.content-types.plugin::media-feeds.media-item.type.placeholder": "Tür girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.type.placeholder":
+      "Tür girin...",
     "content-manager.content-types.plugin::media-feeds.media-item.provider.placeholder":
       "Medya Sağlayıcısı / Platform girin...",
     "content-manager.content-types.plugin::media-feeds.media-item.externalId.placeholder":
@@ -306,7 +313,8 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<string, Record<string, string>>
       "Aktif Canlı Yayın girin...",
     "content-manager.content-types.plugin::media-feeds.media-item.hijriDate.placeholder":
       "örn., 15 Ramazan 1447 H",
-    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder": "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder":
+      "https://...",
     "content-manager.content-types.plugin::media-feeds.media-item.documentId.placeholder":
       "Belge Kimliği (ID) girin...",
     "content-manager.content-types.plugin::media-feeds.media-series.title.placeholder":

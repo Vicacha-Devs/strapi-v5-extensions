@@ -16,9 +16,12 @@ export interface EnrichedMediaMetadata extends ParsedMediaProviderInfo {
 }
 
 const OEMBED_BUILDERS: Record<string, (url: string) => string> = {
-  youtube: (url) => `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
-  vimeo: (url) => `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`,
-  spotify: (url) => `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`,
+  youtube: (url) =>
+    `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
+  vimeo: (url) =>
+    `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(url)}`,
+  spotify: (url) =>
+    `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`,
 };
 
 function mergeOembedPayload(
@@ -28,9 +31,12 @@ function mergeOembedPayload(
   return {
     ...parsed,
     title: typeof payload.title === "string" ? payload.title : null,
-    authorName: typeof payload.author_name === "string" ? payload.author_name : null,
+    authorName:
+      typeof payload.author_name === "string" ? payload.author_name : null,
     thumbnailUrl:
-      typeof payload.thumbnail_url === "string" ? payload.thumbnail_url : parsed.thumbnailUrl,
+      typeof payload.thumbnail_url === "string"
+        ? payload.thumbnail_url
+        : parsed.thumbnailUrl,
   };
 }
 
@@ -41,7 +47,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     };
   },
 
-  async enrichUrl(rawUrl: string, fetchOembed = false): Promise<EnrichedMediaMetadata> {
+  async enrichUrl(
+    rawUrl: string,
+    fetchOembed = false
+  ): Promise<EnrichedMediaMetadata> {
     const parsed = parseMediaUrl(rawUrl);
     const buildEndpoint = OEMBED_BUILDERS[parsed.provider];
     if (
@@ -54,7 +63,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     try {
-      const response = await globalThis.fetch(buildEndpoint(parsed.canonicalUrl));
+      const response = await globalThis.fetch(
+        buildEndpoint(parsed.canonicalUrl)
+      );
       if (!response.ok) return parsed;
       const payload = (await response.json()) as Record<string, unknown>;
       return mergeOembedPayload(parsed, payload);
@@ -68,7 +79,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     sourceId?: string
   ): Promise<{ syncedCount: number; skippedCount: number }> {
     const settings = await this.getSettingsService().getSettings();
-    const sourceConfig = settings.youtubeSyncSources.find((s) => s.id === sourceId);
+    const sourceConfig = settings.youtubeSyncSources.find(
+      (s) => s.id === sourceId
+    );
     const videos = parseYouTubeAtomFeedXml(xmlContent, sourceConfig);
 
     let syncedCount = 0;
@@ -79,7 +92,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       limit: 200,
     });
     const existingIds = new Set(
-      existing.map((r) => (typeof r.externalId === "string" ? r.externalId : null)).filter(Boolean)
+      existing
+        .map((r) => (typeof r.externalId === "string" ? r.externalId : null))
+        .filter(Boolean)
     );
 
     for (const video of videos) {
@@ -141,7 +156,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         const res = await globalThis.fetch(feedUrl);
         if (!res.ok) continue;
         const xml = await res.text();
-        const { syncedCount, skippedCount } = await this.syncYouTubeFeedXml(xml, src.id);
+        const { syncedCount, skippedCount } = await this.syncYouTubeFeedXml(
+          xml,
+          src.id
+        );
         totalSynced += syncedCount;
         totalSkipped += skippedCount;
         sourcesProcessed += 1;

@@ -26,8 +26,14 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
       extractYouTubeVideoId("https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
       "dQw4w9WgXcQ"
     );
-    assert.equal(extractYouTubeVideoId("https://youtu.be/M7lc1UVf-VE?t=45"), "M7lc1UVf-VE");
-    assert.equal(extractYouTubeVideoId("https://www.youtube.com/live/aqz-KE-bpKQ"), "aqz-KE-bpKQ");
+    assert.equal(
+      extractYouTubeVideoId("https://youtu.be/M7lc1UVf-VE?t=45"),
+      "M7lc1UVf-VE"
+    );
+    assert.equal(
+      extractYouTubeVideoId("https://www.youtube.com/live/aqz-KE-bpKQ"),
+      "aqz-KE-bpKQ"
+    );
     assert.equal(
       extractYouTubeVideoId("https://www.youtube.com/shorts/9bZkp7q19f0"),
       "9bZkp7q19f0"
@@ -36,21 +42,34 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
     const parsedYt = parseMediaUrl("https://youtu.be/dQw4w9WgXcQ");
     assert.equal(parsedYt.provider, "youtube");
     assert.equal(parsedYt.externalId, "dQw4w9WgXcQ");
-    assert.equal(parsedYt.embedUrl, "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ");
-    assert.equal(parsedYt.thumbnailUrl, "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg");
+    assert.equal(
+      parsedYt.embedUrl,
+      "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
+    );
+    assert.equal(
+      parsedYt.thumbnailUrl,
+      "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+    );
   });
 
   it("detects Spotify, Vimeo, Apple Podcasts, and SoundCloud URLs", () => {
-    const spotify = parseMediaUrl("https://open.spotify.com/episode/4rOoJ6Egrf8K2IrywzwOMk");
+    const spotify = parseMediaUrl(
+      "https://open.spotify.com/episode/4rOoJ6Egrf8K2IrywzwOMk"
+    );
     assert.equal(spotify.provider, "spotify");
     assert.equal(spotify.externalId, "4rOoJ6Egrf8K2IrywzwOMk");
-    assert.equal(spotify.embedUrl, "https://open.spotify.com/embed/episode/4rOoJ6Egrf8K2IrywzwOMk");
+    assert.equal(
+      spotify.embedUrl,
+      "https://open.spotify.com/embed/episode/4rOoJ6Egrf8K2IrywzwOMk"
+    );
 
     const vimeo = parseMediaUrl("https://vimeo.com/76979871");
     assert.equal(vimeo.provider, "vimeo");
     assert.equal(vimeo.embedUrl, "https://player.vimeo.com/video/76979871");
 
-    const apple = parseMediaUrl("https://podcasts.apple.com/us/podcast/sample/id1500000001");
+    const apple = parseMediaUrl(
+      "https://podcasts.apple.com/us/podcast/sample/id1500000001"
+    );
     assert.equal(apple.provider, "apple_podcasts");
     assert.equal(apple.externalId, "1500000001");
   });
@@ -126,7 +145,10 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
     assert.equal(resolvedAr.transcriptUrl, "/docs/khutbah-ar.pdf");
 
     const resolvedTr = resolveEpisodeForLocale(baseEpisode, "tr", "es");
-    assert.equal(resolvedTr.title, "Cuma Hutbesi: Toplumda Merhamet ve Birlikte Yaşama");
+    assert.equal(
+      resolvedTr.title,
+      "Cuma Hutbesi: Toplumda Merhamet ve Birlikte Yaşama"
+    );
     assert.equal(resolvedTr.audioUrl, "/media/khutbah-tr.mp3");
 
     // Fallback to 'es' when requesting 'fr'
@@ -223,7 +245,10 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
     });
     assert.equal(parsed.length, 1);
     assert.equal(parsed[0].videoId, "M7lc1UVf-VE");
-    assert.equal(parsed[0].title, "Jumu'ah Khutbah: Convivencia y Paz en Bogotá");
+    assert.equal(
+      parsed[0].title,
+      "Jumu'ah Khutbah: Convivencia y Paz en Bogotá"
+    );
     assert.deepEqual(parsed[0].spokenLanguages, ["ar", "es"]);
 
     // Test idempotent sync + host collection normalization
@@ -298,7 +323,8 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
 
     const mockStrapi: any = {
       config: {
-        get: (key: string) => (key === `plugin::${PLUGIN_ID}` ? pluginConfig : {}),
+        get: (key: string) =>
+          key === `plugin::${PLUGIN_ID}` ? pluginConfig : {},
       },
       contentTypes: {
         [MEDIA_ITEM_UID]: { attributes: {} },
@@ -311,7 +337,8 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
         },
       }),
       documents: (uid: string) => ({
-        findMany: async () => (uid === MEDIA_ITEM_UID ? createdItems : hostHighlights),
+        findMany: async () =>
+          uid === MEDIA_ITEM_UID ? createdItems : hostHighlights,
         create: async ({ data }: { data: Record<string, unknown> }) => {
           const rec = {
             id: createdItems.length + 1,
@@ -324,20 +351,29 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
       }),
       plugin: () => ({
         service: (name: string) => {
-          if (name === "settings") return createSettingsService({ strapi: mockStrapi });
-          if (name === "feedService") return createFeedService({ strapi: mockStrapi });
-          if (name === "syncService") return createSyncService({ strapi: mockStrapi });
+          if (name === "settings")
+            return createSettingsService({ strapi: mockStrapi });
+          if (name === "feedService")
+            return createFeedService({ strapi: mockStrapi });
+          if (name === "syncService")
+            return createSyncService({ strapi: mockStrapi });
           return {};
         },
       }),
     };
 
     const syncService = createSyncService({ strapi: mockStrapi });
-    const firstSync = await syncService.syncYouTubeFeedXml(sampleXml, "yt-khutbahs");
+    const firstSync = await syncService.syncYouTubeFeedXml(
+      sampleXml,
+      "yt-khutbahs"
+    );
     assert.equal(firstSync.syncedCount, 1);
     assert.equal(firstSync.skippedCount, 0);
 
-    const secondSync = await syncService.syncYouTubeFeedXml(sampleXml, "yt-khutbahs");
+    const secondSync = await syncService.syncYouTubeFeedXml(
+      sampleXml,
+      "yt-khutbahs"
+    );
     assert.equal(secondSync.syncedCount, 0);
     assert.equal(secondSync.skippedCount, 1);
 

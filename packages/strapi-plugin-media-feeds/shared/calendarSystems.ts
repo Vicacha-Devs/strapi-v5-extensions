@@ -13,7 +13,11 @@ function readOverrideDateString(
   alternateDateFields?: Record<string, string>
 ): string {
   const overrideFieldName = alternateDateFields?.[sys.id] || sys.overrideField;
-  if (!overrideFieldName || !rawDoc || typeof rawDoc[overrideFieldName] !== "string") {
+  if (
+    !overrideFieldName ||
+    !rawDoc ||
+    typeof rawDoc[overrideFieldName] !== "string"
+  ) {
     return "";
   }
   return String(rawDoc[overrideFieldName]).trim();
@@ -26,7 +30,11 @@ function computeSingleCalendarEntry(
   rawOverride: string,
   locale: string
 ): AlternateDateValue | null {
-  const parts = extractCalendarParts(safeDate, sys.intlCalendar, sys.dayOffset ?? 0);
+  const parts = extractCalendarParts(
+    safeDate,
+    sys.intlCalendar,
+    sys.dayOffset ?? 0
+  );
   const label = sys.label || sys.id;
 
   if (rawOverride) {
@@ -79,8 +87,18 @@ export function computeSecondaryDates(
 
   for (const sys of systems) {
     if (!sys || !sys.enabled || !sys.id) continue;
-    const rawOverride = readOverrideDateString(sys, rawDoc, alternateDateFields);
-    const entry = computeSingleCalendarEntry(sys, safeDate, dateStr, rawOverride, locale);
+    const rawOverride = readOverrideDateString(
+      sys,
+      rawDoc,
+      alternateDateFields
+    );
+    const entry = computeSingleCalendarEntry(
+      sys,
+      safeDate,
+      dateStr,
+      rawOverride,
+      locale
+    );
     if (entry) {
       result[sys.id] = entry;
     }

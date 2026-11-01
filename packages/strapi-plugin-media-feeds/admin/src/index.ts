@@ -5,7 +5,18 @@ import { PLUGIN_ID } from "../../shared";
 import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
 import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
 
-export const SUPPORTED_ADMIN_LOCALES = ["en", "es", "ar", "tr", "fr", "de", "pt", "id", "ur", "zh"];
+export const SUPPORTED_ADMIN_LOCALES = [
+  "en",
+  "es",
+  "ar",
+  "tr",
+  "fr",
+  "de",
+  "pt",
+  "id",
+  "ur",
+  "zh",
+];
 
 export default {
   register(app: StrapiApp) {
@@ -47,10 +58,14 @@ export default {
       if (typeof app.addSettingsLink === "function") {
         app.addSettingsLink(broadcastsSuiteSection.id, mediaFeedsSettingsLink);
       } else {
-        app.createSettingSection(broadcastsSuiteSection, [mediaFeedsSettingsLink]);
+        app.createSettingSection(broadcastsSuiteSection, [
+          mediaFeedsSettingsLink,
+        ]);
       }
     } catch {
-      app.createSettingSection(broadcastsSuiteSection, [mediaFeedsSettingsLink]);
+      app.createSettingSection(broadcastsSuiteSection, [
+        mediaFeedsSettingsLink,
+      ]);
     }
 
     app.registerPlugin({
@@ -60,11 +75,15 @@ export default {
   },
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
-    const allLocales = Array.from(new Set([...locales, "en", "es", "ar", "tr"]));
+    const allLocales = Array.from(
+      new Set([...locales, "en", "es", "ar", "tr"])
+    );
     return Promise.all(
       allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(
+            `./translations/${locale}.json`
+          );
           const prefixed: Record<string, string> = {
             ...CM_LABEL_TRANSLATIONS.en,
             ...CM_PLACEHOLDER_TRANSLATIONS.en,
@@ -73,7 +92,9 @@ export default {
           };
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
-            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`)
+              ? k
+              : `${PLUGIN_ID}.${k}`;
             prefixed[fullKey] = v;
           }
           return { data: prefixed, locale };

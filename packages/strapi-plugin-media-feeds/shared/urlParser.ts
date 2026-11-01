@@ -50,7 +50,9 @@ function tryParseKnownPlatformUrl(url: string): ParsedMediaProviderInfo | null {
     };
   }
 
-  const spotifyMatch = url.match(/open\.spotify\.com\/(episode|show|track)\/([a-zA-Z0-9]+)/);
+  const spotifyMatch = url.match(
+    /open\.spotify\.com\/(episode|show|track)\/([a-zA-Z0-9]+)/
+  );
   if (spotifyMatch?.[1] && spotifyMatch?.[2]) {
     const [, kind, id] = spotifyMatch;
     return {
@@ -62,7 +64,9 @@ function tryParseKnownPlatformUrl(url: string): ParsedMediaProviderInfo | null {
     };
   }
 
-  const vimeoMatch = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
+  const vimeoMatch = url.match(
+    /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/
+  );
   if (vimeoMatch?.[1]) {
     const id = vimeoMatch[1];
     return {
@@ -77,7 +81,9 @@ function tryParseKnownPlatformUrl(url: string): ParsedMediaProviderInfo | null {
   return null;
 }
 
-function tryParsePodcastPlatformUrl(url: string): ParsedMediaProviderInfo | null {
+function tryParsePodcastPlatformUrl(
+  url: string
+): ParsedMediaProviderInfo | null {
   if (/podcasts\.apple\.com\//i.test(url)) {
     const idMatch = url.match(/id(\d+)/);
     return {
@@ -108,13 +114,15 @@ export function parseMediaUrl(
 ): ParsedMediaProviderInfo {
   const url = typeof rawUrl === "string" ? rawUrl.trim() : "";
 
-  const matchedPlatform = tryParseKnownPlatformUrl(url) ?? tryParsePodcastPlatformUrl(url);
+  const matchedPlatform =
+    tryParseKnownPlatformUrl(url) ?? tryParsePodcastPlatformUrl(url);
   if (matchedPlatform) {
     return matchedPlatform;
   }
 
   const isExplicitValid =
-    Boolean(explicitProvider) && VALID_PROVIDERS.includes(explicitProvider as MediaProviderType);
+    Boolean(explicitProvider) &&
+    VALID_PROVIDERS.includes(explicitProvider as MediaProviderType);
   const fallbackProvider: MediaProviderType = isExplicitValid
     ? (explicitProvider as MediaProviderType)
     : url.startsWith("/")
@@ -154,7 +162,9 @@ function tryParseIso8601Duration(text: string): number | null {
   return h * 3600 + m * 60 + s;
 }
 
-export function parseDurationToSeconds(raw?: string | number | null): number | null {
+export function parseDurationToSeconds(
+  raw?: string | number | null
+): number | null {
   if (typeof raw === "number" && Number.isFinite(raw) && raw >= 0) {
     return Math.round(raw);
   }
@@ -172,8 +182,14 @@ export function parseDurationToSeconds(raw?: string | number | null): number | n
   return minMatch?.[1] ? Number(minMatch[1]) * 60 : null;
 }
 
-export function formatSecondsToDuration(seconds?: number | null): string | null {
-  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds <= 0) {
+export function formatSecondsToDuration(
+  seconds?: number | null
+): string | null {
+  if (
+    typeof seconds !== "number" ||
+    !Number.isFinite(seconds) ||
+    seconds <= 0
+  ) {
     return null;
   }
   const total = Math.round(seconds);
@@ -181,13 +197,20 @@ export function formatSecondsToDuration(seconds?: number | null): string | null 
   const mins = Math.floor((total % 3600) / 60);
   const secs = total % 60;
   const pad = (n: number) => String(n).padStart(2, "0");
-  return hrs > 0 ? `${hrs}:${pad(mins)}:${pad(secs)}` : `${pad(mins)}:${pad(secs)}`;
+  return hrs > 0
+    ? `${hrs}:${pad(mins)}:${pad(secs)}`
+    : `${pad(mins)}:${pad(secs)}`;
 }
 
-export function normalizeSpokenLanguages(raw: unknown, fallback: string[] = ["es"]): string[] {
+export function normalizeSpokenLanguages(
+  raw: unknown,
+  fallback: string[] = ["es"]
+): string[] {
   if (Array.isArray(raw)) {
     const cleaned = raw
-      .map((item) => (typeof item === "string" ? item.trim().toLowerCase() : ""))
+      .map((item) =>
+        typeof item === "string" ? item.trim().toLowerCase() : ""
+      )
       .filter(Boolean);
     if (cleaned.length > 0) return Array.from(new Set(cleaned));
   }
@@ -218,7 +241,8 @@ function parseSingleLanguageTrack(entry: unknown): MediaLanguageTrack | null {
     videoUrl: trimmedStringOrNull(obj.videoUrl),
     captionsUrl: trimmedStringOrNull(obj.captionsUrl),
     transcriptUrl: trimmedStringOrNull(obj.transcriptUrl),
-    transcriptText: typeof obj.transcriptText === "string" ? obj.transcriptText : null,
+    transcriptText:
+      typeof obj.transcriptText === "string" ? obj.transcriptText : null,
     translatedTitle: trimmedStringOrNull(obj.translatedTitle),
     translatedDescription: trimmedStringOrNull(obj.translatedDescription),
   };
@@ -226,7 +250,9 @@ function parseSingleLanguageTrack(entry: unknown): MediaLanguageTrack | null {
 
 export function normalizeLanguageTracks(raw: unknown): MediaLanguageTrack[] {
   if (!Array.isArray(raw)) return [];
-  return raw.map(parseSingleLanguageTrack).filter((t): t is MediaLanguageTrack => t !== null);
+  return raw
+    .map(parseSingleLanguageTrack)
+    .filter((t): t is MediaLanguageTrack => t !== null);
 }
 
 function parseSingleChapterMarker(item: unknown): MediaChapterMarker | null {
@@ -240,7 +266,9 @@ function parseSingleChapterMarker(item: unknown): MediaChapterMarker | null {
       ? obj.startSeconds
       : (parseDurationToSeconds(obj.timecode as string) ?? 0);
   const timecode =
-    typeof obj.timecode === "string" ? obj.timecode : (formatSecondsToDuration(seconds) ?? "00:00");
+    typeof obj.timecode === "string"
+      ? obj.timecode
+      : (formatSecondsToDuration(seconds) ?? "00:00");
 
   return {
     startSeconds: Math.max(0, seconds),
@@ -278,8 +306,14 @@ export function resolveEpisodeForLocale(
   requestedLocale?: string,
   defaultLocale = "es"
 ): MediaFeedItem {
-  const targetLocale = (requestedLocale || episode.locale || defaultLocale).trim().toLowerCase();
-  const exactTrack = findMatchingTrack(episode.languageTracks, targetLocale, defaultLocale);
+  const targetLocale = (requestedLocale || episode.locale || defaultLocale)
+    .trim()
+    .toLowerCase();
+  const exactTrack = findMatchingTrack(
+    episode.languageTracks,
+    targetLocale,
+    defaultLocale
+  );
 
   if (!exactTrack) {
     return {

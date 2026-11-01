@@ -33,7 +33,9 @@ function slugifyTitle(title: string, videoId: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 60);
-  return base ? `${base}-${videoId.toLowerCase()}` : `yt-${videoId.toLowerCase()}`;
+  return base
+    ? `${base}-${videoId.toLowerCase()}`
+    : `yt-${videoId.toLowerCase()}`;
 }
 
 export function buildYouTubeAtomFeedUrl(
@@ -74,15 +76,20 @@ function parseSingleYouTubeAtomEntry(
   if (!videoId) return null;
 
   const defaults = resolveAtomDefaults(sourceConfig);
-  const rawTitle = matchXmlTag(entry, /<title>([\s\S]*?)<\/title>/i) ?? `Video ${videoId}`;
+  const rawTitle =
+    matchXmlTag(entry, /<title>([\s\S]*?)<\/title>/i) ?? `Video ${videoId}`;
   const title = unescapeXmlEntities(rawTitle);
   const rawDesc =
-    matchXmlTag(entry, /<media:description>([\s\S]*?)<\/media:description>/i) ?? title;
+    matchXmlTag(entry, /<media:description>([\s\S]*?)<\/media:description>/i) ??
+    title;
   const publishedAt =
-    matchXmlTag(entry, /<published>([^<]+)<\/published>/i) ?? new Date().toISOString();
+    matchXmlTag(entry, /<published>([^<]+)<\/published>/i) ??
+    new Date().toISOString();
   const rawAuthor =
-    matchXmlTag(entry, /<author>[\s\S]*?<name>([\s\S]*?)<\/name>[\s\S]*?<\/author>/i) ??
-    defaults.defaultSpeaker;
+    matchXmlTag(
+      entry,
+      /<author>[\s\S]*?<name>([\s\S]*?)<\/name>[\s\S]*?<\/author>/i
+    ) ?? defaults.defaultSpeaker;
   const thumbnailUrl =
     matchXmlTag(entry, /<media:thumbnail[^>]+url="([^"]+)"/i) ??
     `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;

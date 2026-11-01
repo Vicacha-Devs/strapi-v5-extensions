@@ -40,10 +40,18 @@ export const LiveStreamsSection: React.FC<LiveStreamsSectionProps> = ({
       hasRadius
       style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
     >
-      <Flex justifyContent="space-between" alignItems="center" wrap="wrap" gap={3}>
+      <Flex
+        justifyContent="space-between"
+        alignItems="center"
+        wrap="wrap"
+        gap={3}
+      >
         <Box>
           <Typography variant="beta" as="h2">
-            {t("settings.tab.livestreams_heading", "Live Broadcasts & Event Streams")}
+            {t(
+              "settings.tab.livestreams_heading",
+              "Live Broadcasts & Event Streams"
+            )}
           </Typography>
           <Typography variant="pi" textColor="neutral600">
             {t(
@@ -90,13 +98,20 @@ export const LiveStreamsSection: React.FC<LiveStreamsSectionProps> = ({
                 <Badge>
                   {stream.enabled
                     ? idx === 0
-                      ? t("settings.livestreams.primary_active", "Primary Banner")
+                      ? t(
+                          "settings.livestreams.primary_active",
+                          "Primary Banner"
+                        )
                       : t("common.enabled", "Enabled")
                     : t("common.disabled", "Disabled")}
                 </Badge>
               </Flex>
               {liveStreams.length > 1 && (
-                <Button variant="danger-light" size="S" onClick={() => onRemoveStream(stream.id)}>
+                <Button
+                  variant="danger-light"
+                  size="S"
+                  onClick={() => onRemoveStream(stream.id)}
+                >
                   {t("common.remove", "Remove")}
                 </Button>
               )}
@@ -116,7 +131,10 @@ export const LiveStreamsSection: React.FC<LiveStreamsSectionProps> = ({
                 )}
               >
                 <Field.Label>
-                  {t("field.live_broadcast_title", "Live Broadcast / Event Title")}
+                  {t(
+                    "field.live_broadcast_title",
+                    "Live Broadcast / Event Title"
+                  )}
                 </Field.Label>
                 <TextInput
                   placeholder={t(
@@ -138,7 +156,10 @@ export const LiveStreamsSection: React.FC<LiveStreamsSectionProps> = ({
                 )}
               >
                 <Field.Label>
-                  {t("field.youtube_live_stream_watch_url", "YouTube / Live Stream Watch URL")}
+                  {t(
+                    "field.youtube_live_stream_watch_url",
+                    "YouTube / Live Stream Watch URL"
+                  )}
                 </Field.Label>
                 <TextInput
                   placeholder={t(
@@ -160,7 +181,10 @@ export const LiveStreamsSection: React.FC<LiveStreamsSectionProps> = ({
                 )}
               >
                 <Field.Label>
-                  {t("field.live_schedule_label", "Schedule / Broadcast Window Label")}
+                  {t(
+                    "field.live_schedule_label",
+                    "Schedule / Broadcast Window Label"
+                  )}
                 </Field.Label>
                 <TextInput
                   placeholder={t(

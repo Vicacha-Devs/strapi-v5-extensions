@@ -65,7 +65,15 @@
     },
     "provider": {
       "type": "enumeration",
-      "enum": ["youtube", "spotify", "apple_podcasts", "vimeo", "soundcloud", "direct", "upload"],
+      "enum": [
+        "youtube",
+        "spotify",
+        "apple_podcasts",
+        "vimeo",
+        "soundcloud",
+        "direct",
+        "upload"
+      ],
       "default": "youtube"
     },
     "externalId": {
