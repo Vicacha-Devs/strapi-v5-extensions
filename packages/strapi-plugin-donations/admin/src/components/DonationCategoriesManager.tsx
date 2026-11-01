@@ -150,7 +150,7 @@ export const DonationCategoriesManager: React.FC<
         gap={3}
       >
         <Box>
-          <Typography variant="beta" as="h2">
+          <Typography variant="beta" tag="h2">
             {t("settings.categories.title", "Donation Categories Manager")}
           </Typography>
           <Box paddingTop={1}>
@@ -181,7 +181,7 @@ export const DonationCategoriesManager: React.FC<
         hasRadius
         style={cardBorderStyle}
       >
-        <Typography variant="delta" as="h3">
+        <Typography variant="delta" tag="h3">
           {t("settings.categories.add_heading", "Add or Update Category Key")}
         </Typography>
         <Box

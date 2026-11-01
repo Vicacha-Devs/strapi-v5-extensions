@@ -1,510 +1,349 @@
+const CAMPAIGN_PREFIX =
+  "content-manager.content-types.plugin::donations.campaign.";
+const PLEDGE_PREFIX = "content-manager.content-types.plugin::donations.pledge.";
+const ENUM_PREFIX = "content-manager.enum.";
+
+function buildCmLabels(
+  campaign: Record<string, string>,
+  pledge: Record<string, string>,
+  enums: Record<string, string>
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(campaign)) {
+    out[`${CAMPAIGN_PREFIX}${k}`] = v;
+  }
+  for (const [k, v] of Object.entries(pledge)) {
+    out[`${PLEDGE_PREFIX}${k}`] = v;
+  }
+  for (const [k, v] of Object.entries(enums)) {
+    out[`${ENUM_PREFIX}${k}`] = v;
+  }
+  return out;
+}
+
 export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
-  en: {
-    "content-manager.content-types.plugin::donations.campaign.title": "Title",
-    "content-manager.content-types.plugin::donations.campaign.slug": "URL Slug",
-    "content-manager.content-types.plugin::donations.campaign.description":
-      "Description",
-    "content-manager.content-types.plugin::donations.campaign.body":
-      "Body Content",
-    "content-manager.content-types.plugin::donations.campaign.campaignKind":
-      "Campaign Classification",
-    "content-manager.content-types.plugin::donations.campaign.categoryKey":
-      "Fund / Category Key",
-    "content-manager.content-types.plugin::donations.campaign.goalAmount":
-      "Goal Amount",
-    "content-manager.content-types.plugin::donations.campaign.raisedAmount":
-      "Raised Amount",
-    "content-manager.content-types.plugin::donations.campaign.currency":
-      "Currency",
-    "content-manager.content-types.plugin::donations.campaign.donorCount":
-      "Total Donors Count",
-    "content-manager.content-types.plugin::donations.campaign.isUrgent":
-      "Urgent",
-    "content-manager.content-types.plugin::donations.campaign.isFeatured":
-      "Featured",
-    "content-manager.content-types.plugin::donations.campaign.isActive":
-      "Active",
-    "content-manager.content-types.plugin::donations.campaign.startDate":
-      "Start Date & Time",
-    "content-manager.content-types.plugin::donations.campaign.endDate":
-      "End Date & Time",
-    "content-manager.content-types.plugin::donations.campaign.dueDate":
-      "Due Date",
-    "content-manager.content-types.plugin::donations.campaign.billingPeriod":
-      "Billing Period",
-    "content-manager.content-types.plugin::donations.campaign.invoiceReference":
-      "Utility / Invoice Reference Number",
-    "content-manager.content-types.plugin::donations.campaign.invoiceProvider":
-      "Utility / Service Provider",
-    "content-manager.content-types.plugin::donations.campaign.invoiceStatus":
-      "Invoice Payment Status",
-    "content-manager.content-types.plugin::donations.campaign.suggestedAmounts":
-      "Suggested Donation Amounts",
-    "content-manager.content-types.plugin::donations.campaign.allowCustomAmount":
-      "Allow Custom Donation Amount",
-    "content-manager.content-types.plugin::donations.campaign.allowFullBalancePayoff":
-      "Allow Full Remaining Balance Payoff",
-    "content-manager.content-types.plugin::donations.campaign.ctaLabel":
-      "Call-to-Action Button Label",
-    "content-manager.content-types.plugin::donations.campaign.ctaHref":
-      "Call-to-Action URL",
-    "content-manager.content-types.plugin::donations.campaign.coverUrl":
-      "Cover Image URL",
-    "content-manager.content-types.plugin::donations.campaign.invoiceDocumentUrl":
-      "Invoice / Supporting Document URL",
-    "content-manager.content-types.plugin::donations.campaign.paymentGatewayUrl":
-      "External Payment Gateway URL",
-    "content-manager.content-types.plugin::donations.campaign.icon":
-      "Icon Name",
-    "content-manager.content-types.plugin::donations.campaign.evidences":
-      "Transparency Receipts & Evidence",
-    "content-manager.content-types.plugin::donations.campaign.documentId":
-      "Document ID",
-    "content-manager.content-types.plugin::donations.pledge.referenceCode":
-      "Reference Code",
-    "content-manager.content-types.plugin::donations.pledge.donorName":
-      "Donor Full Name",
-    "content-manager.content-types.plugin::donations.pledge.donorEmail":
-      "Donor Email Address",
-    "content-manager.content-types.plugin::donations.pledge.donorPhone":
-      "Donor Phone Number",
-    "content-manager.content-types.plugin::donations.pledge.donorTaxId":
-      "Donor Tax ID / National ID (NIT / CC)",
-    "content-manager.content-types.plugin::donations.pledge.donorTaxIdType":
-      "Tax ID Document Type",
-    "content-manager.content-types.plugin::donations.pledge.isAnonymous":
-      "Anonymous Donation",
-    "content-manager.content-types.plugin::donations.pledge.amount":
-      "Donation Amount",
-    "content-manager.content-types.plugin::donations.pledge.currency":
-      "Currency",
-    "content-manager.content-types.plugin::donations.pledge.convertedBaseAmount":
-      "Converted Amount in Base Currency",
-    "content-manager.content-types.plugin::donations.pledge.categoryKey":
-      "Fund / Category Key",
-    "content-manager.content-types.plugin::donations.pledge.campaignSlug":
-      "Campaign Slug",
-    "content-manager.content-types.plugin::donations.pledge.campaignKind":
-      "Campaign Classification",
-    "content-manager.content-types.plugin::donations.pledge.coversRemainingBalance":
-      "Covers Full Remaining Balance",
-    "content-manager.content-types.plugin::donations.pledge.paymentChannel":
-      "Payment Channel",
-    "content-manager.content-types.plugin::donations.pledge.paymentProvider":
-      "Payment Provider / Bank",
-    "content-manager.content-types.plugin::donations.pledge.transactionReference":
-      "Bank / Gateway Transaction Reference",
-    "content-manager.content-types.plugin::donations.pledge.receiptProofUrl":
-      "Payment Receipt Proof URL",
-    "content-manager.content-types.plugin::donations.pledge.donorNotes":
-      "Donor Message / Intention (Niyyah)",
-    "content-manager.content-types.plugin::donations.pledge.status": "Status",
-    "content-manager.content-types.plugin::donations.pledge.verifiedAt":
-      "Verified Date & Time",
-    "content-manager.content-types.plugin::donations.pledge.verifiedBy":
-      "Verified By (Staff Member)",
-    "content-manager.content-types.plugin::donations.pledge.certificateSerialNumber":
-      "Donation Certificate Serial Number",
-    "content-manager.content-types.plugin::donations.pledge.certificateVerifyUrl":
-      "Certificate Verification URL",
-    "content-manager.content-types.plugin::donations.pledge.documentId":
-      "Document ID",
-    "content-manager.enum.pending": "Pending",
-    "content-manager.enum.verified": "Verified",
-    "content-manager.enum.rejected": "Rejected",
-    "content-manager.enum.certificate_issued": "Certificate Issued",
-    "content-manager.enum.other": "Other",
-    "content-manager.enum.major_campaign": "Major Campaign",
-    "content-manager.enum.utility_invoice": "Utility Invoice",
-    "content-manager.enum.micro_need": "Micro-Need",
-    "content-manager.enum.open": "Open",
-    "content-manager.enum.partially_funded": "Partially Funded",
-    "content-manager.enum.paid": "Paid",
-    "content-manager.enum.overdue": "Overdue",
-    "content-manager.enum.bank_transfer": "Bank Transfer",
-    "content-manager.enum.digital_wallet": "Digital Wallet",
-    "content-manager.enum.card_gateway": "Card / Online Gateway",
-    "content-manager.enum.qr_code": "QR Code",
-    "content-manager.enum.cash": "Cash (In Person)",
-  },
-  es: {
-    "content-manager.content-types.plugin::donations.campaign.title": "Título",
-    "content-manager.content-types.plugin::donations.campaign.slug":
-      "Slug (URL Amigable)",
-    "content-manager.content-types.plugin::donations.campaign.description":
-      "Descripción",
-    "content-manager.content-types.plugin::donations.campaign.body":
-      "Contenido Principal",
-    "content-manager.content-types.plugin::donations.campaign.campaignKind":
-      "Tipo de Campaña",
-    "content-manager.content-types.plugin::donations.campaign.categoryKey":
-      "Categoría o Fondo Destino",
-    "content-manager.content-types.plugin::donations.campaign.goalAmount":
-      "Monto Meta",
-    "content-manager.content-types.plugin::donations.campaign.raisedAmount":
-      "Monto Recaudado",
-    "content-manager.content-types.plugin::donations.campaign.currency":
-      "Moneda",
-    "content-manager.content-types.plugin::donations.campaign.donorCount":
-      "Número de Donantes",
-    "content-manager.content-types.plugin::donations.campaign.isUrgent":
-      "Urgente",
-    "content-manager.content-types.plugin::donations.campaign.isFeatured":
-      "Destacado",
-    "content-manager.content-types.plugin::donations.campaign.isActive":
-      "Activo",
-    "content-manager.content-types.plugin::donations.campaign.startDate":
-      "Fecha y Hora de Inicio",
-    "content-manager.content-types.plugin::donations.campaign.endDate":
-      "Fecha y Hora de Fin",
-    "content-manager.content-types.plugin::donations.campaign.dueDate":
-      "Fecha de Vencimiento",
-    "content-manager.content-types.plugin::donations.campaign.billingPeriod":
-      "Periodo de Facturación",
-    "content-manager.content-types.plugin::donations.campaign.invoiceReference":
-      "Número de Referencia de Factura",
-    "content-manager.content-types.plugin::donations.campaign.invoiceProvider":
-      "Empresa o Proveedor del Servicio",
-    "content-manager.content-types.plugin::donations.campaign.invoiceStatus":
-      "Estado de Pago de la Factura",
-    "content-manager.content-types.plugin::donations.campaign.suggestedAmounts":
-      "Montos de Donación Sugeridos",
-    "content-manager.content-types.plugin::donations.campaign.allowCustomAmount":
-      "Permitir Monto Libre",
-    "content-manager.content-types.plugin::donations.campaign.allowFullBalancePayoff":
-      "Permitir Pago Total del Saldo Restante",
-    "content-manager.content-types.plugin::donations.campaign.ctaLabel":
-      "Texto del Botón de Acción (CTA)",
-    "content-manager.content-types.plugin::donations.campaign.ctaHref":
-      "Enlace del Botón de Acción (CTA)",
-    "content-manager.content-types.plugin::donations.campaign.coverUrl":
-      "URL de Imagen de Portada",
-    "content-manager.content-types.plugin::donations.campaign.invoiceDocumentUrl":
-      "URL de Factura o Soporte (PDF)",
-    "content-manager.content-types.plugin::donations.campaign.paymentGatewayUrl":
-      "Enlace de Pasarela de Pago Externa",
-    "content-manager.content-types.plugin::donations.campaign.icon": "Icono",
-    "content-manager.content-types.plugin::donations.campaign.evidences":
-      "Comprobantes y Evidencias de Ejecución",
-    "content-manager.content-types.plugin::donations.campaign.documentId":
-      "ID del Documento",
-    "content-manager.content-types.plugin::donations.pledge.referenceCode":
-      "Código de Referencia",
-    "content-manager.content-types.plugin::donations.pledge.donorName":
-      "Nombre Completo del Donante",
-    "content-manager.content-types.plugin::donations.pledge.donorEmail":
-      "Correo Electrónico del Donante",
-    "content-manager.content-types.plugin::donations.pledge.donorPhone":
-      "Teléfono del Donante",
-    "content-manager.content-types.plugin::donations.pledge.donorTaxId":
-      "Documento Fiscal del Donante (CC / NIT)",
-    "content-manager.content-types.plugin::donations.pledge.donorTaxIdType":
-      "Tipo de Documento Fiscal",
-    "content-manager.content-types.plugin::donations.pledge.isAnonymous":
-      "Donación Anónima",
-    "content-manager.content-types.plugin::donations.pledge.amount":
-      "Monto de la Donación",
-    "content-manager.content-types.plugin::donations.pledge.currency": "Moneda",
-    "content-manager.content-types.plugin::donations.pledge.convertedBaseAmount":
-      "Monto Convertido en Moneda Base",
-    "content-manager.content-types.plugin::donations.pledge.categoryKey":
-      "Categoría o Fondo Destino",
-    "content-manager.content-types.plugin::donations.pledge.campaignSlug":
-      "Slug de la Campaña",
-    "content-manager.content-types.plugin::donations.pledge.campaignKind":
-      "Tipo de Campaña",
-    "content-manager.content-types.plugin::donations.pledge.coversRemainingBalance":
-      "Cubre el Saldo Total Restante",
-    "content-manager.content-types.plugin::donations.pledge.paymentChannel":
-      "Canal de Pago",
-    "content-manager.content-types.plugin::donations.pledge.paymentProvider":
-      "Banco o Proveedor de Pago",
-    "content-manager.content-types.plugin::donations.pledge.transactionReference":
-      "Referencia de Transacción Bancaria",
-    "content-manager.content-types.plugin::donations.pledge.receiptProofUrl":
-      "URL del Comprobante de Pago",
-    "content-manager.content-types.plugin::donations.pledge.donorNotes":
-      "Notas o Intención del Donante",
-    "content-manager.content-types.plugin::donations.pledge.status": "Estado",
-    "content-manager.content-types.plugin::donations.pledge.verifiedAt":
-      "Fecha y Hora de Verificación",
-    "content-manager.content-types.plugin::donations.pledge.verifiedBy":
-      "Verificado Por (Personal)",
-    "content-manager.content-types.plugin::donations.pledge.certificateSerialNumber":
-      "Número de Serie del Certificado de Donación",
-    "content-manager.content-types.plugin::donations.pledge.certificateVerifyUrl":
-      "URL de Verificación del Certificado",
-    "content-manager.content-types.plugin::donations.pledge.documentId":
-      "ID del Documento",
-    "content-manager.enum.pending": "Pendiente",
-    "content-manager.enum.verified": "Verificado",
-    "content-manager.enum.rejected": "Rechazado",
-    "content-manager.enum.certificate_issued": "Certificado Emitido",
-    "content-manager.enum.other": "Otro",
-    "content-manager.enum.major_campaign": "Campaña Principal",
-    "content-manager.enum.utility_invoice": "Factura de Servicio Público",
-    "content-manager.enum.micro_need": "Micro-Necesidad",
-    "content-manager.enum.open": "Abierta",
-    "content-manager.enum.partially_funded": "Parcialmente Financiada",
-    "content-manager.enum.paid": "Pagada",
-    "content-manager.enum.overdue": "Vencida",
-    "content-manager.enum.bank_transfer": "Transferencia Bancaria",
-    "content-manager.enum.digital_wallet":
-      "Billetera Digital (Nequi / Daviplata)",
-    "content-manager.enum.card_gateway": "Tarjeta / Pasarela en Línea",
-    "content-manager.enum.qr_code": "Código QR",
-    "content-manager.enum.cash": "Efectivo (En la Mezquita)",
-  },
-  ar: {
-    "content-manager.content-types.plugin::donations.campaign.title": "العنوان",
-    "content-manager.content-types.plugin::donations.campaign.slug":
-      "المسار المختصر (Slug)",
-    "content-manager.content-types.plugin::donations.campaign.description":
-      "الوصف",
-    "content-manager.content-types.plugin::donations.campaign.body":
-      "النص الأساسي",
-    "content-manager.content-types.plugin::donations.campaign.campaignKind":
-      "تصنيف الحملة",
-    "content-manager.content-types.plugin::donations.campaign.categoryKey":
-      "مفتاح الصندوق أو الفئة",
-    "content-manager.content-types.plugin::donations.campaign.goalAmount":
-      "المبلغ المستهدف",
-    "content-manager.content-types.plugin::donations.campaign.raisedAmount":
-      "المبلغ المحصل",
-    "content-manager.content-types.plugin::donations.campaign.currency":
-      "العملة",
-    "content-manager.content-types.plugin::donations.campaign.donorCount":
-      "إجمالي عدد المتبرعين",
-    "content-manager.content-types.plugin::donations.campaign.isUrgent": "عاجل",
-    "content-manager.content-types.plugin::donations.campaign.isFeatured":
-      "مميز",
-    "content-manager.content-types.plugin::donations.campaign.isActive": "نشط",
-    "content-manager.content-types.plugin::donations.campaign.startDate":
-      "تاريخ ووقت البداية",
-    "content-manager.content-types.plugin::donations.campaign.endDate":
-      "تاريخ ووقت النهاية",
-    "content-manager.content-types.plugin::donations.campaign.dueDate":
-      "تاريخ الاستحقاق",
-    "content-manager.content-types.plugin::donations.campaign.billingPeriod":
-      "فترة الفوترة",
-    "content-manager.content-types.plugin::donations.campaign.invoiceReference":
-      "الرقم المرجعي للفاتورة",
-    "content-manager.content-types.plugin::donations.campaign.invoiceProvider":
-      "مزود الخدمة / الشركة",
-    "content-manager.content-types.plugin::donations.campaign.invoiceStatus":
-      "حالة سداد الفاتورة",
-    "content-manager.content-types.plugin::donations.campaign.suggestedAmounts":
-      "مبالغ التبرع المقترحة",
-    "content-manager.content-types.plugin::donations.campaign.allowCustomAmount":
-      "السماح بمبلغ تبرع مخصص",
-    "content-manager.content-types.plugin::donations.campaign.allowFullBalancePayoff":
-      "السماح بسداد كامل الرصيد المتبقي",
-    "content-manager.content-types.plugin::donations.campaign.ctaLabel":
-      "نص زر الإجراء (CTA)",
-    "content-manager.content-types.plugin::donations.campaign.ctaHref":
-      "رابط زر الإجراء (CTA)",
-    "content-manager.content-types.plugin::donations.campaign.coverUrl":
-      "رابط صورة الغلاف",
-    "content-manager.content-types.plugin::donations.campaign.invoiceDocumentUrl":
-      "رابط مستند الفاتورة (PDF)",
-    "content-manager.content-types.plugin::donations.campaign.paymentGatewayUrl":
-      "رابط بوابة الدفع الخارجية",
-    "content-manager.content-types.plugin::donations.campaign.icon": "الأيقونة",
-    "content-manager.content-types.plugin::donations.campaign.evidences":
-      "إيصالات وإثباتات الشفافية",
-    "content-manager.content-types.plugin::donations.campaign.documentId":
-      "معرف المستند",
-    "content-manager.content-types.plugin::donations.pledge.referenceCode":
-      "الرمز المرجعي",
-    "content-manager.content-types.plugin::donations.pledge.donorName":
-      "الاسم الكامل للمتبرع",
-    "content-manager.content-types.plugin::donations.pledge.donorEmail":
-      "البريد الإلكتروني للمتبرع",
-    "content-manager.content-types.plugin::donations.pledge.donorPhone":
-      "رقم هاتف المتبرع",
-    "content-manager.content-types.plugin::donations.pledge.donorTaxId":
-      "الرقم الضريبي أو الهوية للمتبرع (NIT / CC)",
-    "content-manager.content-types.plugin::donations.pledge.donorTaxIdType":
-      "نوع وثيقة الهوية الضريبية",
-    "content-manager.content-types.plugin::donations.pledge.isAnonymous":
-      "تبرع مجهول الهوية",
-    "content-manager.content-types.plugin::donations.pledge.amount":
-      "مبلغ التبرع",
-    "content-manager.content-types.plugin::donations.pledge.currency": "العملة",
-    "content-manager.content-types.plugin::donations.pledge.convertedBaseAmount":
-      "المبلغ المحول بالعملة الأساسية",
-    "content-manager.content-types.plugin::donations.pledge.categoryKey":
-      "مفتاح الصندوق أو الفئة",
-    "content-manager.content-types.plugin::donations.pledge.campaignSlug":
-      "معرف الحملة (Slug)",
-    "content-manager.content-types.plugin::donations.pledge.campaignKind":
-      "تصنيف الحملة",
-    "content-manager.content-types.plugin::donations.pledge.coversRemainingBalance":
-      "يغطي كامل الرصيد المتبقي",
-    "content-manager.content-types.plugin::donations.pledge.paymentChannel":
-      "قناة الدفع",
-    "content-manager.content-types.plugin::donations.pledge.paymentProvider":
-      "مزود الدفع / البنك",
-    "content-manager.content-types.plugin::donations.pledge.transactionReference":
-      "مرجع المعاملة البنكية",
-    "content-manager.content-types.plugin::donations.pledge.receiptProofUrl":
-      "رابط إيصال إثبات الدفع",
-    "content-manager.content-types.plugin::donations.pledge.donorNotes":
-      "ملاحظات أو نية المتبرع",
-    "content-manager.content-types.plugin::donations.pledge.status": "الحالة",
-    "content-manager.content-types.plugin::donations.pledge.verifiedAt":
-      "تاريخ ووقت التحقق",
-    "content-manager.content-types.plugin::donations.pledge.verifiedBy":
-      "تم التحقق بواسطة",
-    "content-manager.content-types.plugin::donations.pledge.certificateSerialNumber":
-      "الرقم التسلسلي لشهادة التبرع",
-    "content-manager.content-types.plugin::donations.pledge.certificateVerifyUrl":
-      "رابط التحقق من الشهادة",
-    "content-manager.content-types.plugin::donations.pledge.documentId":
-      "معرف المستند",
-    "content-manager.enum.pending": "قيد الانتظار",
-    "content-manager.enum.verified": "تم التحقق",
-    "content-manager.enum.rejected": "مرفوض",
-    "content-manager.enum.certificate_issued": "تم إصدار الشهادة",
-    "content-manager.enum.other": "أخرى",
-    "content-manager.enum.major_campaign": "حملة كبرى",
-    "content-manager.enum.utility_invoice": "فاتورة خدمات",
-    "content-manager.enum.micro_need": "احتياج عاجل صغير",
-    "content-manager.enum.open": "مفتوحة",
-    "content-manager.enum.partially_funded": "ممولة جزئياً",
-    "content-manager.enum.paid": "مدفوعة",
-    "content-manager.enum.overdue": "متأخرة",
-    "content-manager.enum.bank_transfer": "تحويل بنكي",
-    "content-manager.enum.digital_wallet": "محفظة رقمية",
-    "content-manager.enum.card_gateway": "بطاقة / بوابة دفع",
-    "content-manager.enum.qr_code": "رمز QR",
-    "content-manager.enum.cash": "نقداً (في المسجد)",
-  },
-  tr: {
-    "content-manager.content-types.plugin::donations.campaign.title": "Başlık",
-    "content-manager.content-types.plugin::donations.campaign.slug":
-      "Kısa Ad (URL Slug)",
-    "content-manager.content-types.plugin::donations.campaign.description":
-      "Açıklama",
-    "content-manager.content-types.plugin::donations.campaign.body":
-      "Ana Metin",
-    "content-manager.content-types.plugin::donations.campaign.campaignKind":
-      "Kampanya Türü",
-    "content-manager.content-types.plugin::donations.campaign.categoryKey":
-      "Fon / Kategori Anahtarı",
-    "content-manager.content-types.plugin::donations.campaign.goalAmount":
-      "Hedef Tutar",
-    "content-manager.content-types.plugin::donations.campaign.raisedAmount":
-      "Toplanan Tutar",
-    "content-manager.content-types.plugin::donations.campaign.currency":
-      "Para Birimi",
-    "content-manager.content-types.plugin::donations.campaign.donorCount":
-      "Toplam Bağışçı Sayısı",
-    "content-manager.content-types.plugin::donations.campaign.isUrgent": "Acil",
-    "content-manager.content-types.plugin::donations.campaign.isFeatured":
-      "Öne Çıkan",
-    "content-manager.content-types.plugin::donations.campaign.isActive":
-      "Aktif",
-    "content-manager.content-types.plugin::donations.campaign.startDate":
-      "Başlangıç Tarihi ve Saati",
-    "content-manager.content-types.plugin::donations.campaign.endDate":
-      "Bitiş Tarihi ve Saati",
-    "content-manager.content-types.plugin::donations.campaign.dueDate":
-      "Son Ödeme Tarihi",
-    "content-manager.content-types.plugin::donations.campaign.billingPeriod":
-      "Fatura Dönemi",
-    "content-manager.content-types.plugin::donations.campaign.invoiceReference":
-      "Fatura Referans Numarası",
-    "content-manager.content-types.plugin::donations.campaign.invoiceProvider":
-      "Hizmet / Fatura Sağlayıcısı",
-    "content-manager.content-types.plugin::donations.campaign.invoiceStatus":
-      "Fatura Ödeme Durumu",
-    "content-manager.content-types.plugin::donations.campaign.suggestedAmounts":
-      "Önerilen Bağış Tutarları",
-    "content-manager.content-types.plugin::donations.campaign.allowCustomAmount":
-      "Özel Bağış Tutarına İzin Ver",
-    "content-manager.content-types.plugin::donations.campaign.allowFullBalancePayoff":
-      "Kalan Bakiyenin Tamamını Ödemeye İzin Ver",
-    "content-manager.content-types.plugin::donations.campaign.ctaLabel":
-      "Eylem Çağrısı (CTA) Düğme Metni",
-    "content-manager.content-types.plugin::donations.campaign.ctaHref":
-      "Eylem Çağrısı (CTA) Bağlantısı",
-    "content-manager.content-types.plugin::donations.campaign.coverUrl":
-      "Kapak Görseli URL",
-    "content-manager.content-types.plugin::donations.campaign.invoiceDocumentUrl":
-      "Fatura / Belge Bağlantısı (URL)",
-    "content-manager.content-types.plugin::donations.campaign.paymentGatewayUrl":
-      "Harici Ödeme Geçidi Bağlantısı",
-    "content-manager.content-types.plugin::donations.campaign.icon": "Simge",
-    "content-manager.content-types.plugin::donations.campaign.evidences":
-      "Şeffaflık Makbuzları ve Kanıtlar",
-    "content-manager.content-types.plugin::donations.campaign.documentId":
-      "Belge Kimliği (ID)",
-    "content-manager.content-types.plugin::donations.pledge.referenceCode":
-      "Referans Kodu",
-    "content-manager.content-types.plugin::donations.pledge.donorName":
-      "Bağışçı Adı Soyadı",
-    "content-manager.content-types.plugin::donations.pledge.donorEmail":
-      "Bağışçı E-posta Adresi",
-    "content-manager.content-types.plugin::donations.pledge.donorPhone":
-      "Bağışçı Telefon Numarası",
-    "content-manager.content-types.plugin::donations.pledge.donorTaxId":
-      "Bağışçı Vergi / Kimlik No",
-    "content-manager.content-types.plugin::donations.pledge.donorTaxIdType":
-      "Vergi / Kimlik Belgesi Türü",
-    "content-manager.content-types.plugin::donations.pledge.isAnonymous":
-      "Anonim Bağış",
-    "content-manager.content-types.plugin::donations.pledge.amount":
-      "Bağış Tutarı",
-    "content-manager.content-types.plugin::donations.pledge.currency":
-      "Para Birimi",
-    "content-manager.content-types.plugin::donations.pledge.convertedBaseAmount":
-      "Temel Para Birimine Çevrilen Tutar",
-    "content-manager.content-types.plugin::donations.pledge.categoryKey":
-      "Fon / Kategori Anahtarı",
-    "content-manager.content-types.plugin::donations.pledge.campaignSlug":
-      "Kampanya Kısa Adı (Slug)",
-    "content-manager.content-types.plugin::donations.pledge.campaignKind":
-      "Kampanya Türü",
-    "content-manager.content-types.plugin::donations.pledge.coversRemainingBalance":
-      "Kalan Bakiyenin Tamamını Karşılar",
-    "content-manager.content-types.plugin::donations.pledge.paymentChannel":
-      "Ödeme Kanalı",
-    "content-manager.content-types.plugin::donations.pledge.paymentProvider":
-      "Ödeme Sağlayıcısı / Banka",
-    "content-manager.content-types.plugin::donations.pledge.transactionReference":
-      "Banka / İşlem Referans Numarası",
-    "content-manager.content-types.plugin::donations.pledge.receiptProofUrl":
-      "Ödeme Dekontu Bağlantısı (URL)",
-    "content-manager.content-types.plugin::donations.pledge.donorNotes":
-      "Bağışçı Notu / Niyeti",
-    "content-manager.content-types.plugin::donations.pledge.status": "Durum",
-    "content-manager.content-types.plugin::donations.pledge.verifiedAt":
-      "Doğrulanma Tarihi ve Saati",
-    "content-manager.content-types.plugin::donations.pledge.verifiedBy":
-      "Doğrulayan Yetkili",
-    "content-manager.content-types.plugin::donations.pledge.certificateSerialNumber":
-      "Bağış Sertifikası Seri Numarası",
-    "content-manager.content-types.plugin::donations.pledge.certificateVerifyUrl":
-      "Sertifika Doğrulama Bağlantısı",
-    "content-manager.content-types.plugin::donations.pledge.documentId":
-      "Belge Kimliği (ID)",
-    "content-manager.enum.pending": "Beklemede",
-    "content-manager.enum.verified": "Doğrulandı",
-    "content-manager.enum.rejected": "Reddedildi",
-    "content-manager.enum.certificate_issued": "Sertifika Düzenlendi",
-    "content-manager.enum.other": "Diğer",
-    "content-manager.enum.major_campaign": "Ana Kampanya",
-    "content-manager.enum.utility_invoice": "Fatura Ödemesi",
-    "content-manager.enum.micro_need": "Küçük İhtiyaç",
-    "content-manager.enum.open": "Açık",
-    "content-manager.enum.partially_funded": "Kısmen Fonlandı",
-    "content-manager.enum.paid": "Ödendi",
-    "content-manager.enum.overdue": "Gecikmiş",
-    "content-manager.enum.bank_transfer": "Banka Havalesi",
-    "content-manager.enum.digital_wallet": "Dijital Cüzdan",
-    "content-manager.enum.card_gateway": "Kart / Online Ödeme",
-    "content-manager.enum.qr_code": "QR Kod",
-    "content-manager.enum.cash": "Nakit",
-  },
+  en: buildCmLabels(
+    {
+      title: "Title",
+      slug: "URL Slug",
+      description: "Description",
+      body: "Body Content",
+      campaignKind: "Campaign Classification",
+      categoryKey: "Fund / Category Key",
+      goalAmount: "Goal Amount",
+      raisedAmount: "Raised Amount",
+      currency: "Currency",
+      donorCount: "Total Donors Count",
+      isUrgent: "Urgent",
+      isFeatured: "Featured",
+      isActive: "Active",
+      startDate: "Start Date & Time",
+      endDate: "End Date & Time",
+      dueDate: "Due Date",
+      billingPeriod: "Billing Period",
+      invoiceReference: "Utility / Invoice Reference Number",
+      invoiceProvider: "Utility / Service Provider",
+      invoiceStatus: "Invoice Payment Status",
+      suggestedAmounts: "Suggested Donation Amounts",
+      allowCustomAmount: "Allow Custom Donation Amount",
+      allowFullBalancePayoff: "Allow Full Remaining Balance Payoff",
+      ctaLabel: "Call-to-Action Button Label",
+      ctaHref: "Call-to-Action URL",
+      coverUrl: "Cover Image URL",
+      invoiceDocumentUrl: "Invoice / Supporting Document URL",
+      paymentGatewayUrl: "External Payment Gateway URL",
+      icon: "Icon Name",
+      evidences: "Transparency Receipts & Evidence",
+      documentId: "Document ID",
+    },
+    {
+      referenceCode: "Reference Code",
+      donorName: "Donor Full Name",
+      donorEmail: "Donor Email Address",
+      donorPhone: "Donor Phone Number",
+      donorTaxId: "Donor Tax ID / National ID (NIT / CC)",
+      donorTaxIdType: "Tax ID Document Type",
+      isAnonymous: "Anonymous Donation",
+      amount: "Donation Amount",
+      currency: "Currency",
+      convertedBaseAmount: "Converted Amount in Base Currency",
+      categoryKey: "Fund / Category Key",
+      campaignSlug: "Campaign Slug",
+      campaignKind: "Campaign Classification",
+      coversRemainingBalance: "Covers Full Remaining Balance",
+      paymentChannel: "Payment Channel",
+      paymentProvider: "Payment Provider / Bank",
+      transactionReference: "Bank / Gateway Transaction Reference",
+      receiptProofUrl: "Payment Receipt Proof URL",
+      donorNotes: "Donor Message / Intention (Niyyah)",
+      status: "Status",
+      verifiedAt: "Verified Date & Time",
+      verifiedBy: "Verified By (Staff Member)",
+      certificateSerialNumber: "Donation Certificate Serial Number",
+      certificateVerifyUrl: "Certificate Verification URL",
+      documentId: "Document ID",
+    },
+    {
+      pending: "Pending",
+      verified: "Verified",
+      rejected: "Rejected",
+      certificate_issued: "Certificate Issued",
+      other: "Other",
+      major_campaign: "Major Campaign",
+      utility_invoice: "Utility Invoice",
+      micro_need: "Micro-Need",
+      open: "Open",
+      partially_funded: "Partially Funded",
+      paid: "Paid",
+      overdue: "Overdue",
+      bank_transfer: "Bank Transfer",
+      digital_wallet: "Digital Wallet",
+      card_gateway: "Card / Online Gateway",
+      qr_code: "QR Code",
+      cash: "Cash (In Person)",
+    }
+  ),
+  es: buildCmLabels(
+    {
+      title: "Título",
+      slug: "Slug (URL Amigable)",
+      description: "Descripción",
+      body: "Contenido Principal",
+      campaignKind: "Tipo de Campaña",
+      categoryKey: "Categoría o Fondo Destino",
+      goalAmount: "Monto Meta",
+      raisedAmount: "Monto Recaudado",
+      currency: "Moneda",
+      donorCount: "Número de Donantes",
+      isUrgent: "Urgente",
+      isFeatured: "Destacado",
+      isActive: "Activo",
+      startDate: "Fecha y Hora de Inicio",
+      endDate: "Fecha y Hora de Fin",
+      dueDate: "Fecha de Vencimiento",
+      billingPeriod: "Periodo de Facturación",
+      invoiceReference: "Número de Referencia de Factura",
+      invoiceProvider: "Empresa o Proveedor del Servicio",
+      invoiceStatus: "Estado de Pago de la Factura",
+      suggestedAmounts: "Montos de Donación Sugeridos",
+      allowCustomAmount: "Permitir Monto Libre",
+      allowFullBalancePayoff: "Permitir Pago Total del Saldo Restante",
+      ctaLabel: "Texto del Botón de Acción (CTA)",
+      ctaHref: "Enlace del Botón de Acción (CTA)",
+      coverUrl: "URL de Imagen de Portada",
+      invoiceDocumentUrl: "URL de Factura o Soporte (PDF)",
+      paymentGatewayUrl: "Enlace de Pasarela de Pago Externa",
+      icon: "Icono",
+      evidences: "Comprobantes y Evidencias de Ejecución",
+      documentId: "ID del Documento",
+    },
+    {
+      referenceCode: "Código de Referencia",
+      donorName: "Nombre Completo del Donante",
+      donorEmail: "Correo Electrónico del Donante",
+      donorPhone: "Teléfono del Donante",
+      donorTaxId: "Documento Fiscal del Donante (CC / NIT)",
+      donorTaxIdType: "Tipo de Documento Fiscal",
+      isAnonymous: "Donación Anónima",
+      amount: "Monto de la Donación",
+      currency: "Moneda",
+      convertedBaseAmount: "Monto Convertido en Moneda Base",
+      categoryKey: "Categoría o Fondo Destino",
+      campaignSlug: "Slug de la Campaña",
+      campaignKind: "Tipo de Campaña",
+      coversRemainingBalance: "Cubre el Saldo Total Restante",
+      paymentChannel: "Canal de Pago",
+      paymentProvider: "Banco o Proveedor de Pago",
+      transactionReference: "Referencia de Transacción Bancaria",
+      receiptProofUrl: "URL del Comprobante de Pago",
+      donorNotes: "Notas o Intención del Donante",
+      status: "Estado",
+      verifiedAt: "Fecha y Hora de Verificación",
+      verifiedBy: "Verificado Por (Personal)",
+      certificateSerialNumber: "Número de Serie del Certificado de Donación",
+      certificateVerifyUrl: "URL de Verificación del Certificado",
+      documentId: "ID del Documento",
+    },
+    {
+      pending: "Pendiente",
+      verified: "Verificado",
+      rejected: "Rechazado",
+      certificate_issued: "Certificado Emitido",
+      other: "Otro",
+      major_campaign: "Campaña Principal",
+      utility_invoice: "Factura de Servicio Público",
+      micro_need: "Micro-Necesidad",
+      open: "Abierta",
+      partially_funded: "Parcialmente Financiada",
+      paid: "Pagada",
+      overdue: "Vencida",
+      bank_transfer: "Transferencia Bancaria",
+      digital_wallet: "Billetera Digital (Nequi / Daviplata)",
+      card_gateway: "Tarjeta / Pasarela en Línea",
+      qr_code: "Código QR",
+      cash: "Efectivo (En la Mezquita)",
+    }
+  ),
+  ar: buildCmLabels(
+    {
+      title: "العنوان",
+      slug: "المسار المختصر (Slug)",
+      description: "الوصف",
+      body: "النص الأساسي",
+      campaignKind: "تصنيف الحملة",
+      categoryKey: "مفتاح الصندوق أو الفئة",
+      goalAmount: "المبلغ المستهدف",
+      raisedAmount: "المبلغ المحصل",
+      currency: "العملة",
+      donorCount: "إجمالي عدد المتبرعين",
+      isUrgent: "عاجل",
+      isFeatured: "مميز",
+      isActive: "نشط",
+      startDate: "تاريخ ووقت البداية",
+      endDate: "تاريخ ووقت النهاية",
+      dueDate: "تاريخ الاستحقاق",
+      billingPeriod: "فترة الفوترة",
+      invoiceReference: "الرقم المرجعي للفاتورة",
+      invoiceProvider: "مزود الخدمة / الشركة",
+      invoiceStatus: "حالة سداد الفاتورة",
+      suggestedAmounts: "مبالغ التبرع المقترحة",
+      allowCustomAmount: "السماح بمبلغ تبرع مخصص",
+      allowFullBalancePayoff: "السماح بسداد كامل الرصيد المتبقي",
+      ctaLabel: "نص زر الإجراء (CTA)",
+      ctaHref: "رابط زر الإجراء (CTA)",
+      coverUrl: "رابط صورة الغلاف",
+      invoiceDocumentUrl: "رابط مستند الفاتورة (PDF)",
+      paymentGatewayUrl: "رابط بوابة الدفع الخارجية",
+      icon: "الأيقونة",
+      evidences: "إيصالات وإثباتات الشفافية",
+      documentId: "معرف المستند",
+    },
+    {
+      referenceCode: "الرمز المرجعي",
+      donorName: "الاسم الكامل للمتبرع",
+      donorEmail: "البريد الإلكتروني للمتبرع",
+      donorPhone: "رقم هاتف المتبرع",
+      donorTaxId: "الرقم الضريبي أو الهوية للمتبرع (NIT / CC)",
+      donorTaxIdType: "نوع وثيقة الهوية الضريبية",
+      isAnonymous: "تبرع مجهول الهوية",
+      amount: "مبلغ التبرع",
+      currency: "العملة",
+      convertedBaseAmount: "المبلغ المحول بالعملة الأساسية",
+      categoryKey: "مفتاح الصندوق أو الفئة",
+      campaignSlug: "معرف الحملة (Slug)",
+      campaignKind: "تصنيف الحملة",
+      coversRemainingBalance: "يغطي كامل الرصيد المتبقي",
+      paymentChannel: "قناة الدفع",
+      paymentProvider: "مزود الدفع / البنك",
+      transactionReference: "مرجع المعاملة البنكية",
+      receiptProofUrl: "رابط إيصال إثبات الدفع",
+      donorNotes: "ملاحظات أو نية المتبرع",
+      status: "الحالة",
+      verifiedAt: "تاريخ ووقت التحقق",
+      verifiedBy: "تم التحقق بواسطة",
+      certificateSerialNumber: "الرقم التسلسلي لشهادة التبرع",
+      certificateVerifyUrl: "رابط التحقق من الشهادة",
+      documentId: "معرف المستند",
+    },
+    {
+      pending: "قيد الانتظار",
+      verified: "تم التحقق",
+      rejected: "مرفوض",
+      certificate_issued: "تم إصدار الشهادة",
+      other: "أخرى",
+      major_campaign: "حملة كبرى",
+      utility_invoice: "فاتورة خدمات",
+      micro_need: "احتياج عاجل صغير",
+      open: "مفتوحة",
+      partially_funded: "ممولة جزئياً",
+      paid: "مدفوعة",
+      overdue: "متأخرة",
+      bank_transfer: "تحويل بنكي",
+      digital_wallet: "محفظة رقمية",
+      card_gateway: "بطاقة / بوابة دفع",
+      qr_code: "رمز QR",
+      cash: "نقداً (في المسجد)",
+    }
+  ),
+  tr: buildCmLabels(
+    {
+      title: "Başlık",
+      slug: "Kısa Ad (URL Slug)",
+      description: "Açıklama",
+      body: "Ana Metin",
+      campaignKind: "Kampanya Türü",
+      categoryKey: "Fon / Kategori Anahtarı",
+      goalAmount: "Hedef Tutar",
+      raisedAmount: "Toplanan Tutar",
+      currency: "Para Birimi",
+      donorCount: "Toplam Bağışçı Sayısı",
+      isUrgent: "Acil",
+      isFeatured: "Öne Çıkan",
+      isActive: "Aktif",
+      startDate: "Başlangıç Tarihi ve Saati",
+      endDate: "Bitiş Tarihi ve Saati",
+      dueDate: "Son Ödeme Tarihi",
+      billingPeriod: "Fatura Dönemi",
+      invoiceReference: "Fatura Referans Numarası",
+      invoiceProvider: "Hizmet / Fatura Sağlayıcısı",
+      invoiceStatus: "Fatura Ödeme Durumu",
+      suggestedAmounts: "Önerilen Bağış Tutarları",
+      allowCustomAmount: "Özel Bağış Tutarına İzin Ver",
+      allowFullBalancePayoff: "Kalan Bakiyenin Tamamını Ödemeye İzin Ver",
+      ctaLabel: "Eylem Çağrısı (CTA) Düğme Metni",
+      ctaHref: "Eylem Çağrısı (CTA) Bağlantısı",
+      coverUrl: "Kapak Görseli URL",
+      invoiceDocumentUrl: "Fatura / Belge Bağlantısı (URL)",
+      paymentGatewayUrl: "Harici Ödeme Geçidi Bağlantısı",
+      icon: "Simge",
+      evidences: "Şeffaflık Makbuzları ve Kanıtlar",
+      documentId: "Belge Kimliği (ID)",
+    },
+    {
+      referenceCode: "Referans Kodu",
+      donorName: "Bağışçı Adı Soyadı",
+      donorEmail: "Bağışçı E-posta Adresi",
+      donorPhone: "Bağışçı Telefon Numarası",
+      donorTaxId: "Bağışçı Vergi / Kimlik No",
+      donorTaxIdType: "Vergi / Kimlik Belgesi Türü",
+      isAnonymous: "Anonim Bağış",
+      amount: "Bağış Tutarı",
+      currency: "Para Birimi",
+      convertedBaseAmount: "Temel Para Birimine Çevrilen Tutar",
+      categoryKey: "Fon / Kategori Anahtarı",
+      campaignSlug: "Kampanya Kısa Adı (Slug)",
+      campaignKind: "Kampanya Türü",
+      coversRemainingBalance: "Kalan Bakiyenin Tamamını Karşılar",
+      paymentChannel: "Ödeme Kanalı",
+      paymentProvider: "Ödeme Sağlayıcısı / Banka",
+      transactionReference: "Banka / İşlem Referans Numarası",
+      receiptProofUrl: "Ödeme Dekontu Bağlantısı (URL)",
+      donorNotes: "Bağışçı Notu / Niyeti",
+      status: "Durum",
+      verifiedAt: "Doğrulanma Tarihi ve Saati",
+      verifiedBy: "Doğrulayan Yetkili",
+      certificateSerialNumber: "Bağış Sertifikası Seri Numarası",
+      certificateVerifyUrl: "Sertifika Doğrulama Bağlantısı",
+      documentId: "Belge Kimliği (ID)",
+    },
+    {
+      pending: "Beklemede",
+      verified: "Doğrulandı",
+      rejected: "Reddedildi",
+      certificate_issued: "Sertifika Düzenlendi",
+      other: "Diğer",
+      major_campaign: "Ana Kampanya",
+      utility_invoice: "Fatura Ödemesi",
+      micro_need: "Küçük İhtiyaç",
+      open: "Açık",
+      partially_funded: "Kısmen Fonlandı",
+      paid: "Ödendi",
+      overdue: "Gecikmiş",
+      bank_transfer: "Banka Havalesi",
+      digital_wallet: "Dijital Cüzdan",
+      card_gateway: "Kart / Online Ödeme",
+      qr_code: "QR Kod",
+      cash: "Nakit",
+    }
+  ),
 };

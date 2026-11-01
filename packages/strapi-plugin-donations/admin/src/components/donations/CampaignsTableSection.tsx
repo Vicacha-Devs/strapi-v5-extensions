@@ -226,7 +226,7 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
         gap={2}
       >
         <Flex alignItems="center" gap={3} wrap="wrap">
-          <Typography variant="delta" as="h2">
+          <Typography variant="delta" tag="h2">
             {tableTitle}
           </Typography>
           <Badge active>

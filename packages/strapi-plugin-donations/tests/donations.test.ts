@@ -24,6 +24,74 @@ import {
   verifyWebhookSignature,
 } from "../shared";
 
+function createFakeDonationsStrapi(initialCampaigns: any[] = []) {
+  const campaignsStore: any[] = [...initialCampaigns];
+  const pledgesStore: any[] = [];
+  let storedSettings: any = null;
+
+  const fakeStrapi: any = {
+    config: { get: () => ({}) },
+    store: () => ({
+      get: async () => storedSettings,
+      set: async ({ value }: any) => {
+        storedSettings = value;
+      },
+    }),
+    documents: (uid = "campaign") => ({
+      findMany: async ({ filters }: any = {}) => {
+        const list = uid.includes("pledge") ? pledgesStore : campaignsStore;
+        if (!filters) return list;
+        return list.filter((item) =>
+          Object.entries(filters).every(([k, v]) => item[k] === v)
+        );
+      },
+      create: async ({ data }: any) => {
+        const isPledge = uid.includes("pledge");
+        const list = isPledge ? pledgesStore : campaignsStore;
+        const prefix = isPledge ? "pledge" : "camp-doc";
+        const item = {
+          id: list.length + 1,
+          documentId: `${prefix}-${list.length + 1}`,
+          ...data,
+        };
+        list.push(item);
+        return item;
+      },
+      update: async ({ documentId, data }: any) => {
+        const list = uid.includes("pledge") ? pledgesStore : campaignsStore;
+        const idx = list.findIndex((i) => i.documentId === documentId);
+        if (idx >= 0) {
+          list[idx] = { ...list[idx], ...data };
+          return list[idx];
+        }
+        return null;
+      },
+    }),
+    plugin: (name?: string) => {
+      if (name === "certificates") {
+        return {
+          service: () => ({
+            issueCertificate: async ({ recipientName, metadata }: any) => ({
+              serialNumber: `CERT-TAX-${metadata.referenceCode}`,
+              verifyUrl: `/verify/CERT-TAX-${metadata.referenceCode}`,
+              recipientName,
+            }),
+          }),
+        };
+      }
+      return { service: (svc: string) => servicesMap[svc] };
+    },
+  };
+
+  const servicesMap: Record<string, any> = {
+    settings: settingsServiceFactory({ strapi: fakeStrapi }),
+    campaign: campaignServiceFactory({ strapi: fakeStrapi }),
+    pledge: pledgeServiceFactory({ strapi: fakeStrapi }),
+  };
+
+  return { servicesMap };
+}
+
 describe("@vicacha-devs/strapi-plugin-donations", () => {
   it("computes campaign and utility invoice remaining balance and status transitions accurately", () => {
     const openInvoice = computeCampaignProgress({
@@ -146,7 +214,7 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
   });
 
   it("supports paying remaining utility invoice balance, auto-marking invoice paid, and issuing tax certificate", async () => {
-    const campaignsStore: any[] = [
+    const { servicesMap } = createFakeDonationsStrapi([
       {
         id: 1,
         documentId: "doc-inv-electricity",
@@ -164,70 +232,7 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
         billingPeriod: "February 2026",
         locale: "en",
       },
-    ];
-    const pledgesStore: any[] = [];
-    let storedSettings: any = null;
-
-    const fakeStrapi: any = {
-      config: {
-        get: () => ({}),
-      },
-      store: () => ({
-        get: async () => storedSettings,
-        set: async ({ value }: any) => {
-          storedSettings = value;
-        },
-      }),
-      documents: (uid: string) => ({
-        findMany: async ({ filters }: any = {}) => {
-          const list = uid.includes("campaign") ? campaignsStore : pledgesStore;
-          if (!filters) return list;
-          return list.filter((item) =>
-            Object.entries(filters).every(([k, v]) => item[k] === v)
-          );
-        },
-        create: async ({ data }: any) => {
-          const item = {
-            id: pledgesStore.length + 1,
-            documentId: `pledge-${pledgesStore.length + 1}`,
-            ...data,
-          };
-          pledgesStore.push(item);
-          return item;
-        },
-        update: async ({ documentId, data }: any) => {
-          const list = uid.includes("campaign") ? campaignsStore : pledgesStore;
-          const idx = list.findIndex((i) => i.documentId === documentId);
-          if (idx >= 0) {
-            list[idx] = { ...list[idx], ...data };
-            return list[idx];
-          }
-          return null;
-        },
-      }),
-      plugin: (name: string) => {
-        if (name === "certificates") {
-          return {
-            service: () => ({
-              issueCertificate: async ({ recipientName, metadata }: any) => ({
-                serialNumber: `CERT-TAX-${metadata.referenceCode}`,
-                verifyUrl: `/verify/CERT-TAX-${metadata.referenceCode}`,
-                recipientName,
-              }),
-            }),
-          };
-        }
-        return {
-          service: (svc: string) => servicesMap[svc],
-        };
-      },
-    };
-
-    const servicesMap: Record<string, any> = {
-      settings: settingsServiceFactory({ strapi: fakeStrapi }),
-      campaign: campaignServiceFactory({ strapi: fakeStrapi }),
-      pledge: pledgeServiceFactory({ strapi: fakeStrapi }),
-    };
+    ]);
 
     // Donor clicks "Cover Remaining Balance" on the Electricity Bill (remaining = 350,000 COP)
     const createdPledge = await servicesMap.pledge.createPledge({
@@ -272,53 +277,7 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
   });
 
   it("creates campaigns, manages rich text body (Markdown, HTML, Tiptap JSON), and attaches impact evidences (paid bills, computer photos, Kurban/Ramadan gifts)", async () => {
-    const campaignsStore: any[] = [];
-    let storedSettings: any = null;
-
-    const fakeStrapi: any = {
-      config: { get: () => ({}) },
-      store: () => ({
-        get: async () => storedSettings,
-        set: async ({ value }: any) => {
-          storedSettings = value;
-        },
-      }),
-      documents: () => ({
-        findMany: async ({ filters }: any = {}) => {
-          if (!filters) return campaignsStore;
-          return campaignsStore.filter((item) =>
-            Object.entries(filters).every(([k, v]) => item[k] === v)
-          );
-        },
-        create: async ({ data }: any) => {
-          const item = {
-            id: campaignsStore.length + 1,
-            documentId: `camp-doc-${campaignsStore.length + 1}`,
-            ...data,
-          };
-          campaignsStore.push(item);
-          return item;
-        },
-        update: async ({ documentId, data }: any) => {
-          const idx = campaignsStore.findIndex(
-            (i) => i.documentId === documentId
-          );
-          if (idx >= 0) {
-            campaignsStore[idx] = { ...campaignsStore[idx], ...data };
-            return campaignsStore[idx];
-          }
-          return null;
-        },
-      }),
-      plugin: () => ({
-        service: (svc: string) => servicesMap[svc],
-      }),
-    };
-
-    const servicesMap: Record<string, any> = {
-      settings: settingsServiceFactory({ strapi: fakeStrapi }),
-      campaign: campaignServiceFactory({ strapi: fakeStrapi }),
-    };
+    const { servicesMap } = createFakeDonationsStrapi();
 
     // 1. Verify Tiptap ProseMirror JSON, HTML, and Markdown rich text compatibility
     const tiptapDoc = {
@@ -425,17 +384,11 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
   });
 
   it("registers ISO 4217 currency and ISO 3166-1 country custom fields and orders configured currencies first", () => {
-    const registeredFields: Array<{
-      name: string;
-      plugin: string;
-      type: string;
-    }> = [];
+    const registeredFields: any[] = [];
     registerPlugin({
       strapi: {
         customFields: {
-          register: (field: { name: string; plugin: string; type: string }) => {
-            registeredFields.push(field);
-          },
+          register: (field: any) => registeredFields.push(field),
         },
         config: { get: () => ({}) },
         log: { debug: () => {} },
@@ -474,23 +427,21 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
     const campaignSchema = {
       attributes: {
         body: {
-          type: "richtext" as string,
+          type: "richtext",
           customField: undefined as string | undefined,
         },
       },
       __schema__: {
         attributes: {
           body: {
-            type: "richtext" as string,
+            type: "richtext",
             customField: undefined as string | undefined,
           },
         },
       },
     };
     const mockStrapi: any = {
-      plugins: {
-        "tiptap-editor": {},
-      },
+      plugins: { "tiptap-editor": {} },
       store: () => ({
         get: async () => storedSettings,
         set: async ({ value }: { value: Record<string, unknown> }) => {
@@ -498,26 +449,18 @@ describe("@vicacha-devs/strapi-plugin-donations", () => {
         },
       }),
       config: {
-        get: () => ({
-          richTextCustomField: "plugin::tiptap-editor.RichText",
-        }),
+        get: () => ({ richTextCustomField: "plugin::tiptap-editor.RichText" }),
       },
-      contentTypes: {
-        "plugin::donations.campaign": campaignSchema,
-      },
-      plugin: (name: string) => {
-        if (name === "donations") {
-          return {
-            service: (svc: string) => {
-              if (svc === "settings") {
-                return settingsServiceFactory({ strapi: mockStrapi });
-              }
-              return null;
-            },
-          };
-        }
-        return mockStrapi.plugins[name];
-      },
+      contentTypes: { "plugin::donations.campaign": campaignSchema },
+      plugin: (name: string) =>
+        name === "donations"
+          ? {
+              service: (svc: string) =>
+                svc === "settings"
+                  ? settingsServiceFactory({ strapi: mockStrapi })
+                  : null,
+            }
+          : mockStrapi.plugins[name],
     };
 
     const settingsSvc = settingsServiceFactory({ strapi: mockStrapi });

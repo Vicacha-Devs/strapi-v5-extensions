@@ -118,7 +118,7 @@ export const SettingsPage: React.FC = () => {
           gap={4}
         >
           <Box>
-            <Typography variant="alpha" as="h1">
+            <Typography variant="alpha" tag="h1">
               {t(
                 "settings.page_title",
                 "Donations, Assessment Calculator & Utility Invoices Settings"

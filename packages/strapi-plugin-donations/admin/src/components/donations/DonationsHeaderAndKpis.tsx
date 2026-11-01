@@ -73,7 +73,7 @@ export const DonationsTopHeader: React.FC<DonationsTopHeaderProps> = ({
       >
         <Box style={{ flex: "1 1 480px" }}>
           <Flex alignItems="center" gap={3} wrap="wrap">
-            <Typography variant="alpha" as="h1">
+            <Typography variant="alpha" tag="h1">
               {t(
                 "dashboard.title",
                 "Donations, Crowdfunding, Utility Bills & Impact Evidences"
