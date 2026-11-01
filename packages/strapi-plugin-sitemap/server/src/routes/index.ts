@@ -1,16 +1,16 @@
 const frontend = [
   {
-    method: 'GET',
-    path: '/sitemap.xml',
-    handler: 'controller.getSitemap',
+    method: "GET",
+    path: "/sitemap.xml",
+    handler: "controller.getSitemap",
     config: {
       policies: [],
     },
   },
   {
-    method: 'GET',
-    path: '/sitemap-:slug.xml',
-    handler: 'controller.getSitemapBySlug',
+    method: "GET",
+    path: "/sitemap-:slug.xml",
+    handler: "controller.getSitemapBySlug",
     config: {
       policies: [],
     },
@@ -19,41 +19,41 @@ const frontend = [
 
 const admin = [
   {
-    method: 'GET',
-    path: '/admin-get-content-types',
-    handler: 'controller.adminGETContentTypes',
+    method: "GET",
+    path: "/settings",
+    handler: "controller.getSettings",
     config: {
       policies: [],
     },
   },
   {
-    method: 'GET',
-    path: '/admin-get-locales',
-    handler: 'controller.adminGETLocales',
+    method: "PUT",
+    path: "/settings",
+    handler: "controller.updateSettings",
     config: {
       policies: [],
     },
   },
   {
-    method: 'GET',
-    path: '/admin-allowed-fields',
-    handler: 'controller.adminAllowedFields',
+    method: "GET",
+    path: "/content-types",
+    handler: "controller.getContentTypes",
     config: {
       policies: [],
     },
   },
   {
-    method: 'GET',
-    path: '/settings',
-    handler: 'controller.adminGetSettings',
+    method: "GET",
+    path: "/locales",
+    handler: "controller.getLocales",
     config: {
       policies: [],
     },
   },
   {
-    method: 'PUT',
-    path: '/settings',
-    handler: 'controller.adminPutSettings',
+    method: "GET",
+    path: "/allowed-fields",
+    handler: "controller.getAllowedFields",
     config: {
       policies: [],
     },
@@ -62,11 +62,11 @@ const admin = [
 
 export default {
   frontend: {
-    type: 'content-api',
+    type: "content-api",
     routes: [...frontend],
   },
   admin: {
-    type: 'admin',
+    type: "admin",
     routes: [...admin],
   },
 };

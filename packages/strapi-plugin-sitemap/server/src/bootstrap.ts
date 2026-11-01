@@ -1,18 +1,19 @@
-import type { Core } from '@strapi/strapi';
-import { PLUGIN_ID } from './pluginId';
+import type { Core } from "@strapi/strapi";
+
+import { PLUGIN_ID } from "./pluginId";
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   const actions = [
     {
-      section: 'plugins',
-      displayName: 'Access the plugin settings',
-      uid: 'settings.read',
+      section: "plugins",
+      displayName: "Access the plugin settings",
+      uid: "settings.read",
       pluginName: PLUGIN_ID,
     },
     {
-      section: 'plugins',
-      displayName: 'Menu link to plugin settings',
-      uid: 'menu-link',
+      section: "plugins",
+      displayName: "Menu link to plugin settings",
+      uid: "menu-link",
       pluginName: PLUGIN_ID,
     },
   ];
