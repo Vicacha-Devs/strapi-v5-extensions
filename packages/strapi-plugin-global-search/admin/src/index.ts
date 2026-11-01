@@ -1,3 +1,4 @@
+import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
 import React from "react";
 import { createRoot } from "react-dom/client";
 
@@ -92,27 +93,11 @@ export default {
     createRoot(container).render(React.createElement(GlobalSearchPortal));
   },
 
-  async registerTrads({ locales }: { locales: string[] }) {
-    return Promise.all(
-      locales.map(async (locale) => {
-        try {
-          const data =
-            BUILTIN_TRANSLATIONS[locale] ||
-            ((await import(`./translations/${locale}.json`)).default as Record<
-              string,
-              string
-            >);
-          const prefixed: Record<string, string> = {};
-
-          Object.keys(data).forEach((key) => {
-            prefixed[`${pluginId}.${key}`] = data[key];
-          });
-
-          return { data: prefixed, locale };
-        } catch {
-          return { data: {}, locale };
-        }
-      })
-    );
-  },
+  registerTrads: createRegisterTrads({
+    pluginId,
+    defaultLocales: [],
+    keepUnprefixed: false,
+    translations: BUILTIN_TRANSLATIONS,
+    loadTranslation: (locale) => import(`./translations/${locale}.json`),
+  }),
 };
