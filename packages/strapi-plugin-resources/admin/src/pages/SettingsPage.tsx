@@ -14,6 +14,10 @@ import {
   Typography,
 } from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
+import {
+  LOCALE_OPTIONS,
+  SECONDARY_CALENDAR_OPTIONS,
+} from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -23,31 +27,6 @@ import {
   ResourcesOptimizationTab,
   ResourcesSecurityTab,
 } from "../components/resources/ResourcesSettingsTabs";
-
-const LOCALE_OPTIONS = [
-  { value: "es", label: "es — Español" },
-  { value: "en", label: "en — English" },
-  { value: "ar", label: "ar — العربية (Arabic)" },
-  { value: "tr", label: "tr — Türkçe (Turkish)" },
-  { value: "fr", label: "fr — Français (French)" },
-  { value: "de", label: "de — Deutsch (German)" },
-  { value: "pt", label: "pt — Português (Portuguese)" },
-  { value: "it", label: "it — Italiano (Italian)" },
-  { value: "nl", label: "nl — Nederlands (Dutch)" },
-  { value: "pl", label: "pl — Polski (Polish)" },
-  { value: "id", label: "id — Bahasa Indonesia" },
-  { value: "ur", label: "ur — اردو (Urdu)" },
-  { value: "zh", label: "zh — 中文 (Chinese)" },
-];
-
-const SECONDARY_CALENDAR_OPTIONS = [
-  { value: "islamic-umalqura", label: "islamic-umalqura (Hijri Umm al-Qura)" },
-  { value: "islamic-civil", label: "islamic-civil (Tabular Islamic Civil)" },
-  { value: "islamic-tbla", label: "islamic-tbla (Tabular Astronomical)" },
-  { value: "hebrew", label: "hebrew (Hebrew)" },
-  { value: "persian", label: "persian (Solar Hijri)" },
-  { value: "none", label: "none (Gregorian Only)" },
-];
 
 export const SettingsPage: React.FC = () => {
   const { formatMessage } = useIntl();
