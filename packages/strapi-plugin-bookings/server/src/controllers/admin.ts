@@ -14,7 +14,7 @@ import type {
   SettingsService,
 } from "../types";
 
-interface AdminContext {
+export interface AdminContext {
   query: Record<string, string | undefined>;
   params: Record<string, string | undefined>;
   request: {
