@@ -98,12 +98,17 @@ export const SettingsPage: React.FC = () => {
 
       <Layouts.Content>
         <Tabs.Root defaultValue="slots">
-          <Tabs.List aria-label={t("settings.title", "Bookings & Availability Settings")}>
+          <Tabs.List
+            aria-label={t("settings.title", "Bookings & Availability Settings")}
+          >
             <Tabs.Trigger value="slots">
               {t("settings.defaultsHeading", "Default Slot & Scheduling Rules")}
             </Tabs.Trigger>
             <Tabs.Trigger value="approvals">
-              {t("settings.approvalsHeading", "Approval Workflow & Email Notifications")}
+              {t(
+                "settings.approvalsHeading",
+                "Approval Workflow & Email Notifications"
+              )}
             </Tabs.Trigger>
           </Tabs.List>
 
@@ -121,7 +126,10 @@ export const SettingsPage: React.FC = () => {
             >
               <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" fontWeight="bold" tag="h2">
-                  {t("settings.defaultsHeading", "Default Slot & Scheduling Rules")}
+                  {t(
+                    "settings.defaultsHeading",
+                    "Default Slot & Scheduling Rules"
+                  )}
                 </Typography>
 
                 <div
@@ -139,15 +147,24 @@ export const SettingsPage: React.FC = () => {
                     )}
                   >
                     <Field.Label>
-                      {t("settings.defaultSlotDurationMinutes", "Slot Duration (Minutes)")}
+                      {t(
+                        "settings.defaultSlotDurationMinutes",
+                        "Slot Duration (Minutes)"
+                      )}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t("settings.defaultSlotDurationMinutes.placeholder", "e.g., 60")}
+                      placeholder={t(
+                        "settings.defaultSlotDurationMinutes.placeholder",
+                        "e.g., 60"
+                      )}
                       value={settings.defaultSlotDurationMinutes}
                       onValueChange={(v: number | undefined) =>
                         setSettings({
                           ...settings,
-                          defaultSlotDurationMinutes: Math.max(5, Number(v ?? 60)),
+                          defaultSlotDurationMinutes: Math.max(
+                            5,
+                            Number(v ?? 60)
+                          ),
                         })
                       }
                     />
@@ -162,10 +179,16 @@ export const SettingsPage: React.FC = () => {
                     )}
                   >
                     <Field.Label>
-                      {t("settings.defaultCapacityPerSlot", "Default Capacity Per Slot")}
+                      {t(
+                        "settings.defaultCapacityPerSlot",
+                        "Default Capacity Per Slot"
+                      )}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t("settings.defaultCapacityPerSlot.placeholder", "e.g., 1")}
+                      placeholder={t(
+                        "settings.defaultCapacityPerSlot.placeholder",
+                        "e.g., 1"
+                      )}
                       value={settings.defaultCapacityPerSlot}
                       onValueChange={(v: number | undefined) =>
                         setSettings({
@@ -185,15 +208,24 @@ export const SettingsPage: React.FC = () => {
                     )}
                   >
                     <Field.Label>
-                      {t("settings.defaultBufferBeforeMinutes", "Buffer Before (Minutes)")}
+                      {t(
+                        "settings.defaultBufferBeforeMinutes",
+                        "Buffer Before (Minutes)"
+                      )}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t("settings.defaultBufferBeforeMinutes.placeholder", "e.g., 0")}
+                      placeholder={t(
+                        "settings.defaultBufferBeforeMinutes.placeholder",
+                        "e.g., 0"
+                      )}
                       value={settings.defaultBufferBeforeMinutes}
                       onValueChange={(v: number | undefined) =>
                         setSettings({
                           ...settings,
-                          defaultBufferBeforeMinutes: Math.max(0, Number(v ?? 0)),
+                          defaultBufferBeforeMinutes: Math.max(
+                            0,
+                            Number(v ?? 0)
+                          ),
                         })
                       }
                     />
@@ -208,15 +240,24 @@ export const SettingsPage: React.FC = () => {
                     )}
                   >
                     <Field.Label>
-                      {t("settings.defaultBufferAfterMinutes", "Buffer After (Minutes)")}
+                      {t(
+                        "settings.defaultBufferAfterMinutes",
+                        "Buffer After (Minutes)"
+                      )}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t("settings.defaultBufferAfterMinutes.placeholder", "e.g., 0")}
+                      placeholder={t(
+                        "settings.defaultBufferAfterMinutes.placeholder",
+                        "e.g., 0"
+                      )}
                       value={settings.defaultBufferAfterMinutes}
                       onValueChange={(v: number | undefined) =>
                         setSettings({
                           ...settings,
-                          defaultBufferAfterMinutes: Math.max(0, Number(v ?? 0)),
+                          defaultBufferAfterMinutes: Math.max(
+                            0,
+                            Number(v ?? 0)
+                          ),
                         })
                       }
                     />
@@ -231,10 +272,16 @@ export const SettingsPage: React.FC = () => {
                     )}
                   >
                     <Field.Label>
-                      {t("settings.defaultMinLeadTimeHours", "Minimum Lead Time (Hours)")}
+                      {t(
+                        "settings.defaultMinLeadTimeHours",
+                        "Minimum Lead Time (Hours)"
+                      )}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t("settings.defaultMinLeadTimeHours.placeholder", "e.g., 2")}
+                      placeholder={t(
+                        "settings.defaultMinLeadTimeHours.placeholder",
+                        "e.g., 2"
+                      )}
                       value={settings.defaultMinLeadTimeHours}
                       onValueChange={(v: number | undefined) =>
                         setSettings({
@@ -254,10 +301,16 @@ export const SettingsPage: React.FC = () => {
                     )}
                   >
                     <Field.Label>
-                      {t("settings.defaultMaxAdvanceDays", "Max Advance Horizon (Days)")}
+                      {t(
+                        "settings.defaultMaxAdvanceDays",
+                        "Max Advance Horizon (Days)"
+                      )}
                     </Field.Label>
                     <NumberInput
-                      placeholder={t("settings.defaultMaxAdvanceDays.placeholder", "e.g., 90")}
+                      placeholder={t(
+                        "settings.defaultMaxAdvanceDays.placeholder",
+                        "e.g., 90"
+                      )}
                       value={settings.defaultMaxAdvanceDays}
                       onValueChange={(v: number | undefined) =>
                         setSettings({
@@ -285,7 +338,10 @@ export const SettingsPage: React.FC = () => {
                     )}
                   >
                     <Field.Label>
-                      {t("settings.defaultTimezone", "Operating Hours Timezone (IANA)")}
+                      {t(
+                        "settings.defaultTimezone",
+                        "Operating Hours Timezone (IANA)"
+                      )}
                     </Field.Label>
                     <TextInput
                       placeholder={t(
@@ -321,7 +377,10 @@ export const SettingsPage: React.FC = () => {
             >
               <Flex direction="column" alignItems="stretch" gap={4}>
                 <Typography variant="delta" fontWeight="bold" tag="h2">
-                  {t("settings.approvalsHeading", "Approval Workflow & Email Notifications")}
+                  {t(
+                    "settings.approvalsHeading",
+                    "Approval Workflow & Email Notifications"
+                  )}
                 </Typography>
 
                 <div
@@ -346,7 +405,10 @@ export const SettingsPage: React.FC = () => {
                         })
                       }
                     >
-                      {t("settings.requiresApproval", "Require Manual Admin Approval")}
+                      {t(
+                        "settings.requiresApproval",
+                        "Require Manual Admin Approval"
+                      )}
                     </Checkbox>
                     <Box paddingTop={2}>
                       <Typography variant="pi" textColor="neutral600">

@@ -35,7 +35,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async getAvailableSlots(ctx: ContentApiContext) {
       const now = new Date();
       const from = ctx.query.from || now.toISOString().slice(0, 10);
-      const defaultTo = new Date(now.getTime() + 14 * 86_400_000).toISOString().slice(0, 10);
+      const defaultTo = new Date(now.getTime() + 14 * 86_400_000)
+        .toISOString()
+        .slice(0, 10);
       const to = ctx.query.to || defaultTo;
       const partySize = ctx.query.partySize
         ? Math.max(1, Number.parseInt(ctx.query.partySize, 10) || 1)
@@ -55,26 +57,32 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async createReservation(ctx: ContentApiContext) {
       try {
-        const body = (ctx.request.body ?? {}) as unknown as CreateReservationInput;
+        const body = (ctx.request.body ??
+          {}) as unknown as CreateReservationInput;
         const result = await getReservationService().createReservation(body, {
           referenceNow: new Date(),
         });
         ctx.body = { data: result };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : "Unable to complete reservation");
+        ctx.badRequest(
+          err instanceof Error ? err.message : "Unable to complete reservation"
+        );
       }
     },
 
     async rescheduleReservation(ctx: ContentApiContext) {
       try {
-        const body = (ctx.request.body ?? {}) as unknown as RescheduleBookingInput;
+        const body = (ctx.request.body ??
+          {}) as unknown as RescheduleBookingInput;
         const updated = await getReservationService().rescheduleBooking(body, {
           isAdmin: false,
           referenceNow: new Date(),
         });
         ctx.body = { data: updated };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : "Unable to reschedule booking");
+        ctx.badRequest(
+          err instanceof Error ? err.message : "Unable to reschedule booking"
+        );
       }
     },
 
@@ -86,7 +94,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
         ctx.body = { data: cancelled };
       } catch (err) {
-        ctx.badRequest(err instanceof Error ? err.message : "Unable to cancel booking");
+        ctx.badRequest(
+          err instanceof Error ? err.message : "Unable to cancel booking"
+        );
       }
     },
 

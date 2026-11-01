@@ -14,7 +14,9 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "paths": {
-      "@vicacha-devs/strapi-plugin-calendar/shared": ["../strapi-plugin-calendar/shared/index.ts"],
+      "@vicacha-devs/strapi-plugin-calendar/shared": [
+        "../strapi-plugin-calendar/shared/index.ts"
+      ],
       "@vicacha-devs/strapi-plugin-calendar/strapi-admin": [
         "../strapi-plugin-calendar/admin/src/index.ts"
       ],

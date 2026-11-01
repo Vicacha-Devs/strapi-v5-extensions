@@ -41,7 +41,11 @@ export function formatSecondaryCalendars(
     const compact = formatDateInCalendarSystem(dateStr, sys, locale, {
       compact: true,
     });
-    const parts = extractCalendarParts(date, sys.intlCalendar, sys.dayOffset ?? 0);
+    const parts = extractCalendarParts(
+      date,
+      sys.intlCalendar,
+      sys.dayOffset ?? 0
+    );
     if (formatted) {
       result[sys.id] = {
         calendarId: sys.id,

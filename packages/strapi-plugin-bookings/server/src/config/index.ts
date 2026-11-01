@@ -24,7 +24,9 @@ export default {
   default: defaultConfig,
   validator(config: unknown) {
     if (config && typeof config !== "object") {
-      throw new Error("@vicacha-devs/strapi-plugin-bookings config must be an object");
+      throw new Error(
+        "@vicacha-devs/strapi-plugin-bookings config must be an object"
+      );
     }
   },
 };

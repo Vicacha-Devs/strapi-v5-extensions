@@ -1,8 +1,10 @@
 export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
   en: {
-    "content-manager.content-types.plugin::bookings.booking.bookingCode": "Booking Reference Code",
+    "content-manager.content-types.plugin::bookings.booking.bookingCode":
+      "Booking Reference Code",
     "content-manager.content-types.plugin::bookings.booking.title": "Title",
-    "content-manager.content-types.plugin::bookings.booking.resource": "Booked Resource / Space",
+    "content-manager.content-types.plugin::bookings.booking.resource":
+      "Booked Resource / Space",
     "content-manager.content-types.plugin::bookings.booking.customerName":
       "Visitor / Applicant Name",
     "content-manager.content-types.plugin::bookings.booking.customerEmail":
@@ -11,40 +13,56 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Visitor / Applicant Phone",
     "content-manager.content-types.plugin::bookings.booking.organization":
       "Organization / Institution",
-    "content-manager.content-types.plugin::bookings.booking.startDate": "Start Date & Time",
-    "content-manager.content-types.plugin::bookings.booking.endDate": "End Date & Time",
-    "content-manager.content-types.plugin::bookings.booking.slotLabel": "Time Slot Label",
-    "content-manager.content-types.plugin::bookings.booking.timezone": "Timezone",
-    "content-manager.content-types.plugin::bookings.booking.partySize": "Group / Party Size",
+    "content-manager.content-types.plugin::bookings.booking.startDate":
+      "Start Date & Time",
+    "content-manager.content-types.plugin::bookings.booking.endDate":
+      "End Date & Time",
+    "content-manager.content-types.plugin::bookings.booking.slotLabel":
+      "Time Slot Label",
+    "content-manager.content-types.plugin::bookings.booking.timezone":
+      "Timezone",
+    "content-manager.content-types.plugin::bookings.booking.partySize":
+      "Group / Party Size",
     "content-manager.content-types.plugin::bookings.booking.status": "Status",
     "content-manager.content-types.plugin::bookings.booking.preferredLanguage":
       "Preferred Language",
-    "content-manager.content-types.plugin::bookings.booking.assignedHost": "Assigned Host / Guide",
+    "content-manager.content-types.plugin::bookings.booking.assignedHost":
+      "Assigned Host / Guide",
     "content-manager.content-types.plugin::bookings.booking.notes": "Notes",
-    "content-manager.content-types.plugin::bookings.booking.internalNotes": "Internal Staff Notes",
+    "content-manager.content-types.plugin::bookings.booking.internalNotes":
+      "Internal Staff Notes",
     "content-manager.content-types.plugin::bookings.booking.cancelTokenHash":
       "Cancellation Token Hash",
-    "content-manager.content-types.plugin::bookings.booking.sourceCollection": "Source Collection",
-    "content-manager.content-types.plugin::bookings.booking.metadata": "Additional Metadata (JSON)",
+    "content-manager.content-types.plugin::bookings.booking.sourceCollection":
+      "Source Collection",
+    "content-manager.content-types.plugin::bookings.booking.metadata":
+      "Additional Metadata (JSON)",
     "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage":
       "Preferred Guide Language",
     "content-manager.content-types.plugin::bookings.booking.hijriDate":
       "Hijri Date (Islamic Calendar)",
-    "content-manager.content-types.plugin::bookings.booking.documentId": "Document ID",
+    "content-manager.content-types.plugin::bookings.booking.documentId":
+      "Document ID",
     "content-manager.content-types.plugin::bookings.resource.name": "Name",
     "content-manager.content-types.plugin::bookings.resource.slug": "URL Slug",
-    "content-manager.content-types.plugin::bookings.resource.resourceType": "Resource Type",
-    "content-manager.content-types.plugin::bookings.resource.description": "Description",
-    "content-manager.content-types.plugin::bookings.resource.color": "Color (Hex)",
-    "content-manager.content-types.plugin::bookings.resource.timezone": "Timezone",
+    "content-manager.content-types.plugin::bookings.resource.resourceType":
+      "Resource Type",
+    "content-manager.content-types.plugin::bookings.resource.description":
+      "Description",
+    "content-manager.content-types.plugin::bookings.resource.color":
+      "Color (Hex)",
+    "content-manager.content-types.plugin::bookings.resource.timezone":
+      "Timezone",
     "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes":
       "Slot Duration (Minutes)",
     "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes":
       "Buffer Before Slot (Minutes)",
     "content-manager.content-types.plugin::bookings.resource.bufferAfterMinutes":
       "Buffer After Slot (Minutes)",
-    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot": "Capacity per Slot",
-    "content-manager.content-types.plugin::bookings.resource.maxPartySize": "Maximum Group Size",
+    "content-manager.content-types.plugin::bookings.resource.capacityPerSlot":
+      "Capacity per Slot",
+    "content-manager.content-types.plugin::bookings.resource.maxPartySize":
+      "Maximum Group Size",
     "content-manager.content-types.plugin::bookings.resource.minLeadTimeHours":
       "Minimum Lead Time (Hours)",
     "content-manager.content-types.plugin::bookings.resource.maxAdvanceDays":
@@ -65,14 +83,20 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Supported Languages",
     "content-manager.content-types.plugin::bookings.resource.assignedHosts":
       "Assigned Hosts / Guides",
-    "content-manager.content-types.plugin::bookings.resource.location": "Location / Venue",
-    "content-manager.content-types.plugin::bookings.resource.price": "Price / Fee",
-    "content-manager.content-types.plugin::bookings.resource.currency": "Currency",
-    "content-manager.content-types.plugin::bookings.resource.isActive": "Active",
+    "content-manager.content-types.plugin::bookings.resource.location":
+      "Location / Venue",
+    "content-manager.content-types.plugin::bookings.resource.price":
+      "Price / Fee",
+    "content-manager.content-types.plugin::bookings.resource.currency":
+      "Currency",
+    "content-manager.content-types.plugin::bookings.resource.isActive":
+      "Active",
     "content-manager.content-types.plugin::bookings.resource.metadata":
       "Additional Metadata (JSON)",
-    "content-manager.content-types.plugin::bookings.resource.bookings": "Associated Bookings",
-    "content-manager.content-types.plugin::bookings.resource.documentId": "Document ID",
+    "content-manager.content-types.plugin::bookings.resource.bookings":
+      "Associated Bookings",
+    "content-manager.content-types.plugin::bookings.resource.documentId":
+      "Document ID",
     "content-manager.enum.cancelled": "Cancelled",
     "content-manager.enum.confirmed": "Confirmed",
     "content-manager.enum.pending": "Pending",
@@ -86,7 +110,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.other": "Other",
   },
   es: {
-    "content-manager.content-types.plugin::bookings.booking.bookingCode": "Código de Reserva",
+    "content-manager.content-types.plugin::bookings.booking.bookingCode":
+      "Código de Reserva",
     "content-manager.content-types.plugin::bookings.booking.title": "Título",
     "content-manager.content-types.plugin::bookings.booking.resource":
       "Recurso o Espacio Reservado",
@@ -98,15 +123,19 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Teléfono del Visitante o Solicitante",
     "content-manager.content-types.plugin::bookings.booking.organization":
       "Organización o Institución",
-    "content-manager.content-types.plugin::bookings.booking.startDate": "Fecha y Hora de Inicio",
-    "content-manager.content-types.plugin::bookings.booking.endDate": "Fecha y Hora de Fin",
+    "content-manager.content-types.plugin::bookings.booking.startDate":
+      "Fecha y Hora de Inicio",
+    "content-manager.content-types.plugin::bookings.booking.endDate":
+      "Fecha y Hora de Fin",
     "content-manager.content-types.plugin::bookings.booking.slotLabel":
       "Etiqueta de Franja Horaria",
-    "content-manager.content-types.plugin::bookings.booking.timezone": "Zona Horaria",
+    "content-manager.content-types.plugin::bookings.booking.timezone":
+      "Zona Horaria",
     "content-manager.content-types.plugin::bookings.booking.partySize":
       "Número de Personas (Tamaño del Grupo)",
     "content-manager.content-types.plugin::bookings.booking.status": "Estado",
-    "content-manager.content-types.plugin::bookings.booking.preferredLanguage": "Idioma Preferido",
+    "content-manager.content-types.plugin::bookings.booking.preferredLanguage":
+      "Idioma Preferido",
     "content-manager.content-types.plugin::bookings.booking.assignedHost":
       "Anfitrión o Guía Asignado",
     "content-manager.content-types.plugin::bookings.booking.notes": "Notas",
@@ -122,13 +151,19 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Idioma Preferido del Guía",
     "content-manager.content-types.plugin::bookings.booking.hijriDate":
       "Fecha Hijri (Calendario Islámico)",
-    "content-manager.content-types.plugin::bookings.booking.documentId": "ID del Documento",
+    "content-manager.content-types.plugin::bookings.booking.documentId":
+      "ID del Documento",
     "content-manager.content-types.plugin::bookings.resource.name": "Nombre",
-    "content-manager.content-types.plugin::bookings.resource.slug": "Slug (URL Amigable)",
-    "content-manager.content-types.plugin::bookings.resource.resourceType": "Tipo de Recurso",
-    "content-manager.content-types.plugin::bookings.resource.description": "Descripción",
-    "content-manager.content-types.plugin::bookings.resource.color": "Color (Hex)",
-    "content-manager.content-types.plugin::bookings.resource.timezone": "Zona Horaria",
+    "content-manager.content-types.plugin::bookings.resource.slug":
+      "Slug (URL Amigable)",
+    "content-manager.content-types.plugin::bookings.resource.resourceType":
+      "Tipo de Recurso",
+    "content-manager.content-types.plugin::bookings.resource.description":
+      "Descripción",
+    "content-manager.content-types.plugin::bookings.resource.color":
+      "Color (Hex)",
+    "content-manager.content-types.plugin::bookings.resource.timezone":
+      "Zona Horaria",
     "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes":
       "Duración del Turno (Minutos)",
     "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes":
@@ -159,14 +194,20 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Idiomas Disponibles",
     "content-manager.content-types.plugin::bookings.resource.assignedHosts":
       "Anfitriones o Guías Asignados",
-    "content-manager.content-types.plugin::bookings.resource.location": "Ubicación / Lugar",
-    "content-manager.content-types.plugin::bookings.resource.price": "Precio / Tarifa",
-    "content-manager.content-types.plugin::bookings.resource.currency": "Moneda",
-    "content-manager.content-types.plugin::bookings.resource.isActive": "Activo",
+    "content-manager.content-types.plugin::bookings.resource.location":
+      "Ubicación / Lugar",
+    "content-manager.content-types.plugin::bookings.resource.price":
+      "Precio / Tarifa",
+    "content-manager.content-types.plugin::bookings.resource.currency":
+      "Moneda",
+    "content-manager.content-types.plugin::bookings.resource.isActive":
+      "Activo",
     "content-manager.content-types.plugin::bookings.resource.metadata":
       "Metadatos Adicionales (JSON)",
-    "content-manager.content-types.plugin::bookings.resource.bookings": "Reservas Asociadas",
-    "content-manager.content-types.plugin::bookings.resource.documentId": "ID del Documento",
+    "content-manager.content-types.plugin::bookings.resource.bookings":
+      "Reservas Asociadas",
+    "content-manager.content-types.plugin::bookings.resource.documentId":
+      "ID del Documento",
     "content-manager.enum.cancelled": "Cancelado",
     "content-manager.enum.confirmed": "Confirmado",
     "content-manager.enum.pending": "Pendiente",
@@ -180,40 +221,60 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.other": "Otro",
   },
   ar: {
-    "content-manager.content-types.plugin::bookings.booking.bookingCode": "رمز الحجز المرجعي",
+    "content-manager.content-types.plugin::bookings.booking.bookingCode":
+      "رمز الحجز المرجعي",
     "content-manager.content-types.plugin::bookings.booking.title": "العنوان",
-    "content-manager.content-types.plugin::bookings.booking.resource": "المورد أو القاعة المحجوزة",
+    "content-manager.content-types.plugin::bookings.booking.resource":
+      "المورد أو القاعة المحجوزة",
     "content-manager.content-types.plugin::bookings.booking.customerName":
       "اسم الزائر أو مقدم الطلب",
     "content-manager.content-types.plugin::bookings.booking.customerEmail":
       "البريد الإلكتروني للزائر",
-    "content-manager.content-types.plugin::bookings.booking.customerPhone": "رقم هاتف الزائر",
-    "content-manager.content-types.plugin::bookings.booking.organization": "المؤسسة أو الجهة",
-    "content-manager.content-types.plugin::bookings.booking.startDate": "تاريخ ووقت البداية",
-    "content-manager.content-types.plugin::bookings.booking.endDate": "تاريخ ووقت النهاية",
-    "content-manager.content-types.plugin::bookings.booking.slotLabel": "تسمية الفترة الزمنية",
-    "content-manager.content-types.plugin::bookings.booking.timezone": "المنطقة الزمنية",
-    "content-manager.content-types.plugin::bookings.booking.partySize": "عدد الأفراد (حجم المجموعة)",
+    "content-manager.content-types.plugin::bookings.booking.customerPhone":
+      "رقم هاتف الزائر",
+    "content-manager.content-types.plugin::bookings.booking.organization":
+      "المؤسسة أو الجهة",
+    "content-manager.content-types.plugin::bookings.booking.startDate":
+      "تاريخ ووقت البداية",
+    "content-manager.content-types.plugin::bookings.booking.endDate":
+      "تاريخ ووقت النهاية",
+    "content-manager.content-types.plugin::bookings.booking.slotLabel":
+      "تسمية الفترة الزمنية",
+    "content-manager.content-types.plugin::bookings.booking.timezone":
+      "المنطقة الزمنية",
+    "content-manager.content-types.plugin::bookings.booking.partySize":
+      "عدد الأفراد (حجم المجموعة)",
     "content-manager.content-types.plugin::bookings.booking.status": "الحالة",
-    "content-manager.content-types.plugin::bookings.booking.preferredLanguage": "اللغة المفضلة",
+    "content-manager.content-types.plugin::bookings.booking.preferredLanguage":
+      "اللغة المفضلة",
     "content-manager.content-types.plugin::bookings.booking.assignedHost":
       "المضيف أو المرشد المعين",
     "content-manager.content-types.plugin::bookings.booking.notes": "ملاحظات",
     "content-manager.content-types.plugin::bookings.booking.internalNotes":
       "ملاحظات داخلية للموظفين",
-    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash": "تجزئة رمز الإلغاء",
-    "content-manager.content-types.plugin::bookings.booking.sourceCollection": "المجموعة المصدرية",
-    "content-manager.content-types.plugin::bookings.booking.metadata": "بيانات وصفية إضافية (JSON)",
+    "content-manager.content-types.plugin::bookings.booking.cancelTokenHash":
+      "تجزئة رمز الإلغاء",
+    "content-manager.content-types.plugin::bookings.booking.sourceCollection":
+      "المجموعة المصدرية",
+    "content-manager.content-types.plugin::bookings.booking.metadata":
+      "بيانات وصفية إضافية (JSON)",
     "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage":
       "لغة المرشد المفضلة",
-    "content-manager.content-types.plugin::bookings.booking.hijriDate": "التاريخ الهجري",
-    "content-manager.content-types.plugin::bookings.booking.documentId": "معرف المستند",
+    "content-manager.content-types.plugin::bookings.booking.hijriDate":
+      "التاريخ الهجري",
+    "content-manager.content-types.plugin::bookings.booking.documentId":
+      "معرف المستند",
     "content-manager.content-types.plugin::bookings.resource.name": "الاسم",
-    "content-manager.content-types.plugin::bookings.resource.slug": "المسار المختصر (Slug)",
-    "content-manager.content-types.plugin::bookings.resource.resourceType": "نوع المورد",
-    "content-manager.content-types.plugin::bookings.resource.description": "الوصف",
-    "content-manager.content-types.plugin::bookings.resource.color": "اللون (Hex)",
-    "content-manager.content-types.plugin::bookings.resource.timezone": "المنطقة الزمنية",
+    "content-manager.content-types.plugin::bookings.resource.slug":
+      "المسار المختصر (Slug)",
+    "content-manager.content-types.plugin::bookings.resource.resourceType":
+      "نوع المورد",
+    "content-manager.content-types.plugin::bookings.resource.description":
+      "الوصف",
+    "content-manager.content-types.plugin::bookings.resource.color":
+      "اللون (Hex)",
+    "content-manager.content-types.plugin::bookings.resource.timezone":
+      "المنطقة الزمنية",
     "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes":
       "مدة الفترة الزمنية (بالدقائق)",
     "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes":
@@ -230,7 +291,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "الحد الأقصى للحجز المسبق (بالأيام)",
     "content-manager.content-types.plugin::bookings.resource.requiresApproval":
       "يتطلب موافقة الإدارة",
-    "content-manager.content-types.plugin::bookings.resource.weeklySchedule": "جدول التوفر الأسبوعي",
+    "content-manager.content-types.plugin::bookings.resource.weeklySchedule":
+      "جدول التوفر الأسبوعي",
     "content-manager.content-types.plugin::bookings.resource.seasonalSchedules":
       "الجداول الموسمية الخاصة",
     "content-manager.content-types.plugin::bookings.resource.holidayRules":
@@ -239,17 +301,23 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "التواريخ المحجوبة (غير المتاحة)",
     "content-manager.content-types.plugin::bookings.resource.recurrenceRule":
       "قاعدة التكرار (RRULE)",
-    "content-manager.content-types.plugin::bookings.resource.supportedLanguages": "اللغات المدعومة",
+    "content-manager.content-types.plugin::bookings.resource.supportedLanguages":
+      "اللغات المدعومة",
     "content-manager.content-types.plugin::bookings.resource.assignedHosts":
       "المضيفون أو المرشدون المعينون",
-    "content-manager.content-types.plugin::bookings.resource.location": "الموقع / القاعة",
-    "content-manager.content-types.plugin::bookings.resource.price": "السعر / الرسوم",
-    "content-manager.content-types.plugin::bookings.resource.currency": "العملة",
+    "content-manager.content-types.plugin::bookings.resource.location":
+      "الموقع / القاعة",
+    "content-manager.content-types.plugin::bookings.resource.price":
+      "السعر / الرسوم",
+    "content-manager.content-types.plugin::bookings.resource.currency":
+      "العملة",
     "content-manager.content-types.plugin::bookings.resource.isActive": "نشط",
     "content-manager.content-types.plugin::bookings.resource.metadata":
       "بيانات وصفية إضافية (JSON)",
-    "content-manager.content-types.plugin::bookings.resource.bookings": "الحجوزات المرتبطة",
-    "content-manager.content-types.plugin::bookings.resource.documentId": "معرف المستند",
+    "content-manager.content-types.plugin::bookings.resource.bookings":
+      "الحجوزات المرتبطة",
+    "content-manager.content-types.plugin::bookings.resource.documentId":
+      "معرف المستند",
     "content-manager.enum.cancelled": "ملغى",
     "content-manager.enum.confirmed": "مؤكد",
     "content-manager.enum.pending": "قيد الانتظار",
@@ -263,7 +331,8 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.enum.other": "أخرى",
   },
   tr: {
-    "content-manager.content-types.plugin::bookings.booking.bookingCode": "Rezervasyon Kodu",
+    "content-manager.content-types.plugin::bookings.booking.bookingCode":
+      "Rezervasyon Kodu",
     "content-manager.content-types.plugin::bookings.booking.title": "Başlık",
     "content-manager.content-types.plugin::bookings.booking.resource":
       "Rezerve Edilen Kaynak / Alan",
@@ -273,15 +342,21 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Ziyaretçi E-posta Adresi",
     "content-manager.content-types.plugin::bookings.booking.customerPhone":
       "Ziyaretçi Telefon Numarası",
-    "content-manager.content-types.plugin::bookings.booking.organization": "Kurum / Organizasyon",
-    "content-manager.content-types.plugin::bookings.booking.startDate": "Başlangıç Tarihi ve Saati",
-    "content-manager.content-types.plugin::bookings.booking.endDate": "Bitiş Tarihi ve Saati",
-    "content-manager.content-types.plugin::bookings.booking.slotLabel": "Zaman Dilimi Etiketi",
-    "content-manager.content-types.plugin::bookings.booking.timezone": "Saat Dilimi",
+    "content-manager.content-types.plugin::bookings.booking.organization":
+      "Kurum / Organizasyon",
+    "content-manager.content-types.plugin::bookings.booking.startDate":
+      "Başlangıç Tarihi ve Saati",
+    "content-manager.content-types.plugin::bookings.booking.endDate":
+      "Bitiş Tarihi ve Saati",
+    "content-manager.content-types.plugin::bookings.booking.slotLabel":
+      "Zaman Dilimi Etiketi",
+    "content-manager.content-types.plugin::bookings.booking.timezone":
+      "Saat Dilimi",
     "content-manager.content-types.plugin::bookings.booking.partySize":
       "Kişi Sayısı (Grup Büyüklüğü)",
     "content-manager.content-types.plugin::bookings.booking.status": "Durum",
-    "content-manager.content-types.plugin::bookings.booking.preferredLanguage": "Tercih Edilen Dil",
+    "content-manager.content-types.plugin::bookings.booking.preferredLanguage":
+      "Tercih Edilen Dil",
     "content-manager.content-types.plugin::bookings.booking.assignedHost":
       "Atanan Rehber / Görevli",
     "content-manager.content-types.plugin::bookings.booking.notes": "Notlar",
@@ -289,18 +364,27 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Dahili Personel Notları",
     "content-manager.content-types.plugin::bookings.booking.cancelTokenHash":
       "İptal Jetonu Özeti (Hash)",
-    "content-manager.content-types.plugin::bookings.booking.sourceCollection": "Kaynak Koleksiyon",
-    "content-manager.content-types.plugin::bookings.booking.metadata": "Ek Meta Veriler (JSON)",
+    "content-manager.content-types.plugin::bookings.booking.sourceCollection":
+      "Kaynak Koleksiyon",
+    "content-manager.content-types.plugin::bookings.booking.metadata":
+      "Ek Meta Veriler (JSON)",
     "content-manager.content-types.plugin::bookings.booking.preferredGuideLanguage":
       "Tercih Edilen Rehber Dili",
-    "content-manager.content-types.plugin::bookings.booking.hijriDate": "Hicri Tarih",
-    "content-manager.content-types.plugin::bookings.booking.documentId": "Belge Kimliği (ID)",
+    "content-manager.content-types.plugin::bookings.booking.hijriDate":
+      "Hicri Tarih",
+    "content-manager.content-types.plugin::bookings.booking.documentId":
+      "Belge Kimliği (ID)",
     "content-manager.content-types.plugin::bookings.resource.name": "Ad",
-    "content-manager.content-types.plugin::bookings.resource.slug": "Kısa Ad (URL Slug)",
-    "content-manager.content-types.plugin::bookings.resource.resourceType": "Kaynak Türü",
-    "content-manager.content-types.plugin::bookings.resource.description": "Açıklama",
-    "content-manager.content-types.plugin::bookings.resource.color": "Renk (Hex)",
-    "content-manager.content-types.plugin::bookings.resource.timezone": "Saat Dilimi",
+    "content-manager.content-types.plugin::bookings.resource.slug":
+      "Kısa Ad (URL Slug)",
+    "content-manager.content-types.plugin::bookings.resource.resourceType":
+      "Kaynak Türü",
+    "content-manager.content-types.plugin::bookings.resource.description":
+      "Açıklama",
+    "content-manager.content-types.plugin::bookings.resource.color":
+      "Renk (Hex)",
+    "content-manager.content-types.plugin::bookings.resource.timezone":
+      "Saat Dilimi",
     "content-manager.content-types.plugin::bookings.resource.slotDurationMinutes":
       "Seans Süresi (Dakika)",
     "content-manager.content-types.plugin::bookings.resource.bufferBeforeMinutes":
@@ -331,13 +415,19 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Desteklenen Diller",
     "content-manager.content-types.plugin::bookings.resource.assignedHosts":
       "Atanan Rehberler / Görevliler",
-    "content-manager.content-types.plugin::bookings.resource.location": "Konum / Mekan",
-    "content-manager.content-types.plugin::bookings.resource.price": "Ücret / Fiyat",
-    "content-manager.content-types.plugin::bookings.resource.currency": "Para Birimi",
+    "content-manager.content-types.plugin::bookings.resource.location":
+      "Konum / Mekan",
+    "content-manager.content-types.plugin::bookings.resource.price":
+      "Ücret / Fiyat",
+    "content-manager.content-types.plugin::bookings.resource.currency":
+      "Para Birimi",
     "content-manager.content-types.plugin::bookings.resource.isActive": "Aktif",
-    "content-manager.content-types.plugin::bookings.resource.metadata": "Ek Meta Veriler (JSON)",
-    "content-manager.content-types.plugin::bookings.resource.bookings": "İlgili Rezervasyonlar",
-    "content-manager.content-types.plugin::bookings.resource.documentId": "Belge Kimliği (ID)",
+    "content-manager.content-types.plugin::bookings.resource.metadata":
+      "Ek Meta Veriler (JSON)",
+    "content-manager.content-types.plugin::bookings.resource.bookings":
+      "İlgili Rezervasyonlar",
+    "content-manager.content-types.plugin::bookings.resource.documentId":
+      "Belge Kimliği (ID)",
     "content-manager.enum.cancelled": "İptal Edildi",
     "content-manager.enum.confirmed": "Onaylandı",
     "content-manager.enum.pending": "Beklemede",

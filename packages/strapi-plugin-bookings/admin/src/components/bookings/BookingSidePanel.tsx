@@ -52,7 +52,8 @@ const BookingDetailsSection: React.FC<{
       </Badge>
       {booking.preferredLanguage && (
         <Badge>
-          {t("panel.language", "Lang")}: {booking.preferredLanguage.toUpperCase()}
+          {t("panel.language", "Lang")}:{" "}
+          {booking.preferredLanguage.toUpperCase()}
         </Badge>
       )}
     </Flex>
@@ -87,7 +88,9 @@ const BookingDetailsSection: React.FC<{
         </Typography>
       )}
       <Typography variant="pi">{booking.customerEmail}</Typography>
-      {booking.customerPhone && <Typography variant="pi">{booking.customerPhone}</Typography>}
+      {booking.customerPhone && (
+        <Typography variant="pi">{booking.customerPhone}</Typography>
+      )}
       {booking.notes && (
         <Box padding={2} background="neutral100" hasRadius>
           <Typography variant="pi">{booking.notes}</Typography>
@@ -104,9 +107,15 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
   onUpdateStatus,
   onOpenInContentManager,
 }) => {
-  const [status, setStatus] = useState<BookingStatus>(booking?.status ?? "pending");
-  const [assignedHost, setAssignedHost] = useState<string>(booking?.assignedHost ?? "");
-  const [internalNotes, setInternalNotes] = useState<string>(booking?.internalNotes ?? "");
+  const [status, setStatus] = useState<BookingStatus>(
+    booking?.status ?? "pending"
+  );
+  const [assignedHost, setAssignedHost] = useState<string>(
+    booking?.assignedHost ?? ""
+  );
+  const [internalNotes, setInternalNotes] = useState<string>(
+    booking?.internalNotes ?? ""
+  );
   const [saving, setSaving] = useState(false);
 
   React.useEffect(() => {
@@ -162,9 +171,14 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
         <Field.Root>
           <Field.Label>{t("panel.status", "Booking Status")}</Field.Label>
           <SingleSelect
-            placeholder={t("placeholder.select_booking_status", "Select booking status")}
+            placeholder={t(
+              "placeholder.select_booking_status",
+              "Select booking status"
+            )}
             value={status}
-            onChange={(val: string | number) => setStatus(String(val) as BookingStatus)}
+            onChange={(val: string | number) =>
+              setStatus(String(val) as BookingStatus)
+            }
           >
             {BOOKING_STATUSES.map((st) => (
               <SingleSelectOption key={st} value={st}>
@@ -175,18 +189,30 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
         </Field.Root>
 
         <Field.Root>
-          <Field.Label>{t("panel.assignedHost", "Assigned Staff / Host")}</Field.Label>
+          <Field.Label>
+            {t("panel.assignedHost", "Assigned Staff / Host")}
+          </Field.Label>
           <TextInput
-            placeholder={t("placeholder.assign_guide_or_host", "Assign guide or host...")}
+            placeholder={t(
+              "placeholder.assign_guide_or_host",
+              "Assign guide or host..."
+            )}
             value={assignedHost}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAssignedHost(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setAssignedHost(e.target.value)
+            }
           />
         </Field.Root>
 
         <Field.Root>
-          <Field.Label>{t("panel.internalNotes", "Internal Notes")}</Field.Label>
+          <Field.Label>
+            {t("panel.internalNotes", "Internal Notes")}
+          </Field.Label>
           <Textarea
-            placeholder={t("placeholder.internal_staff_notes", "Internal staff notes...")}
+            placeholder={t(
+              "placeholder.internal_staff_notes",
+              "Internal staff notes..."
+            )}
             value={internalNotes}
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setInternalNotes(e.target.value)
@@ -198,7 +224,10 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
           <Button variant="default" loading={saving} onClick={handleSave}>
             {t("panel.save", "Save Changes")}
           </Button>
-          <Button variant="secondary" onClick={() => onOpenInContentManager(booking)}>
+          <Button
+            variant="secondary"
+            onClick={() => onOpenInContentManager(booking)}
+          >
             {t("panel.openEntry", "Open in Content Manager")}
           </Button>
         </Flex>

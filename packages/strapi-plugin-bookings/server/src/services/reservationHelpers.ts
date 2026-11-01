@@ -61,7 +61,9 @@ function asOptStr(val: unknown): string | undefined {
 }
 
 function asObjRecord(val: unknown): Record<string, unknown> | undefined {
-  return val && typeof val === "object" ? (val as Record<string, unknown>) : undefined;
+  return val && typeof val === "object"
+    ? (val as Record<string, unknown>)
+    : undefined;
 }
 
 function resolveBookingResourceRef(
@@ -71,9 +73,14 @@ function resolveBookingResourceRef(
   const relResource = asObjRecord(raw.resource);
   const rawResourceStr = typeof raw.resource === "string" ? raw.resource : "";
   const resourceDocumentId = String(
-    relResource?.documentId ?? relResource?.id ?? raw.resourceDocumentId ?? rawResourceStr
+    relResource?.documentId ??
+      relResource?.id ??
+      raw.resourceDocumentId ??
+      rawResourceStr
   );
-  const mappedResource = resourceDocumentId ? resourceMap.get(resourceDocumentId) : undefined;
+  const mappedResource = resourceDocumentId
+    ? resourceMap.get(resourceDocumentId)
+    : undefined;
   const resourceName = mappedResource?.name ?? asOptStr(relResource?.name);
   return {
     resourceDocumentId: resourceDocumentId || undefined,
@@ -115,15 +122,17 @@ export function normalizeBookingRecord(
   raw: Record<string, unknown>,
   resourceMap: Map<string, BookingResource>
 ): BookingRecord {
-  const { resourceDocumentId, mappedResource, resourceName } = resolveBookingResourceRef(
-    raw,
-    resourceMap
-  );
+  const { resourceDocumentId, mappedResource, resourceName } =
+    resolveBookingResourceRef(raw, resourceMap);
   const customerName = asStr(raw.customerName, "Guest");
   const partySize = Math.max(1, Number(raw.partySize ?? 1));
   const documentId = asStr(raw.documentId ?? raw.id);
   const startDate = asStr(raw.startDate);
-  const defaultTitle = formatBookingDefaultTitle(customerName, resourceName, partySize);
+  const defaultTitle = formatBookingDefaultTitle(
+    customerName,
+    resourceName,
+    partySize
+  );
 
   return {
     documentId,
@@ -158,7 +167,10 @@ function resolveExternalSlotWindow(
       ...source.slotWindows,
     };
     const key = slotLabel.toLowerCase();
-    const windowSpec = (slotLabel && defaultWindows[key]) || { start: "09:00", end: "10:00" };
+    const windowSpec = (slotLabel && defaultWindows[key]) || {
+      start: "09:00",
+      end: "10:00",
+    };
     return {
       startIso: `${dateStr}T${windowSpec.start}:00.000Z`,
       endIso: initialEndIso || `${dateStr}T${windowSpec.end}:00.000Z`,
@@ -174,7 +186,10 @@ function resolveExternalSlotWindow(
   return { startIso: dateStr, endIso: initialEndIso };
 }
 
-function readMappedField(row: Record<string, unknown>, fieldName?: string): string | undefined {
+function readMappedField(
+  row: Record<string, unknown>,
+  fieldName?: string
+): string | undefined {
   return fieldName && row[fieldName] ? String(row[fieldName]) : undefined;
 }
 
@@ -184,7 +199,9 @@ function resolveExternalPartyAndStatus(
 ): { partySize: number; status: BookingStatus } {
   const rawParty = readMappedField(row, source.partySizeField);
   const partySize = rawParty ? Math.max(1, Number(rawParty)) : 1;
-  const status = source.statusField ? normalizeStatus(row[source.statusField]) : "confirmed";
+  const status = source.statusField
+    ? normalizeStatus(row[source.statusField])
+    : "confirmed";
   return { partySize, status };
 }
 
@@ -198,7 +215,12 @@ export function mapExternalSourceRowToBooking(
   const dateStr = String(rawDate).trim();
   const slotLabel = readMappedField(row, source.slotLabelField) ?? "";
   const initialEndIso = readMappedField(row, source.endDateField) ?? "";
-  const { startIso, endIso } = resolveExternalSlotWindow(dateStr, slotLabel, initialEndIso, source);
+  const { startIso, endIso } = resolveExternalSlotWindow(
+    dateStr,
+    slotLabel,
+    initialEndIso,
+    source
+  );
 
   const documentId = asStr(row.documentId ?? row.id);
   const customerName = asStr(row[source.customerNameField], "Guest");
@@ -227,7 +249,10 @@ export function mapExternalSourceRowToBooking(
   };
 }
 
-function parseBoundaryMs(isoOrDate: string | undefined, endOfDay: boolean): number | null {
+function parseBoundaryMs(
+  isoOrDate: string | undefined,
+  endOfDay: boolean
+): number | null {
   if (!isoOrDate) return null;
   const normalized =
     isoOrDate.length === 10
@@ -266,14 +291,18 @@ function matchesBookingAttributes(
   }
   if (
     query.preferredLanguage &&
-    booking.preferredLanguage?.toLowerCase() !== query.preferredLanguage.toLowerCase()
+    booking.preferredLanguage?.toLowerCase() !==
+      query.preferredLanguage.toLowerCase()
   ) {
     return false;
   }
   return !query.source || booking.sourceCollection === query.source;
 }
 
-function matchesBookingSearch(booking: BookingRecord, searchLower: string | undefined): boolean {
+function matchesBookingSearch(
+  booking: BookingRecord,
+  searchLower: string | undefined
+): boolean {
   if (!searchLower) return true;
   const haystack = [
     booking.bookingCode,
@@ -302,7 +331,8 @@ export function filterAndSortBookings(
     !query.resourceDocumentId && query.resourceSlug
       ? resources.find((r) => r.slug === query.resourceSlug)
       : undefined;
-  const targetResourceId = query.resourceDocumentId ?? matchedResource?.documentId;
+  const targetResourceId =
+    query.resourceDocumentId ?? matchedResource?.documentId;
   const searchLower = query.search?.trim().toLowerCase();
 
   return allBookings
@@ -322,7 +352,9 @@ export function trimOrUndefined(val: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
-export function validateReservationCustomerAndStart(input: CreateReservationInput) {
+export function validateReservationCustomerAndStart(
+  input: CreateReservationInput
+) {
   const customerName = input.customerName?.trim();
   const customerEmail = input.customerEmail?.trim().toLowerCase();
   if (!customerName) {
@@ -344,8 +376,11 @@ export function computeReservationTimingAndParty(
   resource: BookingResource | null,
   settings: BookingsPluginSettings
 ) {
-  const durationMins = resource?.slotDurationMinutes ?? settings.defaultSlotDurationMinutes ?? 60;
-  const endMs = input.endDate ? Date.parse(input.endDate) : startMs + durationMins * 60_000;
+  const durationMins =
+    resource?.slotDurationMinutes ?? settings.defaultSlotDurationMinutes ?? 60;
+  const endMs = input.endDate
+    ? Date.parse(input.endDate)
+    : startMs + durationMins * 60_000;
 
   if (Number.isNaN(endMs) || endMs <= startMs) {
     throw new Error("endDate must be after startDate");
@@ -354,7 +389,9 @@ export function computeReservationTimingAndParty(
   const partySize = Math.max(1, Number(input.partySize ?? 1));
   const maxParty = resource?.maxPartySize ?? 50;
   if (partySize > maxParty) {
-    throw new Error(`Requested partySize (${partySize}) exceeds maximum allowed (${maxParty})`);
+    throw new Error(
+      `Requested partySize (${partySize}) exceeds maximum allowed (${maxParty})`
+    );
   }
   return { endMs, partySize };
 }
@@ -399,7 +436,10 @@ export function buildBookingCreatePayload(params: {
     startDate: new Date(startMs).toISOString(),
     endDate: new Date(endMs).toISOString(),
     slotLabel: trimOrUndefined(input.slotLabel),
-    timezone: asStr(input.timezone || resource?.timezone || settings.defaultTimezone, "UTC"),
+    timezone: asStr(
+      input.timezone || resource?.timezone || settings.defaultTimezone,
+      "UTC"
+    ),
     partySize,
     status,
     preferredLanguage: trimOrUndefined(input.preferredLanguage),
@@ -422,9 +462,15 @@ export function computeRescheduleWindow(
   const oldStartMs = Date.parse(String(targetRaw.startDate));
   const oldEndMs = Date.parse(String(targetRaw.endDate));
   const hasValidOldRange =
-    !Number.isNaN(oldStartMs) && !Number.isNaN(oldEndMs) && oldEndMs > oldStartMs;
-  const defaultDurationMs = hasValidOldRange ? oldEndMs - oldStartMs : 3_600_000;
-  const newEndMs = input.newEndDate ? Date.parse(input.newEndDate) : newStartMs + defaultDurationMs;
+    !Number.isNaN(oldStartMs) &&
+    !Number.isNaN(oldEndMs) &&
+    oldEndMs > oldStartMs;
+  const defaultDurationMs = hasValidOldRange
+    ? oldEndMs - oldStartMs
+    : 3_600_000;
+  const newEndMs = input.newEndDate
+    ? Date.parse(input.newEndDate)
+    : newStartMs + defaultDurationMs;
 
   if (Number.isNaN(newEndMs) || newEndMs <= newStartMs) {
     throw new Error("newEndDate must be after newStartDate");
