@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Typography } from '@strapi/design-system';
+import { Box, Typography } from "@strapi/design-system";
+import React from "react";
 
 interface SectionCardProps {
   title: string;
@@ -7,8 +7,18 @@ interface SectionCardProps {
   children: React.ReactNode;
 }
 
-const SectionCard: React.FC<SectionCardProps> = ({ title, description, children }) => (
-  <Box padding={6} background="neutral0" shadow="filterShadow" hasRadius marginBottom={6}>
+const SectionCard: React.FC<SectionCardProps> = ({
+  title,
+  description,
+  children,
+}) => (
+  <Box
+    padding={6}
+    background="neutral0"
+    shadow="filterShadow"
+    hasRadius
+    marginBottom={6}
+  >
     <Typography variant="delta" as="h2">
       {title}
     </Typography>
