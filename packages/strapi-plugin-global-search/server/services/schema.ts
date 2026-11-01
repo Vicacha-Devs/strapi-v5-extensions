@@ -1,4 +1,8 @@
-import type { ContentTypeDescriptor, PluginSettings, StrapiLike } from "../types";
+import type {
+  ContentTypeDescriptor,
+  PluginSettings,
+  StrapiLike,
+} from "../types";
 import {
   PLUGIN_ID,
   SEARCHABLE_SCALAR_TYPES,
@@ -46,23 +50,34 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
   listCandidateUids(includePluginContentTypes = true): string[] {
     return Object.keys(strapi.contentTypes).filter((uid) => {
       if (uid.startsWith("api::")) return true;
-      if (!includePluginContentTypes || !uid.startsWith("plugin::")) return false;
-      if (SYSTEM_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix))) return false;
+      if (!includePluginContentTypes || !uid.startsWith("plugin::"))
+        return false;
+      if (SYSTEM_PLUGIN_PREFIXES.some((prefix) => uid.startsWith(prefix)))
+        return false;
 
-      const contentType = strapi.contentTypes[uid] as ContentTypeLike | undefined;
-      if (contentType?.pluginOptions?.["content-manager"]?.visible === false) return false;
+      const contentType = strapi.contentTypes[uid] as
+        | ContentTypeLike
+        | undefined;
+      if (contentType?.pluginOptions?.["content-manager"]?.visible === false)
+        return false;
 
       return true;
     });
   },
 
-  isSearchableAttribute(name: string, attribute: AttributeLike | undefined): boolean {
+  isSearchableAttribute(
+    name: string,
+    attribute: AttributeLike | undefined
+  ): boolean {
     if (!attribute || BLOCKLISTED_ATTRIBUTE_NAMES.includes(name)) return false;
     if (attribute.private === true) return false;
     if (attribute.searchable === false) return false;
-    if (attribute.type && SKIPPED_ATTRIBUTE_TYPES.includes(attribute.type)) return false;
+    if (attribute.type && SKIPPED_ATTRIBUTE_TYPES.includes(attribute.type))
+      return false;
 
-    return Boolean(attribute.type && SEARCHABLE_SCALAR_TYPES.includes(attribute.type));
+    return Boolean(
+      attribute.type && SEARCHABLE_SCALAR_TYPES.includes(attribute.type)
+    );
   },
 
   /**
@@ -77,7 +92,12 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       depth = 0,
       prefix = "",
       visited = new Set<string>(),
-    }: { maxDepth: number; depth?: number; prefix?: string; visited?: Set<string> } = {
+    }: {
+      maxDepth: number;
+      depth?: number;
+      prefix?: string;
+      visited?: Set<string>;
+    } = {
       maxDepth: 0,
     }
   ): string[] {
@@ -94,7 +114,12 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       if (attribute.type !== "component" || depth >= maxDepth) return;
 
       const component = strapi.components[attribute.component as string];
-      if (!component || !attribute.component || visited.has(attribute.component)) return;
+      if (
+        !component ||
+        !attribute.component ||
+        visited.has(attribute.component)
+      )
+        return;
 
       paths.push(
         ...this.collectFieldPaths(component.attributes, {
@@ -117,9 +142,16 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
         .service("content-types")
         .findConfiguration(contentType);
 
-      const mainField = configuration && configuration.settings && configuration.settings.mainField;
+      const mainField =
+        configuration &&
+        configuration.settings &&
+        configuration.settings.mainField;
 
-      if (mainField && mainField !== "id" && contentType.attributes?.[mainField]) {
+      if (
+        mainField &&
+        mainField !== "id" &&
+        contentType.attributes?.[mainField]
+      ) {
         return mainField;
       }
     } catch (error) {
@@ -148,10 +180,15 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
   },
 
   hasAnySearchableField(
-    fields: { idFields: string[]; topLevelFields: string[]; nestedFields: string[] },
+    fields: {
+      idFields: string[];
+      topLevelFields: string[];
+      nestedFields: string[];
+    },
     isMainSearchable: boolean
   ): boolean {
-    if (fields.idFields.length > 0 || fields.topLevelFields.length > 0) return true;
+    if (fields.idFields.length > 0 || fields.topLevelFields.length > 0)
+      return true;
     return fields.nestedFields.length > 0 || isMainSearchable;
   },
 
@@ -163,20 +200,28 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     if (!contentType) return null;
 
     const attributes = contentType.attributes || {};
-    const excludedForType = this.extractExcludedFields(uid, settings.excludedFields);
-    const allPaths = this.collectFieldPaths(attributes, { maxDepth: settings.maxDepth }).filter(
-      (path) => !excludedForType.has(path)
+    const excludedForType = this.extractExcludedFields(
+      uid,
+      settings.excludedFields
     );
+    const allPaths = this.collectFieldPaths(attributes, {
+      maxDepth: settings.maxDepth,
+    }).filter((path) => !excludedForType.has(path));
     const mainField = await this.resolveMainField(contentType);
 
     const idFields = [
       "documentId",
-      ...IDENTIFIER_FIELDS.filter((name) => this.isSearchableAttribute(name, attributes[name])),
+      ...IDENTIFIER_FIELDS.filter((name) =>
+        this.isSearchableAttribute(name, attributes[name])
+      ),
     ];
     const topLevelFields = allPaths.filter(
-      (path) => !path.includes(".") && path !== mainField && !idFields.includes(path)
+      (path) =>
+        !path.includes(".") && path !== mainField && !idFields.includes(path)
     );
-    const nestedFields = settings.deep ? allPaths.filter((path) => path.includes(".")) : [];
+    const nestedFields = settings.deep
+      ? allPaths.filter((path) => path.includes("."))
+      : [];
 
     return {
       uid,
@@ -197,10 +242,13 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     };
   },
 
-  async getSearchableContentTypes({ force = false }: { force?: boolean } = {}): Promise<
-    ContentTypeDescriptor[]
-  > {
-    const settings = (await strapi.plugin(PLUGIN_ID).service("settings").get()) as PluginSettings;
+  async getSearchableContentTypes({
+    force = false,
+  }: { force?: boolean } = {}): Promise<ContentTypeDescriptor[]> {
+    const settings = (await strapi
+      .plugin(PLUGIN_ID)
+      .service("settings")
+      .get()) as PluginSettings;
 
     if (cache && !force && cache.signature === JSON.stringify(settings)) {
       return cache.types;
@@ -216,7 +264,9 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     );
 
     const types = described
-      .filter((type): type is ContentTypeDescriptor => Boolean(type && type.searchable))
+      .filter((type): type is ContentTypeDescriptor =>
+        Boolean(type && type.searchable)
+      )
       .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
     cache = { signature: JSON.stringify(settings), types };
@@ -226,10 +276,15 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
 
   /** Every candidate type, searchable or not — the Settings page needs the full list. */
   async getAllContentTypes(): Promise<ContentTypeDescriptor[]> {
-    const settings = (await strapi.plugin(PLUGIN_ID).service("settings").get()) as PluginSettings;
+    const settings = (await strapi
+      .plugin(PLUGIN_ID)
+      .service("settings")
+      .get()) as PluginSettings;
     const includePlugins = settings.includePluginContentTypes !== false;
     const described = await Promise.all(
-      this.listCandidateUids(includePlugins).map((uid) => this.describeContentType(uid, settings))
+      this.listCandidateUids(includePlugins).map((uid) =>
+        this.describeContentType(uid, settings)
+      )
     );
 
     return described

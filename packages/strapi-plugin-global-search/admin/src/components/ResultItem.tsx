@@ -31,7 +31,13 @@ interface ResultItemProps {
 }
 
 /** One hit in the Cmd+K palette: identity first, then what actually matched. */
-const ResultItem = ({ hit, query, isActive, onSelect, onHover = () => {} }: ResultItemProps) => (
+const ResultItem = ({
+  hit,
+  query,
+  isActive,
+  onSelect,
+  onHover = () => {},
+}: ResultItemProps) => (
   <Row
     $active={isActive}
     paddingTop={3}

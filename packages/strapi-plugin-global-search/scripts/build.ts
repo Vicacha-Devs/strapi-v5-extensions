@@ -12,7 +12,14 @@ rmSync(distDir, { recursive: true, force: true });
 // 1. Emit server TypeScript declarations (.d.ts) via tsc
 const tscName = process.platform === "win32" ? "tsc.cmd" : "tsc";
 const localTsc = resolve(rootDir, "node_modules", ".bin", tscName);
-const workspaceTsc = resolve(rootDir, "..", "..", "node_modules", ".bin", tscName);
+const workspaceTsc = resolve(
+  rootDir,
+  "..",
+  "..",
+  "node_modules",
+  ".bin",
+  tscName
+);
 const tscBin = existsSync(localTsc) ? localTsc : workspaceTsc;
 execFileSync(tscBin, ["-p", "tsconfig.server.json", "--emitDeclarationOnly"], {
   cwd: rootDir,
@@ -31,8 +38,14 @@ await build({
   external: ["@strapi/*"],
 });
 
-cpSync(resolve(distDir, "server/index.mjs"), resolve(distDir, "server/index.js"));
-cpSync(resolve(distDir, "server/index.mjs.map"), resolve(distDir, "server/index.js.map"));
+cpSync(
+  resolve(distDir, "server/index.mjs"),
+  resolve(distDir, "server/index.js")
+);
+cpSync(
+  resolve(distDir, "server/index.mjs.map"),
+  resolve(distDir, "server/index.js.map")
+);
 
 // 3. Bundle admin entrypoint as pure ESM (.mjs and .js under "type": "module")
 const externalPeers = [
@@ -57,16 +70,25 @@ await build({
 });
 
 cpSync(resolve(distDir, "admin/index.mjs"), resolve(distDir, "admin/index.js"));
-cpSync(resolve(distDir, "admin/index.mjs.map"), resolve(distDir, "admin/index.js.map"));
+cpSync(
+  resolve(distDir, "admin/index.mjs.map"),
+  resolve(distDir, "admin/index.js.map")
+);
 
 mkdirSync(resolve(distDir, "admin/translations"), { recursive: true });
-cpSync(resolve(rootDir, "admin/src/translations"), resolve(distDir, "admin/translations"), {
-  recursive: true,
-});
+cpSync(
+  resolve(rootDir, "admin/src/translations"),
+  resolve(distDir, "admin/translations"),
+  {
+    recursive: true,
+  }
+);
 
 writeFileSync(
   resolve(distDir, "admin/index.d.ts"),
   "declare const plugin: Record<string, unknown>;\nexport default plugin;\n"
 );
 
-process.stdout.write("[global-search] Built pure ESM dist/server and dist/admin successfully.\n");
+process.stdout.write(
+  "[global-search] Built pure ESM dist/server and dist/admin successfully.\n"
+);

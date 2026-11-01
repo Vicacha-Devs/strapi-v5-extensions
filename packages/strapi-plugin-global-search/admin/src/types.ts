@@ -48,8 +48,19 @@ export interface SearchHit {
 export interface SearchResponse {
   query?: string;
   results: SearchHit[];
-  groups: Array<{ uid: string; label: string; kind: string; count: number; truncated: boolean }>;
-  pagination: { page: number; pageSize: number; total: number; pageCount: number };
+  groups: Array<{
+    uid: string;
+    label: string;
+    kind: string;
+    count: number;
+    truncated: boolean;
+  }>;
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    pageCount: number;
+  };
   meta: {
     searchedTypes?: number;
     truncatedTypes?: string[];

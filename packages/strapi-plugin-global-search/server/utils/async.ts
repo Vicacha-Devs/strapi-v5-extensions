@@ -11,7 +11,10 @@ export const withTimeout = <T>(
       .then(factory)
       .finally(() => clearTimeout(timer)),
     new Promise<never>((_, reject) => {
-      timer = setTimeout(() => reject(new Error(`GLOBAL_SEARCH_TIMEOUT:${label}`)), ms);
+      timer = setTimeout(
+        () => reject(new Error(`GLOBAL_SEARCH_TIMEOUT:${label}`)),
+        ms
+      );
     }),
   ]);
 };
@@ -28,13 +31,16 @@ export const mapWithConcurrency = async <T, R>(
   const results = Array.from<R>({ length: items.length });
   let cursor = 0;
 
-  const runners = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (cursor < items.length) {
-      const index = cursor;
-      cursor += 1;
-      results[index] = await worker(items[index], index);
+  const runners = Array.from(
+    { length: Math.min(concurrency, items.length) },
+    async () => {
+      while (cursor < items.length) {
+        const index = cursor;
+        cursor += 1;
+        results[index] = await worker(items[index], index);
+      }
     }
-  });
+  );
 
   await Promise.all(runners);
 

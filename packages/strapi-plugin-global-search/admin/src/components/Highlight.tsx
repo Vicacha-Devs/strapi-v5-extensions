@@ -1,7 +1,8 @@
 import { Typography } from "@strapi/design-system";
 import React from "react";
 
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 interface HighlightProps {
   text?: string | null;
@@ -10,18 +11,28 @@ interface HighlightProps {
 }
 
 /** Marks every occurrence of the query inside a snippet, case-insensitively. */
-const Highlight = ({ text, query = "", textColor = "neutral600" }: HighlightProps) => {
+const Highlight = ({
+  text,
+  query = "",
+  textColor = "neutral600",
+}: HighlightProps) => {
   if (!text) return null;
   if (!query) return <Typography textColor={textColor}>{text}</Typography>;
 
-  const parts = String(text).split(new RegExp(`(${escapeRegExp(query)})`, "gi"));
+  const parts = String(text).split(
+    new RegExp(`(${escapeRegExp(query)})`, "gi")
+  );
   const lowered = query.toLowerCase();
 
   return (
     <Typography textColor={textColor}>
       {parts.map((part, index) =>
         part.toLowerCase() === lowered ? (
-          <Typography key={`${part}-${index}`} fontWeight="bold" textColor="primary600">
+          <Typography
+            key={`${part}-${index}`}
+            fontWeight="bold"
+            textColor="primary600"
+          >
             {part}
           </Typography>
         ) : (

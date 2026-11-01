@@ -3,7 +3,9 @@ import { PLUGIN_ID } from "../utils/constants";
 
 type Ctx = {
   request: { query: Record<string, unknown>; body?: Partial<PluginSettings> };
-  state: { userAbility?: { can: (action: string, subject: string) => boolean } | null };
+  state: {
+    userAbility?: { can: (action: string, subject: string) => boolean } | null;
+  };
   body?: unknown;
   throw: (code: number, msg: string) => void;
 };

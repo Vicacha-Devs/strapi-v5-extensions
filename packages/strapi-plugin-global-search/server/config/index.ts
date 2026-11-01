@@ -50,24 +50,38 @@ export const validator = (config: Partial<PluginSettings> = {}) => {
   Object.entries(numbers).forEach(([key, [min, max]]) => {
     if ((config as Record<string, unknown>)[key] === undefined) return;
     const value = (config as Record<string, unknown>)[key];
-    if (typeof value !== "number" || Number.isNaN(value) || value < min || value > max) {
-      throw new Error(`[global-search] config.${key} must be a number between ${min} and ${max}`);
+    if (
+      typeof value !== "number" ||
+      Number.isNaN(value) ||
+      value < min ||
+      value > max
+    ) {
+      throw new Error(
+        `[global-search] config.${key} must be a number between ${min} and ${max}`
+      );
     }
   });
 
-  (["deep", "includeDrafts", "includePluginContentTypes"] as const).forEach((key) => {
-    if (config[key] !== undefined && typeof config[key] !== "boolean") {
-      throw new Error(`[global-search] config.${key} must be a boolean`);
+  (["deep", "includeDrafts", "includePluginContentTypes"] as const).forEach(
+    (key) => {
+      if (config[key] !== undefined && typeof config[key] !== "boolean") {
+        throw new Error(`[global-search] config.${key} must be a boolean`);
+      }
     }
-  });
+  );
 
   (["excludedContentTypes", "excludedFields"] as const).forEach((key) => {
     if (config[key] !== undefined && !Array.isArray(config[key])) {
-      throw new Error(`[global-search] config.${key} must be an array of strings`);
+      throw new Error(
+        `[global-search] config.${key} must be an array of strings`
+      );
     }
   });
 
-  if (config.displayFields !== undefined && !isPlainObject(config.displayFields)) {
+  if (
+    config.displayFields !== undefined &&
+    !isPlainObject(config.displayFields)
+  ) {
     throw new Error(
       "[global-search] config.displayFields must be an object keyed by content type UID"
     );

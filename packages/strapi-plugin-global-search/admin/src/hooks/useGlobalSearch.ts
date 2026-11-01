@@ -38,7 +38,11 @@ const useGlobalSearch = ({
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [locale, setLocale] = useState("all");
   const [page, setPage] = useState(1);
-  const [state, setState] = useState<SearchState>({ status: "idle", data: EMPTY, error: null });
+  const [state, setState] = useState<SearchState>({
+    status: "idle",
+    data: EMPTY,
+    error: null,
+  });
 
   const requestId = useRef(0);
   const controller = useRef<AbortController | null>(null);
@@ -75,7 +79,8 @@ const useGlobalSearch = ({
           controller.current.signal
         );
 
-        if (id === requestId.current) setState({ status: "success", data, error: null });
+        if (id === requestId.current)
+          setState({ status: "success", data, error: null });
       } catch (error) {
         if (isCanceled(error) || id !== requestId.current) return;
         setState({ status: "error", data: EMPTY, error });
@@ -94,7 +99,9 @@ const useGlobalSearch = ({
 
   const toggleType = useCallback((uid: string) => {
     setSelectedTypes((previous) =>
-      previous.includes(uid) ? previous.filter((item) => item !== uid) : [...previous, uid]
+      previous.includes(uid)
+        ? previous.filter((item) => item !== uid)
+        : [...previous, uid]
     );
   }, []);
 

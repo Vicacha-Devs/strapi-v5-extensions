@@ -10,7 +10,8 @@ import { withTimeout, mapWithConcurrency } from "../utils/async";
 import { PLUGIN_ID } from "../utils/constants";
 import { sanitizeQuery } from "../utils/text";
 
-const service = (strapi: StrapiLike, name: string) => strapi.plugin(PLUGIN_ID).service(name);
+const service = (strapi: StrapiLike, name: string) =>
+  strapi.plugin(PLUGIN_ID).service(name);
 
 export interface EntryLike {
   id: string | number;
@@ -39,7 +40,11 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
 
   async queryContentType(
     descriptor: ContentTypeDescriptor,
-    { query, locale, settings }: { query: string; locale?: string; settings: PluginSettings }
+    {
+      query,
+      locale,
+      settings,
+    }: { query: string; locale?: string; settings: PluginSettings }
   ): Promise<EntryLike[]> {
     const params = service(strapi, "query").buildParams(descriptor, {
       query,
@@ -52,11 +57,18 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
 
     const result = await strapi.documents(descriptor.uid).findMany(params);
 
-    return (Array.isArray(result) ? result : [result].filter(Boolean)) as EntryLike[];
+    return (
+      Array.isArray(result) ? result : [result].filter(Boolean)
+    ) as EntryLike[];
   },
 
-  resolveEntryTitle(descriptor: ContentTypeDescriptor, entry: EntryLike): string {
-    const mainVal = descriptor.mainField ? (entry[descriptor.mainField] as string) : "";
+  resolveEntryTitle(
+    descriptor: ContentTypeDescriptor,
+    entry: EntryLike
+  ): string {
+    const mainVal = descriptor.mainField
+      ? (entry[descriptor.mainField] as string)
+      : "";
     if (mainVal) return mainVal;
     return entry.name || entry.title || `#${entry.documentId || entry.id}`;
   },
@@ -76,7 +88,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     settings: PluginSettings
   ): RankedHit {
     const scored = service(strapi, "ranking").score(entry, descriptor, query);
-    const extraFields = (settings.displayFields[descriptor.uid] || []).slice(0, 2);
+    const extraFields = (settings.displayFields[descriptor.uid] || []).slice(
+      0,
+      2
+    );
 
     return {
       ...scored,
@@ -87,7 +102,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       documentId: entry.documentId || null,
       title: this.resolveEntryTitle(descriptor, entry),
       mainField: descriptor.mainField,
-      extra: extraFields.map((field) => ({ field, value: entry[field] ?? null })),
+      extra: extraFields.map((field) => ({
+        field,
+        value: entry[field] ?? null,
+      })),
       locale: entry.locale || null,
       status: this.resolveEntryStatus(descriptor, entry),
       updatedAt: entry.updatedAt || null,
@@ -111,7 +129,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     pageSize = 20,
     userAbility,
   }: SearchParams = {}): Promise<SearchResult> {
-    const settings = (await service(strapi, "settings").get()) as PluginSettings;
+    const settings = (await service(
+      strapi,
+      "settings"
+    ).get()) as PluginSettings;
     const query = sanitizeQuery(rawQuery);
 
     const empty: SearchResult = {
@@ -119,7 +140,12 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       results: [],
       groups: [],
       pagination: { page: 1, pageSize, total: 0, pageCount: 0 },
-      meta: { searchedTypes: 0, truncatedTypes: [], failedTypes: [], minChars: settings.minChars },
+      meta: {
+        searchedTypes: 0,
+        truncatedTypes: [],
+        failedTypes: [],
+        minChars: settings.minChars,
+      },
     };
 
     if (query.length < settings.minChars) return empty;
@@ -128,11 +154,15 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       strapi,
       "schema"
     ).getSearchableContentTypes()) as ContentTypeDescriptor[];
-    const requested = Array.isArray(types) && types.length ? new Set(types) : null;
+    const requested =
+      Array.isArray(types) && types.length ? new Set(types) : null;
 
     const candidates = service(strapi, "permissions")
       .filterReadableTypes(searchable, userAbility)
-      .filter((descriptor: ContentTypeDescriptor) => !requested || requested.has(descriptor.uid));
+      .filter(
+        (descriptor: ContentTypeDescriptor) =>
+          !requested || requested.has(descriptor.uid)
+      );
 
     if (!candidates.length) return { ...empty, query };
 
@@ -145,17 +175,24 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       async (descriptor: ContentTypeDescriptor) => {
         try {
           const entries = await withTimeout(
-            () => this.queryContentType(descriptor, { query, locale, settings }),
+            () =>
+              this.queryContentType(descriptor, { query, locale, settings }),
             settings.queryTimeout,
             descriptor.uid
           );
 
-          if (entries.length >= settings.perTypeLimit) truncatedTypes.push(descriptor.uid);
+          if (entries.length >= settings.perTypeLimit)
+            truncatedTypes.push(descriptor.uid);
 
-          return entries.map((entry) => this.toHit(descriptor, entry, query, settings));
+          return entries.map((entry) =>
+            this.toHit(descriptor, entry, query, settings)
+          );
         } catch (error) {
           // One broken or slow content type must never fail the whole search.
-          failedTypes.push({ uid: descriptor.uid, message: (error as Error).message });
+          failedTypes.push({
+            uid: descriptor.uid,
+            message: (error as Error).message,
+          });
           strapi.log.warn(
             `[${PLUGIN_ID}] search failed for ${descriptor.uid}: ${(error as Error).message}`
           );
@@ -183,7 +220,8 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
         uid: descriptor.uid,
         label: descriptor.displayName,
         kind: descriptor.kind,
-        count: ranked.filter((hit) => hit.contentTypeUid === descriptor.uid).length,
+        count: ranked.filter((hit) => hit.contentTypeUid === descriptor.uid)
+          .length,
         truncated: truncatedTypes.includes(descriptor.uid),
       }))
       .filter((group: { count: number }) => group.count > 0)

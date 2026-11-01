@@ -10,7 +10,9 @@ export const sanitizeQuery = (raw: unknown): string => {
   return raw.replace(/%/g, "").trim().slice(0, MAX_QUERY_LENGTH);
 };
 
-const isProseMirrorRoot = (value: unknown): value is Record<string, unknown> => {
+const isProseMirrorRoot = (
+  value: unknown
+): value is Record<string, unknown> => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const obj = value as Record<string, unknown>;
   if (obj.type === "doc" && Array.isArray(obj.content)) return true;
@@ -90,7 +92,8 @@ export const toPlainText = (value: unknown): string => {
  */
 export const collectValues = (node: unknown, parts: string[]): string[] => {
   if (node === null || node === undefined) return [];
-  if (Array.isArray(node)) return node.flatMap((item) => collectValues(item, parts));
+  if (Array.isArray(node))
+    return node.flatMap((item) => collectValues(item, parts));
   if (parts.length === 0) {
     const structured = extractStructuredText(node);
     if (structured !== null) return structured ? [structured] : [];
@@ -99,7 +102,10 @@ export const collectValues = (node: unknown, parts: string[]): string[] => {
     return [];
   }
   if (typeof node !== "object") return [];
-  return collectValues((node as Record<string, unknown>)[parts[0]], parts.slice(1));
+  return collectValues(
+    (node as Record<string, unknown>)[parts[0]],
+    parts.slice(1)
+  );
 };
 
 export const getValuesAtPath = (entry: unknown, path: string): string[] =>
@@ -111,7 +117,9 @@ export const buildSnippet = (value: unknown, query: string): string => {
   const index = text.toLowerCase().indexOf(query.toLowerCase());
 
   if (index === -1) {
-    return text.length > SNIPPET_RADIUS * 2 ? `${text.slice(0, SNIPPET_RADIUS * 2)}…` : text;
+    return text.length > SNIPPET_RADIUS * 2
+      ? `${text.slice(0, SNIPPET_RADIUS * 2)}…`
+      : text;
   }
 
   const start = Math.max(0, index - SNIPPET_RADIUS);
