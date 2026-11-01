@@ -15,8 +15,9 @@ import type {
 } from "../../../shared/types";
 import { getDocumentsClient } from "../types";
 import {
-  type ResolvedTargetEvent,
   aggregateRsvpCounts,
+  buildListRegistrationsQueryFilters,
+  buildRegistrationCreateData,
   formatRegistrationRecord,
   maskEmail,
   resolveAssignedRsvpStatus,
@@ -95,74 +96,6 @@ function resolveOccurrenceDateForInput(
     return inputDate;
   }
   return toDateKey(eventStartDate) || new Date().toISOString().slice(0, 10);
-}
-
-function buildRegistrationCreateData(args: {
-  targetEvent: ResolvedTargetEvent;
-  eventDocumentId: string;
-  occurrenceDate: string;
-  attendeeName: string;
-  attendeeEmail: string;
-  guestsCount: number;
-  assignedStatus: RsvpStatus;
-  checkInToken: string;
-  input: RsvpRegistrationInput;
-}): Record<string, unknown> {
-  const {
-    targetEvent,
-    eventDocumentId,
-    occurrenceDate,
-    attendeeName,
-    attendeeEmail,
-    guestsCount,
-    assignedStatus,
-    checkInToken,
-    input,
-  } = args;
-  return {
-    eventUid: targetEvent.uid,
-    eventDocumentId,
-    eventTitle: targetEvent.title,
-    occurrenceDate,
-    attendeeName,
-    attendeeEmail,
-    attendeePhone: input.attendeePhone
-      ? String(input.attendeePhone).trim().slice(0, 50)
-      : "",
-    guestsCount,
-    status: assignedStatus,
-    checkInToken,
-    locale: input.locale ? String(input.locale).slice(0, 10) : "es",
-    notes: input.notes ? String(input.notes).trim().slice(0, 2000) : "",
-    metadata: input.metadata ?? null,
-  };
-}
-
-function buildListRegistrationsQueryFilters(filters?: {
-  eventDocumentId?: string;
-  occurrenceDate?: string;
-  status?: RsvpStatus;
-  search?: string;
-}): Record<string, unknown> {
-  const queryFilters: Record<string, unknown> = {};
-  if (filters?.eventDocumentId) {
-    queryFilters.eventDocumentId = { $eq: filters.eventDocumentId };
-  }
-  if (filters?.occurrenceDate) {
-    queryFilters.occurrenceDate = { $eq: filters.occurrenceDate };
-  }
-  if (filters?.status) {
-    queryFilters.status = { $eq: filters.status };
-  }
-  const q = filters?.search?.trim();
-  if (q) {
-    queryFilters.$or = [
-      { attendeeName: { $containsi: q } },
-      { attendeeEmail: { $containsi: q } },
-      { eventTitle: { $containsi: q } },
-    ];
-  }
-  return queryFilters;
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {

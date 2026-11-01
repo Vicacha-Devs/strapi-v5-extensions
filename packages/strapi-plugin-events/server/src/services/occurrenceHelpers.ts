@@ -35,6 +35,9 @@ export interface GetOccurrencesParams {
   includeDrafts?: boolean;
 }
 
+const isValidIso = (val?: string) =>
+  Boolean(val && !Number.isNaN(new Date(val).getTime()));
+
 export function resolveOccurrenceWindow(params: GetOccurrencesParams): {
   windowStart: string;
   windowEnd: string;
@@ -53,21 +56,15 @@ export function resolveOccurrenceWindow(params: GetOccurrencesParams): {
     59,
     59
   ).toISOString();
-  const isValidIso = (val?: string) =>
-    Boolean(val && !Number.isNaN(new Date(val).getTime()));
   return {
     windowStart: isValidIso(params.from) ? String(params.from) : defaultFrom,
     windowEnd: isValidIso(params.to) ? String(params.to) : defaultTo,
   };
 }
 
-function resolveEffectiveQueryLocale(
-  paramLocale: string | undefined,
-  defaultLocale: string | undefined
-): string | undefined {
-  if (paramLocale && paramLocale !== "auto") return paramLocale;
-  if (defaultLocale && defaultLocale !== "auto") return defaultLocale;
-  return undefined;
+function resolveEffectiveQueryLocale(paramLoc?: string, defaultLoc?: string) {
+  if (paramLoc && paramLoc !== "auto") return paramLoc;
+  return defaultLoc && defaultLoc !== "auto" ? defaultLoc : undefined;
 }
 
 function buildSourceQueryOptions(
@@ -83,16 +80,12 @@ function buildSourceQueryOptions(
   if (params.documentId) {
     queryOpts.filters = { documentId: { $eq: params.documentId } };
   }
-  const effectiveLocale = resolveEffectiveQueryLocale(
+  const loc = resolveEffectiveQueryLocale(
     params.locale,
     settings.defaultLocale
   );
-  if (effectiveLocale) {
-    queryOpts.locale = effectiveLocale;
-  }
-  if (!params.includeDrafts) {
-    queryOpts.status = "published";
-  }
+  if (loc) queryOpts.locale = loc;
+  if (!params.includeDrafts) queryOpts.status = "published";
   return queryOpts;
 }
 
@@ -122,9 +115,7 @@ async function fetchDocumentsFallback(
 ): Promise<Array<Record<string, unknown>>> {
   try {
     const fallbackOpts: StrapiDocumentQueryOptions = { limit: 500 };
-    if (documentId) {
-      fallbackOpts.filters = { documentId: { $eq: documentId } };
-    }
+    if (documentId) fallbackOpts.filters = { documentId: { $eq: documentId } };
     return await client.findMany(fallbackOpts);
   } catch {
     return [];
@@ -139,10 +130,8 @@ function extractCustomFields(
     return undefined;
   }
   const extracted: Record<string, unknown> = {};
-  for (const fieldKey of customFieldKeys) {
-    if (fieldKey && doc[fieldKey] !== undefined) {
-      extracted[fieldKey] = doc[fieldKey];
-    }
+  for (const k of customFieldKeys) {
+    if (k && doc[k] !== undefined) extracted[k] = doc[k];
   }
   return Object.keys(extracted).length > 0 ? extracted : undefined;
 }
@@ -161,13 +150,8 @@ function resolveDocColor(
   return source.color;
 }
 
-function readOptionalFieldString(
-  doc: Record<string, unknown>,
-  fieldName?: string
-): string {
-  if (!fieldName) return "";
-  return String(doc[fieldName] ?? "");
-}
+const readOptionalFieldString = (doc: Record<string, unknown>, key?: string) =>
+  key ? String(doc[key] ?? "") : "";
 
 function resolveDocCapacity(
   doc: Record<string, unknown>,
@@ -202,57 +186,38 @@ function extractDocMetadata(
   docId: string,
   baseDateKey: string
 ): ExtractedDocMeta {
-  const categoryVal = readOptionalFieldString(doc, source.fields.category);
-  const baseTitle = String(doc[source.fields.title] ?? doc.title ?? "Untitled");
-  const baseLocation = readOptionalFieldString(doc, source.fields.location);
-  const summary = readOptionalFieldString(doc, source.fields.summary);
-  const slugVal = readOptionalFieldString(doc, source.fields.slug);
-  const statusVal = mapEventStatus(
-    source.fields.status ? doc[source.fields.status] : doc.eventStatus
-  );
-  const color = resolveDocColor(doc, source, categoryVal);
-  const rsvpField = source.fields.rsvpEnabled ?? "rsvpEnabled";
-  const rsvpEnabled =
-    doc[rsvpField] !== undefined ? Boolean(doc[rsvpField]) : false;
-  const capacity = resolveDocCapacity(doc, source);
-  const posterField = source.fields.poster;
-  const poster = normalizeEventPoster(
-    posterField ? doc[posterField] : doc.poster,
-    baseTitle
-  );
-  const actionLinks = normalizeEventActionLinks(
-    doc[source.fields.actionLinks ?? "actionLinks"]
-  );
-  const spotlightConfig = normalizeEventSpotlightConfig(
-    doc[source.fields.spotlightConfig ?? "spotlightConfig"]
-  );
+  const f = source.fields;
+  const categoryVal = readOptionalFieldString(doc, f.category);
+  const baseTitle = String(doc[f.title] ?? doc.title ?? "Untitled");
+  const slugVal = readOptionalFieldString(doc, f.slug);
+  const rsvpField = f.rsvpEnabled ?? "rsvpEnabled";
 
   return {
     docId,
     baseTitle,
-    baseLocation,
-    summary,
+    baseLocation: readOptionalFieldString(doc, f.location),
+    summary: readOptionalFieldString(doc, f.summary),
     slug: slugVal || undefined,
     categoryVal,
-    statusVal,
-    color,
-    rsvpEnabled,
-    capacity,
+    statusVal: mapEventStatus(f.status ? doc[f.status] : doc.eventStatus),
+    color: resolveDocColor(doc, source, categoryVal),
+    rsvpEnabled: doc[rsvpField] !== undefined ? Boolean(doc[rsvpField]) : false,
+    capacity: resolveDocCapacity(doc, source),
     baseDateKey,
-    poster,
-    actionLinks,
-    spotlightConfig,
-    extractedCustomFields: extractCustomFields(doc, source.fields.customFields),
+    poster: normalizeEventPoster(
+      f.poster ? doc[f.poster] : doc.poster,
+      baseTitle
+    ),
+    actionLinks: normalizeEventActionLinks(doc[f.actionLinks ?? "actionLinks"]),
+    spotlightConfig: normalizeEventSpotlightConfig(
+      doc[f.spotlightConfig ?? "spotlightConfig"]
+    ),
+    extractedCustomFields: extractCustomFields(doc, f.customFields),
   };
 }
 
-function matchesCategoryFilter(
-  categoryVal: string,
-  filterCategory?: string
-): boolean {
-  if (!filterCategory || filterCategory === "all") return true;
-  return categoryVal.toLowerCase() === filterCategory.toLowerCase();
-}
+const matchesCategoryFilter = (cat: string, filter?: string) =>
+  !filter || filter === "all" || cat.toLowerCase() === filter.toLowerCase();
 
 function resolveDocumentRecurrence(
   doc: Record<string, unknown>,
@@ -266,9 +231,7 @@ function resolveDocumentRecurrence(
       ? doc.timezone
       : defaultTimezone;
   const recurrence = parseRRuleFieldValue(rawRecurrence, docTz);
-  if (allDay) {
-    recurrence.allDay = true;
-  }
+  if (allDay) recurrence.allDay = true;
   return recurrence;
 }
 
@@ -292,9 +255,7 @@ export async function expandDocumentOccurrences(
     docId,
     startEnd.startDate.slice(0, 10)
   );
-  if (!matchesCategoryFilter(meta.categoryVal, params.category)) {
-    return [];
-  }
+  if (!matchesCategoryFilter(meta.categoryVal, params.category)) return [];
 
   const recurrence = resolveDocumentRecurrence(
     doc,
@@ -351,17 +312,10 @@ async function fetchSlotRsvpStats(
   });
 }
 
-function toUndefinedIfEmpty(val: string): string | undefined {
-  return val ? val : undefined;
-}
+const toUndefinedIfEmpty = (val: string) => (val ? val : undefined);
 
-function readOptionalDocString(
-  doc: Record<string, unknown>,
-  key: string
-): string | undefined {
-  const val = doc[key];
-  return typeof val === "string" && val ? val : undefined;
-}
+const readOptionalDocString = (doc: Record<string, unknown>, key: string) =>
+  typeof doc[key] === "string" && doc[key] ? (doc[key] as string) : undefined;
 
 async function buildSingleExpandedOccurrence(args: {
   strapi: Core.Strapi;
