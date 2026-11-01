@@ -42,7 +42,9 @@ function detectDocumentLocale(props: SidePanelProps): string | null {
     return props.document.locale;
   }
   if (typeof window !== "undefined") {
-    const fromUrl = new URLSearchParams(window.location.search).get("plugins[i18n][locale]");
+    const fromUrl = new URLSearchParams(window.location.search).get(
+      "plugins[i18n][locale]"
+    );
     if (fromUrl) {
       return fromUrl;
     }
@@ -81,8 +83,11 @@ function formatNoteMessageWithLocale(
     (typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("plugins[i18n][locale]")
       : null);
-  const globalMessages = (globalThis as unknown as GlobalCmI18nWindow).__CM_I18N_MESSAGES__;
-  const override = activeLoc ? globalMessages?.[activeLoc]?.[fullKey] : undefined;
+  const globalMessages = (globalThis as unknown as GlobalCmI18nWindow)
+    .__CM_I18N_MESSAGES__;
+  const override = activeLoc
+    ? globalMessages?.[activeLoc]?.[fullKey]
+    : undefined;
   if (override) {
     return interpolateTemplateValues(override, values);
   }
@@ -93,23 +98,40 @@ interface NotesSidePanelContentProps {
   entity: NoteEntityContext;
 }
 
-const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({ entity }) => {
+const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
+  entity,
+}) => {
   const { formatMessage } = useIntl();
   const [searchQuery, setSearchQuery] = React.useState<string>("");
-  const [categoryFilter, setCategoryFilter] = React.useState<NoteCategory | "all">("all");
+  const [categoryFilter, setCategoryFilter] = React.useState<
+    NoteCategory | "all"
+  >("all");
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
   const [activeNote, setActiveNote] = React.useState<NoteRecord | null>(null);
-  const [noteToDelete, setNoteToDelete] = React.useState<NoteRecord | null>(null);
+  const [noteToDelete, setNoteToDelete] = React.useState<NoteRecord | null>(
+    null
+  );
 
-  const { notes, isLoading, isMutating, createNote, updateNote, deleteNote } = useNotes({
-    entitySlug: entity.slug,
-    entityDocumentId: entity.documentId,
-    entityId: entity.id,
-    entityLocale: entity.locale,
-  });
+  const { notes, isLoading, isMutating, createNote, updateNote, deleteNote } =
+    useNotes({
+      entitySlug: entity.slug,
+      entityDocumentId: entity.documentId,
+      entityId: entity.id,
+      entityLocale: entity.locale,
+    });
 
-  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
-    formatNoteMessageWithLocale(id, defaultMessage, formatMessage, entity.locale, values);
+  const t = (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) =>
+    formatNoteMessageWithLocale(
+      id,
+      defaultMessage,
+      formatMessage,
+      entity.locale,
+      values
+    );
 
   const visibleNotes = React.useMemo(
     () =>
@@ -121,7 +143,10 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({ entity })
     [notes, categoryFilter, searchQuery]
   );
 
-  const handleUpsert = async (payload: NoteUpsertInput, existingId?: string | number) => {
+  const handleUpsert = async (
+    payload: NoteUpsertInput,
+    existingId?: string | number
+  ) => {
     if (existingId !== undefined && existingId !== "") {
       await updateNote(existingId, payload);
     } else {
@@ -166,14 +191,21 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({ entity })
               name="noteSearch"
               size="S"
               value={searchQuery}
-              onChange={(e: { target: { value: string } }) => setSearchQuery(e.target.value)}
-              placeholder={t("notes.sidePanel.search.placeholder", "Filter notes...")}
+              onChange={(e: { target: { value: string } }) =>
+                setSearchQuery(e.target.value)
+              }
+              placeholder={t(
+                "notes.sidePanel.search.placeholder",
+                "Filter notes..."
+              )}
             />
             <SingleSelect
               size="S"
               value={categoryFilter}
               onChange={(val: string | number) =>
-                setCategoryFilter((String(val) || "all") as NoteCategory | "all")
+                setCategoryFilter(
+                  (String(val) || "all") as NoteCategory | "all"
+                )
               }
             >
               <SingleSelectOption value="all">
@@ -181,7 +213,10 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({ entity })
               </SingleSelectOption>
               {NOTE_CATEGORIES.map((cat) => (
                 <SingleSelectOption key={cat} value={cat}>
-                  {t(NOTE_CATEGORY_META[cat].labelKey, NOTE_CATEGORY_META[cat].defaultLabel)}
+                  {t(
+                    NOTE_CATEGORY_META[cat].labelKey,
+                    NOTE_CATEGORY_META[cat].defaultLabel
+                  )}
                 </SingleSelectOption>
               ))}
             </SingleSelect>
@@ -198,8 +233,14 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({ entity })
           <Box padding={3} background="neutral100" hasRadius>
             <Typography variant="pi" textColor="neutral600">
               {notes.length === 0
-                ? t("notes.sidePanel.empty", "No editorial notes attached to this entry yet.")
-                : t("notes.sidePanel.noMatches", "No notes match the current filter.")}
+                ? t(
+                    "notes.sidePanel.empty",
+                    "No editorial notes attached to this entry yet."
+                  )
+                : t(
+                    "notes.sidePanel.noMatches",
+                    "No notes match the current filter."
+                  )}
             </Typography>
           </Box>
         ) : (
@@ -270,7 +311,9 @@ function resolveSidePanelDocumentId(props: SidePanelProps): string {
   return typeof docId === "string" ? docId : "";
 }
 
-function resolveSidePanelNumericId(props: SidePanelProps): number | string | null {
+function resolveSidePanelNumericId(
+  props: SidePanelProps
+): number | string | null {
   const id = props.document?.id;
   if (typeof id === "number" || typeof id === "string") {
     return id;
@@ -278,7 +321,9 @@ function resolveSidePanelNumericId(props: SidePanelProps): number | string | nul
   return null;
 }
 
-function resolveSidePanelEntity(props: SidePanelProps): NoteEntityContext | null {
+function resolveSidePanelEntity(
+  props: SidePanelProps
+): NoteEntityContext | null {
   const slug = props.model ?? "";
   const documentId = resolveSidePanelDocumentId(props);
   const numericId = resolveSidePanelNumericId(props);
@@ -303,7 +348,12 @@ export const NotesSidePanel = (props: SidePanelProps) => {
   }
 
   return {
-    title: formatNoteMessageWithLocale("plugin.name", "Notes", formatMessage, entity.locale),
+    title: formatNoteMessageWithLocale(
+      "plugin.name",
+      "Notes",
+      formatMessage,
+      entity.locale
+    ),
     content: <NotesSidePanelContent entity={entity} />,
   };
 };

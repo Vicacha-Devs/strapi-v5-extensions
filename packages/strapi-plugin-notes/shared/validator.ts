@@ -17,7 +17,11 @@ import type {
 const ENTITY_SLUG_PATTERN = /^[a-zA-Z0-9_:.-]{1,160}$/;
 const SAFE_ID_PATTERN = /^[a-zA-Z0-9_-]{1,128}$/;
 const LOCALE_PATTERN = /^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/;
-const FORBIDDEN_IDENTIFIER_TOKENS = new Set(["__proto__", "constructor", "prototype"]);
+const FORBIDDEN_IDENTIFIER_TOKENS = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+]);
 
 function isForbiddenIdentifier(value: string): boolean {
   const lower = value.toLowerCase();
@@ -33,11 +37,16 @@ function isForbiddenIdentifier(value: string): boolean {
   ) {
     return true;
   }
-  return lower.split(/[:._/-]+/).some((segment) => FORBIDDEN_IDENTIFIER_TOKENS.has(segment));
+  return lower
+    .split(/[:._/-]+/)
+    .some((segment) => FORBIDDEN_IDENTIFIER_TOKENS.has(segment));
 }
 
 export function isValidNoteCategory(value: unknown): value is NoteCategory {
-  return typeof value === "string" && (NOTE_CATEGORIES as readonly string[]).includes(value);
+  return (
+    typeof value === "string" &&
+    (NOTE_CATEGORIES as readonly string[]).includes(value)
+  );
 }
 
 export function normalizeNoteCategory(value: unknown): NoteCategory {
@@ -99,7 +108,11 @@ function parseStringEntityId(input: string): number | string | null {
     return null;
   }
   const trimmed = input.trim();
-  if (!trimmed || trimmed.length > MAX_ENTITY_ID_LENGTH || isForbiddenIdentifier(trimmed)) {
+  if (
+    !trimmed ||
+    trimmed.length > MAX_ENTITY_ID_LENGTH ||
+    isForbiddenIdentifier(trimmed)
+  ) {
     return null;
   }
   if (/^\d+$/.test(trimmed)) {
@@ -147,7 +160,10 @@ function extractPrimitiveAuthorId(rawUser: unknown): number | string | null {
   return null;
 }
 
-function sanitizePrimitiveAuthor(rawUser: unknown, fallback: string): NoteAuthorMeta | null {
+function sanitizePrimitiveAuthor(
+  rawUser: unknown,
+  fallback: string
+): NoteAuthorMeta | null {
   const primitiveId = extractPrimitiveAuthorId(rawUser);
   if (!fallback && primitiveId === null) {
     return null;
@@ -161,8 +177,13 @@ function sanitizePrimitiveAuthor(rawUser: unknown, fallback: string): NoteAuthor
   };
 }
 
-function asPlainObject(value: unknown, fallback: Record<string, unknown>): Record<string, unknown> {
-  return value && typeof value === "object" ? (value as Record<string, unknown>) : fallback;
+function asPlainObject(
+  value: unknown,
+  fallback: Record<string, unknown>
+): Record<string, unknown> {
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : fallback;
 }
 
 function normalizeRawAuthorId(rawId: unknown): number | string | null {
@@ -206,7 +227,8 @@ export function sanitizeNoteAuthor(
   const explicitDisplayName = sanitizePlainText(attrs.displayName, 120);
 
   const fullName = [firstname, lastname].filter(Boolean).join(" ").trim();
-  const displayName = fullName || username || explicitDisplayName || fallback || "";
+  const displayName =
+    fullName || username || explicitDisplayName || fallback || "";
 
   if (!displayName && id === null) {
     return null;
@@ -228,7 +250,10 @@ export function formatNoteAuthorDisplay(
   if (!author) {
     return emptyFallback;
   }
-  const fullName = [author.firstname, author.lastname].filter(Boolean).join(" ").trim();
+  const fullName = [author.firstname, author.lastname]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
   if (fullName) {
     return fullName;
   }
@@ -284,7 +309,8 @@ function unwrapRawNoteAttributes(raw: unknown): {
   root: Record<string, unknown>;
   attrs: Record<string, unknown>;
 } {
-  const root = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const root =
+    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
   const attrs =
     root.attributes && typeof root.attributes === "object"
       ? { ...root, ...(root.attributes as Record<string, unknown>) }
@@ -296,14 +322,20 @@ export function normalizeNoteRecord(raw: unknown): NoteRecord {
   const { root, attrs } = unwrapRawNoteAttributes(raw);
   const id = extractRecordId(root, attrs);
   const documentId =
-    sanitizeEntityDocumentId(root.documentId ?? attrs.documentId) || String(id || "");
+    sanitizeEntityDocumentId(root.documentId ?? attrs.documentId) ||
+    String(id || "");
 
   const entityId = sanitizeEntityId(attrs.entityId);
   const entityDocumentId =
-    sanitizeEntityDocumentId(attrs.entityDocumentId) || (entityId !== null ? String(entityId) : "");
+    sanitizeEntityDocumentId(attrs.entityDocumentId) ||
+    (entityId !== null ? String(entityId) : "");
 
-  const createdBy = sanitizeNoteAuthor(attrs.createdBy, attrs.createdByName ?? attrs.authorName);
-  const updatedBy = sanitizeNoteAuthor(attrs.updatedBy, attrs.updatedByName) ?? createdBy;
+  const createdBy = sanitizeNoteAuthor(
+    attrs.createdBy,
+    attrs.createdByName ?? attrs.authorName
+  );
+  const updatedBy =
+    sanitizeNoteAuthor(attrs.updatedBy, attrs.updatedByName) ?? createdBy;
 
   const createdAt = sanitizeOptionalIsoString(attrs.createdAt);
   const updatedAt = sanitizeOptionalIsoString(attrs.updatedAt) ?? createdAt;
@@ -355,7 +387,8 @@ export function validateNoteCreatePayload(input: unknown): {
   const entitySlug = sanitizeEntitySlug(raw.entitySlug);
   const entityId = sanitizeEntityId(raw.entityId);
   const entityDocumentId =
-    sanitizeEntityDocumentId(raw.entityDocumentId) || (entityId !== null ? String(entityId) : "");
+    sanitizeEntityDocumentId(raw.entityDocumentId) ||
+    (entityId !== null ? String(entityId) : "");
   const entityLocale = sanitizeEntityLocale(raw.entityLocale);
 
   if (!title) {
@@ -392,7 +425,8 @@ export function validateNoteUpdatePayload(input: unknown): {
   const raw = unwrapDataEnvelope(input);
   const errors: string[] = [];
   const data: Partial<NoteUpsertInput> = {};
-  const hasOwn = (key: string) => Object.prototype.hasOwnProperty.call(raw, key);
+  const hasOwn = (key: string) =>
+    Object.prototype.hasOwnProperty.call(raw, key);
 
   if (hasOwn("title")) {
     const title = sanitizePlainText(raw.title, MAX_NOTE_TITLE_LENGTH);

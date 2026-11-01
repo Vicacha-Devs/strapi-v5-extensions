@@ -52,7 +52,9 @@ declare module "@strapi/strapi" {
     }
 
     export interface DocumentServiceInstance {
-      findMany(params?: DocumentQueryOptions): Promise<Array<Record<string, unknown>>>;
+      findMany(
+        params?: DocumentQueryOptions
+      ): Promise<Array<Record<string, unknown>>>;
       findOne(params: {
         documentId: string;
         locale?: string;
@@ -94,7 +96,9 @@ declare module "@strapi/strapi" {
         data: Record<string, unknown>;
         populate?: string[] | Record<string, unknown>;
       }): Promise<Record<string, unknown> | null>;
-      delete?(params: { where: Record<string, unknown> }): Promise<Record<string, unknown> | null>;
+      delete?(params: {
+        where: Record<string, unknown>;
+      }): Promise<Record<string, unknown> | null>;
     }
 
     export interface PluginInstance {

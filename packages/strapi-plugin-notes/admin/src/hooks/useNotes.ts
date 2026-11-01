@@ -13,7 +13,9 @@ import {
 } from "../../../shared";
 import { getTrad } from "../utils";
 
-function formatEntityIdParam(entityId: number | string | null | undefined): string {
+function formatEntityIdParam(
+  entityId: number | string | null | undefined
+): string {
   if (entityId === undefined || entityId === null || entityId === "") {
     return "";
   }
@@ -27,8 +29,18 @@ function buildNotesQueryString(params: NoteFilterParams = {}): string {
     ["entityId", formatEntityIdParam(params.entityId)],
     ["entityLocale", params.entityLocale ?? undefined],
     ["includeAllLocales", params.includeAllLocales ? "true" : undefined],
-    ["category", params.category && params.category !== "all" ? params.category : undefined],
-    ["isPinned", typeof params.isPinned === "boolean" ? String(params.isPinned) : undefined],
+    [
+      "category",
+      params.category && params.category !== "all"
+        ? params.category
+        : undefined,
+    ],
+    [
+      "isPinned",
+      typeof params.isPinned === "boolean"
+        ? String(params.isPinned)
+        : undefined,
+    ],
     ["search", params.search],
     ["sort", params.sort],
   ];
@@ -49,12 +61,15 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
   const { formatMessage } = useIntl();
 
   const [notes, setNotes] = useState<NoteRecord[]>([]);
-  const [summary, setSummary] = useState<NotesSummaryStats>(() => computeNotesSummaryStats([]));
+  const [summary, setSummary] = useState<NotesSummaryStats>(() =>
+    computeNotesSummaryStats([])
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMutating, setIsMutating] = useState<boolean>(false);
 
   const t = useCallback(
-    (id: string, defaultMessage: string) => formatMessage({ id: getTrad(id), defaultMessage }),
+    (id: string, defaultMessage: string) =>
+      formatMessage({ id: getTrad(id), defaultMessage }),
     [formatMessage]
   );
 
@@ -72,7 +87,9 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
         const rawItems = Array.isArray(res?.data?.data) ? res.data.data : [];
         const normalized = rawItems.map((item) => normalizeNoteRecord(item));
         setNotes(normalized);
-        setSummary(res?.data?.meta?.summary ?? computeNotesSummaryStats(normalized));
+        setSummary(
+          res?.data?.meta?.summary ?? computeNotesSummaryStats(normalized)
+        );
         return normalized;
       } catch {
         toggleNotification({
@@ -111,17 +128,25 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
         const res = await post<{ data?: unknown }>(`/${PLUGIN_ID}/notes`, {
           data: payload,
         });
-        const created = res?.data?.data ? normalizeNoteRecord(res.data.data) : null;
+        const created = res?.data?.data
+          ? normalizeNoteRecord(res.data.data)
+          : null;
         toggleNotification({
           type: "success",
-          message: t("notes.notification.created", "Note has been successfully created."),
+          message: t(
+            "notes.notification.created",
+            "Note has been successfully created."
+          ),
         });
         await fetchNotes();
         return created;
       } catch {
         toggleNotification({
           type: "warning",
-          message: t("notes.notification.createError", "Failed to create note."),
+          message: t(
+            "notes.notification.createError",
+            "Failed to create note."
+          ),
         });
         return null;
       } finally {
@@ -132,24 +157,35 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
   );
 
   const updateNote = useCallback(
-    async (id: string | number, body: Partial<NoteUpsertInput>): Promise<NoteRecord | null> => {
+    async (
+      id: string | number,
+      body: Partial<NoteUpsertInput>
+    ): Promise<NoteRecord | null> => {
       setIsMutating(true);
       try {
         const res = await put<{ data?: unknown }>(
           `/${PLUGIN_ID}/notes/${encodeURIComponent(String(id))}`,
           { data: body }
         );
-        const updated = res?.data?.data ? normalizeNoteRecord(res.data.data) : null;
+        const updated = res?.data?.data
+          ? normalizeNoteRecord(res.data.data)
+          : null;
         toggleNotification({
           type: "success",
-          message: t("notes.notification.updated", "Note has been successfully updated."),
+          message: t(
+            "notes.notification.updated",
+            "Note has been successfully updated."
+          ),
         });
         await fetchNotes();
         return updated;
       } catch {
         toggleNotification({
           type: "warning",
-          message: t("notes.notification.updateError", "Failed to update note."),
+          message: t(
+            "notes.notification.updateError",
+            "Failed to update note."
+          ),
         });
         return null;
       } finally {
@@ -166,14 +202,20 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
         await del(`/${PLUGIN_ID}/notes/${encodeURIComponent(String(id))}`);
         toggleNotification({
           type: "success",
-          message: t("notes.notification.deleted", "Note has been successfully deleted."),
+          message: t(
+            "notes.notification.deleted",
+            "Note has been successfully deleted."
+          ),
         });
         await fetchNotes();
         return true;
       } catch {
         toggleNotification({
           type: "warning",
-          message: t("notes.notification.deleteError", "Failed to delete note."),
+          message: t(
+            "notes.notification.deleteError",
+            "Failed to delete note."
+          ),
         });
         return false;
       } finally {

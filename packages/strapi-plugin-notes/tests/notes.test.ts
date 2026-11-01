@@ -53,7 +53,9 @@ function createMockStrapi() {
     return {
       service(serviceName: string) {
         assert.ok(
-          serviceName === "notesService" || serviceName === "noteService" || serviceName === "note"
+          serviceName === "notesService" ||
+            serviceName === "noteService" ||
+            serviceName === "note"
         );
         return serviceInstance;
       },
@@ -89,7 +91,10 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       assert.equal(sanitized.displayName, "Ada Lovelace");
       assert.equal("password" in (sanitized as Record<string, unknown>), false);
       assert.equal("email" in (sanitized as Record<string, unknown>), false);
-      assert.equal("resetPasswordToken" in (sanitized as Record<string, unknown>), false);
+      assert.equal(
+        "resetPasswordToken" in (sanitized as Record<string, unknown>),
+        false
+      );
       assert.equal(formatNoteAuthorDisplay(sanitized), "Ada Lovelace");
     });
 
@@ -104,7 +109,10 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       // Deleted user relation (null) but preserved createdByName snapshot
       const deletedUserFallback = sanitizeNoteAuthor(null, "Former Editor");
       assert.ok(deletedUserFallback);
-      assert.equal(formatNoteAuthorDisplay(deletedUserFallback), "Former Editor");
+      assert.equal(
+        formatNoteAuthorDisplay(deletedUserFallback),
+        "Former Editor"
+      );
 
       // Completely missing author
       assert.equal(formatNoteAuthorDisplay(null), "-");
@@ -162,8 +170,14 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       assert.ok(createdNote.createdAt);
       assert.ok(createdNote.updatedAt);
       // Backward-compatible attributes mirror
-      assert.equal(createdNote.attributes.createdBy.displayName, "Alice Creator");
-      assert.equal(createdNote.attributes.updatedBy.displayName, "Alice Creator");
+      assert.equal(
+        createdNote.attributes.createdBy.displayName,
+        "Alice Creator"
+      );
+      assert.equal(
+        createdNote.attributes.updatedBy.displayName,
+        "Alice Creator"
+      );
 
       // Update the same note as a different admin user (Bob Reviewer)
       const updateCtx: any = {
@@ -320,7 +334,10 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
         "note.modal.new.title",
         "note.modal.existing.title",
       ]) {
-        assert.ok(baseKeys.includes(requiredKey), `Missing required key ${requiredKey} in en.json`);
+        assert.ok(
+          baseKeys.includes(requiredKey),
+          `Missing required key ${requiredKey} in en.json`
+        );
       }
 
       const locales: Record<string, Record<string, string>> = {

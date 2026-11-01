@@ -1,4 +1,10 @@
-import { Badge, Box, Flex, IconButton, Typography } from "@strapi/design-system";
+import {
+  Badge,
+  Box,
+  Flex,
+  IconButton,
+  Typography,
+} from "@strapi/design-system";
 import { Pencil, Pin, Trash } from "@strapi/icons";
 import * as React from "react";
 import { useIntl } from "react-intl";
@@ -29,9 +35,17 @@ export const NoteListItem: React.FC<NoteListItemProps> = ({
   const t = (id: string, defaultMessage: string) =>
     formatMessage({ id: getTrad(id), defaultMessage });
 
-  const categoryMeta = NOTE_CATEGORY_META[note.category] ?? NOTE_CATEGORY_META.general;
-  const authorLabel = formatNoteAuthorDisplay(note.updatedBy ?? note.createdBy, "");
-  const timestampLabel = formatNoteTimestamp(note.updatedAt ?? note.createdAt, locale, "");
+  const categoryMeta =
+    NOTE_CATEGORY_META[note.category] ?? NOTE_CATEGORY_META.general;
+  const authorLabel = formatNoteAuthorDisplay(
+    note.updatedBy ?? note.createdBy,
+    ""
+  );
+  const timestampLabel = formatNoteTimestamp(
+    note.updatedAt ?? note.createdAt,
+    locale,
+    ""
+  );
 
   return (
     <Box

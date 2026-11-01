@@ -107,7 +107,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     async create(ctx: KoaContext) {
       try {
-        const created = await getService().create(ctx.request?.body ?? {}, ctx.state?.user);
+        const created = await getService().create(
+          ctx.request?.body ?? {},
+          ctx.state?.user
+        );
         return sendJson(ctx, { data: created }, 201);
       } catch (err) {
         if (err instanceof NotesValidationError) {
@@ -123,7 +126,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return sendBadRequest(ctx, "Note identifier is required.");
       }
       try {
-        const updated = await getService().update(id, ctx.request?.body ?? {}, ctx.state?.user);
+        const updated = await getService().update(
+          id,
+          ctx.request?.body ?? {},
+          ctx.state?.user
+        );
         if (!updated) {
           return sendNotFound(ctx);
         }

@@ -73,7 +73,11 @@ function resolveSortDirection(
   rawQuery: Record<string, unknown>,
   sortObj: Record<string, unknown>
 ): "ASC" | "DESC" {
-  const candidates = [rawQuery.sort, sortObj.createdAt, rawQuery["sort[createdAt]"]];
+  const candidates = [
+    rawQuery.sort,
+    sortObj.createdAt,
+    rawQuery["sort[createdAt]"],
+  ];
   const rawSort = candidates.find((val) => typeof val === "string") ?? "DESC";
   return String(rawSort).toUpperCase().includes("ASC") ? "ASC" : "DESC";
 }
@@ -84,14 +88,18 @@ function parseOptionalBoolean(value: unknown): boolean | undefined {
   return undefined;
 }
 
-function parseCategoryFilter(rawCategory: unknown): NoteFilterParams["category"] {
+function parseCategoryFilter(
+  rawCategory: unknown
+): NoteFilterParams["category"] {
   if (rawCategory === "all" || !rawCategory) {
     return "all";
   }
   return normalizeNoteCategory(rawCategory);
 }
 
-export function parseNoteQueryFilters(rawQuery: Record<string, unknown> = {}): NoteFilterParams {
+export function parseNoteQueryFilters(
+  rawQuery: Record<string, unknown> = {}
+): NoteFilterParams {
   const filtersObj = asObjectRecord(rawQuery.filters);
   const sortObj = asObjectRecord(rawQuery.sort);
 
@@ -99,15 +107,18 @@ export function parseNoteQueryFilters(rawQuery: Record<string, unknown> = {}): N
   const rawDocId = pickQueryField(rawQuery, filtersObj, "entityDocumentId");
   const rawEntityId = pickQueryField(rawQuery, filtersObj, "entityId");
   const rawLocale = pickQueryField(rawQuery, filtersObj, "entityLocale");
-  const rawCategory = rawQuery.category ?? extractFilterValue(filtersObj.category);
-  const rawPinned = rawQuery.isPinned ?? extractFilterValue(filtersObj.isPinned);
+  const rawCategory =
+    rawQuery.category ?? extractFilterValue(filtersObj.category);
+  const rawPinned =
+    rawQuery.isPinned ?? extractFilterValue(filtersObj.isPinned);
 
   return {
     entitySlug: sanitizeEntitySlug(rawSlug) || undefined,
     entityDocumentId: sanitizeEntityDocumentId(rawDocId) || undefined,
     entityId: sanitizeEntityId(rawEntityId),
     entityLocale: sanitizeEntityLocale(rawLocale),
-    includeAllLocales: parseOptionalBoolean(rawQuery.includeAllLocales) === true,
+    includeAllLocales:
+      parseOptionalBoolean(rawQuery.includeAllLocales) === true,
     category: parseCategoryFilter(rawCategory),
     isPinned: parseOptionalBoolean(rawPinned),
     search: sanitizePlainText(rawQuery.search ?? rawQuery._q, 160) || undefined,
@@ -115,8 +126,13 @@ export function parseNoteQueryFilters(rawQuery: Record<string, unknown> = {}): N
   };
 }
 
-function resolvePopulatedAuthor(dbValue: unknown, fallbackAuthor: unknown): unknown {
-  return typeof dbValue === "object" && dbValue !== null ? dbValue : (fallbackAuthor ?? dbValue);
+function resolvePopulatedAuthor(
+  dbValue: unknown,
+  fallbackAuthor: unknown
+): unknown {
+  return typeof dbValue === "object" && dbValue !== null
+    ? dbValue
+    : (fallbackAuthor ?? dbValue);
 }
 
 function mergeUpdatedNoteRecord(
@@ -128,7 +144,10 @@ function mergeUpdatedNoteRecord(
     ...existing,
     ...updated,
     createdBy: resolvePopulatedAuthor(updated.createdBy, existing.createdBy),
-    updatedBy: resolvePopulatedAuthor(updated.updatedBy, actor ?? existing.updatedBy),
+    updatedBy: resolvePopulatedAuthor(
+      updated.updatedBy,
+      actor ?? existing.updatedBy
+    ),
   });
 }
 
@@ -140,7 +159,9 @@ async function queryDbByIdentifier(
   if (!dbQuery || typeof dbQuery.findOne !== "function") {
     return null;
   }
-  const numericId = /^\d+$/.test(cleanStr) ? Number.parseInt(cleanStr, 10) : null;
+  const numericId = /^\d+$/.test(cleanStr)
+    ? Number.parseInt(cleanStr, 10)
+    : null;
   if (numericId !== null) {
     const byId = await dbQuery.findOne({
       where: { id: numericId },
@@ -216,7 +237,11 @@ async function persistUpdatedNote(
   actor: unknown
 ): Promise<NoteRecord | null> {
   const dbQuery = getDbQuery(strapi);
-  if (dbQuery && typeof dbQuery.update === "function" && existing.id !== undefined) {
+  if (
+    dbQuery &&
+    typeof dbQuery.update === "function" &&
+    existing.id !== undefined
+  ) {
     const updated = await dbQuery.update({
       where: { id: existing.id },
       data: updateData,
@@ -287,7 +312,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     if (fromDoc) return fromDoc;
 
     const fromMemory = memoryFallback.find(
-      (item) => String(item.id) === cleanStr || String(item.documentId) === cleanStr
+      (item) =>
+        String(item.id) === cleanStr || String(item.documentId) === cleanStr
     );
     return fromMemory ?? null;
   }
@@ -305,7 +331,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       return found ? normalizeNoteRecord(found) : null;
     },
 
-    async getSummaryStats(rawQuery: Record<string, unknown> = {}): Promise<NotesSummaryStats> {
+    async getSummaryStats(
+      rawQuery: Record<string, unknown> = {}
+    ): Promise<NotesSummaryStats> {
       const notes = await this.find(rawQuery);
       return computeNotesSummaryStats(notes);
     },
@@ -319,7 +347,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const actor = sanitizeNoteAuthor(actorUser);
       const nowIso = new Date().toISOString();
       const numericEntityId =
-        typeof validation.data.entityId === "number" ? validation.data.entityId : null;
+        typeof validation.data.entityId === "number"
+          ? validation.data.entityId
+          : null;
 
       const createData: Record<string, unknown> = {
         title: validation.data.title,
@@ -386,7 +416,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         updateData.updatedBy = actor.id;
       }
 
-      const persisted = await persistUpdatedNote(strapi, existing, updateData, actor);
+      const persisted = await persistUpdatedNote(
+        strapi,
+        existing,
+        updateData,
+        actor
+      );
       if (persisted) {
         return persisted;
       }
@@ -416,7 +451,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const normalized = normalizeNoteRecord(existing);
 
       const dbQuery = getDbQuery(strapi);
-      if (dbQuery && typeof dbQuery.delete === "function" && existing.id !== undefined) {
+      if (
+        dbQuery &&
+        typeof dbQuery.delete === "function" &&
+        existing.id !== undefined
+      ) {
         await dbQuery.delete({
           where: { id: existing.id },
         });

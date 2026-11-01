@@ -34,30 +34,51 @@ export default {
     getPlugin: (name: string) =>
       | {
           apis?: {
-            addEditViewSidePanel?: (panels: Array<typeof NotesSidePanel>) => void;
+            addEditViewSidePanel?: (
+              panels: Array<typeof NotesSidePanel>
+            ) => void;
           };
         }
       | undefined;
   }) {
     const cmPlugin = app.getPlugin("content-manager");
-    if (cmPlugin?.apis && typeof cmPlugin.apis.addEditViewSidePanel === "function") {
+    if (
+      cmPlugin?.apis &&
+      typeof cmPlugin.apis.addEditViewSidePanel === "function"
+    ) {
       cmPlugin.apis.addEditViewSidePanel([NotesSidePanel]);
     }
   },
 
   async registerTrads({ locales = [] }: { locales?: string[] } = {}) {
     const allLocales = Array.from(
-      new Set([...locales, "en", "es", "ar", "tr", "fr", "de", "it", "pt", "ru", "zh"])
+      new Set([
+        ...locales,
+        "en",
+        "es",
+        "ar",
+        "tr",
+        "fr",
+        "de",
+        "it",
+        "pt",
+        "ru",
+        "zh",
+      ])
     );
 
     return Promise.all(
       allLocales.map(async (locale) => {
         try {
-          const { default: data } = await import(`./translations/${locale}.json`);
+          const { default: data } = await import(
+            `./translations/${locale}.json`
+          );
           const prefixed: Record<string, string> = {};
           for (const [k, v] of Object.entries(data as Record<string, string>)) {
             prefixed[k] = v;
-            const fullKey = k.startsWith(`${PLUGIN_ID}.`) ? k : `${PLUGIN_ID}.${k}`;
+            const fullKey = k.startsWith(`${PLUGIN_ID}.`)
+              ? k
+              : `${PLUGIN_ID}.${k}`;
             prefixed[fullKey] = v;
           }
           return { data: prefixed, locale };

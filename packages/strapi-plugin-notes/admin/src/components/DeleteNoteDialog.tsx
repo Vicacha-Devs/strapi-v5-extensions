@@ -25,13 +25,21 @@ export const DeleteNoteDialog: React.FC<DeleteNoteDialogProps> = ({
     return null;
   }
 
-  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
-    formatMessage({ id: getTrad(id), defaultMessage }, values);
+  const t = (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => formatMessage({ id: getTrad(id), defaultMessage }, values);
 
   return (
-    <Dialog.Root open={Boolean(note)} onOpenChange={(open: boolean) => !open && onCancel()}>
+    <Dialog.Root
+      open={Boolean(note)}
+      onOpenChange={(open: boolean) => !open && onCancel()}
+    >
       <Dialog.Content>
-        <Dialog.Header>{t("note.delete.dialog.title", "Confirmation")}</Dialog.Header>
+        <Dialog.Header>
+          {t("note.delete.dialog.title", "Confirmation")}
+        </Dialog.Header>
         <Dialog.Body icon={<WarningCircle />}>
           {t(
             "note.delete.dialog.description",

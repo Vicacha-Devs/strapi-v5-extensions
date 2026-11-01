@@ -9,7 +9,9 @@ export default {
       config.defaultSortOrder !== "ASC" &&
       config.defaultSortOrder !== "DESC"
     ) {
-      throw new Error('Invalid notes plugin config: defaultSortOrder must be "ASC" or "DESC".');
+      throw new Error(
+        'Invalid notes plugin config: defaultSortOrder must be "ASC" or "DESC".'
+      );
     }
   },
 };

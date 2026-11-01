@@ -43,7 +43,11 @@ function formatNoteContentPreview(content: string): string {
 interface NoteHubActionsCellProps {
   note: NoteRecord;
   deepLink: string | null;
-  t: (id: string, defaultMessage: string, values?: Record<string, string | number>) => string;
+  t: (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => string;
   onNavigate: (to: string) => void;
   onEdit: (note: NoteRecord) => void;
   onDelete: (note: NoteRecord) => void;
@@ -107,7 +111,11 @@ const NoteHubActionsCell: React.FC<NoteHubActionsCellProps> = ({
 interface NoteHubRowProps {
   note: NoteRecord;
   locale: string;
-  t: (id: string, defaultMessage: string, values?: Record<string, string | number>) => string;
+  t: (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => string;
   onNavigate: (to: string) => void;
   onEdit: (note: NoteRecord) => void;
   onDelete: (note: NoteRecord) => void;
@@ -123,7 +131,8 @@ const NoteHubRow: React.FC<NoteHubRowProps> = ({
   onDelete,
   onTogglePin,
 }) => {
-  const catMeta = NOTE_CATEGORY_META[note.category] ?? NOTE_CATEGORY_META.general;
+  const catMeta =
+    NOTE_CATEGORY_META[note.category] ?? NOTE_CATEGORY_META.general;
   const deepLink = buildContentManagerNoteLink(note);
   const entityBadgeText = note.entityDocumentId || String(note.entityId ?? "");
 
@@ -155,7 +164,10 @@ const NoteHubRow: React.FC<NoteHubRowProps> = ({
       </Td>
 
       <Td>
-        <Badge backgroundColor={catMeta.badgeBackground} textColor={catMeta.badgeTextColor}>
+        <Badge
+          backgroundColor={catMeta.badgeBackground}
+          textColor={catMeta.badgeTextColor}
+        >
           {t(catMeta.labelKey, catMeta.defaultLabel)}
         </Badge>
       </Td>
@@ -214,20 +226,35 @@ export const NotesHomePage: React.FC = () => {
   const { formatMessage, locale } = useIntl();
   const navigate = useNavigate();
 
-  const { notes, summary, isLoading, isMutating, refetch, updateNote, deleteNote } = useNotes({
+  const {
+    notes,
+    summary,
+    isLoading,
+    isMutating,
+    refetch,
+    updateNote,
+    deleteNote,
+  } = useNotes({
     includeAllLocales: true,
   });
 
   const [search, setSearch] = React.useState<string>("");
-  const [selectedCategory, setSelectedCategory] = React.useState<NoteCategory | "all">("all");
+  const [selectedCategory, setSelectedCategory] = React.useState<
+    NoteCategory | "all"
+  >("all");
   const [selectedSlug, setSelectedSlug] = React.useState<string>("all");
   const [pinnedOnly, setPinnedOnly] = React.useState<boolean>(false);
 
   const [editingNote, setEditingNote] = React.useState<NoteRecord | null>(null);
-  const [deletingNote, setDeletingNote] = React.useState<NoteRecord | null>(null);
+  const [deletingNote, setDeletingNote] = React.useState<NoteRecord | null>(
+    null
+  );
 
-  const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
-    formatMessage({ id: getTrad(id), defaultMessage }, values);
+  const t = (
+    id: string,
+    defaultMessage: string,
+    values?: Record<string, string | number>
+  ) => formatMessage({ id: getTrad(id), defaultMessage }, values);
 
   const filteredNotes = React.useMemo(
     () =>
@@ -242,7 +269,10 @@ export const NotesHomePage: React.FC = () => {
     [notes, search, selectedCategory, selectedSlug, pinnedOnly]
   );
 
-  const handleSaveEdit = async (payload: NoteUpsertInput, existingId?: string | number) => {
+  const handleSaveEdit = async (
+    payload: NoteUpsertInput,
+    existingId?: string | number
+  ) => {
     if (existingId !== undefined && existingId !== "") {
       await updateNote(existingId, payload);
     }
@@ -271,7 +301,11 @@ export const NotesHomePage: React.FC = () => {
           "Search, filter, and manage editorial notes across all Strapi v5 Content Manager entries."
         )}
         primaryAction={
-          <Button variant="secondary" onClick={() => void refetch()} loading={isLoading}>
+          <Button
+            variant="secondary"
+            onClick={() => void refetch()}
+            loading={isLoading}
+          >
             {t("hub.actions.refresh", "Refresh")}
           </Button>
         }
@@ -298,14 +332,19 @@ export const NotesHomePage: React.FC = () => {
             </Flex>
           ) : filteredNotes.length === 0 ? (
             <EmptyStateLayout
-              content={t("hub.empty", "No editorial notes found matching your current filters.")}
+              content={t(
+                "hub.empty",
+                "No editorial notes found matching your current filters."
+              )}
             />
           ) : (
             <Table colCount={6} rowCount={filteredNotes.length + 1}>
               <Thead>
                 <Tr>
                   <Th>
-                    <Typography variant="sigma">{t("note.modal.fields.title", "Title")}</Typography>
+                    <Typography variant="sigma">
+                      {t("note.modal.fields.title", "Title")}
+                    </Typography>
                   </Th>
                   <Th>
                     <Typography variant="sigma">
@@ -328,7 +367,9 @@ export const NotesHomePage: React.FC = () => {
                     </Typography>
                   </Th>
                   <Th>
-                    <Typography variant="sigma">{t("hub.table.actions", "Actions")}</Typography>
+                    <Typography variant="sigma">
+                      {t("hub.table.actions", "Actions")}
+                    </Typography>
                   </Th>
                 </Tr>
               </Thead>

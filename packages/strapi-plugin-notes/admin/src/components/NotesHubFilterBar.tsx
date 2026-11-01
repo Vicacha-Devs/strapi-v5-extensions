@@ -64,7 +64,11 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
               <Typography variant="sigma" textColor="neutral600">
                 {t("hub.stats.total", "Total Notes")}
               </Typography>
-              <Typography variant="alpha" fontWeight="bold" textColor="neutral800">
+              <Typography
+                variant="alpha"
+                fontWeight="bold"
+                textColor="neutral800"
+              >
                 {summary.total}
               </Typography>
             </Flex>
@@ -83,7 +87,11 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
               <Typography variant="sigma" textColor="primary600">
                 {t("hub.stats.pinned", "Pinned Notes")}
               </Typography>
-              <Typography variant="alpha" fontWeight="bold" textColor="primary700">
+              <Typography
+                variant="alpha"
+                fontWeight="bold"
+                textColor="primary700"
+              >
                 {summary.pinned}
               </Typography>
             </Flex>
@@ -102,7 +110,11 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
               <Typography variant="sigma" textColor="danger600">
                 {t("hub.stats.blockers", "Blockers")}
               </Typography>
-              <Typography variant="alpha" fontWeight="bold" textColor="danger700">
+              <Typography
+                variant="alpha"
+                fontWeight="bold"
+                textColor="danger700"
+              >
                 {summary.byCategory.blocker}
               </Typography>
             </Flex>
@@ -121,7 +133,11 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
               <Typography variant="sigma" textColor="neutral600">
                 {t("hub.stats.todos", "Open Todos")}
               </Typography>
-              <Typography variant="alpha" fontWeight="bold" textColor="neutral800">
+              <Typography
+                variant="alpha"
+                fontWeight="bold"
+                textColor="neutral800"
+              >
                 {summary.byCategory.todo}
               </Typography>
             </Flex>
@@ -134,11 +150,15 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
         <Flex gap={4} wrap="wrap" alignItems="flex-end">
           <Box style={{ flex: "2 1 240px" }}>
             <Field.Root name="hubSearch">
-              <Field.Label>{t("hub.filters.search", "Search notes")}</Field.Label>
+              <Field.Label>
+                {t("hub.filters.search", "Search notes")}
+              </Field.Label>
               <TextInput
                 name="hubSearch"
                 value={search}
-                onChange={(e: { target: { value: string } }) => onSearchChange(e.target.value)}
+                onChange={(e: { target: { value: string } }) =>
+                  onSearchChange(e.target.value)
+                }
                 placeholder={t(
                   "hub.filters.search.placeholder",
                   "Search by title, content, content type, or author..."
@@ -149,11 +169,15 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
 
           <Box style={{ flex: "1 1 180px" }}>
             <Field.Root name="hubCategory">
-              <Field.Label>{t("note.modal.fields.category", "Category")}</Field.Label>
+              <Field.Label>
+                {t("note.modal.fields.category", "Category")}
+              </Field.Label>
               <SingleSelect
                 value={selectedCategory}
                 onChange={(val: string | number) =>
-                  onCategoryChange((String(val) || "all") as NoteCategory | "all")
+                  onCategoryChange(
+                    (String(val) || "all") as NoteCategory | "all"
+                  )
                 }
               >
                 <SingleSelectOption value="all">
@@ -161,7 +185,10 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
                 </SingleSelectOption>
                 {NOTE_CATEGORIES.map((cat) => (
                   <SingleSelectOption key={cat} value={cat}>
-                    {t(NOTE_CATEGORY_META[cat].labelKey, NOTE_CATEGORY_META[cat].defaultLabel)}
+                    {t(
+                      NOTE_CATEGORY_META[cat].labelKey,
+                      NOTE_CATEGORY_META[cat].defaultLabel
+                    )}
                   </SingleSelectOption>
                 ))}
               </SingleSelect>
@@ -170,10 +197,14 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
 
           <Box style={{ flex: "1 1 200px" }}>
             <Field.Root name="hubContentType">
-              <Field.Label>{t("hub.filters.contentType", "Content Type")}</Field.Label>
+              <Field.Label>
+                {t("hub.filters.contentType", "Content Type")}
+              </Field.Label>
               <SingleSelect
                 value={selectedSlug}
-                onChange={(val: string | number) => onSlugChange(String(val) || "all")}
+                onChange={(val: string | number) =>
+                  onSlugChange(String(val) || "all")
+                }
               >
                 <SingleSelectOption value="all">
                   {t("hub.filters.contentType.all", "All content types")}
@@ -190,7 +221,9 @@ export const NotesHubFilterBar: React.FC<NotesHubFilterBarProps> = ({
           <Box paddingBottom={2}>
             <Checkbox
               checked={pinnedOnly}
-              onCheckedChange={(checked: boolean) => onPinnedOnlyChange(Boolean(checked))}
+              onCheckedChange={(checked: boolean) =>
+                onPinnedOnlyChange(Boolean(checked))
+              }
             >
               {t("hub.filters.pinnedOnly", "Pinned only")}
             </Checkbox>
