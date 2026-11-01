@@ -11,6 +11,7 @@ import {
   TextInput,
   Typography,
 } from "@strapi/design-system";
+import { mergeSelectOptions } from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 
 import { PLUGIN_ID, STARTER_AUTOMATION_RULES } from "../../../shared/constants";
@@ -27,7 +28,6 @@ import {
 import {
   BROADCAST_CHANNEL_OPTIONS,
   BROADCAST_TOPIC_OPTIONS,
-  mergeSelectOptions,
 } from "./OrganizationEmailTab";
 
 export function parseChannelsInput(

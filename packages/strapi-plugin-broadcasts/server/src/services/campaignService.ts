@@ -96,11 +96,9 @@ const createCampaignService = ({ strapi }: { strapi: Core.Strapi }) => ({
   async findCampaignByDocIdOrSlug(
     documentIdOrSlug: string
   ): Promise<CampaignRecord | null> {
-    const byDoc = (await strapi
-      .documents(CAMPAIGN_UID)
-      .findOne({
-        documentId: documentIdOrSlug,
-      })) as unknown as CampaignRecord | null;
+    const byDoc = (await strapi.documents(CAMPAIGN_UID).findOne({
+      documentId: documentIdOrSlug,
+    })) as unknown as CampaignRecord | null;
     return byDoc ?? (await this.getCampaignBySlug(documentIdOrSlug));
   },
 

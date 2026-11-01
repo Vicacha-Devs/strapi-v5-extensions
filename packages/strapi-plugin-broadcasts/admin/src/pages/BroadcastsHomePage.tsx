@@ -10,10 +10,10 @@ import {
   MultiSelectOption,
   SingleSelect,
   SingleSelectOption,
-  TextInput,
   Typography,
 } from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
+import { mergeSelectOptions } from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 import { useIntl } from "react-intl";
 import { useNavigate } from "react-router-dom";
@@ -36,15 +36,17 @@ import {
 import {
   CampaignsTableSection,
   EmailTemplateSelectorField,
+  RequiredTextField,
 } from "../components/CampaignsTableSection";
 import type { TranslateFn } from "../components/DeliveryLedgerSection";
 import {
   BROADCAST_CHANNEL_OPTIONS,
   BROADCAST_TOPIC_OPTIONS,
-  mergeSelectOptions,
 } from "../components/OrganizationEmailTab";
 
 type ActiveTab = "campaigns" | "automations" | "logs";
+
+const DEFAULT_CHANNELS: BroadcastChannel[] = ["email", "telegram", "whatsapp"];
 
 export const BroadcastsHomePage: React.FC = () => {
   const { formatMessage } = useIntl();
@@ -59,23 +61,18 @@ export const BroadcastsHomePage: React.FC = () => {
   const [emailTemplates, setEmailTemplates] = React.useState<
     EmailDesignerTemplateSummary[]
   >([]);
-  const [statusMessage, setStatusMessage] = React.useState<string>("");
-
+  const [statusMessage, setStatusMessage] = React.useState("");
   const [editingCampaignId, setEditingCampaignId] = React.useState<
     string | null
   >(null);
-  const [newSlug, setNewSlug] = React.useState<string>("");
-  const [newTitle, setNewTitle] = React.useState<string>("");
-  const [newTopic, setNewTopic] = React.useState<string>("announcements");
-  const [newChannels, setNewChannels] = React.useState<BroadcastChannel[]>([
-    "email",
-    "telegram",
-    "whatsapp",
-  ]);
-  const [newEmailTemplateRef, setNewEmailTemplateRef] =
-    React.useState<string>("");
-  const [newSubject, setNewSubject] = React.useState<string>("");
-  const [newBodyText, setNewBodyText] = React.useState<string>("");
+  const [newSlug, setNewSlug] = React.useState("");
+  const [newTitle, setNewTitle] = React.useState("");
+  const [newTopic, setNewTopic] = React.useState("announcements");
+  const [newChannels, setNewChannels] =
+    React.useState<BroadcastChannel[]>(DEFAULT_CHANNELS);
+  const [newEmailTemplateRef, setNewEmailTemplateRef] = React.useState("");
+  const [newSubject, setNewSubject] = React.useState("");
+  const [newBodyText, setNewBodyText] = React.useState("");
 
   const loadAll = async () => {
     try {
@@ -92,7 +89,6 @@ export const BroadcastsHomePage: React.FC = () => {
     } catch {
       // Initial empty state in test or unmounted mode
     }
-
     try {
       const tplRes = await get<{ data?: EmailDesignerTemplateSummary[] }>(
         `/${PLUGIN_ID}/email-templates`
@@ -109,30 +105,26 @@ export const BroadcastsHomePage: React.FC = () => {
     void loadAll();
   }, []);
 
-  const resetCampaignForm = () => {
-    setEditingCampaignId(null);
-    setNewSlug("");
-    setNewTitle("");
-    setNewTopic("announcements");
-    setNewChannels(["email", "telegram", "whatsapp"]);
-    setNewEmailTemplateRef("");
-    setNewSubject("");
-    setNewBodyText("");
+  const resetCampaignForm = (
+    camp?: Partial<CampaignRecord>,
+    editId: string | null = null,
+    fallbackChannels: BroadcastChannel[] = DEFAULT_CHANNELS
+  ) => {
+    setEditingCampaignId(editId);
+    setNewSlug(camp?.slug || "");
+    setNewTitle(camp?.title || "");
+    setNewTopic(camp?.topic || "announcements");
+    setNewChannels(camp?.channels?.length ? camp.channels : fallbackChannels);
+    setNewEmailTemplateRef(camp?.emailTemplateRef || "");
+    setNewSubject(camp?.subject || "");
+    setNewBodyText(camp?.bodyText || "");
   };
 
   const handleStartEditCampaign = (camp: CampaignRecord) => {
-    setEditingCampaignId(camp.documentId || camp.slug);
-    setNewSlug(camp.slug);
-    setNewTitle(camp.title);
-    setNewTopic(camp.topic || "announcements");
-    setNewChannels(
-      Array.isArray(camp.channels) && camp.channels.length > 0
-        ? camp.channels
-        : ["email", "telegram"]
-    );
-    setNewEmailTemplateRef(camp.emailTemplateRef || "");
-    setNewSubject(camp.subject || "");
-    setNewBodyText(camp.bodyText || "");
+    resetCampaignForm(camp, camp.documentId || camp.slug, [
+      "email",
+      "telegram",
+    ]);
     setStatusMessage(
       `${t("page.ui.editing_campaign", "Editing campaign")}: ${camp.title}`
     );
@@ -156,20 +148,13 @@ export const BroadcastsHomePage: React.FC = () => {
   };
 
   const handleSaveCampaign = async () => {
-    const isComplete = Boolean(
-      newSlug && newTitle && newSubject && newBodyText
-    );
-    if (!isComplete) return;
+    if (!newSlug || !newTitle || !newSubject || !newBodyText) return;
 
     const payload = {
       slug: newSlug.trim(),
       title: newTitle.trim(),
       topic: newTopic.trim() || "announcements",
-      channels: parseChannelsInput(newChannels, [
-        "email",
-        "telegram",
-        "whatsapp",
-      ]),
+      channels: parseChannelsInput(newChannels, DEFAULT_CHANNELS),
       priority: "normal",
       emailTemplateRef: newEmailTemplateRef.trim() || undefined,
       subject: newSubject.trim(),
@@ -201,6 +186,15 @@ export const BroadcastsHomePage: React.FC = () => {
         "Compose New Omnichannel Broadcast"
       );
   const topicOpts = mergeSelectOptions(BROADCAST_TOPIC_OPTIONS, [newTopic]);
+  const tabs: Array<[ActiveTab, string, number]> = [
+    ["campaigns", t("page.ui.campaigns_tab", "Campaigns"), campaigns.length],
+    [
+      "automations",
+      t("page.ui.automation_rules_tab", "Automation Rules"),
+      rules.length,
+    ],
+    ["logs", t("page.ui.delivery_ledger_tab", "Delivery Ledger"), logs.length],
+  ];
 
   return (
     <Main>
@@ -227,26 +221,15 @@ export const BroadcastsHomePage: React.FC = () => {
             </Typography>
           </Box>
           <Flex gap={2} wrap="wrap">
-            <Button
-              variant={activeTab === "campaigns" ? "default" : "tertiary"}
-              onClick={() => setActiveTab("campaigns")}
-            >
-              {t("page.ui.campaigns_tab", "Campaigns")} ({campaigns.length})
-            </Button>
-            <Button
-              variant={activeTab === "automations" ? "default" : "tertiary"}
-              onClick={() => setActiveTab("automations")}
-            >
-              {t("page.ui.automation_rules_tab", "Automation Rules")} (
-              {rules.length})
-            </Button>
-            <Button
-              variant={activeTab === "logs" ? "default" : "tertiary"}
-              onClick={() => setActiveTab("logs")}
-            >
-              {t("page.ui.delivery_ledger_tab", "Delivery Ledger")} (
-              {logs.length})
-            </Button>
+            {tabs.map(([tabKey, label, count]) => (
+              <Button
+                key={tabKey}
+                variant={activeTab === tabKey ? "default" : "tertiary"}
+                onClick={() => setActiveTab(tabKey)}
+              >
+                {label} ({count})
+              </Button>
+            ))}
           </Flex>
         </Flex>
 
@@ -320,54 +303,34 @@ export const BroadcastsHomePage: React.FC = () => {
                   alignItems: "start",
                 }}
               >
-                <Field.Root
+                <RequiredTextField
                   name="slug"
-                  required
+                  label={t("field.campaign_slug", "Campaign Slug")}
                   hint={t(
                     "page.ui.unique_url_safe_identifier_for_idempotency_track",
                     "Unique URL-safe identifier for idempotency tracking."
                   )}
-                >
-                  <Field.Label>
-                    {t("field.campaign_slug", "Campaign Slug")}
-                  </Field.Label>
-                  <TextInput
-                    name="slug"
-                    placeholder={t(
-                      "placeholder.e_g_friday_khutbah_bulletin",
-                      "e.g., friday-khutbah-bulletin"
-                    )}
-                    value={newSlug}
-                    onChange={(e: { target: { value: string } }) =>
-                      setNewSlug(e.target.value)
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
-                <Field.Root
+                  placeholder={t(
+                    "placeholder.e_g_friday_khutbah_bulletin",
+                    "e.g., friday-khutbah-bulletin"
+                  )}
+                  value={newSlug}
+                  onChange={setNewSlug}
+                />
+                <RequiredTextField
                   name="title"
-                  required
+                  label={t("field.campaign_title", "Campaign Title")}
                   hint={t(
                     "page.ui.internal_display_name_in_the_campaign_table",
                     "Internal display name in the campaign table."
                   )}
-                >
-                  <Field.Label>
-                    {t("field.campaign_title", "Campaign Title")}
-                  </Field.Label>
-                  <TextInput
-                    name="title"
-                    placeholder={t(
-                      "placeholder.e_g_bolet_n_semanal_de_jumu_ah",
-                      "e.g., Boletín Semanal de Jumu'ah"
-                    )}
-                    value={newTitle}
-                    onChange={(e: { target: { value: string } }) =>
-                      setNewTitle(e.target.value)
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
+                  placeholder={t(
+                    "placeholder.e_g_bolet_n_semanal_de_jumu_ah",
+                    "e.g., Boletín Semanal de Jumu'ah"
+                  )}
+                  value={newTitle}
+                  onChange={setNewTitle}
+                />
                 <Field.Root
                   name="topic"
                   hint={t(
@@ -434,58 +397,38 @@ export const BroadcastsHomePage: React.FC = () => {
                   onChange={setNewEmailTemplateRef}
                 />
 
-                <Field.Root
+                <RequiredTextField
                   name="subject"
-                  required
+                  label={t("field.subject_headline", "Subject / Headline")}
                   hint={t(
                     "page.ui.email_subject_line_and_bold_header_on_telegram_w",
                     "Email subject line and bold header on Telegram/WhatsApp."
                   )}
-                >
-                  <Field.Label>
-                    {t("field.subject_headline", "Subject / Headline")}
-                  </Field.Label>
-                  <TextInput
-                    name="subject"
-                    placeholder={t(
-                      "placeholder.e_g_as_salamu_alaykum_horarios_y_anuncios",
-                      "e.g., As-salamu alaykum — Prayer Times & Announcements"
-                    )}
-                    value={newSubject}
-                    onChange={(e: { target: { value: string } }) =>
-                      setNewSubject(e.target.value)
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
+                  placeholder={t(
+                    "placeholder.e_g_as_salamu_alaykum_horarios_y_anuncios",
+                    "e.g., As-salamu alaykum — Prayer Times & Announcements"
+                  )}
+                  value={newSubject}
+                  onChange={setNewSubject}
+                />
                 <Box style={{ gridColumn: "1 / -1" }}>
-                  <Field.Root
+                  <RequiredTextField
                     name="bodyText"
-                    required
+                    label={t(
+                      "field.message_body_with_placeholders",
+                      "Message Body (supports {{recipientName}}, {{secondaryDate}}, {{organizationName}})"
+                    )}
                     hint={t(
                       "page.ui.main_text_dispatched_across_email_telegram_and_w",
                       "Main text dispatched across Email, Telegram, and WhatsApp channels."
                     )}
-                  >
-                    <Field.Label>
-                      {t(
-                        "field.message_body_with_placeholders",
-                        "Message Body (supports {{recipientName}}, {{secondaryDate}}, {{organizationName}})"
-                      )}
-                    </Field.Label>
-                    <TextInput
-                      name="bodyText"
-                      placeholder={t(
-                        "placeholder.e_g_hola_recipientname_hoy_secondarydate_te_invi",
-                        "e.g., Hello {{recipientName}}, today ({{secondaryDate}}) we invite you to..."
-                      )}
-                      value={newBodyText}
-                      onChange={(e: { target: { value: string } }) =>
-                        setNewBodyText(e.target.value)
-                      }
-                    />
-                    <Field.Hint />
-                  </Field.Root>
+                    placeholder={t(
+                      "placeholder.e_g_hola_recipientname_hoy_secondarydate_te_invi",
+                      "e.g., Hello {{recipientName}}, today ({{secondaryDate}}) we invite you to..."
+                    )}
+                    value={newBodyText}
+                    onChange={setNewBodyText}
+                  />
                 </Box>
               </Box>
               <Flex justifyContent="flex-end" paddingTop={3} gap={2}>

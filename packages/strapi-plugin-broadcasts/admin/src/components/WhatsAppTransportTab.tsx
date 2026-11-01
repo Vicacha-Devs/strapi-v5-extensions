@@ -8,6 +8,7 @@ import {
   TextInput,
   Typography,
 } from "@strapi/design-system";
+import { parseCsvList } from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 
 import type { BroadcastSettings, WhatsAppDriver } from "../../../shared/types";
@@ -31,13 +32,6 @@ const cardBorderStyle: React.CSSProperties = {
   borderTopLeftRadius: 0,
   borderTopRightRadius: 0,
 };
-
-function parseCsvList(raw: string): string[] {
-  return raw
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
 
 export interface WhatsAppTransportTabProps {
   settings: BroadcastSettings;

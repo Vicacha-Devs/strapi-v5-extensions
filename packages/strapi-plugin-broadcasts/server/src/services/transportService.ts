@@ -16,9 +16,11 @@ import {
 } from "../../../shared";
 import {
   buildEmailTemplateVariables,
+  buildTelegramIdempotencyKey,
   executeTelegramHttpSend,
   executeWhatsAppHttpSend,
   hasWhatsAppCredentials,
+  makeResult,
   resolveEffectiveEmailTemplateRef,
 } from "./campaignHelpers";
 import {
@@ -67,20 +69,6 @@ export interface WhatsAppSendPayload {
   templateName?: string;
   ctaUrl?: string;
   secondaryDateLabel?: string;
-}
-
-function buildTelegramIdempotencyKey(
-  payload: TelegramSendPayload,
-  targetChatId: string
-): string {
-  const hasThread =
-    typeof payload.threadId === "number" && payload.threadId > 0;
-  const threadKeySuffix = hasThread ? `:${payload.threadId}` : "";
-  return computeIdempotencyKey(
-    payload.campaignSlug,
-    "telegram",
-    `${targetChatId}${threadKeySuffix}:${payload.locale}`
-  );
 }
 
 const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -150,6 +138,30 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     return result;
   },
 
+  async logOutcome(
+    p: { campaignSlug: string; locale: string; secondaryDateLabel?: string },
+    channel: BroadcastChannel,
+    driver: string,
+    recipientMasked: string,
+    status: ChannelDispatchResult["status"],
+    idempotencyKey: string,
+    extra?: Partial<ChannelDispatchResult>
+  ): Promise<ChannelDispatchResult> {
+    return this.persistResult(
+      p.campaignSlug,
+      p.secondaryDateLabel,
+      makeResult(
+        channel,
+        driver,
+        recipientMasked,
+        p.locale,
+        status,
+        idempotencyKey,
+        extra
+      )
+    );
+  },
+
   async simulateDryRunEmail(
     payload: EmailSendPayload,
     effectiveTemplateRef: string,
@@ -166,16 +178,14 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const refSuffix =
       resolvedDryRunTpl?.templateReferenceId || effectiveTemplateRef;
 
-    return this.persistResult(
-      payload.campaignSlug,
-      payload.secondaryDateLabel,
+    return this.logOutcome(
+      payload,
+      "email",
+      useDesigner ? "email-designer-5-dryrun" : "strapi-email-dryrun",
+      recipientMasked,
+      "simulated",
+      idempotencyKey,
       {
-        channel: "email",
-        driver: useDesigner ? "email-designer-5-dryrun" : "strapi-email-dryrun",
-        recipientMasked,
-        locale: payload.locale,
-        status: "simulated",
-        idempotencyKey,
         externalMessageId: useDesigner
           ? `sim_ed5_${refSuffix}_${Date.now()}`
           : `sim_email_${Date.now()}`,
@@ -190,10 +200,9 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     recipientMasked: string,
     idempotencyKey: string
   ): Promise<ChannelDispatchResult> {
-    const headers: Record<string, string> = {};
-    if (payload.unsubscribeUrl) {
-      headers["List-Unsubscribe"] = `<${payload.unsubscribeUrl}>`;
-    }
+    const headers: Record<string, string> = payload.unsubscribeUrl
+      ? { "List-Unsubscribe": `<${payload.unsubscribeUrl}>` }
+      : {};
     const inlineHtml = payload.html || `<p>${escapeHtml(payload.text)}</p>`;
     const templateVars = buildEmailTemplateVariables(
       payload,
@@ -216,18 +225,14 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         interpolate: interpolateBroadcastTemplate,
       });
       if (externalMessageId) {
-        return this.persistResult(
-          payload.campaignSlug,
-          payload.secondaryDateLabel,
-          {
-            channel: "email",
-            driver: "email-designer-5",
-            recipientMasked,
-            locale: payload.locale,
-            status: "sent",
-            idempotencyKey,
-            externalMessageId,
-          }
+        return this.logOutcome(
+          payload,
+          "email",
+          "email-designer-5",
+          recipientMasked,
+          "sent",
+          idempotencyKey,
+          { externalMessageId }
         );
       }
     }
@@ -237,18 +242,14 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     }>("email");
 
     if (!emailService?.send) {
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
-        {
-          channel: "email",
-          driver: "strapi-email-fallback",
-          recipientMasked,
-          locale: payload.locale,
-          status: "simulated",
-          idempotencyKey,
-          externalMessageId: `sim_fallback_${Date.now()}`,
-        }
+      return this.logOutcome(
+        payload,
+        "email",
+        "strapi-email-fallback",
+        recipientMasked,
+        "simulated",
+        idempotencyKey,
+        { externalMessageId: `sim_fallback_${Date.now()}` }
       );
     }
 
@@ -262,18 +263,14 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
       headers,
     });
 
-    return this.persistResult(
-      payload.campaignSlug,
-      payload.secondaryDateLabel,
-      {
-        channel: "email",
-        driver: "strapi-email",
-        recipientMasked,
-        locale: payload.locale,
-        status: "sent",
-        idempotencyKey,
-        externalMessageId: `email_${Date.now()}`,
-      }
+    return this.logOutcome(
+      payload,
+      "email",
+      "strapi-email",
+      recipientMasked,
+      "sent",
+      idempotencyKey,
+      { externalMessageId: `email_${Date.now()}` }
     );
   },
 
@@ -296,14 +293,14 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
       : "strapi-email";
 
     if (await this.hasAlreadyDelivered(idempotencyKey)) {
-      return {
-        channel: "email",
-        driver: defaultDriver,
+      return makeResult(
+        "email",
+        defaultDriver,
         recipientMasked,
-        locale: payload.locale,
-        status: "skipped_duplicate",
-        idempotencyKey,
-      };
+        payload.locale,
+        "skipped_duplicate",
+        idempotencyKey
+      );
     }
 
     if (settings.dryRun) {
@@ -324,18 +321,14 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         idempotencyKey
       );
     } catch (err) {
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
-        {
-          channel: "email",
-          driver: defaultDriver,
-          recipientMasked,
-          locale: payload.locale,
-          status: "failed",
-          idempotencyKey,
-          errorMessage: (err as Error)?.message || "Email delivery failed",
-        }
+      return this.logOutcome(
+        payload,
+        "email",
+        defaultDriver,
+        recipientMasked,
+        "failed",
+        idempotencyKey,
+        { errorMessage: (err as Error)?.message || "Email delivery failed" }
       );
     }
   },
@@ -349,29 +342,25 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const recipientMasked = maskRecipientIdentifier(targetChatId);
 
     if (await this.hasAlreadyDelivered(idempotencyKey)) {
-      return {
-        channel: "telegram",
-        driver: "telegram-bot-api",
+      return makeResult(
+        "telegram",
+        "telegram-bot-api",
         recipientMasked,
-        locale: payload.locale,
-        status: "skipped_duplicate",
-        idempotencyKey,
-      };
+        payload.locale,
+        "skipped_duplicate",
+        idempotencyKey
+      );
     }
 
     if (settings.dryRun || !settings.telegramBotToken) {
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
-        {
-          channel: "telegram",
-          driver: "telegram-bot-dryrun",
-          recipientMasked,
-          locale: payload.locale,
-          status: "simulated",
-          idempotencyKey,
-          externalMessageId: `sim_tg_${Date.now()}`,
-        }
+      return this.logOutcome(
+        payload,
+        "telegram",
+        "telegram-bot-dryrun",
+        recipientMasked,
+        "simulated",
+        idempotencyKey,
+        { externalMessageId: `sim_tg_${Date.now()}` }
       );
     }
 
@@ -381,30 +370,24 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         targetChatId,
         settings.telegramBotToken
       );
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
-        {
-          channel: "telegram",
-          driver: "telegram-bot-api",
-          recipientMasked,
-          locale: payload.locale,
-          status: "sent",
-          idempotencyKey,
-          externalMessageId,
-        }
+      return this.logOutcome(
+        payload,
+        "telegram",
+        "telegram-bot-api",
+        recipientMasked,
+        "sent",
+        idempotencyKey,
+        { externalMessageId }
       );
     } catch (err) {
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
+      return this.logOutcome(
+        payload,
+        "telegram",
+        "telegram-bot-api",
+        recipientMasked,
+        "failed",
+        idempotencyKey,
         {
-          channel: "telegram",
-          driver: "telegram-bot-api",
-          recipientMasked,
-          locale: payload.locale,
-          status: "failed",
-          idempotencyKey,
           errorMessage: (err as Error)?.message || "Telegram delivery failed",
         }
       );
@@ -425,43 +408,37 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const recipientMasked = maskRecipientIdentifier(target.normalized);
 
     if (await this.hasAlreadyDelivered(idempotencyKey)) {
-      return {
-        channel: "whatsapp",
+      return makeResult(
+        "whatsapp",
         driver,
         recipientMasked,
-        locale: payload.locale,
-        status: "skipped_duplicate",
-        idempotencyKey,
-      };
+        payload.locale,
+        "skipped_duplicate",
+        idempotencyKey
+      );
     }
 
     if (settings.dryRun || !hasWhatsAppCredentials(driver, settings)) {
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
-        {
-          channel: "whatsapp",
-          driver: `${driver}-dryrun`,
-          recipientMasked,
-          locale: payload.locale,
-          status: "simulated",
-          idempotencyKey,
-          externalMessageId: `sim_wa_${Date.now()}`,
-        }
+      return this.logOutcome(
+        payload,
+        "whatsapp",
+        `${driver}-dryrun`,
+        recipientMasked,
+        "simulated",
+        idempotencyKey,
+        { externalMessageId: `sim_wa_${Date.now()}` }
       );
     }
 
     if (driver === "meta-cloud" && target.isGroupOrChannel) {
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
+      return this.logOutcome(
+        payload,
+        "whatsapp",
+        "meta-cloud",
+        recipientMasked,
+        "failed",
+        idempotencyKey,
         {
-          channel: "whatsapp",
-          driver: "meta-cloud",
-          recipientMasked,
-          locale: payload.locale,
-          status: "failed",
-          idempotencyKey,
           errorMessage:
             "Meta WhatsApp Cloud API does not support @g.us group or @newsletter channel JIDs; use evolution or openwa gateway driver",
         }
@@ -475,30 +452,24 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         settings,
         target
       );
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
-        {
-          channel: "whatsapp",
-          driver,
-          recipientMasked,
-          locale: payload.locale,
-          status: "sent",
-          idempotencyKey,
-          externalMessageId,
-        }
+      return this.logOutcome(
+        payload,
+        "whatsapp",
+        driver,
+        recipientMasked,
+        "sent",
+        idempotencyKey,
+        { externalMessageId }
       );
     } catch (err) {
-      return this.persistResult(
-        payload.campaignSlug,
-        payload.secondaryDateLabel,
+      return this.logOutcome(
+        payload,
+        "whatsapp",
+        driver,
+        recipientMasked,
+        "failed",
+        idempotencyKey,
         {
-          channel: "whatsapp",
-          driver,
-          recipientMasked,
-          locale: payload.locale,
-          status: "failed",
-          idempotencyKey,
           errorMessage: (err as Error)?.message || "WhatsApp delivery failed",
         }
       );

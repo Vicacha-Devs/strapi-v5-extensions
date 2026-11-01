@@ -1,7 +1,9 @@
 import {
+  computeIdempotencyKey,
   escapeHtml,
   normalizeWhatsAppTarget,
   validateGatewayUrl,
+  type BroadcastChannel,
   type BroadcastSettings,
   type CampaignRecord,
   type CampaignStats,
@@ -14,6 +16,40 @@ import type {
   TelegramSendPayload,
   WhatsAppSendPayload,
 } from "./transportService";
+
+export function buildTelegramIdempotencyKey(
+  payload: TelegramSendPayload,
+  targetChatId: string
+): string {
+  const hasThread =
+    typeof payload.threadId === "number" && payload.threadId > 0;
+  const threadKeySuffix = hasThread ? `:${payload.threadId}` : "";
+  return computeIdempotencyKey(
+    payload.campaignSlug,
+    "telegram",
+    `${targetChatId}${threadKeySuffix}:${payload.locale}`
+  );
+}
+
+export function makeResult(
+  channel: BroadcastChannel,
+  driver: string,
+  recipientMasked: string,
+  locale: string,
+  status: ChannelDispatchResult["status"],
+  idempotencyKey: string,
+  extra?: Partial<ChannelDispatchResult>
+): ChannelDispatchResult {
+  return {
+    channel,
+    driver,
+    recipientMasked,
+    locale,
+    status,
+    idempotencyKey,
+    ...extra,
+  };
+}
 
 export function parseTargetList(raw?: string | string[]): string[] {
   if (!raw) return [];

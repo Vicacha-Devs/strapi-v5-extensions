@@ -165,9 +165,7 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
   getCampaignService() {
     return strapi.plugin(PLUGIN_ID).service("campaignService") as {
       createCampaign(input: Partial<CampaignRecord>): Promise<CampaignRecord>;
-      dispatchCampaign(
-        documentIdOrSlug: string
-      ): Promise<{
+      dispatchCampaign(documentIdOrSlug: string): Promise<{
         campaign: CampaignRecord;
         results: ChannelDispatchResult[];
       }>;
@@ -192,11 +190,9 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
   async findRuleByDocIdOrSlug(
     documentIdOrSlug: string
   ): Promise<AutomationRuleRecord | null> {
-    const byDoc = (await strapi
-      .documents(AUTOMATION_RULE_UID)
-      .findOne({
-        documentId: documentIdOrSlug,
-      })) as unknown as AutomationRuleRecord | null;
+    const byDoc = (await strapi.documents(AUTOMATION_RULE_UID).findOne({
+      documentId: documentIdOrSlug,
+    })) as unknown as AutomationRuleRecord | null;
     return byDoc ?? (await this.getRuleBySlug(documentIdOrSlug));
   },
 

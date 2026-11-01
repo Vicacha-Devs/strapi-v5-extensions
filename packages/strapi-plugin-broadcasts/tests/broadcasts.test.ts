@@ -26,6 +26,16 @@ import {
   type BroadcastSettings,
 } from "../shared";
 
+const makeSub = (
+  email: string,
+  phone: string,
+  fullName: string,
+  locale: string,
+  topics: string[],
+  status = "confirmed",
+  unsubscribeToken?: string
+) => ({ email, phone, fullName, locale, topics, status, unsubscribeToken });
+
 function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
   const storeMap = new Map<string, unknown>();
   const collections: Record<string, Array<Record<string, unknown>>> = {
@@ -37,34 +47,35 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
   const emittedEvents: Array<{ event: string; payload: unknown }> = [];
 
   const mockSubscribers = [
-    {
-      email: "ahmad@mezquitabogota.org",
-      phone: "3101234567",
-      fullName: "Ahmad Al-Mansoor",
-      locale: "ar",
-      topics: ["announcements", "urgent_janazah", "events"],
-      status: "confirmed",
-      unsubscribeToken: "tok_ahmad_123",
-    },
-    {
-      email: "maria@example.com",
-      phone: "+573159876543",
-      fullName: "María Rodríguez",
-      locale: "es",
-      topics: ["announcements", "courses"],
-      status: "confirmed",
-      unsubscribeToken: "tok_maria_456",
-    },
-    {
-      email: "pending@example.com",
-      phone: "+573001112233",
-      fullName: "Pending User",
-      locale: "en",
-      topics: ["announcements"],
-      status: "pending",
-    },
+    makeSub(
+      "ahmad@mezquitabogota.org",
+      "3101234567",
+      "Ahmad Al-Mansoor",
+      "ar",
+      ["announcements", "urgent_janazah", "events"],
+      "confirmed",
+      "tok_ahmad_123"
+    ),
+    makeSub(
+      "maria@example.com",
+      "+573159876543",
+      "María Rodríguez",
+      "es",
+      ["announcements", "courses"],
+      "confirmed",
+      "tok_maria_456"
+    ),
+    makeSub(
+      "pending@example.com",
+      "+573001112233",
+      "Pending User",
+      "en",
+      ["announcements"],
+      "pending"
+    ),
   ];
 
+  const services: Record<string, unknown> = {};
   const strapi: Record<string, unknown> = {
     config: {
       get: (_key: string, def?: unknown) => ({
@@ -72,12 +83,7 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
         ...customConfig,
       }),
     },
-    log: {
-      debug: () => {},
-      info: () => {},
-      warn: () => {},
-      error: () => {},
-    },
+    log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
     eventHub: {
       emit: (event: string, payload?: unknown) => {
         emittedEvents.push({ event, payload });
@@ -93,34 +99,20 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
       findMany: async (params?: {
         filters?: Record<string, unknown>;
         limit?: number;
-      }) => {
-        const list = collections[uid] || [];
-        const filters = params?.filters || {};
-        return list.filter((item) =>
-          Object.entries(filters).every(([k, v]) => {
-            if (
-              v &&
-              typeof v === "object" &&
-              "$in" in (v as Record<string, unknown>) &&
-              Array.isArray((v as { $in: unknown[] }).$in)
-            ) {
-              return (v as { $in: unknown[] }).$in.includes(item[k]);
-            }
-            return item[k] === v;
-          })
-        );
-      },
-      findOne: async ({ documentId }: { documentId: string }) => {
-        const list = collections[uid] || [];
-        return list.find((item) => item.documentId === documentId) ?? null;
-      },
+      }) =>
+        (collections[uid] || []).filter((item) =>
+          Object.entries(params?.filters || {}).every(([k, v]) =>
+            v && typeof v === "object" && "$in" in v
+              ? ((v as { $in: unknown[] }).$in || []).includes(item[k])
+              : item[k] === v
+          )
+        ),
+      findOne: async ({ documentId }: { documentId: string }) =>
+        (collections[uid] || []).find((i) => i.documentId === documentId) ??
+        null,
       create: async ({ data }: { data: Record<string, unknown> }) => {
-        const doc = {
-          ...data,
-          documentId: `doc_${idCounter++}`,
-        };
-        if (!collections[uid]) collections[uid] = [];
-        collections[uid].push(doc);
+        const doc = { ...data, documentId: `doc_${idCounter++}` };
+        (collections[uid] ||= []).push(doc);
         return doc;
       },
       update: async ({
@@ -133,57 +125,39 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
         const list = collections[uid] || [];
         const idx = list.findIndex((item) => item.documentId === documentId);
         if (idx === -1) return null;
-        list[idx] = { ...list[idx], ...data };
-        return list[idx];
+        return (list[idx] = { ...list[idx], ...data });
       },
     }),
-  };
-
-  const services: Record<string, unknown> = {};
-
-  strapi.plugin = (name: string) => {
-    if (name === "inbox") {
-      return {
-        service: () => ({
-          listSubscribers: async (params?: {
-            status?: string;
-            topic?: string;
-          }) =>
-            mockSubscribers.filter((sub) => {
-              if (params?.status && sub.status !== params.status) return false;
-              if (params?.topic && !sub.topics.includes(params.topic))
-                return false;
-              return true;
+    plugin: (name: string) =>
+      name === "inbox"
+        ? {
+            service: () => ({
+              listSubscribers: async (p?: {
+                status?: string;
+                topic?: string;
+              }) =>
+                mockSubscribers.filter(
+                  (sub) =>
+                    (!p?.status || sub.status === p.status) &&
+                    (!p?.topic || sub.topics.includes(p.topic))
+                ),
             }),
-        }),
-      };
-    }
-    return {
-      service: (svcName: string) => services[svcName],
-    };
+          }
+        : { service: (svcName: string) => services[svcName] },
   };
 
-  const typedStrapi = strapi as unknown as Parameters<
+  const s = strapi as unknown as Parameters<
     typeof settingsServiceFactory
   >[0]["strapi"];
-  services.settings = settingsServiceFactory({ strapi: typedStrapi });
-  services.transportService = transportServiceFactory({ strapi: typedStrapi });
-  services.campaignService = campaignServiceFactory({ strapi: typedStrapi });
-  services.automationService = automationServiceFactory({
-    strapi: typedStrapi,
-  });
-
-  return {
-    strapi: typedStrapi,
-    services: services as {
-      settings: ReturnType<typeof settingsServiceFactory>;
-      transportService: ReturnType<typeof transportServiceFactory>;
-      campaignService: ReturnType<typeof campaignServiceFactory>;
-      automationService: ReturnType<typeof automationServiceFactory>;
-    },
-    collections,
-    emittedEvents,
+  const typedServices = {
+    settings: settingsServiceFactory({ strapi: s }),
+    transportService: transportServiceFactory({ strapi: s }),
+    campaignService: campaignServiceFactory({ strapi: s }),
+    automationService: automationServiceFactory({ strapi: s }),
   };
+  Object.assign(services, typedServices);
+
+  return { strapi: s, services: typedServices, collections, emittedEvents };
 }
 
 describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
@@ -216,33 +190,22 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
   });
 
   it("enforces SSRF protection and HTTPS on gateway URLs", () => {
-    const metadataBlocked = validateGatewayUrl(
-      "https://169.254.169.254/latest/meta-data"
-    );
-    assert.equal(metadataBlocked.valid, false);
-
-    const httpExternalBlocked = validateGatewayUrl(
-      "http://gateway.example.com/api"
-    );
-    assert.equal(httpExternalBlocked.valid, false);
-
-    const localhostBlockedByDefault = validateGatewayUrl(
-      "http://localhost:3000/api"
-    );
-    assert.equal(localhostBlockedByDefault.valid, false);
-
-    const localhostAllowedExplicitly = validateGatewayUrl(
+    for (const invalidUrl of [
+      "https://169.254.169.254/latest/meta-data",
+      "http://gateway.example.com/api",
       "http://localhost:3000/api",
-      {
-        allowLocalhost: true,
-      }
+    ]) {
+      assert.equal(validateGatewayUrl(invalidUrl).valid, false);
+    }
+    assert.equal(
+      validateGatewayUrl("http://localhost:3000/api", { allowLocalhost: true })
+        .valid,
+      true
     );
-    assert.equal(localhostAllowedExplicitly.valid, true);
-
-    const validHttps = validateGatewayUrl(
-      "https://wa-gateway.mezquitabogota.org"
+    assert.equal(
+      validateGatewayUrl("https://wa-gateway.mezquitabogota.org").valid,
+      true
     );
-    assert.equal(validHttps.valid, true);
   });
 
   it("validates campaign and automation rule inputs and resolves localized copy", () => {
@@ -270,10 +233,7 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
         subject: "Default Subject",
         bodyText: "Default Body",
         translations: {
-          ar: {
-            subject: "عنوان بالعربية",
-            bodyText: "نص الرسالة بالعربية",
-          },
+          ar: { subject: "عنوان بالعربية", bodyText: "نص الرسالة بالعربية" },
         },
       },
       "ar",
@@ -311,30 +271,21 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
       ...DEFAULT_BROADCAST_SETTINGS,
       dryRun: true,
     });
+    const cs = services.campaignService;
 
-    const seededCount = await services.campaignService.seedStarterCampaigns();
-    assert.equal(seededCount, 2);
+    assert.equal(await cs.seedStarterCampaigns(), 2);
 
-    const jumuah = await services.campaignService.getCampaignBySlug(
-      "jumuah-weekly-reminder"
-    );
-    assert.ok(jumuah);
-    assert.ok(jumuah.secondaryDateLabel);
+    const slug = "jumuah-weekly-reminder";
+    const jumuah = await cs.getCampaignBySlug(slug);
+    assert.ok(jumuah && jumuah.secondaryDateLabel);
 
-    const updatedJumuah = await services.campaignService.updateCampaign(
-      jumuah.documentId || "jumuah-weekly-reminder",
-      {
-        title: "Recordatorio Semanal de Jumu’ah (Actualizado)",
-      }
-    );
-    assert.equal(
-      updatedJumuah.title,
-      "Recordatorio Semanal de Jumu’ah (Actualizado)"
-    );
+    const newTitle = "Recordatorio Semanal de Jumu’ah (Actualizado)";
+    const updatedJumuah = await cs.updateCampaign(jumuah.documentId || slug, {
+      title: newTitle,
+    });
+    assert.equal(updatedJumuah.title, newTitle);
 
-    const firstDispatch = await services.campaignService.dispatchCampaign(
-      "jumuah-weekly-reminder"
-    );
+    const firstDispatch = await cs.dispatchCampaign(slug);
     // 1 Telegram channel + 2 confirmed email subscribers + 2 confirmed WhatsApp phone subscribers = 5 dispatches
     assert.equal(firstDispatch.results.length, 5);
     assert.equal(firstDispatch.campaign.status, "sent");
@@ -358,9 +309,7 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
     );
 
     // Second dispatch of the same campaign should be skipped as duplicate via idempotencyKey
-    const secondDispatch = await services.campaignService.dispatchCampaign(
-      "jumuah-weekly-reminder"
-    );
+    const secondDispatch = await cs.dispatchCampaign(slug);
     assert.equal(secondDispatch.campaign.stats?.skippedCount, 5);
     assert.equal(secondDispatch.campaign.stats?.simulatedCount, 0);
     assert.ok(
@@ -373,25 +322,22 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
       ...DEFAULT_BROADCAST_SETTINGS,
       dryRun: true,
     });
+    const auto = services.automationService;
 
-    const seededRules = await services.automationService.seedStarterRules();
-    assert.equal(seededRules, 2);
+    assert.equal(await auto.seedStarterRules(), 2);
 
-    const toggledRule = await services.automationService.updateRule(
+    const toggledRule = await auto.updateRule(
       "auto-event-published-broadcast",
       { active: false }
     );
     assert.equal(toggledRule.active, false);
 
-    const outcomes = await services.automationService.handleEventTrigger(
-      "inbox.alert.published",
-      {
-        code: "ramadan-1447-sighting",
-        title: "Inicio Oficial de Ramadán 1447 AH",
-        message:
-          "Esta noche inicia el mes sagrado de Ramadán con oración de Tarawih a las 7:30 PM.",
-      }
-    );
+    const outcomes = await auto.handleEventTrigger("inbox.alert.published", {
+      code: "ramadan-1447-sighting",
+      title: "Inicio Oficial de Ramadán 1447 AH",
+      message:
+        "Esta noche inicia el mes sagrado de Ramadán con oración de Tarawih a las 7:30 PM.",
+    });
 
     assert.equal(outcomes.length, 1);
     assert.equal(outcomes[0].ruleSlug, "auto-alert-banner-broadcast");
@@ -408,18 +354,7 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
   });
 
   it("ensures all 10 Admin locales contain identical keys and non-empty translations", async () => {
-    const locales = [
-      "en",
-      "es",
-      "ar",
-      "fr",
-      "de",
-      "pt",
-      "it",
-      "tr",
-      "ru",
-      "zh",
-    ];
+    const locales = "en,es,ar,fr,de,pt,it,tr,ru,zh".split(",");
     const loaded: Array<{ locale: string; data: Record<string, string> }> = [];
 
     for (const locale of locales) {
@@ -493,20 +428,16 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
   });
 
   it("normalizes and dispatches to WhatsApp Groups (@g.us), WhatsApp Channels (@newsletter), and Telegram Groups", async () => {
-    assert.equal(isWhatsAppGroupOrChannelJid("120363025891234567@g.us"), true);
-    assert.equal(
-      isWhatsAppGroupOrChannelJid("120363099999999999@newsletter"),
-      true
-    );
+    const groupJid = "120363025891234567@g.us";
+    const channelJid = "120363099999999999@newsletter";
+    assert.equal(isWhatsAppGroupOrChannelJid(groupJid), true);
+    assert.equal(isWhatsAppGroupOrChannelJid(channelJid), true);
     assert.equal(isWhatsAppGroupOrChannelJid("+573101234567"), false);
 
-    const groupTarget = normalizeWhatsAppTarget(
-      "120363025891234567@g.us",
-      "57"
-    );
+    const groupTarget = normalizeWhatsAppTarget(groupJid, "57");
     assert.equal(groupTarget.isGroupOrChannel, true);
-    assert.equal(groupTarget.evolutionNumber, "120363025891234567@g.us");
-    assert.equal(groupTarget.chatId, "120363025891234567@g.us");
+    assert.equal(groupTarget.evolutionNumber, groupJid);
+    assert.equal(groupTarget.chatId, groupJid);
 
     const phoneTarget = normalizeWhatsAppTarget("3101234567", "57");
     assert.equal(phoneTarget.isGroupOrChannel, false);
@@ -514,10 +445,7 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
     assert.equal(phoneTarget.evolutionNumber, "573101234567");
     assert.equal(phoneTarget.chatId, "573101234567@c.us");
 
-    assert.equal(
-      maskRecipientIdentifier("120363025891234567@g.us"),
-      "120363025891234567@g.us"
-    );
+    assert.equal(maskRecipientIdentifier(groupJid), groupJid);
     assert.equal(maskRecipientIdentifier("-1001234567890"), "-1001234567890");
 
     const { services } = createMockStrapi({
@@ -526,10 +454,7 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
       whatsappDriver: "evolution",
       whatsappDefaultRecipients: ["120363011111111111@g.us"],
       whatsappTopicGroupMap: {
-        urgent_janazah: [
-          "120363022222222222@g.us",
-          "120363099999999999@newsletter",
-        ],
+        urgent_janazah: ["120363022222222222@g.us", channelJid],
       },
       telegramTopicChatMap: {
         urgent_janazah: ["@MezquitaCentralBogota", "-1009876543210"],
@@ -549,23 +474,26 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
     const dispatched = await services.campaignService.dispatchCampaign(
       "janazah-group-broadcast"
     );
-    const tgRecipients = dispatched.results
-      .filter((r) => r.channel === "telegram")
-      .map((r) => r.recipientMasked);
-    const waRecipients = dispatched.results
-      .filter((r) => r.channel === "whatsapp")
-      .map((r) => r.recipientMasked);
+    const recipientsFor = (ch: string) =>
+      dispatched.results
+        .filter((r) => r.channel === ch)
+        .map((r) => r.recipientMasked);
+    const waRecipients = recipientsFor("whatsapp");
 
-    assert.deepEqual(tgRecipients, [
+    assert.deepEqual(recipientsFor("telegram"), [
       "@MezquitaCentralBogota",
       "-1009876543210",
     ]);
     // 1 subscriber on urgent_janazah (+57***4567) + 1 default group + 2 topic groups/channels + 1 campaign group = 5
     assert.equal(waRecipients.length, 5);
-    assert.ok(waRecipients.includes("+57***4567"));
-    assert.ok(waRecipients.includes("120363011111111111@g.us"));
-    assert.ok(waRecipients.includes("120363022222222222@g.us"));
-    assert.ok(waRecipients.includes("120363099999999999@newsletter"));
-    assert.ok(waRecipients.includes("120363033333333333@g.us"));
+    assert.ok(
+      [
+        "+57***4567",
+        "120363011111111111@g.us",
+        "120363022222222222@g.us",
+        channelJid,
+        "120363033333333333@g.us",
+      ].every((id) => waRecipients.includes(id))
+    );
   });
 });
