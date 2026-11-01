@@ -52,13 +52,9 @@ function matchesYearlessRange(
   startStr: string,
   endStr: string
 ): boolean {
-  const targetMmDd = extractMonthDay(dateStr);
-  const startMmDd = extractMonthDay(startStr);
-  const endMmDd = extractMonthDay(endStr);
-  if (!targetMmDd || !startMmDd || !endMmDd) return false;
-  if (startMmDd <= endMmDd)
-    return targetMmDd >= startMmDd && targetMmDd <= endMmDd;
-  return targetMmDd >= startMmDd || targetMmDd <= endMmDd;
+  const [t, s, e] = [dateStr, startStr, endStr].map(extractMonthDay);
+  if (!t || !s || !e) return false;
+  return s <= e ? t >= s && t <= e : t >= s || t <= e;
 }
 
 export function matchesDateOrYearlessRange(
@@ -69,10 +65,10 @@ export function matchesDateOrYearlessRange(
 ): boolean {
   if (!dateStr || !startStr || !endStr) return false;
   if (yearless) return matchesYearlessRange(dateStr, startStr, endStr);
-  const targetDay = dateStr.trim().slice(0, 10);
-  const startDay = startStr.trim().slice(0, 10);
-  const endDay = endStr.trim().slice(0, 10);
-  return targetDay >= startDay && targetDay <= endDay;
+  const [t, s, e] = [dateStr, startStr, endStr].map((d) =>
+    d.trim().slice(0, 10)
+  );
+  return t >= s && t <= e;
 }
 
 export function matchesSingleDateOrYearless(
@@ -90,32 +86,11 @@ export function matchesSingleDateOrYearless(
 
 function parsePeriodTimestamp(raw: string, endOfDay: boolean): number {
   const trimmed = raw.trim();
-  if (trimmed.length === 10) {
-    return Date.parse(
-      `${trimmed}T${endOfDay ? "23:59:59.999Z" : "00:00:00.000Z"}`
-    );
-  }
-  return Date.parse(trimmed);
-}
-
-function doesPeriodBlackOutSlot(
-  period: BlackoutPeriod,
-  slotDateStr: string,
-  slotStartMs: number,
-  slotEndMs: number
-): boolean {
-  if (!period.start || !period.end) return false;
-  if (period.yearless)
-    return matchesDateOrYearlessRange(
-      slotDateStr,
-      period.start,
-      period.end,
-      true
-    );
-  const startMs = parsePeriodTimestamp(period.start, false);
-  const endMs = parsePeriodTimestamp(period.end, true);
-  if (Number.isNaN(startMs) || Number.isNaN(endMs)) return false;
-  return slotStartMs < endMs && slotEndMs > startMs;
+  return Date.parse(
+    trimmed.length === 10
+      ? `${trimmed}T${endOfDay ? "23:59:59.999Z" : "00:00:00.000Z"}`
+      : trimmed
+  );
 }
 
 export function isSlotBlackedOut(
@@ -124,9 +99,25 @@ export function isSlotBlackedOut(
   blackoutDates: BlackoutPeriod[]
 ): boolean {
   const slotDateStr = new Date(slotStartMs).toISOString().slice(0, 10);
-  return blackoutDates.some((period) =>
-    doesPeriodBlackOutSlot(period, slotDateStr, slotStartMs, slotEndMs)
-  );
+  return blackoutDates.some((period) => {
+    if (!period.start || !period.end) return false;
+    if (period.yearless) {
+      return matchesDateOrYearlessRange(
+        slotDateStr,
+        period.start,
+        period.end,
+        true
+      );
+    }
+    const startMs = parsePeriodTimestamp(period.start, false);
+    const endMs = parsePeriodTimestamp(period.end, true);
+    return (
+      !Number.isNaN(startMs) &&
+      !Number.isNaN(endMs) &&
+      slotStartMs < endMs &&
+      slotEndMs > startMs
+    );
+  });
 }
 
 export interface ResolvedDailySchedule {
@@ -138,63 +129,42 @@ export interface ResolvedDailySchedule {
 
 function findMatchingHoliday(
   dateStr: string,
-  globalHolidays: HolidayScheduleRule[],
-  resourceHolidays?: HolidayScheduleRule[]
+  globalHolidays: HolidayScheduleRule[] = [],
+  resourceHolidays: HolidayScheduleRule[] = []
 ): HolidayScheduleRule | undefined {
-  const combined = [
+  return [
     ...(Array.isArray(globalHolidays) ? globalHolidays : []),
     ...(Array.isArray(resourceHolidays) ? resourceHolidays : []),
-  ];
-  let matched: HolidayScheduleRule | undefined;
-  for (const rule of combined) {
-    if (
-      rule?.date &&
-      matchesSingleDateOrYearless(dateStr, rule.date, Boolean(rule.yearless))
-    ) {
-      matched = rule;
-    }
-  }
-  return matched;
-}
-
-function buildHolidayDailySchedule(
-  holiday: HolidayScheduleRule,
-  baseMode: "interval" | "window",
-  baseDurationMins: number
-): ResolvedDailySchedule {
-  const hasCustomWindows =
-    Array.isArray(holiday.windows) && holiday.windows.length > 0;
-  const isClosed = (holiday.isClosed ?? !hasCustomWindows) || !hasCustomWindows;
-  return {
-    mode: isClosed ? baseMode : (holiday.mode ?? baseMode),
-    durationMins: baseDurationMins,
-    windows: isClosed ? [] : (holiday.windows ?? []),
-    scheduleLabel: holiday.name,
-  };
+  ]
+    .filter(
+      (r) =>
+        Boolean(r?.date) &&
+        matchesSingleDateOrYearless(dateStr, r.date, Boolean(r.yearless))
+    )
+    .pop();
 }
 
 function findWinningSeasonalSchedule(
   dateStr: string,
-  globalSeasonalSchedules: SeasonalScheduleOverride[],
-  resourceSeasonals?: SeasonalScheduleOverride[]
+  globalSeasonalSchedules: SeasonalScheduleOverride[] = [],
+  resourceSeasonals: SeasonalScheduleOverride[] = []
 ): SeasonalScheduleOverride | undefined {
-  const combined = [
+  return [
     ...(Array.isArray(globalSeasonalSchedules) ? globalSeasonalSchedules : []),
     ...(Array.isArray(resourceSeasonals) ? resourceSeasonals : []),
-  ];
-  const matching = combined.filter(
-    (s) =>
-      s?.schedule &&
-      matchesDateOrYearlessRange(
-        dateStr,
-        s.startDate,
-        s.endDate,
-        Boolean(s.yearless)
-      )
-  );
-  if (matching.length === 0) return undefined;
-  matching.sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
-  return matching[matching.length - 1];
+  ]
+    .filter(
+      (s) =>
+        s?.schedule &&
+        matchesDateOrYearlessRange(
+          dateStr,
+          s.startDate,
+          s.endDate,
+          Boolean(s.yearless)
+        )
+    )
+    .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
+    .pop();
 }
 
 export function resolveDailyScheduleForDate(
@@ -209,32 +179,36 @@ export function resolveDailyScheduleForDate(
     : DEFAULT_WEEKLY_SCHEDULE;
   const baseMode = baseSchedule.mode ?? "interval";
   const baseDurationMins = Math.max(5, resource.slotDurationMinutes || 60);
-  const matchedHoliday = findMatchingHoliday(
+  const holiday = findMatchingHoliday(
     dateStr,
     globalHolidays,
     resource.holidayRules
   );
-  if (matchedHoliday) {
-    return buildHolidayDailySchedule(
-      matchedHoliday,
-      baseMode,
-      baseDurationMins
-    );
+  if (holiday) {
+    const hasCustom =
+      Array.isArray(holiday.windows) && holiday.windows.length > 0;
+    const isClosed = (holiday.isClosed ?? !hasCustom) || !hasCustom;
+    return {
+      mode: isClosed ? baseMode : (holiday.mode ?? baseMode),
+      durationMins: baseDurationMins,
+      windows: isClosed ? [] : (holiday.windows ?? []),
+      scheduleLabel: holiday.name,
+    };
   }
-  const winningSeasonal = findWinningSeasonalSchedule(
+  const seasonal = findWinningSeasonalSchedule(
     dateStr,
     globalSeasonalSchedules,
     resource.seasonalSchedules
   );
-  if (winningSeasonal) {
+  if (seasonal) {
     return {
-      mode: winningSeasonal.schedule.mode ?? baseMode,
+      mode: seasonal.schedule.mode ?? baseMode,
       durationMins: Math.max(
         5,
-        winningSeasonal.slotDurationMinutes ?? baseDurationMins
+        seasonal.slotDurationMinutes ?? baseDurationMins
       ),
-      windows: winningSeasonal.schedule.days?.[dayKey] ?? [],
-      scheduleLabel: winningSeasonal.label,
+      windows: seasonal.schedule.days?.[dayKey] ?? [],
+      scheduleLabel: seasonal.label,
     };
   }
   return {
@@ -261,9 +235,10 @@ export function doesBookingOverlapSlot(
   const bStart = Date.parse(booking.startDate);
   const bEnd = Date.parse(booking.endDate);
   if (Number.isNaN(bStart) || Number.isNaN(bEnd)) return false;
-  const effectiveBookingStart = bStart - bufferBeforeMinutes * 60_000;
-  const effectiveBookingEnd = bEnd + bufferAfterMinutes * 60_000;
-  return slotStartMs < effectiveBookingEnd && slotEndMs > effectiveBookingStart;
+  return (
+    slotStartMs < bEnd + bufferAfterMinutes * 60_000 &&
+    slotEndMs > bStart - bufferBeforeMinutes * 60_000
+  );
 }
 
 export function selectAvailableHostsForSlot(
@@ -275,24 +250,24 @@ export function selectAvailableHostsForSlot(
     ? resource.assignedHosts
     : [];
   if (hosts.length === 0) return [];
-  const busyHostNamesOrIds = new Set(
+  const busy = new Set(
     overlappingBookings
       .map((b) => b.assignedHost?.trim().toLowerCase())
       .filter((v): v is string => Boolean(v))
   );
-  const freeHosts = hosts.filter((host) => {
-    const idKey = host.id.trim().toLowerCase();
-    const nameKey = host.name.trim().toLowerCase();
-    return !busyHostNamesOrIds.has(idKey) && !busyHostNamesOrIds.has(nameKey);
-  });
-  if (!preferredLanguage) return freeHosts;
-  const normalizedLang = preferredLanguage.trim().toLowerCase();
-  const matchingLang = freeHosts.filter(
-    (host) =>
-      Array.isArray(host.languages) &&
-      host.languages.some((l) => l.trim().toLowerCase() === normalizedLang)
+  const freeHosts = hosts.filter(
+    (h) =>
+      !busy.has(h.id.trim().toLowerCase()) &&
+      !busy.has(h.name.trim().toLowerCase())
   );
-  return matchingLang.length > 0 ? matchingLang : freeHosts;
+  if (!preferredLanguage) return freeHosts;
+  const lang = preferredLanguage.trim().toLowerCase();
+  const matching = freeHosts.filter(
+    (h) =>
+      Array.isArray(h.languages) &&
+      h.languages.some((l) => l.trim().toLowerCase() === lang)
+  );
+  return matching.length > 0 ? matching : freeHosts;
 }
 
 export interface ComputeAvailableSlotsParams {
@@ -348,32 +323,16 @@ function buildWindowCandidateBlocks(
     const isExactMatch = Boolean(
       win.label && winStartMins + durationMins === winEndMins
     );
-    const label = isExactMatch
-      ? String(win.label)
-      : `${formatTimeMinutes(cursorMins)}-${formatTimeMinutes(blockEndMins)}`;
     blocks.push({
       startMins: cursorMins,
       endMins: blockEndMins,
-      label,
+      label: isExactMatch
+        ? String(win.label)
+        : `${formatTimeMinutes(cursorMins)}-${formatTimeMinutes(blockEndMins)}`,
       capacity: cap,
     });
   }
   return blocks;
-}
-
-function isCandidateSlotPermitted(
-  slotStartMs: number,
-  slotEndMs: number,
-  rangeStartMs: number,
-  rangeEndMs: number,
-  minAllowedMs: number | null,
-  maxAllowedMs: number | null,
-  blackoutDates: BlackoutPeriod[]
-): boolean {
-  if (slotEndMs <= rangeStartMs || slotStartMs > rangeEndMs) return false;
-  if (minAllowedMs !== null && slotStartMs < minAllowedMs) return false;
-  if (maxAllowedMs !== null && slotStartMs > maxAllowedMs) return false;
-  return !isSlotBlackedOut(slotStartMs, slotEndMs, blackoutDates);
 }
 
 function evaluateCandidateBlockToSlot(
@@ -431,21 +390,6 @@ function evaluateCandidateBlockToSlot(
   };
 }
 
-function resolveLeadAndAdvanceBounds(
-  resource: BookingResource,
-  referenceNow?: Date
-): { minAllowedMs: number | null; maxAllowedMs: number | null } {
-  if (!referenceNow) return { minAllowedMs: null, maxAllowedMs: null };
-  const nowMs = referenceNow.getTime();
-  const minAllowedMs =
-    nowMs + Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000;
-  const maxAllowedMs =
-    resource.maxAdvanceDays > 0
-      ? nowMs + resource.maxAdvanceDays * 86_400_000
-      : null;
-  return { minAllowedMs, maxAllowedMs };
-}
-
 export function computeAvailableSlots(
   params: ComputeAvailableSlotsParams
 ): AvailableSlot[] {
@@ -477,10 +421,15 @@ export function computeAvailableSlots(
       (!b.resourceDocumentId || b.resourceDocumentId === resource.documentId) &&
       isActiveBookingStatus(b.status)
   );
-  const { minAllowedMs, maxAllowedMs } = resolveLeadAndAdvanceBounds(
-    resource,
-    referenceNow
-  );
+  const nowMs = referenceNow?.getTime() ?? null;
+  const minAllowedMs =
+    nowMs !== null
+      ? nowMs + Math.max(0, resource.minLeadTimeHours || 0) * 3_600_000
+      : null;
+  const maxAllowedMs =
+    nowMs !== null && resource.maxAdvanceDays > 0
+      ? nowMs + resource.maxAdvanceDays * 86_400_000
+      : null;
   const blackoutDates = resource.blackoutDates ?? [];
   const slots: AvailableSlot[] = [];
   const startDayUtc = new Date(rangeStartMs);
@@ -515,17 +464,13 @@ export function computeAvailableSlots(
     for (const block of dayBlocks) {
       const slotStartMs = dayCursorMs + block.startMins * 60_000;
       const slotEndMs = dayCursorMs + block.endMins * 60_000;
-      if (
-        isCandidateSlotPermitted(
-          slotStartMs,
-          slotEndMs,
-          rangeStartMs,
-          rangeEndMs,
-          minAllowedMs,
-          maxAllowedMs,
-          blackoutDates
-        )
-      ) {
+      const permitted =
+        slotEndMs > rangeStartMs &&
+        slotStartMs <= rangeEndMs &&
+        (minAllowedMs === null || slotStartMs >= minAllowedMs) &&
+        (maxAllowedMs === null || slotStartMs <= maxAllowedMs) &&
+        !isSlotBlackedOut(slotStartMs, slotEndMs, blackoutDates);
+      if (permitted) {
         slots.push(
           evaluateCandidateBlockToSlot(
             block,

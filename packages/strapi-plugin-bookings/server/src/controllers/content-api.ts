@@ -8,7 +8,7 @@ import type {
 } from "../../../shared/types";
 import type { AvailabilityService, ReservationService } from "../types";
 
-interface ContentApiContext {
+export interface ContentApiContext {
   query: Record<string, string | undefined>;
   params: Record<string, string | undefined>;
   request: {
