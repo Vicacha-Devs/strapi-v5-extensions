@@ -32,6 +32,18 @@ export const STRAPI_GLOBAL_IGNORES: string[] = [
 ];
 
 export const STRAPI_SHARED_RULES: Linter.RulesRecord = {
+  "max-len": [
+    "error",
+    {
+      code: 80,
+      tabWidth: 2,
+      ignoreUrls: true,
+      ignoreStrings: true,
+      ignoreTemplateLiterals: true,
+      ignoreRegExpLiterals: true,
+      ignoreComments: true,
+    },
+  ],
   "max-lines": [
     "error",
     {
