@@ -74,7 +74,8 @@
   "dependencies": {
     "@strapi/design-system": "2.2.0",
     "@strapi/icons": "2.2.0",
-    "react-intl": "8.1.3"
+    "react-intl": "8.1.3",
+    "strapi-plugin-form-builder-cms": "1.1.0-rc.1"
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "6.1.1",
@@ -84,11 +85,11 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/plugin-shared": "workspace:*",
     "@vicacha-devs/typescript-config": "workspace:*",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.30.3",
-    "strapi-plugin-form-builder-cms": "1.1.0-rc.1",
     "styled-components": "6.3.11",
     "typescript": "5.9.3",
     "vitest": "4.1.0"
@@ -102,7 +103,6 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",
-    "strapi-plugin-form-builder-cms": "^1.1.0-rc.1",
     "styled-components": "^6.0.0"
   },
   "peerDependenciesMeta": {
