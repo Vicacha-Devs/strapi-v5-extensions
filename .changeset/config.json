@@ -5,10 +5,7 @@
   "format": "auto",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "ignore": [
-    "@vicacha-devs/dashboard",
-    "@vicacha-devs/docs"
-  ],
+  "ignore": ["@vicacha-devs/dashboard", "@vicacha-devs/docs"],
   "fixed": [],
   "linked": [],
   "updateInternalDependencies": "patch"
