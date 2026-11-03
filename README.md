@@ -1,6 +1,6 @@
 # `@vicacha-devs/strapi-v5-extensions`
 
-Enterprise **pnpm + Turborepo + Semantic Release** monorepo for Strapi v5 plugins and extensions, modeled after [`frameless/strapi-v5-extensions`](https://github.com/frameless/strapi-v5-extensions).
+Enterprise **pnpm + Turborepo + Changesets** monorepo for Strapi v5 plugins and extensions, modeled after [`frameless/strapi-v5-extensions`](https://github.com/frameless/strapi-v5-extensions).
 
 ---
 
@@ -8,7 +8,8 @@ Enterprise **pnpm + Turborepo + Semantic Release** monorepo for Strapi v5 plugin
 
 ```text
 strapi-v5-extensions/
-├── .github/workflows/                  # CI (ci.yml) & automated npm release (npm-release.yml)
+├── .changeset/                         # Changesets configuration & per-PR release notes
+├── .github/workflows/                  # CI (ci.yml) & Changesets npm release (npm-release.yml)
 ├── .husky/                             # Git hooks (commit-msg, pre-commit, pre-push)
 ├── apps/
 │   └── dashboard/                      # @vicacha-devs/dashboard — Strapi v5 host app wiring all workspace plugins
@@ -31,14 +32,12 @@ strapi-v5-extensions/
 │   └── strapi-plugin-sitemap/          # @vicacha-devs/strapi-plugin-sitemap — Multilingual XML sitemap & robots.txt generator
 ├── scripts/
 │   ├── ensure-esm-dist.ts              # Ensures dist/package.json ({"type":"module"}) & entry .d.ts files
-│   ├── publint-all.ts                  # Strict publint validation across all 14 publishable plugins
-│   └── release.ts                      # Monorepo per-package semantic-release & pnpm publish runner
-├── commitlint.config.ts                # Conventional Commits + optional [TICKET-123] prefix
+│   └── publint-all.ts                  # Strict publint validation across all 14 publishable plugins
+├── commitlint.config.ts                # Conventional Commits + optional [TICKET-123] prefix (style check)
 ├── eslint.config.ts                    # Root ESLint v10 flat configuration
 ├── .oxfmtrc.json                       # Oxfmt code formatting configuration
 ├── .oxlintrc.json                      # Oxlint fast static analysis configuration
-├── .releaserc.json                     # Semantic Release configuration
-├── package.json                        # Monorepo root scripts (format, lint, check, build, publint, verify, release)
+├── package.json                        # Monorepo root scripts (format, lint, check, build, publint, verify, changeset, release)
 ├── pnpm-workspace.yaml                 # Workspace globs, linkWorkspacePackages, onlyBuiltDependencies & peerDependencyRules
 └── turbo.json                          # Turborepo task pipeline & dependency graph
 ```
@@ -76,8 +75,8 @@ strapi-v5-extensions/
    Every plugin validates both its Admin (`admin/tsconfig.json`) and Server (`server/tsconfig.json`) bundles against `@vicacha-devs/typescript-config` with zero `any` leaks in implementation code.
 4. **Multilingual Admin i18n Parity (`en`, `es`, `ar`, `tr`, +9 locales)**:
    Every `@vicacha-devs` plugin ships with verified translation parity across `en`, `es`, `ar`, `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur`, and `zh`.
-5. **NPM Package Quality (`publint` + `@strapi/sdk-plugin`)**:
-   All 14 plugins are validated with `strapi-plugin verify` and strict `publint` (`pack: "pnpm"`) prior to automated `semantic-release` publishing with npm provenance.
+5. **NPM Package Quality & Changesets Releases (`publint` + `@strapi/sdk-plugin` + Trusted Publishing)**:
+   All 14 plugins are validated with `strapi-plugin verify` and strict `publint` (`pack: "pnpm"`). Independent per-package versions and changelogs are managed via [Changesets](https://changesets.dev) ("Version Packages" PRs) and published via npm OIDC Trusted Publishing with provenance.
 
 ---
 
@@ -111,7 +110,9 @@ pnpm test
 # Run the complete verification pipeline (format:check + lint + build + check + verify:sdk + publint + test)
 pnpm verify
 
-# Preview per-package semantic-release version bumps and changelogs
-pnpm release:dry
-```
+# Add a changeset for changed package(s) in a pull request
+pnpm changeset
 
+# Apply pending changesets to bump versions and update package CHANGELOGs
+pnpm version-packages
+```
