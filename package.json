@@ -42,7 +42,7 @@
     "publint": "node ./scripts/publint-all.ts",
     "release": "pnpm build && changeset publish",
     "start": "turbo run start",
-    "test": "turbo run test",
+    "test": "turbo run test --filter=./packages/*",
     "test:ts": "turbo run test:ts",
     "verify": "pnpm format:check && pnpm lint && pnpm build && pnpm check && pnpm verify:sdk && pnpm publint && pnpm test",
     "verify:sdk": "turbo run verify",
