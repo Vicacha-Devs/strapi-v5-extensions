@@ -61,7 +61,7 @@ export const STRAPI_SHARED_RULES: Linter.RulesRecord = {
   "prefer-const": "error",
   "eqeqeq": ["error", "always", { null: "ignore" }],
   "@typescript-eslint/no-empty-object-type": "off",
-  "@typescript-eslint/no-explicit-any": "off",
+  "@typescript-eslint/no-explicit-any": "error",
   "@typescript-eslint/consistent-type-imports": [
     "warn",
     {
@@ -88,30 +88,25 @@ export const strapiBaseConfig: Linter.Config[] = defineConfig([
     ignores: ["**/*.{json,md,mdx,css}"],
     rules: {
       ...sonarjs.recommended.rules,
+      // Duplicate of @typescript-eslint/no-unused-vars (lacks ^_ ignore rules)
+      "sonarjs/no-unused-vars": "off",
+      // Stylistic rules conflicting with JSX, ASCII regexes & TS types
       "sonarjs/cognitive-complexity": "off",
       "sonarjs/concise-regex": "off",
-      "sonarjs/hardcoded-secret-signatures": "off",
-      "sonarjs/no-clear-text-protocols": "off",
-      "sonarjs/no-duplicated-branches": "off",
-      "sonarjs/no-empty-test-file": "off",
-      "sonarjs/no-hardcoded-ip": "off",
-      "sonarjs/no-hardcoded-passwords": "off",
-      "sonarjs/no-identical-functions": "off",
-      "sonarjs/no-inverted-boolean-check": "off",
-      "sonarjs/no-nested-assignment": "off",
       "sonarjs/no-nested-conditional": "off",
       "sonarjs/no-nested-functions": "off",
       "sonarjs/no-nested-template-literals": "off",
-      "sonarjs/no-os-command-from-path": "off",
-      "sonarjs/no-unused-vars": "off",
-      "sonarjs/prefer-specific-assertions": "off",
-      "sonarjs/pseudo-random": "off",
       "sonarjs/redundant-type-aliases": "off",
-      "sonarjs/slow-regex": "off",
-      "sonarjs/super-linear-regex": "off",
-      "sonarjs/todo-tag": "warn",
       "sonarjs/use-type-alias": "off",
-      "sonarjs/void-use": "off",
+      // Surfaced as warnings without blocking builds on existing helpers
+      "sonarjs/no-duplicated-branches": "warn",
+      "sonarjs/no-identical-functions": "warn",
+      "sonarjs/no-inverted-boolean-check": "warn",
+      "sonarjs/no-nested-assignment": "warn",
+      "sonarjs/pseudo-random": "warn",
+      "sonarjs/slow-regex": "warn",
+      "sonarjs/super-linear-regex": "warn",
+      "sonarjs/todo-tag": "warn",
     },
   },
   importX.configs.typescript as Linter.Config,
@@ -129,6 +124,68 @@ export const strapiBaseConfig: Linter.Config[] = defineConfig([
     rules: STRAPI_SHARED_RULES,
   },
   {
+    name: "@vicacha-devs/eslint-config/admin-void",
+    files: [
+      "packages/*/admin/**/*.{js,jsx,ts,tsx}",
+      "apps/dashboard/src/admin/**/*.{js,jsx,ts,tsx}",
+      "apps/docs/src/**/*.{js,jsx,ts,tsx,mjs}",
+    ],
+    plugins: sonarjs.recommended.plugins,
+    rules: {
+      // Allow `void fetchSettings()` fire-and-forget promises in React effects
+      "sonarjs/void-use": "off",
+    },
+  },
+  {
+    name: "@vicacha-devs/eslint-config/translations",
+    files: ["**/translations/**/*.{js,ts}"],
+    plugins: sonarjs.recommended.plugins,
+    rules: {
+      // UI field labels/placeholders with "password"/"secret"/"token" keys
+      "sonarjs/hardcoded-secret-signatures": "off",
+      "sonarjs/no-hardcoded-passwords": "off",
+    },
+  },
+  {
+    name: "@vicacha-devs/eslint-config/scripts",
+    files: [
+      "scripts/**/*.{js,mjs,cjs,ts,mts,cts}",
+      "apps/*/scripts/**/*.{js,mjs,cjs,ts,mts,cts}",
+      "packages/*/scripts/**/*.{js,mjs,cjs,ts,mts,cts}",
+    ],
+    plugins: sonarjs.recommended.plugins,
+    rules: {
+      // CLI build, release & Playwright scripts legitimately invoke git/pnpm
+      "sonarjs/no-hardcoded-ip": "off",
+      "sonarjs/no-os-command-from-path": "off",
+    },
+  },
+  {
+    name: "@vicacha-devs/eslint-config/network-allowlist",
+    files: [
+      "apps/dashboard/config/**/*.{js,ts}",
+      "packages/strapi-plugin-broadcasts/shared/validator.ts",
+      "packages/strapi-plugin-inbox/server/**/*.{js,ts}",
+    ],
+    plugins: sonarjs.recommended.plugins,
+    rules: {
+      // Loopback 127.0.0.1 binding/fallbacks and SSRF metadata IP blocklists
+      "sonarjs/no-hardcoded-ip": "off",
+    },
+  },
+  {
+    name: "@vicacha-devs/eslint-config/xml-namespaces",
+    files: [
+      "packages/strapi-plugin-media-feeds/shared/rssGenerator.ts",
+      "packages/strapi-plugin-sitemap/server/src/services/xml-builder.ts",
+    ],
+    plugins: sonarjs.recommended.plugins,
+    rules: {
+      // Standard http:// XML namespace URIs (xmlns:itunes, sitemaps.org)
+      "sonarjs/no-clear-text-protocols": "off",
+    },
+  },
+  {
     name: "@vicacha-devs/eslint-config/json",
     files: ["**/*.json"],
     ignores: ["package-lock.json", "**/tsconfig*.json"],
@@ -137,9 +194,35 @@ export const strapiBaseConfig: Linter.Config[] = defineConfig([
     extends: ["json/recommended"],
   },
   {
-    files: ["**/tests/**/*.test.{js,mjs,ts,tsx}"],
+    name: "@vicacha-devs/eslint-config/tests",
+    files: ["**/tests/**/*.{js,mjs,ts,tsx}"],
+    plugins: sonarjs.recommended.plugins,
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-console": "off",
+      "sonarjs/hardcoded-secret-signatures": "off",
+      "sonarjs/no-clear-text-protocols": "off",
+      "sonarjs/no-duplicated-branches": "off",
+      "sonarjs/no-empty-test-file": "off",
+      "sonarjs/no-hardcoded-ip": "off",
+      "sonarjs/no-hardcoded-passwords": "off",
+      "sonarjs/no-identical-functions": "off",
+      "sonarjs/prefer-specific-assertions": "off",
+      "sonarjs/pseudo-random": "off",
+    },
+  },
+  {
     ...vitest.configs.recommended,
     name: "@vicacha-devs/eslint-config/vitest",
+    files: [
+      "packages/strapi-plugin-calendar/tests/**/*.test.{js,mjs,ts,tsx}",
+      "packages/strapi-plugin-events/tests/**/*.test.{js,mjs,ts,tsx}",
+    ],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -147,6 +230,7 @@ export const strapiBaseConfig: Linter.Config[] = defineConfig([
       },
     },
     rules: {
+      ...vitest.configs.recommended.rules,
       "vitest/expect-expect": "off",
       "no-console": "off",
     },
