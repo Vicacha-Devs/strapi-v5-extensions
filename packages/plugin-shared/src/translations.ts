@@ -72,10 +72,7 @@ export function createRegisterTrads(
   }: { locales?: string[] } = {}): Promise<
     Array<{ data: Record<string, string>; locale: string }>
   > {
-    const allLocales =
-      defaultLocales.length > 0
-        ? Array.from(new Set([...locales, ...defaultLocales]))
-        : Array.from(new Set(locales));
+    const allLocales = Array.from(new Set([...locales, ...defaultLocales]));
 
     return Promise.all(
       allLocales.map(async (locale) => {
@@ -87,13 +84,11 @@ export function createRegisterTrads(
             translations?.[locale];
           if (!rawData && loadTranslation) {
             const loaded = await loadTranslation(locale);
-            rawData =
-              loaded &&
-              typeof loaded === "object" &&
-              "default" in loaded &&
-              loaded.default
-                ? (loaded.default as Record<string, string>)
-                : (loaded as Record<string, string>);
+            rawData = (
+              loaded && "default" in loaded && loaded.default
+                ? loaded.default
+                : loaded
+            ) as Record<string, string>;
           }
           if (!rawData) {
             return { data: {}, locale };
