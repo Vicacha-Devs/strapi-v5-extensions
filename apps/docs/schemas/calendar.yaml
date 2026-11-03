@@ -1,0 +1,380 @@
+openapi: 3.0.3
+info:
+  title: Calendar & Scheduling (@vicacha-devs/strapi-plugin-calendar)
+  version: 1.0.0
+  description: Universal Multi-Source Calendar, FullCalendar v6 Scheduler, RFC 5545/7529 Recurrence (RRULE &
+    RSCALE), Multi-Calendar Systems (Hijri, Hebrew, Persian, etc.), and iCal (.ics) plugin for Strapi v5.
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /calendar/calendar:
+    get:
+      operationId: getCalendarCalendar
+      summary: Get Calendar
+      description: Strapi v5 Admin API endpoint handled by `admin.getCalendar`.
+      tags:
+        - Admin API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: false
+          description: End of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: sourceId
+          in: query
+          required: false
+          description: Filter by registered calendar collection source ID
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: Filter by category name
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: BCP-47 content/display locale (e.g. en, es, ar, tr)
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /calendar/calendar/reschedule:
+    post:
+      operationId: postCalendarCalendarReschedule
+      summary: Reschedule
+      description: Strapi v5 Admin API endpoint handled by `admin.reschedule`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /calendar/calendar/quick-create:
+    post:
+      operationId: postCalendarCalendarQuickCreate
+      summary: Quick Create
+      description: Strapi v5 Admin API endpoint handled by `admin.quickCreate`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /calendar/content-types:
+    get:
+      operationId: getCalendarContentTypes
+      summary: Get Content Types
+      description: Strapi v5 Admin API endpoint handled by `admin.getContentTypes`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /calendar/settings:
+    get:
+      operationId: getCalendarSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putCalendarSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /calendar/clear-settings:
+    post:
+      operationId: postCalendarClearSettings
+      summary: Clear Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.clearSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /api/calendar/occurrences:
+    get:
+      operationId: getApiCalendarOccurrences
+      summary: Get Occurrences
+      description: Strapi v5 Content API endpoint handled by `content-api.getOccurrences`.
+      tags:
+        - Content API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: false
+          description: End of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: sourceId
+          in: query
+          required: false
+          description: Filter by registered calendar collection source ID
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: Filter by category name
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: BCP-47 content/display locale (e.g. en, es, ar, tr)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/calendar/feed.ics:
+    get:
+      operationId: getApiCalendarFeedIcs
+      summary: Download Feed Ics
+      description: Strapi v5 Content API endpoint handled by `content-api.downloadFeedIcs`.
+      tags:
+        - Content API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: false
+          description: End of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: sourceId
+          in: query
+          required: false
+          description: Filter by registered calendar collection source ID
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: Filter by category name
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: BCP-47 content/display locale (e.g. en, es, ar, tr)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/calendar:
+              schema:
+                type: string
+                description: RFC 5545 iCalendar (.ics) stream
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/calendar/{documentId}/invite.ics:
+    get:
+      operationId: getApiCalendarByDocumentIdInviteIcs
+      summary: Download Event Ics
+      description: Strapi v5 Content API endpoint handled by `content-api.downloadEventIcs`.
+      tags:
+        - Content API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/calendar:
+              schema:
+                type: string
+                description: RFC 5545 iCalendar (.ics) stream
+        "400":
+          description: Bad Request — validation or parameter error
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication

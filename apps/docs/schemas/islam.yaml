@@ -1,0 +1,937 @@
+openapi: 3.0.3
+info:
+  title: Islam Suite (Salah, Qibla, Hijri) (@vicacha-devs/strapi-plugin-islam)
+  version: 1.0.0
+  description: "Comprehensive Strapi v5 Islamic Liturgical, Scriptural & Fiqh Suite: Salah/Adhan/Iqamah
+    Astronomical Engine, Qibla Spherical Compass, Hilal Moon-Sighting & Eid/Ramadan Operations,
+    Quran/Hadith/Dua Hub, and Zakat/Nisab/Fitrana/Fidyah/Kaffarah Calculators powered by
+    @vicacha-devs/strapi-plugin-calendar"
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /islam/overview:
+    get:
+      operationId: getIslamOverview
+      summary: Get Overview
+      description: Strapi v5 Admin API endpoint handled by `admin.getOverview`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /islam/settings:
+    get:
+      operationId: getIslamSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putIslamSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /islam/hilal/confirm:
+    post:
+      operationId: postIslamHilalConfirm
+      summary: Confirm Hilal
+      description: Strapi v5 Admin API endpoint handled by `admin.confirmHilal`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IslamHilalMoonSightingAnnouncement"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /islam/scripture/pins:
+    post:
+      operationId: postIslamScripturePins
+      summary: Update Daily Pins
+      description: Strapi v5 Admin API endpoint handled by `admin.updateDailyPins`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IslamScriptureDuaEntry"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IslamScriptureDuaEntry"
+  /api/islam/prayer-times:
+    get:
+      operationId: getApiIslamPrayerTimes
+      summary: Get Prayer Times
+      description: Strapi v5 Content API endpoint handled by `content-api.getPrayerTimes`. Protected by Strapi Users
+        & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: Target Gregorian date (YYYY-MM-DD)
+          schema:
+            type: string
+        - name: method
+          in: query
+          required: false
+          description: Astronomical calculation method code
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/prayer-times/monthly:
+    get:
+      operationId: getApiIslamPrayerTimesMonthly
+      summary: Get Monthly Prayer Times
+      description: Strapi v5 Content API endpoint handled by `content-api.getMonthlyPrayerTimes`. Protected by
+        Strapi Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: Target Gregorian date (YYYY-MM-DD)
+          schema:
+            type: string
+        - name: method
+          in: query
+          required: false
+          description: Astronomical calculation method code
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/prayer-times/calendar.ics:
+    get:
+      operationId: getApiIslamPrayerTimesCalendarIcs
+      summary: Get Prayer Calendar Ics
+      description: Strapi v5 Content API endpoint handled by `content-api.getPrayerCalendarIcs`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: Target Gregorian date (YYYY-MM-DD)
+          schema:
+            type: string
+        - name: method
+          in: query
+          required: false
+          description: Astronomical calculation method code
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/calendar:
+              schema:
+                type: string
+                description: RFC 5545 iCalendar (.ics) stream
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/qibla:
+    get:
+      operationId: getApiIslamQibla
+      summary: Get Qibla
+      description: Strapi v5 Content API endpoint handled by `content-api.getQibla`. Protected by Strapi Users &
+        Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: lat
+          in: query
+          required: false
+          description: Observer latitude in decimal degrees
+          schema:
+            type: number
+        - name: lng
+          in: query
+          required: false
+          description: Observer longitude in decimal degrees
+          schema:
+            type: number
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/hijri:
+    get:
+      operationId: getApiIslamHijri
+      summary: Get Hijri And Observances
+      description: Strapi v5 Content API endpoint handled by `content-api.getHijriAndObservances`. Protected by
+        Strapi Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/hijri/convert:
+    get:
+      operationId: getApiIslamHijriConvert
+      summary: Convert Date
+      description: Strapi v5 Content API endpoint handled by `content-api.convertDate`. Protected by Strapi Users &
+        Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/scripture:
+    get:
+      operationId: getApiIslamScripture
+      summary: Get Scripture Hub
+      description: Strapi v5 Content API endpoint handled by `content-api.getScriptureHub`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IslamScriptureDuaEntry"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/scripture/daily:
+    get:
+      operationId: getApiIslamScriptureDaily
+      summary: Get Daily Inspiration
+      description: Strapi v5 Content API endpoint handled by `content-api.getDailyInspiration`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IslamScriptureDuaEntry"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/daily-inspiration:
+    get:
+      operationId: getApiIslamDailyInspiration
+      summary: Get Daily Inspiration
+      description: Strapi v5 Content API endpoint handled by `content-api.getDailyInspiration`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/quran/chapters:
+    get:
+      operationId: getApiIslamQuranChapters
+      summary: Get Quran Chapters
+      description: Strapi v5 Content API endpoint handled by `content-api.getQuranChapters`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/quran/chapters/{chapterNumber}:
+    get:
+      operationId: getApiIslamQuranChaptersByChapterNumber
+      summary: Get Quran Chapter Verses
+      description: Strapi v5 Content API endpoint handled by `content-api.getQuranChapterVerses`. Protected by
+        Strapi Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: chapterNumber
+          in: path
+          required: true
+          description: Target chapterNumber identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/quran/chapters/{chapterNumber}/info:
+    get:
+      operationId: getApiIslamQuranChaptersByChapterNumberInfo
+      summary: Get Quran Chapter Info
+      description: Strapi v5 Content API endpoint handled by `content-api.getQuranChapterInfo`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: chapterNumber
+          in: path
+          required: true
+          description: Target chapterNumber identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/quran/chapters/{chapterNumber}/audio:
+    get:
+      operationId: getApiIslamQuranChaptersByChapterNumberAudio
+      summary: Get Quran Chapter Audio
+      description: Strapi v5 Content API endpoint handled by `content-api.getQuranChapterAudio`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: chapterNumber
+          in: path
+          required: true
+          description: Target chapterNumber identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/quran/verses/{verseKey}:
+    get:
+      operationId: getApiIslamQuranVersesByVerseKey
+      summary: Get Quran Verse By Key
+      description: Strapi v5 Content API endpoint handled by `content-api.getQuranVerseByKey`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: verseKey
+          in: path
+          required: true
+          description: Target verseKey identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/quran/verses/{verseKey}/hadiths:
+    get:
+      operationId: getApiIslamQuranVersesByVerseKeyHadiths
+      summary: Get Quran Ayah Hadiths
+      description: Strapi v5 Content API endpoint handled by `content-api.getQuranAyahHadiths`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: verseKey
+          in: path
+          required: true
+          description: Target verseKey identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/quran/resources:
+    get:
+      operationId: getApiIslamQuranResources
+      summary: Get Quran Resources
+      description: Strapi v5 Content API endpoint handled by `content-api.getQuranResources`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/nisab:
+    get:
+      operationId: getApiIslamNisab
+      summary: Get Nisab
+      description: Strapi v5 Content API endpoint handled by `content-api.getNisab`. Protected by Strapi Users &
+        Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/islam/zakat/calculate:
+    post:
+      operationId: postApiIslamZakatCalculate
+      summary: Calculate Zakat
+      description: Strapi v5 Content API endpoint handled by `content-api.calculateZakat`. Protected by Strapi Users
+        & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
+      tags:
+        - Content API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /api/islam/fitrana-fidyah/calculate:
+    post:
+      operationId: postApiIslamFitranaFidyahCalculate
+      summary: Calculate Fitrana Fidyah
+      description: Strapi v5 Content API endpoint handled by `content-api.calculateFitranaFidyah`. Protected by
+        Strapi Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
+      tags:
+        - Content API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    IslamHilalMoonSightingAnnouncement:
+      type: object
+      description: Official Mosque Hilal Moon-Sighting confirmations for Ramadan, Eid al-Fitr, and Dhu al-Hijjah
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        occasion:
+          type: string
+          enum:
+            - ramadan
+            - eid_al_fitr
+            - dhul_hijjah_eid_al_adha
+            - monthly_hilal
+          default: ramadan
+        hijriYear:
+          type: integer
+        hijriMonth:
+          type: integer
+        confirmedGregorianDate:
+          type: string
+        shiftingApplied:
+          type: string
+          default: "0"
+        approvedByImam:
+          type: string
+        notes:
+          type: object
+          additionalProperties: true
+        broadcastDispatched:
+          type: boolean
+          default: false
+      required:
+        - occasion
+        - hijriYear
+        - hijriMonth
+        - confirmedGregorianDate
+    IslamScriptureDuaEntry:
+      type: object
+      description: Custom curated Quranic Ayah, Prophetic Hadith, or Hisnul Muslim Dua/Adhkar entry
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        entryKind:
+          type: string
+          enum:
+            - ayah
+            - hadith
+            - dua
+          default: dua
+        slug:
+          type: string
+        referenceKey:
+          type: string
+        arabicText:
+          type: string
+        transliteration:
+          type: string
+        translations:
+          type: object
+          additionalProperties: true
+        reflections:
+          type: object
+          additionalProperties: true
+        gradingOrCategory:
+          type: string
+        recommendedRepetitions:
+          type: integer
+          default: 1
+        audioUrl:
+          type: string
+        topicTags:
+          type: object
+          additionalProperties: true
+        active:
+          type: boolean
+          default: true
+      required:
+        - entryKind
+        - slug
+        - referenceKey
+        - arabicText
+        - translations
