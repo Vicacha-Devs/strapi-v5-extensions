@@ -2,11 +2,26 @@
   "name": "@vicacha-devs/eslint-config",
   "version": "1.0.0",
   "private": true,
-  "description": "Shared ESLint configuration for @vicacha-devs/strapi-v5-extensions",
-  "author": "Vicacha Devs",
+  "description": "Shared TypeScript ESLint Flat Configuration for @vicacha-devs/strapi-v5-extensions (base, strapi-admin, and strapi-server presets)",
   "license": "MIT",
-  "main": "index.js",
+  "author": "Vicacha Devs",
   "files": [
-    "index.js"
-  ]
+    "index.ts",
+    "base.ts",
+    "strapi-admin.ts",
+    "strapi-server.ts",
+    "tsconfig.json"
+  ],
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./base": "./base.ts",
+    "./strapi-admin": "./strapi-admin.ts",
+    "./strapi-server": "./strapi-server.ts"
+  },
+  "scripts": {
+    "test:ts": "tsc --noEmit"
+  }
 }

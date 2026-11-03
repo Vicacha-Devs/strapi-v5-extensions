@@ -7,6 +7,7 @@ node_modules/
 dist/
 build/
 .strapi/
+.strapi-updater.json
 .turbo/
 .cache/
 .tmp/
@@ -23,3 +24,6 @@ yarn-debug.log*
 pnpm-debug.log*
 .DS_Store
 coverage/
+
+# Archify scratch directory
+.archify/

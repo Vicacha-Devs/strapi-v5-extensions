@@ -2,13 +2,42 @@ packages:
   - apps/*
   - packages/*
 
+linkWorkspacePackages: true
+
 hoistPattern:
   - "*"
-  - "!@strapi/*"
+
+overrides:
+  better-sqlite3: "^13.0.3"
 
 onlyBuiltDependencies:
   - "@apollo/protobufjs"
   - "@parcel/watcher"
   - "@swc/core"
   - "better-sqlite3"
+  - "core-js"
+  - "core-js-pure"
   - "esbuild"
+  - "sharp"
+  - "unrs-resolver"
+
+peerDependencyRules:
+  ignoreMissing:
+    - "@babel/runtime"
+    - "@codemirror/*"
+    - "@strapi/sdk-plugin"
+    - "codemirror"
+  allowAny:
+    - "@strapi/*"
+    - "@types/react"
+    - "@types/react-dom"
+    - "codemirror"
+    - "eslint"
+    - "react"
+    - "react-dom"
+    - "react-intl"
+    - "react-router-dom"
+    - "styled-components"
+    - "typescript"
+    - "webpack"
+    - "zod"
