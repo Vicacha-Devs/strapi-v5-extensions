@@ -139,6 +139,8 @@ function buildDocQueryOpts(
   return opts;
 }
 
+const docKey = (d: Record<string, unknown>) => String(d.documentId ?? d.id);
+
 async function fetchDocumentsForSource(
   strapi: Core.Strapi,
   source: CalendarSourceMapping,
@@ -152,7 +154,6 @@ async function fetchDocumentsForSource(
       .catch(() => []);
   if (!params.locale || params.locale === "auto") return find(false);
   const [primary, fallback] = await Promise.all([find(true), find(false)]);
-  const docKey = (d: Record<string, unknown>) => String(d.documentId ?? d.id);
   const seen = new Set(primary.map(docKey));
   return [...primary, ...fallback.filter((d) => !seen.has(docKey(d)))];
 }

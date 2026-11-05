@@ -1,3 +1,5 @@
+import { randomInt } from "node:crypto";
+
 import type { CalendarSourceMapping } from "../../../shared/types";
 import type { QuickCreateEntryParams } from "../types";
 
@@ -63,7 +65,10 @@ export function isBookingCollectionSource(
 
 function generateBookingCode(startIso: string): string {
   const dateCompact = startIso.slice(0, 10).replace(/-/g, "") || "20260101";
-  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const rand = randomInt(36 ** 4)
+    .toString(36)
+    .padStart(4, "0")
+    .toUpperCase();
   return `BK-${dateCompact}-${rand}`;
 }
 
