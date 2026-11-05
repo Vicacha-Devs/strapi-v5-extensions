@@ -46,6 +46,7 @@ export const SettingsPage: React.FC = () => {
     useState<BookingsCompanionSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedBanner, setSavedBanner] = useState<string | null>(null);
+  const [bannerIsError, setBannerIsError] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -81,6 +82,7 @@ export const SettingsPage: React.FC = () => {
     if (!settings) return;
     setSaving(true);
     setSavedBanner(null);
+    setBannerIsError(false);
     try {
       const [res, eventsRes, bookingsRes] = await Promise.all([
         put<SettingsApiResponse>(`/${PLUGIN_ID}/settings`, settings),
@@ -113,6 +115,7 @@ export const SettingsPage: React.FC = () => {
         )
       );
     } catch {
+      setBannerIsError(true);
       setSavedBanner(t("settings.error", "Could not save settings."));
     } finally {
       setSaving(false);
@@ -121,6 +124,7 @@ export const SettingsPage: React.FC = () => {
 
   const handleResetSettings = async () => {
     setSaving(true);
+    setBannerIsError(false);
     try {
       const res = await post<SettingsApiResponse>(
         `/${PLUGIN_ID}/clear-settings`,
@@ -131,6 +135,7 @@ export const SettingsPage: React.FC = () => {
       }
       setSavedBanner(t("settings.resetSuccess", "Settings reset to defaults."));
     } catch {
+      setBannerIsError(true);
       setSavedBanner(t("settings.error", "Could not reset settings."));
     } finally {
       setSaving(false);
@@ -242,11 +247,15 @@ export const SettingsPage: React.FC = () => {
       <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={4}>
           {savedBanner && (
-            <Box padding={3} background="success100" hasRadius>
+            <Box
+              padding={3}
+              background={bannerIsError ? "danger100" : "success100"}
+              hasRadius
+            >
               <Typography
                 variant="omega"
                 fontWeight="bold"
-                textColor="success700"
+                textColor={bannerIsError ? "danger700" : "success700"}
               >
                 {savedBanner}
               </Typography>

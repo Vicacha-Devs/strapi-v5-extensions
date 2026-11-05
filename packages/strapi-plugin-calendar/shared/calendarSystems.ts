@@ -101,6 +101,21 @@ function parseIntlPartsToYmd(
   return ymd.month >= 1 && ymd.day >= 1 ? ymd : null;
 }
 
+const intlFormatterCache = new Map<string, Intl.DateTimeFormat>();
+
+function getCachedIntlFormatter(
+  locale: string,
+  options: Intl.DateTimeFormatOptions
+): Intl.DateTimeFormat {
+  const key = `${locale}|${options.year ?? ""}|${options.month ?? ""}|${options.day ?? ""}|${options.timeZone ?? "UTC"}`;
+  let fmt = intlFormatterCache.get(key);
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat(locale, options);
+    intlFormatterCache.set(key, fmt);
+  }
+  return fmt;
+}
+
 /**
  * Extracts numeric { year, month, day } parts for any Date in any Unicode CLDR calendar
  * (e.g. "islamic-umalqura", "hebrew", "persian", "gregory").
@@ -117,15 +132,12 @@ export function extractCalendarParts(
   const calendarTag = (intlCalendar || "gregory").trim().toLowerCase();
 
   try {
-    const formatter = new Intl.DateTimeFormat(
-      `en-u-ca-${calendarTag}-nu-latn`,
-      {
-        year: "numeric",
-        month: "numeric",
-        day: "numeric",
-        timeZone: "UTC",
-      }
-    );
+    const formatter = getCachedIntlFormatter(`en-u-ca-${calendarTag}-nu-latn`, {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      timeZone: "UTC",
+    });
     const parsed = parseIntlPartsToYmd(formatter.formatToParts(effectiveDate));
     if (parsed) return parsed;
   } catch {
@@ -180,7 +192,7 @@ function formatWithIntlFallback(
   compact: boolean
 ): string {
   try {
-    const formatter = new Intl.DateTimeFormat(
+    const formatter = getCachedIntlFormatter(
       intlLocale,
       compact
         ? { day: "numeric", month: "short", timeZone: "UTC" }
@@ -189,7 +201,7 @@ function formatWithIntlFallback(
     return formatter.format(effectiveDate);
   } catch {
     try {
-      const fallback = new Intl.DateTimeFormat("en-u-ca-gregory", {
+      const fallback = getCachedIntlFormatter("en-u-ca-gregory", {
         day: "numeric",
         month: "short",
         year: "numeric",

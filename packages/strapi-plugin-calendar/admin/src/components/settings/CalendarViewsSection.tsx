@@ -359,13 +359,10 @@ export const CalendarViewsSection: React.FC<CalendarViewsSectionProps> = ({
                   ["settings.defaultTimezone", "Default Timezone (IANA)"],
                   [
                     "settings.timezoneHint",
-                    "IANA timezone identifier (e.g., America/Bogota or UTC).",
+                    "IANA timezone identifier (e.g., UTC or America/New_York).",
                   ],
-                  [
-                    "settings.defaultTimezone.placeholder",
-                    "e.g., America/Bogota",
-                  ],
-                  settings.defaultTimezone || "America/Bogota",
+                  ["settings.defaultTimezone.placeholder", "e.g., UTC"],
+                  settings.defaultTimezone || "UTC",
                   (defaultTimezone) => onPatchSettings({ defaultTimezone })
                 )}
 
@@ -429,12 +426,12 @@ export const CalendarViewsSection: React.FC<CalendarViewsSectionProps> = ({
                   ],
                   [
                     "settings.feedTitle.placeholder",
-                    "e.g., Abu Bakr As-Siddiq Central Mosque — General Calendar",
+                    "e.g., Organization — General Calendar",
                   ],
                   settings.feedTitle ||
                     t(
                       "settings.defaultFeedTitle",
-                      "Abu Bakr As-Siddiq Central Mosque — General Calendar"
+                      "Organization — General Calendar"
                     ),
                   (feedTitle) => onPatchSettings({ feedTitle })
                 )}

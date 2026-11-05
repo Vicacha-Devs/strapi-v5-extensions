@@ -342,13 +342,20 @@ export const RRuleInput: React.FC<RRuleInputProps> = ({
                     t("rrule.byMonth", "Month (1-12)"),
                     t("placeholder.1", "1"),
                     parsedRule.byMonth ?? 1,
-                    (val) =>
+                    (val) => {
+                      const maxMonth =
+                        parsedRule.rscale &&
+                        parsedRule.rscale !== "gregory" &&
+                        parsedRule.rscale !== "iso8601"
+                          ? 13
+                          : 12;
                       updateRule({
                         byMonth:
-                          val && val >= 1 && val <= 13
+                          val && val >= 1 && val <= maxMonth
                             ? Math.floor(val)
                             : undefined,
-                      })
+                      });
+                    }
                   )}
                 {renderNumber(
                   160,

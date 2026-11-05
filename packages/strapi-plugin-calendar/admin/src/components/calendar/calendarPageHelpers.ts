@@ -130,23 +130,16 @@ export function buildOrderedRecurrencePresets(
   return result;
 }
 
+const VALID_WEEKDAY_CODES = new Set<RRuleWeekday>(WEEKDAYS.map((w) => w.code));
+
 export function extractByDays(rrule: string): RRuleWeekday[] {
   const match = rrule.match(/BYDAY=([A-Z,]+)/i);
   if (!match?.[1]) return [];
-  const validCodes = new Set<RRuleWeekday>([
-    "MO",
-    "TU",
-    "WE",
-    "TH",
-    "FR",
-    "SA",
-    "SU",
-  ]);
   return match[1]
     .toUpperCase()
     .split(",")
     .map((d) => d.trim() as RRuleWeekday)
-    .filter((d) => validCodes.has(d));
+    .filter((d) => VALID_WEEKDAY_CODES.has(d));
 }
 
 export function formatCategoryLabel(category: string): string {
@@ -364,6 +357,16 @@ export function buildEnabledCalendarViews(
   return list;
 }
 
+function toExclusiveAllDayEnd(startDate: string, endDate?: string): string {
+  const sDay = startDate.slice(0, 10);
+  const eDay = (endDate || startDate).slice(0, 10);
+  const baseDay = eDay >= sDay ? eDay : sDay;
+  const dt = new Date(`${baseDay}T00:00:00.000Z`);
+  if (Number.isNaN(dt.getTime())) return endDate || startDate;
+  dt.setUTCDate(dt.getUTCDate() + 1);
+  return dt.toISOString().slice(0, 10);
+}
+
 export function mapOccurrencesToFullCalendarEvents(
   occurrences: ExpandedCalendarOccurrence[],
   primaryColor?: string
@@ -372,8 +375,10 @@ export function mapOccurrencesToFullCalendarEvents(
   return occurrences.map((occ) => ({
     id: occ.occurrenceId,
     title: occ.title,
-    start: occ.startDate,
-    end: occ.endDate,
+    start: occ.allDay ? occ.startDate.slice(0, 10) : occ.startDate,
+    end: occ.allDay
+      ? toExclusiveAllDayEnd(occ.startDate, occ.endDate)
+      : occ.endDate,
     allDay: occ.allDay,
     backgroundColor: occ.color || fallbackColor,
     borderColor: occ.color || fallbackColor,
@@ -386,8 +391,8 @@ function addSourceCategoryKeys(
   src: CalendarSourceMapping,
   sourceFilter: string
 ): void {
-  if (src.enabled === false) return;
-  if (sourceFilter && src.id !== sourceFilter) return;
+  if (src.enabled === false || (sourceFilter && src.id !== sourceFilter))
+    return;
   for (const key of Object.keys(src.categoryColors ?? {})) {
     if (key) cats.add(key);
   }

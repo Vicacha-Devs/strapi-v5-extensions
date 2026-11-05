@@ -29,23 +29,19 @@ export interface CollectionSourcesSectionProps {
 const CARD_BORDER_STYLE: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.22)",
 };
-
 const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.18)",
 };
-
 const GRID_3_STYLE: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
   gap: 16,
 };
-
 const GRID_2_STYLE: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
   gap: 16,
 };
-
 const TITLE_CANDIDATES =
   "title,name,customerName,visitorName,headline,subject,fullName,slug".split(
     ","
@@ -66,9 +62,10 @@ export const CollectionSourcesSection: React.FC<
   onRemoveSource,
 }) => {
   const [isFormOpen, setIsFormOpen] = useState(true);
+  const [editingSourceId, setEditingSourceId] = useState<string | null>(null);
   const [newSourceUid, setNewSourceUid] = useState("plugin::events.event");
   const [newSourceLabel, setNewSourceLabel] = useState(() =>
-    t("settings.defaultSourceLabel", "Mosque Events")
+    t("settings.defaultSourceLabel", "Events")
   );
   const [newSourceColor, setNewSourceColor] = useState("#0284C7");
   const [newTitleField, setNewTitleField] = useState("title");
@@ -77,6 +74,7 @@ export const CollectionSourcesSection: React.FC<
   const [newRRuleField, setNewRRuleField] = useState("recurrence");
 
   const selectCollectionDefaults = (ct: DiscoveredContentType) => {
+    setEditingSourceId(null);
     setNewSourceUid(ct.uid);
     setNewSourceLabel(ct.displayName || ct.uid);
     const fieldNames = ct.fields.map((f) => f.name);
@@ -126,37 +124,43 @@ export const CollectionSourcesSection: React.FC<
   }, [contentTypes, newSourceUid, newTitleField, newStartField]);
 
   const handleEditSource = (src: CalendarSourceMapping) => {
+    setEditingSourceId(src.id);
     setNewSourceUid(src.uid);
     setNewSourceLabel(src.label);
     setNewSourceColor(src.color || "#0284C7");
     setNewTitleField(src.fields.title || "title");
     setNewStartField(src.fields.startDate || "startDate");
-    setNewEndField(src.fields.endDate || "endDate");
-    setNewRRuleField(src.fields.rrule || "recurrence");
+    setNewEndField(src.fields.endDate || "");
+    setNewRRuleField(src.fields.rrule || "");
     setIsFormOpen(true);
   };
 
   const handleSaveSource = () => {
     if (!newSourceUid || !newTitleField || !newStartField) return;
+    const existing = sources.find(
+      (s) => s.id === editingSourceId || s.uid === newSourceUid
+    );
     const idSlug = (newSourceLabel || newSourceUid)
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
 
     const nextSource: CalendarSourceMapping = {
-      id: idSlug || `source-${Date.now()}`,
+      ...existing,
+      id: existing?.id || idSlug || `source-${Date.now()}`,
       label: newSourceLabel.trim() || newSourceUid,
       uid: newSourceUid,
       color: newSourceColor.startsWith("#") ? newSourceColor : "#0284C7",
-      enabled: true,
+      enabled: existing?.enabled ?? true,
       fields: {
+        ...existing?.fields,
         title: newTitleField,
         startDate: newStartField,
         endDate: newEndField.trim() || undefined,
         rrule: newRRuleField.trim() || undefined,
       },
     };
-
+    setEditingSourceId(null);
     onAddOrUpdateSource(nextSource);
   };
 
@@ -411,7 +415,7 @@ export const CollectionSourcesSection: React.FC<
                     "settings.sourceLabelHint",
                     "Human-readable label shown on calendar filter chips.",
                   ],
-                  ["settings.sourceLabel.placeholder", "e.g., Mosque Events"],
+                  ["settings.sourceLabel.placeholder", "e.g., Events"],
                   newSourceLabel,
                   setNewSourceLabel
                 )}

@@ -387,4 +387,52 @@ describe("Strapi Plugin Calendar Services & Controllers", () => {
     expect(headers["Content-Type"]).toContain("text/calendar");
     expect(String(icsCtx.body)).toContain("BEGIN:VCALENDAR");
   });
+
+  it("persists deleted sources, rejects unknown sourceId in reschedule, and scopes single-occurrence ICS", async () => {
+    const { services } = createMockStrapi({
+      sources: [
+        {
+          id: "events",
+          label: "Events",
+          uid: "api::event.event",
+          color: "#4945ff",
+          enabled: true,
+          fields: {
+            title: "title",
+            startDate: "startDate",
+            endDate: "endDate",
+            rrule: "rrule",
+          },
+        },
+      ],
+    });
+    const afterDelete = await services.settings.updateSettings({ sources: [] });
+    expect(afterDelete.sources).toEqual([]);
+
+    await services.settings.clearSettings();
+    let rescheduleErr = "";
+    try {
+      await services.occurrence.rescheduleOccurrence({
+        sourceId: "non-existent-source",
+        documentId: "evt-doc-1",
+        occurrenceDate: "2026-05-01",
+        newStartDate: "2026-05-02T13:00:00.000Z",
+      });
+    } catch (err) {
+      rescheduleErr = (err as Error).message;
+    }
+    expect(rescheduleErr).toContain("Target calendar source is not configured");
+
+    const singleIcs = await services.ical.buildSingleInviteIcs({
+      documentId: "evt-doc-1",
+      occurrenceDate: "2032-05-07",
+    });
+    expect(singleIcs).toContain("DTSTART:20320507T130000Z");
+
+    const missingIcs = await services.ical.buildSingleInviteIcs({
+      documentId: "evt-doc-1",
+      occurrenceDate: "2032-05-06",
+    });
+    expect(missingIcs.includes("BEGIN:VEVENT")).toBe(false);
+  });
 });

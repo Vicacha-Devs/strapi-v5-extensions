@@ -14,7 +14,7 @@ Enterprise, **100% generic Multi-Collection Calendar, Scheduler, Non-Gregorian `
    - **5 Views out of the box**: Month (`dayGridMonth`), Week (`timeGridWeek`), Day (`timeGridDay`), Agenda (`listMonth`), and Year (`multiMonthYear`).
    - **Drag-and-Drop Rescheduling & Resize**: Drag events across days/times or resize durations to automatically update the underlying Strapi document's mapped `startField` and `endField`.
    - **Drag-to-Create Slot Selection**: Select any time range on the calendar to quick-create a new entry in any mapped collection or jump directly to the Strapi Content Manager.
-   - **Configurable Business Hours & Time Slots**: Customize `slotDuration`, `slotMinTime`, `slotMaxTime`, `firstDay` of week, and `businessHours`.
+   - **Configurable Operating Hours & Time Slots**: Customize `slotDuration`, `startHour`, `endHour`, and `firstDayOfWeek`.
 3. **Multi-Calendar Systems & Dual-Calendar Day Cells (`Hijri`, `Hebrew`, `Persian`, etc.)**:
    - Supports 13 built-in Unicode CLDR calendar systems (`islamic-umalqura`, `islamic-civil`, `islamic-tbla`, `hebrew`, `persian`, `buddhist`, `chinese`, `japanese`, `indian`, `coptic`, `ethiopic`, `roc`, `iso8601`).
    - Renders secondary calendar dates directly inside FullCalendar day cells (`showInDayCell: true`) and inside the event side panel (`showInSidePanel: true`).
@@ -24,8 +24,8 @@ Enterprise, **100% generic Multi-Collection Calendar, Scheduler, Non-Gregorian `
    - Supports standard Gregorian recurrence (`FREQ=WEEKLY;BYDAY=FR`) **and** non-Gregorian `RSCALE` recurrence (`RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1` for annual 1st of Ramadan, or `RSCALE=HEBREW` / `RSCALE=PERSIAN`).
 5. **Unified RFC 5545 iCalendar (`.ics`) Feed**:
    - Public `/api/calendar/feed.ics` and single-event `/api/calendar/:documentId/invite.ics` endpoints with `?sourceId=`, `?category=`, `?from=`, and `?to=` filters for Google Calendar, Apple Calendar, and Outlook subscriptions.
-6. **13 Admin Locales Included**:
-   - `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL), `zh`.
+6. **10 Admin Locales Included**:
+   - `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`.
 
 ---
 
@@ -46,10 +46,10 @@ export default () => ({
     config: {
       defaultView: "dayGridMonth",
       defaultTimezone: "UTC",
-      firstDay: 1, // Monday
+      firstDayOfWeek: 1, // Monday
       slotDuration: "00:30:00",
-      slotMinTime: "06:00:00",
-      slotMaxTime: "22:00:00",
+      startHour: "06:00:00",
+      endHour: "22:00:00",
       sources: [
         {
           id: "events",

@@ -20,8 +20,18 @@ export interface SidePanelProps {
   model?: string;
 }
 
-function resolveSidePanelStartDate(docRecord: Record<string, unknown>): string {
-  for (const key of ["startDate", "preferredDate", "date"]) {
+function resolveSidePanelStartDate(
+  docRecord: Record<string, unknown>,
+  mappedStartField?: string
+): string {
+  const candidates = [
+    ...(mappedStartField ? [mappedStartField] : []),
+    "startDate",
+    "preferredDate",
+    "date",
+    "checkIn",
+  ];
+  for (const key of candidates) {
     const val = docRecord[key];
     if (typeof val === "string" && val) return val;
   }
@@ -38,16 +48,19 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
   const documentId =
     props.documentId ??
     (typeof docRecord.documentId === "string" ? docRecord.documentId : "");
-  const rawStartDate = resolveSidePanelStartDate(docRecord);
+  const matchedSource = useMemo(
+    () => settings?.sources?.find((s) => s.uid === model && s.enabled),
+    [settings?.sources, model]
+  );
+  const rawStartDate = resolveSidePanelStartDate(
+    docRecord,
+    matchedSource?.fields.startDate
+  );
   const activeLocale = resolveActiveContentLocale(locale);
-
-  const hasScheduleFields = Boolean(rawStartDate || docRecord.recurrence);
+  const rruleField = matchedSource?.fields.rrule || "recurrence";
+  const hasScheduleFields = Boolean(rawStartDate || docRecord[rruleField]);
 
   useEffect(() => {
-    if (!hasScheduleFields) {
-      return;
-    }
-
     let mounted = true;
     get<{ data?: CalendarPluginSettings }>(`/${PLUGIN_ID}/settings`)
       .then((res) => {
@@ -62,7 +75,7 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
     return () => {
       mounted = false;
     };
-  }, [hasScheduleFields, model, get]);
+  }, [model, get]);
 
   const computedAlternateDates = useMemo(() => {
     if (!rawStartDate || !settings?.secondaryCalendars) {

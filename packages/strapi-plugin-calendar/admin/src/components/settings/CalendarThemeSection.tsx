@@ -277,7 +277,7 @@ export const CalendarThemeSection: React.FC<CalendarThemeSectionProps> = ({
               >
                 {t(
                   "settings.theme.previewSampleEvent",
-                  "09:00 · Jumu'ah / Event"
+                  "09:00 · Community Event"
                 )}
               </div>
 

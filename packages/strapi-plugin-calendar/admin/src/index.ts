@@ -92,7 +92,7 @@ export default {
 
   registerTrads: createRegisterTrads({
     pluginId: PLUGIN_ID,
-    defaultLocales: ["en", "es", "ar", "tr"],
+    defaultLocales: SUPPORTED_LOCALES,
     loadTranslation: (locale) => import(`./translations/${locale}.json`),
   }),
 };

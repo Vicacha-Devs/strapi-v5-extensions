@@ -132,9 +132,13 @@ function resolveThemeVariantTokens(activeTheme: CalendarThemeDefinition) {
 }
 
 export function buildCalendarThemeCss(
-  activeTheme: CalendarThemeDefinition,
+  rawTheme: CalendarThemeDefinition,
   allowCreate = true
 ): string {
+  const safePrimary = /^#[0-9a-fA-F]{3,8}$/.test(rawTheme.primaryColor ?? "")
+    ? rawTheme.primaryColor
+    : "#0284C7";
+  const activeTheme = { ...rawTheme, primaryColor: safePrimary };
   const scope = `.vicacha-fc-container.vicacha-fc-theme-${activeTheme.id}`;
   const defaults = resolveThemeDefaults(activeTheme);
   const variants = resolveThemeVariantTokens(activeTheme);

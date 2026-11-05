@@ -73,13 +73,12 @@ export const CalendarPage: React.FC = () => {
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
   const [loading, setLoading] = useState(false);
   const [bannerMessage, setBannerMessage] = useState<string | null>(null);
-
+  const [bannerError, setBannerError] = useState(false);
   const [selectedOccurrence, setSelectedOccurrence] = useState<OccItem | null>(
     null
   );
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [applyToSeries, setApplyToSeries] = useState(false);
-
   const [showQuickCreate, setShowQuickCreate] = useState(false);
   const [quickSourceId, setQuickSourceId] = useState("");
   const [quickTitle, setQuickTitle] = useState("");
@@ -92,13 +91,9 @@ export const CalendarPage: React.FC = () => {
   const [quickCustomerEmail, setQuickCustomerEmail] = useState("");
   const [quickPartySize, setQuickPartySize] = useState(1);
 
-  const defaultLoc =
-    settings?.defaultLocale && settings.defaultLocale !== "auto"
-      ? settings.defaultLocale
-      : "es";
   const effectiveLocale = resolveFullCalendarLocale(
     locale,
-    defaultLoc,
+    settings?.defaultLocale,
     localeOverride
   );
   const effectiveDirection = resolveCalendarDirection(
@@ -119,7 +114,6 @@ export const CalendarPage: React.FC = () => {
         locale: effectiveLocale,
       });
       if (categoryFilter !== "all") params.set("category", categoryFilter);
-
       const res = await get<CalendarApiResponse>(
         `/${PLUGIN_ID}/calendar?${params.toString()}`
       );
@@ -146,6 +140,7 @@ export const CalendarPage: React.FC = () => {
       }
       setBannerMessage((prev) => (prev === loadErrorMsg ? null : prev));
     } catch {
+      setBannerError(true);
       setBannerMessage(loadErrorMsg);
     } finally {
       setLoading(false);
@@ -159,14 +154,12 @@ export const CalendarPage: React.FC = () => {
   useEffect(() => {
     const loadedSources = settings?.sources ?? [];
     if (loadedSources.length === 0) return;
-
     if (sourceFilter !== "all") {
       const matchedId = matchLoadedSourceId(loadedSources, sourceFilter);
       if (matchedId && matchedId !== sourceFilter) setSourceFilter(matchedId);
       setQuickSourceId(matchedId ?? sourceFilter);
       return;
     }
-
     setQuickSourceId((prev) => {
       if (prev && loadedSources.some((s) => s.id === prev)) return prev;
       const first =
@@ -221,23 +214,21 @@ export const CalendarPage: React.FC = () => {
 
   const scrollQuickCreateIntoView = () => {
     if (typeof window === "undefined") return;
-    window.setTimeout(() => {
-      quickCreateRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-      });
-    }, 40);
+    const opts: ScrollIntoViewOptions = {
+      behavior: "smooth",
+      block: "nearest",
+    };
+    window.setTimeout(() => quickCreateRef.current?.scrollIntoView(opts), 40);
   };
 
   const handleSelectSlot = (startStr: string, endStr: string) => {
     setQuickStart(startStr);
     setQuickEnd(normalizeSelectedEndSlot(startStr, endStr));
+    const sources = settings?.sources ?? [];
     if (sourceFilter !== "all") {
       setQuickSourceId(sourceFilter);
-    } else if (!quickSourceId && settings?.sources?.length) {
-      const first =
-        settings.sources.find((s) => s.enabled !== false) ??
-        settings.sources[0];
+    } else if (!quickSourceId && sources.length) {
+      const first = sources.find((s) => s.enabled !== false) ?? sources[0];
       if (first) setQuickSourceId(first.id);
     }
     setShowQuickCreate(true);
@@ -275,11 +266,13 @@ export const CalendarPage: React.FC = () => {
   ) => {
     try {
       await postReschedule(occ, newStartIso, newEndIso);
+      setBannerError(false);
       setBannerMessage(
         `${t("calendar.rescheduled", "Rescheduled")} "${occ.title}" → ${newStartIso.slice(0, 10)}`
       );
       await fetchCalendarData();
     } catch {
+      setBannerError(true);
       setBannerMessage(
         t("calendar.error.reschedule", "Failed to reschedule occurrence.")
       );
@@ -310,11 +303,13 @@ export const CalendarPage: React.FC = () => {
       setQuickCustomerName("");
       setQuickCustomerEmail("");
       setQuickPartySize(1);
+      setBannerError(false);
       setBannerMessage(
         t("calendar.created", "Calendar entry created and published.")
       );
       await fetchCalendarData();
     } catch {
+      setBannerError(true);
       setBannerMessage(
         t("calendar.error.create", "Could not create calendar entry.")
       );
@@ -342,6 +337,7 @@ export const CalendarPage: React.FC = () => {
         cancelOccurrence
       );
       setSelectedOccurrence(null);
+      setBannerError(false);
       setBannerMessage(
         cancelOccurrence
           ? t("calendar.occurrenceCancelled", "Occurrence cancelled.")
@@ -349,6 +345,7 @@ export const CalendarPage: React.FC = () => {
       );
       await fetchCalendarData();
     } catch {
+      setBannerError(true);
       setBannerMessage(
         t("calendar.error.reschedule", "Failed to update schedule.")
       );
@@ -408,15 +405,17 @@ export const CalendarPage: React.FC = () => {
         {bannerMessage && (
           <Box
             padding={3}
-            background="primary100"
+            background={bannerError ? "danger100" : "primary100"}
             hasRadius
-            style={{ border: "1px solid #0284C7" }}
+            style={{
+              border: `1px solid ${bannerError ? "#DC2626" : "#0284C7"}`,
+            }}
           >
             <Flex justifyContent="space-between" alignItems="center">
               <Typography
                 variant="omega"
                 fontWeight="bold"
-                textColor="primary700"
+                textColor={bannerError ? "danger700" : "primary700"}
               >
                 {bannerMessage}
               </Typography>

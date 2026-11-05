@@ -182,10 +182,7 @@ export const BookingVisitorFields: React.FC<{
             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
               onQuickCustomerEmailChange(e.target.value)
             }
-            placeholder={t(
-              "placeholder.customer_email",
-              "reservas@mezquitabogota.org"
-            )}
+            placeholder={t("placeholder.customer_email", "guest@example.com")}
           />
         </Field.Root>
       )}

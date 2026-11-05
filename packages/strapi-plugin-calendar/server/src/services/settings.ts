@@ -142,26 +142,14 @@ function mergeSourceLists(
   defaults: CalendarSourceMapping[],
   stored?: CalendarSourceMapping[]
 ): CalendarSourceMapping[] {
-  const result = Array.isArray(stored) ? [...stored] : [];
-  for (const defSource of defaults ?? []) {
-    if (!result.some((s) => s.id === defSource.id || s.uid === defSource.uid)) {
-      result.push(defSource);
-    }
-  }
-  return result;
+  return Array.isArray(stored) ? [...stored] : [...(defaults ?? [])];
 }
 
 function mergeCalendarLists(
   defaults: CalendarSystemConfig[] | undefined,
   stored?: CalendarSystemConfig[]
 ): CalendarSystemConfig[] {
-  const result = Array.isArray(stored) ? [...stored] : [];
-  for (const defCal of defaults ?? []) {
-    if (!result.some((c) => c.id === defCal.id)) {
-      result.push(defCal);
-    }
-  }
-  return result;
+  return Array.isArray(stored) ? [...stored] : [...(defaults ?? [])];
 }
 
 function pickNonEmptyStr(
@@ -202,8 +190,12 @@ function pickRecordKey<T extends string>(
   return typeof val === "string" && val in record ? (val as T) : fallback;
 }
 
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{3,8}$/;
+
 function pickPrimaryHex(val: unknown, fallback: string): string {
-  return typeof val === "string" && val.startsWith("#") ? val.trim() : fallback;
+  return typeof val === "string" && HEX_COLOR_RE.test(val.trim())
+    ? val.trim()
+    : fallback;
 }
 
 function resolveThemePatch(

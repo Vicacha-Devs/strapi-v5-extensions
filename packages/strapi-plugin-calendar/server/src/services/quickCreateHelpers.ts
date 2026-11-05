@@ -183,7 +183,7 @@ function applyBookingCollectionFields(
   setIfBookingFieldPresent(
     data,
     "customerEmail",
-    params.customerEmail?.trim() || "reservas@mezquitabogota.org",
+    params.customerEmail?.trim() || "noreply@example.com",
     attrs,
     source
   );

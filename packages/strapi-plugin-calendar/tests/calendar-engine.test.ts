@@ -90,6 +90,37 @@ describe("RFC 5545 RRULE & RFC 7529 RSCALE Recurrence Engine", () => {
     expect(slots[0].occurrenceDate).toBe("2026-02-18");
     expect(slots[0].rscale).toBe("islamic-umalqura");
   });
+
+  it("aligns WEEKLY INTERVAL>1 to calendar weeks and expands series >4 years old", () => {
+    const biweekly = parseRRuleFieldValue(
+      "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,WE,FR",
+      "UTC"
+    );
+    // Starts Friday 2026-05-01 (Week 0). Week 1 (May 4-10) skipped.
+    // Week 2 (May 11-17) includes Mon May 11, Wed May 13, Fri May 15.
+    const weeklySlots = expandRuleSlots({
+      baseStartDate: "2026-05-01T09:00:00.000Z",
+      recurrence: biweekly,
+      windowStart: "2026-05-01T00:00:00.000Z",
+      windowEnd: "2026-05-17T23:59:59.000Z",
+    });
+    expect(weeklySlots.map((s) => s.occurrenceDate)).toEqual([
+      "2026-05-01",
+      "2026-05-11",
+      "2026-05-13",
+      "2026-05-15",
+    ]);
+
+    // Series starting 8 years before windowStart (2018 -> 2026)
+    const longRunning = parseRRuleFieldValue("FREQ=YEARLY;INTERVAL=1", "UTC");
+    const longSlots = expandRuleSlots({
+      baseStartDate: "2018-05-10T10:00:00.000Z",
+      recurrence: longRunning,
+      windowStart: "2026-05-01T00:00:00.000Z",
+      windowEnd: "2026-05-31T23:59:59.000Z",
+    });
+    expect(longSlots.map((s) => s.occurrenceDate)).toEqual(["2026-05-10"]);
+  });
 });
 
 describe("Multi-Calendar Systems & Custom Formatters", () => {
@@ -159,13 +190,15 @@ describe("Multi-Calendar Systems & Custom Formatters", () => {
     expect(map.lunar.formatted).toBe("Lunar-2026");
   });
 
-  it("generates valid RFC 5545 iCalendar (.ics) feeds with categories and alternate dates", () => {
+  it("generates valid RFC 5545 iCalendar (.ics) feeds with 75-octet UTF-8 folding and exclusive all-day DTEND", () => {
     const calendarLinks = buildCalendarLinks({
       documentId: "doc-1",
       title: "Community Gathering, Dinner & Talk",
-      startDate: "2026-05-01T18:00:00.000Z",
-      endDate: "2026-05-01T20:00:00.000Z",
+      startDate: "2026-05-01T00:00:00.000Z",
+      endDate: "2026-05-01T00:00:00.000Z",
+      allDay: true,
     });
+    expect(calendarLinks.google).toContain("dates=20260501%2F20260502");
 
     const ics = generateIcsCalendar({
       calendarTitle: "Unified Calendar Feed",
@@ -178,11 +211,12 @@ describe("Multi-Calendar Systems & Custom Formatters", () => {
           uid: "api::event.event",
           documentId: "doc-1",
           occurrenceDate: "2026-05-01",
-          startDate: "2026-05-01T18:00:00.000Z",
-          endDate: "2026-05-01T20:00:00.000Z",
-          allDay: false,
+          startDate: "2026-05-01T00:00:00.000Z",
+          endDate: "2026-05-01T00:00:00.000Z",
+          allDay: true,
           timezone: "UTC",
-          title: "Community Gathering, Dinner & Talk",
+          title:
+            "Community Gathering, Dinner & Talk — اجتماع المجتمع واللقاء السنوي العام",
           category: "Community",
           location: "Main Hall",
           status: "scheduled",
@@ -201,10 +235,15 @@ describe("Multi-Calendar Systems & Custom Formatters", () => {
     });
 
     expect(ics).toContain("BEGIN:VCALENDAR");
-    expect(ics).toContain("X-WR-CALNAME:Unified Calendar Feed");
-    expect(ics).toContain("SUMMARY:Community Gathering\\, Dinner & Talk");
+    expect(ics).toContain("DTSTART;VALUE=DATE:20260501");
+    expect(ics).toContain("DTEND;VALUE=DATE:20260502");
     expect(ics).toContain("CATEGORIES:Community");
     expect(ics).toContain("X-ALT-DATE-HIJRI:14 Dhu al-Qiʻdah 1447 AH");
     expect(ics).toContain("END:VCALENDAR");
+
+    const encoder = new TextEncoder();
+    for (const line of ics.split("\r\n")) {
+      expect(encoder.encode(line).byteLength <= 75).toBe(true);
+    }
   });
 });

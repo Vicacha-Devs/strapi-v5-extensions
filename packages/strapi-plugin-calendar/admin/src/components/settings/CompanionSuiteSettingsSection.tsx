@@ -218,7 +218,7 @@ export const CompanionSuiteSettingsSection: React.FC<
             </Box>
             <Badge active>
               {t("settings.badge.timezone", "Timezone")}:{" "}
-              {eventsSettings.defaultTimezone || "America/Bogota"}
+              {eventsSettings.defaultTimezone || "UTC"}
             </Badge>
           </Flex>
 
@@ -306,7 +306,7 @@ export const CompanionSuiteSettingsSection: React.FC<
                 {t("settings.defaultTimezone", "Events Timezone (IANA)")}
               </Field.Label>
               <TextInput
-                value={eventsSettings.defaultTimezone || "America/Bogota"}
+                value={eventsSettings.defaultTimezone || "UTC"}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   onPatchEvents({ defaultTimezone: e.target.value })
                 }
@@ -325,8 +325,7 @@ export const CompanionSuiteSettingsSection: React.FC<
               </Field.Label>
               <TextInput
                 value={
-                  eventsSettings.feedTitle ||
-                  "Abu Bakr As-Siddiq Central Mosque — Events Calendar"
+                  eventsSettings.feedTitle || "Organization — Events Calendar"
                 }
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   onPatchEvents({ feedTitle: e.target.value })

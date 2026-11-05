@@ -122,12 +122,16 @@ function resolveQueryWindow(params: OccurrenceQueryParams) {
 
 function buildDocQueryOpts(
   params: OccurrenceQueryParams,
+  source: CalendarSourceMapping,
+  windowEnd: string,
   includeLocale: boolean
 ): Core.DocumentQueryOptions {
-  const opts: Core.DocumentQueryOptions = { limit: 500 };
-  if (params.documentId) {
-    opts.filters = { documentId: { $eq: params.documentId } };
-  }
+  const opts: Core.DocumentQueryOptions = {
+    limit: 1000,
+    filters: params.documentId
+      ? { documentId: { $eq: params.documentId } }
+      : { [source.fields.startDate]: { $lte: windowEnd } },
+  };
   if (includeLocale && params.locale && params.locale !== "auto") {
     opts.locale = params.locale;
   }
@@ -137,25 +141,26 @@ function buildDocQueryOpts(
 
 async function fetchDocumentsForSource(
   strapi: Core.Strapi,
-  uid: string,
-  params: OccurrenceQueryParams
+  source: CalendarSourceMapping,
+  params: OccurrenceQueryParams,
+  windowEnd: string
 ): Promise<Array<Record<string, unknown>>> {
   const find = (withLocale: boolean) =>
     strapi
-      .documents(uid)
-      .findMany(buildDocQueryOpts(params, withLocale))
+      .documents(source.uid)
+      .findMany(buildDocQueryOpts(params, source, windowEnd, withLocale))
       .catch(() => []);
-  const primaryDocs = await find(true);
-  return primaryDocs.length > 0 ? primaryDocs : find(false);
+  if (!params.locale || params.locale === "auto") return find(false);
+  const [primary, fallback] = await Promise.all([find(true), find(false)]);
+  const docKey = (d: Record<string, unknown>) => String(d.documentId ?? d.id);
+  const seen = new Set(primary.map(docKey));
+  return [...primary, ...fallback.filter((d) => !seen.has(docKey(d)))];
 }
 
-function extractCustomFields(
-  doc: Record<string, unknown>,
-  fieldKeys?: string[]
-) {
-  if (!Array.isArray(fieldKeys) || fieldKeys.length === 0) return undefined;
+function extractCustomFields(doc: Record<string, unknown>, keys?: string[]) {
+  if (!Array.isArray(keys) || keys.length === 0) return undefined;
   const extracted: Record<string, unknown> = {};
-  for (const key of fieldKeys) {
+  for (const key of keys) {
     if (key && doc[key] !== undefined) extracted[key] = doc[key];
   }
   return Object.keys(extracted).length > 0 ? extracted : undefined;
@@ -347,13 +352,12 @@ function buildDirectUpdatePayload(
   if (params.cancelOccurrence && source.fields.status) {
     return { [source.fields.status]: "cancelled" };
   }
-  const payload: Record<string, unknown> = {
+  return {
     [source.fields.startDate]: params.newStartDate,
+    ...(params.newEndDate && source.fields.endDate
+      ? { [source.fields.endDate]: params.newEndDate }
+      : {}),
   };
-  if (params.newEndDate && source.fields.endDate) {
-    payload[source.fields.endDate] = params.newEndDate;
-  }
-  return payload;
 }
 
 function buildRecurrenceOverridePayload(
@@ -395,64 +399,63 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
 
       const allOccurrences: ExpandedCalendarOccurrence[] = [];
       for (const source of activeSources) {
-        const docs = await fetchDocumentsForSource(strapi, source.uid, params);
+        const docs = await fetchDocumentsForSource(
+          strapi,
+          source,
+          params,
+          windowEnd
+        );
         for (const doc of docs) {
-          allOccurrences.push(
-            ...expandDocumentOccurrences(
-              doc,
-              source,
-              settings,
-              params,
-              windowStart,
-              windowEnd
-            )
+          const items = expandDocumentOccurrences(
+            doc,
+            source,
+            settings,
+            params,
+            windowStart,
+            windowEnd
           );
+          allOccurrences.push(...items);
         }
       }
-
-      allOccurrences.sort(
+      return allOccurrences.sort(
         (a, b) =>
           new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
-      return allOccurrences;
     },
 
     async rescheduleOccurrence(
       params: RescheduleOccurrenceParams
     ): Promise<Record<string, unknown>> {
       const settings = await getSettingsService().getSettings();
+      const sources = settings.sources ?? [];
       const source =
-        (settings.sources ?? []).find(
-          (s: CalendarSourceMapping) =>
-            s.id === params.sourceId || s.uid === params.uid
-        ) ?? settings.sources[0];
-
+        params.sourceId || params.uid
+          ? sources.find(
+              (s: CalendarSourceMapping) =>
+                s.id === params.sourceId || s.uid === params.uid
+            )
+          : sources[0];
       if (!source) throw new Error("Target calendar source is not configured.");
 
-      const existing = await strapi.documents(source.uid).findOne({
-        documentId: params.documentId,
-      });
+      const existing = await strapi
+        .documents(source.uid)
+        .findOne({ documentId: params.documentId });
       if (!existing) {
         throw new Error(
           `Document ${params.documentId} not found in ${source.uid}.`
         );
       }
-
       const rruleField = source.fields.rrule;
       const recurrence = rruleField
         ? parseRRuleFieldValue(existing[rruleField], settings.defaultTimezone)
         : null;
-      const useSeriesOverride = Boolean(
+      const data =
         recurrence?.rrule && !params.applyToSeries && rruleField
-      );
-      const data = useSeriesOverride
-        ? buildRecurrenceOverridePayload(recurrence!, rruleField!, params)
-        : buildDirectUpdatePayload(params, source);
-
-      const updatedDoc = await strapi.documents(source.uid).update({
-        documentId: params.documentId,
-        data,
-      });
+          ? buildRecurrenceOverridePayload(recurrence, rruleField, params)
+          : buildDirectUpdatePayload(params, source);
+      const updatedDoc = await strapi
+        .documents(source.uid)
+        .update({ documentId: params.documentId, data });
       return updatedDoc ?? {};
     },
 

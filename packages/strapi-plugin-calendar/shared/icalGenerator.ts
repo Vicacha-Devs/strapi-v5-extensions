@@ -9,18 +9,29 @@ function escapeIcsText(value?: string): string {
     .replace(/\r?\n/g, "\\n");
 }
 
+const utf8Encoder = new TextEncoder();
+
 export function foldIcsLine(line: string): string {
-  const maxOctets = 73;
-  if (line.length <= maxOctets) {
+  if (utf8Encoder.encode(line).byteLength <= 75) {
     return line;
   }
   const chunks: string[] = [];
-  let offset = 0;
-  while (offset < line.length) {
-    const sliceLen = offset === 0 ? maxOctets : maxOctets - 1;
-    const part = line.slice(offset, offset + sliceLen);
-    chunks.push(offset === 0 ? part : ` ${part}`);
-    offset += sliceLen;
+  let current = "";
+  let currentBytes = 0;
+
+  for (const codePoint of line) {
+    const cpBytes = utf8Encoder.encode(codePoint).byteLength;
+    if (currentBytes + cpBytes > 75) {
+      chunks.push(current);
+      current = ` ${codePoint}`;
+      currentBytes = 1 + cpBytes;
+    } else {
+      current += codePoint;
+      currentBytes += cpBytes;
+    }
+  }
+  if (current) {
+    chunks.push(current);
   }
   return chunks.join("\r\n");
 }
@@ -44,6 +55,38 @@ export function toIcsTimestamp(iso: string, allDay = false): string {
   return `${y}${m}${d}T${hh}${mm}${ss}Z`;
 }
 
+function toExclusiveAllDayEndStamp(startIso: string, endIso: string): string {
+  const startDate = new Date(startIso);
+  const endDate = new Date(endIso);
+  if (Number.isNaN(startDate.getTime())) {
+    return "19700102";
+  }
+  const startMidnight = Date.UTC(
+    startDate.getUTCFullYear(),
+    startDate.getUTCMonth(),
+    startDate.getUTCDate()
+  );
+  const endMidnight = Number.isNaN(endDate.getTime())
+    ? startMidnight
+    : Date.UTC(
+        endDate.getUTCFullYear(),
+        endDate.getUTCMonth(),
+        endDate.getUTCDate()
+      );
+  const isAlreadyExclusiveMidnight =
+    !Number.isNaN(endDate.getTime()) &&
+    endMidnight > startMidnight &&
+    endDate.getUTCHours() === 0 &&
+    endDate.getUTCMinutes() === 0 &&
+    endDate.getUTCSeconds() === 0;
+  const exclusiveDate = new Date(
+    isAlreadyExclusiveMidnight
+      ? endMidnight
+      : Math.max(startMidnight, endMidnight) + 86_400_000
+  );
+  return toIcsTimestamp(exclusiveDate.toISOString(), true);
+}
+
 export function buildCalendarLinks(params: {
   documentId: string;
   title: string;
@@ -55,7 +98,9 @@ export function buildCalendarLinks(params: {
   occurrenceDate?: string;
 }): CalendarLinkSet {
   const startStamp = toIcsTimestamp(params.startDate, params.allDay);
-  const endStamp = toIcsTimestamp(params.endDate, params.allDay);
+  const endStamp = params.allDay
+    ? toExclusiveAllDayEndStamp(params.startDate, params.endDate)
+    : toIcsTimestamp(params.endDate, false);
 
   const googleParams = new URLSearchParams({
     action: "TEMPLATE",
@@ -118,7 +163,9 @@ export function generateIcsCalendar(params: {
     lines.push(`DTSTAMP:${nowStamp}`);
     if (occ.allDay) {
       lines.push(`DTSTART;VALUE=DATE:${toIcsTimestamp(occ.startDate, true)}`);
-      lines.push(`DTEND;VALUE=DATE:${toIcsTimestamp(occ.endDate, true)}`);
+      lines.push(
+        `DTEND;VALUE=DATE:${toExclusiveAllDayEndStamp(occ.startDate, occ.endDate)}`
+      );
     } else {
       lines.push(`DTSTART:${toIcsTimestamp(occ.startDate, false)}`);
       lines.push(`DTEND:${toIcsTimestamp(occ.endDate, false)}`);

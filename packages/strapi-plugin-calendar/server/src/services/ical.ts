@@ -37,9 +37,15 @@ export default ({ strapi }: { strapi: Core.Strapi }): IcalService => {
       locale?: string;
     }): Promise<string> {
       const settings = await getSettingsService().getSettings();
-      const now = new Date();
-      const from = new Date(now.getFullYear() - 1, 0, 1).toISOString();
-      const to = new Date(now.getFullYear() + 2, 11, 31).toISOString();
+      const refYear =
+        params.occurrenceDate &&
+        /^\d{4}-\d{2}-\d{2}$/.test(params.occurrenceDate)
+          ? Number.parseInt(params.occurrenceDate.slice(0, 4), 10)
+          : new Date().getUTCFullYear();
+      const from = new Date(Date.UTC(refYear - 1, 0, 1)).toISOString();
+      const to = new Date(
+        Date.UTC(refYear + 2, 11, 31, 23, 59, 59)
+      ).toISOString();
 
       let occurrences = await getOccurrenceService().getOccurrences({
         documentId: params.documentId,
@@ -50,12 +56,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): IcalService => {
       });
 
       if (params.occurrenceDate) {
-        const filtered = occurrences.filter(
+        occurrences = occurrences.filter(
           (o) => o.occurrenceDate === params.occurrenceDate
         );
-        if (filtered.length > 0) {
-          occurrences = filtered;
-        }
       } else if (occurrences.length > 1) {
         occurrences = [occurrences[0]];
       }
