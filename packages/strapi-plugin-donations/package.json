@@ -1,0 +1,117 @@
+{
+  "name": "@vicacha-devs/strapi-plugin-donations",
+  "version": "1.0.0",
+  "description": "Generic Strapi v5 Crowdfunding Campaigns, Pledges, Rule-Based Assessment & Commodity Threshold Calculator, Payment Webhooks & Tax Certificate Bridge powered by @vicacha-devs/strapi-plugin-calendar and @vicacha-devs/strapi-plugin-certificates",
+  "keywords": [
+    "calculator",
+    "campaigns",
+    "crowdfunding",
+    "donations",
+    "micro-donations",
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5",
+    "tax-certificate",
+    "utility-bills",
+    "webhooks"
+  ],
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions/tree/main/packages/strapi-plugin-donations#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
+  },
+  "license": "MIT",
+  "author": "Vicacha Devs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
+    "directory": "packages/strapi-plugin-donations"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.mjs"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
+    "./shared": {
+      "types": "./dist/shared/index.d.ts",
+      "source": "./shared/index.ts",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
+      "default": "./dist/shared/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "strapi-plugin build && node ../../scripts/ensure-esm-dist.ts",
+    "clean": "rm -rf dist",
+    "test": "node --import ./tests/register-ts-resolver.ts --test tests/*.test.ts",
+    "test:ts": "npm run test:ts:front && npm run test:ts:back",
+    "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
+    "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
+    "test:vitest": "vitest run",
+    "test:watch": "vitest",
+    "verify": "strapi-plugin verify",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link"
+  },
+  "dependencies": {
+    "@strapi/design-system": "2.2.0",
+    "@strapi/icons": "2.2.0",
+    "@vicacha-devs/strapi-plugin-calendar": "workspace:*",
+    "@vicacha-devs/strapi-plugin-certificates": "workspace:*",
+    "react-intl": "8.1.3"
+  },
+  "devDependencies": {
+    "@strapi/sdk-plugin": "6.1.1",
+    "@strapi/strapi": "5.39.0",
+    "@strapi/typescript-utils": "5.39.0",
+    "@types/node": "22.10.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/plugin-shared": "workspace:*",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.30.3",
+    "styled-components": "6.3.11",
+    "typescript": "5.9.3",
+    "vitest": "4.1.0"
+  },
+  "peerDependencies": {
+    "@strapi/sdk-plugin": "^5.0.0 || ^6.0.0",
+    "@strapi/strapi": "^5.0.0",
+    "@vicacha-devs/strapi-plugin-calendar": "^1.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  },
+  "strapi": {
+    "kind": "plugin",
+    "name": "donations",
+    "displayName": "Donations & Campaigns",
+    "description": "Generic Strapi v5 Crowdfunding Campaigns, Assessment Calculator, Payment Verification & Official Tax Certificates"
+  }
+}
