@@ -38,6 +38,7 @@ export interface SearchHit {
   matchedField: string | null;
   matchedFieldLabel: string | null;
   matchedSnippet: string | null;
+  extra?: Array<{ field: string; value: unknown }>;
   locale: string | null;
   status: string | null;
   updatedAt: string | null;

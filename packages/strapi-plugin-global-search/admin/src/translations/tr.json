@@ -61,6 +61,8 @@
   "settings.max_depth_hint": "Aranacak bileşen seviyesi sayısı.",
   "settings.query_timeout_label": "Sorgu zaman aşımı (ms)",
   "settings.query_timeout_hint": "Daha yavaş bir içerik türü atlanır.",
+  "settings.concurrency_label": "Eşzamanlılık",
+  "settings.concurrency_hint": "Paralel olarak sorgulanan maksimum içerik türü sayısı.",
   "settings.deep_label": "Bileşenlerin içinde ara",
   "settings.deep_hint": "Bileşenlerin içine yerleştirilmiş alanları da eşleştir.",
   "settings.drafts_label": "Taslakları dahil et",
@@ -81,5 +83,7 @@
   "settings.saved": "Genel arama ayarları kaydedildi.",
   "settings.error_save": "Genel arama ayarları kaydedilemedi.",
   "settings.restored": "Varsayılanlar geri yüklendi.",
-  "settings.error_restore": "Varsayılanlar geri yüklenemedi."
+  "settings.error_restore": "Varsayılanlar geri yüklenemedi.",
+  "status.published": "Yayınlandı",
+  "status.draft": "Taslak"
 }

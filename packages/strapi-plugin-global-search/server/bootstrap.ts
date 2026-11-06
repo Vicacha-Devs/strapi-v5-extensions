@@ -10,14 +10,14 @@ export default async ({ strapi }: { strapi: StrapiLike }) => {
       .service("schema")
       .getSearchableContentTypes()) as ContentTypeDescriptor[];
 
+    const uidList = types.map((type) => type.uid).join(", ");
     strapi.log.debug(
-      `[${PLUGIN_ID}] indexed ${types.length} content type(s) for search: ${types
-        .map((type) => type.uid)
-        .join(", ")}`
+      `[${PLUGIN_ID}] indexed ${types.length} content type(s): ${uidList}`
     );
   } catch (error) {
+    const msg = (error as Error).message;
     strapi.log.error(
-      `[${PLUGIN_ID}] failed to introspect content types: ${(error as Error).message}`
+      `[${PLUGIN_ID}] failed to introspect content types: ${msg}`
     );
   }
 };

@@ -31,8 +31,9 @@ export const mapWithConcurrency = async <T, R>(
   const results = Array.from<R>({ length: items.length });
   let cursor = 0;
 
+  const safeConcurrency = Math.max(1, Math.floor(Number(concurrency) || 1));
   const runners = Array.from(
-    { length: Math.min(concurrency, items.length) },
+    { length: Math.min(safeConcurrency, items.length) },
     async () => {
       while (cursor < items.length) {
         const index = cursor;

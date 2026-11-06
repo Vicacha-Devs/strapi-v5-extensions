@@ -61,6 +61,8 @@
   "settings.max_depth_hint": "Nombre de niveaux de composants à parcourir.",
   "settings.query_timeout_label": "Délai d'expiration de requête (ms)",
   "settings.query_timeout_hint": "Un type de contenu plus lent est ignoré.",
+  "settings.concurrency_label": "Parallélisme",
+  "settings.concurrency_hint": "Nombre maximal de types de contenu interrogés en parallèle.",
   "settings.deep_label": "Rechercher dans les composants",
   "settings.deep_hint": "Correspondre aussi aux champs imbriqués dans les composants.",
   "settings.drafts_label": "Inclure les brouillons",
@@ -81,5 +83,7 @@
   "settings.saved": "Paramètres de recherche globale enregistrés.",
   "settings.error_save": "Impossible d'enregistrer les paramètres de recherche globale.",
   "settings.restored": "Valeurs par défaut restaurées.",
-  "settings.error_restore": "Impossible de restaurer les valeurs par défaut."
+  "settings.error_restore": "Impossible de restaurer les valeurs par défaut.",
+  "status.published": "Publié",
+  "status.draft": "Brouillon"
 }

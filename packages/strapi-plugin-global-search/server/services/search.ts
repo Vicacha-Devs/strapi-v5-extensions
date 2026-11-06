@@ -7,7 +7,7 @@ import type {
   StrapiLike,
 } from "../types";
 import { withTimeout, mapWithConcurrency } from "../utils/async";
-import { PLUGIN_ID } from "../utils/constants";
+import { BLOCKLISTED_ATTRIBUTE_NAMES, PLUGIN_ID } from "../utils/constants";
 import { sanitizeQuery } from "../utils/text";
 
 const service = (strapi: StrapiLike, name: string) =>
@@ -27,15 +27,18 @@ export interface EntryLike {
 export default ({ strapi }: { strapi: StrapiLike }) => ({
   /** Content Manager deep-link for a hit. */
   buildAdminUrl(descriptor: ContentTypeDescriptor, entry: EntryLike): string {
-    const localeQuery = entry.locale ? `?locale=${entry.locale}` : "";
+    const localeQuery = entry.locale
+      ? `?locale=${encodeURIComponent(entry.locale)}`
+      : "";
 
     if (descriptor.kind === "singleType") {
       return `/content-manager/single-types/${descriptor.uid}${localeQuery}`;
     }
 
-    const documentId = entry.documentId || entry.id;
+    const documentId = encodeURIComponent(String(entry.documentId || entry.id));
+    const base = `/content-manager/collection-types/${descriptor.uid}`;
 
-    return `/content-manager/collection-types/${descriptor.uid}/${documentId}${localeQuery}`;
+    return `${base}/${documentId}${localeQuery}`;
   },
 
   async queryContentType(
@@ -69,8 +72,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     const mainVal = descriptor.mainField
       ? (entry[descriptor.mainField] as string)
       : "";
-    if (mainVal) return mainVal;
-    return entry.name || entry.title || `#${entry.documentId || entry.id}`;
+    if (mainVal) return String(mainVal);
+    return String(
+      entry.name || entry.title || `#${entry.documentId || entry.id}`
+    );
   },
 
   resolveEntryStatus(
@@ -88,10 +93,19 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     settings: PluginSettings
   ): RankedHit {
     const scored = service(strapi, "ranking").score(entry, descriptor, query);
-    const extraFields = (settings.displayFields[descriptor.uid] || []).slice(
-      0,
-      2
-    );
+    const rawExtra =
+      descriptor.displayFields ??
+      (Array.isArray(settings.displayFields?.[descriptor.uid])
+        ? settings.displayFields[descriptor.uid]
+        : []);
+    const extraFields = rawExtra
+      .filter(
+        (field): field is string =>
+          typeof field === "string" &&
+          Boolean(field) &&
+          !BLOCKLISTED_ATTRIBUTE_NAMES.includes(field)
+      )
+      .slice(0, 2);
 
     return {
       ...scored,
@@ -134,12 +148,16 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       "settings"
     ).get()) as PluginSettings;
     const query = sanitizeQuery(rawQuery);
+    const safePageSize = Math.min(
+      Math.max(Math.floor(Number(pageSize)) || 20, 1),
+      100
+    );
 
     const empty: SearchResult = {
       query,
       results: [],
       groups: [],
-      pagination: { page: 1, pageSize, total: 0, pageCount: 0 },
+      pagination: { page: 1, pageSize: safePageSize, total: 0, pageCount: 0 },
       meta: {
         searchedTypes: 0,
         truncatedTypes: [],
@@ -189,12 +207,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
           );
         } catch (error) {
           // One broken or slow content type must never fail the whole search.
-          failedTypes.push({
-            uid: descriptor.uid,
-            message: (error as Error).message,
-          });
+          const msg = (error as Error).message;
+          failedTypes.push({ uid: descriptor.uid, message: msg });
           strapi.log.warn(
-            `[${PLUGIN_ID}] search failed for ${descriptor.uid}: ${(error as Error).message}`
+            `[${PLUGIN_ID}] search failed for ${descriptor.uid}: ${msg}`
           );
 
           return [];
@@ -202,14 +218,17 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       }
     );
 
+    const allHits = perType.flat();
     const ranked = service(strapi, "ranking")
-      .sort(perType.flat())
+      .sort(allHits)
       .slice(0, settings.maxResults) as RankedHit[];
 
     const total = ranked.length;
-    const safePageSize = Math.min(Math.max(Number(pageSize) || 20, 1), 100);
     const pageCount = Math.ceil(total / safePageSize) || 0;
-    const safePage = Math.min(Math.max(Number(page) || 1, 1), pageCount || 1);
+    const safePage = Math.min(
+      Math.max(Math.floor(Number(page)) || 1, 1),
+      pageCount || 1
+    );
     const start = (safePage - 1) * safePageSize;
     const results = ranked.slice(start, start + safePageSize);
 
@@ -237,7 +256,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
         truncatedTypes,
         failedTypes,
         minChars: settings.minChars,
-        capped: total >= settings.maxResults,
+        capped:
+          allHits.length > settings.maxResults ||
+          total >= settings.maxResults ||
+          truncatedTypes.length > 0,
       },
     };
   },

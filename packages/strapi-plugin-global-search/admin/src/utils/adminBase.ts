@@ -8,10 +8,15 @@ export const getAdminBase = (): string => {
 
   try {
     const pathname = window.location.pathname || "";
-    const match = pathname.match(/^(.*\/admin)(?:\/|$)/);
+    const marker = "/admin";
+    let idx = pathname.lastIndexOf(marker);
 
-    if (match) {
-      return match[1].endsWith("/") ? match[1] : `${match[1]}/`;
+    while (idx !== -1) {
+      const end = idx + marker.length;
+      if (end === pathname.length || pathname[end] === "/") {
+        return `${pathname.slice(0, end)}/`;
+      }
+      idx = pathname.lastIndexOf(marker, idx - 1);
     }
   } catch {
     // Fall through to the default admin path.

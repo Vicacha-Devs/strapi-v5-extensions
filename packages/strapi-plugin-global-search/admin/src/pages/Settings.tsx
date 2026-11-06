@@ -78,6 +78,14 @@ const getNumberFields = (): Array<{
     label: t("settings.query_timeout_label", "Query timeout (ms)"),
     hint: t("settings.query_timeout_hint", "A slower content type is skipped."),
   },
+  {
+    name: "concurrency",
+    label: t("settings.concurrency_label", "Concurrency"),
+    hint: t(
+      "settings.concurrency_hint",
+      "Maximum content types queried in parallel."
+    ),
+  },
 ];
 
 const extractSaveErrorMessage = (error: unknown): string => {
@@ -154,12 +162,14 @@ const SearchBehaviourPanel = ({
                   name={field.name}
                   aria-label={field.label}
                   value={settings[field.name] as number}
-                  onValueChange={(value: number | undefined) =>
-                    onSetField(
-                      field.name,
-                      value as PluginSettings[typeof field.name]
-                    )
-                  }
+                  onValueChange={(value: number | undefined) => {
+                    if (typeof value === "number" && Number.isFinite(value)) {
+                      onSetField(
+                        field.name,
+                        Math.round(value) as PluginSettings[typeof field.name]
+                      );
+                    }
+                  }}
                   disabled={!canEdit}
                 />
                 <Field.Hint />
@@ -221,7 +231,8 @@ const ContentTypesTablePanel = ({
       <Typography textColor="neutral600" variant="pi">
         {t(
           "settings.content_types_hint",
-          "Every API and visible plugin content type is discovered automatically. Turn one off to exclude it from search results."
+          "Every API and visible plugin content type is discovered " +
+            "automatically. Turn one off to exclude it from search results."
         )}
       </Typography>
     </Box>
@@ -355,7 +366,9 @@ const SettingsPage = () => {
 
     try {
       const saved = await updateSettings(settings);
+      const schema = await fetchAllTypes();
       setSettings(saved);
+      setContentTypes(schema.contentTypes || []);
       invalidateSearchableTypes();
       toggleNotification({
         type: "success",
@@ -375,7 +388,10 @@ const SettingsPage = () => {
     setIsSaving(true);
 
     try {
-      setSettings(await resetSettings());
+      const restored = await resetSettings();
+      const schema = await fetchAllTypes();
+      setSettings(restored);
+      setContentTypes(schema.contentTypes || []);
       invalidateSearchableTypes();
       toggleNotification({
         type: "success",
@@ -393,13 +409,16 @@ const SettingsPage = () => {
 
   if (isLoading || !settings) return <Page.Loading />;
 
+  const ctTabTitle = t("settings.content_types_title", "Content types");
+
   return (
     <Main>
       <Layouts.Header
         title={t("plugin.name", "Global Search")}
         subtitle={t(
           "settings.subtitle",
-          "Tune how the search page and the Ctrl/Cmd + K palette query your content."
+          "Tune how the search page and the Ctrl/Cmd + K palette " +
+            "query your content."
         )}
         primaryAction={
           <Flex gap={2}>
@@ -429,7 +448,7 @@ const SettingsPage = () => {
               {t("settings.behaviour_title", "Search behaviour")}
             </Tabs.Trigger>
             <Tabs.Trigger value="content-types">
-              {`${t("settings.content_types_title", "Content types")} (${contentTypes.length})`}
+              {`${ctTabTitle} (${contentTypes.length})`}
             </Tabs.Trigger>
           </Tabs.List>
 

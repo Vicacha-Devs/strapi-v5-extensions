@@ -17,19 +17,27 @@ const Highlight = ({
   textColor = "neutral600",
 }: HighlightProps) => {
   if (!text) return null;
-  if (!query) return <Typography textColor={textColor}>{text}</Typography>;
+  const cleanQuery = query.trim();
+  if (!cleanQuery) {
+    return (
+      <Typography tag="span" textColor={textColor}>
+        {text}
+      </Typography>
+    );
+  }
 
   const parts = String(text).split(
-    new RegExp(`(${escapeRegExp(query)})`, "gi")
+    new RegExp(`(${escapeRegExp(cleanQuery)})`, "gi")
   );
-  const lowered = query.toLowerCase();
+  const lowered = cleanQuery.toLowerCase();
 
   return (
-    <Typography textColor={textColor}>
+    <Typography tag="span" textColor={textColor}>
       {parts.map((part, index) =>
         part.toLowerCase() === lowered ? (
           <Typography
             key={`${part}-${index}`}
+            tag="span"
             fontWeight="bold"
             textColor="primary600"
           >

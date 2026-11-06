@@ -10,10 +10,21 @@ type Ctx = {
   throw: (code: number, msg: string) => void;
 };
 
-/** `?types[]=a&types[]=b` and `?types=a,b` are both accepted. */
+/** `?types[]=a&types[]=b`, `?types[0]=a`, and `?types=a,b` are all accepted. */
 const toArray = (value: unknown): string[] => {
   if (!value) return [];
-  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  if (Array.isArray(value)) {
+    return value
+      .flatMap((item) => String(item).split(","))
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>)
+      .flatMap((item) => String(item).split(","))
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
 
   return String(value)
     .split(",")
@@ -23,7 +34,8 @@ const toArray = (value: unknown): string[] => {
 
 export default ({ strapi }: { strapi: StrapiLike }) => ({
   async find(ctx: Ctx) {
-    const { q, types, locale, page, pageSize } = ctx.request.query;
+    const { q, locale, page, pageSize } = ctx.request.query;
+    const rawTypes = ctx.request.query.types ?? ctx.request.query["types[]"];
 
     try {
       ctx.body = await strapi
@@ -31,16 +43,15 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
         .service("search")
         .search({
           query: typeof q === "string" ? q : undefined,
-          types: toArray(types),
+          types: toArray(rawTypes),
           locale: typeof locale === "string" ? locale : undefined,
           page: page !== undefined ? Number(page) : undefined,
           pageSize: pageSize !== undefined ? Number(pageSize) : undefined,
           userAbility: ctx.state.userAbility,
         });
     } catch (error) {
-      strapi.log.error(
-        `[${PLUGIN_ID}] search request failed: ${(error as Error).stack || (error as Error).message}`
-      );
+      const detail = (error as Error).stack || (error as Error).message;
+      strapi.log.error(`[${PLUGIN_ID}] search request failed: ${detail}`);
       ctx.throw(
         500,
         "Global search failed. Check the server logs for details."

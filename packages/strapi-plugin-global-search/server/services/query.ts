@@ -48,39 +48,59 @@ const buildPopulate = (
   return Object.keys(tree).length ? toPopulate(tree) : undefined;
 };
 
+const MAX_PG_INT32 = 2_147_483_647;
+
 export default () => ({
   nest,
   buildPopulate,
 
   /** All field paths a hit could have matched, in ranking order. */
   searchablePaths(descriptor: ContentTypeDescriptor): string[] {
-    return [
-      ...descriptor.idFields,
-      ...(descriptor.mainField && descriptor.mainField !== "id"
+    const main =
+      descriptor.mainField &&
+      descriptor.mainField !== "id" &&
+      descriptor.mainFieldSearchable !== false
         ? [descriptor.mainField]
-        : []),
-      ...descriptor.topLevelFields,
-      ...descriptor.nestedFields,
-    ];
+        : [];
+    return Array.from(
+      new Set([
+        ...descriptor.idFields,
+        ...main,
+        ...descriptor.topLevelFields,
+        ...descriptor.nestedFields,
+      ])
+    );
   },
 
   /**
    * One `$or` over every searchable path. `id` is numeric, so it is only added —
-   * as an equality — when the query is a plain integer; `$containsi` on an
-   * integer column is rejected by Postgres and misbehaves elsewhere.
-   * `documentId` is always matched as a string.
+   * as an equality — when the query is a plain integer within 32-bit Postgres INT
+   * bounds; `$containsi` on an integer column is rejected by Postgres.
+   * `documentId` is matched as a string unless excluded.
    */
   buildFilters(
     descriptor: ContentTypeDescriptor,
     query: string
   ): { $or: unknown[] } | null {
-    const conditions: unknown[] = [{ documentId: { $containsi: query } }];
+    const paths = this.searchablePaths(descriptor);
+    const conditions: unknown[] = [];
 
-    if (/^\d+$/.test(query)) {
-      conditions.push({ id: { $eq: Number(query) } });
+    if (paths.includes("documentId")) {
+      conditions.push({ documentId: { $containsi: query } });
     }
 
-    this.searchablePaths(descriptor).forEach((path) => {
+    if (/^\d+$/.test(query)) {
+      const numericId = Number(query);
+      if (
+        Number.isSafeInteger(numericId) &&
+        numericId >= 1 &&
+        numericId <= MAX_PG_INT32
+      ) {
+        conditions.push({ id: { $eq: numericId } });
+      }
+    }
+
+    paths.forEach((path) => {
       if (path === "documentId") return;
       conditions.push(nest(path, { $containsi: query }));
     });
@@ -108,6 +128,7 @@ export default () => ({
           ...descriptor.idFields,
           descriptor.mainField,
           ...descriptor.topLevelFields,
+          ...(descriptor.displayFields || []),
           "createdAt",
           "updatedAt",
           ...(descriptor.draftAndPublish ? ["publishedAt"] : []),

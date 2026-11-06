@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- single-file service test suite */
 /**
  * Exercises the global-search plugin services against a fake Strapi instance.
  * No Strapi boot, no database, no test runner: `npm test` (tsx).
@@ -347,7 +348,8 @@ const run = async () => {
   checkEq(
     "collection links use documentId and locale",
     result.results.find((h: any) => h.id === 7).adminUrl,
-    "/content-manager/collection-types/api::article.article/doc-careers?locale=en"
+    "/content-manager/collection-types/api::article.article/" +
+      "doc-careers?locale=en"
   );
   checkEq(
     "draft/published status is reported",
@@ -435,49 +437,76 @@ const run = async () => {
   const withPlugins = await services.schema.getSearchableContentTypes({
     force: true,
   });
-  const findPlugin = (uid: string) =>
-    withPlugins.find((t: { uid: string }) => t.uid === uid);
-  const eventDescriptor = findPlugin("plugin::events.event");
-
-  check(
-    "discovers visible plugin::* content types while skipping system/hidden plugins",
-    () => {
-      assert.ok(eventDescriptor, "plugin::events.event should be discovered");
-      assert.ok(!findPlugin("plugin::upload.file"));
-      assert.ok(!findPlugin("plugin::custom.hidden"));
-    }
+  const eventDescriptor = withPlugins.find(
+    (t: { uid: string }) => t.uid === "plugin::events.event"
   );
+
+  check("discovers visible plugin::* types and skips system/hidden", () => {
+    assert.ok(eventDescriptor, "plugin::events.event should be discovered");
+    assert.ok(!withPlugins.some((t: any) => t.uid === "plugin::upload.file"));
+    assert.ok(!withPlugins.some((t: any) => t.uid === "plugin::custom.hidden"));
+  });
   check("indexes customField attributes as searchable top-level fields", () =>
     assert.ok(eventDescriptor.topLevelFields.includes("content"))
   );
-  check(
-    "extracts plain text from ProseMirror/Tiptap JSON without matching JSON keys",
-    () => {
-      const text = "Join our Friday community lecture on careers";
-      const content = JSON.stringify({
-        doc: {
-          type: "doc",
-          content: [{ type: "paragraph", content: [{ type: "text", text }] }],
-        },
-        metrics: { words: 7, readingTimeMinutes: 1 },
-      });
+  check("extracts plain text from ProseMirror/Tiptap JSON", () => {
+    const text = "Join our Friday community lecture on careers";
+    const content = JSON.stringify({
+      doc: {
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+      },
+      metrics: { words: 7, readingTimeMinutes: 1 },
+    });
+    const entry = { id: 101, title: "Weekly Gathering", content };
+    const hitScore = services.ranking.score(entry, eventDescriptor, "careers");
+    assert.strictEqual(hitScore.tier, 5);
+    assert.ok(hitScore.matchedSnippet.includes("lecture on careers"));
+    assert.strictEqual(
+      services.ranking.score(entry, eventDescriptor, "readingTimeMinutes").tier,
+      7
+    );
+  });
+  check("handles 50k unclosed < in linear time and blocks _ wildcards", () => {
+    const start = Date.now();
+    const scored = services.ranking.score(
+      { id: 1, title: "x", body: `${"<".repeat(50_000)} careers` },
+      article,
+      "careers"
+    );
+    assert.strictEqual(scored.tier, 5);
+    assert.ok(Date.now() - start < 200, "toPlainText must be linear");
+  });
+  check("guards Postgres INT32 overflow and matches across inline HTML", () => {
+    const bigNum = services.query.buildFilters(article, "99999999999999999999");
+    assert.ok(!JSON.stringify(bigNum).includes('"$eq"'));
+    const htmlEntry = {
+      id: 1,
+      title: "x",
+      body: "<p>we are <strong>hiring</strong> for careers</p>",
+    };
+    const rankHtml = (q: string) =>
+      services.ranking.score(htmlEntry, article, q).tier;
+    assert.strictEqual(rankHtml("hiring for careers"), 5);
+    assert.strictEqual(rankHtml("strong"), 7);
+  });
+  const uWildcard = await services.search.search({ query: "____" });
+  checkEq("bare _ wildcard returns nothing", uWildcard.results.length, 0);
 
-      const entry = { id: 101, title: "Weekly Gathering", content };
-      const score = (q: string) =>
-        services.ranking.score(entry, eventDescriptor, q);
-      const hitScore = score("careers");
-      assert.strictEqual(hitScore.tier, 5);
-      assert.ok(
-        hitScore.matchedSnippet.includes("Friday community lecture on careers")
-      );
-      assert.ok(!hitScore.matchedSnippet.includes("readingTimeMinutes"));
-      assert.strictEqual(score("readingTimeMinutes").tier, 7);
-    }
-  );
+  strapi.config.get = () => ({
+    excludedFields: ["api::article.article:title"],
+    displayFields: { "api::article.article": ["password", "secret", "views"] },
+  });
+  const nextTypes = await services.schema.getSearchableContentTypes({
+    force: true,
+  });
+  const nextArt = nextTypes.find((t: any) => t.uid === "api::article.article");
+  check("honors excludedFields on mainField & filters displayFields", () => {
+    assert.strictEqual(nextArt.mainFieldSearchable, false);
+    assert.deepStrictEqual(nextArt.displayFields, ["views"]);
+  });
 
-  console.log(
-    `\n${failures === 0 ? "ALL CHECKS PASSED" : `${failures} CHECK(S) FAILED`}\n`
-  );
+  console.log(`\n${failures ? `${failures} FAILED` : "ALL CHECKS PASSED"}\n`);
   process.exit(failures === 0 ? 0 : 1);
 };
 

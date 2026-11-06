@@ -13,10 +13,15 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
   tr,
 };
 
-const getActiveLocale = (): string => {
+export const getActiveLocale = (): string => {
   if (typeof window === "undefined") return "en";
   try {
-    return window.localStorage.getItem("strapi-admin-language") || "en";
+    const raw = window.localStorage.getItem("strapi-admin-language");
+    if (!raw) return "en";
+    const clean = raw.replace(/^"|"$/g, "").trim();
+    if (TRANSLATIONS[clean]) return clean;
+    const base = clean.split(/[-_]/)[0];
+    return TRANSLATIONS[base] ? base : "en";
   } catch {
     return "en";
   }
@@ -33,8 +38,7 @@ export const t = (
   if (!values) return template;
 
   return Object.entries(values).reduce(
-    (result, [key, value]) =>
-      result.replace(new RegExp(`\\{${key}\\}`, "g"), String(value)),
+    (result, [key, value]) => result.split(`{${key}}`).join(String(value)),
     template
   );
 };

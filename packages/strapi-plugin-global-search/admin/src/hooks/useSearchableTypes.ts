@@ -28,6 +28,8 @@ interface SearchableTypesState {
   settings: Partial<PluginSettings>;
 }
 
+const INVALIDATE_EVENT = "global-search:schema-invalidated";
+
 const useSearchableTypes = (): SearchableTypesState => {
   const [state, setState] = useState<SearchableTypesState>({
     status: "loading",
@@ -38,22 +40,32 @@ const useSearchableTypes = (): SearchableTypesState => {
   useEffect(() => {
     let cancelled = false;
 
-    load()
-      .then((data) => {
-        if (cancelled) return;
-        setState({
-          status: "success",
-          contentTypes: data.contentTypes || [],
-          settings: data.settings || {},
+    const refresh = () => {
+      load()
+        .then((data) => {
+          if (cancelled) return;
+          setState({
+            status: "success",
+            contentTypes: data.contentTypes || [],
+            settings: data.settings || {},
+          });
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setState({ status: "error", contentTypes: [], settings: {} });
         });
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setState({ status: "error", contentTypes: [], settings: {} });
-      });
+    };
+
+    refresh();
+    if (typeof window !== "undefined") {
+      window.addEventListener(INVALIDATE_EVENT, refresh);
+    }
 
     return () => {
       cancelled = true;
+      if (typeof window !== "undefined") {
+        window.removeEventListener(INVALIDATE_EVENT, refresh);
+      }
     };
   }, []);
 
@@ -62,6 +74,9 @@ const useSearchableTypes = (): SearchableTypesState => {
 
 export const invalidateSearchableTypes = (): void => {
   inFlight = null;
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(INVALIDATE_EVENT));
+  }
 };
 
 export default useSearchableTypes;
