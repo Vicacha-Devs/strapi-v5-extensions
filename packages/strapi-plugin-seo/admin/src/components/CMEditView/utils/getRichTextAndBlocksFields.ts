@@ -1,9 +1,3 @@
-import get from "lodash/get";
-import isArray from "lodash/isArray";
-import isEmpty from "lodash/isEmpty";
-import isObject from "lodash/isObject";
-import pull from "lodash/pull";
-
 import type {
   ComponentSchemasMap,
   ContentManagerFormValues,
@@ -16,6 +10,9 @@ export interface FieldDescriptor {
   field: string | null;
   inDz?: string;
 }
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
 const matchesFieldType = (
   fieldProperties: SchemaAttribute | undefined,
@@ -74,6 +71,83 @@ const collectFieldsByType = (
   return fields;
 };
 
+const resolveAndDeduplicateFields = (
+  fields: FieldDescriptor[],
+  dynamicZones: string[],
+  modifiedData: ContentManagerFormValues
+): FieldDescriptor[] => {
+  const updated = fields.map((entry) => ({ ...entry }));
+  const removedIndices = new Set<number>();
+
+  dynamicZones.forEach((dz) => {
+    const rawDz = modifiedData?.[dz];
+    const dynamicZoneData = Array.isArray(rawDz)
+      ? rawDz.filter(isPlainObject)
+      : [];
+
+    updated.forEach((field, index) => {
+      if (removedIndices.has(index)) return;
+
+      const componentExistsInDZ = dynamicZoneData.filter(
+        (x) => x.__component === field.name
+      );
+
+      if (
+        componentExistsInDZ.length > 0 &&
+        !field.inDz &&
+        field.field &&
+        dynamicZoneData.some((x) =>
+          Object.prototype.hasOwnProperty.call(x, field.field!)
+        )
+      ) {
+        updated[index] = { ...field, inDz: dz };
+      } else if (componentExistsInDZ.length === 0 && field.inDz === dz) {
+        removedIndices.add(index);
+      }
+    });
+  });
+
+  const seenKeys = new Set<string>();
+  const deduplicated: FieldDescriptor[] = [];
+
+  updated.forEach((field, index) => {
+    if (removedIndices.has(index)) return;
+    if (field.field === null) {
+      const key = `root:${field.name}`;
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        deduplicated.push(field);
+      }
+      return;
+    }
+
+    if (field.inDz) {
+      const key = `dz:${field.inDz}:${field.name}:${field.field}`;
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        deduplicated.push(field);
+      }
+      return;
+    }
+
+    const compKey = field.name.split(".").pop() || field.name;
+    if (
+      field.name.includes(".") &&
+      modifiedData?.[compKey] === undefined &&
+      modifiedData?.[field.name] === undefined
+    ) {
+      return;
+    }
+    const key = `comp:${compKey}:${field.field}`;
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      deduplicated.push(field);
+    }
+  });
+
+  return deduplicated;
+};
+
 export const getRichTextAndBlocksFields = (
   contentType: ContentTypeSchemaInfo,
   components: ComponentSchemasMap,
@@ -82,54 +156,31 @@ export const getRichTextAndBlocksFields = (
   const dynamicZones: string[] = [];
 
   Object.entries(modifiedData ?? {}).forEach(([fieldName, fieldValue]) => {
-    if (isArray(fieldValue)) {
+    if (Array.isArray(fieldValue)) {
       const isComponentField = fieldValue.some(
-        (subField) => isObject(subField) && "__component" in subField
+        (subField) => isPlainObject(subField) && "__component" in subField
       );
       if (isComponentField) dynamicZones.push(fieldName);
     }
   });
 
-  const richTextFields = collectFieldsByType(
+  const rawRichTextFields = collectFieldsByType(
     contentType,
     components,
     "richtext"
   );
-  const blockFields = collectFieldsByType(contentType, components, "blocks");
+  const rawBlockFields = collectFieldsByType(contentType, components, "blocks");
 
-  const filterFields = (fields: FieldDescriptor[]) => {
-    dynamicZones.forEach((dz) => {
-      const dynamicZoneData = get<Array<Record<string, unknown>>>(
-        modifiedData,
-        dz,
-        []
-      );
-
-      fields.forEach((field, index) => {
-        const componentExistsInDZ = dynamicZoneData.filter(
-          (x) => x.__component === field.name
-        );
-
-        if (
-          !isEmpty(componentExistsInDZ) &&
-          !field.inDz &&
-          field.field &&
-          dynamicZoneData.find((x) =>
-            Object.prototype.hasOwnProperty.call(x, field.field!)
-          )
-        ) {
-          fields[index] = { ...field, inDz: dz };
-        }
-
-        if (isEmpty(componentExistsInDZ) && field.inDz) {
-          pull(fields, field);
-        }
-      });
-    });
+  return {
+    richTextFields: resolveAndDeduplicateFields(
+      rawRichTextFields,
+      dynamicZones,
+      modifiedData
+    ),
+    blockFields: resolveAndDeduplicateFields(
+      rawBlockFields,
+      dynamicZones,
+      modifiedData
+    ),
   };
-
-  filterFields(richTextFields);
-  filterFields(blockFields);
-
-  return { richTextFields, blockFields };
 };

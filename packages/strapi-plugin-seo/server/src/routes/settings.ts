@@ -1,3 +1,11 @@
+const SETTINGS_POLICIES = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: ["plugin::seo.read"] },
+  },
+];
+
 export const settingsRoutes = {
   type: "admin",
   routes: [
@@ -5,13 +13,13 @@ export const settingsRoutes = {
       method: "GET",
       path: "/settings",
       handler: "settings.getSettings",
-      config: { policies: [] },
+      config: { policies: SETTINGS_POLICIES },
     },
     {
       method: "POST",
       path: "/settings",
       handler: "settings.setSettings",
-      config: { policies: [] },
+      config: { policies: SETTINGS_POLICIES },
     },
   ],
 };

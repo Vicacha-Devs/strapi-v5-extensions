@@ -125,5 +125,6 @@
   "Bad": "Kötü",
   "Social-preview.alert": "Önizlemeyi görmek için sosyal ağ bileşeninizi tamamlayın",
   "Information": "Bilgi",
-  "notification.success.settings": "{collectionName} içerik türü için ayarlar kaydedildi."
+  "notification.success.settings": "{collectionName} içerik türü için ayarlar kaydedildi.",
+  "notification.error.settings": "SEO ayarları kaydedilemedi."
 }

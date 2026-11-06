@@ -4,8 +4,14 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   const actions = [
     {
       section: "plugins",
-      displayName: "Access the plugin settings",
+      displayName: "Access the SEO plugin",
       uid: "read",
+      pluginName: "seo",
+    },
+    {
+      section: "plugins",
+      displayName: "Manage SEO plugin settings",
+      uid: "settings.update",
       pluginName: "seo",
     },
   ];

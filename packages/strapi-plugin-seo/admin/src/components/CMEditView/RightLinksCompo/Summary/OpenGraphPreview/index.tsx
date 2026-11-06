@@ -46,9 +46,9 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
       <Modal.Body>
         {openGraph?.ogTitle &&
         openGraph?.ogDescription &&
-        openGraph?.ogImage ? (
+        openGraph?.ogImage?.url ? (
           <>
-            <Flex alignItems="left" direction="column" gap={2}>
+            <Flex alignItems="flex-start" direction="column" gap={2}>
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
                   {formatMessage({
@@ -63,7 +63,7 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
               description={openGraph.ogDescription}
               image={openGraph.ogImage}
             />
-            <Flex alignItems="left" direction="column" gap={2}>
+            <Flex alignItems="flex-start" direction="column" gap={2}>
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
                   {formatMessage({
@@ -78,7 +78,7 @@ export const OpenGraphPreview = ({ modifiedData }: OpenGraphPreviewProps) => {
               description={openGraph.ogDescription}
               image={openGraph.ogImage}
             />
-            <Flex alignItems="left" direction="column" gap={2}>
+            <Flex alignItems="flex-start" direction="column" gap={2}>
               <Flex gap={1}>
                 <Badge backgroundColor="neutral150" textColor="neutral600">
                   {formatMessage({

@@ -1,5 +1,3 @@
-import isNull from "lodash/isNull";
-
 import type {
   ContentManagerFormValues,
   ContentTypeSchemaInfo,
@@ -10,32 +8,35 @@ const recursiveSearch = (
   keyword: string,
   relations: string[],
   results: string[] = [],
-  allImageNames: string[] = []
+  allImageNames: string[] = [],
+  visited: WeakSet<object> = new WeakSet()
 ): { alternativeTexts: string[]; imageNames: string[] } => {
   const alternativeTexts = results;
   const imageNames = allImageNames;
 
-  if (!obj || typeof obj !== "object") {
+  if (!obj || typeof obj !== "object" || visited.has(obj)) {
     return { alternativeTexts, imageNames };
   }
+  visited.add(obj);
 
   Object.keys(obj).forEach((key) => {
     const value = obj[key];
 
-    if (key === keyword && typeof value !== "object") {
+    if (key === keyword && (value === null || typeof value !== "object")) {
       alternativeTexts.push(typeof value === "string" ? value : "");
       imageNames.push(typeof obj.name === "string" ? obj.name : "");
     } else if (
+      value !== null &&
       typeof value === "object" &&
-      !relations.includes(key) &&
-      !isNull(value)
+      !relations.includes(key)
     ) {
       recursiveSearch(
         value as Record<string, unknown>,
         keyword,
         relations,
         alternativeTexts,
-        imageNames
+        imageNames,
+        visited
       );
     }
   });

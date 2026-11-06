@@ -1,7 +1,3 @@
-import get from "lodash/get";
-import isEmpty from "lodash/isEmpty";
-import isNull from "lodash/isNull";
-
 import type {
   ContentManagerFormValues,
   EmptyAltCount,
@@ -17,212 +13,219 @@ export const qualityVerdict: Record<SeoQualityVerdict, SeoQualityVerdict> = {
   bad: "bad",
 };
 
+export const isEmptyValue = (value: unknown): boolean => {
+  if (value === null || value === undefined) return true;
+  if (typeof value === "string") return value.trim().length === 0;
+  if (Array.isArray(value)) return value.length === 0;
+  if (typeof value === "object") {
+    return Object.keys(value as Record<string, unknown>).length === 0;
+  }
+  return false;
+};
+
+export const isSameCheckStatus = (
+  a?: SeoCheckStatus | null,
+  b?: SeoCheckStatus | null
+): boolean => {
+  if (!a || !b) return false;
+  return a.qualityVerdict === b.qualityVerdict && a.message === b.message;
+};
+
 export const getMetaTitleCheckPreview = (
   modifiedData: ContentManagerFormValues
 ): SeoCheckStatus => {
-  const metaTitle = get<string | null>(modifiedData, "seo.metaTitle", null);
+  const metaTitle = modifiedData?.seo?.metaTitle ?? null;
 
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.good,
-  };
-
-  if (isNull(metaTitle) || isEmpty(metaTitle)) {
-    status = {
+  if (typeof metaTitle !== "string" || isEmptyValue(metaTitle)) {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.improvements,
     };
-  } else if (metaTitle.length > 60) {
-    status = {
+  }
+  if (metaTitle.length > 60) {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.bad,
     };
   }
-  return status;
+  return {
+    message: "",
+    qualityVerdict: qualityVerdict.good,
+  };
 };
 
 export const getMetaDescriptionPreview = (
   modifiedData: ContentManagerFormValues
 ): SeoCheckStatus => {
-  const metaDescription = get<string | null>(
-    modifiedData,
-    "seo.metaDescription",
-    null
-  );
+  const metaDescription = modifiedData?.seo?.metaDescription ?? null;
 
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.good,
-  };
-
-  if (isNull(metaDescription) || isEmpty(metaDescription)) {
-    status = {
+  if (typeof metaDescription !== "string" || isEmptyValue(metaDescription)) {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.improvements,
     };
-  } else if (metaDescription.length > 160) {
-    status = {
-      message: "",
-      qualityVerdict: qualityVerdict.bad,
-    };
-  } else if (metaDescription.length < 50) {
-    status = {
+  }
+  if (metaDescription.length > 160 || metaDescription.length < 50) {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.bad,
     };
   }
-  return status;
+  return {
+    message: "",
+    qualityVerdict: qualityVerdict.good,
+  };
 };
 
 export const getAlternativeTextPreview = (
   emptyAltCount: EmptyAltCount
 ): SeoCheckStatus => {
-  const intersections = get<number | null>(
-    emptyAltCount,
-    "intersections",
-    null
-  );
-  const richTextAlts = get<EmptyAltCount["richTextAlts"]>(
-    emptyAltCount,
-    "richTextAlts",
-    []
-  );
-  const altTexts = get<string[]>(emptyAltCount, "altTexts", []);
+  const intersections = emptyAltCount?.intersections ?? null;
+  const richTextAlts = Array.isArray(emptyAltCount?.richTextAlts)
+    ? emptyAltCount.richTextAlts
+    : [];
+  const blockTextAlts = Array.isArray(emptyAltCount?.blockTextAlts)
+    ? emptyAltCount.blockTextAlts
+    : [];
+  const altTexts = Array.isArray(emptyAltCount?.altTexts)
+    ? emptyAltCount.altTexts
+    : [];
 
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.good,
-  };
-
-  const missingRichTextAlt = richTextAlts.filter(
+  const missingRichOrBlockAlt = [...richTextAlts, ...blockTextAlts].filter(
     (x) => x.occurences !== 0
   ).length;
+
   if (intersections === 0) {
-    status = {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.bad,
     };
-  } else if (altTexts.includes("")) {
-    status = {
-      message: "",
-      qualityVerdict: qualityVerdict.improvements,
-    };
-  } else if (missingRichTextAlt >= 1) {
-    status = {
+  }
+  if (altTexts.includes("") || missingRichOrBlockAlt >= 1) {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.improvements,
     };
   }
-  return status;
+  return {
+    message: "",
+    qualityVerdict: qualityVerdict.good,
+  };
 };
 
 export const getWordCountPreview = (
   wordCount: number | null
 ): SeoCheckStatus => {
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.good,
-  };
-
-  if (isNull(wordCount) || wordCount < 300) {
-    status = {
+  if (typeof wordCount !== "number" || wordCount < 300) {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.improvements,
     };
   }
-  return status;
+  return {
+    message: "",
+    qualityVerdict: qualityVerdict.good,
+  };
 };
 
 export const getKeywordDensityPreview = (
   keywordsDensity: KeywordDensityMap
 ): SeoCheckStatus => {
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.good,
-  };
-
-  if (isEmpty(keywordsDensity)) {
+  if (isEmptyValue(keywordsDensity)) {
     return {
       message: "",
       qualityVerdict: qualityVerdict.improvements,
     };
   }
 
+  let hasUnused = false;
+  let hasUsedOnce = false;
+
   Object.keys(keywordsDensity).forEach((keyword) => {
-    const count = get<number>(keywordsDensity[keyword], "count", 0);
+    const count = keywordsDensity[keyword]?.count ?? 0;
     if (count === 0) {
-      status = {
-        message: "",
-        qualityVerdict: qualityVerdict.improvements,
-      };
+      hasUnused = true;
     } else if (count <= 1) {
-      status = {
-        message: "",
-        qualityVerdict: qualityVerdict.bad,
-      };
+      hasUsedOnce = true;
     }
   });
 
-  return status;
+  if (hasUsedOnce) {
+    return {
+      message: "",
+      qualityVerdict: qualityVerdict.bad,
+    };
+  }
+  if (hasUnused) {
+    return {
+      message: "",
+      qualityVerdict: qualityVerdict.improvements,
+    };
+  }
+
+  return {
+    message: "",
+    qualityVerdict: qualityVerdict.good,
+  };
 };
 
 export const canonicalUrlPreview = (
   modifiedData: ContentManagerFormValues
 ): SeoCheckStatus => {
-  const canonicalUrl = get<string | null>(
-    modifiedData,
-    "seo.canonicalURL",
-    null
-  );
-  let status: SeoCheckStatus = {
+  const canonicalUrl = modifiedData?.seo?.canonicalURL ?? null;
+  if (typeof canonicalUrl !== "string" || isEmptyValue(canonicalUrl)) {
+    return {
+      message: "",
+      qualityVerdict: qualityVerdict.bad,
+    };
+  }
+  return {
     message: "",
     qualityVerdict: qualityVerdict.good,
   };
-  if (isNull(canonicalUrl)) {
-    status = {
-      message: "",
-      qualityVerdict: qualityVerdict.bad,
-    };
-  }
-  return status;
 };
 
 export const lastUpdatedAtPreview = (
-  modifiedData: ContentManagerFormValues
+  modifiedData: ContentManagerFormValues,
+  fallbackUpdatedAt: string | null = null
 ): SeoCheckStatus => {
-  const updatedAt = get<string | null>(modifiedData, "updatedAt", null);
+  const updatedAt = fallbackUpdatedAt ?? modifiedData?.updatedAt ?? null;
 
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.improvements,
-  };
-
-  if (isNull(updatedAt)) {
-    status = {
+  if (typeof updatedAt !== "string" || isEmptyValue(updatedAt)) {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.bad,
     };
-  } else {
-    const oneYearAgo = Date.parse(
-      new Date(
-        new Date().setFullYear(new Date().getFullYear() - 1)
-      ).toISOString()
-    );
-    if (Date.parse(updatedAt) >= oneYearAgo) {
-      status = {
-        message: "",
-        qualityVerdict: qualityVerdict.good,
-      };
-    }
   }
-  return status;
+
+  const parsedUpdatedAt = Date.parse(updatedAt);
+  if (Number.isNaN(parsedUpdatedAt)) {
+    return {
+      message: "",
+      qualityVerdict: qualityVerdict.bad,
+    };
+  }
+
+  const oneYearAgoDate = new Date();
+  oneYearAgoDate.setFullYear(oneYearAgoDate.getFullYear() - 1);
+  if (parsedUpdatedAt >= oneYearAgoDate.getTime()) {
+    return {
+      message: "",
+      qualityVerdict: qualityVerdict.good,
+    };
+  }
+
+  return {
+    message: "",
+    qualityVerdict: qualityVerdict.improvements,
+  };
 };
 
 export const metaRobotPreview = (
   modifiedData: ContentManagerFormValues
 ): SeoCheckStatus => {
-  const metaRobots = get<string | null>(modifiedData, "seo.metaRobots", null);
-  if (isNull(metaRobots) || isEmpty(metaRobots)) {
+  const metaRobots = modifiedData?.seo?.metaRobots ?? null;
+  if (typeof metaRobots !== "string" || isEmptyValue(metaRobots)) {
     return {
       message: "",
       qualityVerdict: qualityVerdict.good,
@@ -237,48 +240,42 @@ export const metaRobotPreview = (
 export const openGraphPreview = (
   modifiedData: ContentManagerFormValues
 ): SeoCheckStatus => {
-  const openGraph = get<OpenGraphData | null>(
-    modifiedData,
-    "seo.openGraph",
-    null
-  );
+  const openGraph: OpenGraphData | null = modifiedData?.seo?.openGraph ?? null;
 
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.good,
-  };
-
-  if (isNull(openGraph) || openGraph === undefined) {
+  if (!openGraph || typeof openGraph !== "object") {
     return {
       message: "",
       qualityVerdict: qualityVerdict.bad,
     };
-  } else if (
-    !openGraph.ogTitle ||
-    !openGraph.ogDescription ||
+  }
+  if (
+    isEmptyValue(openGraph.ogTitle) ||
+    isEmptyValue(openGraph.ogDescription) ||
     !openGraph.ogImage
   ) {
-    status = {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.improvements,
     };
   }
-  return status;
+  return {
+    message: "",
+    qualityVerdict: qualityVerdict.good,
+  };
 };
 
 export const structuredDataPreview = (
   modifiedData: ContentManagerFormValues
 ): SeoCheckStatus => {
-  const structuredData = get<unknown>(modifiedData, "seo.structuredData", null);
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.good,
-  };
-  if (isEmpty(structuredData)) {
-    status = {
+  const structuredData = modifiedData?.seo?.structuredData ?? null;
+  if (isEmptyValue(structuredData)) {
+    return {
       message: "",
       qualityVerdict: qualityVerdict.bad,
     };
   }
-  return status;
+  return {
+    message: "",
+    qualityVerdict: qualityVerdict.good,
+  };
 };

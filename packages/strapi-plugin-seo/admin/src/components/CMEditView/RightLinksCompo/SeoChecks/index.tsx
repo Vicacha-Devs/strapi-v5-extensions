@@ -116,7 +116,10 @@ const MediaAndFreshnessChecksSection = ({
     {checks?.alternativeText && (
       <AlternativeTextCheck
         intersections={emptyAltCount?.intersections ?? null}
-        richTextAlts={emptyAltCount?.richTextAlts ?? []}
+        richTextAlts={[
+          ...(emptyAltCount?.richTextAlts ?? []),
+          ...(emptyAltCount?.blockTextAlts ?? []),
+        ]}
         altTexts={emptyAltCount?.altTexts ?? []}
         checks={checks}
       />

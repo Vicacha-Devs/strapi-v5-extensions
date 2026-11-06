@@ -22,51 +22,55 @@ export const HomePage = React.memo(() => {
 
   const { formatMessage } = useIntl();
   const [isLoading, setIsLoading] = React.useState(true);
-  const [shouldEffect, setShouldEffect] = React.useState(false);
-
-  const seoComponent = React.useRef<Record<string, unknown> | null>(null);
-  const contentTypes = React.useRef<ContentTypesResponse | null>(null);
-
-  const fetchSeoComponent = async () => {
-    try {
-      const { data } = await get<Record<string, unknown> | null>(
-        `/${pluginId}/component`
-      );
-      return data;
-    } catch {
-      return null;
-    }
-  };
-
-  const fetchContentTypes = async () => {
-    try {
-      const { data } = await get<ContentTypesResponse>(
-        `/${pluginId}/content-types`
-      );
-      return data;
-    } catch {
-      return null;
-    }
-  };
-
-  const createSeoComponent = async () => {
-    try {
-      const { data } = await post<Record<string, unknown> | null>(
-        `/${pluginId}/component`
-      );
-      return data;
-    } catch {
-      return null;
-    }
-  };
+  const [seoComponent, setSeoComponent] = React.useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const [contentTypes, setContentTypes] =
+    React.useState<ContentTypesResponse | null>(null);
 
   React.useEffect(() => {
+    let isMounted = true;
+
+    const fetchSeoComponent = async () => {
+      try {
+        const { data } = await get<Record<string, unknown> | null>(
+          `/${pluginId}/component`
+        );
+        return data;
+      } catch {
+        return null;
+      }
+    };
+
+    const fetchContentTypes = async () => {
+      try {
+        const { data } = await get<ContentTypesResponse>(
+          `/${pluginId}/content-types`
+        );
+        return data;
+      } catch {
+        return null;
+      }
+    };
+
+    const createSeoComponent = async () => {
+      try {
+        const { data } = await post<Record<string, unknown> | null>(
+          `/${pluginId}/component`
+        );
+        return data;
+      } catch {
+        return null;
+      }
+    };
+
     const fetchData = async () => {
-      seoComponent.current = await fetchSeoComponent();
-      contentTypes.current = await fetchContentTypes();
+      let currentComponent = await fetchSeoComponent();
+      let currentContentTypes = await fetchContentTypes();
 
       const hasNoSeoComponent =
-        !seoComponent.current || Object.keys(seoComponent.current).length === 0;
+        !currentComponent || Object.keys(currentComponent).length === 0;
       if (hasNoSeoComponent) {
         try {
           lockAppWithAutoreload();
@@ -75,14 +79,24 @@ export const HomePage = React.memo(() => {
           // Ignore component creation error during auto-reload
         } finally {
           unlockAppWithAutoreload();
-          setShouldEffect(true);
         }
+        currentComponent = await fetchSeoComponent();
+        currentContentTypes = await fetchContentTypes();
+      }
+
+      if (isMounted) {
+        setSeoComponent(currentComponent);
+        setContentTypes(currentContentTypes);
+        setIsLoading(false);
       }
     };
-    void fetchData().then(() => {
-      setIsLoading(false);
-    });
-  }, [shouldEffect]);
+
+    void fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   if (isLoading) {
     return <Page.Loading />;
@@ -90,7 +104,7 @@ export const HomePage = React.memo(() => {
 
   return (
     <React.Fragment>
-      <Header seoComponent={seoComponent.current} />
+      <Header seoComponent={seoComponent} />
       <Box paddingLeft={8} paddingRight={8}>
         <ContentBox
           title={formatMessage({
@@ -100,13 +114,14 @@ export const HomePage = React.memo(() => {
           subtitle={formatMessage({
             id: getTrad("SEOPage.info.information"),
             defaultMessage:
-              "When adding your SEO component, make sure to name it 'seo' and to include it in the root of your Content-Type.",
+              "When adding your SEO component, make sure to name it 'seo' " +
+              "and to include it in the root of your Content-Type.",
           })}
           icon={<Information />}
           iconBackground="primary100"
         />
       </Box>
-      <Main contentTypes={contentTypes.current} />
+      <Main contentTypes={contentTypes} />
     </React.Fragment>
   );
 });

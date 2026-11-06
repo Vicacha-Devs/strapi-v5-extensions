@@ -1,8 +1,5 @@
 import { Box, Flex, Status, Typography } from "@strapi/design-system";
 import { CheckCircle, WarningCircle } from "@strapi/icons";
-import isEmpty from "lodash/isEmpty";
-import isEqual from "lodash/isEqual";
-import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -11,7 +8,11 @@ import type {
   SeoCheckStatus,
 } from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
-import { qualityVerdict } from "../../../utils/checks";
+import {
+  isEmptyValue,
+  isSameCheckStatus,
+  qualityVerdict,
+} from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
 import { SEOAccordion } from "../SEOAccordion";
 
@@ -45,18 +46,18 @@ interface MetaRobotCheckProps {
 export const MetaRobotCheck = ({ metaRobots, checks }: MetaRobotCheckProps) => {
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
-
-  let status: SeoCheckStatus = {
-    message: formatMessage({
-      id: getTrad("SEOChecks.metaRobotsCheck.default"),
-      defaultMessage: "Robot meta tags have been found!",
-    }),
-    qualityVerdict: qualityVerdict.good,
-  };
   const [tags, setTags] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    if (isNull(metaRobots) || isEmpty(metaRobots)) {
+    let status: SeoCheckStatus = {
+      message: formatMessage({
+        id: getTrad("SEOChecks.metaRobotsCheck.default"),
+        defaultMessage: "Robot meta tags have been found!",
+      }),
+      qualityVerdict: qualityVerdict.good,
+    };
+
+    if (typeof metaRobots !== "string" || isEmptyValue(metaRobots)) {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.metaRobotsCheck.not-found"),
@@ -64,16 +65,17 @@ export const MetaRobotCheck = ({ metaRobots, checks }: MetaRobotCheckProps) => {
         }),
         qualityVerdict: qualityVerdict.good,
       };
+      setTags([]);
     } else {
       setTags(metaRobots.split(","));
     }
-    if (!isEqual(status, checks.metaRobots) && dispatch) {
+    if (!isSameCheckStatus(status, checks.metaRobots) && dispatch) {
       dispatch({
         type: "UPDATE_PONCTUAL",
         value: { ...status, entity: "metaRobots" },
       });
     }
-  }, []);
+  }, [metaRobots]);
 
   return (
     <SEOAccordion
@@ -85,7 +87,8 @@ export const MetaRobotCheck = ({ metaRobots, checks }: MetaRobotCheckProps) => {
       label={formatMessage({
         id: getTrad("SEOChecks.metaRobotsCheck.label"),
         defaultMessage:
-          "The robots meta tag informs search engines which pages on your site should be indexed and more.",
+          "The robots meta tag informs search engines which pages on your " +
+          "site should be indexed and more.",
       })}
       component={
         <Box padding={2} background="neutral100">
@@ -140,7 +143,8 @@ export const MetaRobotCheck = ({ metaRobots, checks }: MetaRobotCheckProps) => {
                 {formatMessage({
                   id: getTrad("SEOChecks.metaRobotsCheck.notice-before"),
                   defaultMessage:
-                    "In order to not index your entry and no follow, your MetaRobots field should contain the following:",
+                    "In order to not index your entry and no follow, your " +
+                    "MetaRobots field should contain the following:",
                 })}{" "}
                 <Typography fontWeight="bold">
                   {formatMessage({
@@ -151,7 +155,9 @@ export const MetaRobotCheck = ({ metaRobots, checks }: MetaRobotCheckProps) => {
                 {formatMessage({
                   id: getTrad("SEOChecks.metaRobotsCheck.notice-after"),
                   defaultMessage:
-                    '. The rest should be handled by your front-end code logic. "If the field contains noindex, then you need to create the corresponding meta tag etc..."',
+                    ". The rest should be handled by your front-end code " +
+                    'logic. "If the field contains noindex, then you need ' +
+                    'to create the corresponding meta tag etc..."',
                 })}
               </Typography>
             </Status>

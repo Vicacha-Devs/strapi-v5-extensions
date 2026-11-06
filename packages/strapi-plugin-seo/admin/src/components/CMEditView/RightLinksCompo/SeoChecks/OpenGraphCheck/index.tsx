@@ -1,5 +1,3 @@
-import isEqual from "lodash/isEqual";
-import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -9,7 +7,11 @@ import type {
   SeoCheckStatus,
 } from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
-import { qualityVerdict } from "../../../utils/checks";
+import {
+  isEmptyValue,
+  isSameCheckStatus,
+  qualityVerdict,
+} from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
 import { SEOAccordion } from "../SEOAccordion";
 
@@ -22,13 +24,10 @@ export const OpenGraphCheck = ({ openGraph, checks }: OpenGraphCheckProps) => {
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
 
-  let status: SeoCheckStatus = {
-    message: "",
-    qualityVerdict: qualityVerdict.good,
-  };
-
   React.useEffect(() => {
-    if (isNull(openGraph) || openGraph === undefined) {
+    let status: SeoCheckStatus;
+
+    if (!openGraph || typeof openGraph !== "object") {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.openGraphCheck.not-found"),
@@ -37,8 +36,8 @@ export const OpenGraphCheck = ({ openGraph, checks }: OpenGraphCheckProps) => {
         qualityVerdict: qualityVerdict.bad,
       };
     } else if (
-      !openGraph.ogTitle ||
-      !openGraph.ogDescription ||
+      isEmptyValue(openGraph.ogTitle) ||
+      isEmptyValue(openGraph.ogDescription) ||
       !openGraph.ogImage
     ) {
       status = {
@@ -58,13 +57,13 @@ export const OpenGraphCheck = ({ openGraph, checks }: OpenGraphCheckProps) => {
       };
     }
 
-    if (!isEqual(status, checks.openGraph) && dispatch) {
+    if (!isSameCheckStatus(status, checks.openGraph) && dispatch) {
       dispatch({
         type: "UPDATE_PONCTUAL",
         value: { ...status, entity: "openGraph" },
       });
     }
-  }, []);
+  }, [openGraph]);
 
   return (
     <SEOAccordion
@@ -76,7 +75,8 @@ export const OpenGraphCheck = ({ openGraph, checks }: OpenGraphCheckProps) => {
       label={formatMessage({
         id: getTrad("SEOChecks.openGraphCheck.label"),
         defaultMessage:
-          "OpenGraph tags allow you to manage the title, description & image of your posts.",
+          "OpenGraph tags allow you to manage the title, description & " +
+          "image of your posts.",
       })}
     />
   );

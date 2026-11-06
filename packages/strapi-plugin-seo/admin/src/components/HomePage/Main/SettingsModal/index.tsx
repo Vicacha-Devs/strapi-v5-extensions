@@ -20,9 +20,15 @@ import { getTrad } from "../../../../utils/getTrad";
 
 interface SettingsModalProps {
   item: ContentTypeSeoItem;
+  defaultSettings?: SeoSettingsMap | null;
+  onSettingsUpdated?: (next: SeoSettingsMap) => void;
 }
 
-export const SettingsModal = ({ item }: SettingsModalProps) => {
+export const SettingsModal = ({
+  item,
+  defaultSettings: sharedSettings = null,
+  onSettingsUpdated,
+}: SettingsModalProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { getSettings, setSettings } = useSettingsApi();
@@ -40,21 +46,13 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
   const [alternativeText, setAlternativeText] = React.useState(true);
   const [lastUpdatedAt, setLastUpdatedAt] = React.useState(true);
 
-  const [defaultSettings, setDefaultSettings] =
-    React.useState<SeoSettingsMap | null>(null);
+  const [localSettings, setLocalSettings] =
+    React.useState<SeoSettingsMap | null>(sharedSettings);
 
-  React.useEffect(() => {
-    const fetchDefaultSettings = async () => {
-      const { data: defaultSettingsResult } = await getSettings();
-      setDefaultSettings(defaultSettingsResult);
-    };
+  const activeSettings = sharedSettings ?? localSettings;
 
-    void fetchDefaultSettings();
-  }, []);
-
-  const setupModalSettings = () => {
-    const seoChecks = defaultSettings?.[item?.uid]?.seoChecks;
-
+  const applyChecksToState = (settingsMap: SeoSettingsMap | null) => {
+    const seoChecks = settingsMap?.[item?.uid]?.seoChecks;
     if (!seoChecks) {
       return;
     }
@@ -71,18 +69,28 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
     setLastUpdatedAt(seoChecks.lastUpdatedAt);
   };
 
-  const handleSavingSettingsModal = () => {
-    if (!defaultSettings) {
+  const setupModalSettings = async () => {
+    if (activeSettings) {
+      applyChecksToState(activeSettings);
       return;
     }
+    try {
+      const { data } = await getSettings();
+      setLocalSettings(data);
+      onSettingsUpdated?.(data);
+      applyChecksToState(data);
+    } catch {
+      // Fall back to default switch states
+    }
+  };
 
+  const handleSavingSettingsModal = async () => {
+    const baseSettings = activeSettings ?? {};
     const collectionName =
-      defaultSettings?.[item?.uid]?.collectionName ??
-      item?.globalId ??
-      item?.uid;
+      baseSettings?.[item?.uid]?.collectionName ?? item?.globalId ?? item?.uid;
 
     const newSettings: SeoSettingsMap = {
-      ...defaultSettings,
+      ...baseSettings,
       [item?.uid]: {
         collectionName,
         seoChecks: {
@@ -100,21 +108,31 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
       },
     };
 
-    void setSettings(newSettings).then(async () => {
-      setDefaultSettings(newSettings);
+    try {
+      const { data: savedSettings } = await setSettings(newSettings);
+      const resolvedSettings = savedSettings ?? newSettings;
+      setLocalSettings(resolvedSettings);
+      onSettingsUpdated?.(resolvedSettings);
       setIsOpen(false);
-    });
-
-    toggleNotification({
-      type: "success",
-      message: formatMessage(
-        {
-          id: getTrad("notification.success.settings"),
-          defaultMessage: "Settings saved for {collectionName} content-type.",
-        },
-        { collectionName }
-      ),
-    });
+      toggleNotification({
+        type: "success",
+        message: formatMessage(
+          {
+            id: getTrad("notification.success.settings"),
+            defaultMessage: "Settings saved for {collectionName} content-type.",
+          },
+          { collectionName }
+        ),
+      });
+    } catch {
+      toggleNotification({
+        type: "danger",
+        message: formatMessage({
+          id: getTrad("notification.error.settings"),
+          defaultMessage: "Failed to save SEO settings.",
+        }),
+      });
+    }
   };
 
   return (
@@ -123,7 +141,7 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
         <Button
           variant="tertiary"
           startIcon={<Cog />}
-          onClick={() => setupModalSettings()}
+          onClick={() => void setupModalSettings()}
         >
           {formatMessage({
             id: getTrad("SEOPage.info.settings"),
@@ -147,9 +165,8 @@ export const SettingsModal = ({ item }: SettingsModalProps) => {
         </Modal.Header>
         <form
           onSubmit={(event: React.FormEvent) => {
-            handleSavingSettingsModal();
-            setIsOpen(false);
             event.preventDefault();
+            void handleSavingSettingsModal();
           }}
         >
           <Modal.Body>

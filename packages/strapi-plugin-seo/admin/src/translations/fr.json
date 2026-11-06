@@ -125,5 +125,6 @@
   "Bad": "Problèmes",
   "Social-preview.alert": "Complétez votre composant afin d'obtenir un aperçu",
   "Information": "Information",
-  "notification.success.settings": "Paramètres enregistrés pour le content-type {collectionName}."
+  "notification.success.settings": "Paramètres enregistrés pour le content-type {collectionName}.",
+  "notification.error.settings": "Impossible d'enregistrer les paramètres SEO."
 }

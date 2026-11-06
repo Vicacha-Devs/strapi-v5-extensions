@@ -1,7 +1,5 @@
 import { Box, Typography } from "@strapi/design-system";
 import { formatDistance } from "date-fns";
-import isEqual from "lodash/isEqual";
-import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -10,7 +8,11 @@ import type {
   SeoCheckStatus,
 } from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
-import { qualityVerdict } from "../../../utils/checks";
+import {
+  isEmptyValue,
+  isSameCheckStatus,
+  qualityVerdict,
+} from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
 import { SEOAccordion } from "../SEOAccordion";
 
@@ -25,18 +27,24 @@ export const LastUpdatedAtCheck = ({
 }: LastUpdatedAtCheckProps) => {
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
-
-  let status: SeoCheckStatus = {
-    message: formatMessage({
-      id: getTrad("SEOChecks.lastUpdatedAtCheck.default"),
-      defaultMessage:
-        "This content was modified over a year ago! Search engines love fresh content.",
-    }),
-    qualityVerdict: qualityVerdict.improvements,
-  };
+  const parsedTimestamp =
+    typeof updatedAt === "string" && !isEmptyValue(updatedAt)
+      ? Date.parse(updatedAt)
+      : Number.NaN;
+  const isValidUpdatedAt = !Number.isNaN(parsedTimestamp);
 
   React.useEffect(() => {
-    if (isNull(updatedAt)) {
+    let status: SeoCheckStatus = {
+      message: formatMessage({
+        id: getTrad("SEOChecks.lastUpdatedAtCheck.default"),
+        defaultMessage:
+          "This content was modified over a year ago! Search engines love " +
+          "fresh content.",
+      }),
+      qualityVerdict: qualityVerdict.improvements,
+    };
+
+    if (!isValidUpdatedAt) {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.lastUpdatedAtCheck.save-content"),
@@ -45,29 +53,27 @@ export const LastUpdatedAtCheck = ({
         qualityVerdict: qualityVerdict.bad,
       };
     } else {
-      const oneYearAgo = Date.parse(
-        new Date(
-          new Date().setFullYear(new Date().getFullYear() - 1)
-        ).toISOString()
-      );
-      if (Date.parse(updatedAt) >= oneYearAgo) {
+      const oneYearAgoDate = new Date();
+      oneYearAgoDate.setFullYear(oneYearAgoDate.getFullYear() - 1);
+      if (parsedTimestamp >= oneYearAgoDate.getTime()) {
         status = {
           message: formatMessage({
             id: getTrad("SEOChecks.lastUpdatedAtCheck.success"),
             defaultMessage:
-              "Awesome! This content was last modified in less than an year ago!",
+              "Awesome! This content was last modified in less than an year " +
+              "ago!",
           }),
           qualityVerdict: qualityVerdict.good,
         };
       }
     }
-    if (!isEqual(status, checks.lastUpdatedAt) && dispatch) {
+    if (!isSameCheckStatus(status, checks.lastUpdatedAt) && dispatch) {
       dispatch({
         type: "UPDATE_PONCTUAL",
         value: { ...status, entity: "lastUpdatedAt" },
       });
     }
-  }, []);
+  }, [updatedAt, isValidUpdatedAt, parsedTimestamp]);
 
   return (
     <SEOAccordion
@@ -78,10 +84,12 @@ export const LastUpdatedAtCheck = ({
       label={formatMessage({
         id: getTrad("SEOChecks.lastUpdatedAtCheck.label"),
         defaultMessage:
-          "Search engines love fresh content. This will check if your entry was last modified in less than an year ago.",
+          "Search engines love fresh content. This will check if your entry " +
+          "was last modified in less than an year ago.",
       })}
       status={checks.lastUpdatedAt}
       component={
+        isValidUpdatedAt &&
         updatedAt && (
           <Box padding={4} background="neutral100">
             <Typography variant="omega">
