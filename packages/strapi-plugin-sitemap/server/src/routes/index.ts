@@ -1,3 +1,25 @@
+import { PLUGIN_ID } from "../pluginId";
+
+const readSettingsPolicies = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: {
+      actions: [`plugin::${PLUGIN_ID}.settings.read`],
+    },
+  },
+];
+
+const updateSettingsPolicies = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: {
+      actions: [`plugin::${PLUGIN_ID}.settings.update`],
+    },
+  },
+];
+
 const frontend = [
   {
     method: "GET",
@@ -23,7 +45,7 @@ const admin = [
     path: "/settings",
     handler: "controller.getSettings",
     config: {
-      policies: [],
+      policies: readSettingsPolicies,
     },
   },
   {
@@ -31,7 +53,7 @@ const admin = [
     path: "/settings",
     handler: "controller.updateSettings",
     config: {
-      policies: [],
+      policies: updateSettingsPolicies,
     },
   },
   {
@@ -39,7 +61,7 @@ const admin = [
     path: "/content-types",
     handler: "controller.getContentTypes",
     config: {
-      policies: [],
+      policies: readSettingsPolicies,
     },
   },
   {
@@ -47,7 +69,7 @@ const admin = [
     path: "/locales",
     handler: "controller.getLocales",
     config: {
-      policies: [],
+      policies: readSettingsPolicies,
     },
   },
   {
@@ -55,7 +77,7 @@ const admin = [
     path: "/allowed-fields",
     handler: "controller.getAllowedFields",
     config: {
-      policies: [],
+      policies: readSettingsPolicies,
     },
   },
 ];

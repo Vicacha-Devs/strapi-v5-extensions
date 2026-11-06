@@ -243,21 +243,26 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
         ? sitemapEntry.langcode
         : undefined;
 
-    let entries: Record<string, unknown>[];
+    const hasDraftAndPublish = ctSchema.options?.draftAndPublish !== false;
+    let entries: Record<string, unknown>[] = [];
+    let documentsSucceeded = false;
     try {
-      entries =
-        (await getDocuments(strapi)<Record<string, unknown>>(
-          targetUid
-        ).findMany({
-          locale,
-          status: "published",
-          populate,
-        })) ?? [];
+      const docsResult = await getDocuments(strapi)<Record<string, unknown>>(
+        targetUid
+      ).findMany({
+        locale,
+        status: "published",
+        populate,
+      });
+      if (Array.isArray(docsResult)) {
+        entries = docsResult;
+        documentsSucceeded = true;
+      }
     } catch {
       entries = [];
     }
 
-    if (entries.length === 0) {
+    if (!documentsSucceeded || entries.length === 0) {
       const fallbackQuery = getDbQuery<Record<string, unknown>>(
         strapi,
         targetUid
@@ -265,14 +270,23 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       if (fallbackQuery?.findMany) {
         try {
           const where = locale ? { locale } : undefined;
-          entries =
-            (await fallbackQuery.findMany(where ? { where } : undefined)) ?? [];
+          const fallbackRows =
+            (await fallbackQuery.findMany({
+              ...(where ? { where } : {}),
+              ...(populate ? { populate } : {}),
+            })) ?? [];
+          if (fallbackRows.length > 0) {
+            entries = fallbackRows;
+          }
         } catch {
-          entries = [];
+          // Ignore fallback query errors when documents already ran
         }
       }
     }
 
+    if (hasDraftAndPublish) {
+      return entries.filter((entry) => entry.publishedAt !== null);
+    }
     return entries;
   },
 

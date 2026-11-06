@@ -7,8 +7,31 @@ import services from "./services";
 const register = () => {};
 const destroy = () => {};
 const config = {
-  default: {},
-  validator() {},
+  default: {
+    hostname: "",
+    includeHreflang: true,
+  },
+  validator(pluginConfig: unknown) {
+    if (
+      pluginConfig === null ||
+      typeof pluginConfig !== "object" ||
+      Array.isArray(pluginConfig)
+    ) {
+      throw new Error("Sitemap plugin config must be an object");
+    }
+    const cfg = pluginConfig as Record<string, unknown>;
+    if (cfg.hostname !== undefined && typeof cfg.hostname !== "string") {
+      throw new Error("Sitemap plugin config.hostname must be a string");
+    }
+    if (
+      cfg.includeHreflang !== undefined &&
+      typeof cfg.includeHreflang !== "boolean"
+    ) {
+      throw new Error(
+        "Sitemap plugin config.includeHreflang must be a boolean"
+      );
+    }
+  },
 };
 
 const plugin: {

@@ -69,5 +69,6 @@
   "modal.sitemapDef.includeCustomUrls": "Inclure les URLs personnalisées dans ce sitemap",
   "modal.sitemapDef.namePlaceholder": "ex. articles ou pages",
   "settings.index.table.configsCount": "{count} configuration(s)",
-  "settings.tabs.general": "Général & Index du Sitemap"
+  "settings.tabs.general": "Général & Index du Sitemap",
+  "settings.notification.error": "Échec de l’enregistrement des paramètres du sitemap"
 }

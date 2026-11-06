@@ -2,14 +2,11 @@ import {
   Main,
   Box,
   Button,
-  Grid,
   Flex,
   Typography,
-  TextInput,
   Tabs,
 } from "@strapi/design-system";
-import { Check } from "@strapi/icons";
-import { useFetchClient } from "@strapi/strapi/admin";
+import { useFetchClient, useNotification } from "@strapi/strapi/admin";
 import React, { useState, useEffect } from "react";
 import { useIntl } from "react-intl";
 
@@ -19,6 +16,7 @@ import CollectionTypeModal, {
 import CustomURLModal, {
   type CustomURLConfig,
 } from "../components/CustomURLModal";
+import BaseUrlSection from "../components/settings/BaseUrlSection";
 import { CollectionTypesSection } from "../components/settings/CollectionTypesSection";
 import { CustomUrlsSection } from "../components/settings/CustomUrlsSection";
 import { ExcludedUrlsSection } from "../components/settings/ExcludedUrlsSection";
@@ -68,8 +66,20 @@ const upsertAtIndex = <T,>(
   return items.map((item, i) => (i === index ? nextItem : item));
 };
 
+const remapSitemapIndicesAfterDelete = (
+  sitemaps: SitemapDefinition[],
+  deletedIndex: number
+): SitemapDefinition[] =>
+  sitemaps.map((def) => ({
+    ...def,
+    collectionTypeConfigIndices: (def.collectionTypeConfigIndices ?? [])
+      .filter((idx) => idx !== deletedIndex)
+      .map((idx) => (idx > deletedIndex ? idx - 1 : idx)),
+  }));
+
 const Settings: React.FC = () => {
   const { get, put } = useFetchClient();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
 
   const [baseUrl, setBaseUrl] = useState<string>("");
@@ -106,6 +116,9 @@ const Settings: React.FC = () => {
     null
   );
 
+  const tr = (id: string, defaultMessage: string) =>
+    formatMessage({ id: getTrad(id), defaultMessage });
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -135,6 +148,13 @@ const Settings: React.FC = () => {
   const isExcludedUrlsModified =
     JSON.stringify(excludedUrls) !== JSON.stringify(initialExcludedUrls);
 
+  const notifyError = (defaultMessage: string) => {
+    toggleNotification({
+      type: "danger",
+      message: tr("settings.notification.error", defaultMessage),
+    });
+  };
+
   const persistSettings = async (
     overrides: Partial<NormalizedSitemapSettings> = {}
   ) => {
@@ -155,6 +175,7 @@ const Settings: React.FC = () => {
       setInitialBaseUrl(baseUrl);
     } catch (err) {
       console.error("Failed to update baseUrl:", err);
+      notifyError("Failed to save sitemap settings");
     }
   };
 
@@ -165,6 +186,7 @@ const Settings: React.FC = () => {
       setInitialSitemaps(sitemaps);
     } catch (err) {
       console.error("Failed to update sitemap settings:", err);
+      notifyError("Failed to save sitemap settings");
     }
   };
 
@@ -188,6 +210,7 @@ const Settings: React.FC = () => {
       setInitialExcludedUrls(excludedUrls);
     } catch (err) {
       console.error("Failed to update excluded URLs:", err);
+      notifyError("Failed to save excluded URLs");
     }
   };
 
@@ -201,6 +224,7 @@ const Settings: React.FC = () => {
       setInitialSitemaps(updated);
     } catch (err) {
       console.error("Failed to save sitemap definition:", err);
+      notifyError("Failed to save sitemap definition");
     }
   };
 
@@ -212,6 +236,7 @@ const Settings: React.FC = () => {
       setInitialSitemaps(updated);
     } catch (err) {
       console.error("Failed to delete sitemap definition:", err);
+      notifyError("Failed to delete sitemap definition");
     }
   };
 
@@ -229,6 +254,7 @@ const Settings: React.FC = () => {
       await persistSettings({ collectionTypes: updatedCollectionTypes });
     } catch (err) {
       console.error("Failed to save collection types:", err);
+      notifyError("Failed to save collection types");
     }
   };
 
@@ -236,12 +262,19 @@ const Settings: React.FC = () => {
     const updatedCollectionTypes = collectionTypes.filter(
       (_, i) => i !== index
     );
+    const updatedSitemaps = remapSitemapIndicesAfterDelete(sitemaps, index);
     setCollectionTypes(updatedCollectionTypes);
+    setSitemaps(updatedSitemaps);
 
     try {
-      await persistSettings({ collectionTypes: updatedCollectionTypes });
+      await persistSettings({
+        collectionTypes: updatedCollectionTypes,
+        sitemaps: updatedSitemaps,
+      });
+      setInitialSitemaps(updatedSitemaps);
     } catch (err) {
       console.error("Failed to delete collection type:", err);
+      notifyError("Failed to delete collection type");
     }
   };
 
@@ -259,6 +292,7 @@ const Settings: React.FC = () => {
       await persistSettings({ customURLs: updatedCustomURLs });
     } catch (err) {
       console.error("Failed to save custom URLs:", err);
+      notifyError("Failed to save custom URLs");
     }
   };
 
@@ -270,11 +304,12 @@ const Settings: React.FC = () => {
       await persistSettings({ customURLs: updatedCustomURLs });
     } catch (err) {
       console.error("Failed to delete custom URL:", err);
+      notifyError("Failed to delete custom URL");
     }
   };
 
-  const tr = (id: string, defaultMessage: string) =>
-    formatMessage({ id: getTrad(id), defaultMessage });
+  const tabCountLabel = (id: string, fallback: string, count: number) =>
+    `${tr(id, fallback)} (${count})`;
 
   return (
     <Main>
@@ -312,63 +347,36 @@ const Settings: React.FC = () => {
               {tr("settings.tabs.general", "General & Sitemap Index")}
             </Tabs.Trigger>
             <Tabs.Trigger value="collection-types">
-              {`${tr("settings.collectionTypes.title", "Collection Types")} (${collectionTypes.length})`}
+              {tabCountLabel(
+                "settings.collectionTypes.title",
+                "Collection Types",
+                collectionTypes.length
+              )}
             </Tabs.Trigger>
             <Tabs.Trigger value="custom-urls">
-              {`${tr("settings.customUrls.title", "Custom URLs")} (${customURLs.length})`}
+              {tabCountLabel(
+                "settings.customUrls.title",
+                "Custom URLs",
+                customURLs.length
+              )}
             </Tabs.Trigger>
             <Tabs.Trigger value="excluded-urls">
-              {`${tr("settings.excludedUrls.title", "Excluded URLs")} (${excludedUrls.length})`}
+              {tabCountLabel(
+                "settings.excludedUrls.title",
+                "Excluded URLs",
+                excludedUrls.length
+              )}
             </Tabs.Trigger>
           </Tabs.List>
 
           <Tabs.Content value="general">
             <Box paddingTop={4}>
-              <Box
-                padding={6}
-                background="neutral0"
-                shadow="filterShadow"
-                hasRadius
-                marginBottom={6}
-              >
-                <Typography variant="delta" tag="h2">
-                  {tr("settings.baseUrl.title", "Base URL")}
-                </Typography>
-                <Box paddingBottom={4}>
-                  <Typography variant="pi" textColor="neutral600">
-                    {tr(
-                      "settings.baseUrl.description",
-                      "Enter the base URL used for all sitemap entries"
-                    )}
-                  </Typography>
-                </Box>
-                <Grid.Root gap={4}>
-                  <Grid.Item col={6} s={12}>
-                    <Box style={{ width: "100%" }}>
-                      <TextInput
-                        placeholder={tr(
-                          "settings.baseUrl.placeholder",
-                          "https://example.com"
-                        )}
-                        value={baseUrl}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setBaseUrl(e.target.value)
-                        }
-                      />
-                    </Box>
-                  </Grid.Item>
-                </Grid.Root>
-                <Box paddingTop={4}>
-                  <Button
-                    startIcon={<Check />}
-                    onClick={handleSaveBaseUrl}
-                    disabled={!isUrlModified}
-                    variant={isUrlModified ? "default" : "tertiary"}
-                  >
-                    {tr("settings.save", "Save")}
-                  </Button>
-                </Box>
-              </Box>
+              <BaseUrlSection
+                baseUrl={baseUrl}
+                isModified={isUrlModified}
+                onChange={setBaseUrl}
+                onSave={handleSaveBaseUrl}
+              />
 
               <SitemapIndexSection
                 useSitemapIndex={useSitemapIndex}

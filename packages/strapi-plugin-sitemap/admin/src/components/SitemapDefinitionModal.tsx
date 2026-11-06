@@ -99,7 +99,8 @@ const SitemapDefinitionModal: React.FC<SitemapDefinitionModalProps> = ({
             hint={formatMessage({
               id: getTrad("modal.sitemapDef.nameHint"),
               defaultMessage:
-                "Used in URL: /api/sitemap/sitemap-[name].xml (letters, numbers, hyphens, underscores only)",
+                "Used in URL: /api/sitemap/sitemap-[name].xml " +
+                "(letters, numbers, hyphens, underscores only)",
             })}
           >
             <Field.Label>
@@ -133,7 +134,8 @@ const SitemapDefinitionModal: React.FC<SitemapDefinitionModalProps> = ({
                 {formatMessage({
                   id: getTrad("modal.sitemapDef.noCollectionTypes"),
                   defaultMessage:
-                    "No collection type configs yet. Add some in the Collection Types section first.",
+                    "No collection type configs yet. Add some in the " +
+                    "Collection Types section first.",
                 })}
               </Typography>
             ) : (
