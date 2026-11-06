@@ -1,7 +1,13 @@
 import { randomInt } from "node:crypto";
 
-import type { CalendarSourceMapping } from "../../../shared/types";
-import type { QuickCreateEntryParams } from "../types";
+import type {
+  CalendarSourceMapping,
+  RRuleFieldValue,
+} from "../../../shared/types";
+import type {
+  QuickCreateEntryParams,
+  RescheduleOccurrenceParams,
+} from "../types";
 
 export interface ContentTypeSchemaShape {
   options?: {
@@ -65,10 +71,7 @@ export function isBookingCollectionSource(
 
 function generateBookingCode(startIso: string): string {
   const dateCompact = startIso.slice(0, 10).replace(/-/g, "") || "20260101";
-  const rand = randomInt(36 ** 4)
-    .toString(36)
-    .padStart(4, "0")
-    .toUpperCase();
+  const rand = randomInt(1000, 9999);
   return `BK-${dateCompact}-${rand}`;
 }
 
@@ -273,4 +276,52 @@ export function buildQuickCreatePayload(
       : source.uid !== "plugin::bookings.booking";
 
   return { data, shouldPublish };
+}
+
+export function buildDirectUpdatePayload(
+  params: RescheduleOccurrenceParams,
+  source: CalendarSourceMapping,
+  existingDoc?: Record<string, unknown>
+): Record<string, unknown> {
+  if (params.cancelOccurrence) {
+    return source.fields.status ? { [source.fields.status]: "cancelled" } : {};
+  }
+  const rawExistingStart = existingDoc?.[source.fields.startDate];
+  const isDateOnlyStart =
+    typeof rawExistingStart === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(rawExistingStart);
+  const payload: Record<string, unknown> = {
+    [source.fields.startDate]: isDateOnlyStart
+      ? params.newStartDate.slice(0, 10)
+      : params.newStartDate,
+  };
+  if (params.newEndDate && source.fields.endDate) {
+    const rawExistingEnd = existingDoc?.[source.fields.endDate];
+    const isDateOnlyEnd =
+      isDateOnlyStart ||
+      (typeof rawExistingEnd === "string" &&
+        /^\d{4}-\d{2}-\d{2}$/.test(rawExistingEnd));
+    payload[source.fields.endDate] = isDateOnlyEnd
+      ? params.newEndDate.slice(0, 10)
+      : params.newEndDate;
+  }
+  return payload;
+}
+
+export function buildRecurrenceOverridePayload(
+  recurrence: RRuleFieldValue,
+  rruleField: string,
+  params: RescheduleOccurrenceParams
+): Record<string, unknown> {
+  const overrides = {
+    ...recurrence.overrides,
+    [params.occurrenceDate]: {
+      ...recurrence.overrides?.[params.occurrenceDate],
+      originalDate: params.occurrenceDate,
+      cancelled: Boolean(params.cancelOccurrence),
+      startDate: params.newStartDate || undefined,
+      endDate: params.newEndDate || undefined,
+    },
+  };
+  return { [rruleField]: { ...recurrence, overrides } };
 }

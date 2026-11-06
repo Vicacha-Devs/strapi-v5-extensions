@@ -190,7 +190,7 @@ export const CalendarViewsSection: React.FC<CalendarViewsSectionProps> = ({
                     "settings.defaultLocale.placeholder",
                     "Select primary language",
                   ],
-                  settings.defaultLocale || "es",
+                  settings.defaultLocale || "auto",
                   [
                     ["es", "settings.locale.es", "Español — Spanish (ES)"],
                     ["en", "settings.locale.en", "English (EN)"],

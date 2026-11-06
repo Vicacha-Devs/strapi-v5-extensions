@@ -12,45 +12,12 @@ import {
 } from "../../../shared/types";
 import { DEFAULT_CALENDAR_SETTINGS } from "../config";
 import { getCalendarService, type SettingsService } from "../types";
+import {
+  BUILTIN_BOOKINGS_SOURCE,
+  BUILTIN_EVENTS_SOURCE,
+} from "./builtinSources";
 
 const STORE_KEY = "settings";
-
-const BUILTIN_EVENTS_SOURCE: CalendarSourceMapping = {
-  id: "events",
-  label: "Events",
-  uid: "plugin::events.event",
-  color: "#4945FF",
-  enabled: true,
-  fields: {
-    title: "title",
-    startDate: "startDate",
-    endDate: "endDate",
-    rrule: "recurrence",
-    location: "location",
-    category: "category",
-    status: "eventStatus",
-    summary: "summary",
-    slug: "slug",
-    color: "color",
-  },
-};
-
-const BUILTIN_BOOKINGS_SOURCE: CalendarSourceMapping = {
-  id: "bookings",
-  label: "Bookings & Reservations",
-  uid: "plugin::bookings.booking",
-  color: "#0D9488",
-  enabled: true,
-  fields: {
-    title: "title",
-    startDate: "startDate",
-    endDate: "endDate",
-    status: "status",
-    location: "assignedHost",
-    summary: "notes",
-    category: "status",
-  },
-};
 
 const INTERNAL_PLUGIN_PREFIXES = [
   "plugin::upload",
@@ -267,6 +234,21 @@ function resolveViewBooleansPatch(
   };
 }
 
+function sanitizeSourceItem(src: CalendarSourceMapping): CalendarSourceMapping {
+  const categoryColors = src.categoryColors
+    ? Object.fromEntries(
+        Object.entries(src.categoryColors).filter(
+          ([, v]) => typeof v === "string" && HEX_COLOR_RE.test(v.trim())
+        )
+      )
+    : undefined;
+  return {
+    ...src,
+    color: pickPrimaryHex(src.color, "#4945ff"),
+    ...(categoryColors ? { categoryColors } : {}),
+  };
+}
+
 function buildUpdatedSettings(
   current: CalendarPluginSettings,
   patch: Partial<CalendarPluginSettings>
@@ -310,7 +292,7 @@ function buildUpdatedSettings(
     slotDuration: pickNonEmptyStr(patch.slotDuration, current.slotDuration),
     feedTitle: pickNonEmptyStr(patch.feedTitle, current.feedTitle, 140),
     businessHours: pickArray(patch.businessHours, current.businessHours),
-    sources: pickArray(patch.sources, current.sources),
+    sources: pickArray(patch.sources, current.sources).map(sanitizeSourceItem),
     secondaryCalendars: pickArray(
       patch.secondaryCalendars,
       current.secondaryCalendars ?? []

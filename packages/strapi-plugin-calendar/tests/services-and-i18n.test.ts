@@ -435,4 +435,57 @@ describe("Strapi Plugin Calendar Services & Controllers", () => {
     });
     expect(missingIcs.includes("BEGIN:VEVENT")).toBe(false);
   });
+
+  it("enforces publicFeed privacy, sanitizes hex colors & ICS headers, and preserves date-only reschedule", async () => {
+    const { services, documentsDb } = createMockStrapi({
+      sources: [
+        {
+          id: "events",
+          label: "Events",
+          uid: "api::event.event",
+          color: "#000; background: url(evil)",
+          enabled: true,
+          publicFeed: true,
+          fields: { title: "title", startDate: "startDate", color: "color" },
+        },
+        {
+          id: "bookings",
+          label: "Private Bookings",
+          uid: "api::booking.booking",
+          color: "#059669",
+          enabled: true,
+          publicFeed: false,
+          fields: { title: "bookingTitle", startDate: "checkIn" },
+        },
+      ],
+    });
+    documentsDb["api::event.event"][0].color = "#123;color:red";
+    documentsDb["api::event.event"][0].alternateDates = {
+      "bad:key\r\nSUMMARY:Injected": "Malicious",
+    };
+    documentsDb["api::booking.booking"][0].checkIn = "2026-05-03";
+
+    const publicOccs = await services.occurrence.getOccurrences({
+      from: "2026-05-01T00:00:00.000Z",
+      to: "2026-05-10T23:59:59.000Z",
+      publicOnly: true,
+    });
+    expect(publicOccs.some((o) => o.sourceId === "bookings")).toBe(false);
+    expect(publicOccs[0]?.color).toBe("#4945ff");
+
+    const ics = await services.ical.buildSingleInviteIcs({
+      documentId: "evt-doc-1",
+      occurrenceDate: "2026-05-01",
+    });
+    expect(ics).toContain("X-ALT-DATE-BADKEYSUMMARYINJECTED:Malicious");
+    expect(ics.includes("\r\nSUMMARY:Injected")).toBe(false);
+
+    await services.occurrence.rescheduleOccurrence({
+      sourceId: "bookings",
+      documentId: "bkg-doc-1",
+      occurrenceDate: "2026-05-03",
+      newStartDate: "2026-05-09T00:00:00.000Z",
+    });
+    expect(documentsDb["api::booking.booking"][0].checkIn).toBe("2026-05-09");
+  });
 });

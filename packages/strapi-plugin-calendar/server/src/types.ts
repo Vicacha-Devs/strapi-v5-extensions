@@ -55,12 +55,14 @@ export interface OccurrenceQueryParams {
   sourceId?: string;
   documentId?: string;
   includeDrafts?: boolean;
+  publicOnly?: boolean;
 }
 
 export interface RescheduleOccurrenceParams {
   sourceId?: string;
   uid?: string;
   documentId: string;
+  locale?: string;
   occurrenceDate: string;
   newStartDate: string;
   newEndDate?: string;
@@ -114,11 +116,13 @@ export interface IcalService {
     locale?: string;
     category?: string;
     sourceId?: string;
+    publicOnly?: boolean;
   }): Promise<string>;
   buildSingleInviteIcs(params: {
     documentId: string;
     occurrenceDate?: string;
     locale?: string;
+    publicOnly?: boolean;
   }): Promise<string>;
 }
 

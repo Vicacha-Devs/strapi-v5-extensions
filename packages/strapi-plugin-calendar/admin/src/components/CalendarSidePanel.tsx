@@ -2,6 +2,7 @@ import { Box, Button, Flex, Typography } from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
 import React, { useEffect, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
+import { NavLink } from "react-router-dom";
 
 import { formatDateInCalendarSystem } from "../../../shared/calendarSystems";
 import { PLUGIN_ID } from "../../../shared/pluginId";
@@ -61,6 +62,7 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
   const hasScheduleFields = Boolean(rawStartDate || docRecord[rruleField]);
 
   useEffect(() => {
+    if (!hasScheduleFields || !documentId) return;
     let mounted = true;
     get<{ data?: CalendarPluginSettings }>(`/${PLUGIN_ID}/settings`)
       .then((res) => {
@@ -75,7 +77,7 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
     return () => {
       mounted = false;
     };
-  }, [model, get]);
+  }, [model, get, hasScheduleFields, documentId]);
 
   const computedAlternateDates = useMemo(() => {
     if (!rawStartDate || !settings?.secondaryCalendars) {
@@ -169,8 +171,8 @@ export const CalendarSidePanel = (props: SidePanelProps) => {
             <Button
               variant="tertiary"
               size="S"
-              tag="a"
-              href={`/admin/plugins/${PLUGIN_ID}?documentId=${encodeURIComponent(documentId)}`}
+              tag={NavLink}
+              to={`/plugins/${PLUGIN_ID}?documentId=${encodeURIComponent(documentId)}`}
             >
               {t("sidePanel.openCalendar", "Open in Calendar View")}
             </Button>

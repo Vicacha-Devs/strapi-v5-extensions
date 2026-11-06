@@ -126,6 +126,8 @@ export interface CalendarSourceMapping {
   color: string;
   /** Whether this source is enabled on the calendar & occurrence APIs */
   enabled: boolean;
+  /** Whether this source is included in public Content-API feeds (defaults to true, false for private bookings) */
+  publicFeed?: boolean;
   /** Field mapping on the target collection type */
   fields: {
     title: string;

@@ -89,7 +89,7 @@ function resolveTitleAndLocationLabels(
       ? t("calendar.field.assignedHost", "Assigned Host / Resource")
       : t("calendar.field.location", "Location"),
     locationPlaceholder: isBookingSource
-      ? t("placeholder.assigned_host", "Main Hall / Imam / Coordinator")
+      ? t("placeholder.assigned_host", "Main Hall / Host / Coordinator")
       : t("placeholder.room_101_online", "Room 101 / Online"),
   };
 }
@@ -319,7 +319,7 @@ export const QuickCreatePanel: React.FC<QuickCreatePanelProps> = (props) => {
                   }
                   onClick={() => handleToggleWeekday(day.code)}
                 >
-                  {day.label}
+                  {t(`weekday.${day.code.toLowerCase()}`, day.label)}
                 </Button>
               ))}
             </Flex>

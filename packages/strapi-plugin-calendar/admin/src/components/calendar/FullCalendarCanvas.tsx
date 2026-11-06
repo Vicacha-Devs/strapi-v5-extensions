@@ -312,13 +312,16 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (
       const occ = arg.event.extendedProps?.occurrence as
         | ExpandedCalendarOccurrence
         | undefined;
-      if (occ && arg.event.start) {
-        onDropOrResizeOccurrence(
-          occ,
-          arg.event.start.toISOString(),
-          arg.event.end?.toISOString()
-        );
+      if (!occ || !arg.event.start) return;
+      const startIso = arg.event.allDay
+        ? `${arg.event.start.toISOString().slice(0, 10)}T00:00:00.000Z`
+        : arg.event.start.toISOString();
+      let endIso = arg.event.end?.toISOString();
+      if (arg.event.allDay && arg.event.end) {
+        const inclusiveEnd = new Date(arg.event.end.getTime() - 86_400_000);
+        endIso = `${inclusiveEnd.toISOString().slice(0, 10)}T23:59:59.000Z`;
       }
+      onDropOrResizeOccurrence(occ, startIso, endIso);
     },
     [onDropOrResizeOccurrence]
   );
@@ -339,7 +342,7 @@ export const FullCalendarCanvas: React.FC<FullCalendarCanvasProps> = (
       const tooltipParts = [
         dateKey,
         secondarySummary,
-        allowCreate ? "Click to create Event or Booking" : "",
+        allowCreate ? "+" : "",
       ].filter(Boolean);
 
       return (

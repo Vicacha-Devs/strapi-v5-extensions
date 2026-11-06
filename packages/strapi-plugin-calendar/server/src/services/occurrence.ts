@@ -14,12 +14,10 @@ import {
   type ExpandedSlot,
 } from "../../../shared/rruleEngine";
 import type {
-  CalendarItemStatus,
   CalendarPluginSettings,
   CalendarSourceMapping,
   ExpandedCalendarOccurrence,
   RRuleFieldValue,
-  TimeSlotWindow,
 } from "../../../shared/types";
 import {
   getCalendarService,
@@ -28,84 +26,15 @@ import {
   type QuickCreateEntryParams,
   type RescheduleOccurrenceParams,
 } from "../types";
+import { mapStatus, resolveStartEndFromDocument } from "./occurrenceDates";
 import {
+  buildDirectUpdatePayload,
   buildQuickCreatePayload,
+  buildRecurrenceOverridePayload,
   matchesSourceFilter,
   resolveTargetSource,
   type ContentTypeSchemaShape,
 } from "./quickCreateHelpers";
-
-const DEFAULT_TIME_SLOTS: Record<string, TimeSlotWindow> = {
-  morning: { start: "09:00:00", end: "11:00:00" },
-  afternoon: { start: "14:00:00", end: "16:00:00" },
-  evening: { start: "18:00:00", end: "20:00:00" },
-};
-
-function resolveDateOnlyWithSlot(
-  rawStart: string,
-  rawSlot: unknown,
-  source: CalendarSourceMapping
-) {
-  if (typeof rawSlot === "string" && rawSlot) {
-    const mapped = { ...DEFAULT_TIME_SLOTS, ...source.timeSlotMap }[rawSlot];
-    if (mapped) {
-      return {
-        startDate: `${rawStart}T${mapped.start}.000Z`,
-        endDate: `${rawStart}T${mapped.end}.000Z`,
-        allDay: false,
-      };
-    }
-    if (/^\d{2}:\d{2}(:\d{2})?$/.test(rawSlot)) {
-      const normalizedTime = rawSlot.length === 5 ? `${rawSlot}:00` : rawSlot;
-      return {
-        startDate: `${rawStart}T${normalizedTime}.000Z`,
-        endDate: null,
-        allDay: false,
-      };
-    }
-  }
-  return {
-    startDate: `${rawStart}T00:00:00.000Z`,
-    endDate: `${rawStart}T23:59:59.000Z`,
-    allDay: source.defaultAllDay ?? true,
-  };
-}
-
-function resolveStartEndFromDocument(
-  doc: Record<string, unknown>,
-  source: CalendarSourceMapping
-) {
-  const rawStart = doc[source.fields.startDate];
-  if (!rawStart || typeof rawStart !== "string") return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(rawStart)) {
-    const rawSlot = source.fields.timeSlot ? doc[source.fields.timeSlot] : null;
-    return resolveDateOnlyWithSlot(rawStart, rawSlot, source);
-  }
-  const rawEnd = source.fields.endDate ? doc[source.fields.endDate] : null;
-  const allDay =
-    typeof doc.allDay === "boolean"
-      ? doc.allDay
-      : Boolean(source.defaultAllDay);
-  return {
-    startDate: rawStart,
-    endDate: typeof rawEnd === "string" && rawEnd ? rawEnd : null,
-    allDay,
-  };
-}
-
-const STATUS_MAP: Record<string, CalendarItemStatus> = {
-  cancelled: "cancelled",
-  canceled: "cancelled",
-  rejected: "cancelled",
-  postponed: "postponed",
-  pending: "postponed",
-  rescheduled: "rescheduled",
-};
-
-function mapStatus(rawStatus: unknown): CalendarItemStatus {
-  if (typeof rawStatus !== "string") return "scheduled";
-  return STATUS_MAP[rawStatus.toLowerCase()] ?? "scheduled";
-}
 
 function resolveQueryWindow(params: OccurrenceQueryParams) {
   const y = new Date().getUTCFullYear();
@@ -120,9 +49,29 @@ function resolveQueryWindow(params: OccurrenceQueryParams) {
   };
 }
 
+function buildWindowFilters(
+  source: CalendarSourceMapping,
+  windowStart: string,
+  windowEnd: string
+): Record<string, unknown> {
+  if (source.fields.rrule) {
+    return { [source.fields.startDate]: { $lte: windowEnd } };
+  }
+  if (source.fields.endDate) {
+    return {
+      [source.fields.startDate]: { $lte: windowEnd },
+      [source.fields.endDate]: { $gte: windowStart },
+    };
+  }
+  return {
+    [source.fields.startDate]: { $gte: windowStart, $lte: windowEnd },
+  };
+}
+
 function buildDocQueryOpts(
   params: OccurrenceQueryParams,
   source: CalendarSourceMapping,
+  windowStart: string,
   windowEnd: string,
   includeLocale: boolean
 ): Core.DocumentQueryOptions {
@@ -130,7 +79,10 @@ function buildDocQueryOpts(
     limit: 1000,
     filters: params.documentId
       ? { documentId: { $eq: params.documentId } }
-      : { [source.fields.startDate]: { $lte: windowEnd } },
+      : buildWindowFilters(source, windowStart, windowEnd),
+    ...({
+      sort: { [source.fields.startDate]: "desc" },
+    } as Partial<Core.DocumentQueryOptions>),
   };
   if (includeLocale && params.locale && params.locale !== "auto") {
     opts.locale = params.locale;
@@ -145,12 +97,15 @@ async function fetchDocumentsForSource(
   strapi: Core.Strapi,
   source: CalendarSourceMapping,
   params: OccurrenceQueryParams,
+  windowStart: string,
   windowEnd: string
 ): Promise<Array<Record<string, unknown>>> {
   const find = (withLocale: boolean) =>
     strapi
       .documents(source.uid)
-      .findMany(buildDocQueryOpts(params, source, windowEnd, withLocale))
+      .findMany(
+        buildDocQueryOpts(params, source, windowStart, windowEnd, withLocale)
+      )
       .catch(() => []);
   if (!params.locale || params.locale === "auto") return find(false);
   const [primary, fallback] = await Promise.all([find(true), find(false)]);
@@ -167,6 +122,8 @@ function extractCustomFields(doc: Record<string, unknown>, keys?: string[]) {
   return Object.keys(extracted).length > 0 ? extracted : undefined;
 }
 
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{3,8}$/;
+
 function resolveDocColor(
   doc: Record<string, unknown>,
   source: CalendarSourceMapping,
@@ -175,13 +132,19 @@ function resolveDocColor(
   const catColor = categoryVal
     ? source.categoryColors?.[categoryVal]
     : undefined;
-  if (catColor) return catColor;
+  if (typeof catColor === "string" && HEX_COLOR_RE.test(catColor.trim())) {
+    return catColor.trim();
+  }
   const docColorVal = source.fields.color
     ? doc[source.fields.color]
     : doc.color;
-  return typeof docColorVal === "string" && docColorVal.startsWith("#")
-    ? docColorVal
-    : source.color;
+  if (
+    typeof docColorVal === "string" &&
+    HEX_COLOR_RE.test(docColorVal.trim())
+  ) {
+    return docColorVal.trim();
+  }
+  return HEX_COLOR_RE.test(source.color) ? source.color : "#4945ff";
 }
 
 const optStr = (v?: string) => (v ? v : undefined);
@@ -346,39 +309,6 @@ function expandDocumentOccurrences(
   return slots.map((slot) => buildOccurrenceItem(slot, meta));
 }
 
-function buildDirectUpdatePayload(
-  params: RescheduleOccurrenceParams,
-  source: CalendarSourceMapping
-): Record<string, unknown> {
-  if (params.cancelOccurrence && source.fields.status) {
-    return { [source.fields.status]: "cancelled" };
-  }
-  return {
-    [source.fields.startDate]: params.newStartDate,
-    ...(params.newEndDate && source.fields.endDate
-      ? { [source.fields.endDate]: params.newEndDate }
-      : {}),
-  };
-}
-
-function buildRecurrenceOverridePayload(
-  recurrence: RRuleFieldValue,
-  rruleField: string,
-  params: RescheduleOccurrenceParams
-): Record<string, unknown> {
-  const overrides = {
-    ...recurrence.overrides,
-    [params.occurrenceDate]: {
-      ...recurrence.overrides?.[params.occurrenceDate],
-      originalDate: params.occurrenceDate,
-      cancelled: Boolean(params.cancelOccurrence),
-      startDate: params.newStartDate || undefined,
-      endDate: params.newEndDate || undefined,
-    },
-  };
-  return { [rruleField]: { ...recurrence, overrides } };
-}
-
 export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
   const getSettingsService = () =>
     getCalendarService(strapi, PLUGIN_ID, "settings");
@@ -395,7 +325,9 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
       const { windowStart, windowEnd } = resolveQueryWindow(params);
       const activeSources = (settings.sources ?? []).filter(
         (s: CalendarSourceMapping) =>
-          s.enabled && matchesSourceFilter(s, params.sourceId)
+          s.enabled &&
+          (!params.publicOnly || s.publicFeed !== false) &&
+          matchesSourceFilter(s, params.sourceId)
       );
 
       const allOccurrences: ExpandedCalendarOccurrence[] = [];
@@ -404,6 +336,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
           strapi,
           source,
           params,
+          windowStart,
           windowEnd
         );
         for (const doc of docs) {
@@ -438,9 +371,13 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
           : sources[0];
       if (!source) throw new Error("Target calendar source is not configured.");
 
+      const localeOpt =
+        params.locale && params.locale !== "auto"
+          ? { locale: params.locale }
+          : {};
       const existing = await strapi
         .documents(source.uid)
-        .findOne({ documentId: params.documentId });
+        .findOne({ documentId: params.documentId, ...localeOpt });
       if (!existing) {
         throw new Error(
           `Document ${params.documentId} not found in ${source.uid}.`
@@ -453,10 +390,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): OccurrenceService => {
       const data =
         recurrence?.rrule && !params.applyToSeries && rruleField
           ? buildRecurrenceOverridePayload(recurrence, rruleField, params)
-          : buildDirectUpdatePayload(params, source);
+          : buildDirectUpdatePayload(params, source, existing);
       const updatedDoc = await strapi
         .documents(source.uid)
-        .update({ documentId: params.documentId, data });
+        .update({ documentId: params.documentId, data, ...localeOpt });
       return updatedDoc ?? {};
     },
 

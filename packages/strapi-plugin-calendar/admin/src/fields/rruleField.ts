@@ -6,11 +6,11 @@ export const rruleCustomField = {
   pluginId: PLUGIN_ID,
   type: "json",
   intlLabel: {
-    id: `${PLUGIN_ID}.customField.rrule.label`,
+    id: `${PLUGIN_ID}.rrule.field.label`,
     defaultMessage: "Recurrence Schedule (RRULE / RSCALE)",
   },
   intlDescription: {
-    id: `${PLUGIN_ID}.customField.rrule.description`,
+    id: `${PLUGIN_ID}.rrule.field.description`,
     defaultMessage:
       "Configure RFC 5545 & RFC 7529 recurring schedules, non-Gregorian calendar recurrence, excluded dates, and per-occurrence overrides.",
   },

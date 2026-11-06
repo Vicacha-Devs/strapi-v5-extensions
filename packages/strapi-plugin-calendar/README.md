@@ -16,16 +16,16 @@ Enterprise, **100% generic Multi-Collection Calendar, Scheduler, Non-Gregorian `
    - **Drag-to-Create Slot Selection**: Select any time range on the calendar to quick-create a new entry in any mapped collection or jump directly to the Strapi Content Manager.
    - **Configurable Operating Hours & Time Slots**: Customize `slotDuration`, `startHour`, `endHour`, and `firstDayOfWeek`.
 3. **Multi-Calendar Systems & Dual-Calendar Day Cells (`Hijri`, `Hebrew`, `Persian`, etc.)**:
-   - Supports 13 built-in Unicode CLDR calendar systems (`islamic-umalqura`, `islamic-civil`, `islamic-tbla`, `hebrew`, `persian`, `buddhist`, `chinese`, `japanese`, `indian`, `coptic`, `ethiopic`, `roc`, `iso8601`).
-   - Renders secondary calendar dates directly inside FullCalendar day cells (`showInDayCell: true`) and inside the event side panel (`showInSidePanel: true`).
+   - Supports 13 built-in Unicode CLDR calendar systems (`islamic-umalqura`, `islamic-civil`, `islamic-tbla`, `hebrew`, `persian`, `buddhist`, `chinese`, `japanese`, `indian`, `coptic`, `ethiopic`, `gregory`, `iso8601`).
+   - Renders secondary calendar dates directly inside FullCalendar day cells and inside the Content Manager edit view side panel.
    - Supports **`dayOffset` (`-2..+2`)** for moon-sighting adjustments and **`overrideField`** for explicit document-level date strings (e.g. `hijriDate`).
 4. **RFC 5545 `RRULE` + RFC 7529 `RSCALE` Non-Gregorian Recurrence Engine**:
    - Includes a custom field (`plugin::calendar.rrule`) with a visual builder and preset selector.
    - Supports standard Gregorian recurrence (`FREQ=WEEKLY;BYDAY=FR`) **and** non-Gregorian `RSCALE` recurrence (`RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1` for annual 1st of Ramadan, or `RSCALE=HEBREW` / `RSCALE=PERSIAN`).
 5. **Unified RFC 5545 iCalendar (`.ics`) Feed**:
-   - Public `/api/calendar/feed.ics` and single-event `/api/calendar/:documentId/invite.ics` endpoints with `?sourceId=`, `?category=`, `?from=`, and `?to=` filters for Google Calendar, Apple Calendar, and Outlook subscriptions.
+   - Content-API `/api/calendar/feed.ics` and single-event `/api/calendar/:documentId/invite.ics` endpoints with `?sourceId=`, `?category=`, `?from=`, and `?to=` filters for Google Calendar, Apple Calendar, and Outlook subscriptions.
 6. **10 Admin Locales Included**:
-   - `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`.
+   - `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `id`, `ur` (RTL), `fa` (RTL).
 
 ---
 
@@ -57,6 +57,7 @@ export default () => ({
           uid: "plugin::events.event",
           color: "#4945FF",
           enabled: true,
+          publicFeed: true,
           fields: {
             title: "title",
             startDate: "startDate",
@@ -75,6 +76,7 @@ export default () => ({
           uid: "plugin::bookings.booking",
           color: "#059669",
           enabled: true,
+          publicFeed: false,
           fields: {
             title: "customerName",
             startDate: "startDate",
@@ -90,8 +92,6 @@ export default () => ({
           intlCalendar: "islamic-umalqura",
           dayOffset: 0,
           overrideField: "hijriDate",
-          showInDayCell: true,
-          showInSidePanel: true,
           enabled: true,
         },
       ],
@@ -100,7 +100,6 @@ export default () => ({
           id: "ramadan-start",
           label: "Every 1st of Ramadan (Hijri Yearly)",
           rrule: "RSCALE=ISLAMIC-UMALQURA;FREQ=YEARLY;BYMONTH=9;BYMONTHDAY=1",
-          description: "Recurs annually on 1 Ramadan in the Islamic Umm al-Qura calendar",
         },
       ],
     },

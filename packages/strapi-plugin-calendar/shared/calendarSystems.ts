@@ -110,6 +110,10 @@ function getCachedIntlFormatter(
   const key = `${locale}|${options.year ?? ""}|${options.month ?? ""}|${options.day ?? ""}|${options.timeZone ?? "UTC"}`;
   let fmt = intlFormatterCache.get(key);
   if (!fmt) {
+    if (intlFormatterCache.size >= 200) {
+      const oldestKey = intlFormatterCache.keys().next().value;
+      if (oldestKey !== undefined) intlFormatterCache.delete(oldestKey);
+    }
     fmt = new Intl.DateTimeFormat(locale, options);
     intlFormatterCache.set(key, fmt);
   }

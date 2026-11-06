@@ -17,6 +17,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): IcalService => {
       locale?: string;
       category?: string;
       sourceId?: string;
+      publicOnly?: boolean;
     }): Promise<string> {
       const settings = await getSettingsService().getSettings();
       const occurrences = await getOccurrenceService().getOccurrences({
@@ -35,6 +36,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): IcalService => {
       documentId: string;
       occurrenceDate?: string;
       locale?: string;
+      publicOnly?: boolean;
     }): Promise<string> {
       const settings = await getSettingsService().getSettings();
       const refYear =
@@ -53,6 +55,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): IcalService => {
         to,
         locale: params.locale,
         includeDrafts: false,
+        publicOnly: params.publicOnly,
       });
 
       if (params.occurrenceDate) {

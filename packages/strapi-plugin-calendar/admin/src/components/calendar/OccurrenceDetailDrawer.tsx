@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@strapi/design-system";
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 import { describeRRule } from "../../../../shared/rruleEngine";
 import type { ExpandedCalendarOccurrence } from "../../../../shared/types";
@@ -161,8 +162,8 @@ export const OccurrenceDetailDrawer: React.FC<OccurrenceDetailDrawerProps> = ({
             <Button
               size="S"
               variant="tertiary"
-              tag="a"
-              href={`/admin/content-manager/collection-types/${occurrence.uid}/${occurrence.documentId}${
+              tag={NavLink}
+              to={`/content-manager/collection-types/${occurrence.uid}/${occurrence.documentId}${
                 occurrence.locale
                   ? `?plugins[i18n][locale]=${encodeURIComponent(occurrence.locale)}`
                   : ""

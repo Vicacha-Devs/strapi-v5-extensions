@@ -82,6 +82,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           sourceId: readOptString(body.sourceId),
           uid: readOptString(body.uid),
           documentId: String(body.documentId ?? ""),
+          locale: readOptString(body.locale),
           occurrenceDate: String(body.occurrenceDate ?? ""),
           newStartDate: String(body.newStartDate ?? ""),
           newEndDate: readOptString(body.newEndDate),

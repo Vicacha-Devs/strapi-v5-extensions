@@ -339,6 +339,7 @@ declare module "@fullcalendar/core" {
       title: string;
       start: Date | null;
       end: Date | null;
+      allDay: boolean;
       extendedProps: Record<string, unknown>;
     };
   }

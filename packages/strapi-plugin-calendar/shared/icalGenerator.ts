@@ -182,9 +182,11 @@ export function generateIcsCalendar(params: {
     }
     if (occ.alternateDates) {
       for (const alt of Object.values(occ.alternateDates)) {
-        lines.push(
-          `X-ALT-DATE-${alt.calendarId.toUpperCase()}:${escapeIcsText(alt.formatted)}`
-        );
+        const safeCalId = alt.calendarId
+          .replace(/[^A-Za-z0-9-]/g, "")
+          .toUpperCase();
+        if (!safeCalId) continue;
+        lines.push(`X-ALT-DATE-${safeCalId}:${escapeIcsText(alt.formatted)}`);
       }
     }
     const icsStatus =

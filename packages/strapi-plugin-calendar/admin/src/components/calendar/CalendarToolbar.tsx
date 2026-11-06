@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@strapi/design-system";
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 import { getLocalizedCalendarBundle } from "../../../../shared/localization";
 import { PLUGIN_ID } from "../../../../shared/pluginId";
@@ -170,8 +171,8 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           <Button
             variant="tertiary"
             size="S"
-            tag="a"
-            href={`/admin/settings/${PLUGIN_ID}`}
+            tag={NavLink}
+            to={`/settings/${PLUGIN_ID}`}
           >
             {t("calendar.settings", "Settings")}
           </Button>

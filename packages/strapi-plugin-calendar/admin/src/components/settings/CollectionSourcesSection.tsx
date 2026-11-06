@@ -150,7 +150,9 @@ export const CollectionSourcesSection: React.FC<
       id: existing?.id || idSlug || `source-${Date.now()}`,
       label: newSourceLabel.trim() || newSourceUid,
       uid: newSourceUid,
-      color: newSourceColor.startsWith("#") ? newSourceColor : "#0284C7",
+      color: /^#[0-9a-fA-F]{3,8}$/.test(newSourceColor.trim())
+        ? newSourceColor.trim()
+        : "#0284C7",
       enabled: existing?.enabled ?? true,
       fields: {
         ...existing?.fields,

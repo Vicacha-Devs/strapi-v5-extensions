@@ -84,19 +84,26 @@ export const SettingsPage: React.FC = () => {
     setSavedBanner(null);
     setBannerIsError(false);
     try {
+      let companionFailed = false;
       const [res, eventsRes, bookingsRes] = await Promise.all([
         put<SettingsApiResponse>(`/${PLUGIN_ID}/settings`, settings),
         eventsSettings
           ? put<CompanionApiResponse<EventsCompanionSettings>>(
               "/events/settings",
               eventsSettings
-            ).catch(() => null)
+            ).catch(() => {
+              companionFailed = true;
+              return null;
+            })
           : Promise.resolve(null),
         bookingsSettings
           ? put<CompanionApiResponse<BookingsCompanionSettings>>(
               "/bookings/settings",
               bookingsSettings
-            ).catch(() => null)
+            ).catch(() => {
+              companionFailed = true;
+              return null;
+            })
           : Promise.resolve(null),
       ]);
       if (res?.data?.data) {
@@ -108,12 +115,22 @@ export const SettingsPage: React.FC = () => {
       if (bookingsRes?.data?.data) {
         setBookingsSettings(bookingsRes.data.data);
       }
-      setSavedBanner(
-        t(
-          "settings.saved",
-          "Calendar, Events, and Bookings settings saved successfully."
-        )
-      );
+      if (companionFailed) {
+        setBannerIsError(true);
+        setSavedBanner(
+          t(
+            "settings.savedPartial",
+            "Calendar settings saved, but companion plugin settings could not be updated."
+          )
+        );
+      } else {
+        setSavedBanner(
+          t(
+            "settings.saved",
+            "Calendar, Events, and Bookings settings saved successfully."
+          )
+        );
+      }
     } catch {
       setBannerIsError(true);
       setSavedBanner(t("settings.error", "Could not save settings."));

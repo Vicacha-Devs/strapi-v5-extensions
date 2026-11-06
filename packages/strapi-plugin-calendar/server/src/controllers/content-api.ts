@@ -27,6 +27,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           documentId:
             typeof query.documentId === "string" ? query.documentId : undefined,
           includeDrafts: false,
+          publicOnly: true,
         });
 
         ctx.body = {
@@ -56,6 +57,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             typeof query.category === "string" ? query.category : undefined,
           sourceId:
             typeof query.sourceId === "string" ? query.sourceId : undefined,
+          publicOnly: true,
         });
 
         ctx.set?.("Content-Type", "text/calendar; charset=utf-8");
@@ -83,6 +85,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
               ? query.occurrenceDate
               : undefined,
           locale: typeof query.locale === "string" ? query.locale : undefined,
+          publicOnly: true,
         });
 
         ctx.set?.("Content-Type", "text/calendar; charset=utf-8");

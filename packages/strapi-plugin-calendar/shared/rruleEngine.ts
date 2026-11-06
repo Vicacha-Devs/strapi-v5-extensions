@@ -283,24 +283,21 @@ function matchesNonGregorianFrequency(
   ctx: SlotContext
 ): boolean {
   const calParts = extractCalendarParts(candidateDate, ctx.effectiveRScale!);
-  if (!calParts) return false;
+  if (!calParts || !ctx.baseParts) return false;
   const interval = Math.max(1, ctx.parsed.interval);
   if (ctx.parsed.freq === "MONTHLY") {
-    const monthsDiff = ctx.baseParts
-      ? (calParts.year - ctx.baseParts.year) * 12 +
-        (calParts.month - ctx.baseParts.month)
-      : 0;
+    const monthsDiff =
+      (calParts.year - ctx.baseParts.year) * 12 +
+      (calParts.month - ctx.baseParts.month);
     return (
       monthsDiff >= 0 &&
       monthsDiff % interval === 0 &&
       calParts.day === ctx.targetDayOfMonth
     );
   }
-  const yearsDiff =
-    ctx.baseParts && !ctx.parsed.byMonth
-      ? calParts.year - ctx.baseParts.year
-      : Math.max(0, calParts.year - (ctx.baseParts?.year ?? calParts.year));
+  const yearsDiff = calParts.year - ctx.baseParts.year;
   return (
+    yearsDiff >= 0 &&
     yearsDiff % interval === 0 &&
     calParts.month === ctx.targetMonth &&
     calParts.day === ctx.targetDayOfMonth

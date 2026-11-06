@@ -34,24 +34,17 @@ import { CalendarToolbar } from "../components/calendar/CalendarToolbar";
 import { FullCalendarCanvas } from "../components/calendar/FullCalendarCanvas";
 import { OccurrenceDetailDrawer } from "../components/calendar/OccurrenceDetailDrawer";
 import { QuickCreatePanel } from "../components/calendar/QuickCreatePanel";
+import { getUrlParam, type CalendarApiResponse } from "./calendarPageSupport";
 
 type OccItem = ExpandedCalendarOccurrence;
 type SecLang = SecondaryCalendarLanguageMode;
-
-interface CalendarApiResponse {
-  data?: { occurrences?: OccItem[]; settings?: CalendarPluginSettings };
-}
-
-const getUrlParam = (key: string) =>
-  typeof window === "undefined"
-    ? null
-    : new URLSearchParams(window.location.search).get(key);
 
 export const CalendarPage: React.FC = () => {
   const { formatMessage, locale } = useIntl();
   const { get, post } = useFetchClient();
   const calendarRef = useRef<FullCalendar | null>(null);
   const quickCreateRef = useRef<HTMLDivElement | null>(null);
+  const initialViewSyncedRef = useRef(false);
 
   const t = useCallback(
     (id: string, defaultMessage: string) =>
@@ -68,7 +61,6 @@ export const CalendarPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [localeOverride, setLocaleOverride] = useState("auto");
   const [secondaryLangMode, setSecondaryLangMode] = useState<SecLang>("local");
-
   const [occurrences, setOccurrences] = useState<OccItem[]>([]);
   const [settings, setSettings] = useState<CalendarPluginSettings | null>(null);
   const [loading, setLoading] = useState(false);
@@ -134,6 +126,13 @@ export const CalendarPage: React.FC = () => {
       }
       if (payload.settings) {
         setSettings(payload.settings);
+        if (!initialViewSyncedRef.current && payload.settings.defaultView) {
+          initialViewSyncedRef.current = true;
+          setViewMode(payload.settings.defaultView);
+          calendarRef.current
+            ?.getApi()
+            ?.changeView(payload.settings.defaultView);
+        }
         if (payload.settings.secondaryCalendarLanguage) {
           setSecondaryLangMode(payload.settings.secondaryCalendarLanguage);
         }
@@ -252,6 +251,7 @@ export const CalendarPage: React.FC = () => {
       sourceId: occ.sourceId,
       uid: occ.uid,
       documentId: occ.documentId,
+      locale: occ.locale,
       occurrenceDate: occ.occurrenceDate,
       newStartDate,
       newEndDate,
