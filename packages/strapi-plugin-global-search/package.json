@@ -31,15 +31,15 @@
     "./package.json": "./package.json",
     "./strapi-admin": {
       "types": "./dist/admin/index.d.ts",
-      "import": "./dist/admin/index.mjs",
-      "require": "./dist/admin/index.js",
-      "default": "./dist/admin/index.mjs"
+      "import": "./dist/admin/index.js",
+      "require": "./dist/admin/index.cjs",
+      "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
       "types": "./dist/server/index.d.ts",
-      "import": "./dist/server/index.mjs",
-      "require": "./dist/server/index.js",
-      "default": "./dist/server/index.mjs"
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs",
+      "default": "./dist/server/index.js"
     }
   },
   "publishConfig": {
