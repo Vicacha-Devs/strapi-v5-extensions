@@ -1,0 +1,1 @@
+export { getTrad } from "./getTrad";

@@ -1,0 +1,105 @@
+{
+  "name": "@vicacha-devs/strapi-plugin-notes",
+  "version": "1.0.0",
+  "description": "Strapi v5 Entity Notes plugin (forked & evolved from strapi-community/strapi-plugin-notes) with Audit Logs-style modal metadata (Created/Updated At & By), pinned notes, category badges, document/locale scoping, and a Global Notes Hub.",
+  "keywords": [
+    "audit-metadata",
+    "content-manager",
+    "editorial-notes",
+    "entity-notes",
+    "notes",
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5"
+  ],
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions/tree/main/packages/strapi-plugin-notes#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
+  },
+  "license": "MIT",
+  "author": "Vicacha Devs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
+    "directory": "packages/strapi-plugin-notes"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.js",
+      "require": "./dist/admin/index.cjs",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs",
+      "default": "./dist/server/index.js"
+    },
+    "./shared": {
+      "types": "./dist/shared/index.d.ts",
+      "source": "./shared/index.ts",
+      "import": "./dist/shared/index.js",
+      "require": "./dist/shared/index.cjs",
+      "default": "./dist/shared/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "strapi-plugin build && node ../../scripts/ensure-esm-dist.ts",
+    "test": "node --import ./tests/register-ts-resolver.ts --test tests/*.test.ts",
+    "test:ts": "tsc --noEmit -p admin/tsconfig.json && tsc --noEmit -p server/tsconfig.json",
+    "test:ts:admin": "tsc --noEmit -p admin/tsconfig.json",
+    "test:ts:server": "tsc --noEmit -p server/tsconfig.json",
+    "verify": "strapi-plugin verify",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link"
+  },
+  "dependencies": {
+    "@strapi/design-system": "^2.0.0-rc.21",
+    "@strapi/icons": "^2.0.0-rc.21",
+    "react-intl": "^6.6.8"
+  },
+  "devDependencies": {
+    "@strapi/sdk-plugin": "6.1.1",
+    "@strapi/strapi": "^5.39.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/plugin-shared": "workspace:*",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "styled-components": "^6.1.13",
+    "typescript": "^5.5.4"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  },
+  "strapi": {
+    "name": "notes",
+    "displayName": "Notes",
+    "description": "Attach rich editorial notes with author/timestamp metadata, categories, and pinned alerts to any Strapi v5 Content Manager entry.",
+    "kind": "plugin",
+    "required": false
+  }
+}
