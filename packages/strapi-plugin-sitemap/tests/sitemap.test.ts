@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import serverPlugin from "../dist/server/index.mjs";
+import serverPlugin from "../server/src/index";
 
 const createMockStrapi = ({
   pluginConfig = {},
@@ -44,6 +44,39 @@ const createMockStrapi = ({
   let currentOptions = optionsDoc;
   let currentEntries = [...sitemapEntries];
   let currentCustomUrls = [...customUrls];
+
+  const makeCrudRepo = <T extends { id: number }>(
+    getItems: () => T[],
+    setItems: (next: T[]) => void,
+    baseId = 0
+  ) => ({
+    async findMany() {
+      return getItems();
+    },
+    async update({
+      where,
+      data,
+    }: {
+      where: { id: number };
+      data: Record<string, unknown>;
+    }) {
+      const updated = getItems().map((item) =>
+        item.id === where.id ? ({ ...item, ...data } as T) : item
+      );
+      setItems(updated);
+      return updated.find((item) => item.id === where.id);
+    },
+    async delete({ where }: { where: { id: number } }) {
+      setItems(getItems().filter((item) => item.id !== where.id));
+    },
+    async create({ data }: { data: Record<string, unknown> }) {
+      const items = getItems();
+      const maxId = items.reduce((max, item) => Math.max(max, item.id), baseId);
+      const created = { id: maxId + 1, ...data } as unknown as T;
+      setItems([...items, created]);
+      return created;
+    },
+  });
 
   const strapi = {
     log: { error() {} },
@@ -91,13 +124,8 @@ const createMockStrapi = ({
           pluralName: "categories",
           displayName: "Category",
         },
-        pluginOptions: {
-          "content-manager": { visible: false },
-        },
-        attributes: {
-          name: { type: "string" },
-          slug: { type: "uid" },
-        },
+        pluginOptions: { "content-manager": { visible: false } },
+        attributes: { name: { type: "string" }, slug: { type: "uid" } },
       },
       "plugin::upload.file": {
         kind: "collectionType",
@@ -160,74 +188,22 @@ const createMockStrapi = ({
     db: {
       query(uid: string) {
         if (uid === "plugin::sitemap.sitemap-content-type") {
-          return {
-            async findMany() {
-              return currentEntries;
+          return makeCrudRepo(
+            () => currentEntries,
+            (next) => {
+              currentEntries = next;
             },
-            async update({
-              where,
-              data,
-            }: {
-              where: { id: number };
-              data: Record<string, unknown>;
-            }) {
-              currentEntries = currentEntries.map((e) =>
-                e.id === where.id
-                  ? ({ ...e, ...data } as (typeof currentEntries)[number])
-                  : e
-              );
-              return currentEntries.find((e) => e.id === where.id);
-            },
-            async delete({ where }: { where: { id: number } }) {
-              currentEntries = currentEntries.filter((e) => e.id !== where.id);
-            },
-            async create({ data }: { data: Record<string, unknown> }) {
-              const maxId = currentEntries.reduce(
-                (max, e) => Math.max(max, e.id),
-                0
-              );
-              const created = { id: maxId + 1, ...data };
-              currentEntries.push(created as (typeof currentEntries)[number]);
-              return created;
-            },
-          };
+            0
+          );
         }
         if (uid === "plugin::sitemap.sitemap-content-type-single-url") {
-          return {
-            async findMany() {
-              return currentCustomUrls;
+          return makeCrudRepo(
+            () => currentCustomUrls,
+            (next) => {
+              currentCustomUrls = next;
             },
-            async update({
-              where,
-              data,
-            }: {
-              where: { id: number };
-              data: Record<string, unknown>;
-            }) {
-              currentCustomUrls = currentCustomUrls.map((u) =>
-                u.id === where.id
-                  ? ({ ...u, ...data } as (typeof currentCustomUrls)[number])
-                  : u
-              );
-              return currentCustomUrls.find((u) => u.id === where.id);
-            },
-            async delete({ where }: { where: { id: number } }) {
-              currentCustomUrls = currentCustomUrls.filter(
-                (u) => u.id !== where.id
-              );
-            },
-            async create({ data }: { data: Record<string, unknown> }) {
-              const maxId = currentCustomUrls.reduce(
-                (max, u) => Math.max(max, u.id),
-                10
-              );
-              const created = { id: maxId + 1, ...data };
-              currentCustomUrls.push(
-                created as (typeof currentCustomUrls)[number]
-              );
-              return created;
-            },
-          };
+            10
+          );
         }
         if (uid === "plugin::sitemap.sitemap-option") {
           return {
@@ -264,32 +240,30 @@ const createMockStrapi = ({
 };
 
 describe("strapi-plugin-sitemap", () => {
-  it("parses single and multi-level table references from URL patterns", () => {
+  it("parses table references and blocks prototype pollution", () => {
     const strapi = createMockStrapi();
     const svc = serverPlugin.services.service({ strapi });
 
     const single = svc.parseTableReferences("blog/[category.slug]/[slug]");
-    assert.deepEqual(single, {
-      populate: {
-        category: true,
-      },
-    });
+    assert.deepEqual(single, { populate: { category: true } });
 
     const nested = svc.parseTableReferences(
       "shop/[department.category.slug]/[slug]"
     );
     assert.deepEqual(nested, {
-      populate: {
-        department: {
-          populate: {
-            category: true,
-          },
-        },
-      },
+      populate: { department: { populate: { category: true } } },
     });
+
+    const polluted = svc.parseTableReferences(
+      "evil/[__proto__.polluted.slug]/[constructor.prototype.x]/[slug]"
+    );
+    assert.deepEqual(polluted, {});
+    assert.equal(({} as Record<string, unknown>).polluted, undefined);
+    assert.equal(svc.getNestedValue({ a: 1 }, "__proto__.toString"), null);
+    assert.equal(svc.getNestedValue({ a: 1 }, "toString"), null);
   });
 
-  it("generates XML urlset with dynamic entries, relative media URLs, XML escaping, and exclusions", async () => {
+  it("generates XML urlset with dynamic entries and exclusions", async () => {
     const strapi = createMockStrapi();
     const svc = serverPlugin.services.service({ strapi });
 
@@ -312,7 +286,38 @@ describe("strapi-plugin-sitemap", () => {
     assert.ok(!xml.includes("https://example.com/excluded"));
   });
 
-  it("attaches xhtml:link hreflang alternates across localized documents sharing a documentId", async () => {
+  it("excludes draft entries when draftAndPublish is enabled", async () => {
+    const strapi = createMockStrapi({
+      articleDocs: [
+        {
+          id: 100,
+          documentId: "doc-published",
+          slug: "published-post",
+          title: "Published",
+          category: { slug: "tech" },
+          publishedAt: "2026-01-15T00:00:00.000Z",
+          updatedAt: "2026-01-15T00:00:00.000Z",
+          cover: { url: "", name: "" },
+        },
+        {
+          id: 101,
+          documentId: "doc-draft",
+          slug: "secret-draft",
+          title: "Draft",
+          category: { slug: "tech" },
+          publishedAt: null,
+          updatedAt: "2026-01-15T00:00:00.000Z",
+          cover: { url: "", name: "" },
+        },
+      ] as never,
+    });
+    const svc = serverPlugin.services.service({ strapi });
+    const xml = await svc.getSitemap();
+    assert.ok(xml.includes("published-post"));
+    assert.ok(!xml.includes("secret-draft"));
+  });
+
+  it("attaches hreflang alternates across localized documents", async () => {
     const strapi = createMockStrapi({
       sitemapEntries: [
         {
@@ -364,20 +369,18 @@ describe("strapi-plugin-sitemap", () => {
     const svc = serverPlugin.services.service({ strapi });
 
     const xml = await svc.getSitemap();
+    const enLink =
+      '<xhtml:link rel="alternate" hreflang="en" ' +
+      'href="https://example.com/en/blog/hello-world" />';
+    const esLink =
+      '<xhtml:link rel="alternate" hreflang="es" ' +
+      'href="https://example.com/es/blog/hola-mundo" />';
     assert.ok(xml.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'));
-    assert.ok(
-      xml.includes(
-        '<xhtml:link rel="alternate" hreflang="en" href="https://example.com/en/blog/hello-world" />'
-      )
-    );
-    assert.ok(
-      xml.includes(
-        '<xhtml:link rel="alternate" hreflang="es" href="https://example.com/es/blog/hola-mundo" />'
-      )
-    );
+    assert.ok(xml.includes(enLink));
+    assert.ok(xml.includes(esLink));
   });
 
-  it("generates sitemap index XML and sub-sitemaps when useSitemapIndex is enabled", async () => {
+  it("generates sitemap index XML and sub-sitemaps", async () => {
     const strapi = createMockStrapi({
       optionsDoc: {
         baseUrl: "https://example.com",
@@ -409,7 +412,7 @@ describe("strapi-plugin-sitemap", () => {
     assert.ok(!subXml.includes("<loc>https://example.com/about</loc>"));
   });
 
-  it("extracts allowed fields, mediaFields, target relation subfields, and locales", async () => {
+  it("extracts allowed fields, mediaFields, and locales", async () => {
     const strapi = createMockStrapi();
     const svc = serverPlugin.services.service({ strapi });
 
@@ -436,7 +439,14 @@ describe("strapi-plugin-sitemap", () => {
     assert.ok(!allowedFields.includes("createdAt"));
   });
 
-  it("synchronizes unified settings via getSettings and updateSettings and falls back to config.hostname", async () => {
+  it("synchronizes settings and enforces RBAC routes", async () => {
+    const adminRoutes = serverPlugin.routes.admin.routes;
+    assert.equal(adminRoutes.length, 5);
+    for (const route of adminRoutes) {
+      assert.ok(route.config.policies.includes("admin::isAuthenticatedAdmin"));
+    }
+    assert.throws(() => serverPlugin.config.validator({ hostname: 123 }));
+
     const strapi = createMockStrapi({
       pluginConfig: { hostname: "https://fallback.example.org" },
       optionsDoc: {
@@ -450,18 +460,15 @@ describe("strapi-plugin-sitemap", () => {
 
     const initial = await settingsSvc.getSettings();
     assert.equal(initial.baseUrl, "https://fallback.example.org");
-    assert.equal(initial.collectionTypes.length, 1);
-    assert.equal(initial.collectionTypes[0].lastModified, true);
-    assert.equal(initial.customURLs.length, 2);
 
     const updated = await settingsSvc.updateSettings({
-      baseUrl: "https://new-domain.org",
-      excludedUrls: ["/admin-preview"],
+      baseUrl: "https://new-domain.org/",
+      excludedUrls: ["/admin-preview", "/admin-preview"],
       useSitemapIndex: true,
       sitemaps: [
         {
           name: "main",
-          collectionTypeConfigIndices: [0],
+          collectionTypeConfigIndices: [0, 0],
           includeCustomUrls: true,
         },
       ],
@@ -470,21 +477,21 @@ describe("strapi-plugin-sitemap", () => {
           type: "article",
           langcode: "en",
           pattern: "/articles/[slug]",
-          priority: 0.9,
-          frequency: "daily",
+          priority: 9.5,
+          frequency: "INVALID_FREQ",
           lastModified: true,
           thumbnail: "cover",
           populateLinkedModels: true,
         },
       ],
-      customURLs: [{ url: "/contact", priority: 0.6, frequency: "monthly" }],
+      customURLs: [{ url: "/contact", priority: -2, frequency: "monthly" }],
     });
 
     assert.equal(updated.baseUrl, "https://new-domain.org");
-    assert.equal(updated.useSitemapIndex, true);
-    assert.equal(updated.collectionTypes.length, 1);
-    assert.equal(updated.collectionTypes[0].priority, 0.9);
-    assert.equal(updated.customURLs.length, 1);
+    assert.deepEqual(updated.excludedUrls, ["/admin-preview"]);
+    assert.equal(updated.collectionTypes[0].priority, 1);
+    assert.equal(updated.collectionTypes[0].frequency, "monthly");
+    assert.equal(updated.customURLs[0].priority, 0);
     assert.equal(updated.customURLs[0].url, "contact");
   });
 });

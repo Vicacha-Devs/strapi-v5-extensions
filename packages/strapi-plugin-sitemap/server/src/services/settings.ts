@@ -21,7 +21,28 @@ import type {
   SitemapSettingsPayload,
   SitemapSettingsUpdateInput,
 } from "./types";
-import { isTruthyFlag } from "./xml-builder";
+import { clampPriority, isTruthyFlag, sanitizeFrequency } from "./xml-builder";
+
+export const sanitizeBaseUrl = (rawUrl: unknown): string => {
+  const trimmed = String(rawUrl ?? "")
+    .trim()
+    .replace(/\/+$/, "");
+  if (!trimmed) {
+    return "";
+  }
+  if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed) && !/^https?:\/\//i.test(trimmed)) {
+    return "";
+  }
+  return trimmed;
+};
+
+export const sanitizeExcludedUrls = (rawUrls: unknown): string[] => {
+  const items = toArray<string>(rawUrls)
+    .map((u) => String(u ?? "").trim())
+    .filter(Boolean)
+    .map((u) => (u.startsWith("/") ? u : `/${u}`));
+  return Array.from(new Set(items));
+};
 
 const EXCLUDED_PLUGIN_PREFIXES = [
   "plugin::upload.",
@@ -135,8 +156,8 @@ export const normalizeCollectionTypeRow = (
   type: String(row.type ?? ""),
   langcode: String(row.langcode ?? "-"),
   pattern: String(row.pattern ?? ""),
-  priority: Number(row.priority ?? 0.5),
-  frequency: String(row.frequency ?? "monthly"),
+  priority: clampPriority(row.priority),
+  frequency: sanitizeFrequency(row.frequency),
   lastModified: isTruthyFlag(row.lastModified),
   thumbnail:
     row.thumbnail && row.thumbnail !== "-" ? String(row.thumbnail) : "",
@@ -148,8 +169,8 @@ export const normalizeCustomUrlRow = (
 ): CustomUrlSettingItem => ({
   ...(row.id != null ? { id: row.id } : {}),
   url: String(row.slug ?? row.url ?? "").replace(/^\/+/, ""),
-  priority: Number(row.priority ?? 0.5),
-  frequency: String(row.frequency ?? "monthly"),
+  priority: clampPriority(row.priority),
+  frequency: sanitizeFrequency(row.frequency),
 });
 
 export const normalizeSitemapDefinition = (
@@ -167,7 +188,7 @@ export const normalizeSitemapDefinition = (
 
   return {
     name: String(def.name ?? "").trim(),
-    collectionTypeConfigIndices: resolvedIndices,
+    collectionTypeConfigIndices: Array.from(new Set(resolvedIndices)),
     ...(rawIds.length > 0 ? { collectionTypeConfigIds: rawIds } : {}),
     includeCustomUrls: Boolean(def.includeCustomUrls),
   };
@@ -210,11 +231,11 @@ export const syncCollectionTypeRows = async (
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     const rowData: SitemapEntryConfig = {
-      type: String(item.type ?? ""),
-      langcode: String(item.langcode || "-"),
-      pattern: String(item.pattern ?? ""),
-      priority: Number(item.priority ?? 0.5),
-      frequency: String(item.frequency || "monthly"),
+      type: String(item.type ?? "").trim(),
+      langcode: String(item.langcode || "-").trim(),
+      pattern: String(item.pattern ?? "").trim(),
+      priority: clampPriority(item.priority),
+      frequency: sanitizeFrequency(item.frequency),
       lastModified: isTruthyFlag(item.lastModified) ? "true" : "false",
       thumbnail:
         item.thumbnail && item.thumbnail !== "-" ? String(item.thumbnail) : "",
@@ -259,9 +280,11 @@ export const syncCustomUrlRows = async (
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     const rowData: CustomUrlRecord = {
-      slug: String(item.url ?? item.slug ?? "").replace(/^\/+/, ""),
-      priority: Number(item.priority ?? 0.5),
-      frequency: String(item.frequency || "monthly"),
+      slug: String(item.url ?? item.slug ?? "")
+        .trim()
+        .replace(/^\/+/, ""),
+      priority: clampPriority(item.priority),
+      frequency: sanitizeFrequency(item.frequency),
     };
 
     const existingRow = existing[i];
@@ -305,10 +328,10 @@ export const readUnifiedSettings = async (
     optionDoc?.sitemapDefinitions
   );
   return {
-    baseUrl: optionDoc?.baseUrl || pluginCfg.hostname || "",
+    baseUrl: sanitizeBaseUrl(optionDoc?.baseUrl || pluginCfg.hostname || ""),
     collectionTypes: ctRows.map(normalizeCollectionTypeRow),
     customURLs: customRows.map(normalizeCustomUrlRow),
-    excludedUrls: toArray<string>(optionDoc?.excludedUrls),
+    excludedUrls: sanitizeExcludedUrls(optionDoc?.excludedUrls),
     useSitemapIndex: Boolean(optionDoc?.useSitemapIndex),
     sitemaps: rawDefs.map((def) => normalizeSitemapDefinition(def, ctRows)),
   };
@@ -338,10 +361,14 @@ export const writeUnifiedSettings = async (
     ? data.sitemaps
     : toArray<SitemapDefinitionRecord>(existingOption?.sitemapDefinitions);
 
-  const normalizedDefinitions: SitemapDefinitionRecord[] = rawSitemaps.map(
-    (def) => {
-      const indices = toArray<number>(def.collectionTypeConfigIndices);
-      const explicitIds = toArray<number>(def.collectionTypeConfigIds);
+  const normalizedDefinitions: SitemapDefinitionRecord[] = rawSitemaps
+    .map((def) => {
+      const indices = Array.from(
+        new Set(toArray<number>(def.collectionTypeConfigIndices))
+      );
+      const explicitIds = Array.from(
+        new Set(toArray<number>(def.collectionTypeConfigIds))
+      );
       const mappedIds =
         indices.length > 0
           ? indices
@@ -355,22 +382,22 @@ export const writeUnifiedSettings = async (
         collectionTypeConfigIds: mappedIds,
         includeCustomUrls: Boolean(def.includeCustomUrls),
       };
-    }
-  );
+    })
+    .filter((def) => def.name !== "");
 
   const resolvedBaseUrl =
     data.baseUrl !== undefined
-      ? String(data.baseUrl)
+      ? sanitizeBaseUrl(data.baseUrl)
       : data.baseURL !== undefined
-        ? String(data.baseURL)
-        : (existingOption?.baseUrl ?? "");
+        ? sanitizeBaseUrl(data.baseURL)
+        : sanitizeBaseUrl(existingOption?.baseUrl ?? "");
 
   const updateData: SitemapOptionRecord = {
     baseUrl: resolvedBaseUrl,
     excludedUrls:
       data.excludedUrls !== undefined
-        ? toArray<string>(data.excludedUrls)
-        : toArray<string>(existingOption?.excludedUrls),
+        ? sanitizeExcludedUrls(data.excludedUrls)
+        : sanitizeExcludedUrls(existingOption?.excludedUrls),
     useSitemapIndex:
       data.useSitemapIndex !== undefined
         ? Boolean(data.useSitemapIndex)

@@ -69,5 +69,6 @@
   "modal.sitemapDef.includeCustomUrls": "Include custom URLs in this sitemap",
   "modal.sitemapDef.namePlaceholder": "e.g. articles or pages",
   "settings.index.table.configsCount": "{count} config(s)",
-  "settings.tabs.general": "General & Sitemap Index"
+  "settings.tabs.general": "General & Sitemap Index",
+  "settings.notification.error": "Failed to save sitemap settings"
 }

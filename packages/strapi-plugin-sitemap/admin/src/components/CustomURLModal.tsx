@@ -44,8 +44,12 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
       setUrl(existingData.url);
       setPriority(existingData.priority);
       setFrequency(existingData.frequency);
+    } else {
+      setUrl("");
+      setPriority(0.5);
+      setFrequency("monthly");
     }
-  }, [existingData]);
+  }, [existingData, isOpen]);
 
   const handleSave = () => {
     if (!priority || !frequency) return;

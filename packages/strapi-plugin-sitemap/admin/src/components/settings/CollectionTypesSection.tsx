@@ -1,21 +1,21 @@
 import {
   Box,
   Button,
-  Flex,
   Table,
   Tbody,
   Td,
-  Th,
   Thead,
   Tr,
   Typography,
 } from "@strapi/design-system";
-import { Pencil, Plus, Trash } from "@strapi/icons";
+import { Plus } from "@strapi/icons";
 import React from "react";
 import { useIntl } from "react-intl";
 
 import getTrad from "../../utils/getTrad";
 import type { CollectionTypeConfig } from "../CollectionTypeModal";
+import SectionCard from "./SectionCard";
+import { HeadCell, RowActions, useYesNo } from "./TableParts";
 
 interface CollectionTypesSectionProps {
   collectionTypes: CollectionTypeConfig[];
@@ -31,105 +31,30 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
   onDeleteCollectionType,
 }) => {
   const { formatMessage } = useIntl();
+  const yesNo = useYesNo();
+  const tr = (id: string, defaultMessage: string) =>
+    formatMessage({ id: getTrad(id), defaultMessage });
 
   return (
-    <Box
-      padding={6}
-      background="neutral0"
-      shadow="filterShadow"
-      hasRadius
-      marginBottom={6}
+    <SectionCard
+      title={tr("settings.collectionTypes.title", "Collection Types")}
+      description={tr(
+        "settings.collectionTypes.description",
+        "Configure how your collection types are included in the sitemap"
+      )}
     >
-      <Typography variant="delta" tag="h2">
-        {formatMessage({
-          id: getTrad("settings.collectionTypes.title"),
-          defaultMessage: "Collection Types",
-        })}
-      </Typography>
-      <Box paddingBottom={4}>
-        <Typography variant="pi" textColor="neutral600">
-          {formatMessage({
-            id: getTrad("settings.collectionTypes.description"),
-            defaultMessage:
-              "Configure how your collection types are included in the sitemap",
-          })}
-        </Typography>
-      </Box>
       <Table colCount={9} rowCount={collectionTypes.length + 1}>
         <Thead>
           <Tr>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.id"),
-                  defaultMessage: "ID",
-                })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.type"),
-                  defaultMessage: "Type",
-                })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.langcode"),
-                  defaultMessage: "Langcode",
-                })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.pattern"),
-                  defaultMessage: "Pattern",
-                })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.priority"),
-                  defaultMessage: "Priority",
-                })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.frequency"),
-                  defaultMessage: "Frequency",
-                })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.lastModified"),
-                  defaultMessage: "Last Modified",
-                })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.thumbnail"),
-                  defaultMessage: "Thumbnail",
-                })}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {formatMessage({
-                  id: getTrad("table.actions"),
-                  defaultMessage: "Actions",
-                })}
-              </Typography>
-            </Th>
+            <HeadCell label={tr("table.id", "ID")} />
+            <HeadCell label={tr("table.type", "Type")} />
+            <HeadCell label={tr("table.langcode", "Langcode")} />
+            <HeadCell label={tr("table.pattern", "Pattern")} />
+            <HeadCell label={tr("table.priority", "Priority")} />
+            <HeadCell label={tr("table.frequency", "Frequency")} />
+            <HeadCell label={tr("table.lastModified", "Last Modified")} />
+            <HeadCell label={tr("table.thumbnail", "Thumbnail")} />
+            <HeadCell label={tr("table.actions", "Actions")} />
           </Tr>
         </Thead>
         <Tbody>
@@ -155,15 +80,7 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
               </Td>
               <Td>
                 <Typography textColor="neutral800">
-                  {item.lastModified
-                    ? formatMessage({
-                        id: getTrad("common.yes"),
-                        defaultMessage: "Yes",
-                      })
-                    : formatMessage({
-                        id: getTrad("common.no"),
-                        defaultMessage: "No",
-                      })}
+                  {yesNo(item.lastModified)}
                 </Typography>
               </Td>
               <Td>
@@ -172,28 +89,10 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
                 </Typography>
               </Td>
               <Td>
-                <Flex gap={2}>
-                  <Button
-                    variant="tertiary"
-                    startIcon={<Pencil />}
-                    onClick={() => onEditCollectionType(index)}
-                  >
-                    {formatMessage({
-                      id: getTrad("action.edit"),
-                      defaultMessage: "Edit",
-                    })}
-                  </Button>
-                  <Button
-                    variant="danger-light"
-                    startIcon={<Trash />}
-                    onClick={() => onDeleteCollectionType(index)}
-                  >
-                    {formatMessage({
-                      id: getTrad("action.delete"),
-                      defaultMessage: "Delete",
-                    })}
-                  </Button>
-                </Flex>
+                <RowActions
+                  onEdit={() => onEditCollectionType(index)}
+                  onDelete={() => onDeleteCollectionType(index)}
+                />
               </Td>
             </Tr>
           ))}
@@ -205,12 +104,9 @@ export const CollectionTypesSection: React.FC<CollectionTypesSectionProps> = ({
           variant="secondary"
           onClick={onAddCollectionType}
         >
-          {formatMessage({
-            id: getTrad("settings.collectionTypes.add"),
-            defaultMessage: "Add another collection type",
-          })}
+          {tr("settings.collectionTypes.add", "Add another collection type")}
         </Button>
       </Box>
-    </Box>
+    </SectionCard>
   );
 };

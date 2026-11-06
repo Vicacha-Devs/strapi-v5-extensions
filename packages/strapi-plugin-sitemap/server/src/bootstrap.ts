@@ -12,6 +12,12 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     },
     {
       section: "plugins",
+      displayName: "Update the plugin settings",
+      uid: "settings.update",
+      pluginName: PLUGIN_ID,
+    },
+    {
+      section: "plugins",
       displayName: "Menu link to plugin settings",
       uid: "menu-link",
       pluginName: PLUGIN_ID,

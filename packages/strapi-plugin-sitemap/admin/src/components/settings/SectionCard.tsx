@@ -19,7 +19,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
     hasRadius
     marginBottom={6}
   >
-    <Typography variant="delta" as="h2">
+    <Typography variant="delta" tag="h2">
       {title}
     </Typography>
     <Box paddingBottom={4}>

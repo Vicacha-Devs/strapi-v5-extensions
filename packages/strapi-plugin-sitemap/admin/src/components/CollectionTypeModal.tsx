@@ -239,18 +239,28 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
   }, [get]);
 
   useEffect(() => {
-    if (!type) return;
+    if (!type) {
+      setFields([]);
+      setMediaFields([]);
+      return;
+    }
 
     const fetchFields = async () => {
       try {
+        const encodedType = encodeURIComponent(type);
+        const query =
+          `singularName=${encodedType}` +
+          `&populateLinkedModels=${populateLinkedModels}`;
         const response = await get<{
           allowedFields?: string[];
           mediaFields?: string[];
-        }>(
-          `/sitemap/allowed-fields?singularName=${encodeURIComponent(type)}&populateLinkedModels=${populateLinkedModels}`
-        );
+        }>(`/sitemap/allowed-fields?${query}`);
+        const nextMediaFields = response?.data?.mediaFields ?? [];
         setFields(response?.data?.allowedFields ?? []);
-        setMediaFields(response?.data?.mediaFields ?? []);
+        setMediaFields(nextMediaFields);
+        setThumbnail((prev) =>
+          prev && nextMediaFields.includes(prev) ? prev : ""
+        );
       } catch (err) {
         console.error("Failed to fetch fields:", err);
       }
@@ -260,18 +270,16 @@ const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
   }, [type, populateLinkedModels, get]);
 
   useEffect(() => {
-    if (existingData) {
-      const next = getInitialConfig(existingData);
-      setType(next.type);
-      setLangcode(next.langcode);
-      setPattern(next.pattern);
-      setPriority(next.priority);
-      setFrequency(next.frequency);
-      setLastModified(next.lastModified);
-      setThumbnail(next.thumbnail);
-      setPopulateLinkedModels(Boolean(next.populateLinkedModels));
-    }
-  }, [existingData]);
+    const next = getInitialConfig(existingData);
+    setType(next.type);
+    setLangcode(next.langcode);
+    setPattern(next.pattern);
+    setPriority(next.priority);
+    setFrequency(next.frequency);
+    setLastModified(next.lastModified);
+    setThumbnail(next.thumbnail);
+    setPopulateLinkedModels(Boolean(next.populateLinkedModels));
+  }, [existingData, isOpen]);
 
   const canSave = isConfigReadyToSave(type, pattern, priority, frequency);
 

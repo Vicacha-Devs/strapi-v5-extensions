@@ -69,5 +69,6 @@
   "modal.sitemapDef.includeCustomUrls": "تضمين الروابط المخصصة في خريطة الموقع هذه",
   "modal.sitemapDef.namePlaceholder": "مثال: articles أو pages",
   "settings.index.table.configsCount": "{count} إعداد(ات)",
-  "settings.tabs.general": "عام وفهرس خريطة الموقع"
+  "settings.tabs.general": "عام وفهرس خريطة الموقع",
+  "settings.notification.error": "فشل في حفظ إعدادات خريطة الموقع"
 }

@@ -32,7 +32,12 @@ export default {
           id: `${PLUGIN_ID}.configuration`,
           to: PLUGIN_ID,
           Component: () => import("./pages/Settings"),
-          permissions: [],
+          permissions: [
+            {
+              action: `plugin::${PLUGIN_ID}.settings.read`,
+              subject: null,
+            },
+          ],
         },
       ]
     );

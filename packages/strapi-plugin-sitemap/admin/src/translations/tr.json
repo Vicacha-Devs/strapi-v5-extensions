@@ -69,5 +69,6 @@
   "modal.sitemapDef.includeCustomUrls": "Bu site haritasına özel URL'leri dahil et",
   "modal.sitemapDef.namePlaceholder": "örn. makaleler veya sayfalar",
   "settings.index.table.configsCount": "{count} yapılandırma",
-  "settings.tabs.general": "Genel ve Site Haritası İndeksi"
+  "settings.tabs.general": "Genel ve Site Haritası İndeksi",
+  "settings.notification.error": "Site haritası ayarları kaydedilemedi"
 }

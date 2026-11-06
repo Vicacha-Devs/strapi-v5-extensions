@@ -19,7 +19,6 @@ const SYSTEM_FIELDS = [
   "updatedBy",
   "locale",
 ];
-
 const FALLBACK_IMAGE_URL_KEYS = [
   "imageUrl",
   "coverUrl",
@@ -28,8 +27,37 @@ const FALLBACK_IMAGE_URL_KEYS = [
   "posterUrl",
   "thumbnailUrl",
 ] as const;
-
 const FALLBACK_TITLE_KEYS = ["title", "name", "term", "slug"] as const;
+const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+const VALID_FREQUENCIES = new Set([
+  "always",
+  "hourly",
+  "daily",
+  "weekly",
+  "monthly",
+  "yearly",
+  "never",
+]);
+
+const isSafeKey = (key: string): boolean =>
+  Boolean(key) && !FORBIDDEN_KEYS.has(key);
+
+export const clampPriority = (value: unknown, fallback = 0.5): number => {
+  const num = Number(value);
+  return Number.isFinite(num)
+    ? Math.min(1, Math.max(0, Math.round(num * 10) / 10))
+    : fallback;
+};
+
+export const sanitizeFrequency = (
+  value: unknown,
+  fallback = "monthly"
+): string => {
+  const normalized = String(value ?? "")
+    .trim()
+    .toLowerCase();
+  return VALID_FREQUENCIES.has(normalized) ? normalized : fallback;
+};
 
 export const escapeXml = (value: string): string =>
   String(value)
@@ -43,31 +71,37 @@ export const isTruthyFlag = (value: unknown): boolean =>
   value === true || value === "true";
 
 export const getNestedValue = (obj: unknown, path: string): unknown => {
-  return path.split(".").reduce<unknown>((current, key) => {
-    if (current !== null && typeof current === "object") {
-      const record = current as Record<string, unknown>;
-      return record[key] !== undefined ? record[key] : null;
+  const segments = path.split(".");
+  if (!segments.every(isSafeKey)) {
+    return null;
+  }
+  return segments.reduce<unknown>((current, key) => {
+    if (
+      current !== null &&
+      typeof current === "object" &&
+      Object.prototype.hasOwnProperty.call(current, key)
+    ) {
+      const val = (current as Record<string, unknown>)[key];
+      return val !== undefined ? val : null;
     }
     return null;
   }, obj);
 };
 
-const ensureNestedPopulate = (node: PopulateNode | undefined): PopulateMap => {
-  if (!node || node === true) {
-    return {};
-  }
-  return node.populate;
-};
+const ensureNestedPopulate = (node: PopulateNode | undefined): PopulateMap =>
+  !node || node === true ? {} : node.populate;
 
 const insertNestedPath = (populate: PopulateMap, parts: string[]): void => {
-  if (parts.length === 1) {
-    populate[parts[0]] = true;
+  if (parts.length === 0 || !parts.every(isSafeKey)) {
     return;
   }
   let current = populate;
   for (let i = 0; i < parts.length - 1; i++) {
     const tableName = parts[i];
-    const nextPopulate = ensureNestedPopulate(current[tableName]);
+    const existing = Object.prototype.hasOwnProperty.call(current, tableName)
+      ? current[tableName]
+      : undefined;
+    const nextPopulate = ensureNestedPopulate(existing);
     current[tableName] = { populate: nextPopulate };
     current = nextPopulate;
   }
@@ -100,11 +134,16 @@ export const generateSitemapIndexXml = (
   const sitemaps = definitions
     .filter((d) => String(d.name ?? "").trim() !== "")
     .map((d) => {
-      const loc = `${base}${prefix}/sitemap-${encodeURIComponent(String(d.name).trim())}.xml`;
+      const slug = encodeURIComponent(String(d.name).trim());
+      const loc = `${base}${prefix}/sitemap-${slug}.xml`;
       return `<sitemap><loc>${escapeXml(loc)}</loc></sitemap>`;
     })
     .join("");
-  return `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${sitemaps}</sitemapindex>`;
+  const ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
+  return (
+    `<?xml version="1.0" encoding="UTF-8"?>` +
+    `<sitemapindex xmlns="${ns}">${sitemaps}</sitemapindex>`
+  );
 };
 
 const formatAlternatesXml = (alternates?: HreflangLink[]): string => {
@@ -112,10 +151,11 @@ const formatAlternatesXml = (alternates?: HreflangLink[]): string => {
     return "";
   }
   return alternates
-    .map(
-      (alt) =>
-        `<xhtml:link rel="alternate" hreflang="${escapeXml(alt.lang)}" href="${escapeXml(alt.url)}" />`
-    )
+    .map((alt) => {
+      const lang = escapeXml(alt.lang);
+      const href = escapeXml(alt.url);
+      return `<xhtml:link rel="alternate" hreflang="${lang}" href="${href}" />`;
+    })
     .join("");
 };
 
@@ -124,15 +164,19 @@ const formatUrlEntryXml = (entry: UrlsetEntry): string => {
     ? `<lastmod>${escapeXml(entry.lastmod)}</lastmod>`
     : "";
   const titleText = escapeXml(entry.thumbnailTitle ?? "");
+  const imageLoc = entry.thumbnail ? escapeXml(entry.thumbnail) : "";
   const imageXml = entry.thumbnail
-    ? `<image:image><image:loc>${escapeXml(entry.thumbnail)}</image:loc><image:title>${titleText}</image:title></image:image>`
+    ? `<image:image><image:loc>${imageLoc}</image:loc>` +
+      `<image:title>${titleText}</image:title></image:image>`
     : "";
   const alternatesXml = formatAlternatesXml(entry.alternates);
+  const priority = clampPriority(entry.priority);
+  const changefreq = sanitizeFrequency(entry.frequency);
   return `
       <url>
         <loc>${escapeXml(entry.url)}</loc>
-        <priority>${escapeXml(String(entry.priority ?? 0.5))}</priority>
-        <changefreq>${escapeXml(String(entry.frequency ?? "monthly"))}</changefreq>
+        <priority>${escapeXml(String(priority))}</priority>
+        <changefreq>${escapeXml(changefreq)}</changefreq>
         ${lastmodXml}
         ${imageXml}
         ${alternatesXml}
@@ -141,7 +185,13 @@ const formatUrlEntryXml = (entry: UrlsetEntry): string => {
 
 export const generateUrlsetXml = (sitemap: UrlsetEntry[]): string => {
   const urlSet = sitemap.map(formatUrlEntryXml).join("");
-  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:xhtml="http://www.w3.org/1999/xhtml">${urlSet}</urlset>`;
+  const ns = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"';
+  const imgNs = 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"';
+  const xhtmlNs = 'xmlns:xhtml="http://www.w3.org/1999/xhtml"';
+  return (
+    `<?xml version="1.0" encoding="UTF-8"?>` +
+    `<urlset ${ns} ${imgNs} ${xhtmlNs}>${urlSet}</urlset>`
+  );
 };
 
 export const attachHreflangAlternates = (
@@ -151,7 +201,6 @@ export const attachHreflangAlternates = (
   if (!includeHreflang) {
     return entries;
   }
-
   const byDocId = new Map<string, HreflangLink[]>();
   for (const entry of entries) {
     const docId = entry.documentId?.trim();
@@ -165,20 +214,10 @@ export const attachHreflangAlternates = (
       byDocId.set(docId, existing);
     }
   }
-
   return entries.map((entry) => {
     const docId = entry.documentId?.trim();
-    if (!docId) {
-      return entry;
-    }
-    const group = byDocId.get(docId);
-    if (!group || group.length === 0) {
-      return entry;
-    }
-    return {
-      ...entry,
-      alternates: group,
-    };
+    const group = docId ? byDocId.get(docId) : undefined;
+    return group && group.length > 0 ? { ...entry, alternates: group } : entry;
   });
 };
 
@@ -198,11 +237,22 @@ const resolvePlaceholderValue = (
   if (key.includes(".")) {
     return getNestedValue(entry, key);
   }
+  if (!isSafeKey(key) || !Object.prototype.hasOwnProperty.call(entry, key)) {
+    return undefined;
+  }
   return entry[key];
 };
 
 const isNonEmptyValue = (value: unknown): boolean =>
   value !== null && value !== undefined && String(value).trim() !== "";
+
+const encodePathValue = (value: unknown): string =>
+  String(value)
+    .trim()
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
 
 const interpolatePattern = (
   pattern: string,
@@ -215,7 +265,7 @@ const interpolatePattern = (
     const key = placeholder.replace(/[[\]]/g, "");
     const value = resolvePlaceholderValue(entry, key, fallbackLangcode);
     if (isNonEmptyValue(value)) {
-      url = url.replace(placeholder, String(value));
+      url = url.replace(placeholder, encodePathValue(value));
     } else if (key.includes(".")) {
       url = url.replace(placeholder, "");
     } else {
@@ -233,10 +283,9 @@ const formatFullUrl = (baseURL: string, path: string): string => {
 
 const resolveMediaUrlString = (baseURL: string, rawUrl: string): string => {
   const trimmed = rawUrl.trim();
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-  return formatFullUrl(baseURL, trimmed);
+  return /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : formatFullUrl(baseURL, trimmed);
 };
 
 const findFallbackStringValue = (
@@ -266,22 +315,17 @@ const extractThumbnailMedia = (
     candidate && typeof candidate === "object"
       ? (candidate as { url?: string; name?: string })
       : undefined;
-
   const rawMediaUrl =
     mediaObj?.url ?? findFallbackStringValue(entry, FALLBACK_IMAGE_URL_KEYS);
   if (!rawMediaUrl || rawMediaUrl.trim() === "") {
     return undefined;
   }
-
-  const resolvedUrl = resolveMediaUrlString(baseURL, rawMediaUrl);
-  const resolvedTitle =
-    mediaObj?.name?.trim() ||
-    findFallbackStringValue(entry, FALLBACK_TITLE_KEYS) ||
-    "";
-
   return {
-    url: resolvedUrl,
-    name: resolvedTitle,
+    url: resolveMediaUrlString(baseURL, rawMediaUrl),
+    name:
+      mediaObj?.name?.trim() ||
+      findFallbackStringValue(entry, FALLBACK_TITLE_KEYS) ||
+      "",
   };
 };
 
@@ -298,12 +342,10 @@ export const buildCollectionUrlEntry = (
   if (relativePath === null) {
     return null;
   }
-
   const resolvedLang =
     typeof entry.locale === "string" && entry.locale.trim() !== ""
       ? entry.locale
       : config.langcode;
-
   const sitemapEntry: UrlsetEntry = {
     url: formatFullUrl(baseURL, relativePath),
     priority: config.priority,
@@ -315,47 +357,37 @@ export const buildCollectionUrlEntry = (
       typeof entry.documentId === "string" ? entry.documentId : undefined,
     langcode: resolvedLang && resolvedLang !== "-" ? resolvedLang : undefined,
   };
-
   if (isTruthyFlag(config.lastModified) && entry.updatedAt) {
     sitemapEntry.lastmod = String(entry.updatedAt);
   }
-
   const media = extractThumbnailMedia(baseURL, entry, config.thumbnail);
   if (media) {
     sitemapEntry.thumbnail = media.url;
     sitemapEntry.thumbnailTitle = media.name;
   }
-
   return sitemapEntry;
 };
 
 export const buildCustomUrlEntries = (
   baseURL: string,
   customURLs: CustomUrlRecord[]
-): UrlsetEntry[] => {
-  return customURLs.map((customURL) => {
-    const rawSlug = String(customURL.slug ?? customURL.url ?? "");
-    return {
-      url: formatFullUrl(baseURL, rawSlug),
-      priority: customURL.priority,
-      frequency: customURL.frequency,
-    };
-  });
-};
+): UrlsetEntry[] =>
+  customURLs.map((customURL) => ({
+    url: formatFullUrl(baseURL, String(customURL.slug ?? customURL.url ?? "")),
+    priority: customURL.priority,
+    frequency: customURL.frequency,
+  }));
 
 const getPathFromUrl = (url: string): string => {
   try {
-    const pathname = new URL(url).pathname;
-    return pathname.replace(/\/$/, "") || "/";
+    return new URL(url).pathname.replace(/\/$/, "") || "/";
   } catch {
     return "/";
   }
 };
 
-const normalizeExcludedPath = (rawPath: string): string => {
-  const prefixed = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
-  return prefixed.replace(/\/$/, "") || "/";
-};
+const normalizeExcludedPath = (rawPath: string): string =>
+  (rawPath.startsWith("/") ? rawPath : `/${rawPath}`).replace(/\/$/, "") || "/";
 
 export const filterExcludedUrls = (
   sitemap: UrlsetEntry[],
@@ -365,39 +397,29 @@ export const filterExcludedUrls = (
     .map((path) => String(path).trim())
     .filter(Boolean)
     .map(normalizeExcludedPath);
-
-  return sitemap.filter((entry) => {
-    const path = getPathFromUrl(entry.url);
-    return !normalizedExcluded.includes(path);
-  });
+  return sitemap.filter(
+    (entry) => !normalizedExcluded.includes(getPathFromUrl(entry.url))
+  );
 };
 
 const isScalarAttribute = (
   fieldName: string,
   field: ContentTypeAttribute
-): boolean => {
-  if (SYSTEM_FIELDS.includes(fieldName)) {
-    return false;
-  }
-  return (
-    field.type !== "relation" &&
-    field.type !== "component" &&
-    field.type !== "media"
-  );
-};
+): boolean =>
+  !SYSTEM_FIELDS.includes(fieldName) &&
+  field.type !== "relation" &&
+  field.type !== "component" &&
+  field.type !== "media";
 
 const isToOneRelationAttribute = (
   fieldName: string,
   field: ContentTypeAttribute
-): boolean => {
-  if (field.type !== "relation" || typeof field.relation !== "string") {
-    return false;
-  }
-  if (fieldName === "createdBy" || fieldName === "updatedBy") {
-    return false;
-  }
-  return field.relation.endsWith("ToOne");
-};
+): boolean =>
+  field.type === "relation" &&
+  typeof field.relation === "string" &&
+  fieldName !== "createdBy" &&
+  fieldName !== "updatedBy" &&
+  field.relation.endsWith("ToOne");
 
 const getRelationSubFields = (
   fieldName: string,
@@ -406,15 +428,11 @@ const getRelationSubFields = (
   populateLinkedModels: boolean
 ): string[] => {
   const subFields = [`${fieldName}.id`];
-  if (
-    !populateLinkedModels ||
-    !field.target ||
-    !contentTypes?.[field.target]?.attributes
-  ) {
-    return subFields;
-  }
-  const targetAttrs = contentTypes[field.target].attributes ?? {};
-  for (const [subName, subAttr] of Object.entries(targetAttrs)) {
+  const targetAttrs =
+    populateLinkedModels && field.target
+      ? contentTypes?.[field.target]?.attributes
+      : undefined;
+  for (const [subName, subAttr] of Object.entries(targetAttrs ?? {})) {
     if (isScalarAttribute(subName, subAttr)) {
       subFields.push(`${fieldName}.${subName}`);
     }
@@ -432,10 +450,7 @@ const collectComponentSubFields = (
   if (field.type !== "component" || field.repeatable || !field.component) {
     return;
   }
-  const subAttrs = components[field.component]?.attributes;
-  if (!subAttrs) {
-    return;
-  }
+  const subAttrs = components[field.component]?.attributes ?? {};
   for (const [subFieldName, subAttr] of Object.entries(subAttrs)) {
     if (subAttr.type === "media") {
       mediaFields.push(`${fieldName}.${subFieldName}`);
@@ -453,25 +468,22 @@ export const extractAllowedFieldsFromSchema = (
 ): { allowedFields: string[]; mediaFields: string[] } => {
   const allowedFields: string[] = [];
   const mediaFields: string[] = [];
-  const attributes = contentType.attributes ?? {};
-
-  for (const [fieldName, field] of Object.entries(attributes)) {
+  for (const [name, field] of Object.entries(contentType.attributes ?? {})) {
     if (field.type === "media") {
-      mediaFields.push(fieldName);
-    } else if (isScalarAttribute(fieldName, field)) {
-      allowedFields.push(fieldName);
-    } else if (isToOneRelationAttribute(fieldName, field)) {
-      allowedFields.push(
-        ...getRelationSubFields(
-          fieldName,
-          field,
-          contentTypes,
-          populateLinkedModels
-        )
+      mediaFields.push(name);
+    } else if (isScalarAttribute(name, field)) {
+      allowedFields.push(name);
+    } else if (isToOneRelationAttribute(name, field)) {
+      const relFields = getRelationSubFields(
+        name,
+        field,
+        contentTypes,
+        populateLinkedModels
       );
+      allowedFields.push(...relFields);
     } else {
       collectComponentSubFields(
-        fieldName,
+        name,
         field,
         components,
         allowedFields,
@@ -479,7 +491,6 @@ export const extractAllowedFieldsFromSchema = (
       );
     }
   }
-
   if (!allowedFields.includes("id")) {
     allowedFields.push("id");
   }
