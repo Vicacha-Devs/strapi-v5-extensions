@@ -32,13 +32,11 @@
     "./strapi-admin": {
       "types": "./dist/admin/index.d.ts",
       "import": "./dist/admin/index.js",
-      "require": "./dist/admin/index.cjs",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
       "types": "./dist/server/index.d.ts",
       "import": "./dist/server/index.js",
-      "require": "./dist/server/index.cjs",
       "default": "./dist/server/index.js"
     }
   },
