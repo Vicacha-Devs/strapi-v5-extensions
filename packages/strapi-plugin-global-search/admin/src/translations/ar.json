@@ -61,6 +61,8 @@
   "settings.max_depth_hint": "عدد مستويات المكونات التي يتم البحث بداخلها.",
   "settings.query_timeout_label": "مهلة الاستعلام (مللي ثانية)",
   "settings.query_timeout_hint": "يتم تخطي نوع المحتوى الأبطأ.",
+  "settings.concurrency_label": "التزامن",
+  "settings.concurrency_hint": "الحد الأقصى لأنواع المحتوى المستعلم عنها بالتوازي.",
   "settings.deep_label": "البحث داخل المكونات",
   "settings.deep_hint": "مطابقة الحقول المتداخلة في المكونات أيضاً.",
   "settings.drafts_label": "تضمين المسودات",
@@ -81,5 +83,7 @@
   "settings.saved": "تم حفظ إعدادات البحث الشامل.",
   "settings.error_save": "تعذّر حفظ إعدادات البحث الشامل.",
   "settings.restored": "تمت استعادة الإعدادات الافتراضية.",
-  "settings.error_restore": "تعذّرت استعادة الإعدادات الافتراضية."
+  "settings.error_restore": "تعذّرت استعادة الإعدادات الافتراضية.",
+  "status.published": "منشور",
+  "status.draft": "مسودة"
 }

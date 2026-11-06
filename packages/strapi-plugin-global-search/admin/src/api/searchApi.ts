@@ -25,7 +25,17 @@ export const searchEntries = async (
   signal?: AbortSignal
 ): Promise<SearchResponse> => {
   const { get } = getFetchClient();
-  const { data } = await get(`/${pluginId}/search`, { params, signal });
+  const queryParams = {
+    q: params.q,
+    ...(params.types?.length ? { types: params.types.join(",") } : {}),
+    ...(params.locale ? { locale: params.locale } : {}),
+    ...(params.page !== undefined ? { page: params.page } : {}),
+    ...(params.pageSize !== undefined ? { pageSize: params.pageSize } : {}),
+  };
+  const { data } = await get(`/${pluginId}/search`, {
+    params: queryParams,
+    signal,
+  });
 
   return data as SearchResponse;
 };

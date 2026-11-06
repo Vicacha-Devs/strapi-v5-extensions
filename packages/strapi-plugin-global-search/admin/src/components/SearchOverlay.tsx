@@ -24,7 +24,7 @@ import useSearchableTypes from "../hooks/useSearchableTypes";
 import type { SearchHit } from "../types";
 import { toAdminUrl } from "../utils/adminBase";
 import { t } from "../utils/getTrad";
-import { ResultItem } from "./ResultItem";
+import { getHitOptionId, ResultItem } from "./ResultItem";
 
 const ResultsScroller = styled(Box)`
   max-height: 45vh;
@@ -32,6 +32,7 @@ const ResultsScroller = styled(Box)`
 `;
 
 const PALETTE_PAGE_SIZE = 30;
+const LISTBOX_ID = "global-search-results-listbox";
 
 interface SearchOverlayProps {
   onClose: () => void;
@@ -102,7 +103,8 @@ const OverlayBody = ({
         <Typography textColor="neutral500">
           {t(
             "palette.idle_hint",
-            "Search every collection type and single type by id, name, or any text field."
+            "Search every collection type and single type by id, " +
+              "name, or any text field."
           )}
         </Typography>
       </Box>
@@ -115,7 +117,8 @@ const OverlayBody = ({
         <Typography textColor="danger600">
           {t(
             "palette.error",
-            "Search failed. Check that you have permission to read content, and see the server logs."
+            "Search failed. Check that you have permission to read " +
+              "content, and see the server logs."
           )}
         </Typography>
       </Box>
@@ -142,12 +145,17 @@ const OverlayBody = ({
 
   return (
     <ResultsScroller
+      id={LISTBOX_ID}
       role="listbox"
       aria-label={t("palette.results_aria", "Search results")}
     >
       {results.map((hit, index) => (
         <ResultItem
-          key={`${hit.contentTypeUid}-${hit.documentId || hit.id}-${hit.locale || ""}`}
+          key={[
+            hit.contentTypeUid,
+            hit.documentId || hit.id,
+            hit.locale || "",
+          ].join("-")}
           hit={hit}
           query={query.trim()}
           isActive={index === activeIndex}
@@ -215,6 +223,8 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
 
   const countSuffix = search.data.meta.capped ? "+" : "";
   const totalCount = `${search.data.pagination.total}${countSuffix}`;
+  const activeHit = results[activeIndex];
+  const activeOptionId = activeHit ? getHitOptionId(activeHit) : undefined;
 
   return (
     <Modal.Root open onOpenChange={(isOpen: boolean) => !isOpen && onClose()}>
@@ -235,6 +245,10 @@ const SearchOverlay = ({ onClose }: SearchOverlayProps) => {
             <TextInput
               ref={inputRef}
               name="global-search-palette"
+              role="combobox"
+              aria-expanded={results.length > 0}
+              aria-controls={LISTBOX_ID}
+              aria-activedescendant={activeOptionId}
               aria-label={t("palette.title", "Global search")}
               placeholder={t("palette.placeholder", "Search all content…")}
               startIcon={<Search />}

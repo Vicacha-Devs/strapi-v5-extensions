@@ -19,5 +19,7 @@ const RBAC_ACTIONS = [
 ];
 
 export default ({ strapi }: { strapi: StrapiLike }) => {
-  strapi.admin!.services.permission.actionProvider.registerMany(RBAC_ACTIONS);
+  strapi.admin?.services?.permission?.actionProvider?.registerMany(
+    RBAC_ACTIONS
+  );
 };

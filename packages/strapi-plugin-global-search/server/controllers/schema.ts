@@ -10,6 +10,23 @@ type Ctx = {
   throw: (code: number, msg: string) => void;
 };
 
+const collectAllFields = (type: ContentTypeDescriptor): string[] => {
+  const main =
+    type.mainField &&
+    type.mainField !== "id" &&
+    type.mainFieldSearchable !== false
+      ? [type.mainField]
+      : [];
+  return Array.from(
+    new Set([
+      ...type.idFields,
+      ...main,
+      ...type.topLevelFields,
+      ...type.nestedFields,
+    ])
+  );
+};
+
 /** Field paths are internal detail; the admin only needs counts and labels. */
 const toSummary = (type: ContentTypeDescriptor) => ({
   uid: type.uid,
@@ -18,10 +35,7 @@ const toSummary = (type: ContentTypeDescriptor) => ({
   mainField: type.mainField,
   localized: type.localized,
   draftAndPublish: type.draftAndPublish,
-  fieldCount:
-    type.idFields.length +
-    type.topLevelFields.length +
-    type.nestedFields.length,
+  fieldCount: collectAllFields(type).length,
   searchable: type.searchable,
 });
 
@@ -57,11 +71,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
       contentTypes: types.map((type: ContentTypeDescriptor) => ({
         ...toSummary(type),
         excluded: (settings.excludedContentTypes || []).includes(type.uid),
-        fields: [
-          ...type.idFields,
-          ...type.topLevelFields,
-          ...type.nestedFields,
-        ],
+        fields: collectAllFields(type),
       })),
     };
   },

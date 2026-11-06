@@ -1,11 +1,22 @@
-import { defaults, validator } from "../config";
+import { defaults, isPlainObject, validator } from "../config";
 import type { PluginSettings, StrapiLike } from "../types";
 import { PLUGIN_ID } from "../utils/constants";
 
 const STORE_KEY = "settings";
+const ALLOWED_KEYS = Object.keys(defaults);
 
 const getStore = (strapi: StrapiLike) =>
   strapi.store({ type: "plugin", name: PLUGIN_ID });
+
+const pickAllowed = (source: unknown): Partial<PluginSettings> => {
+  if (!isPlainObject(source)) return {};
+  return Object.entries(source).reduce((acc, [key, value]) => {
+    if (ALLOWED_KEYS.includes(key) && value !== undefined) {
+      (acc as Record<string, unknown>)[key] = value;
+    }
+    return acc;
+  }, {} as Partial<PluginSettings>);
+};
 
 export default ({ strapi }: { strapi: StrapiLike }) => ({
   /**
@@ -13,23 +24,23 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
    * then the built-in defaults. Every key always resolves to something usable.
    */
   async get(): Promise<PluginSettings> {
-    const fromFile = strapi.config.get(`plugin::${PLUGIN_ID}`, {}) || {};
-    const fromStore = (await getStore(strapi).get({ key: STORE_KEY })) || {};
+    const fromFile = pickAllowed(strapi.config.get(`plugin::${PLUGIN_ID}`, {}));
+    const fromStore = pickAllowed(
+      await getStore(strapi).get({ key: STORE_KEY })
+    );
 
     return { ...defaults, ...fromFile, ...fromStore };
   },
 
   async set(patch: Partial<PluginSettings> = {}): Promise<PluginSettings> {
-    const allowedKeys = Object.keys(defaults);
-    const sanitized = Object.entries(patch).reduce((acc, [key, value]) => {
-      if (allowedKeys.includes(key) && value !== undefined)
-        (acc as Record<string, unknown>)[key] = value;
-      return acc;
-    }, {} as Partial<PluginSettings>);
+    if (!isPlainObject(patch)) {
+      throw new Error("[global-search] settings payload must be an object");
+    }
+    const sanitized = pickAllowed(patch);
 
     validator(sanitized);
 
-    const current = (await getStore(strapi).get({ key: STORE_KEY })) || {};
+    const current = pickAllowed(await getStore(strapi).get({ key: STORE_KEY }));
     const next = { ...current, ...sanitized };
 
     await getStore(strapi).set({ key: STORE_KEY, value: next });

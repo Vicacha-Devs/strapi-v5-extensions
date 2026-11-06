@@ -33,10 +33,19 @@ export const defaults: PluginSettings = {
   displayFields: {},
 };
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+export const isPlainObject = (
+  value: unknown
+): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string");
+
 export const validator = (config: Partial<PluginSettings> = {}) => {
+  if (!isPlainObject(config)) {
+    throw new Error("[global-search] config must be a plain object");
+  }
+
   const numbers: Record<string, [number, number]> = {
     minChars: [1, 10],
     debounce: [0, 5000],
@@ -52,12 +61,13 @@ export const validator = (config: Partial<PluginSettings> = {}) => {
     const value = (config as Record<string, unknown>)[key];
     if (
       typeof value !== "number" ||
-      Number.isNaN(value) ||
+      !Number.isInteger(value) ||
       value < min ||
       value > max
     ) {
       throw new Error(
-        `[global-search] config.${key} must be a number between ${min} and ${max}`
+        `[global-search] config.${key} must be an integer ` +
+          `between ${min} and ${max}`
       );
     }
   });
@@ -71,20 +81,23 @@ export const validator = (config: Partial<PluginSettings> = {}) => {
   );
 
   (["excludedContentTypes", "excludedFields"] as const).forEach((key) => {
-    if (config[key] !== undefined && !Array.isArray(config[key])) {
+    if (config[key] !== undefined && !isStringArray(config[key])) {
       throw new Error(
         `[global-search] config.${key} must be an array of strings`
       );
     }
   });
 
-  if (
-    config.displayFields !== undefined &&
-    !isPlainObject(config.displayFields)
-  ) {
-    throw new Error(
-      "[global-search] config.displayFields must be an object keyed by content type UID"
-    );
+  if (config.displayFields !== undefined) {
+    const validMap =
+      isPlainObject(config.displayFields) &&
+      Object.values(config.displayFields).every(isStringArray);
+    if (!validMap) {
+      throw new Error(
+        "[global-search] config.displayFields must map content type UIDs " +
+          "to string arrays"
+      );
+    }
   }
 };
 

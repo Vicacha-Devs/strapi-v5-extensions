@@ -61,6 +61,8 @@
   "settings.max_depth_hint": "Cuántos niveles de componentes buscar.",
   "settings.query_timeout_label": "Tiempo de espera de consulta (ms)",
   "settings.query_timeout_hint": "Se omite un tipo de contenido más lento.",
+  "settings.concurrency_label": "Concurrencia",
+  "settings.concurrency_hint": "Máximo de tipos de contenido consultados en paralelo.",
   "settings.deep_label": "Buscar dentro de componentes",
   "settings.deep_hint": "También busca en campos anidados dentro de componentes.",
   "settings.drafts_label": "Incluir borradores",
@@ -81,5 +83,7 @@
   "settings.saved": "Configuración de búsqueda global guardada.",
   "settings.error_save": "No se pudo guardar la configuración de búsqueda global.",
   "settings.restored": "Valores predeterminados restaurados.",
-  "settings.error_restore": "No se pudieron restaurar los valores predeterminados."
+  "settings.error_restore": "No se pudieron restaurar los valores predeterminados.",
+  "status.published": "Publicado",
+  "status.draft": "Borrador"
 }

@@ -5,9 +5,13 @@ import { MAX_QUERY_LENGTH, SNIPPET_RADIUS } from "./constants";
  * so there is no injection surface — but `%` is still a wildcard inside the bound
  * value and a lone `%` would match every row. Strip it and cap the length.
  */
+const MAX_DOC_DEPTH = 32;
+const MAX_STRUCTURED_CHARS = 500_000;
+
 export const sanitizeQuery = (raw: unknown): string => {
   if (typeof raw !== "string") return "";
-  return raw.replace(/%/g, "").trim().slice(0, MAX_QUERY_LENGTH);
+  const cleaned = raw.replace(/%/g, "").trim().slice(0, MAX_QUERY_LENGTH);
+  return /^[_\s]+$/.test(cleaned) ? "" : cleaned;
 };
 
 const isProseMirrorRoot = (
@@ -23,26 +27,35 @@ const isProseMirrorRoot = (
   return false;
 };
 
-const walkDocNodes = (node: unknown, chunks: string[]): void => {
-  if (!node) return;
+const walkDocNodes = (
+  node: unknown,
+  chunks: string[],
+  depth = 0,
+  visited = new WeakSet<object>()
+): void => {
+  if (!node || depth > MAX_DOC_DEPTH) return;
   if (Array.isArray(node)) {
-    node.forEach((child) => walkDocNodes(child, chunks));
+    if (visited.has(node)) return;
+    visited.add(node);
+    node.forEach((child) => walkDocNodes(child, chunks, depth + 1, visited));
     return;
   }
   if (typeof node !== "object") return;
+  if (visited.has(node)) return;
+  visited.add(node);
 
   const obj = node as Record<string, unknown>;
   if (typeof obj.text === "string" && obj.text.trim()) {
     chunks.push(obj.text);
   }
   if (obj.doc && typeof obj.doc === "object") {
-    walkDocNodes(obj.doc, chunks);
+    walkDocNodes(obj.doc, chunks, depth + 1, visited);
   }
   if (Array.isArray(obj.content)) {
-    walkDocNodes(obj.content, chunks);
+    walkDocNodes(obj.content, chunks, depth + 1, visited);
   }
   if (Array.isArray(obj.children)) {
-    walkDocNodes(obj.children, chunks);
+    walkDocNodes(obj.children, chunks, depth + 1, visited);
   }
 };
 
@@ -57,7 +70,9 @@ export const extractStructuredText = (value: unknown): string | null => {
 
   if (typeof value === "string") {
     const trimmed = value.trim();
-    if (!trimmed.startsWith("{")) return null;
+    if (!trimmed.startsWith("{") || trimmed.length > MAX_STRUCTURED_CHARS) {
+      return null;
+    }
     try {
       candidate = JSON.parse(trimmed);
     } catch {
@@ -72,6 +87,36 @@ export const extractStructuredText = (value: unknown): string | null => {
   return chunks.join(" ").replace(/\s+/g, " ").trim();
 };
 
+/**
+ * Linear O(N) HTML/XML tag stripper without regex backtracking.
+ * Unclosed `<` characters are preserved without re-scanning the remainder.
+ */
+const stripHtmlTags = (input: string): string => {
+  let out = "";
+  let tagStart = -1;
+
+  for (let i = 0; i < input.length; i += 1) {
+    const ch = input[i];
+    if (ch === "<") {
+      if (tagStart !== -1) {
+        out += input.slice(tagStart, i);
+      }
+      tagStart = i;
+    } else if (ch === ">" && tagStart !== -1) {
+      out += " ";
+      tagStart = -1;
+    } else if (tagStart === -1) {
+      out += ch;
+    }
+  }
+
+  if (tagStart !== -1) {
+    out += input.slice(tagStart);
+  }
+
+  return out;
+};
+
 /** Plain-text projection of richtext/HTML/Markdown/ProseMirror JSON, used for snippets. */
 export const toPlainText = (value: unknown): string => {
   if (value === null || value === undefined) return "";
@@ -79,8 +124,7 @@ export const toPlainText = (value: unknown): string => {
   const structured = extractStructuredText(value);
   if (structured !== null) return structured;
 
-  return String(value)
-    .replace(/<[^>]*>/g, " ")
+  return stripHtmlTags(String(value))
     .replace(/[#*_>`~]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -125,7 +169,9 @@ export const buildSnippet = (value: unknown, query: string): string => {
   const start = Math.max(0, index - SNIPPET_RADIUS);
   const end = Math.min(text.length, index + query.length + SNIPPET_RADIUS);
 
-  return `${start > 0 ? "…" : ""}${text.slice(start, end)}${end < text.length ? "…" : ""}`;
+  const prefix = start > 0 ? "…" : "";
+  const suffix = end < text.length ? "…" : "";
+  return `${prefix}${text.slice(start, end)}${suffix}`;
 };
 
 export const humanizeFieldPath = (path: string): string =>

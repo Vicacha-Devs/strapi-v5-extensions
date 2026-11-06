@@ -22,9 +22,11 @@ export interface ContentTypeDescriptor {
   displayName: string;
   apiName?: string;
   mainField: string;
+  mainFieldSearchable?: boolean;
   idFields: string[];
   topLevelFields: string[];
   nestedFields: string[];
+  displayFields?: string[];
   localized: boolean;
   draftAndPublish: boolean;
   searchable: boolean;

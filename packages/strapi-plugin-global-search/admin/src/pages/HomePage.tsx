@@ -1,5 +1,4 @@
 import {
-  Badge,
   Box,
   Button,
   Flex,
@@ -11,134 +10,21 @@ import {
   SearchForm,
   SingleSelect,
   SingleSelectOption,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
   Typography,
 } from "@strapi/design-system";
 import { Layouts } from "@strapi/strapi/admin";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { styled } from "styled-components";
 
 import { fetchLocales } from "../api/searchApi";
-import { Highlight } from "../components/Highlight";
+import { ResultsTable } from "../components/ResultsTable";
 import useGlobalSearch from "../hooks/useGlobalSearch";
 import useSearchableTypes from "../hooks/useSearchableTypes";
 import type { ContentTypeSummary, LocaleOption, SearchHit } from "../types";
+import { toAdminUrl } from "../utils/adminBase";
 import { t } from "../utils/getTrad";
 
-const ClickableRow = styled(Tr)`
-  cursor: pointer;
-
-  &:hover {
-    background: ${({ theme }: { theme: { colors: Record<string, string> } }) =>
-      theme.colors.neutral100};
-  }
-`;
-
 const PAGE_SIZES = [10, 20, 50];
-
-const TABLE_HEADERS: Array<[string, string]> = [
-  ["table.type", "Type"],
-  ["table.id", "Id"],
-  ["table.name", "Name"],
-  ["table.matched", "Matched"],
-  ["table.locale", "Locale"],
-  ["table.status", "Status"],
-  ["table.updated", "Updated"],
-];
-
-interface ResultsTableProps {
-  results: SearchHit[];
-  trimmedQuery: string;
-  onSelectHit: (adminUrl: string) => void;
-}
-
-const ResultsTable = ({
-  results,
-  trimmedQuery,
-  onSelectHit,
-}: ResultsTableProps) => (
-  <Table colCount={7} rowCount={results.length}>
-    <Thead>
-      <Tr>
-        {TABLE_HEADERS.map(([key, label]) => (
-          <Th key={key}>
-            <Typography variant="sigma">{t(key, label)}</Typography>
-          </Th>
-        ))}
-      </Tr>
-    </Thead>
-    <Tbody>
-      {results.map((hit) => (
-        <ClickableRow
-          key={`${hit.contentTypeUid}-${hit.documentId || hit.id}-${hit.locale || ""}`}
-          onClick={() => onSelectHit(hit.adminUrl)}
-        >
-          <Td>
-            <Typography textColor="neutral800">
-              {hit.contentTypeLabel}
-            </Typography>
-          </Td>
-          <Td>
-            <Typography textColor="neutral600">
-              {hit.documentId || hit.id}
-            </Typography>
-          </Td>
-          <Td>
-            <Typography fontWeight="semiBold" textColor="neutral800">
-              <Highlight
-                text={String(hit.title)}
-                query={trimmedQuery}
-                textColor="neutral800"
-              />
-            </Typography>
-          </Td>
-          <Td>
-            {hit.matchedField ? (
-              <Box maxWidth="32rem">
-                <Typography variant="pi" textColor="neutral500">
-                  {hit.matchedFieldLabel}
-                </Typography>
-                <Box>
-                  <Typography variant="pi">
-                    <Highlight
-                      text={hit.matchedSnippet || ""}
-                      query={trimmedQuery}
-                    />
-                  </Typography>
-                </Box>
-              </Box>
-            ) : (
-              <Typography textColor="neutral400">—</Typography>
-            )}
-          </Td>
-          <Td>
-            <Typography textColor="neutral600">{hit.locale || "—"}</Typography>
-          </Td>
-          <Td>
-            {hit.status ? (
-              <Badge>{hit.status}</Badge>
-            ) : (
-              <Typography textColor="neutral400">—</Typography>
-            )}
-          </Td>
-          <Td>
-            <Typography textColor="neutral600">
-              {hit.updatedAt
-                ? new Date(hit.updatedAt).toLocaleDateString()
-                : "—"}
-            </Typography>
-          </Td>
-        </ClickableRow>
-      ))}
-    </Tbody>
-  </Table>
-);
 
 const renderMessageCard = (heading: string, subtitle: string) => (
   <Box padding={8} background="neutral0" hasRadius>
@@ -158,7 +44,7 @@ interface SearchResultsSectionProps {
   trimmedQuery: string;
   hasTypeFilters: boolean;
   results: SearchHit[];
-  onSelectHit: (adminUrl: string) => void;
+  onSelectHit: (adminUrl: string, newTab?: boolean) => void;
 }
 
 const SearchResultsSection = ({
@@ -176,7 +62,8 @@ const SearchResultsSection = ({
         <Typography textColor="danger600">
           {t(
             "page.error",
-            "Search failed. Check that you have permission to read content, and see the server logs for details."
+            "Search failed. Check that you have permission to read " +
+              "content, and see the server logs for details."
           )}
         </Typography>
       </Box>
@@ -196,7 +83,9 @@ const SearchResultsSection = ({
       headingText,
       t(
         "page.idle_subtitle",
-        "Results are ordered by id, then name, then any other field — including fields nested inside components. Press Ctrl/Cmd + K anywhere in the admin to open the quick palette."
+        "Results are ordered by id, then name, then any other field — " +
+          "including fields nested inside components. Press Ctrl/Cmd + K " +
+          "anywhere in the admin to open the quick palette."
       )
     );
   }
@@ -461,7 +350,11 @@ const HomePage = () => {
             trimmedQuery={search.query.trim()}
             hasTypeFilters={search.selectedTypes.length > 0}
             results={results}
-            onSelectHit={(adminUrl) => navigate(adminUrl)}
+            onSelectHit={(url, newTab) =>
+              newTab
+                ? window.open(toAdminUrl(url), "_blank", "noopener")
+                : navigate(url)
+            }
           />
 
           {results.length ? (

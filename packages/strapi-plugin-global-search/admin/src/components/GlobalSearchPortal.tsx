@@ -2,6 +2,7 @@ import { DesignSystemProvider } from "@strapi/design-system";
 import { useEffect, useState } from "react";
 
 import useHotkey from "../hooks/useHotkey";
+import { getActiveLocale } from "../utils/getTrad";
 import { useAdminTheme } from "../utils/theme";
 import { SearchOverlay } from "./SearchOverlay";
 
@@ -16,18 +17,24 @@ const hasToken = (storage: Storage | undefined): boolean => {
   }
 };
 
+const hasCookieToken = (): boolean => {
+  if (typeof document === "undefined" || !document.cookie) return false;
+  return document.cookie.split(";").some((entry) => {
+    const [key, val] = entry.trim().split("=");
+    return key === "jwtToken" && Boolean(val);
+  });
+};
+
 const isAuthenticated = (): boolean => {
   if (typeof window === "undefined") return false;
-  if (hasToken(window.localStorage) || hasToken(window.sessionStorage))
-    return true;
-  if (
-    typeof document !== "undefined" &&
-    /(?:^|;\s*)jwtToken=/.test(document.cookie || "")
-  ) {
-    return true;
-  }
+  const segments = (window.location?.pathname || "").split("/");
+  if (segments.includes("auth")) return false;
 
-  return !/\/auth(\/|$)/.test(window.location?.pathname || "");
+  return (
+    hasToken(window.localStorage) ||
+    hasToken(window.sessionStorage) ||
+    hasCookieToken()
+  );
 };
 
 /**
@@ -50,7 +57,7 @@ const GlobalSearchPortal = () => {
   }, []);
 
   return (
-    <DesignSystemProvider theme={theme} locale="en">
+    <DesignSystemProvider theme={theme} locale={getActiveLocale()}>
       {isOpen ? <SearchOverlay onClose={() => setIsOpen(false)} /> : null}
     </DesignSystemProvider>
   );

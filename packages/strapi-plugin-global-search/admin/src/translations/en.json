@@ -61,6 +61,8 @@
   "settings.max_depth_hint": "How many component levels to search into.",
   "settings.query_timeout_label": "Query timeout (ms)",
   "settings.query_timeout_hint": "A slower content type is skipped.",
+  "settings.concurrency_label": "Concurrency",
+  "settings.concurrency_hint": "Maximum content types queried in parallel.",
   "settings.deep_label": "Search inside components",
   "settings.deep_hint": "Also match fields nested in components.",
   "settings.drafts_label": "Include drafts",
@@ -81,5 +83,7 @@
   "settings.saved": "Global search settings saved.",
   "settings.error_save": "Could not save global search settings.",
   "settings.restored": "Defaults restored.",
-  "settings.error_restore": "Could not restore defaults."
+  "settings.error_restore": "Could not restore defaults.",
+  "status.published": "Published",
+  "status.draft": "Draft"
 }

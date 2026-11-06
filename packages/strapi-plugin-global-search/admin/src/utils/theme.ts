@@ -5,6 +5,7 @@ const THEME_STORAGE_KEY = "STRAPI_THEME";
 const DARK_QUERY = "(prefers-color-scheme: dark)";
 
 const readStoredTheme = (): string => {
+  if (typeof window === "undefined") return "light";
   try {
     const raw = window.localStorage.getItem(THEME_STORAGE_KEY);
     if (!raw) return "system";
@@ -18,6 +19,7 @@ const readStoredTheme = (): string => {
 const resolve = (preference: string) => {
   if (preference === "dark") return darkTheme;
   if (preference === "light") return lightTheme;
+  if (typeof window === "undefined") return lightTheme;
 
   const prefersDark =
     window.matchMedia && window.matchMedia(DARK_QUERY).matches;
@@ -33,6 +35,7 @@ export const useAdminTheme = () => {
   const [theme, setTheme] = useState(() => resolve(readStoredTheme()));
 
   useEffect(() => {
+    if (typeof window === "undefined") return undefined;
     const sync = () => setTheme(resolve(readStoredTheme()));
 
     window.addEventListener("storage", sync);

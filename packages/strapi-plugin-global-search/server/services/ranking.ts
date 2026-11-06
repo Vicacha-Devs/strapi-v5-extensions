@@ -4,6 +4,7 @@ import {
   getValuesAtPath,
   buildSnippet,
   humanizeFieldPath,
+  toPlainText,
 } from "../utils/text";
 
 type ScoreResult = Pick<
@@ -35,12 +36,14 @@ export default () => ({
   findMatch(
     entry: unknown,
     paths: string[],
-    test: (value: string) => boolean
+    test: (value: string) => boolean,
+    normalize = false
   ): { path: string; value: string } | null {
     for (const path of paths) {
       const values = getValuesAtPath(entry, path);
 
-      for (const value of values) {
+      for (const rawValue of values) {
+        const value = normalize ? toPlainText(rawValue) || rawValue : rawValue;
         if (test(value)) return { path, value };
       }
     }
@@ -54,44 +57,59 @@ export default () => ({
     query: string
   ): ScoreResult {
     const lowered = query.toLowerCase();
-    const idPaths = ["id", "documentId", ...descriptor.idFields];
+    const idSet = new Set(["id", ...descriptor.idFields]);
+    const idPaths = Array.from(idSet);
     const mainPaths =
-      descriptor.mainField && descriptor.mainField !== "id"
+      descriptor.mainField &&
+      descriptor.mainField !== "id" &&
+      descriptor.mainFieldSearchable !== false
         ? [descriptor.mainField]
         : [];
 
-    const attempts: Array<[number, string[], (value: string) => boolean]> = [
-      [TIER.ID_EXACT, idPaths, (value) => value.toLowerCase() === lowered],
+    const attempts: Array<
+      [number, string[], (value: string) => boolean, boolean]
+    > = [
+      [TIER.ID_EXACT, idPaths, (val) => val.toLowerCase() === lowered, false],
       [
         TIER.ID_CONTAINS,
         idPaths,
-        (value) => value.toLowerCase().includes(lowered),
+        (val) => val.toLowerCase().includes(lowered),
+        false,
       ],
-      [TIER.MAIN_EXACT, mainPaths, (value) => value.toLowerCase() === lowered],
+      [
+        TIER.MAIN_EXACT,
+        mainPaths,
+        (val) => val.toLowerCase() === lowered,
+        true,
+      ],
       [
         TIER.MAIN_STARTS_WITH,
         mainPaths,
-        (value) => value.toLowerCase().startsWith(lowered),
+        (val) => val.toLowerCase().startsWith(lowered),
+        true,
       ],
       [
         TIER.MAIN_CONTAINS,
         mainPaths,
-        (value) => value.toLowerCase().includes(lowered),
+        (val) => val.toLowerCase().includes(lowered),
+        true,
       ],
       [
         TIER.FIELD_CONTAINS,
         descriptor.topLevelFields,
-        (value) => value.toLowerCase().includes(lowered),
+        (val) => val.toLowerCase().includes(lowered),
+        true,
       ],
       [
         TIER.NESTED_CONTAINS,
         descriptor.nestedFields,
-        (value) => value.toLowerCase().includes(lowered),
+        (val) => val.toLowerCase().includes(lowered),
+        true,
       ],
     ];
 
-    for (const [tier, paths, test] of attempts) {
-      const match = this.findMatch(entry, paths, test);
+    for (const [tier, paths, test, normalize] of attempts) {
+      const match = this.findMatch(entry, paths, test, normalize);
 
       if (match) {
         return {
