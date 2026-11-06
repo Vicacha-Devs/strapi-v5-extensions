@@ -1,0 +1,115 @@
+{
+  "kind": "collectionType",
+  "collectionName": "broadcast_campaigns",
+  "info": {
+    "singularName": "campaign",
+    "pluralName": "campaigns",
+    "displayName": "Broadcast Campaign",
+    "description": "Omnichannel Email, Telegram & WhatsApp broadcast campaign"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "topic": {
+      "type": "string",
+      "default": "announcements",
+      "required": true
+    },
+    "channels": {
+      "type": "json",
+      "required": true,
+      "default": ["email", "telegram"]
+    },
+    "priority": {
+      "type": "enumeration",
+      "enum": ["low", "normal", "high", "urgent"],
+      "default": "normal",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["draft", "scheduled", "sending", "sent", "failed", "cancelled"],
+      "default": "draft",
+      "required": true
+    },
+    "scheduledAt": {
+      "type": "datetime"
+    },
+    "sentAt": {
+      "type": "datetime"
+    },
+    "subject": {
+      "type": "string",
+      "required": true
+    },
+    "bodyText": {
+      "type": "text",
+      "required": true
+    },
+    "bodyHtml": {
+      "type": "richtext"
+    },
+    "ctaLabel": {
+      "type": "string"
+    },
+    "ctaUrl": {
+      "type": "string"
+    },
+    "mediaUrl": {
+      "type": "string"
+    },
+    "emailTemplateRef": {
+      "type": "string"
+    },
+    "whatsappTemplateName": {
+      "type": "string"
+    },
+    "whatsappGroupIds": {
+      "type": "json",
+      "default": []
+    },
+    "telegramChatId": {
+      "type": "string"
+    },
+    "telegramThreadId": {
+      "type": "integer"
+    },
+    "translations": {
+      "type": "json",
+      "default": {}
+    },
+    "secondaryDate": {
+      "type": "json",
+      "default": {}
+    },
+    "secondaryDateLabel": {
+      "type": "string"
+    },
+    "stats": {
+      "type": "json",
+      "default": {}
+    },
+    "metadata": {
+      "type": "json",
+      "default": {}
+    }
+  }
+}
