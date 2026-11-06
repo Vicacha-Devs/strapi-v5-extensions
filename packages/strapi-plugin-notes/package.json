@@ -73,6 +73,8 @@
   "devDependencies": {
     "@strapi/sdk-plugin": "6.1.1",
     "@strapi/strapi": "^5.39.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
     "@vicacha-devs/eslint-config": "workspace:*",
     "@vicacha-devs/plugin-shared": "workspace:*",
     "@vicacha-devs/typescript-config": "workspace:*",

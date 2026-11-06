@@ -1,6 +1,6 @@
 import type { Core } from "@strapi/strapi";
 
-import { PLUGIN_ID } from "../../../shared";
+import { computeNotesSummaryStats, PLUGIN_ID } from "../../../shared";
 import type createNotesService from "../services/notesService";
 import { NotesValidationError } from "../services/notesService";
 
@@ -24,10 +24,10 @@ export interface KoaContext {
 
 function sendJson(ctx: KoaContext, payload: unknown, statusCode = 200) {
   ctx.status = statusCode;
+  ctx.body = payload;
   if (typeof ctx.send === "function" && statusCode === 200) {
     ctx.send(payload);
   }
-  ctx.body = payload;
   return payload;
 }
 
@@ -76,8 +76,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async find(ctx: KoaContext) {
       const query = ctx.query ?? {};
       const service = getService();
+      if (typeof service.findWithMeta === "function") {
+        const { data, total, summary } = await service.findWithMeta(query);
+        return sendJson(ctx, {
+          data,
+          meta: {
+            total,
+            summary,
+          },
+        });
+      }
       const notes = await service.find(query);
-      const summary = await service.getSummaryStats(query);
+      const summary = computeNotesSummaryStats(notes);
       return sendJson(ctx, {
         data: notes,
         meta: {

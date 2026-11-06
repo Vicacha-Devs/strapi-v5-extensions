@@ -19,10 +19,13 @@ import { useIntl } from "react-intl";
 import {
   formatNoteAuthorDisplay,
   formatNoteTimestamp,
+  MAX_NOTE_CONTENT_LENGTH,
+  MAX_NOTE_TITLE_LENGTH,
   NOTE_CATEGORIES,
   NOTE_CATEGORY_META,
   normalizeNoteCategory,
   normalizeNoteRecord,
+  sanitizeEntityLocale,
   type NoteCategory,
   type NoteRecord,
   type NoteUpsertInput,
@@ -194,14 +197,27 @@ export const NoteModal: React.FC<NoteModalProps> = ({
   const [scopeToLocale, setScopeToLocale] = React.useState<boolean>(false);
   const [titleError, setTitleError] = React.useState<string>("");
 
+  const lastInitKeyRef = React.useRef<string | null>(null);
+  const noteIdentityKey = normalizedExisting
+    ? String(normalizedExisting.id || normalizedExisting.documentId)
+    : "new";
+
   React.useEffect(() => {
+    if (!isOpen) {
+      lastInitKeyRef.current = null;
+      return;
+    }
+    if (lastInitKeyRef.current === noteIdentityKey) {
+      return;
+    }
+    lastInitKeyRef.current = noteIdentityKey;
     setTitle(normalizedExisting?.title ?? "");
     setContent(normalizedExisting?.content ?? "");
     setCategory(normalizedExisting?.category ?? "general");
     setIsPinned(Boolean(normalizedExisting?.isPinned));
     setScopeToLocale(Boolean(normalizedExisting?.entityLocale));
     setTitleError("");
-  }, [normalizedExisting, isOpen]);
+  }, [isOpen, noteIdentityKey, normalizedExisting]);
 
   const t = (
     id: string,
@@ -210,9 +226,14 @@ export const NoteModal: React.FC<NoteModalProps> = ({
   ) => formatMessage({ id: getTrad(id), defaultMessage }, values);
 
   const effectiveLocale =
-    normalizedExisting?.entityLocale || entity.locale || null;
+    normalizedExisting?.entityLocale ||
+    sanitizeEntityLocale(entity.locale) ||
+    null;
 
   const handleSave = async () => {
+    if (isSubmitting) {
+      return;
+    }
     const trimmedTitle = title.trim();
     if (!trimmedTitle) {
       setTitleError(
@@ -270,6 +291,7 @@ export const NoteModal: React.FC<NoteModalProps> = ({
               <TextInput
                 name="title"
                 value={title}
+                maxLength={MAX_NOTE_TITLE_LENGTH}
                 onChange={(e: { target: { value: string } }) => {
                   setTitle(e.target.value);
                   if (titleError) setTitleError("");
@@ -310,12 +332,14 @@ export const NoteModal: React.FC<NoteModalProps> = ({
               <Textarea
                 name="content"
                 value={content}
+                maxLength={MAX_NOTE_CONTENT_LENGTH}
                 onChange={(e: { target: { value: string } }) =>
                   setContent(e.target.value)
                 }
                 placeholder={t(
                   "note.modal.fields.content.placeholder",
-                  "Write detailed editorial context, review feedback, or follow-up steps..."
+                  "Write detailed editorial context, review feedback, or " +
+                    "follow-up steps..."
                 )}
               />
             </Field.Root>

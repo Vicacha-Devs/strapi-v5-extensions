@@ -1,4 +1,11 @@
 declare module "react" {
+  export interface KeyboardEvent<T = Element> {
+    key: string;
+    currentTarget: T;
+    preventDefault(): void;
+    stopPropagation(): void;
+  }
+
   export type ReactNode =
     | string
     | number

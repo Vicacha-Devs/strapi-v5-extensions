@@ -49,7 +49,6 @@ export const NoteListItem: React.FC<NoteListItemProps> = ({
 
   return (
     <Box
-      tabIndex={0}
       hasRadius
       padding={3}
       background="neutral0"
@@ -78,8 +77,16 @@ export const NoteListItem: React.FC<NoteListItemProps> = ({
               textColor="neutral800"
               fontWeight="bold"
               ellipsis
+              role="button"
+              tabIndex={0}
               style={{ cursor: "pointer" }}
               onClick={() => onEdit(note)}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onEdit(note);
+                }
+              }}
             >
               {note.title}
             </Typography>

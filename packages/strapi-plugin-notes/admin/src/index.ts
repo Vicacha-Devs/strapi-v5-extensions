@@ -21,7 +21,12 @@ export default {
         import("./pages/NotesHomePage").then((mod) => ({
           default: mod.NotesHomePage,
         })),
-      permissions: [],
+      permissions: [
+        {
+          action: `plugin::${PLUGIN_ID}.read`,
+          subject: null,
+        },
+      ],
     });
 
     app.registerPlugin({

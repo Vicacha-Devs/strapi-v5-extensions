@@ -1,11 +1,12 @@
 import { useFetchClient, useNotification } from "@strapi/strapi/admin";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 
 import {
   computeNotesSummaryStats,
   normalizeNoteRecord,
   PLUGIN_ID,
+  sortNotesPinnedFirst,
   type NoteFilterParams,
   type NoteRecord,
   type NotesSummaryStats,
@@ -20,6 +21,12 @@ function formatEntityIdParam(
     return "";
   }
   return String(entityId);
+}
+
+function formatOptionalIntParam(value: number | undefined): string | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? String(Math.trunc(value))
+    : undefined;
 }
 
 function buildNotesQueryString(params: NoteFilterParams = {}): string {
@@ -43,6 +50,8 @@ function buildNotesQueryString(params: NoteFilterParams = {}): string {
     ],
     ["search", params.search],
     ["sort", params.sort],
+    ["limit", formatOptionalIntParam(params.limit)],
+    ["offset", formatOptionalIntParam(params.offset)],
   ];
 
   const searchParams = new URLSearchParams();
@@ -53,6 +62,16 @@ function buildNotesQueryString(params: NoteFilterParams = {}): string {
   }
   const qs = searchParams.toString();
   return qs ? `?${qs}` : "";
+}
+
+function matchesNoteIdentifier(
+  note: NoteRecord,
+  targetId: string | number
+): boolean {
+  const cleanTarget = String(targetId);
+  return (
+    String(note.id) === cleanTarget || String(note.documentId) === cleanTarget
+  );
 }
 
 export function useNotes(initialParams: NoteFilterParams = {}) {
@@ -66,6 +85,21 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
   );
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMutating, setIsMutating] = useState<boolean>(false);
+  const requestIdRef = useRef<number>(0);
+  const pendingMutationsRef = useRef<number>(0);
+  const notesRef = useRef<NoteRecord[]>([]);
+
+  const beginMutation = useCallback(() => {
+    pendingMutationsRef.current += 1;
+    setIsMutating(true);
+  }, []);
+
+  const endMutation = useCallback(() => {
+    pendingMutationsRef.current = Math.max(0, pendingMutationsRef.current - 1);
+    if (pendingMutationsRef.current === 0) {
+      setIsMutating(false);
+    }
+  }, []);
 
   const t = useCallback(
     (id: string, defaultMessage: string) =>
@@ -73,8 +107,22 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
     [formatMessage]
   );
 
+  const applyLocalNotesState = useCallback(
+    (updater: (prev: NoteRecord[]) => NoteRecord[]) => {
+      const next = sortNotesPinnedFirst(
+        updater(notesRef.current),
+        initialParams.sort ?? "DESC"
+      );
+      notesRef.current = next;
+      setNotes(next);
+      setSummary(computeNotesSummaryStats(next));
+    },
+    [initialParams.sort]
+  );
+
   const fetchNotes = useCallback(
     async (overrideParams?: NoteFilterParams): Promise<NoteRecord[]> => {
+      const requestId = ++requestIdRef.current;
       const merged = { ...initialParams, ...overrideParams };
       setIsLoading(true);
       try {
@@ -86,19 +134,26 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
 
         const rawItems = Array.isArray(res?.data?.data) ? res.data.data : [];
         const normalized = rawItems.map((item) => normalizeNoteRecord(item));
-        setNotes(normalized);
-        setSummary(
-          res?.data?.meta?.summary ?? computeNotesSummaryStats(normalized)
-        );
+        if (requestId === requestIdRef.current) {
+          notesRef.current = normalized;
+          setNotes(normalized);
+          setSummary(
+            res?.data?.meta?.summary ?? computeNotesSummaryStats(normalized)
+          );
+        }
         return normalized;
       } catch {
-        toggleNotification({
-          type: "warning",
-          message: t("notes.notification.loadError", "Unable to load notes."),
-        });
+        if (requestId === requestIdRef.current) {
+          toggleNotification({
+            type: "warning",
+            message: t("notes.notification.loadError", "Unable to load notes."),
+          });
+        }
         return [];
       } finally {
-        setIsLoading(false);
+        if (requestId === requestIdRef.current) {
+          setIsLoading(false);
+        }
       }
     },
     [
@@ -110,6 +165,8 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
       initialParams.entitySlug,
       initialParams.includeAllLocales,
       initialParams.isPinned,
+      initialParams.limit,
+      initialParams.offset,
       initialParams.search,
       initialParams.sort,
       t,
@@ -119,11 +176,14 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
 
   useEffect(() => {
     void fetchNotes();
+    return () => {
+      requestIdRef.current += 1;
+    };
   }, [fetchNotes]);
 
   const createNote = useCallback(
     async (payload: NoteUpsertInput): Promise<NoteRecord | null> => {
-      setIsMutating(true);
+      beginMutation();
       try {
         const res = await post<{ data?: unknown }>(`/${PLUGIN_ID}/notes`, {
           data: payload,
@@ -131,6 +191,9 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
         const created = res?.data?.data
           ? normalizeNoteRecord(res.data.data)
           : null;
+        if (created) {
+          applyLocalNotesState((prev) => [created, ...prev]);
+        }
         toggleNotification({
           type: "success",
           message: t(
@@ -150,10 +213,18 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
         });
         return null;
       } finally {
-        setIsMutating(false);
+        endMutation();
       }
     },
-    [fetchNotes, post, t, toggleNotification]
+    [
+      applyLocalNotesState,
+      beginMutation,
+      endMutation,
+      fetchNotes,
+      post,
+      t,
+      toggleNotification,
+    ]
   );
 
   const updateNote = useCallback(
@@ -161,7 +232,7 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
       id: string | number,
       body: Partial<NoteUpsertInput>
     ): Promise<NoteRecord | null> => {
-      setIsMutating(true);
+      beginMutation();
       try {
         const res = await put<{ data?: unknown }>(
           `/${PLUGIN_ID}/notes/${encodeURIComponent(String(id))}`,
@@ -170,6 +241,13 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
         const updated = res?.data?.data
           ? normalizeNoteRecord(res.data.data)
           : null;
+        if (updated) {
+          applyLocalNotesState((prev) =>
+            prev.map((item) =>
+              matchesNoteIdentifier(item, id) ? updated : item
+            )
+          );
+        }
         toggleNotification({
           type: "success",
           message: t(
@@ -189,17 +267,28 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
         });
         return null;
       } finally {
-        setIsMutating(false);
+        endMutation();
       }
     },
-    [fetchNotes, put, t, toggleNotification]
+    [
+      applyLocalNotesState,
+      beginMutation,
+      endMutation,
+      fetchNotes,
+      put,
+      t,
+      toggleNotification,
+    ]
   );
 
   const deleteNote = useCallback(
     async (id: string | number): Promise<boolean> => {
-      setIsMutating(true);
+      beginMutation();
       try {
         await del(`/${PLUGIN_ID}/notes/${encodeURIComponent(String(id))}`);
+        applyLocalNotesState((prev) =>
+          prev.filter((item) => !matchesNoteIdentifier(item, id))
+        );
         toggleNotification({
           type: "success",
           message: t(
@@ -219,10 +308,18 @@ export function useNotes(initialParams: NoteFilterParams = {}) {
         });
         return false;
       } finally {
-        setIsMutating(false);
+        endMutation();
       }
     },
-    [del, fetchNotes, t, toggleNotification]
+    [
+      applyLocalNotesState,
+      beginMutation,
+      del,
+      endMutation,
+      fetchNotes,
+      t,
+      toggleNotification,
+    ]
   );
 
   return {

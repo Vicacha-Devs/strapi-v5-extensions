@@ -144,7 +144,28 @@ export function filterNotesList(
   };
 
   const filtered = notes.filter((note) => matchesAllNoteFilters(note, filters));
-  return sortNotesPinnedFirst(filtered, params.sort ?? "DESC");
+  const sorted = sortNotesPinnedFirst(filtered, params.sort ?? "DESC");
+
+  const offset =
+    typeof params.offset === "number" &&
+    Number.isFinite(params.offset) &&
+    params.offset > 0
+      ? Math.trunc(params.offset)
+      : 0;
+  const limit =
+    typeof params.limit === "number" &&
+    Number.isFinite(params.limit) &&
+    params.limit > 0
+      ? Math.trunc(params.limit)
+      : undefined;
+
+  if (offset > 0 || limit !== undefined) {
+    return sorted.slice(
+      offset,
+      limit !== undefined ? offset + limit : undefined
+    );
+  }
+  return sorted;
 }
 
 export function computeNotesSummaryStats(
@@ -182,7 +203,9 @@ export function buildContentManagerNoteLink(
   note: Pick<
     NoteRecord,
     "entitySlug" | "entityDocumentId" | "entityId" | "entityLocale"
-  >
+  > & {
+    collectionType?: "collection-types" | "single-types" | string;
+  }
 ): string | null {
   const slug = sanitizeEntitySlug(note.entitySlug);
   const targetId =
@@ -190,12 +213,18 @@ export function buildContentManagerNoteLink(
     (note.entityId !== null && note.entityId !== undefined
       ? sanitizeEntityDocumentId(String(note.entityId))
       : "");
-  if (!slug || !targetId) {
+  const isSingleType =
+    note.collectionType === "single-types" ||
+    note.collectionType === "singleType" ||
+    targetId === "single";
+  if (!slug || (!isSingleType && !targetId)) {
     return null;
   }
-  const basePath = `/content-manager/collection-types/${encodeURIComponent(
-    slug
-  )}/${encodeURIComponent(targetId)}`;
+  const basePath = isSingleType
+    ? `/content-manager/single-types/${encodeURIComponent(slug)}`
+    : `/content-manager/collection-types/${encodeURIComponent(
+        slug
+      )}/${encodeURIComponent(targetId)}`;
   const locale = sanitizeEntityLocale(note.entityLocale);
   if (locale) {
     return `${basePath}?plugins[i18n][locale]=${encodeURIComponent(locale)}`;

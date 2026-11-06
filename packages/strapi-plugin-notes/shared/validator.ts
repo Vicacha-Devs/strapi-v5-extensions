@@ -16,7 +16,7 @@ import type {
 
 const ENTITY_SLUG_PATTERN = /^[a-zA-Z0-9_:.-]{1,160}$/;
 const SAFE_ID_PATTERN = /^[a-zA-Z0-9_-]{1,128}$/;
-const LOCALE_PATTERN = /^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/;
+const LOCALE_PATTERN = /^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8}){0,4}$/;
 const FORBIDDEN_IDENTIFIER_TOKENS = new Set([
   "__proto__",
   "constructor",
@@ -25,9 +25,7 @@ const FORBIDDEN_IDENTIFIER_TOKENS = new Set([
 
 function isForbiddenIdentifier(value: string): boolean {
   const lower = value.toLowerCase();
-  if (FORBIDDEN_IDENTIFIER_TOKENS.has(lower)) {
-    return true;
-  }
+  if (FORBIDDEN_IDENTIFIER_TOKENS.has(lower)) return true;
   if (
     value === "." ||
     value === ".." ||
@@ -38,8 +36,14 @@ function isForbiddenIdentifier(value: string): boolean {
     return true;
   }
   return lower
-    .split(/[:._/-]+/)
+    .split(/[:./]+/)
     .some((segment) => FORBIDDEN_IDENTIFIER_TOKENS.has(segment));
+}
+
+function toPositiveSafeInt(input: unknown): number | null {
+  if (typeof input !== "number" || !Number.isFinite(input)) return null;
+  const truncated = Math.trunc(input);
+  return Number.isSafeInteger(truncated) && truncated >= 1 ? truncated : null;
 }
 
 export function isValidNoteCategory(value: unknown): value is NoteCategory {
@@ -52,26 +56,20 @@ export function isValidNoteCategory(value: unknown): value is NoteCategory {
 export function normalizeNoteCategory(value: unknown): NoteCategory {
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
-    if (isValidNoteCategory(normalized)) {
-      return normalized;
-    }
+    if (isValidNoteCategory(normalized)) return normalized;
   }
   return "general";
 }
 
 export function sanitizePlainText(input: unknown, maxLength: number): string {
-  if (typeof input !== "string") {
-    return "";
-  }
+  if (typeof input !== "string") return "";
   // Remove null bytes and normalize line endings while preserving user text
   const cleaned = input.replace(/\0/g, "").replace(/\r\n/g, "\n").trim();
   return cleaned.length > maxLength ? cleaned.slice(0, maxLength) : cleaned;
 }
 
 export function sanitizeEntitySlug(input: unknown): string {
-  if (typeof input !== "string" || input.includes("\0")) {
-    return "";
-  }
+  if (typeof input !== "string" || input.includes("\0")) return "";
   const cleaned = input.trim();
   if (
     !cleaned ||
@@ -85,12 +83,9 @@ export function sanitizeEntitySlug(input: unknown): string {
 }
 
 export function sanitizeEntityDocumentId(input: unknown): string {
-  if (typeof input === "number" && Number.isFinite(input) && input > 0) {
-    return String(Math.trunc(input));
-  }
-  if (typeof input !== "string" || input.includes("\0")) {
-    return "";
-  }
+  const numeric = toPositiveSafeInt(input);
+  if (numeric !== null) return String(numeric);
+  if (typeof input !== "string" || input.includes("\0")) return "";
   const cleaned = input.trim();
   if (
     !cleaned ||
@@ -104,9 +99,7 @@ export function sanitizeEntityDocumentId(input: unknown): string {
 }
 
 function parseStringEntityId(input: string): number | string | null {
-  if (input.includes("\0")) {
-    return null;
-  }
+  if (input.includes("\0")) return null;
   const trimmed = input.trim();
   if (
     !trimmed ||
@@ -123,8 +116,9 @@ function parseStringEntityId(input: string): number | string | null {
 }
 
 export function sanitizeEntityId(input: unknown): number | string | null {
-  if (typeof input === "number" && Number.isFinite(input) && input > 0) {
-    return Math.trunc(input);
+  const numeric = toPositiveSafeInt(input);
+  if (numeric !== null) {
+    return numeric;
   }
   if (typeof input === "string") {
     return parseStringEntityId(input);
@@ -151,8 +145,9 @@ export function sanitizeEntityLocale(input: unknown): string | null {
 }
 
 function extractPrimitiveAuthorId(rawUser: unknown): number | string | null {
-  if (typeof rawUser === "number" && Number.isFinite(rawUser) && rawUser > 0) {
-    return Math.trunc(rawUser);
+  const numeric = toPositiveSafeInt(rawUser);
+  if (numeric !== null) {
+    return numeric;
   }
   if (typeof rawUser === "string" && rawUser.trim()) {
     return sanitizeEntityDocumentId(rawUser) || null;
@@ -181,19 +176,9 @@ function asPlainObject(
   value: unknown,
   fallback: Record<string, unknown>
 ): Record<string, unknown> {
-  return value && typeof value === "object"
+  return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : fallback;
-}
-
-function normalizeRawAuthorId(rawId: unknown): number | string | null {
-  if (typeof rawId === "number" && Number.isFinite(rawId)) {
-    return rawId;
-  }
-  if (typeof rawId === "string" && rawId.trim()) {
-    return rawId.trim();
-  }
-  return null;
 }
 
 function unwrapAuthorRecord(rawUser: Record<string, unknown>): {
@@ -202,7 +187,7 @@ function unwrapAuthorRecord(rawUser: Record<string, unknown>): {
 } {
   const nestedData = asPlainObject(rawUser.data, rawUser);
   const attrs = asPlainObject(nestedData.attributes, nestedData);
-  const id = normalizeRawAuthorId(nestedData.id ?? rawUser.id);
+  const id = extractPrimitiveAuthorId(nestedData.id ?? rawUser.id);
   return { attrs, id };
 }
 
@@ -216,7 +201,7 @@ export function sanitizeNoteAuthor(
 ): NoteAuthorMeta | null {
   const fallback = sanitizePlainText(fallbackDisplayName, 120);
 
-  if (!rawUser || typeof rawUser !== "object") {
+  if (!rawUser || typeof rawUser !== "object" || Array.isArray(rawUser)) {
     return sanitizePrimitiveAuthor(rawUser, fallback);
   }
 
@@ -292,10 +277,16 @@ function extractRecordId(
   root: Record<string, unknown>,
   attrs: Record<string, unknown>
 ): number | string {
-  if (typeof root.id === "number" || typeof root.id === "string") {
+  if (
+    (typeof root.id === "number" && Number.isFinite(root.id)) ||
+    typeof root.id === "string"
+  ) {
     return root.id;
   }
-  if (typeof attrs.id === "number" || typeof attrs.id === "string") {
+  if (
+    (typeof attrs.id === "number" && Number.isFinite(attrs.id)) ||
+    typeof attrs.id === "string"
+  ) {
     return attrs.id;
   }
   return "";
@@ -309,12 +300,9 @@ function unwrapRawNoteAttributes(raw: unknown): {
   root: Record<string, unknown>;
   attrs: Record<string, unknown>;
 } {
-  const root =
-    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  const attrs =
-    root.attributes && typeof root.attributes === "object"
-      ? { ...root, ...(root.attributes as Record<string, unknown>) }
-      : root;
+  const root = asPlainObject(raw, {});
+  const rawAttrs = asPlainObject(root.attributes, {});
+  const attrs = { ...root, ...rawAttrs };
   return { root, attrs };
 }
 
@@ -417,6 +405,30 @@ export function validateNoteCreatePayload(input: unknown): {
   };
 }
 
+function applyEntityTargetUpdates(
+  raw: Record<string, unknown>,
+  hasOwn: (key: string) => boolean,
+  data: Partial<NoteUpsertInput>,
+  errors: string[]
+): void {
+  if (hasOwn("entityDocumentId")) {
+    const docId = sanitizeEntityDocumentId(raw.entityDocumentId);
+    if (docId) data.entityDocumentId = docId;
+  }
+  if (hasOwn("entityId")) {
+    const entityId = sanitizeEntityId(raw.entityId);
+    if (entityId !== null) data.entityId = entityId;
+  }
+  if (hasOwn("entitySlug")) {
+    const slug = sanitizeEntitySlug(raw.entitySlug);
+    if (slug) {
+      data.entitySlug = slug;
+    } else if (raw.entitySlug !== undefined && raw.entitySlug !== null) {
+      errors.push("A valid target entitySlug is required.");
+    }
+  }
+}
+
 export function validateNoteUpdatePayload(input: unknown): {
   valid: boolean;
   errors: string[];
@@ -436,32 +448,25 @@ export function validateNoteUpdatePayload(input: unknown): {
       data.title = title;
     }
   }
-
   if (hasOwn("content")) {
     data.content = sanitizePlainText(raw.content, MAX_NOTE_CONTENT_LENGTH);
   }
-
   if (hasOwn("category")) {
     data.category = normalizeNoteCategory(raw.category);
   }
-
   if (hasOwn("isPinned")) {
     data.isPinned = Boolean(raw.isPinned);
   }
-
   if (hasOwn("entityLocale")) {
     data.entityLocale = sanitizeEntityLocale(raw.entityLocale);
   }
+  applyEntityTargetUpdates(raw, hasOwn, data, errors);
 
   if (Object.keys(data).length === 0 && errors.length === 0) {
     errors.push("At least one valid note field must be provided for update.");
   }
 
-  return {
-    valid: errors.length === 0,
-    errors,
-    data,
-  };
+  return { valid: errors.length === 0, errors, data };
 }
 
 export function unwrapDataEnvelope(input: unknown): Record<string, unknown> {

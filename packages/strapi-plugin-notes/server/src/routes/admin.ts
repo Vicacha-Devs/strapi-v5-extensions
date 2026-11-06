@@ -1,3 +1,29 @@
+import { PLUGIN_ID } from "../../../shared";
+
+const readPolicies = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: [`plugin::${PLUGIN_ID}.read`] },
+  },
+];
+
+const updatePolicies = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: [`plugin::${PLUGIN_ID}.update`] },
+  },
+];
+
+const deletePolicies = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: [`plugin::${PLUGIN_ID}.delete`] },
+  },
+];
+
 export default {
   type: "admin",
   routes: [
@@ -6,7 +32,7 @@ export default {
       path: "/notes",
       handler: "notesController.find",
       config: {
-        policies: [],
+        policies: readPolicies,
       },
     },
     {
@@ -14,7 +40,7 @@ export default {
       path: "/notes/stats",
       handler: "notesController.stats",
       config: {
-        policies: [],
+        policies: readPolicies,
       },
     },
     {
@@ -22,7 +48,7 @@ export default {
       path: "/notes/:id",
       handler: "notesController.findOne",
       config: {
-        policies: [],
+        policies: readPolicies,
       },
     },
     {
@@ -30,7 +56,7 @@ export default {
       path: "/notes",
       handler: "notesController.create",
       config: {
-        policies: [],
+        policies: updatePolicies,
       },
     },
     {
@@ -38,7 +64,7 @@ export default {
       path: "/notes/:id",
       handler: "notesController.update",
       config: {
-        policies: [],
+        policies: updatePolicies,
       },
     },
     {
@@ -46,7 +72,7 @@ export default {
       path: "/notes/:id",
       handler: "notesController.delete",
       config: {
-        policies: [],
+        policies: deletePolicies,
       },
     },
   ],

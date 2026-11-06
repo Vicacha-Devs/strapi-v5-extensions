@@ -149,8 +149,16 @@ const NoteHubRow: React.FC<NoteHubRowProps> = ({
             <Typography
               fontWeight="bold"
               textColor="neutral800"
+              role="button"
+              tabIndex={0}
               style={{ cursor: "pointer" }}
               onClick={() => onEdit(note)}
+              onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onEdit(note);
+                }
+              }}
             >
               {note.title}
             </Typography>
@@ -250,6 +258,16 @@ export const NotesHomePage: React.FC = () => {
     null
   );
 
+  React.useEffect(() => {
+    if (
+      !isLoading &&
+      selectedSlug !== "all" &&
+      !summary.entitySlugs.includes(selectedSlug)
+    ) {
+      setSelectedSlug("all");
+    }
+  }, [isLoading, selectedSlug, summary.entitySlugs]);
+
   const t = (
     id: string,
     defaultMessage: string,
@@ -274,9 +292,11 @@ export const NotesHomePage: React.FC = () => {
     existingId?: string | number
   ) => {
     if (existingId !== undefined && existingId !== "") {
-      await updateNote(existingId, payload);
+      const updated = await updateNote(existingId, payload);
+      if (updated) {
+        setEditingNote(null);
+      }
     }
-    setEditingNote(null);
   };
 
   const handleTogglePin = async (note: NoteRecord) => {
@@ -288,8 +308,10 @@ export const NotesHomePage: React.FC = () => {
   const handleConfirmDelete = async (note: NoteRecord) => {
     const id = note.id || note.documentId;
     if (!id) return;
-    await deleteNote(id);
-    setDeletingNote(null);
+    const deleted = await deleteNote(id);
+    if (deleted) {
+      setDeletingNote(null);
+    }
   };
 
   return (
@@ -298,7 +320,8 @@ export const NotesHomePage: React.FC = () => {
         title={t("hub.title", "Editorial Notes Hub")}
         subtitle={t(
           "hub.subtitle",
-          "Search, filter, and manage editorial notes across all Strapi v5 Content Manager entries."
+          "Search, filter, and manage editorial notes across all Strapi v5 " +
+            "Content Manager entries."
         )}
         primaryAction={
           <Button

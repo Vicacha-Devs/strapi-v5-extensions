@@ -68,8 +68,8 @@ function createMockStrapi() {
   };
 }
 
-describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", () => {
-  describe("Issue #18: Author & Timestamp Meta Information (Created At / By, Updated At / By)", () => {
+describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & v5", () => {
+  describe("Issue #18: Author & Timestamp Meta Information", () => {
     it("sanitizes admin user objects and strips sensitive/PII fields", () => {
       const rawAdminUser = {
         id: 42,
@@ -98,7 +98,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       assert.equal(formatNoteAuthorDisplay(sanitized), "Ada Lovelace");
     });
 
-    it("falls back to username or deleted-user snapshot name when firstname/lastname are absent", () => {
+    it("falls back to username or snapshot name when names are absent", () => {
       const usernameOnly = sanitizeNoteAuthor({
         id: 7,
         username: "comfortably_coding",
@@ -118,7 +118,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       assert.equal(formatNoteAuthorDisplay(null), "-");
     });
 
-    it("formats ISO timestamps for the NoteModal Audit Logs-style metadata grid", () => {
+    it("formats ISO timestamps for the NoteModal metadata grid", () => {
       const formatted = formatNoteTimestamp("2026-10-29T10:00:00.000Z", "en");
       assert.ok(formatted.length > 4);
       assert.notEqual(formatted, "-");
@@ -127,7 +127,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       assert.equal(formatNoteTimestamp("not-a-valid-date", "en"), "-");
     });
 
-    it("automatically populates createdBy/updatedBy on create and updates only updatedBy on update", async () => {
+    it("tracks createdBy on create and updatedBy on update", async () => {
       const { controller } = createMockStrapi();
 
       const creatorUser = {
@@ -199,7 +199,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
 
       assert.equal(updatedNote.title, "Verify hero banner contrast (resolved)");
       assert.equal(updatedNote.category, "todo");
-      // Created By must remain Alice Creator while Updated By becomes Bob Reviewer!
+      // Created By must remain Alice Creator while Updated By becomes Bob
       assert.equal(updatedNote.createdBy.displayName, "Alice Creator");
       assert.equal(updatedNote.createdBy.id, 10);
       assert.equal(updatedNote.updatedBy.displayName, "Bob Reviewer");
@@ -207,9 +207,9 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
     });
   });
 
-  describe("Pinned Notes, Category Badges, Document & Locale Scoping, and Global Hub", () => {
-    it("sorts pinned notes first and filters by category, documentId, locale, and search query", async () => {
-      const { service } = createMockStrapi();
+  describe("Pinned Notes, Category Badges, Document & Locale Scoping", () => {
+    it("sorts pinned first and preserves pre-paginated meta", async () => {
+      const { service, controller } = createMockStrapi();
 
       await service.create(
         {
@@ -232,7 +232,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
           category: "blocker",
           isPinned: true,
           entitySlug: "api::event.event",
-          entityId: 2, // Simulates Strapi v5 new numeric id after publish on same documentId
+          entityId: 2,
           entityDocumentId: "doc_event_1",
           entityLocale: "es",
         },
@@ -253,7 +253,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
         { id: 3, firstname: "Claire", lastname: "Translator" }
       );
 
-      // Query for doc_event_1 in locale 'es' -> returns global note (null) + 'es' note, with pinned first
+      // Query for doc_event_1 in locale 'es' -> global (null) + 'es' note
       const esNotes = await service.find({
         entitySlug: "api::event.event",
         entityDocumentId: "doc_event_1",
@@ -269,6 +269,22 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
         includeAllLocales: true,
       });
       assert.equal(allNotes.length, 3);
+
+      // Paginated controller.find & service.getSummaryStats keep full summary
+      const pagedCtx: any = {
+        query: { includeAllLocales: "true", limit: "1", offset: "0" },
+      };
+      const pagedRes: any = await controller.find(pagedCtx);
+      assert.equal(pagedRes.data.length, 1);
+      assert.equal(pagedRes.meta.total, 3);
+      assert.equal(pagedRes.meta.summary.total, 3);
+      assert.equal(pagedRes.meta.summary.pinned, 1);
+
+      const statsFromService = await service.getSummaryStats({
+        includeAllLocales: "true",
+        limit: "1",
+      });
+      assert.equal(statsFromService.total, 3);
 
       // Summary stats
       const stats = computeNotesSummaryStats(allNotes);
@@ -288,7 +304,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       assert.equal(searchByAuthor[0].category, "blocker");
     });
 
-    it("builds safe Content Manager deep links and rejects invalid slugs", () => {
+    it("builds safe Content Manager deep links and rejects bad slugs", () => {
       const linkWithLocale = buildContentManagerNoteLink({
         entitySlug: "api::article.article",
         entityDocumentId: "doc_abc_123",
@@ -297,7 +313,20 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       });
       assert.equal(
         linkWithLocale,
-        "/content-manager/collection-types/api%3A%3Aarticle.article/doc_abc_123?plugins[i18n][locale]=es"
+        "/content-manager/collection-types/" +
+          "api%3A%3Aarticle.article/doc_abc_123?plugins[i18n][locale]=es"
+      );
+
+      const singleTypeLink = buildContentManagerNoteLink({
+        entitySlug: "api::homepage.homepage",
+        entityDocumentId: "single",
+        entityId: null,
+        entityLocale: "en",
+      });
+      assert.equal(
+        singleTypeLink,
+        "/content-manager/single-types/" +
+          "api%3A%3Ahomepage.homepage?plugins[i18n][locale]=en"
       );
 
       const invalidLink = buildContentManagerNoteLink({
@@ -309,7 +338,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       assert.equal(invalidLink, null);
     });
 
-    it("validates create and update payloads strictly", () => {
+    it("validates create/update payloads and supports backfill", () => {
       const badCreate = validateNoteCreatePayload({
         title: "   ",
         entitySlug: "invalid/slug",
@@ -322,9 +351,26 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
 
       const emptyTitleUpdate = validateNoteUpdatePayload({ title: "  " });
       assert.equal(emptyTitleUpdate.valid, false);
+
+      const badSlugUpdate = validateNoteUpdatePayload({
+        title: "Valid title",
+        entitySlug: "../bad",
+      });
+      assert.equal(badSlugUpdate.valid, false);
+
+      const backfillUpdate = validateNoteUpdatePayload({
+        title: "Migrated v5 note",
+        entityDocumentId: "doc_v5_backfill",
+        entityId: 42,
+        entitySlug: "api::article.article",
+      });
+      assert.equal(backfillUpdate.valid, true);
+      assert.equal(backfillUpdate.data.entityDocumentId, "doc_v5_backfill");
+      assert.equal(backfillUpdate.data.entityId, 42);
+      assert.equal(backfillUpdate.data.entitySlug, "api::article.article");
     });
 
-    it("maintains 10-locale translation key parity including Issue #18 metadata keys", () => {
+    it("maintains 10-locale translation key parity", () => {
       const baseKeys = Object.keys(en).sort();
       for (const requiredKey of [
         "note.modal.meta.createdAt",
@@ -368,7 +414,7 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       }
     });
 
-    it("sorts pinned notes ahead of unpinned notes in both ASC and DESC modes", () => {
+    it("sorts pinned notes first and supports limit/offset pagination", () => {
       const n1 = normalizeNoteRecord({
         id: 1,
         title: "Older unpinned",
@@ -388,9 +434,13 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       const sortedAsc = sortNotesPinnedFirst([n1, n2], "ASC");
       assert.equal(sortedAsc[0].id, 2);
       assert.equal(NOTE_CATEGORIES.length, 4);
+
+      const paged = filterNotesList([n1, n2], { offset: 1, limit: 1 });
+      assert.equal(paged.length, 1);
+      assert.equal(paged[0].id, 1);
     });
 
-    it("rejects prototype pollution keys, dot traversal, null bytes, oversized identifiers, and inherited update properties", () => {
+    it("rejects forbidden identifiers, sub-1 floats, and arrays", () => {
       for (const token of [
         "__proto__",
         "constructor",
@@ -406,10 +456,21 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
         assert.equal(sanitizeEntityId(token), null);
         assert.equal(sanitizeEntityLocale(token), null);
       }
+      assert.equal(
+        sanitizeEntitySlug("api::design-prototype.design-prototype"),
+        "api::design-prototype.design-prototype"
+      );
+      assert.equal(
+        sanitizeEntityDocumentId("doc_prototype_123"),
+        "doc_prototype_123"
+      );
       assert.equal(sanitizeEntitySlug("api::post.post\0evil"), "");
       assert.equal(sanitizeEntityDocumentId("doc_123\0evil"), "");
       assert.equal(sanitizeEntityId("123\0"), null);
+      assert.equal(sanitizeEntityId(0.9), null);
+      assert.equal(sanitizeEntityId(-5), null);
       assert.equal(sanitizeEntityLocale("en\0"), null);
+      assert.equal(sanitizeEntityLocale("en-US-a-b-c-d-e"), null);
       assert.equal(sanitizeEntitySlug("a".repeat(161)), "");
       assert.equal(sanitizeEntityDocumentId("a".repeat(129)), "");
       assert.equal(sanitizeEntityId("a".repeat(129)), null);
@@ -419,6 +480,8 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & Strapi v5 Suite", ()
       const updateResult = validateNoteUpdatePayload(inheritedPayload);
       assert.equal(updateResult.valid, false);
 
+      assert.equal(sanitizeNoteAuthor([1, 2, 3]), null);
+      assert.equal(sanitizeNoteAuthor(0.5), null);
       const unpopulatedAuthor = sanitizeNoteAuthor(10, "Alice Creator");
       assert.deepEqual(unpopulatedAuthor, {
         id: 10,

@@ -4,20 +4,23 @@ import {
   computeNotesSummaryStats,
   filterNotesList,
   NOTE_CONTENT_TYPE_UID,
-  normalizeNoteCategory,
   normalizeNoteRecord,
-  sanitizeEntityDocumentId,
-  sanitizeEntityId,
-  sanitizeEntityLocale,
-  sanitizeEntitySlug,
   sanitizeNoteAuthor,
-  sanitizePlainText,
   validateNoteCreatePayload,
   validateNoteUpdatePayload,
   type NoteFilterParams,
   type NoteRecord,
   type NotesSummaryStats,
 } from "../../../shared";
+import {
+  buildDbWhereClause,
+  getNotesPluginConfig,
+  parseNoteQueryFilters,
+  resolvePopulatedAuthor,
+  type NotesPluginConfig,
+} from "./notesQueryHelpers";
+
+export { getNotesPluginConfig, parseNoteQueryFilters, type NotesPluginConfig };
 
 export class NotesValidationError extends Error {
   status = 400;
@@ -40,99 +43,25 @@ function getDbQuery(strapi: Core.Strapi) {
   return null;
 }
 
-function extractFilterValue(value: unknown): unknown {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    const obj = value as Record<string, unknown>;
-    if ("$eq" in obj) {
-      return obj.$eq;
-    }
+function getDocService(strapi: Core.Strapi) {
+  if (typeof strapi?.documents === "function") {
+    return strapi.documents(NOTE_CONTENT_TYPE_UID) ?? null;
   }
-  return value;
+  return null;
 }
 
-function asObjectRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
+function hasExternalStorage(strapi: Core.Strapi): boolean {
+  return Boolean(getDbQuery(strapi) || getDocService(strapi));
 }
 
-function pickQueryField(
-  rawQuery: Record<string, unknown>,
-  filtersObj: Record<string, unknown>,
-  key: string
-): unknown {
-  return (
-    rawQuery[key] ??
-    extractFilterValue(filtersObj[key]) ??
-    rawQuery[`filters[${key}]`] ??
-    rawQuery[`filters[${key}][$eq]`]
+function hasNamedActorDisplay(actor: ReturnType<typeof sanitizeNoteAuthor>) {
+  if (!actor) return false;
+  return Boolean(
+    actor.firstname ||
+    actor.lastname ||
+    actor.username ||
+    (actor.displayName && !actor.displayName.startsWith("#"))
   );
-}
-
-function resolveSortDirection(
-  rawQuery: Record<string, unknown>,
-  sortObj: Record<string, unknown>
-): "ASC" | "DESC" {
-  const candidates = [
-    rawQuery.sort,
-    sortObj.createdAt,
-    rawQuery["sort[createdAt]"],
-  ];
-  const rawSort = candidates.find((val) => typeof val === "string") ?? "DESC";
-  return String(rawSort).toUpperCase().includes("ASC") ? "ASC" : "DESC";
-}
-
-function parseOptionalBoolean(value: unknown): boolean | undefined {
-  if (value === true || value === "true") return true;
-  if (value === false || value === "false") return false;
-  return undefined;
-}
-
-function parseCategoryFilter(
-  rawCategory: unknown
-): NoteFilterParams["category"] {
-  if (rawCategory === "all" || !rawCategory) {
-    return "all";
-  }
-  return normalizeNoteCategory(rawCategory);
-}
-
-export function parseNoteQueryFilters(
-  rawQuery: Record<string, unknown> = {}
-): NoteFilterParams {
-  const filtersObj = asObjectRecord(rawQuery.filters);
-  const sortObj = asObjectRecord(rawQuery.sort);
-
-  const rawSlug = pickQueryField(rawQuery, filtersObj, "entitySlug");
-  const rawDocId = pickQueryField(rawQuery, filtersObj, "entityDocumentId");
-  const rawEntityId = pickQueryField(rawQuery, filtersObj, "entityId");
-  const rawLocale = pickQueryField(rawQuery, filtersObj, "entityLocale");
-  const rawCategory =
-    rawQuery.category ?? extractFilterValue(filtersObj.category);
-  const rawPinned =
-    rawQuery.isPinned ?? extractFilterValue(filtersObj.isPinned);
-
-  return {
-    entitySlug: sanitizeEntitySlug(rawSlug) || undefined,
-    entityDocumentId: sanitizeEntityDocumentId(rawDocId) || undefined,
-    entityId: sanitizeEntityId(rawEntityId),
-    entityLocale: sanitizeEntityLocale(rawLocale),
-    includeAllLocales:
-      parseOptionalBoolean(rawQuery.includeAllLocales) === true,
-    category: parseCategoryFilter(rawCategory),
-    isPinned: parseOptionalBoolean(rawPinned),
-    search: sanitizePlainText(rawQuery.search ?? rawQuery._q, 160) || undefined,
-    sort: resolveSortDirection(rawQuery, sortObj),
-  };
-}
-
-function resolvePopulatedAuthor(
-  dbValue: unknown,
-  fallbackAuthor: unknown
-): unknown {
-  return typeof dbValue === "object" && dbValue !== null
-    ? dbValue
-    : (fallbackAuthor ?? dbValue);
 }
 
 function mergeUpdatedNoteRecord(
@@ -151,6 +80,26 @@ function mergeUpdatedNoteRecord(
   });
 }
 
+const MAX_SQL_INT32 = 2_147_483_647;
+
+function toSqlInt32(value: unknown): number | null {
+  if (
+    typeof value === "number" &&
+    Number.isInteger(value) &&
+    value >= 1 &&
+    value <= MAX_SQL_INT32
+  ) {
+    return value;
+  }
+  if (typeof value === "string" && /^\d{1,10}$/.test(value)) {
+    const parsed = Number.parseInt(value, 10);
+    if (parsed >= 1 && parsed <= MAX_SQL_INT32) {
+      return parsed;
+    }
+  }
+  return null;
+}
+
 async function queryDbByIdentifier(
   strapi: Core.Strapi,
   cleanStr: string
@@ -159,9 +108,7 @@ async function queryDbByIdentifier(
   if (!dbQuery || typeof dbQuery.findOne !== "function") {
     return null;
   }
-  const numericId = /^\d+$/.test(cleanStr)
-    ? Number.parseInt(cleanStr, 10)
-    : null;
+  const numericId = toSqlInt32(cleanStr);
   if (numericId !== null) {
     const byId = await dbQuery.findOne({
       where: { id: numericId },
@@ -180,10 +127,7 @@ async function queryDocServiceByIdentifier(
   strapi: Core.Strapi,
   cleanStr: string
 ): Promise<Record<string, unknown> | null> {
-  if (typeof strapi?.documents !== "function") {
-    return null;
-  }
-  const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
+  const docService = getDocService(strapi);
   if (!docService || typeof docService.findOne !== "function") {
     return null;
   }
@@ -212,19 +156,17 @@ async function persistCreatedNote(
     });
   }
 
-  if (typeof strapi?.documents === "function") {
-    const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-    if (docService && typeof docService.create === "function") {
-      const created = await docService.create({
-        data: createData,
-        populate: ["createdBy", "updatedBy"],
-      });
-      return normalizeNoteRecord({
-        ...created,
-        createdBy: resolvePopulatedAuthor(created.createdBy, actor),
-        updatedBy: resolvePopulatedAuthor(created.updatedBy, actor),
-      });
-    }
+  const docService = getDocService(strapi);
+  if (docService && typeof docService.create === "function") {
+    const created = await docService.create({
+      data: createData,
+      populate: ["createdBy", "updatedBy"],
+    });
+    return normalizeNoteRecord({
+      ...created,
+      createdBy: resolvePopulatedAuthor(created.createdBy, actor),
+      updatedBy: resolvePopulatedAuthor(created.updatedBy, actor),
+    });
   }
 
   return null;
@@ -247,23 +189,21 @@ async function persistUpdatedNote(
       data: updateData,
       populate: ["createdBy", "updatedBy"],
     });
-    if (updated) {
-      return mergeUpdatedNoteRecord(existing, updated, actor);
-    }
+    return updated ? mergeUpdatedNoteRecord(existing, updated, actor) : null;
   }
 
-  if (typeof strapi?.documents === "function" && existing.documentId) {
-    const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-    if (docService && typeof docService.update === "function") {
-      const updated = await docService.update({
-        documentId: String(existing.documentId),
-        data: updateData,
-        populate: ["createdBy", "updatedBy"],
-      });
-      if (updated) {
-        return mergeUpdatedNoteRecord(existing, updated, actor);
-      }
-    }
+  const docService = getDocService(strapi);
+  if (
+    docService &&
+    typeof docService.update === "function" &&
+    existing.documentId
+  ) {
+    const updated = await docService.update({
+      documentId: String(existing.documentId),
+      data: updateData,
+      populate: ["createdBy", "updatedBy"],
+    });
+    return updated ? mergeUpdatedNoteRecord(existing, updated, actor) : null;
   }
 
   return null;
@@ -273,25 +213,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   const memoryFallback: Array<Record<string, unknown>> = [];
   let nextMemoryId = 1;
 
-  async function fetchRawNotes(): Promise<Array<Record<string, unknown>>> {
+  async function fetchRawNotes(
+    filters: NoteFilterParams
+  ): Promise<Array<Record<string, unknown>>> {
+    const where = buildDbWhereClause(filters);
+    const hasWhere = Object.keys(where).length > 0;
+    const sortDir = (filters.sort ?? "DESC").toLowerCase() as "asc" | "desc";
+
     const dbQuery = getDbQuery(strapi);
     if (dbQuery && typeof dbQuery.findMany === "function") {
       const rows = await dbQuery.findMany({
+        ...(hasWhere ? { where } : {}),
         populate: ["createdBy", "updatedBy"],
-        orderBy: { createdAt: "desc" },
+        orderBy: { isPinned: "desc", createdAt: sortDir },
       });
       return Array.isArray(rows) ? rows : [];
     }
 
-    if (typeof strapi?.documents === "function") {
-      const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-      if (docService && typeof docService.findMany === "function") {
-        const docs = await docService.findMany({
-          populate: ["createdBy", "updatedBy"],
-          sort: { createdAt: "desc" },
-        });
-        return Array.isArray(docs) ? docs : [];
-      }
+    const docService = getDocService(strapi);
+    if (docService && typeof docService.findMany === "function") {
+      const docs = await docService.findMany({
+        ...(hasWhere ? { filters: where } : {}),
+        populate: ["createdBy", "updatedBy"],
+        sort: { isPinned: "desc", createdAt: sortDir },
+      });
+      return Array.isArray(docs) ? docs : [];
     }
 
     return [...memoryFallback];
@@ -311,6 +257,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const fromDoc = await queryDocServiceByIdentifier(strapi, cleanStr);
     if (fromDoc) return fromDoc;
 
+    if (hasExternalStorage(strapi)) {
+      return null;
+    }
+
     const fromMemory = memoryFallback.find(
       (item) =>
         String(item.id) === cleanStr || String(item.documentId) === cleanStr
@@ -319,11 +269,36 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   return {
-    async find(rawQuery: Record<string, unknown> = {}): Promise<NoteRecord[]> {
-      const filters = parseNoteQueryFilters(rawQuery);
-      const rawList = await fetchRawNotes();
+    async findWithMeta(rawQuery: Record<string, unknown> = {}): Promise<{
+      data: NoteRecord[];
+      total: number;
+      summary: NotesSummaryStats;
+    }> {
+      const pluginConfig = getNotesPluginConfig(strapi);
+      const filters = parseNoteQueryFilters(rawQuery, pluginConfig);
+      const rawList = await fetchRawNotes(filters);
       const normalized = rawList.map((item) => normalizeNoteRecord(item));
-      return filterNotesList(normalized, filters);
+      const matched = filterNotesList(normalized, {
+        ...filters,
+        limit: undefined,
+        offset: undefined,
+      });
+      const summary = computeNotesSummaryStats(matched);
+      const data = filterNotesList(matched, {
+        sort: filters.sort,
+        limit: filters.limit,
+        offset: filters.offset,
+      });
+      return {
+        data,
+        total: matched.length,
+        summary,
+      };
+    },
+
+    async find(rawQuery: Record<string, unknown> = {}): Promise<NoteRecord[]> {
+      const { data } = await this.findWithMeta(rawQuery);
+      return data;
     },
 
     async findOne(identifier: string | number): Promise<NoteRecord | null> {
@@ -334,8 +309,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async getSummaryStats(
       rawQuery: Record<string, unknown> = {}
     ): Promise<NotesSummaryStats> {
-      const notes = await this.find(rawQuery);
-      return computeNotesSummaryStats(notes);
+      const { summary } = await this.findWithMeta(rawQuery);
+      return summary;
     },
 
     async create(input: unknown, actorUser?: unknown): Promise<NoteRecord> {
@@ -344,12 +319,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         throw new NotesValidationError(validation.errors);
       }
 
+      const pluginConfig = getNotesPluginConfig(strapi);
       const actor = sanitizeNoteAuthor(actorUser);
+      const actorName = hasNamedActorDisplay(actor)
+        ? (actor?.displayName ?? "")
+        : "";
       const nowIso = new Date().toISOString();
-      const numericEntityId =
-        typeof validation.data.entityId === "number"
-          ? validation.data.entityId
-          : null;
+      const numericEntityId = toSqlInt32(validation.data.entityId);
 
       const createData: Record<string, unknown> = {
         title: validation.data.title,
@@ -359,9 +335,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         entitySlug: validation.data.entitySlug,
         entityId: numericEntityId,
         entityDocumentId: validation.data.entityDocumentId,
-        entityLocale: validation.data.entityLocale,
-        createdByName: actor?.displayName ?? "",
-        updatedByName: actor?.displayName ?? "",
+        entityLocale: pluginConfig.enableLocaleScoping
+          ? validation.data.entityLocale
+          : null,
+        createdByName: actorName,
+        updatedByName: actorName,
       };
 
       if (actor?.id !== null && actor?.id !== undefined) {
@@ -403,27 +381,41 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return null;
       }
 
+      const pluginConfig = getNotesPluginConfig(strapi);
       const actor = sanitizeNoteAuthor(actorUser);
       const nowIso = new Date().toISOString();
       const updateData: Record<string, unknown> = {
         ...validation.data,
       };
+      if ("entityId" in updateData) {
+        const rawEntityId = updateData.entityId;
+        updateData.entityId = toSqlInt32(rawEntityId);
+        if (
+          updateData.entityId === null &&
+          rawEntityId !== null &&
+          rawEntityId !== undefined &&
+          !updateData.entityDocumentId &&
+          !existing.entityDocumentId
+        ) {
+          updateData.entityDocumentId = String(rawEntityId);
+        }
+      }
+      if (
+        !pluginConfig.enableLocaleScoping &&
+        "entityLocale" in validation.data
+      ) {
+        updateData.entityLocale = null;
+      }
 
-      if (actor?.displayName) {
+      if (hasNamedActorDisplay(actor) && actor?.displayName) {
         updateData.updatedByName = actor.displayName;
       }
       if (actor?.id !== null && actor?.id !== undefined) {
         updateData.updatedBy = actor.id;
       }
 
-      const persisted = await persistUpdatedNote(
-        strapi,
-        existing,
-        updateData,
-        actor
-      );
-      if (persisted) {
-        return persisted;
+      if (hasExternalStorage(strapi)) {
+        return persistUpdatedNote(strapi, existing, updateData, actor);
       }
 
       const memIndex = memoryFallback.findIndex(
@@ -435,7 +427,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ...existing,
         ...updateData,
         updatedAt: nowIso,
-        updatedBy: actor ?? existing.updatedBy,
+        updatedBy: resolvePopulatedAuthor(actor, existing.updatedBy),
       };
       if (memIndex >= 0) {
         memoryFallback[memIndex] = merged;
@@ -462,14 +454,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return normalized;
       }
 
-      if (typeof strapi?.documents === "function" && existing.documentId) {
-        const docService = strapi.documents(NOTE_CONTENT_TYPE_UID);
-        if (docService && typeof docService.delete === "function") {
-          await docService.delete({
-            documentId: String(existing.documentId),
-          });
-          return normalized;
-        }
+      const docService = getDocService(strapi);
+      if (
+        docService &&
+        typeof docService.delete === "function" &&
+        existing.documentId
+      ) {
+        await docService.delete({
+          documentId: String(existing.documentId),
+        });
+        return normalized;
       }
 
       const memIndex = memoryFallback.findIndex(

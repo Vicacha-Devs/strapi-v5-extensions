@@ -18,6 +18,7 @@ import {
   filterNotesList,
   NOTE_CATEGORIES,
   NOTE_CATEGORY_META,
+  sanitizeEntityLocale,
   type NoteCategory,
   type NoteRecord,
   type NoteUpsertInput,
@@ -38,16 +39,15 @@ export interface SidePanelProps {
 }
 
 function detectDocumentLocale(props: SidePanelProps): string | null {
-  if (typeof props.document?.locale === "string" && props.document.locale) {
-    return props.document.locale;
+  const fromDoc = sanitizeEntityLocale(props.document?.locale);
+  if (fromDoc) {
+    return fromDoc;
   }
   if (typeof window !== "undefined") {
     const fromUrl = new URLSearchParams(window.location.search).get(
       "plugins[i18n][locale]"
     );
-    if (fromUrl) {
-      return fromUrl;
-    }
+    return sanitizeEntityLocale(fromUrl);
   }
   return null;
 }
@@ -62,7 +62,7 @@ function interpolateTemplateValues(
 ): string {
   if (!values) return template;
   return Object.entries(values).reduce(
-    (acc, [k, v]) => acc.replace(new RegExp(`\\{${k}\\}`, "g"), String(v)),
+    (acc, [k, v]) => acc.split(`{${k}}`).join(String(v)),
     template
   );
 }
@@ -74,20 +74,23 @@ function formatNoteMessageWithLocale(
     descriptor: { id: string; defaultMessage: string },
     values?: Record<string, string | number>
   ) => string,
-  locale?: string | null,
+  uiLocale?: string | null,
+  entityLocale?: string | null,
   values?: Record<string, string | number>
 ): string {
   const fullKey = getTrad(id);
-  const activeLoc =
-    locale ||
+  const fallbackEntityLoc =
+    entityLocale ||
     (typeof window !== "undefined"
       ? new URLSearchParams(window.location.search).get("plugins[i18n][locale]")
       : null);
   const globalMessages = (globalThis as unknown as GlobalCmI18nWindow)
     .__CM_I18N_MESSAGES__;
-  const override = activeLoc
-    ? globalMessages?.[activeLoc]?.[fullKey]
-    : undefined;
+  const override =
+    (uiLocale ? globalMessages?.[uiLocale]?.[fullKey] : undefined) ??
+    (fallbackEntityLoc
+      ? globalMessages?.[fallbackEntityLoc]?.[fullKey]
+      : undefined);
   if (override) {
     return interpolateTemplateValues(override, values);
   }
@@ -101,7 +104,7 @@ interface NotesSidePanelContentProps {
 const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
   entity,
 }) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale: uiLocale } = useIntl();
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [categoryFilter, setCategoryFilter] = React.useState<
     NoteCategory | "all"
@@ -129,6 +132,7 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
       id,
       defaultMessage,
       formatMessage,
+      uiLocale,
       entity.locale,
       values
     );
@@ -143,17 +147,21 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
     [notes, categoryFilter, searchQuery]
   );
 
+  const showFilterControls =
+    notes.length > 1 || Boolean(searchQuery.trim()) || categoryFilter !== "all";
+
   const handleUpsert = async (
     payload: NoteUpsertInput,
     existingId?: string | number
   ) => {
-    if (existingId !== undefined && existingId !== "") {
-      await updateNote(existingId, payload);
-    } else {
-      await createNote(payload);
+    const saved =
+      existingId !== undefined && existingId !== ""
+        ? await updateNote(existingId, payload)
+        : await createNote(payload);
+    if (saved) {
+      setIsModalOpen(false);
+      setActiveNote(null);
     }
-    setIsModalOpen(false);
-    setActiveNote(null);
   };
 
   const handleTogglePin = async (note: NoteRecord) => {
@@ -165,8 +173,10 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
   const handleConfirmDelete = async (note: NoteRecord) => {
     const targetId = note.id || note.documentId;
     if (!targetId) return;
-    await deleteNote(targetId);
-    setNoteToDelete(null);
+    const deleted = await deleteNote(targetId);
+    if (deleted) {
+      setNoteToDelete(null);
+    }
   };
 
   return (
@@ -185,7 +195,7 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
           )}
         </Flex>
 
-        {notes.length > 1 && (
+        {showFilterControls && (
           <Flex direction="column" alignItems="stretch" gap={2}>
             <TextInput
               name="noteSearch"
@@ -327,21 +337,27 @@ function resolveSidePanelEntity(
   const slug = props.model ?? "";
   const documentId = resolveSidePanelDocumentId(props);
   const numericId = resolveSidePanelNumericId(props);
-  const hasIdentifier = Boolean(documentId || numericId !== null);
+  const isSingleType =
+    props.collectionType === "single-types" ||
+    props.collectionType === "singleType";
+  const hasIdentifier = Boolean(
+    documentId || numericId !== null || isSingleType
+  );
   if (!slug || !hasIdentifier) {
     return null;
   }
 
   return {
     id: numericId,
-    documentId: documentId || String(numericId),
+    documentId:
+      documentId || (numericId !== null ? String(numericId) : "single"),
     slug,
     locale: detectDocumentLocale(props),
   };
 }
 
 export const NotesSidePanel = (props: SidePanelProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale: uiLocale } = useIntl();
   const entity = resolveSidePanelEntity(props);
   if (!entity) {
     return null;
@@ -352,6 +368,7 @@ export const NotesSidePanel = (props: SidePanelProps) => {
       "plugin.name",
       "Notes",
       formatMessage,
+      uiLocale,
       entity.locale
     ),
     content: <NotesSidePanelContent entity={entity} />,
