@@ -13,6 +13,10 @@ const distDir = resolve(cwd, "dist");
 for (const subdir of ["server", "admin", "shared"]) {
   const mjsPath = resolve(distDir, subdir, "index.mjs");
   const jsPath = resolve(distDir, subdir, "index.js");
+  const cjsPath = resolve(distDir, subdir, "index.cjs");
+  if (existsSync(jsPath)) {
+    copyFileSync(jsPath, cjsPath);
+  }
   if (existsSync(mjsPath)) {
     copyFileSync(mjsPath, jsPath);
   }
