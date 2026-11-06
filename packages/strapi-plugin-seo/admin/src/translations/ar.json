@@ -125,5 +125,6 @@
   "Bad": "ضعيف",
   "Social-preview.alert": "أكمل مكوّن الشبكات الاجتماعية لرؤية المعاينة",
   "Information": "معلومات",
-  "notification.success.settings": "تم حفظ الإعدادات لنوع المحتوى {collectionName}."
+  "notification.success.settings": "تم حفظ الإعدادات لنوع المحتوى {collectionName}.",
+  "notification.error.settings": "فشل في حفظ إعدادات SEO."
 }

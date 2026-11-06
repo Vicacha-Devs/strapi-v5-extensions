@@ -1,7 +1,4 @@
 import { Box, Flex, ProgressBar, Typography } from "@strapi/design-system";
-import isEmpty from "lodash/isEmpty";
-import isEqual from "lodash/isEqual";
-import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -10,7 +7,11 @@ import type {
   SeoCheckStatus,
 } from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
-import { qualityVerdict } from "../../../utils/checks";
+import {
+  isEmptyValue,
+  isSameCheckStatus,
+  qualityVerdict,
+} from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
 import { SEOAccordion } from "../SEOAccordion";
 
@@ -25,16 +26,16 @@ export const MetaTitleCheck = ({ metaTitle, checks }: MetaTitleCheckProps) => {
 
   const maxLength = 60;
 
-  let status: SeoCheckStatus = {
-    message: formatMessage({
-      id: getTrad("SEOChecks.metaTitleCheck.default"),
-      defaultMessage: "A Meta Title has been found!",
-    }),
-    qualityVerdict: qualityVerdict.good,
-  };
-
   React.useEffect(() => {
-    if (isNull(metaTitle) || isEmpty(metaTitle)) {
+    let status: SeoCheckStatus = {
+      message: formatMessage({
+        id: getTrad("SEOChecks.metaTitleCheck.default"),
+        defaultMessage: "A Meta Title has been found!",
+      }),
+      qualityVerdict: qualityVerdict.good,
+    };
+
+    if (typeof metaTitle !== "string" || isEmptyValue(metaTitle)) {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.metaTitleCheck.not-found"),
@@ -51,13 +52,13 @@ export const MetaTitleCheck = ({ metaTitle, checks }: MetaTitleCheckProps) => {
         qualityVerdict: qualityVerdict.bad,
       };
     }
-    if (!isEqual(status, checks.metaTitle) && dispatch) {
+    if (!isSameCheckStatus(status, checks.metaTitle) && dispatch) {
       dispatch({
         type: "UPDATE_PONCTUAL",
         value: { ...status, entity: "metaTitle" },
       });
     }
-  }, []);
+  }, [metaTitle]);
 
   return (
     <SEOAccordion
@@ -69,7 +70,11 @@ export const MetaTitleCheck = ({ metaTitle, checks }: MetaTitleCheckProps) => {
       label={formatMessage({
         id: getTrad("Title-settings.metaTitle-tooltip"),
         defaultMessage:
-          "The title tag is the clickable title of a webpage that appears with the result on the SERP (search engine page results page).\n You should aim to make your SEO titles around 60 characters long. Clear title tags will go a long way towards making your website easy to read and understand.",
+          "The title tag is the clickable title of a webpage that appears " +
+          "with the result on the SERP (search engine page results page).\n " +
+          "You should aim to make your SEO titles around 60 characters " +
+          "long. Clear title tags will go a long way towards making your " +
+          "website easy to read and understand.",
       })}
       component={
         metaTitle && (

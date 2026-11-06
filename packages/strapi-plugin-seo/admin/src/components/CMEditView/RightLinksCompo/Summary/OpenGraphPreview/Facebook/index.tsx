@@ -8,15 +8,31 @@ interface FacebookOGPreviewProps {
   description: string;
 }
 
+const toSafeImageUrl = (rawUrl?: string): string => {
+  if (typeof rawUrl !== "string") return "";
+  const trimmed = rawUrl.trim();
+  if (
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("/")
+  ) {
+    return trimmed;
+  }
+  return "";
+};
+
 export const FacebookOGPreview = ({
   image,
   title,
   description,
 }: FacebookOGPreviewProps) => {
+  const safeSrc = toSafeImageUrl(image?.url);
+
   return (
     <div
       style={{
-        width: "500px",
+        width: "100%",
+        maxWidth: "500px",
         border: "1px solid #dadde1",
         fontFamily: "Helvetica, Arial, sans-serif",
         cursor: "pointer",
@@ -34,18 +50,20 @@ export const FacebookOGPreview = ({
         <div
           style={{ width: "100%", position: "relative", paddingTop: "52.5%" }}
         >
-          <img
-            src={image.url}
-            alt={title}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
-          />
+          {safeSrc ? (
+            <img
+              src={safeSrc}
+              alt={title}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          ) : null}
         </div>
       </div>
 

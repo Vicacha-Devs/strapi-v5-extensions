@@ -296,54 +296,6 @@ declare module "@strapi/icons" {
   export const WarningCircle: FC<Record<string, unknown>>;
 }
 
-declare module "lodash/get" {
-  export default function get<T = unknown>(
-    object: unknown,
-    path: string | string[],
-    defaultValue?: T
-  ): T;
-}
-
-declare module "lodash/isEmpty" {
-  export default function isEmpty(value: unknown): boolean;
-}
-
-declare module "lodash/isEqual" {
-  export default function isEqual(value: unknown, other: unknown): boolean;
-}
-
-declare module "lodash/isNull" {
-  export default function isNull(value: unknown): value is null;
-}
-
-declare module "lodash/isNumber" {
-  export default function isNumber(value: unknown): value is number;
-}
-
-declare module "lodash/isArray" {
-  export default function isArray(value: unknown): value is unknown[];
-}
-
-declare module "lodash/isObject" {
-  export default function isObject(
-    value: unknown
-  ): value is Record<string, unknown>;
-}
-
-declare module "lodash/pull" {
-  export default function pull<T>(array: T[], ...values: T[]): T[];
-}
-
-declare module "showdown" {
-  export class Converter {
-    makeHtml(markdown: string): string;
-  }
-  const showdownDefault: {
-    Converter: typeof Converter;
-  };
-  export default showdownDefault;
-}
-
 declare module "date-fns" {
   export function formatDistance(
     date: Date | number,

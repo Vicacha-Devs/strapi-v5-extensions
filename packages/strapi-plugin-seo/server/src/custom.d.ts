@@ -3,18 +3,6 @@ declare function setImmediate(
   ...args: unknown[]
 ): unknown;
 
-declare module "lodash" {
-  export function get<T = unknown>(
-    object: unknown,
-    path: string | string[],
-    defaultValue?: T
-  ): T;
-  const lodashDefault: {
-    get: typeof get;
-  };
-  export default lodashDefault;
-}
-
 declare module "@strapi/strapi" {
   export namespace Core {
     export interface PluginStore {

@@ -1,7 +1,4 @@
 import { Box, Flex, ProgressBar, Typography } from "@strapi/design-system";
-import isEmpty from "lodash/isEmpty";
-import isEqual from "lodash/isEqual";
-import isNull from "lodash/isNull";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -10,7 +7,11 @@ import type {
   SeoCheckStatus,
 } from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
-import { qualityVerdict } from "../../../utils/checks";
+import {
+  isEmptyValue,
+  isSameCheckStatus,
+  qualityVerdict,
+} from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
 import { SEOAccordion } from "../SEOAccordion";
 
@@ -29,16 +30,16 @@ export const MetaDescriptionCheck = ({
   const maxLength = 160;
   const minimumLength = 50;
 
-  let status: SeoCheckStatus = {
-    message: formatMessage({
-      id: getTrad("SEOChecks.metaDescriptionCheck.default"),
-      defaultMessage: "A Meta Description has been found!",
-    }),
-    qualityVerdict: qualityVerdict.good,
-  };
-
   React.useEffect(() => {
-    if (isNull(metaDescription) || isEmpty(metaDescription)) {
+    let status: SeoCheckStatus = {
+      message: formatMessage({
+        id: getTrad("SEOChecks.metaDescriptionCheck.default"),
+        defaultMessage: "A Meta Description has been found!",
+      }),
+      qualityVerdict: qualityVerdict.good,
+    };
+
+    if (typeof metaDescription !== "string" || isEmptyValue(metaDescription)) {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.metaDescriptionCheck.not-found"),
@@ -63,13 +64,13 @@ export const MetaDescriptionCheck = ({
         qualityVerdict: qualityVerdict.bad,
       };
     }
-    if (!isEqual(status, checks.metaDescription) && dispatch) {
+    if (!isSameCheckStatus(status, checks.metaDescription) && dispatch) {
       dispatch({
         type: "UPDATE_PONCTUAL",
         value: { ...status, entity: "metaDescription" },
       });
     }
-  }, []);
+  }, [metaDescription]);
 
   return (
     <SEOAccordion
@@ -80,7 +81,12 @@ export const MetaDescriptionCheck = ({
       status={checks.metaDescription}
       label={formatMessage({
         id: getTrad("Title-settings.metaDescription-tooltip"),
-        defaultMessage: `A meta description is an HTML tag used to describe the content of a web page.\n This description appears below the title and URL of your page as it appears in search engine results.\n For it to remain visible in Google, it must not exceed 140-${maxLength} characters.`,
+        defaultMessage:
+          "A meta description is an HTML tag used to describe the content " +
+          "of a web page.\n This description appears below the title and " +
+          "URL of your page as it appears in search engine results.\n For " +
+          "it to remain visible in Google, it must not exceed " +
+          `140-${maxLength} characters.`,
       })}
       component={
         metaDescription && (

@@ -125,5 +125,6 @@
   "Bad": "Ruim",
   "Social-preview.alert": "Complete as informações do componente de rede social para ver a prévia",
   "Information": "Informações",
-  "notification.success.settings": "Configurações salvas para o tipo de conteúdo {collectionName}."
+  "notification.success.settings": "Configurações salvas para o tipo de conteúdo {collectionName}.",
+  "notification.error.settings": "Falha ao salvar as configurações de SEO."
 }

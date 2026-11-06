@@ -1,5 +1,3 @@
-import isEmpty from "lodash/isEmpty";
-import isEqual from "lodash/isEqual";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -8,7 +6,11 @@ import type {
   SeoCheckStatus,
 } from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
-import { qualityVerdict } from "../../../utils/checks";
+import {
+  isEmptyValue,
+  isSameCheckStatus,
+  qualityVerdict,
+} from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
 import { SEOAccordion } from "../SEOAccordion";
 
@@ -24,17 +26,18 @@ export const StructuredDataCheck = ({
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
 
-  let status: SeoCheckStatus = {
-    message: formatMessage({
-      id: getTrad("SEOChecks.structuredDataCheck.default"),
-      defaultMessage:
-        "A Structured Data json has been found! However we can validate the accuracy of its content.",
-    }),
-    qualityVerdict: qualityVerdict.good,
-  };
-
   React.useEffect(() => {
-    if (isEmpty(structuredData)) {
+    let status: SeoCheckStatus = {
+      message: formatMessage({
+        id: getTrad("SEOChecks.structuredDataCheck.default"),
+        defaultMessage:
+          "A Structured Data json has been found! However we can validate " +
+          "the accuracy of its content.",
+      }),
+      qualityVerdict: qualityVerdict.good,
+    };
+
+    if (isEmptyValue(structuredData)) {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.structuredDataCheck.not-found"),
@@ -43,13 +46,13 @@ export const StructuredDataCheck = ({
         qualityVerdict: qualityVerdict.bad,
       };
     }
-    if (!isEqual(status, checks.structuredData) && dispatch) {
+    if (!isSameCheckStatus(status, checks.structuredData) && dispatch) {
       dispatch({
         type: "UPDATE_PONCTUAL",
         value: { ...status, entity: "structuredData" },
       });
     }
-  }, []);
+  }, [structuredData]);
 
   return (
     <SEOAccordion
@@ -61,7 +64,8 @@ export const StructuredDataCheck = ({
       label={formatMessage({
         id: getTrad("SEOChecks.structuredDataCheck.label"),
         defaultMessage:
-          "Structured data is a standardized format for providing information about a page and classifying the page content.",
+          "Structured data is a standardized format for providing " +
+          "information about a page and classifying the page content.",
       })}
     />
   );

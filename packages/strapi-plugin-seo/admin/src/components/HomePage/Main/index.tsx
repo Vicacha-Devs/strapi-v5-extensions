@@ -20,7 +20,9 @@ import { NavLink } from "react-router-dom";
 import type {
   ContentTypeSeoItem,
   ContentTypesResponse,
+  SeoSettingsMap,
 } from "../../../../../shared";
+import { useSettingsApi } from "../../../hooks/useSettingsApi";
 import { getTrad } from "../../../utils/getTrad";
 import { Illo } from "./EmptyComponentLayout/illo";
 import { SettingsModal } from "./SettingsModal";
@@ -31,9 +33,15 @@ interface MainProps {
 
 interface ContentTypeRowProps {
   item: ContentTypeSeoItem;
+  defaultSettings: SeoSettingsMap | null;
+  onSettingsUpdated: (next: SeoSettingsMap) => void;
 }
 
-const ContentTypeRow = ({ item }: ContentTypeRowProps) => {
+const ContentTypeRow = ({
+  item,
+  defaultSettings,
+  onSettingsUpdated,
+}: ContentTypeRowProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -42,14 +50,19 @@ const ContentTypeRow = ({ item }: ContentTypeRowProps) => {
         <Typography textColor="neutral800">{item.globalId}</Typography>
       </Td>
       <Td>
-        <Flex justifyContent="right" alignItems="right">
+        <Flex justifyContent="flex-end" alignItems="center">
           {item.seo ? (
-            <SettingsModal item={item} />
+            <SettingsModal
+              item={item}
+              defaultSettings={defaultSettings}
+              onSettingsUpdated={onSettingsUpdated}
+            />
           ) : (
             <LinkButton
               startIcon={<Plus />}
               variant="secondary"
-              href={`/admin/plugins/content-type-builder/content-types/${item.uid}`}
+              tag={NavLink}
+              to={`/plugins/content-type-builder/content-types/${item.uid}`}
             >
               {formatMessage({
                 id: getTrad("SEOPage.info.add"),
@@ -70,6 +83,8 @@ interface ContentTypeTabTableProps {
   createLinkTo?: string;
   createButtonId?: string;
   createButtonDefaultMessage?: string;
+  defaultSettings: SeoSettingsMap | null;
+  onSettingsUpdated: (next: SeoSettingsMap) => void;
 }
 
 const ContentTypeTabTable = ({
@@ -79,6 +94,8 @@ const ContentTypeTabTable = ({
   createLinkTo,
   createButtonId,
   createButtonDefaultMessage,
+  defaultSettings,
+  onSettingsUpdated,
 }: ContentTypeTabTableProps) => {
   const { formatMessage } = useIntl();
   const safeItems = Array.isArray(items) ? items : [];
@@ -99,7 +116,7 @@ const ContentTypeTabTable = ({
     ) : undefined;
 
   return (
-    <Table colCount={2} rowCount={safeItems.length}>
+    <Table colCount={2} rowCount={Math.max(safeItems.length, 1)}>
       <Thead>
         <Tr>
           <Th>
@@ -110,22 +127,34 @@ const ContentTypeTabTable = ({
               })}
             </Typography>
           </Th>
+          <Th />
         </Tr>
       </Thead>
       <Tbody>
         {safeItems.length > 0 ? (
-          safeItems.map((item) => <ContentTypeRow key={item.uid} item={item} />)
-        ) : (
-          <Box padding={8} background="neutral0">
-            <EmptyStateLayout
-              icon={<Illo />}
-              content={formatMessage({
-                id: getTrad(emptyMessageId),
-                defaultMessage: emptyDefaultMessage,
-              })}
-              action={createAction}
+          safeItems.map((item) => (
+            <ContentTypeRow
+              key={item.uid}
+              item={item}
+              defaultSettings={defaultSettings}
+              onSettingsUpdated={onSettingsUpdated}
             />
-          </Box>
+          ))
+        ) : (
+          <Tr>
+            <Td colSpan={2}>
+              <Box padding={8} background="neutral0">
+                <EmptyStateLayout
+                  icon={<Illo />}
+                  content={formatMessage({
+                    id: getTrad(emptyMessageId),
+                    defaultMessage: emptyDefaultMessage,
+                  })}
+                  action={createAction}
+                />
+              </Box>
+            </Td>
+          </Tr>
         )}
       </Tbody>
     </Table>
@@ -134,6 +163,25 @@ const ContentTypeTabTable = ({
 
 export const Main = ({ contentTypes }: MainProps) => {
   const { formatMessage } = useIntl();
+  const { getSettings } = useSettingsApi();
+  const [defaultSettings, setDefaultSettings] =
+    React.useState<SeoSettingsMap | null>(null);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    void getSettings()
+      .then(({ data }) => {
+        if (isMounted && data) {
+          setDefaultSettings(data);
+        }
+      })
+      .catch(() => {
+        // Ignore initial settings fetch error; SettingsModal retries on open
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const TabValues = {
     collectionTypes: "collection-types",
@@ -182,6 +230,8 @@ export const Main = ({ contentTypes }: MainProps) => {
             createLinkTo="/plugins/content-type-builder"
             createButtonId="SEOPage.info.create-collection-type"
             createButtonDefaultMessage="Create your first collection-type"
+            defaultSettings={defaultSettings}
+            onSettingsUpdated={setDefaultSettings}
           />
         </Tabs.Content>
         <Tabs.Content value={TabValues.singleTypes}>
@@ -189,9 +239,11 @@ export const Main = ({ contentTypes }: MainProps) => {
             items={contentTypes?.singleTypes}
             emptyMessageId="SEOPage.info.no-single-types"
             emptyDefaultMessage="You don't have any single-types yet..."
-            createLinkTo="/admin/plugins/content-type-builder"
+            createLinkTo="/plugins/content-type-builder"
             createButtonId="SEOPage.info.create-single-type"
             createButtonDefaultMessage="Create your first single-type"
+            defaultSettings={defaultSettings}
+            onSettingsUpdated={setDefaultSettings}
           />
         </Tabs.Content>
         <Tabs.Content value={TabValues.plugins}>
@@ -199,6 +251,8 @@ export const Main = ({ contentTypes }: MainProps) => {
             items={contentTypes?.plugins}
             emptyMessageId="SEOPage.info.no-plugin-content-type"
             emptyDefaultMessage="You don't have any plugin content-type yet..."
+            defaultSettings={defaultSettings}
+            onSettingsUpdated={setDefaultSettings}
           />
         </Tabs.Content>
       </Tabs.Root>

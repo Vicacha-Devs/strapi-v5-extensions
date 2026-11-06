@@ -52,7 +52,8 @@ export const SeoCheckerContext =
 
 const buildMetaChecksPreview = (
   seoChecks: SeoChecksConfig,
-  currentModifiedData: ContentManagerFormValues
+  currentModifiedData: ContentManagerFormValues,
+  updatedAt: string | null
 ): SeoChecksState => ({
   ...(seoChecks.metaTitle && {
     metaTitle: getMetaTitleCheckPreview(currentModifiedData),
@@ -73,16 +74,44 @@ const buildMetaChecksPreview = (
     structuredData: structuredDataPreview(currentModifiedData),
   }),
   ...(seoChecks.lastUpdatedAt && {
-    lastUpdatedAt: lastUpdatedAtPreview(currentModifiedData),
+    lastUpdatedAt: lastUpdatedAtPreview(currentModifiedData, updatedAt),
   }),
 });
+
+const computeAllChecks = (
+  seoChecks: SeoChecksConfig,
+  currentModifiedData: ContentManagerFormValues,
+  currentComponents: ComponentSchemasMap,
+  currentContentType: ContentTypeSchemaInfo,
+  updatedAt: string | null
+): SeoChecksState => {
+  const { wordCount, keywordsDensity, emptyAltCount } = getRichTextData(
+    currentModifiedData,
+    currentComponents,
+    currentContentType
+  );
+
+  return {
+    ...buildMetaChecksPreview(seoChecks, currentModifiedData, updatedAt),
+    ...(seoChecks.wordCount && {
+      wordCount: getWordCountPreview(wordCount),
+    }),
+    ...(seoChecks.alternativeText && {
+      alternativeText: getAlternativeTextPreview(emptyAltCount),
+    }),
+    ...(seoChecks.keywordDensity && {
+      keywordsDensity: getKeywordDensityPreview(keywordsDensity),
+    }),
+  };
+};
 
 export const Summary = () => {
   const { formatMessage } = useIntl();
   const { getSettings } = useSettingsApi();
 
   const [isLoading, setIsLoading] = React.useState(true);
-  const [localChecks, setLocalChecks] = React.useState<SeoChecksState>({});
+  const [seoChecksConfig, setSeoChecksConfig] =
+    React.useState<SeoChecksConfig>(DEFAULT_SEO_CHECKS);
   const [checks, dispatch] = React.useReducer(reducer, initialState);
 
   const { model, collectionType, id, form, contentType, components } =
@@ -97,63 +126,46 @@ export const Summary = () => {
     documentId: id,
   });
 
-  const getAllChecks = async (
-    currentModifiedData: ContentManagerFormValues,
-    currentComponents: ComponentSchemasMap,
-    currentContentType: ContentTypeSchemaInfo
-  ): Promise<SeoChecksState> => {
-    const { data: defaultSettings } = await getSettings();
-    const uid = currentContentType?.uid ?? "";
-    const seoChecks = defaultSettings?.[uid]?.seoChecks ?? DEFAULT_SEO_CHECKS;
-
-    const { wordCount, keywordsDensity, emptyAltCount } = getRichTextData(
-      currentModifiedData,
-      currentComponents,
-      currentContentType
-    );
-
-    return {
-      ...buildMetaChecksPreview(seoChecks, currentModifiedData),
-      ...(seoChecks.wordCount && {
-        wordCount: getWordCountPreview(wordCount),
-      }),
-      ...(seoChecks.alternativeText && {
-        alternativeText: getAlternativeTextPreview(emptyAltCount),
-      }),
-      ...(seoChecks.keywordDensity && {
-        keywordsDensity: getKeywordDensityPreview(keywordsDensity),
-      }),
-    };
-  };
+  const updatedAt = document?.updatedAt ?? modifiedData?.updatedAt ?? null;
+  const uid = contentType?.uid ?? "";
 
   React.useEffect(() => {
-    const fetchChecks = async () => {
-      if (!(JSON.stringify(localChecks) === JSON.stringify(checks))) {
-        if (checks?.preview) {
-          const status = await getAllChecks(
-            modifiedData,
-            components,
-            contentType
-          );
-
-          dispatch({
-            type: "UPDATE_FOR_PREVIEW",
-            value: status,
-          });
-        } else {
-          dispatch({
-            type: "UPDATE_FOR_PREVIEW",
-            value: checks,
-          });
+    let isMounted = true;
+    void getSettings()
+      .then(({ data: defaultSettings }) => {
+        if (!isMounted) return;
+        const resolved =
+          defaultSettings?.[uid]?.seoChecks ?? DEFAULT_SEO_CHECKS;
+        setSeoChecksConfig(resolved);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setSeoChecksConfig(DEFAULT_SEO_CHECKS);
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
         }
-        setLocalChecks(checks);
-      }
-    };
+      });
 
-    void fetchChecks().then(() => {
-      setIsLoading(false);
+    return () => {
+      isMounted = false;
+    };
+  }, [uid]);
+
+  React.useEffect(() => {
+    const status = computeAllChecks(
+      seoChecksConfig,
+      modifiedData,
+      components,
+      contentType,
+      updatedAt
+    );
+    dispatch({
+      type: "UPDATE_FOR_PREVIEW",
+      value: status,
     });
-  }, [checks]);
+  }, [seoChecksConfig, modifiedData, components, contentType, updatedAt]);
 
   return (
     <SeoCheckerContext.Provider value={dispatch}>

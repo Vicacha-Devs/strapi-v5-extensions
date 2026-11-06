@@ -1,3 +1,11 @@
+const READ_POLICIES = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: ["plugin::seo.read"] },
+  },
+];
+
 export const seoRoutes = {
   type: "admin",
   routes: [
@@ -6,7 +14,7 @@ export const seoRoutes = {
       path: "/component",
       handler: "seo.findSeoComponent",
       config: {
-        policies: [],
+        policies: READ_POLICIES,
       },
     },
     {
@@ -14,7 +22,7 @@ export const seoRoutes = {
       path: "/component",
       handler: "seo.createSeoComponent",
       config: {
-        policies: [],
+        policies: READ_POLICIES,
       },
     },
     {
@@ -22,7 +30,7 @@ export const seoRoutes = {
       path: "/content-types",
       handler: "seo.findContentTypes",
       config: {
-        policies: [],
+        policies: READ_POLICIES,
       },
     },
   ],

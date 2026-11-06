@@ -125,5 +125,6 @@
   "Bad": "Malo",
   "Social-preview.alert": "Completa tu componente social para ver la vista previa",
   "Information": "Información",
-  "notification.success.settings": "Configuración guardada para el tipo de contenido {collectionName}."
+  "notification.success.settings": "Configuración guardada para el tipo de contenido {collectionName}.",
+  "notification.error.settings": "No se pudo guardar la configuración SEO."
 }

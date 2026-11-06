@@ -6,7 +6,6 @@ import {
   Modal,
   Typography,
 } from "@strapi/design-system";
-import get from "lodash/get";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -27,10 +26,10 @@ interface BrowserPreviewProps {
 export const BrowserPreview = ({ modifiedData }: BrowserPreviewProps) => {
   const { formatMessage } = useIntl();
 
-  const seo = get<SeoComponentValues | null>(modifiedData, "seo", null);
-  const metaTitle = get<string | null>(seo, "metaTitle", null);
-  const metaDescription = get<string | null>(seo, "metaDescription", null);
-  const keywords = get<string | null>(seo, "keywords", null);
+  const seo: SeoComponentValues | null = modifiedData?.seo ?? null;
+  const metaTitle = seo?.metaTitle ?? null;
+  const metaDescription = seo?.metaDescription ?? null;
+  const keywords = seo?.keywords ?? null;
 
   return (
     <Modal.Content labelledBy="title">

@@ -125,5 +125,6 @@
   "Bad": "Bad",
   "Social-preview.alert": "Complete your social component to see the preview",
   "Information": "Information",
-  "notification.success.settings": "Settings saved for {collectionName} content-type."
+  "notification.success.settings": "Settings saved for {collectionName} content-type.",
+  "notification.error.settings": "Failed to save SEO settings."
 }

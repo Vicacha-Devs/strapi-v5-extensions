@@ -1,5 +1,4 @@
 import type { Core } from "@strapi/strapi";
-import _ from "lodash";
 
 import type { ContentTypeSeoItem, ContentTypesResponse } from "../../../shared";
 import openGraph from "../components/open-graph.json";
@@ -34,11 +33,19 @@ const resolveGlobalId = (name: string, ct: Core.ContentTypeSchema): string => {
   return ct.info?.displayName ?? name;
 };
 
+const hasSeoComponentAttribute = (ct: Core.ContentTypeSchema): boolean => {
+  const seoAttr = ct.attributes?.seo as { component?: unknown } | undefined;
+  return (
+    typeof seoAttr?.component === "string" &&
+    seoAttr.component.trim().length > 0
+  );
+};
+
 const buildContentTypeSeoItem = (
   name: string,
   ct: Core.ContentTypeSchema
 ): ContentTypeSeoItem => ({
-  seo: Boolean(_.get(ct, "attributes.seo.component", null)),
+  seo: hasSeoComponentAttribute(ct),
   uid: ct.uid ?? name,
   kind: ct.kind ?? "collectionType",
   globalId: resolveGlobalId(name, ct),
@@ -93,6 +100,8 @@ export const seoService = ({ strapi }: { strapi: Core.Strapi }) => ({
       return null;
     }
 
+    const hasOpenGraph = Boolean(strapi.components?.["shared.open-graph"]);
+
     try {
       return await strapi
         .plugin("content-type-builder")
@@ -103,15 +112,17 @@ export const seoService = ({ strapi }: { strapi: Core.Strapi }) => ({
             icon: seoContent.info.icon,
             attributes: seoContent.attributes,
           },
-          components: [
-            {
-              tmpUID: "shared.open-graph",
-              category: "shared",
-              displayName: openGraph.info.displayName,
-              icon: openGraph.info.icon,
-              attributes: openGraph.attributes,
-            },
-          ],
+          components: hasOpenGraph
+            ? []
+            : [
+                {
+                  tmpUID: "shared.open-graph",
+                  category: "shared",
+                  displayName: openGraph.info.displayName,
+                  icon: openGraph.info.icon,
+                  attributes: openGraph.attributes,
+                },
+              ],
         });
     } catch (error) {
       strapi.log?.error?.(String(error));

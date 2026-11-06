@@ -15,7 +15,7 @@ export const Serp = ({ metaTitle, metaDescription }: SerpProps) => {
       : metaDescription;
 
   return (
-    <Box padding={4} background="neutral100" width="580px">
+    <Box padding={4} background="neutral100" width="100%" maxWidth="580px">
       <Typography variant="beta" textColor="primary600">
         {metaTitleToDisplay}
       </Typography>

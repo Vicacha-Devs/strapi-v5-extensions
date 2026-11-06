@@ -1,7 +1,4 @@
 import { Box, Typography } from "@strapi/design-system";
-import isEqual from "lodash/isEqual";
-import isNull from "lodash/isNull";
-import isNumber from "lodash/isNumber";
 import * as React from "react";
 import { useIntl } from "react-intl";
 
@@ -10,7 +7,7 @@ import type {
   SeoCheckStatus,
 } from "../../../../../../../shared";
 import { getTrad } from "../../../../../utils/getTrad";
-import { qualityVerdict } from "../../../utils/checks";
+import { isSameCheckStatus, qualityVerdict } from "../../../utils/checks";
 import { SeoCheckerContext } from "../../Summary";
 import { SEOAccordion } from "../SEOAccordion";
 
@@ -23,17 +20,21 @@ export const WordCountCheck = ({ wordCount, checks }: WordCountCheckProps) => {
   const { formatMessage } = useIntl();
   const dispatch = React.useContext(SeoCheckerContext);
 
-  let status: SeoCheckStatus = {
-    message: formatMessage({
-      id: getTrad("SEOChecks.wordCountCheck.default"),
-      defaultMessage:
-        "You have more than 300 words. The word counter is not a direct ranking factor. But your content should be as high quality as possible, with relevant and unique information. To meet these conditions, your content requires a minimum of paragraphs, and therefore of words.",
-    }),
-    qualityVerdict: qualityVerdict.good,
-  };
-
   React.useEffect(() => {
-    if (isNull(wordCount)) {
+    let status: SeoCheckStatus = {
+      message: formatMessage({
+        id: getTrad("SEOChecks.wordCountCheck.default"),
+        defaultMessage:
+          "You have more than 300 words. The word counter is not a direct " +
+          "ranking factor. But your content should be as high quality as " +
+          "possible, with relevant and unique information. To meet these " +
+          "conditions, your content requires a minimum of paragraphs, and " +
+          "therefore of words.",
+      }),
+      qualityVerdict: qualityVerdict.good,
+    };
+
+    if (typeof wordCount !== "number") {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.wordCountCheck.not-found"),
@@ -41,7 +42,6 @@ export const WordCountCheck = ({ wordCount, checks }: WordCountCheckProps) => {
         }),
         qualityVerdict: qualityVerdict.improvements,
       };
-      return;
     } else if (wordCount < 300) {
       status = {
         message: formatMessage({
@@ -52,13 +52,13 @@ export const WordCountCheck = ({ wordCount, checks }: WordCountCheckProps) => {
         qualityVerdict: qualityVerdict.improvements,
       };
     }
-    if (!isEqual(status, checks.wordCount) && dispatch) {
+    if (!isSameCheckStatus(status, checks.wordCount) && dispatch) {
       dispatch({
         type: "UPDATE_PONCTUAL",
         value: { ...status, entity: "wordCount" },
       });
     }
-  }, []);
+  }, [wordCount]);
 
   return (
     <SEOAccordion
@@ -70,10 +70,12 @@ export const WordCountCheck = ({ wordCount, checks }: WordCountCheckProps) => {
       label={formatMessage({
         id: getTrad("SEOChecks.wordCountCheck.label"),
         defaultMessage:
-          "Your content should be as high quality as possible, with relevant and unique information. You entry requires a minimum of paragraphs, and therefore of words.",
+          "Your content should be as high quality as possible, with " +
+          "relevant and unique information. You entry requires a minimum " +
+          "of paragraphs, and therefore of words.",
       })}
       component={
-        isNumber(wordCount) && (
+        typeof wordCount === "number" && (
           <Box padding={4} background="neutral100">
             <Typography variant="omega" fontWeight="bold">
               {formatMessage({

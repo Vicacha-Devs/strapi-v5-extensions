@@ -13,9 +13,12 @@ interface KeywordCheckProps {
 
 export const KeywordCheck = ({ item, keywords, label }: KeywordCheckProps) => {
   const { formatMessage } = useIntl();
-  const _keywords = keywords.split(",");
-  const matches = _keywords.filter((x) =>
-    item.toLowerCase().includes(x.toLowerCase().trim())
+  const normalizedKeywords = keywords
+    .split(",")
+    .map((x) => x.trim())
+    .filter((x) => x.length > 0);
+  const matches = normalizedKeywords.filter((x) =>
+    item.toLowerCase().includes(x.toLowerCase())
   );
 
   const getIcon = () => {

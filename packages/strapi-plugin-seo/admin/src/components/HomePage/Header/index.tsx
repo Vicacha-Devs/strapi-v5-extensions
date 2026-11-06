@@ -11,6 +11,9 @@ interface HeaderProps {
   seoComponent?: Record<string, unknown> | null;
 }
 
+const SEO_COMPONENT_PATH =
+  "/plugins/content-type-builder/component-categories/shared/shared.seo";
+
 export const Header = ({ seoComponent }: HeaderProps) => {
   const { formatMessage } = useIntl();
 
@@ -19,11 +22,11 @@ export const Header = ({ seoComponent }: HeaderProps) => {
       <Layouts.Header
         primaryAction={
           <Flex gap={2} alignItems="center">
-            {seoComponent ? null : (
+            {seoComponent ? (
               <LinkButton
                 variant="secondary"
                 tag={NavLink}
-                to="/plugins/content-type-builder/component-categories/shared/shared.seo"
+                to={SEO_COMPONENT_PATH}
                 startIcon={<Pencil />}
               >
                 {formatMessage({
@@ -31,7 +34,7 @@ export const Header = ({ seoComponent }: HeaderProps) => {
                   defaultMessage: "Edit SEO component",
                 })}
               </LinkButton>
-            )}
+            ) : null}
             <LinkButton
               tag={NavLink}
               variant="tertiary"
