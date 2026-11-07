@@ -1,0 +1,123 @@
+{
+  "name": "@vicacha-devs/strapi-plugin-calendar",
+  "version": "1.0.0",
+  "description": "Universal Multi-Source Calendar, FullCalendar v6 Scheduler, RFC 5545/7529 Recurrence (RRULE & RSCALE), Multi-Calendar Systems (Hijri, Hebrew, Persian, etc.), and iCal (.ics) plugin for Strapi v5.",
+  "keywords": [
+    "calendar",
+    "fullcalendar",
+    "hebrew",
+    "hijri",
+    "ical",
+    "ics",
+    "internationalized-date",
+    "persian",
+    "rrule",
+    "rscale",
+    "scheduler",
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5"
+  ],
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions/tree/main/packages/strapi-plugin-calendar#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
+  },
+  "license": "MIT",
+  "author": "Vicacha Devs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
+    "directory": "packages/strapi-plugin-calendar"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.js",
+      "require": "./dist/admin/index.cjs",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.js",
+      "require": "./dist/server/index.cjs",
+      "default": "./dist/server/index.js"
+    },
+    "./shared": {
+      "types": "./dist/shared/index.d.ts",
+      "source": "./shared/index.ts",
+      "import": "./dist/shared/index.js",
+      "require": "./dist/shared/index.cjs",
+      "default": "./dist/shared/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "strapi-plugin build && node ../../scripts/ensure-esm-dist.ts",
+    "clean": "rm -rf dist .strapi",
+    "test": "node --import ./tests/register-ts-resolver.ts --test tests/*.test.ts",
+    "test:ts": "npm run test:ts:front && npm run test:ts:back",
+    "test:ts:back": "tsc -p server/tsconfig.json --noEmit",
+    "test:ts:front": "tsc -p admin/tsconfig.json --noEmit",
+    "verify": "strapi-plugin verify",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link"
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.15",
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/list": "^6.1.15",
+    "@fullcalendar/multimonth": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
+    "@internationalized/date": "^3.10.0",
+    "@strapi/design-system": "^2.0.0",
+    "@strapi/icons": "^2.0.0",
+    "react-intl": "^6.6.8"
+  },
+  "devDependencies": {
+    "@strapi/sdk-plugin": "6.1.1",
+    "@strapi/strapi": "^5.0.0",
+    "@strapi/typescript-utils": "^5.0.0",
+    "@types/node": "^20.11.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vicacha-devs/plugin-shared": "workspace:*",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
+    "styled-components": "^6.1.12",
+    "typescript": "^5.5.4",
+    "vitest": "^2.1.0"
+  },
+  "peerDependencies": {
+    "@strapi/design-system": "^2.0.0",
+    "@strapi/icons": "^2.0.0",
+    "@strapi/strapi": "^5.0.0",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  },
+  "strapi": {
+    "name": "calendar",
+    "displayName": "Calendar & Scheduler",
+    "description": "Visualize, schedule, and syndicate any Strapi v5 collection types across Month, Week, Day, Agenda, and Year views with multi-calendar & RRULE support.",
+    "kind": "plugin"
+  }
+}
