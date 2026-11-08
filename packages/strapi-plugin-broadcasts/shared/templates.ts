@@ -180,6 +180,8 @@ export function computeIdempotencyKey(
   const normalizedRecipient = String(recipient || "")
     .trim()
     .toLowerCase();
+  // Fixed namespace used for deterministic dedupe keys, not a secret.
+  // eslint-disable-next-line sonarjs/hardcoded-secret-signatures
   const digest = createHmac("sha256", "vicacha-broadcasts-idempotency-v1")
     .update(`${campaignSlug}:${channel}:${normalizedRecipient}`, "utf8")
     .digest("hex")
