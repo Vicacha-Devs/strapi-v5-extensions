@@ -120,6 +120,13 @@ declare module "react-intl" {
 }
 
 declare module "react-router-dom" {
+  export const NavLink: FC<{
+    to: string;
+    end?: boolean;
+    className?: string | ((props: { isActive: boolean }) => string);
+    children?: ReactNode;
+    [key: string]: unknown;
+  }>;
   export function useNavigate(): (to: string) => void;
   export function useLocation(): {
     pathname: string;
