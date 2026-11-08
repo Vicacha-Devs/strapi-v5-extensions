@@ -176,6 +176,13 @@ declare module "react-router-dom" {
     path?: string;
     element?: ReactNode;
   }>;
+  export const NavLink: FC<{
+    to: string;
+    end?: boolean;
+    className?: string | ((props: { isActive: boolean }) => string);
+    children?: ReactNode;
+    [key: string]: unknown;
+  }>;
   export function useNavigate(): (to: string) => void;
 }
 
@@ -283,6 +290,7 @@ declare module "@fullcalendar/core" {
       title: string;
       start: Date | null;
       end: Date | null;
+      allDay: boolean;
       extendedProps: Record<string, unknown>;
     };
   }
