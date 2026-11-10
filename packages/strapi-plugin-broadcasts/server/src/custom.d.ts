@@ -122,6 +122,20 @@ declare module "@strapi/strapi" {
           event: string,
           listener: (payload: unknown) => void | Promise<void>
         ): void;
+        off?(
+          event: string,
+          listener: (payload: unknown) => void | Promise<void>
+        ): void;
+        removeListener?(
+          event: string,
+          listener: (payload: unknown) => void | Promise<void>
+        ): void;
+        subscribe?(
+          listener: (
+            eventName: string,
+            payload?: unknown
+          ) => void | Promise<void>
+        ): () => void;
       };
       contentTypes: Record<string, ContentTypeSchema>;
       store(params: { type: string; name: string }): PluginStore;

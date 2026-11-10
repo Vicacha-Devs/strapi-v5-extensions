@@ -140,6 +140,7 @@ export interface AutomationRulesTableProps {
   onEdit: (rule: AutomationRuleRecord) => void;
   onToggleActive: (rule: AutomationRuleRecord) => void;
   navigate: (path: string) => void;
+  isBusy?: boolean;
 }
 
 export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
@@ -148,6 +149,7 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
   onEdit,
   onToggleActive,
   navigate,
+  isBusy = false,
 }) => (
   <Table colCount={7} rowCount={rules.length + 1}>
     <Thead>
@@ -219,12 +221,18 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
           </Td>
           <Td>
             <Flex gap={2} wrap="wrap">
-              <Button variant="tertiary" size="S" onClick={() => onEdit(rule)}>
+              <Button
+                variant="tertiary"
+                size="S"
+                disabled={isBusy}
+                onClick={() => onEdit(rule)}
+              >
                 {t("common.edit", "Edit")}
               </Button>
               <Button
                 variant="secondary"
                 size="S"
+                disabled={isBusy}
                 onClick={() => onToggleActive(rule)}
               >
                 {rule.active
@@ -235,6 +243,7 @@ export const AutomationRulesTable: React.FC<AutomationRulesTableProps> = ({
                 <Button
                   variant="tertiary"
                   size="S"
+                  disabled={isBusy}
                   onClick={() =>
                     navigate(
                       `/content-manager/collection-types/${AUTOMATION_RULE_UID}/${rule.documentId}`

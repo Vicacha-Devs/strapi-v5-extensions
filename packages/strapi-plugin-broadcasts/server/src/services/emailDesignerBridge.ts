@@ -1,6 +1,9 @@
 import type { Core } from "@strapi/strapi";
 
-import type { EmailDesignerTemplateSummary } from "../../../shared";
+import {
+  stripHeaderControlChars,
+  type EmailDesignerTemplateSummary,
+} from "../../../shared";
 
 export const EMAIL_DESIGNER_TEMPLATE_UID =
   "plugin::email-designer-5.email-designer-template";
@@ -238,14 +241,14 @@ async function trySendViaPluginService(
     if (emailDesignerService?.sendTemplatedEmail) {
       await emailDesignerService.sendTemplatedEmail(
         {
-          to: recipientEmail,
-          from: fromAddress,
-          replyTo: replyToAddress,
+          to: stripHeaderControlChars(recipientEmail),
+          from: stripHeaderControlChars(fromAddress),
+          replyTo: stripHeaderControlChars(replyToAddress),
           headers,
         },
         {
           templateReferenceId: numericTemplateId,
-          subject,
+          subject: stripHeaderControlChars(subject),
         },
         templateVars
       );
@@ -324,16 +327,17 @@ export async function trySendEmailViaDesigner5(params: {
         bodyText: text,
       })
     : text;
-  const renderedSubject =
+  const renderedSubject = stripHeaderControlChars(
     subject ||
-    (resolvedTemplate.subject
-      ? interpolate(resolvedTemplate.subject, { ...templateVars, subject })
-      : "");
+      (resolvedTemplate.subject
+        ? interpolate(resolvedTemplate.subject, { ...templateVars, subject })
+        : "")
+  );
 
   await emailService.send({
-    to: recipientEmail,
-    from: fromAddress,
-    replyTo: replyToAddress,
+    to: stripHeaderControlChars(recipientEmail),
+    from: stripHeaderControlChars(fromAddress),
+    replyTo: stripHeaderControlChars(replyToAddress),
     subject: renderedSubject,
     text: renderedText,
     html: renderedHtml,

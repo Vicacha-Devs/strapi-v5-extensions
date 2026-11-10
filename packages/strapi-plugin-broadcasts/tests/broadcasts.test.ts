@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 
 import automationServiceFactory from "../server/src/services/automationService";
 import campaignServiceFactory from "../server/src/services/campaignService";
+import { computeIdempotencyKey } from "../server/src/services/idempotency";
 import settingsServiceFactory from "../server/src/services/settings";
 import transportServiceFactory from "../server/src/services/transportService";
 import {
@@ -10,7 +11,6 @@ import {
   CAMPAIGN_UID,
   DEFAULT_BROADCAST_SETTINGS,
   DELIVERY_LOG_UID,
-  computeIdempotencyKey,
   escapeHtml,
   interpolateBroadcastTemplate,
   isWhatsAppGroupOrChannelJid,
@@ -74,11 +74,10 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
       "pending"
     ),
   ];
-
   const services: Record<string, unknown> = {};
   const strapi: Record<string, unknown> = {
     config: {
-      get: (_key: string, def?: unknown) => ({
+      get: (_k: string, def?: unknown) => ({
         ...(def as Record<string, unknown>),
         ...customConfig,
       }),
@@ -96,12 +95,9 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
       },
     }),
     documents: (uid: string) => ({
-      findMany: async (params?: {
-        filters?: Record<string, unknown>;
-        limit?: number;
-      }) =>
+      findMany: async (p?: { filters?: Record<string, unknown> }) =>
         (collections[uid] || []).filter((item) =>
-          Object.entries(params?.filters || {}).every(([k, v]) =>
+          Object.entries(p?.filters || {}).every(([k, v]) =>
             v && typeof v === "object" && "$in" in v
               ? ((v as { $in: unknown[] }).$in || []).includes(item[k])
               : item[k] === v
@@ -112,20 +108,23 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
         null,
       create: async ({ data }: { data: Record<string, unknown> }) => {
         const doc = { ...data, documentId: `doc_${idCounter++}` };
-        (collections[uid] ||= []).push(doc);
+        if (!collections[uid]) {
+          collections[uid] = [];
+        }
+        collections[uid].push(doc);
         return doc;
       },
-      update: async ({
-        documentId,
-        data,
-      }: {
+      update: async (p: {
         documentId: string;
         data: Record<string, unknown>;
       }) => {
         const list = collections[uid] || [];
-        const idx = list.findIndex((item) => item.documentId === documentId);
-        if (idx === -1) return null;
-        return (list[idx] = { ...list[idx], ...data });
+        const idx = list.findIndex((i) => i.documentId === p.documentId);
+        if (idx === -1) {
+          return null;
+        }
+        list[idx] = { ...list[idx], ...p.data };
+        return list[idx];
       },
     }),
     plugin: (name: string) =>
@@ -137,15 +136,14 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
                 topic?: string;
               }) =>
                 mockSubscribers.filter(
-                  (sub) =>
-                    (!p?.status || sub.status === p.status) &&
-                    (!p?.topic || sub.topics.includes(p.topic))
+                  (s) =>
+                    (!p?.status || s.status === p.status) &&
+                    (!p?.topic || s.topics.includes(p.topic))
                 ),
             }),
           }
         : { service: (svcName: string) => services[svcName] },
   };
-
   const s = strapi as unknown as Parameters<
     typeof settingsServiceFactory
   >[0]["strapi"];
@@ -156,7 +154,6 @@ function createMockStrapi(customConfig: Partial<BroadcastSettings> = {}) {
     automationService: automationServiceFactory({ strapi: s }),
   };
   Object.assign(services, typedServices);
-
   return { strapi: s, services: typedServices, collections, emittedEvents };
 }
 
@@ -341,10 +338,10 @@ describe("@vicacha-devs/strapi-plugin-broadcasts", () => {
 
     assert.equal(outcomes.length, 1);
     assert.equal(outcomes[0].ruleSlug, "auto-alert-banner-broadcast");
-    assert.equal(
-      outcomes[0].campaignSlug,
-      "auto-auto-alert-banner-broadcast-ramadan-1447-sighting"
-    );
+    const slugPrefix =
+      "auto-auto-alert-banner-broadcast-ramadan-1447-sighting-";
+    assert.ok(outcomes[0].campaignSlug.startsWith(slugPrefix));
+    assert.ok(/^[a-z0-9-]+$/.test(outcomes[0].campaignSlug));
     // Rule channels: telegram (1) + whatsapp (2 confirmed subscribers on 'announcements') = 3
     assert.equal(outcomes[0].results.length, 3);
 

@@ -2,9 +2,12 @@ import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
 
 import { Initializer } from "./components/Initializer";
 import { PluginIcon } from "./components/PluginIcon";
+import { pluginPermissions } from "./permissions";
 import { PLUGIN_ID } from "./pluginId";
 import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
 import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
+
+export { pluginPermissions };
 
 export const SUPPORTED_ADMIN_LOCALES = [
   "en",
@@ -46,7 +49,7 @@ export default {
         import("./pages/BroadcastsHomePage").then((mod) => ({
           default: mod.BroadcastsHomePage,
         })),
-      permissions: [],
+      permissions: pluginPermissions.main,
     });
 
     const broadcastsSuiteSection = {
@@ -67,7 +70,7 @@ export default {
         import("./pages/SettingsPage").then((mod) => ({
           default: mod.SettingsPage,
         })),
-      permissions: [],
+      permissions: pluginPermissions.settings,
     };
     try {
       if (typeof app.addSettingsLink === "function") {
@@ -93,7 +96,7 @@ export default {
 
   registerTrads: createRegisterTrads({
     pluginId: PLUGIN_ID,
-    defaultLocales: ["en", "es", "ar", "tr"],
+    defaultLocales: SUPPORTED_ADMIN_LOCALES,
     loadTranslation: (locale) => import(`./translations/${locale}.json`),
     getBaseTranslations: (locale) => ({
       ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en),

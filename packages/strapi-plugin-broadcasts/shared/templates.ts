@@ -1,5 +1,3 @@
-import { createHmac } from "node:crypto";
-
 import type { CampaignRecord, CampaignTranslation } from "./types";
 
 const HTML_ESCAPE_MAP: Record<string, string> = {
@@ -10,11 +8,113 @@ const HTML_ESCAPE_MAP: Record<string, string> = {
   "'": "&#39;",
 };
 
+const TELEGRAM_INLINE_TAGS = new Set([
+  "b",
+  "strong",
+  "i",
+  "em",
+  "u",
+  "ins",
+  "s",
+  "strike",
+  "del",
+  "code",
+  "pre",
+  "tg-spoiler",
+]);
+
 export function escapeHtml(raw: string): string {
   return String(raw).replace(
     /[&<>"']/g,
     (char) => HTML_ESCAPE_MAP[char] || char
   );
+}
+
+export function stripHeaderControlChars(raw: string): string {
+  return String(raw || "")
+    .replace(/[\r\n<>]/g, "")
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim();
+}
+
+function extractSafeAnchorHref(attrs: string): string | null {
+  const match = attrs.match(
+    /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/i
+  );
+  const rawHref = (match?.[1] ?? match?.[2] ?? match?.[3] ?? "")
+    .replace(/&amp;/gi, "&")
+    .trim();
+  if (!rawHref || /[\u0000-\u001f\u007f]/.test(rawHref)) return null;
+  try {
+    const parsed = new URL(rawHref);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+export function sanitizeTelegramHtml(rawHtml: string): string {
+  if (!rawHtml) return "";
+
+  let text = String(rawHtml)
+    // eslint-disable-next-line sonarjs/no-control-regex -- strips private sentinel chars
+    .replace(/[\u0001\u0002]/g, "")
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<h[1-6](?:\s[^>]*)?>/gi, "<b>")
+    .replace(/<\/h[1-6]\s*>/gi, "</b>\n")
+    .replace(/<p(?:\s[^>]*)?>/gi, "")
+    .replace(/<\/p\s*>/gi, "\n\n")
+    .replace(/<div(?:\s[^>]*)?>/gi, "")
+    .replace(/<\/div\s*>/gi, "\n")
+    .replace(/<li(?:\s[^>]*)?>/gi, "• ")
+    .replace(/<\/li\s*>/gi, "\n");
+
+  let openAnchors = 0;
+  text = text.replace(
+    /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)(\s[^<>]*)?(\/?)>/g,
+    (_full, slash: string, rawName: string, attrs = "", selfClose = "") => {
+      const tag = rawName.toLowerCase();
+      if (selfClose === "/") return "";
+      if (slash === "/") {
+        if (TELEGRAM_INLINE_TAGS.has(tag)) return `\u0001/${tag}\u0002`;
+        if (tag === "a" && openAnchors > 0) {
+          openAnchors -= 1;
+          return "\u0001/a\u0002";
+        }
+        return "";
+      }
+      if (TELEGRAM_INLINE_TAGS.has(tag)) return `\u0001${tag}\u0002`;
+      if (tag === "a") {
+        const safeHref = extractSafeAnchorHref(attrs);
+        if (!safeHref) return "";
+        openAnchors += 1;
+        return `\u0001a href="${escapeHtml(safeHref)}"\u0002`;
+      }
+      return "";
+    }
+  );
+
+  while (openAnchors > 0) {
+    text += "\u0001/a\u0002";
+    openAnchors -= 1;
+  }
+
+  text = text
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);)/gi, "&amp;")
+    // eslint-disable-next-line sonarjs/no-control-regex -- restores private sentinel chars
+    .replace(/\u0001([^\u0002]+)\u0002/g, "<$1>")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  return text;
 }
 
 export function interpolateBroadcastTemplate(
@@ -67,13 +167,13 @@ export function maskPhone(phone: string): string {
 }
 
 export interface NormalizedWhatsAppTarget {
-  /** Canonical identifier used for idempotency keys & masking (e.g. "+573101234567" or "120363025891234567@g.us") */
+  /** Canonical identifier used for idempotency keys & masking */
   normalized: string;
-  /** True when target is a WhatsApp Group (@g.us) or WhatsApp Channel (@newsletter) */
+  /** True when target is a WhatsApp Group (@g.us) or Channel (@newsletter) */
   isGroupOrChannel: boolean;
-  /** JID for WAHA / OpenWA gateways (e.g. "573101234567@c.us", "1203630...@g.us", or "1203630...@newsletter") */
+  /** JID for WAHA / OpenWA gateways */
   chatId: string;
-  /** Recipient identifier for Evolution API v2 (e.g. "573101234567", "1203630...@g.us", or "1203630...@newsletter") */
+  /** Recipient identifier for Evolution API v2 */
   evolutionNumber: string;
 }
 
@@ -142,7 +242,7 @@ export function maskRecipientIdentifier(identifier: string): string {
     return maskEmail(trimmed);
   }
   if (trimmed.startsWith("@") || /^-\d+$/.test(trimmed)) {
-    // Public/group Telegram channel and group/supergroup IDs (@handle or -100... / -...) are non-PII channel identifiers
+    // Public/group Telegram channel and group/supergroup IDs (@handle or -100...) are non-PII channel identifiers
     return trimmed;
   }
   return maskPhone(trimmed);
@@ -170,23 +270,6 @@ export function normalizeE164Phone(
     return `+${defaultCountryCode.replace(/\D+/g, "")}${digitsOnly}`;
   }
   return `+${digitsOnly}`;
-}
-
-export function computeIdempotencyKey(
-  campaignSlug: string,
-  channel: string,
-  recipient: string
-): string {
-  const normalizedRecipient = String(recipient || "")
-    .trim()
-    .toLowerCase();
-  // Fixed namespace used for deterministic dedupe keys, not a secret.
-  // eslint-disable-next-line sonarjs/hardcoded-secret-signatures
-  const digest = createHmac("sha256", "vicacha-broadcasts-idempotency-v1")
-    .update(`${campaignSlug}:${channel}:${normalizedRecipient}`, "utf8")
-    .digest("hex")
-    .slice(0, 24);
-  return `${campaignSlug}:${channel}:${digest}`;
 }
 
 export function resolveLocalizedCampaignCopy(

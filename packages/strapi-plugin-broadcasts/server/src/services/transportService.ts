@@ -1,11 +1,7 @@
 import type { Core } from "@strapi/strapi";
 
 import {
-  DELIVERY_LOG_UID,
   PLUGIN_ID,
-  computeIdempotencyKey,
-  escapeHtml,
-  interpolateBroadcastTemplate,
   maskRecipientIdentifier,
   normalizeWhatsAppTarget,
   type BroadcastChannel,
@@ -15,7 +11,6 @@ import {
   type EmailDesignerTemplateSummary,
 } from "../../../shared";
 import {
-  buildEmailTemplateVariables,
   buildTelegramIdempotencyKey,
   executeTelegramHttpSend,
   executeWhatsAppHttpSend,
@@ -24,13 +19,21 @@ import {
   resolveEffectiveEmailTemplateRef,
 } from "./campaignHelpers";
 import {
+  extractSecretList,
+  hasAlreadyDeliveredInDb,
+  listDeliveryLogsFromDb,
+  sanitizeDispatchResult,
+  sendLiveEmailViaProviders,
+  upsertDeliveryLogInDb,
+} from "./deliveryLedger";
+import {
   EMAIL_DESIGNER_TEMPLATE_UID,
   fetchRawEmailDesignerTemplates,
   listEmailDesignerTemplatesFromDb,
   resolveEmailDesignerTemplateFromDb,
-  trySendEmailViaDesigner5,
   type EmailDesignerTemplateRow,
 } from "./emailDesignerBridge";
+import { computeIdempotencyKey, redactSecretsFromMessage } from "./idempotency";
 
 export { EMAIL_DESIGNER_TEMPLATE_UID, type EmailDesignerTemplateRow };
 
@@ -47,6 +50,7 @@ export interface EmailSendPayload {
   emailTemplateRef?: string;
   secondaryDateLabel?: string;
   templateData?: Record<string, string | number | undefined>;
+  isTestDispatch?: boolean;
 }
 
 export interface TelegramSendPayload {
@@ -59,6 +63,7 @@ export interface TelegramSendPayload {
   ctaLabel?: string;
   ctaUrl?: string;
   secondaryDateLabel?: string;
+  isTestDispatch?: boolean;
 }
 
 export interface WhatsAppSendPayload {
@@ -69,6 +74,7 @@ export interface WhatsAppSendPayload {
   templateName?: string;
   ctaUrl?: string;
   secondaryDateLabel?: string;
+  isTestDispatch?: boolean;
 }
 
 const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -94,20 +100,14 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   async hasAlreadyDelivered(idempotencyKey: string): Promise<boolean> {
-    const existing = await strapi.documents(DELIVERY_LOG_UID).findMany({
-      filters: { idempotencyKey, status: { $in: ["sent", "simulated"] } },
-      limit: 1,
-    });
-    return existing.length > 0;
+    return hasAlreadyDeliveredInDb(strapi, idempotencyKey);
   },
 
   async recordDeliveryLog(
-    entry: Omit<DeliveryLogRecord, "documentId" | "sentAt">
+    entry: Omit<DeliveryLogRecord, "documentId" | "sentAt">,
+    secrets: Array<string | undefined> = []
   ): Promise<DeliveryLogRecord> {
-    const created = await strapi.documents(DELIVERY_LOG_UID).create({
-      data: { ...entry, sentAt: new Date().toISOString() },
-    });
-    return created as unknown as DeliveryLogRecord;
+    return upsertDeliveryLogInDb(strapi, entry, secrets);
   },
 
   async listDeliveryLogs(params?: {
@@ -115,27 +115,38 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     channel?: BroadcastChannel;
     limit?: number;
   }): Promise<DeliveryLogRecord[]> {
-    const filters: Record<string, unknown> = {};
-    if (params?.campaignSlug) filters.campaignSlug = params.campaignSlug;
-    if (params?.channel) filters.channel = params.channel;
-    const docs = await strapi.documents(DELIVERY_LOG_UID).findMany({
-      filters,
-      limit: params?.limit || 100,
-    });
-    return docs as unknown as DeliveryLogRecord[];
+    return listDeliveryLogsFromDb(strapi, params);
   },
 
   async persistResult(
     campaignSlug: string,
     secondaryDateLabel: string | undefined,
-    result: ChannelDispatchResult
+    result: ChannelDispatchResult,
+    settings?: BroadcastSettings
   ): Promise<ChannelDispatchResult> {
-    await this.recordDeliveryLog({
-      ...result,
-      campaignSlug,
-      secondaryDateLabel,
-    });
-    return result;
+    const secrets = extractSecretList(settings);
+    const safeResult = sanitizeDispatchResult(result, secrets);
+
+    try {
+      await this.recordDeliveryLog(
+        {
+          ...safeResult,
+          campaignSlug,
+          secondaryDateLabel,
+        },
+        secrets
+      );
+    } catch (logErr) {
+      const safeErr = redactSecretsFromMessage(
+        (logErr as Error)?.message || "log write error",
+        secrets
+      );
+      strapi.log?.warn?.(
+        `[@vicacha-devs/strapi-plugin-broadcasts] Delivery log fallback for ${safeResult.idempotencyKey}: ${safeErr}`
+      );
+    }
+
+    return safeResult;
   },
 
   async logOutcome(
@@ -145,7 +156,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     recipientMasked: string,
     status: ChannelDispatchResult["status"],
     idempotencyKey: string,
-    extra?: Partial<ChannelDispatchResult>
+    extra?: Partial<ChannelDispatchResult>,
+    settings?: BroadcastSettings
   ): Promise<ChannelDispatchResult> {
     return this.persistResult(
       p.campaignSlug,
@@ -158,7 +170,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         status,
         idempotencyKey,
         extra
-      )
+      ),
+      settings
     );
   },
 
@@ -166,7 +179,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     payload: EmailSendPayload,
     effectiveTemplateRef: string,
     recipientMasked: string,
-    idempotencyKey: string
+    idempotencyKey: string,
+    settings: BroadcastSettings
   ): Promise<ChannelDispatchResult> {
     const resolvedDryRunTpl = effectiveTemplateRef
       ? await this.resolveEmailDesignerTemplate(
@@ -189,7 +203,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         externalMessageId: useDesigner
           ? `sim_ed5_${refSuffix}_${Date.now()}`
           : `sim_email_${Date.now()}`,
-      }
+      },
+      settings
     );
   },
 
@@ -200,77 +215,21 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     recipientMasked: string,
     idempotencyKey: string
   ): Promise<ChannelDispatchResult> {
-    const headers: Record<string, string> = payload.unsubscribeUrl
-      ? { "List-Unsubscribe": `<${payload.unsubscribeUrl}>` }
-      : {};
-    const inlineHtml = payload.html || `<p>${escapeHtml(payload.text)}</p>`;
-    const templateVars = buildEmailTemplateVariables(
+    const sent = await sendLiveEmailViaProviders(
+      strapi,
       payload,
       settings,
-      inlineHtml
+      effectiveTemplateRef
     );
-
-    if (effectiveTemplateRef) {
-      const externalMessageId = await trySendEmailViaDesigner5({
-        strapi,
-        effectiveTemplateRef,
-        locale: payload.locale,
-        recipientEmail: payload.recipientEmail,
-        fromAddress: settings.emailFromAddress,
-        replyToAddress: settings.emailReplyToAddress,
-        subject: payload.subject,
-        text: payload.text,
-        headers,
-        templateVars,
-        interpolate: interpolateBroadcastTemplate,
-      });
-      if (externalMessageId) {
-        return this.logOutcome(
-          payload,
-          "email",
-          "email-designer-5",
-          recipientMasked,
-          "sent",
-          idempotencyKey,
-          { externalMessageId }
-        );
-      }
-    }
-
-    const emailService = strapi.plugin("email")?.service<{
-      send?: (opts: Record<string, unknown>) => Promise<unknown>;
-    }>("email");
-
-    if (!emailService?.send) {
-      return this.logOutcome(
-        payload,
-        "email",
-        "strapi-email-fallback",
-        recipientMasked,
-        "simulated",
-        idempotencyKey,
-        { externalMessageId: `sim_fallback_${Date.now()}` }
-      );
-    }
-
-    await emailService.send({
-      to: payload.recipientEmail,
-      from: settings.emailFromAddress,
-      replyTo: settings.emailReplyToAddress,
-      subject: payload.subject,
-      text: payload.text,
-      html: inlineHtml,
-      headers,
-    });
-
     return this.logOutcome(
       payload,
       "email",
-      "strapi-email",
+      sent.driver,
       recipientMasked,
-      "sent",
+      sent.status,
       idempotencyKey,
-      { externalMessageId: `email_${Date.now()}` }
+      { externalMessageId: sent.externalMessageId },
+      settings
     );
   },
 
@@ -281,7 +240,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const idempotencyKey = computeIdempotencyKey(
       payload.campaignSlug,
       "email",
-      payload.recipientEmail
+      payload.recipientEmail,
+      { isTest: payload.isTestDispatch }
     );
     const recipientMasked = maskRecipientIdentifier(payload.recipientEmail);
     const effectiveTemplateRef = resolveEffectiveEmailTemplateRef(
@@ -292,7 +252,10 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
       ? "email-designer-5"
       : "strapi-email";
 
-    if (await this.hasAlreadyDelivered(idempotencyKey)) {
+    if (
+      !payload.isTestDispatch &&
+      (await this.hasAlreadyDelivered(idempotencyKey))
+    ) {
       return makeResult(
         "email",
         defaultDriver,
@@ -308,7 +271,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         payload,
         effectiveTemplateRef,
         recipientMasked,
-        idempotencyKey
+        idempotencyKey,
+        settings
       );
     }
 
@@ -328,7 +292,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         recipientMasked,
         "failed",
         idempotencyKey,
-        { errorMessage: (err as Error)?.message || "Email delivery failed" }
+        { errorMessage: (err as Error)?.message || "Email delivery failed" },
+        settings
       );
     }
   },
@@ -341,7 +306,10 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const idempotencyKey = buildTelegramIdempotencyKey(payload, targetChatId);
     const recipientMasked = maskRecipientIdentifier(targetChatId);
 
-    if (await this.hasAlreadyDelivered(idempotencyKey)) {
+    if (
+      !payload.isTestDispatch &&
+      (await this.hasAlreadyDelivered(idempotencyKey))
+    ) {
       return makeResult(
         "telegram",
         "telegram-bot-api",
@@ -360,7 +328,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         recipientMasked,
         "simulated",
         idempotencyKey,
-        { externalMessageId: `sim_tg_${Date.now()}` }
+        { externalMessageId: `sim_tg_${Date.now()}` },
+        settings
       );
     }
 
@@ -377,7 +346,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         recipientMasked,
         "sent",
         idempotencyKey,
-        { externalMessageId }
+        { externalMessageId },
+        settings
       );
     } catch (err) {
       return this.logOutcome(
@@ -389,7 +359,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         idempotencyKey,
         {
           errorMessage: (err as Error)?.message || "Telegram delivery failed",
-        }
+        },
+        settings
       );
     }
   },
@@ -403,11 +374,15 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
     const idempotencyKey = computeIdempotencyKey(
       payload.campaignSlug,
       "whatsapp",
-      target.normalized
+      target.normalized,
+      { isTest: payload.isTestDispatch }
     );
     const recipientMasked = maskRecipientIdentifier(target.normalized);
 
-    if (await this.hasAlreadyDelivered(idempotencyKey)) {
+    if (
+      !payload.isTestDispatch &&
+      (await this.hasAlreadyDelivered(idempotencyKey))
+    ) {
       return makeResult(
         "whatsapp",
         driver,
@@ -426,7 +401,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         recipientMasked,
         "simulated",
         idempotencyKey,
-        { externalMessageId: `sim_wa_${Date.now()}` }
+        { externalMessageId: `sim_wa_${Date.now()}` },
+        settings
       );
     }
 
@@ -441,7 +417,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         {
           errorMessage:
             "Meta WhatsApp Cloud API does not support @g.us group or @newsletter channel JIDs; use evolution or openwa gateway driver",
-        }
+        },
+        settings
       );
     }
 
@@ -459,7 +436,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         recipientMasked,
         "sent",
         idempotencyKey,
-        { externalMessageId }
+        { externalMessageId },
+        settings
       );
     } catch (err) {
       return this.logOutcome(
@@ -471,7 +449,8 @@ const createTransportService = ({ strapi }: { strapi: Core.Strapi }) => ({
         idempotencyKey,
         {
           errorMessage: (err as Error)?.message || "WhatsApp delivery failed",
-        }
+        },
+        settings
       );
     }
   },

@@ -16,57 +16,20 @@ import {
 } from "@vicacha-devs/plugin-shared";
 import * as React from "react";
 
-import type {
-  BroadcastChannel,
-  BroadcastSettings,
-} from "../../../shared/types";
+import type { BroadcastSettings } from "../../../shared/types";
+import {
+  BROADCAST_CHANNEL_OPTIONS,
+  BROADCAST_TOPIC_OPTIONS,
+  getBroadcastChannelOptions,
+  getBroadcastTopicOptions,
+} from "../utils/selectOptions";
 
-export const BROADCAST_TOPIC_OPTIONS: Array<{ value: string; label: string }> =
-  [
-    {
-      value: "announcements",
-      label: "announcements — General Mosque Announcements",
-    },
-    { value: "events", label: "events — Community Events & Conferences" },
-    {
-      value: "courses",
-      label: "courses — Arabic, Quran & Islamic Studies Courses",
-    },
-    {
-      value: "ramadan_eid",
-      label: "ramadan_eid — Ramadan, Suhoor/Iftar & Eid Bulletins",
-    },
-    {
-      value: "urgent_janazah",
-      label: "urgent_janazah — Urgent Janazah & Funeral Alerts",
-    },
-    {
-      value: "newsletter",
-      label: "newsletter — Weekly Jumu'ah & Community Newsletter",
-    },
-    { value: "khutbahs", label: "khutbahs — Friday Khutbah Summaries & Audio" },
-    {
-      value: "charity_campaigns",
-      label: "charity_campaigns — Zakat & Relief Campaigns",
-    },
-    {
-      value: "youth_programs",
-      label: "youth_programs — Youth, Sisters & Family Programs",
-    },
-    {
-      value: "new_muslims",
-      label: "new_muslims — New Muslim Circle & Mentorship",
-    },
-  ];
-
-export const BROADCAST_CHANNEL_OPTIONS: Array<{
-  value: BroadcastChannel;
-  label: string;
-}> = [
-  { value: "email", label: "email — Email Newsletter & Bulletins" },
-  { value: "telegram", label: "telegram — Telegram Bot & Forum Topics" },
-  { value: "whatsapp", label: "whatsapp — WhatsApp Cloud API / Gateway" },
-];
+export {
+  BROADCAST_CHANNEL_OPTIONS,
+  BROADCAST_TOPIC_OPTIONS,
+  getBroadcastChannelOptions,
+  getBroadcastTopicOptions,
+};
 
 const orgEmailCardBorderStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.22)",
@@ -92,7 +55,7 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
     settings.supportedLocales
   );
   const topicOpts = mergeSelectOptions(
-    BROADCAST_TOPIC_OPTIONS,
+    getBroadcastTopicOptions(t),
     settings.availableTopics
   );
 
@@ -143,7 +106,7 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
           name="organizationName"
           hint={t(
             "settings.ui.organization_name_hint",
-            "Injected into broadcast templates via the {{organizationName}} variable."
+            "Injected into broadcast templates via the '{{organizationName}}' variable."
           )}
         >
           <Field.Label>
@@ -167,7 +130,7 @@ export const OrganizationEmailTab: React.FC<OrganizationEmailTabProps> = ({
           name="siteBaseUrl"
           hint={t(
             "settings.ui.site_base_url_hint",
-            "Base URL used for CTA links, 1-click unsubscribe links, and {{siteBaseUrl}} placeholders."
+            "Base URL used for CTA links, 1-click unsubscribe links, and '{{siteBaseUrl}}' placeholders."
           )}
         >
           <Field.Label>

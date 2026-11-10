@@ -3,6 +3,8 @@ import type { Core } from "@strapi/strapi";
 import {
   PLUGIN_ID,
   STARTER_CAMPAIGN_TEMPLATES,
+  SUPPORTED_CHANNELS,
+  isSafeHttpUrl,
   type AutomationRuleRecord,
   type BroadcastChannel,
   type BroadcastSettings,
@@ -12,15 +14,42 @@ import {
   type EmailDesignerTemplateSummary,
   type SubscriberRecipient,
 } from "../../../shared";
+import { clampLimit } from "../services/campaignHelpers";
 
 export interface ControllerCtx {
-  params?: Record<string, string>;
-  query?: Record<string, string>;
+  params?: Record<string, unknown>;
+  query?: Record<string, unknown>;
   request: {
     body?: Record<string, unknown>;
   };
   status?: number;
   body?: unknown;
+  badRequest?: (message: string) => unknown;
+  notFound?: (message: string) => unknown;
+}
+
+function toPlainString(val: unknown): string | undefined {
+  if (typeof val !== "string") return undefined;
+  const trimmed = val.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function respondError(ctx: ControllerCtx, err: unknown): unknown {
+  const message = (err as Error)?.message || "Invalid request";
+  if (/not found$/i.test(message)) {
+    if (typeof ctx.notFound === "function") {
+      return ctx.notFound(message);
+    }
+    ctx.status = 404;
+    ctx.body = { error: message };
+    return undefined;
+  }
+  if (typeof ctx.badRequest === "function") {
+    return ctx.badRequest(message);
+  }
+  ctx.status = 400;
+  ctx.body = { error: message };
+  return undefined;
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -46,9 +75,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       );
       const data = await svc.getPublicSafeSettings();
       ctx.body = { data };
+      return undefined;
     } catch (err) {
-      ctx.status = 400;
-      ctx.body = { error: (err as Error).message };
+      return respondError(ctx, err);
     }
   },
 
@@ -73,8 +102,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }>("campaignService");
 
     const data = await svc.listCampaigns({
-      status: ctx.query?.status,
-      topic: ctx.query?.topic,
+      status: toPlainString(ctx.query?.status),
+      topic: toPlainString(ctx.query?.topic),
     });
     ctx.body = { data };
   },
@@ -90,14 +119,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       );
       ctx.status = 201;
       ctx.body = { data };
+      return undefined;
     } catch (err) {
-      ctx.status = 400;
-      ctx.body = { error: (err as Error).message };
+      return respondError(ctx, err);
     }
   },
 
   async updateCampaign(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || "";
+    const documentId = toPlainString(ctx.params?.documentId) || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       updateCampaign(
         documentIdOrSlug: string,
@@ -111,9 +140,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         (ctx.request.body || {}) as Partial<CampaignRecord>
       );
       ctx.body = { data };
+      return undefined;
     } catch (err) {
-      ctx.status = 400;
-      ctx.body = { error: (err as Error).message };
+      return respondError(ctx, err);
     }
   },
 
@@ -123,18 +152,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }>("campaignService");
 
     try {
-      const body = (ctx.request.body || {}) as { templateId: string };
-      const data = await svc.createFromStarterTemplate(body.templateId);
+      const body = (ctx.request.body || {}) as { templateId?: unknown };
+      const templateId = toPlainString(body.templateId) || "";
+      const data = await svc.createFromStarterTemplate(templateId);
       ctx.status = 201;
       ctx.body = { data };
+      return undefined;
     } catch (err) {
-      ctx.status = 400;
-      ctx.body = { error: (err as Error).message };
+      return respondError(ctx, err);
     }
   },
 
   async sendCampaign(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || "";
+    const documentId = toPlainString(ctx.params?.documentId) || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       dispatchCampaign(
         documentIdOrSlug: string,
@@ -142,6 +172,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           customRecipients?: SubscriberRecipient[];
           testRecipientEmail?: string;
           testRecipientPhone?: string;
+          testTelegramChatId?: string;
         }
       ): Promise<{
         campaign: CampaignRecord;
@@ -150,16 +181,29 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }>("campaignService");
 
     try {
-      const body = (ctx.request.body || {}) as {
-        customRecipients?: SubscriberRecipient[];
-        testRecipientEmail?: string;
-        testRecipientPhone?: string;
-      };
-      const data = await svc.dispatchCampaign(documentId, body);
+      const rawBody =
+        ctx.request.body &&
+        typeof ctx.request.body === "object" &&
+        !Array.isArray(ctx.request.body)
+          ? ctx.request.body
+          : {};
+      const customRecipients = Array.isArray(rawBody.customRecipients)
+        ? (rawBody.customRecipients.filter(
+            (item): item is Record<string, unknown> =>
+              Boolean(item) && typeof item === "object" && !Array.isArray(item)
+          ) as unknown as SubscriberRecipient[])
+        : undefined;
+
+      const data = await svc.dispatchCampaign(documentId, {
+        customRecipients,
+        testRecipientEmail: toPlainString(rawBody.testRecipientEmail),
+        testRecipientPhone: toPlainString(rawBody.testRecipientPhone),
+        testTelegramChatId: toPlainString(rawBody.testTelegramChatId),
+      });
       ctx.body = { data };
+      return undefined;
     } catch (err) {
-      ctx.status = 400;
-      ctx.body = { error: (err as Error).message };
+      return respondError(ctx, err);
     }
   },
 
@@ -185,14 +229,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       );
       ctx.status = 201;
       ctx.body = { data };
+      return undefined;
     } catch (err) {
-      ctx.status = 400;
-      ctx.body = { error: (err as Error).message };
+      return respondError(ctx, err);
     }
   },
 
   async updateAutomationRule(ctx: ControllerCtx) {
-    const documentId = ctx.params?.documentId || "";
+    const documentId = toPlainString(ctx.params?.documentId) || "";
     const svc = strapi.plugin(PLUGIN_ID).service<{
       updateRule(
         documentIdOrSlug: string,
@@ -206,9 +250,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         (ctx.request.body || {}) as Partial<AutomationRuleRecord>
       );
       ctx.body = { data };
+      return undefined;
     } catch (err) {
-      ctx.status = 400;
-      ctx.body = { error: (err as Error).message };
+      return respondError(ctx, err);
     }
   },
 
@@ -217,12 +261,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       listDeliveryLogs(params?: {
         campaignSlug?: string;
         channel?: BroadcastChannel;
+        limit?: number;
       }): Promise<DeliveryLogRecord[]>;
     }>("transportService");
 
+    const rawChannel = toPlainString(ctx.query?.channel);
+    const channel =
+      rawChannel &&
+      (SUPPORTED_CHANNELS as readonly string[]).includes(rawChannel)
+        ? (rawChannel as BroadcastChannel)
+        : undefined;
+
     const data = await svc.listDeliveryLogs({
-      campaignSlug: ctx.query?.campaignSlug,
-      channel: ctx.query?.channel as BroadcastChannel | undefined,
+      campaignSlug: toPlainString(ctx.query?.campaignSlug),
+      channel,
+      limit: clampLimit(ctx.query?.limit, 100),
     });
     ctx.body = { data };
   },
@@ -232,13 +285,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       getSettings(): Promise<BroadcastSettings>;
     }>("settings");
     const settings = await svc.getSettings();
+    const safeLinks = (settings.publicChannelLinks || []).filter((link) =>
+      isSafeHttpUrl(link?.inviteUrl)
+    );
     ctx.body = {
       data: {
         organizationName: settings.organizationName,
         defaultLocale: settings.defaultLocale,
         supportedLocales: settings.supportedLocales,
         availableTopics: settings.availableTopics,
-        publicChannelLinks: settings.publicChannelLinks || [],
+        publicChannelLinks: safeLinks,
       },
     };
   },
@@ -252,8 +308,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }>("campaignService");
 
     const data = await svc.listPublicArchive({
-      topic: ctx.query?.topic,
-      limit: ctx.query?.limit ? Number(ctx.query.limit) : 20,
+      topic: toPlainString(ctx.query?.topic),
+      limit: clampLimit(ctx.query?.limit, 20),
     });
     ctx.body = { data };
   },

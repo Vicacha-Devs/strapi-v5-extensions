@@ -1,7 +1,10 @@
 import {
+  escapeHtml,
   interpolateBroadcastTemplate,
+  isSafeHttpUrl,
   normalizeChannels,
   resolveLocalizedCampaignCopy,
+  stripHeaderControlChars,
   type BroadcastChannel,
   type BroadcastSettings,
   type CampaignRecord,
@@ -10,6 +13,7 @@ import {
   type SubscriberRecipient,
 } from "../../../shared";
 import {
+  parseTargetList,
   recordResultInStats,
   resolveTelegramTargets,
   resolveWhatsAppRecipients,
@@ -33,19 +37,20 @@ export interface TransportServiceContract {
 export function buildCampaignDocumentData(
   candidate: Partial<CampaignRecord>,
   channels: BroadcastChannel[],
-  fallbackStatus = "draft"
+  resolvedStatus: CampaignRecord["status"] = "draft"
 ): Record<string, unknown> {
+  const safeBodyText = String(candidate.bodyText || "");
   return {
     title: candidate.title,
     slug: candidate.slug,
     topic: candidate.topic || "announcements",
     channels,
     priority: candidate.priority || "normal",
-    status: candidate.status || fallbackStatus,
+    status: resolvedStatus,
     scheduledAt: candidate.scheduledAt,
     subject: candidate.subject,
-    bodyText: candidate.bodyText,
-    bodyHtml: candidate.bodyHtml || `<p>${candidate.bodyText}</p>`,
+    bodyText: safeBodyText,
+    bodyHtml: candidate.bodyHtml || `<p>${escapeHtml(safeBodyText)}</p>`,
     ctaLabel: candidate.ctaLabel,
     ctaUrl: candidate.ctaUrl,
     mediaUrl: candidate.mediaUrl,
@@ -104,9 +109,14 @@ async function dispatchTelegramChannel(
   campaign: CampaignRecord,
   settings: BroadcastSettings,
   secondaryDateLabel: string,
+  isTestDispatch: boolean,
+  testTelegramChatId: string | undefined,
   stats: CampaignStats,
   results: ChannelDispatchResult[]
 ): Promise<void> {
+  if (isTestDispatch && !testTelegramChatId) {
+    return;
+  }
   const channelLocale = settings.defaultLocale || "es";
   const localized = resolveLocalizedCampaignCopy(
     campaign,
@@ -119,10 +129,22 @@ async function dispatchTelegramChannel(
     secondaryDate: secondaryDateLabel,
     siteBaseUrl: settings.siteBaseUrl,
   };
-  const tgTargets = resolveTelegramTargets(campaign, settings);
+  const tgTargets = isTestDispatch
+    ? parseTargetList(testTelegramChatId)
+    : resolveTelegramTargets(campaign, settings);
   const threadId =
     campaign.telegramThreadId ??
     settings.telegramTopicThreadMap?.[campaign.topic];
+
+  const htmlBody = localized.bodyHtml
+    ? interpolateBroadcastTemplate(localized.bodyHtml, vars, {
+        escapeHtmlValues: true,
+      })
+    : escapeHtml(interpolateBroadcastTemplate(localized.bodyText, vars));
+
+  const interpolatedCtaUrl = localized.ctaUrl
+    ? interpolateBroadcastTemplate(localized.ctaUrl, vars)
+    : undefined;
 
   for (const chatId of tgTargets) {
     const tgRes = await transport.sendTelegramBroadcast({
@@ -130,19 +152,17 @@ async function dispatchTelegramChannel(
       chatId,
       threadId,
       locale: channelLocale,
-      subject: interpolateBroadcastTemplate(localized.subject, vars, {
-        escapeHtmlValues: true,
-      }),
-      htmlBody: interpolateBroadcastTemplate(
-        localized.bodyHtml || localized.bodyText,
-        vars,
-        {
-          escapeHtmlValues: true,
-        }
-      ),
-      ctaLabel: localized.ctaLabel,
-      ctaUrl: localized.ctaUrl,
+      subject: interpolateBroadcastTemplate(localized.subject, vars),
+      htmlBody,
+      ctaLabel: localized.ctaLabel
+        ? interpolateBroadcastTemplate(localized.ctaLabel, vars)
+        : undefined,
+      ctaUrl:
+        interpolatedCtaUrl && isSafeHttpUrl(interpolatedCtaUrl)
+          ? interpolatedCtaUrl
+          : undefined,
       secondaryDateLabel,
+      isTestDispatch,
     });
     results.push(tgRes);
     recordResultInStats(stats, tgRes);
@@ -153,7 +173,8 @@ function buildEmailSendPayloadForRecipient(
   campaign: CampaignRecord,
   recipient: SubscriberRecipient & { email: string },
   settings: BroadcastSettings,
-  secondaryDateLabel: string
+  secondaryDateLabel: string,
+  isTestDispatch: boolean
 ): EmailSendPayload {
   const locale = recipient.locale || settings.defaultLocale || "es";
   const localized = resolveLocalizedCampaignCopy(
@@ -161,12 +182,16 @@ function buildEmailSendPayloadForRecipient(
     locale,
     settings.defaultLocale
   );
-  const baseSite = settings.siteBaseUrl.replace(/\/+$/, "");
-  const unsubscribeUrl = recipient.unsubscribeToken
+  let baseSite = settings.siteBaseUrl;
+  while (baseSite.endsWith("/")) {
+    baseSite = baseSite.slice(0, -1);
+  }
+  const rawUnsubscribeUrl = recipient.unsubscribeToken
     ? `${baseSite}/api/inbox/public/unsubscribe?token=${encodeURIComponent(
         recipient.unsubscribeToken
       )}`
-    : `${baseSite}/${locale}/unsubscribe`;
+    : `${baseSite}/${encodeURIComponent(locale)}/unsubscribe`;
+  const unsubscribeUrl = stripHeaderControlChars(rawUnsubscribeUrl);
   const recipientName = recipient.fullName || recipient.email;
   const vars = {
     recipientName,
@@ -176,25 +201,32 @@ function buildEmailSendPayloadForRecipient(
     unsubscribeUrl,
   };
 
+  const html = localized.bodyHtml
+    ? interpolateBroadcastTemplate(localized.bodyHtml, vars, {
+        escapeHtmlValues: true,
+      })
+    : `<p>${escapeHtml(interpolateBroadcastTemplate(localized.bodyText, vars))}</p>`;
+
+  const resolvedCtaUrl = localized.ctaUrl
+    ? interpolateBroadcastTemplate(localized.ctaUrl, vars)
+    : undefined;
+
   return {
     campaignSlug: campaign.slug,
     recipientEmail: recipient.email,
     locale,
-    subject: interpolateBroadcastTemplate(localized.subject, vars),
-    text: interpolateBroadcastTemplate(localized.bodyText, vars),
-    html: interpolateBroadcastTemplate(
-      localized.bodyHtml || `<p>${localized.bodyText}</p>`,
-      vars,
-      {
-        escapeHtmlValues: true,
-      }
+    subject: stripHeaderControlChars(
+      interpolateBroadcastTemplate(localized.subject, vars)
     ),
+    text: interpolateBroadcastTemplate(localized.bodyText, vars),
+    html,
     ctaLabel: localized.ctaLabel
       ? interpolateBroadcastTemplate(localized.ctaLabel, vars)
       : undefined,
-    ctaUrl: localized.ctaUrl
-      ? interpolateBroadcastTemplate(localized.ctaUrl, vars)
-      : undefined,
+    ctaUrl:
+      resolvedCtaUrl && isSafeHttpUrl(resolvedCtaUrl)
+        ? resolvedCtaUrl
+        : undefined,
     unsubscribeUrl,
     emailTemplateRef: campaign.emailTemplateRef,
     secondaryDateLabel,
@@ -203,6 +235,7 @@ function buildEmailSendPayloadForRecipient(
       title: campaign.title,
       topic: campaign.topic,
     },
+    isTestDispatch,
   };
 }
 
@@ -212,6 +245,7 @@ async function dispatchEmailChannel(
   settings: BroadcastSettings,
   recipients: SubscriberRecipient[],
   secondaryDateLabel: string,
+  isTestDispatch: boolean,
   stats: CampaignStats,
   results: ChannelDispatchResult[]
 ): Promise<void> {
@@ -221,7 +255,8 @@ async function dispatchEmailChannel(
       campaign,
       recipient as SubscriberRecipient & { email: string },
       settings,
-      secondaryDateLabel
+      secondaryDateLabel,
+      isTestDispatch
     );
     const emailRes = await transport.sendEmailBroadcast(payload);
     results.push(emailRes);
@@ -259,14 +294,21 @@ async function dispatchWhatsAppChannel(
       secondaryDate: secondaryDateLabel,
       siteBaseUrl: settings.siteBaseUrl,
     };
+    const resolvedCtaUrl = localized.ctaUrl
+      ? interpolateBroadcastTemplate(localized.ctaUrl, vars)
+      : undefined;
     const waRes = await transport.sendWhatsAppBroadcast({
       campaignSlug: campaign.slug,
       recipientPhone: recipient.phone,
       locale,
       textBody: interpolateBroadcastTemplate(localized.bodyText, vars),
       templateName: campaign.whatsappTemplateName,
-      ctaUrl: localized.ctaUrl,
+      ctaUrl:
+        resolvedCtaUrl && isSafeHttpUrl(resolvedCtaUrl)
+          ? resolvedCtaUrl
+          : undefined,
       secondaryDateLabel,
+      isTestDispatch,
     });
     results.push(waRes);
     recordResultInStats(stats, waRes);
@@ -279,6 +321,7 @@ export async function dispatchAllActiveChannels(params: {
   settings: BroadcastSettings;
   recipients: SubscriberRecipient[];
   isTestDispatch: boolean;
+  testTelegramChatId?: string;
   secondaryDateLabel: string;
   stats: CampaignStats;
 }): Promise<ChannelDispatchResult[]> {
@@ -288,6 +331,7 @@ export async function dispatchAllActiveChannels(params: {
     settings,
     recipients,
     isTestDispatch,
+    testTelegramChatId,
     secondaryDateLabel,
     stats,
   } = params;
@@ -300,6 +344,8 @@ export async function dispatchAllActiveChannels(params: {
       campaign,
       settings,
       secondaryDateLabel,
+      isTestDispatch,
+      testTelegramChatId,
       stats,
       results
     );
@@ -312,6 +358,7 @@ export async function dispatchAllActiveChannels(params: {
       settings,
       recipients,
       secondaryDateLabel,
+      isTestDispatch,
       stats,
       results
     );

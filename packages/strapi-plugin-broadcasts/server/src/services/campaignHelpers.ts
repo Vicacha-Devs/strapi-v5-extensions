@@ -1,7 +1,9 @@
 import {
-  computeIdempotencyKey,
   escapeHtml,
+  isSafeHttpUrl,
+  isValidGatewaySession,
   normalizeWhatsAppTarget,
+  sanitizeTelegramHtml,
   validateGatewayUrl,
   type BroadcastChannel,
   type BroadcastSettings,
@@ -11,11 +13,29 @@ import {
   type ChannelDispatchResult,
   type SubscriberRecipient,
 } from "../../../shared";
+import { computeIdempotencyKey } from "./idempotency";
 import type {
   EmailSendPayload,
   TelegramSendPayload,
   WhatsAppSendPayload,
 } from "./transportService";
+
+export { computeIdempotencyKey };
+
+const TELEGRAM_BOT_TOKEN_RE = /^\d+:[A-Za-z0-9_-]+$/;
+const FETCH_TIMEOUT_MS = 15_000;
+
+export function clampLimit(val: unknown, defaultLimit: number): number {
+  if (val === undefined || val === null || val === "") return defaultLimit;
+  const parsed =
+    typeof val === "number"
+      ? val
+      : typeof val === "string"
+        ? Number(val)
+        : Number.NaN;
+  if (!Number.isFinite(parsed)) return defaultLimit;
+  return Math.min(100, Math.max(1, Math.trunc(parsed)));
+}
 
 export function buildTelegramIdempotencyKey(
   payload: TelegramSendPayload,
@@ -27,7 +47,8 @@ export function buildTelegramIdempotencyKey(
   return computeIdempotencyKey(
     payload.campaignSlug,
     "telegram",
-    `${targetChatId}${threadKeySuffix}:${payload.locale}`
+    `${targetChatId}${threadKeySuffix}:${payload.locale}`,
+    { isTest: payload.isTestDispatch }
   );
 }
 
@@ -190,16 +211,25 @@ export function buildTelegramRequestPayload(
   payload: TelegramSendPayload,
   targetChatId: string
 ): Record<string, unknown> {
+  const normalizedSubject = String(payload.subject || "")
+    .replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .trim();
+  const safeSubject = escapeHtml(normalizedSubject);
+  const safeBody = sanitizeTelegramHtml(payload.htmlBody);
+  const text = safeBody
+    ? `<b>${safeSubject}</b>\n\n${safeBody}`
+    : `<b>${safeSubject}</b>`;
+
   const bodyPayload: Record<string, unknown> = {
     chat_id: targetChatId,
-    text: `<b>${payload.subject}</b>\n\n${payload.htmlBody}`,
+    text,
     parse_mode: "HTML",
     disable_web_page_preview: false,
   };
   if (typeof payload.threadId === "number" && payload.threadId > 0) {
     bodyPayload.message_thread_id = payload.threadId;
   }
-  if (payload.ctaLabel && payload.ctaUrl) {
+  if (payload.ctaLabel && payload.ctaUrl && isSafeHttpUrl(payload.ctaUrl)) {
     bodyPayload.reply_markup = {
       inline_keyboard: [[{ text: payload.ctaLabel, url: payload.ctaUrl }]],
     };
@@ -212,12 +242,19 @@ export async function executeTelegramHttpSend(
   targetChatId: string,
   botToken: string
 ): Promise<string> {
-  const endpoint = `https://api.telegram.org/bot${botToken}/sendMessage`;
+  const cleanToken = String(botToken || "").trim();
+  if (!TELEGRAM_BOT_TOKEN_RE.test(cleanToken)) {
+    throw new Error("Invalid Telegram bot token format");
+  }
+
+  const endpoint = `https://api.telegram.org/bot${cleanToken}/sendMessage`;
   const bodyPayload = buildTelegramRequestPayload(payload, targetChatId);
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(bodyPayload),
+    redirect: "error",
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   const json = (await response.json()) as {
     ok?: boolean;
@@ -236,8 +273,12 @@ export async function sendViaMetaCloudApi(
   evolutionNumber: string,
   fullText: string
 ): Promise<string> {
+  const phoneId = String(settings.whatsappPhoneNumberId || "").trim();
+  if (!/^[A-Za-z0-9_-]+$/.test(phoneId)) {
+    throw new Error("Invalid Meta WABA phoneNumberId format");
+  }
   const endpoint = `https://graph.facebook.com/v20.0/${encodeURIComponent(
-    settings.whatsappPhoneNumberId || ""
+    phoneId
   )}/messages`;
   const reqBody = payload.templateName
     ? {
@@ -263,6 +304,8 @@ export async function sendViaMetaCloudApi(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(reqBody),
+    redirect: "error",
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   const json = (await res.json()) as {
     messages?: Array<{ id?: string }>;
@@ -285,10 +328,18 @@ export async function sendViaSelfHostedGateway(
   });
   if (!gatewayCheck.valid) throw new Error(gatewayCheck.errors.join("; "));
 
-  const baseUrl = (settings.whatsappGatewayUrl || "").replace(/\/+$/, "");
-  const session = encodeURIComponent(
+  const rawSession = String(
     settings.whatsappGatewaySession || "default"
-  );
+  ).trim();
+  if (!isValidGatewaySession(rawSession)) {
+    throw new Error("Invalid WhatsApp gateway session identifier");
+  }
+
+  let baseUrl = settings.whatsappGatewayUrl || "";
+  while (baseUrl.endsWith("/")) {
+    baseUrl = baseUrl.slice(0, -1);
+  }
+  const session = encodeURIComponent(rawSession);
   const endpoint =
     driver === "evolution"
       ? `${baseUrl}/message/sendText/${session}`
@@ -306,7 +357,7 @@ export async function sendViaSelfHostedGateway(
     driver === "evolution"
       ? { number: target.evolutionNumber, text: fullText }
       : {
-          session: settings.whatsappGatewaySession || "default",
+          session: rawSession,
           chatId: target.chatId,
           text: fullText,
         };
@@ -315,6 +366,8 @@ export async function sendViaSelfHostedGateway(
     method: "POST",
     headers,
     body: JSON.stringify(body),
+    redirect: "error",
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`${driver} gateway HTTP ${res.status}`);
   return `${driver}_${Date.now()}`;
@@ -326,8 +379,12 @@ export async function executeWhatsAppHttpSend(
   settings: BroadcastSettings,
   target: ReturnType<typeof normalizeWhatsAppTarget>
 ): Promise<string> {
-  const fullText = payload.ctaUrl
-    ? `${payload.textBody}\n\n🔗 ${payload.ctaUrl}`
+  const safeCtaUrl =
+    payload.ctaUrl && isSafeHttpUrl(payload.ctaUrl)
+      ? payload.ctaUrl
+      : undefined;
+  const fullText = safeCtaUrl
+    ? `${payload.textBody}\n\n🔗 ${safeCtaUrl}`
     : payload.textBody;
   if (driver === "meta-cloud") {
     return sendViaMetaCloudApi(

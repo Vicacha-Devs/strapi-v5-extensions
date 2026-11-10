@@ -1,13 +1,7 @@
 import type { Core } from "@strapi/strapi";
 
 import { PLUGIN_ID, type BroadcastSettings } from "../../shared";
-
-const MONITORED_EVENTS = [
-  "inbox.alert.published",
-  "inbox.subscriber.confirmed",
-  "event.published",
-  "media-feeds.episode.synced",
-] as const;
+import { registerEventHubListeners } from "./eventHubRegistry";
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   const settingsService = strapi.plugin(PLUGIN_ID).service<{
@@ -22,32 +16,19 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   const automationService = strapi.plugin(PLUGIN_ID).service<{
     seedStarterRules(): Promise<number>;
-    handleEventTrigger(
-      eventName: string,
-      payload?: Record<string, unknown>
-    ): Promise<unknown>;
   }>("automationService");
   await automationService.seedStarterRules();
 
-  if (strapi.eventHub?.on) {
-    for (const evt of MONITORED_EVENTS) {
-      strapi.eventHub.on(evt, async (payload: unknown) => {
-        try {
-          await automationService.handleEventTrigger(
-            evt,
-            (payload as Record<string, unknown>) || {}
-          );
-        } catch (err) {
-          strapi.log.warn(
-            `[@vicacha-devs/strapi-plugin-broadcasts] EventHub automation warning for ${evt}: ${(err as Error).message}`
-          );
-        }
-      });
-    }
-  }
+  await registerEventHubListeners(strapi);
 
   if (strapi.admin?.services?.permission?.actionProvider?.registerMany) {
     await strapi.admin.services.permission.actionProvider.registerMany([
+      {
+        section: "plugins",
+        displayName: "Read Broadcast Campaigns & Delivery Ledger",
+        uid: "read",
+        pluginName: PLUGIN_ID,
+      },
       {
         section: "plugins",
         displayName: "Manage Broadcast Campaigns",

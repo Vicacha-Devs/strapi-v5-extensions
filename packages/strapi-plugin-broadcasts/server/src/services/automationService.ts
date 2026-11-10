@@ -4,8 +4,10 @@ import {
   AUTOMATION_RULE_UID,
   PLUGIN_ID,
   STARTER_AUTOMATION_RULES,
+  escapeHtml,
   formatSecondaryDate,
   interpolateBroadcastTemplate,
+  isSafeHttpUrl,
   normalizeChannels,
   validateAutomationRuleInput,
   type AutomationRuleRecord,
@@ -14,12 +16,15 @@ import {
   type CampaignRecord,
   type ChannelDispatchResult,
 } from "../../../shared";
+import { ensureEventHubListener } from "../eventHubRegistry";
+import { generateUniqueSlugSuffix } from "./idempotency";
 
 function buildRuleDocumentData(
   rule: Partial<AutomationRuleRecord>,
   channels: BroadcastChannel[],
   fallbackActive = true
 ): Record<string, unknown> {
+  const safeBodyTemplate = String(rule.bodyTextTemplate || "");
   return {
     slug: rule.slug,
     name: rule.name,
@@ -30,9 +35,9 @@ function buildRuleDocumentData(
     active: rule.active ?? fallbackActive,
     priority: rule.priority || "normal",
     subjectTemplate: rule.subjectTemplate,
-    bodyTextTemplate: rule.bodyTextTemplate,
+    bodyTextTemplate: safeBodyTemplate,
     bodyHtmlTemplate:
-      rule.bodyHtmlTemplate || `<p>${rule.bodyTextTemplate}</p>`,
+      rule.bodyHtmlTemplate || `<p>${escapeHtml(safeBodyTemplate)}</p>`,
     ctaLabelTemplate: rule.ctaLabelTemplate,
     ctaUrlTemplate: rule.ctaUrlTemplate,
     translations: rule.translations || {},
@@ -127,32 +132,62 @@ function buildAutoCampaignInput(
   rule: AutomationRuleRecord,
   vars: Record<string, string | number | undefined>
 ): Partial<CampaignRecord> {
-  const rawCode = String(vars.code || "item")
+  let rawCode = String(vars.code || "item")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/^-+/, "");
+  while (rawCode.endsWith("-")) {
+    rawCode = rawCode.slice(0, -1);
+  }
   const safeCode = rawCode || "item";
+  const uniqueSuffix = generateUniqueSlugSuffix();
+
+  const bodyHtml = rule.bodyHtmlTemplate
+    ? interpolateBroadcastTemplate(rule.bodyHtmlTemplate, vars, {
+        escapeHtmlValues: true,
+      })
+    : `<p>${escapeHtml(interpolateBroadcastTemplate(rule.bodyTextTemplate, vars))}</p>`;
+
+  const rawCtaUrl = rule.ctaUrlTemplate
+    ? interpolateBroadcastTemplate(rule.ctaUrlTemplate, vars)
+    : undefined;
 
   return {
-    slug: `auto-${rule.slug}-${safeCode}`,
+    slug: `auto-${rule.slug}-${safeCode}-${uniqueSuffix}`,
     title: `[Auto] ${rule.name}: ${vars.title}`,
     topic: rule.topic,
     channels: rule.channels,
     priority: rule.priority,
     subject: interpolateBroadcastTemplate(rule.subjectTemplate, vars),
     bodyText: interpolateBroadcastTemplate(rule.bodyTextTemplate, vars),
-    bodyHtml: interpolateBroadcastTemplate(
-      rule.bodyHtmlTemplate || `<p>${rule.bodyTextTemplate}</p>`,
-      vars,
-      { escapeHtmlValues: true }
-    ),
+    bodyHtml,
     ctaLabel: rule.ctaLabelTemplate
       ? interpolateBroadcastTemplate(rule.ctaLabelTemplate, vars)
       : undefined,
-    ctaUrl: rule.ctaUrlTemplate
-      ? interpolateBroadcastTemplate(rule.ctaUrlTemplate, vars)
-      : undefined,
+    ctaUrl: rawCtaUrl && isSafeHttpUrl(rawCtaUrl) ? rawCtaUrl : undefined,
   };
+}
+
+function isSelfBroadcastEvent(
+  eventName: string,
+  payload: Record<string, unknown>
+): boolean {
+  const normalizedEvent = String(eventName || "")
+    .trim()
+    .toLowerCase();
+  if (!normalizedEvent || normalizedEvent.startsWith("broadcasts.")) {
+    return true;
+  }
+  const model =
+    typeof payload?.model === "string"
+      ? payload.model.trim().toLowerCase()
+      : "";
+  const uid =
+    typeof payload?.uid === "string" ? payload.uid.trim().toLowerCase() : "";
+  return (
+    model.startsWith("plugin::broadcasts.") ||
+    uid.startsWith("plugin::broadcasts.")
+  );
 }
 
 const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -199,16 +234,21 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
   async createRule(
     input: Partial<AutomationRuleRecord>
   ): Promise<AutomationRuleRecord> {
-    const channels = normalizeChannels(input.channels);
+    const rawChannels =
+      input.channels === undefined ? ["telegram"] : input.channels;
+    const validation = validateAutomationRuleInput({
+      ...input,
+      channels: rawChannels as AutomationRuleRecord["channels"],
+    });
+    if (!validation.valid) {
+      throw new Error(validation.errors.join("; "));
+    }
+
+    const channels = normalizeChannels(rawChannels, ["telegram"]);
     const candidate: Partial<AutomationRuleRecord> = {
       ...input,
       channels,
     };
-
-    const validation = validateAutomationRuleInput(candidate);
-    if (!validation.valid) {
-      throw new Error(validation.errors.join("; "));
-    }
 
     const created = await strapi.documents(AUTOMATION_RULE_UID).create({
       data: {
@@ -216,6 +256,10 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
         triggerCount: 0,
       },
     });
+
+    if (candidate.eventName) {
+      ensureEventHubListener(strapi, candidate.eventName);
+    }
 
     return created as unknown as AutomationRuleRecord;
   },
@@ -229,22 +273,43 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
       throw new Error(`Automation rule "${documentIdOrSlug}" not found`);
     }
 
-    const channels = normalizeChannels(input.channels ?? existing.channels);
-    const merged: Partial<AutomationRuleRecord> = {
+    const rawChannels =
+      input.channels === undefined ? existing.channels : input.channels;
+    const resolvedBodyHtmlTemplate =
+      input.bodyHtmlTemplate !== undefined
+        ? input.bodyHtmlTemplate
+        : input.bodyTextTemplate !== undefined &&
+            (input.bodyTextTemplate !== existing.bodyTextTemplate ||
+              !existing.bodyHtmlTemplate)
+          ? `<p>${escapeHtml(String(input.bodyTextTemplate))}</p>`
+          : existing.bodyHtmlTemplate;
+
+    const mergedForValidation: Partial<AutomationRuleRecord> = {
       ...existing,
       ...input,
-      channels,
+      bodyHtmlTemplate: resolvedBodyHtmlTemplate,
+      channels: rawChannels as AutomationRuleRecord["channels"],
     };
 
-    const validation = validateAutomationRuleInput(merged);
+    const validation = validateAutomationRuleInput(mergedForValidation);
     if (!validation.valid) {
       throw new Error(validation.errors.join("; "));
     }
+
+    const channels = normalizeChannels(rawChannels, ["telegram"]);
+    const merged: Partial<AutomationRuleRecord> = {
+      ...mergedForValidation,
+      channels,
+    };
 
     const updated = await strapi.documents(AUTOMATION_RULE_UID).update({
       documentId: existing.documentId,
       data: buildRuleDocumentData(merged, channels, existing.active ?? true),
     });
+
+    if (merged.eventName) {
+      ensureEventHubListener(strapi, merged.eventName);
+    }
 
     return (
       (updated as unknown as AutomationRuleRecord) ||
@@ -312,6 +377,10 @@ const createAutomationService = ({ strapi }: { strapi: Core.Strapi }) => ({
       results: ChannelDispatchResult[];
     }>
   > {
+    if (isSelfBroadcastEvent(eventName, payload)) {
+      return [];
+    }
+
     const settings = await this.getSettingsService().getSettings();
     if (!settings.enableEventHubAutomations) return [];
 

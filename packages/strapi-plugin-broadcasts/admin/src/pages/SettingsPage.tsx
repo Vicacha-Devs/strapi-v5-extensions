@@ -26,6 +26,7 @@ import {
   WhatsAppTransportTab,
   type WhatsAppTransportTabProps,
 } from "../components/WhatsAppTransportTab";
+import { extractApiErrorMessage } from "../utils/extractApiError";
 
 const cardBorderStyle: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.22)",
@@ -154,14 +155,17 @@ export const SettingsPage: React.FC = () => {
     DEFAULT_BROADCAST_SETTINGS
   );
   const [savedNotice, setSavedNotice] = React.useState<string>("");
+  const [noticeIsError, setNoticeIsError] = React.useState<boolean>(false);
+  const [isSaving, setIsSaving] = React.useState<boolean>(false);
 
   React.useEffect(() => {
+    let isMounted = true;
     const fetchSettings = async () => {
       try {
         const res = await get<{ data?: Partial<BroadcastSettings> }>(
           `/${PLUGIN_ID}/settings`
         );
-        if (res?.data?.data) {
+        if (isMounted && res?.data?.data) {
           setSettings({
             ...DEFAULT_BROADCAST_SETTINGS,
             ...res.data.data,
@@ -172,29 +176,49 @@ export const SettingsPage: React.FC = () => {
       }
     };
     void fetchSettings();
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [get]);
 
   const handleSave = async () => {
-    const res = await put<{ data?: Partial<BroadcastSettings> }>(
-      `/${PLUGIN_ID}/settings`,
-      settings
-    );
-    if (res?.data?.data) {
-      setSettings({
-        ...DEFAULT_BROADCAST_SETTINGS,
-        ...res.data.data,
-      });
+    if (isSaving) return;
+    setIsSaving(true);
+    setNoticeIsError(false);
+    try {
+      const res = await put<{ data?: Partial<BroadcastSettings> }>(
+        `/${PLUGIN_ID}/settings`,
+        settings
+      );
+      if (res?.data?.data) {
+        setSettings({
+          ...DEFAULT_BROADCAST_SETTINGS,
+          ...res.data.data,
+        });
+      }
       setSavedNotice(
         t(
           "settings.ui.settings_saved_notice",
           "Omnichannel Broadcast transport & channel settings saved successfully."
         )
       );
+    } catch (err) {
+      setNoticeIsError(true);
+      setSavedNotice(
+        extractApiErrorMessage(
+          err,
+          t("settings.ui.save_failed", "Failed to save broadcast settings.")
+        )
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleResetDefaults = () => {
+    if (isSaving) return;
     setSettings(DEFAULT_BROADCAST_SETTINGS);
+    setNoticeIsError(false);
     setSavedNotice(
       t(
         "settings.ui.settings_reset_notice",
@@ -255,18 +279,31 @@ export const SettingsPage: React.FC = () => {
             </Flex>
           </Box>
           <Flex gap={2}>
-            <Button variant="tertiary" onClick={handleResetDefaults}>
+            <Button
+              variant="tertiary"
+              disabled={isSaving}
+              onClick={handleResetDefaults}
+            >
               {t("settings.ui.reset_to_defaults", "Reset to Defaults")}
             </Button>
-            <Button onClick={handleSave}>
+            <Button loading={isSaving} disabled={isSaving} onClick={handleSave}>
               {t("settings.ui.save_settings", "Save Settings")}
             </Button>
           </Flex>
         </Flex>
 
         {savedNotice && (
-          <Box padding={3} marginBottom={4} background="success100" hasRadius>
-            <Typography textColor="success700" fontWeight="semiBold">
+          <Box
+            padding={3}
+            marginBottom={4}
+            background={noticeIsError ? "danger100" : "success100"}
+            hasRadius
+            role={noticeIsError ? "alert" : "status"}
+          >
+            <Typography
+              textColor={noticeIsError ? "danger700" : "success700"}
+              fontWeight="semiBold"
+            >
               {savedNotice}
             </Typography>
           </Box>

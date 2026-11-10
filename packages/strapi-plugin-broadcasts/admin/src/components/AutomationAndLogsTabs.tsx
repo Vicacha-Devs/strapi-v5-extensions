@@ -8,7 +8,6 @@ import {
   MultiSelectOption,
   SingleSelect,
   SingleSelectOption,
-  TextInput,
   Typography,
 } from "@strapi/design-system";
 import { mergeSelectOptions } from "@vicacha-devs/plugin-shared";
@@ -18,16 +17,19 @@ import { PLUGIN_ID, STARTER_AUTOMATION_RULES } from "../../../shared/constants";
 import type {
   AutomationRuleRecord,
   BroadcastChannel,
+  BroadcastPriority,
   DeliveryLogRecord,
 } from "../../../shared/types";
+import { extractApiErrorMessage } from "../utils/extractApiError";
+import { RequiredTextField } from "./CampaignsTableSection";
 import {
   AutomationRulesTable,
   DeliveryLedgerSection,
   type TranslateFn,
 } from "./DeliveryLedgerSection";
 import {
-  BROADCAST_CHANNEL_OPTIONS,
-  BROADCAST_TOPIC_OPTIONS,
+  getBroadcastChannelOptions,
+  getBroadcastTopicOptions,
 } from "./OrganizationEmailTab";
 
 export function parseChannelsInput(
@@ -50,7 +52,7 @@ export interface AutomationAndLogsTabsProps {
   navigate: (path: string) => void;
   post: (url: string, body?: unknown) => Promise<unknown>;
   put: (url: string, body?: unknown) => Promise<unknown>;
-  setStatusMessage: (msg: string) => void;
+  notifyStatus: (msg: string, isError?: boolean) => void;
   loadAll: () => Promise<void>;
 }
 
@@ -62,10 +64,14 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
   navigate,
   post,
   put,
-  setStatusMessage,
+  notifyStatus,
   loadAll,
 }) => {
   const [editingRuleId, setEditingRuleId] = React.useState<string | null>(null);
+  const [ruleActive, setRuleActive] = React.useState<boolean>(true);
+  const [rulePriority, setRulePriority] =
+    React.useState<BroadcastPriority>("normal");
+  const [isBusy, setIsBusy] = React.useState<boolean>(false);
   const [ruleSlug, setRuleSlug] = React.useState<string>("");
   const [ruleName, setRuleName] = React.useState<string>("");
   const [ruleEventName, setRuleEventName] =
@@ -83,6 +89,8 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
 
   const resetRuleForm = () => {
     setEditingRuleId(null);
+    setRuleActive(true);
+    setRulePriority("normal");
     setRuleSlug("");
     setRuleName("");
     setRuleEventName("event.published");
@@ -94,6 +102,8 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
 
   const handleStartEditRule = (rule: AutomationRuleRecord) => {
     setEditingRuleId(rule.documentId || rule.slug);
+    setRuleActive(rule.active ?? true);
+    setRulePriority(rule.priority || "normal");
     setRuleSlug(rule.slug);
     setRuleName(rule.name);
     setRuleEventName(rule.eventName);
@@ -105,9 +115,7 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
     );
     setRuleSubjectTemplate(rule.subjectTemplate || "");
     setRuleBodyTextTemplate(rule.bodyTextTemplate || "");
-    setStatusMessage(
-      `${t("page.ui.editing_rule", "Editing rule")}: ${rule.name}`
-    );
+    notifyStatus(`${t("page.ui.editing_rule", "Editing rule")}: ${rule.name}`);
   };
 
   const handleSaveRule = async () => {
@@ -118,7 +126,7 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
       ruleSubjectTemplate &&
       ruleBodyTextTemplate
     );
-    if (!isComplete) return;
+    if (!isComplete || isBusy) return;
 
     const payload = {
       slug: ruleSlug.trim(),
@@ -126,54 +134,95 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
       eventName: ruleEventName.trim(),
       topic: ruleTopic.trim() || "announcements",
       channels: parseChannelsInput(ruleChannels, ["telegram", "email"]),
-      active: true,
-      priority: "normal",
+      active: ruleActive,
+      priority: rulePriority,
       subjectTemplate: ruleSubjectTemplate.trim(),
       bodyTextTemplate: ruleBodyTextTemplate.trim(),
     };
 
-    if (editingRuleId) {
-      await put(`/${PLUGIN_ID}/automation-rules/${editingRuleId}`, payload);
-      setStatusMessage(
-        `${t("page.ui.updated_rule", "Updated automation rule")}: ${payload.name}`
+    setIsBusy(true);
+    try {
+      if (editingRuleId) {
+        await put(`/${PLUGIN_ID}/automation-rules/${editingRuleId}`, payload);
+        notifyStatus(
+          `${t("page.ui.updated_rule", "Updated automation rule")}: ${payload.name}`
+        );
+      } else {
+        await post(`/${PLUGIN_ID}/automation-rules`, payload);
+        notifyStatus(
+          `${t("page.ui.created_rule", "Created automation rule")}: ${payload.name}`
+        );
+      }
+      resetRuleForm();
+      await loadAll();
+    } catch (err) {
+      notifyStatus(
+        extractApiErrorMessage(
+          err,
+          t("page.ui.operation_failed", "Broadcast operation failed.")
+        ),
+        true
       );
-    } else {
-      await post(`/${PLUGIN_ID}/automation-rules`, payload);
-      setStatusMessage(
-        `${t("page.ui.created_rule", "Created automation rule")}: ${payload.name}`
-      );
+    } finally {
+      setIsBusy(false);
     }
-    resetRuleForm();
-    await loadAll();
   };
 
   const handleToggleRuleActive = async (rule: AutomationRuleRecord) => {
+    if (isBusy) return;
     const targetId = rule.documentId || rule.slug;
     const nextActive = !rule.active;
-    await put(`/${PLUGIN_ID}/automation-rules/${targetId}`, {
-      ...rule,
-      active: nextActive,
-    });
-    const stateLabel = nextActive
-      ? t("page.ui.rule_activated", "activated")
-      : t("page.ui.rule_paused", "paused");
-    setStatusMessage(`${rule.name}: ${stateLabel}`);
-    await loadAll();
+    setIsBusy(true);
+    try {
+      await put(`/${PLUGIN_ID}/automation-rules/${targetId}`, {
+        ...rule,
+        active: nextActive,
+      });
+      const stateLabel = nextActive
+        ? t("page.ui.rule_activated", "activated")
+        : t("page.ui.rule_paused", "paused");
+      notifyStatus(`${rule.name}: ${stateLabel}`);
+      await loadAll();
+    } catch (err) {
+      notifyStatus(
+        extractApiErrorMessage(
+          err,
+          t("page.ui.operation_failed", "Broadcast operation failed.")
+        ),
+        true
+      );
+    } finally {
+      setIsBusy(false);
+    }
   };
 
   const handleSeedStarterRule = async (
     preset: (typeof STARTER_AUTOMATION_RULES)[number]
   ) => {
+    if (isBusy) return;
     const existing = rules.find((r) => r.slug === preset.slug);
     if (existing) {
       handleStartEditRule(existing);
       return;
     }
-    await post(`/${PLUGIN_ID}/automation-rules`, preset);
-    setStatusMessage(
-      `${t("page.ui.added_starter_rule", "Added starter automation rule")}: ${preset.name}`
-    );
-    await loadAll();
+    setIsBusy(true);
+    try {
+      await post(`/${PLUGIN_ID}/automation-rules`, preset);
+      notifyStatus(
+        `${t("page.ui.added_starter_rule", "Added starter automation rule")}: ${preset.name}`
+      );
+      await loadAll();
+    } catch (err) {
+      notifyStatus(
+        extractApiErrorMessage(
+          err,
+          t("page.ui.operation_failed", "Broadcast operation failed.")
+        ),
+        true
+      );
+    } finally {
+      setIsBusy(false);
+    }
   };
 
   if (activeTab === "logs") {
@@ -190,7 +239,10 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
         "page.ui.create_new_eventhub_automation_rule",
         "Create New EventHub Automation Rule"
       );
-  const topicOpts = mergeSelectOptions(BROADCAST_TOPIC_OPTIONS, [ruleTopic]);
+  const topicOpts = mergeSelectOptions(getBroadcastTopicOptions(t), [
+    ruleTopic,
+  ]);
+  const channelOpts = getBroadcastChannelOptions(t);
 
   return (
     <Box paddingTop={6}>
@@ -209,6 +261,7 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
             <Button
               key={preset.slug}
               variant="secondary"
+              disabled={isBusy}
               onClick={() => handleSeedStarterRule(preset)}
             >
               + {preset.slug}
@@ -242,74 +295,48 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
             alignItems: "start",
           }}
         >
-          <Field.Root
+          <RequiredTextField
             name="ruleSlug"
-            required
+            label={t("field.rule_slug", "Rule Slug")}
             hint={t(
               "page.ui.rule_slug_hint",
               "Unique identifier (lowercase & hyphens)."
             )}
-          >
-            <Field.Label>{t("field.rule_slug", "Rule Slug")}</Field.Label>
-            <TextInput
-              name="ruleSlug"
-              placeholder={t(
-                "placeholder.e_g_auto_course_published",
-                "e.g., auto-course-published"
-              )}
-              value={ruleSlug}
-              onChange={(e: { target: { value: string } }) =>
-                setRuleSlug(e.target.value)
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
-          <Field.Root
+            placeholder={t(
+              "placeholder.e_g_auto_course_published",
+              "e.g., auto-course-published"
+            )}
+            value={ruleSlug}
+            onChange={setRuleSlug}
+          />
+          <RequiredTextField
             name="ruleName"
-            required
+            label={t("field.rule_name", "Rule Name")}
             hint={t(
               "page.ui.rule_name_hint",
               "Human-readable rule description."
             )}
-          >
-            <Field.Label>{t("field.rule_name", "Rule Name")}</Field.Label>
-            <TextInput
-              name="ruleName"
-              placeholder={t(
-                "placeholder.e_g_auto_broadcast_new_courses",
-                "e.g., Auto-Broadcast New Courses"
-              )}
-              value={ruleName}
-              onChange={(e: { target: { value: string } }) =>
-                setRuleName(e.target.value)
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
-          <Field.Root
+            placeholder={t(
+              "placeholder.e_g_auto_broadcast_new_courses",
+              "e.g., Auto-Broadcast New Courses"
+            )}
+            value={ruleName}
+            onChange={setRuleName}
+          />
+          <RequiredTextField
             name="ruleEventName"
-            required
+            label={t("field.eventhub_trigger_name", "EventHub Trigger Name")}
             hint={t(
               "page.ui.rule_event_name_hint",
               "Strapi EventHub event that triggers this rule."
             )}
-          >
-            <Field.Label>
-              {t("field.eventhub_trigger_name", "EventHub Trigger Name")}
-            </Field.Label>
-            <TextInput
-              name="ruleEventName"
-              placeholder={t(
-                "placeholder.e_g_event_published",
-                "e.g., event.published or inbox.alert.published"
-              )}
-              value={ruleEventName}
-              onChange={(e: { target: { value: string } }) =>
-                setRuleEventName(e.target.value)
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
+            placeholder={t(
+              "placeholder.e_g_event_published",
+              "e.g., event.published or inbox.alert.published"
+            )}
+            value={ruleEventName}
+            onChange={setRuleEventName}
+          />
           <Field.Root
             name="ruleTopic"
             hint={t(
@@ -358,7 +385,7 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
               }
               onClear={() => setRuleChannels(["telegram"])}
             >
-              {BROADCAST_CHANNEL_OPTIONS.map((opt) => (
+              {channelOpts.map((opt) => (
                 <MultiSelectOption key={opt.value} value={opt.value}>
                   {opt.label}
                 </MultiSelectOption>
@@ -366,64 +393,48 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
             </MultiSelect>
             <Field.Hint />
           </Field.Root>
-          <Field.Root
+          <RequiredTextField
             name="ruleSubjectTemplate"
-            required
+            label={t("field.subject_template", "Subject Template")}
             hint={t(
               "page.ui.rule_subject_template_hint",
-              "Supports {{title}}, {{secondaryDate}}, {{organizationName}}."
+              "Supports '{{title}}', '{{secondaryDate}}', '{{organizationName}}'."
             )}
-          >
-            <Field.Label>
-              {t("field.subject_template", "Subject Template")}
-            </Field.Label>
-            <TextInput
-              name="ruleSubjectTemplate"
-              placeholder={t(
-                "placeholder.rule_subject_template",
-                "🚨 {{title}} — {{organizationName}}"
-              )}
-              value={ruleSubjectTemplate}
-              onChange={(e: { target: { value: string } }) =>
-                setRuleSubjectTemplate(e.target.value)
-              }
-            />
-            <Field.Hint />
-          </Field.Root>
+            placeholder={t(
+              "placeholder.rule_subject_template",
+              "🚨 '{{title}}' — '{{organizationName}}'"
+            )}
+            value={ruleSubjectTemplate}
+            onChange={setRuleSubjectTemplate}
+          />
           <Box style={{ gridColumn: "1 / -1" }}>
-            <Field.Root
+            <RequiredTextField
               name="ruleBodyTextTemplate"
-              required
+              label={t("field.body_text_template", "Body Text Template")}
               hint={t(
                 "page.ui.rule_body_text_template_hint",
-                "Interpolated with event payload fields ({{title}}, {{message}}, {{summary}}, {{secondaryDate}})."
+                "Interpolated with event payload fields ('{{title}}', '{{message}}', '{{summary}}', '{{secondaryDate}}')."
               )}
-            >
-              <Field.Label>
-                {t("field.body_text_template", "Body Text Template")}
-              </Field.Label>
-              <TextInput
-                name="ruleBodyTextTemplate"
-                placeholder={t(
-                  "placeholder.rule_body_text_template",
-                  "{{title}}: {{message}} ({{secondaryDate}})"
-                )}
-                value={ruleBodyTextTemplate}
-                onChange={(e: { target: { value: string } }) =>
-                  setRuleBodyTextTemplate(e.target.value)
-                }
-              />
-              <Field.Hint />
-            </Field.Root>
+              placeholder={t(
+                "placeholder.rule_body_text_template",
+                "'{{title}}': '{{message}}' ('{{secondaryDate}}')"
+              )}
+              value={ruleBodyTextTemplate}
+              onChange={setRuleBodyTextTemplate}
+            />
           </Box>
         </Box>
         <Flex justifyContent="flex-end" paddingTop={3} gap={2}>
           {editingRuleId && (
-            <Button variant="tertiary" onClick={resetRuleForm}>
+            <Button
+              variant="tertiary"
+              disabled={isBusy}
+              onClick={() => resetRuleForm()}
+            >
               {t("common.cancel", "Cancel")}
             </Button>
           )}
-          <Button onClick={handleSaveRule}>
+          <Button loading={isBusy} disabled={isBusy} onClick={handleSaveRule}>
             {editingRuleId
               ? t("page.ui.save_rule_changes", "Save Rule Changes")
               : t("page.ui.create_automation_rule", "Create Automation Rule")}
@@ -437,6 +448,7 @@ export const AutomationAndLogsTabs: React.FC<AutomationAndLogsTabsProps> = ({
         onEdit={handleStartEditRule}
         onToggleActive={handleToggleRuleActive}
         navigate={navigate}
+        isBusy={isBusy}
       />
     </Box>
   );

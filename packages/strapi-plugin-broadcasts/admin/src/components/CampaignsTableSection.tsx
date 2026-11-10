@@ -60,7 +60,7 @@ export const EmailTemplateSelectorField: React.FC<EmailTemplateFieldProps> = ({
     name="emailTemplateRef"
     hint={t(
       "page.ui.email_designer_template_hint",
-      "Wraps email broadcasts in an Email Designer 5 layout (injects {{subject}}, {{bodyHtml}}, {{recipientName}}, {{secondaryDate}})."
+      "Wraps email broadcasts in an Email Designer 5 layout (injects '{{subject}}', '{{bodyHtml}}', '{{recipientName}}', '{{secondaryDate}}')."
     )}
   >
     <Field.Label>
@@ -124,6 +124,7 @@ export interface CampaignsTableSectionProps {
   onEdit: (camp: CampaignRecord) => void;
   onDispatch: (slugOrDocId?: string) => void;
   navigate: (path: string) => void;
+  isBusy?: boolean;
 }
 
 export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
@@ -132,6 +133,7 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
   onEdit,
   onDispatch,
   navigate,
+  isBusy = false,
 }) => (
   <Table colCount={7} rowCount={campaigns.length + 1}>
     <Thead>
@@ -218,6 +220,7 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
                 <Button
                   variant="tertiary"
                   size="S"
+                  disabled={isBusy}
                   onClick={() => onEdit(camp)}
                 >
                   {t("common.edit", "Edit")}
@@ -226,6 +229,7 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
                   <Button
                     variant="tertiary"
                     size="S"
+                    disabled={isBusy}
                     onClick={() =>
                       navigate(
                         `/content-manager/collection-types/${CAMPAIGN_UID}/${camp.documentId}`
@@ -238,6 +242,7 @@ export const CampaignsTableSection: React.FC<CampaignsTableSectionProps> = ({
                 <Button
                   variant="secondary"
                   size="S"
+                  disabled={isBusy}
                   onClick={() => onDispatch(camp.documentId || camp.slug)}
                 >
                   {t("page.ui.dispatch_now", "Dispatch Now")}

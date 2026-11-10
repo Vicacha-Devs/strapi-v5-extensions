@@ -79,26 +79,6 @@ declare module "*.json" {
   export default value;
 }
 
-declare module "node:crypto" {
-  export function randomBytes(size: number): {
-    toString(encoding: "hex" | "base64" | "base64url"): string;
-  };
-  export function createHmac(
-    algorithm: string,
-    key: string
-  ): {
-    update(
-      data: string,
-      encoding?: string
-    ): { digest(encoding: string): string };
-  };
-  export function timingSafeEqual(a: unknown, b: unknown): boolean;
-}
-
-declare const Buffer: {
-  from(data: string, encoding?: string): { length: number };
-};
-
 declare module "@strapi/design-system" {
   import type { FC, ReactNode } from "react";
   export type DesignComponentProps = Record<string, unknown> & {
