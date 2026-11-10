@@ -2,6 +2,7 @@ import type { Core } from "@strapi/strapi";
 import { randomBytes } from "node:crypto";
 
 import {
+  isValidEmailFormat,
   PLUGIN_ID,
   SUBSCRIBER_UID,
   type InboxSettings,
@@ -9,8 +10,6 @@ import {
   type SubscriberStatus,
 } from "../../../shared";
 import { getDocuments } from "./docHelper";
-
-const EMAIL_Check = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function normalizeSubscriberTopics(topics?: string[]): string[] {
   return Array.isArray(topics) && topics.length > 0
@@ -75,7 +74,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     sourceFormSlug?: string;
   }): Promise<SubscriberRecord> {
     const email = (input.email || "").trim().toLowerCase();
-    if (!EMAIL_Check.test(email)) {
+    if (!isValidEmailFormat(email)) {
       const err = new Error("A valid email address is required to subscribe");
       err.name = "ValidationError";
       throw err;

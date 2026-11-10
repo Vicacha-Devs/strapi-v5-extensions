@@ -10,7 +10,22 @@ import type {
   ValidationRule,
 } from "./types";
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/**
+ * Linear-time equivalent of /^[^\s@]+@[^\s@]+\.[^\s@]+$/ (that pattern
+ * backtracks quadratically on long dotted domains): no whitespace, exactly
+ * one "@" with a non-empty local part, and a dot in the domain that has
+ * characters on both sides.
+ */
+export function isValidEmailFormat(value: string): boolean {
+  if (/\s/.test(value)) return false;
+  const at = value.indexOf("@");
+  if (at < 1 || at !== value.lastIndexOf("@")) return false;
+  const domain = value.slice(at + 1);
+  for (let i = 1; i < domain.length - 1; i++) {
+    if (domain[i] === ".") return true;
+  }
+  return false;
+}
 
 const LOCALIZED_REQUIRED_FALLBACK: Record<string, (label: string) => string> = {
   es: (label) => `${label} es obligatorio`,
@@ -79,7 +94,7 @@ function validateFieldTypeAndOptions(
   rules: ValidationRule[]
 ): string[] {
   const fieldErrors: string[] = [];
-  if (field.type === "email" && !EMAIL_REGEX.test(strVal)) {
+  if (field.type === "email" && !isValidEmailFormat(strVal)) {
     const emailRule = rules.find((r) => r.type === "email");
     fieldErrors.push(
       resolveRuleMessage(
@@ -187,7 +202,7 @@ function checkPatternOrEmailRule(
   if (
     rule.type === "email" &&
     fieldType !== "email" &&
-    !EMAIL_REGEX.test(strVal)
+    !isValidEmailFormat(strVal)
   ) {
     return resolveRuleMessage(
       rule,
