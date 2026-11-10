@@ -32,28 +32,27 @@
   "files": [
     "dist"
   ],
-  "type": "module",
   "exports": {
     "./package.json": "./package.json",
     "./strapi-admin": {
       "types": "./dist/admin/src/index.d.ts",
       "source": "./admin/src/index.ts",
-      "import": "./dist/admin/index.js",
-      "require": "./dist/admin/index.cjs",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
-      "import": "./dist/server/index.js",
-      "require": "./dist/server/index.cjs",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
       "default": "./dist/server/index.js"
     },
     "./shared": {
       "types": "./dist/shared/index.d.ts",
       "source": "./shared/index.ts",
-      "import": "./dist/shared/index.js",
-      "require": "./dist/shared/index.cjs",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
       "default": "./dist/shared/index.js"
     }
   },
@@ -62,7 +61,7 @@
     "provenance": true
   },
   "scripts": {
-    "build": "strapi-plugin build && node ../../scripts/ensure-esm-dist.ts",
+    "build": "strapi-plugin build && node ../../scripts/ensure-dist-types.ts",
     "clean": "rm -rf dist .strapi",
     "test": "node --import ./tests/register-ts-resolver.ts --test tests/*.test.ts",
     "test:ts": "npm run test:ts:front && npm run test:ts:back",
