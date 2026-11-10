@@ -2,7 +2,7 @@
   "name": "@vicacha-devs/strapi-v5-extensions",
   "version": "1.0.0",
   "private": true,
-  "description": "Enterprise Strapi v5 Extensions & Plugins Monorepo (@vicacha-devs/strapi-plugin-calendar, @vicacha-devs/strapi-plugin-events, and companion plugins)",
+  "description": "Enterprise Strapi v5 Extensions & Plugins Monorepo (14 publishable @vicacha-devs Strapi v5 plugins, shared configs, dashboard & documentation apps)",
   "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions#readme",
   "bugs": {
     "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
@@ -42,7 +42,7 @@
     "publint": "node ./scripts/publint-all.ts",
     "release": "pnpm build && changeset publish",
     "start": "turbo run start",
-    "test": "turbo run test --filter=./packages/*",
+    "test": "turbo run test",
     "test:ts": "turbo run test:ts",
     "verify": "pnpm format:check && pnpm lint && pnpm build && pnpm check && pnpm verify:sdk && pnpm publint && pnpm test",
     "verify:sdk": "turbo run verify",
