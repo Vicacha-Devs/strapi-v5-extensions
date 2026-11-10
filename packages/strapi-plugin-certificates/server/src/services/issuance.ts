@@ -1,4 +1,5 @@
 import type { Core } from "@strapi/strapi";
+import { slugify } from "@vicacha-devs/plugin-shared";
 
 import {
   PLUGIN_ID,
@@ -49,11 +50,7 @@ const pickNonEmptyArray = <T>(primary: T[] | undefined, fallback: T[]): T[] =>
   Array.isArray(primary) && primary.length > 0 ? primary : fallback;
 
 const slugifyName = (name: string, explicitSlug?: string): string =>
-  trimStr(explicitSlug) ||
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
+  trimStr(explicitSlug) || slugify(name, { normalization: false });
 
 const DEFAULT_BODY_TEMPLATE =
   "This is to certify that {{recipientFullName}} has been officially attested by {{organizationName}} on {{issuedDateFormatted}}.";

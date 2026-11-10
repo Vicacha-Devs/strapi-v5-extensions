@@ -1,3 +1,5 @@
+import { slugify } from "@vicacha-devs/plugin-shared";
+
 import type { MediaFeedType, YouTubeSyncSourceConfig } from "./types";
 
 export interface ParsedYouTubeFeedVideo {
@@ -26,13 +28,7 @@ function unescapeXmlEntities(input: string): string {
 }
 
 function slugifyTitle(title: string, videoId: string): string {
-  const base = title
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
+  const base = slugify(title, { normalization: "NFKD", maxLength: 60 });
   return base
     ? `${base}-${videoId.toLowerCase()}`
     : `yt-${videoId.toLowerCase()}`;

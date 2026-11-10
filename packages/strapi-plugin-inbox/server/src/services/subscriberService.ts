@@ -1,8 +1,8 @@
 import type { Core } from "@strapi/strapi";
+import { isValidEmail } from "@vicacha-devs/plugin-shared";
 import { randomBytes } from "node:crypto";
 
 import {
-  isValidEmailFormat,
   PLUGIN_ID,
   SUBSCRIBER_UID,
   type InboxSettings,
@@ -74,7 +74,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     sourceFormSlug?: string;
   }): Promise<SubscriberRecord> {
     const email = (input.email || "").trim().toLowerCase();
-    if (!isValidEmailFormat(email)) {
+    if (!isValidEmail(email)) {
       const err = new Error("A valid email address is required to subscribe");
       err.name = "ValidationError";
       throw err;
