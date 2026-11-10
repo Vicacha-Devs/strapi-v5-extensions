@@ -1,0 +1,103 @@
+import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
+import React from "react";
+import { createRoot } from "react-dom/client";
+
+import { GlobalSearchPortal } from "./components/GlobalSearchPortal";
+import { Initializer } from "./components/Initializer";
+import { PluginIcon } from "./components/PluginIcon";
+import pluginPermissions from "./permissions";
+import pluginId from "./pluginId";
+import ar from "./translations/ar.json";
+import en from "./translations/en.json";
+import es from "./translations/es.json";
+import fr from "./translations/fr.json";
+import tr from "./translations/tr.json";
+
+const BUILTIN_TRANSLATIONS: Record<string, Record<string, string>> = {
+  en,
+  fr,
+  es,
+  ar,
+  tr,
+};
+
+const PORTAL_ROOT_ID = "global-search-portal-root";
+
+interface StrapiApp {
+  addMenuLink: (options: Record<string, unknown>) => void;
+  addSettingsLink: (
+    section: Record<string, unknown>,
+    links: Array<Record<string, unknown>>
+  ) => void;
+  registerPlugin: (plugin: Record<string, unknown>) => void;
+}
+
+export default {
+  register(app: StrapiApp) {
+    app.addMenuLink({
+      to: `plugins/${pluginId}`,
+      icon: PluginIcon,
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: "Global Search",
+      },
+      permissions: pluginPermissions.main,
+      Component: () => import("./pages/App"),
+    });
+
+    app.addSettingsLink(
+      {
+        id: pluginId,
+        intlLabel: {
+          id: `${pluginId}.settings.section`,
+          defaultMessage: "Global Search",
+        },
+      },
+      [
+        {
+          intlLabel: {
+            id: `${pluginId}.settings.link`,
+            defaultMessage: "Configuration",
+          },
+          id: `${pluginId}-settings`,
+          to: pluginId,
+          permissions: pluginPermissions.settings,
+          Component: () => import("./pages/Settings"),
+        },
+      ]
+    );
+
+    app.registerPlugin({
+      id: pluginId,
+      initializer: Initializer,
+      isReady: false,
+      name: pluginId,
+    });
+  },
+
+  /**
+   * The Ctrl/Cmd + K palette is mounted on document.body so it is available on
+   * every admin screen, not only the plugin page.
+   */
+  bootstrap() {
+    if (
+      typeof document === "undefined" ||
+      document.getElementById(PORTAL_ROOT_ID)
+    )
+      return;
+
+    const container = document.createElement("div");
+    container.id = PORTAL_ROOT_ID;
+    document.body.appendChild(container);
+
+    createRoot(container).render(React.createElement(GlobalSearchPortal));
+  },
+
+  registerTrads: createRegisterTrads({
+    pluginId,
+    defaultLocales: [],
+    keepUnprefixed: false,
+    translations: BUILTIN_TRANSLATIONS,
+    loadTranslation: (locale) => import(`./translations/${locale}.json`),
+  }),
+};
