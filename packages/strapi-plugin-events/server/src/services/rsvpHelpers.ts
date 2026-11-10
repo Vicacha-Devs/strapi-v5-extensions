@@ -1,4 +1,5 @@
 import type { Core } from "@strapi/strapi";
+import { isValidEmail } from "@vicacha-devs/plugin-shared";
 
 import { EVENT_CONTENT_TYPE_UID } from "../../../shared/pluginId";
 import { parseRRuleFieldValue } from "../../../shared/rruleEngine";
@@ -277,8 +278,6 @@ export function aggregateRsvpCounts(
   };
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/;
-
 function assertValidAttendeeIdentity(
   attendeeName: string,
   attendeeEmail: string
@@ -291,7 +290,7 @@ function assertValidAttendeeIdentity(
   if (
     !attendeeEmail ||
     attendeeEmail.length > 254 ||
-    !EMAIL_REGEX.test(attendeeEmail)
+    !isValidEmail(attendeeEmail)
   ) {
     throw new PluginValidationError(
       "Invalid attendeeEmail: must be a valid email address."

@@ -1,3 +1,5 @@
+import { isValidEmail } from "@vicacha-devs/plugin-shared";
+
 import {
   extractZonedWallClock,
   isSlotBlackedOut,
@@ -20,16 +22,6 @@ import {
 } from "./reservationHostCapacity";
 
 export { verifySlotCapacityAndResolveHost, type VerifyCapacityAndHostParams };
-
-/** Linear-time email shape check: one "@", non-empty local part, dotted domain. */
-function isValidEmail(value: string): boolean {
-  if (/\s/.test(value)) return false;
-  const at = value.indexOf("@");
-  if (at < 1 || at !== value.lastIndexOf("@")) return false;
-  const domain = value.slice(at + 1);
-  const dot = domain.indexOf(".");
-  return dot > 0 && dot < domain.length - 1;
-}
 
 function hasInvalidRolloverPrefix(raw: string): boolean {
   const trimmed = raw.trim();

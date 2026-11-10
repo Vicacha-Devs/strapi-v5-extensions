@@ -1,3 +1,4 @@
+export { isValidEmail } from "./email.ts";
 export {
   LOCALE_OPTIONS,
   SECONDARY_CALENDAR_OPTIONS,

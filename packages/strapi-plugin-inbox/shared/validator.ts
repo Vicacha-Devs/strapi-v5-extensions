@@ -2,6 +2,8 @@
  * Field validation, Honeypot check, Sliding-Window IP Rate Limiter & CAPTCHA Verifier.
  * Adapted and extended from devCluna/strapi-plugin-form-builder-cms (MIT License).
  */
+import { isValidEmail } from "@vicacha-devs/plugin-shared";
+
 import { CAPTCHA_ENDPOINTS, DECORATIVE_FIELD_TYPES } from "./constants";
 import type {
   CaptchaProvider,
@@ -9,23 +11,6 @@ import type {
   ValidationResult,
   ValidationRule,
 } from "./types";
-
-/**
- * Linear-time equivalent of /^[^\s@]+@[^\s@]+\.[^\s@]+$/ (that pattern
- * backtracks quadratically on long dotted domains): no whitespace, exactly
- * one "@" with a non-empty local part, and a dot in the domain that has
- * characters on both sides.
- */
-export function isValidEmailFormat(value: string): boolean {
-  if (/\s/.test(value)) return false;
-  const at = value.indexOf("@");
-  if (at < 1 || at !== value.lastIndexOf("@")) return false;
-  const domain = value.slice(at + 1);
-  for (let i = 1; i < domain.length - 1; i++) {
-    if (domain[i] === ".") return true;
-  }
-  return false;
-}
 
 const LOCALIZED_REQUIRED_FALLBACK: Record<string, (label: string) => string> = {
   es: (label) => `${label} es obligatorio`,
@@ -94,7 +79,7 @@ function validateFieldTypeAndOptions(
   rules: ValidationRule[]
 ): string[] {
   const fieldErrors: string[] = [];
-  if (field.type === "email" && !isValidEmailFormat(strVal)) {
+  if (field.type === "email" && !isValidEmail(strVal)) {
     const emailRule = rules.find((r) => r.type === "email");
     fieldErrors.push(
       resolveRuleMessage(
@@ -199,11 +184,7 @@ function checkPatternOrEmailRule(
       // Ignore malformed regex pattern
     }
   }
-  if (
-    rule.type === "email" &&
-    fieldType !== "email" &&
-    !isValidEmailFormat(strVal)
-  ) {
+  if (rule.type === "email" && fieldType !== "email" && !isValidEmail(strVal)) {
     return resolveRuleMessage(
       rule,
       locale,
