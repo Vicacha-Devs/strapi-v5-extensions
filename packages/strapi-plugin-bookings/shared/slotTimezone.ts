@@ -63,6 +63,10 @@ export function normalizeTimeZone(tz?: string): string {
   }
 }
 
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
 export interface ZonedWallClock {
   year: number;
   month: number;
@@ -107,7 +111,6 @@ export function extractZonedWallClock(
     }
   }
 
-  const pad2 = (n: number) => String(n).padStart(2, "0");
   const dateStr = `${String(year).padStart(4, "0")}-${pad2(month)}-${pad2(day)}`;
   const ms = ((epochMs % 1000) + 1000) % 1000;
 
