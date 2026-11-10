@@ -116,14 +116,13 @@ const formatAltFieldName = (field: string, name: string | null): string => {
   return `${name}.${field}`;
 };
 
-const HTML_ALT_PATTERNS = [
-  /\balt\s*=\s*"[^"]*[^\s"][^"]*"/i,
-  /\balt\s*=\s*'[^']*[^\s'][^']*'/i,
-  /\balt\s*=\s*[^\s"'=<>`]+/i,
-];
-
-const hasNonEmptyHtmlAlt = (imgTag: string): boolean =>
-  HTML_ALT_PATTERNS.some((pattern) => pattern.test(imgTag));
+const hasNonEmptyHtmlAlt = (imgTag: string): boolean => {
+  const match = /\balt\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/i.exec(
+    imgTag
+  );
+  const val = match?.[1] ?? match?.[2] ?? match?.[3] ?? "";
+  return val.trim().length > 0;
+};
 
 const getEmptyAltCount = (
   richtext: unknown,
@@ -140,10 +139,10 @@ const getEmptyAltCount = (
       richtext as RichTextBlockNode[]
     );
   } else if (typeof richtext === "string" && richtext) {
-    const emptyMdImages = richtext.match(/!\[\s*\]\([^)]*\)/g);
+    const emptyMdImages = richtext.match(/!\[\s*\]\([^()[\]]*\)/g);
     markdownOccurrences = emptyMdImages ? emptyMdImages.length : 0;
 
-    const htmlImages = richtext.match(/<img\b[^>]*\/?>/gi) || [];
+    const htmlImages = richtext.match(/<img\b[^<>]*>/gi) || [];
     htmlOccurrences = htmlImages.filter(
       (image) => !hasNonEmptyHtmlAlt(image)
     ).length;
@@ -159,9 +158,9 @@ const stripMarkdownAndHtmlToWords = (input: string, isPlainTree: boolean) => {
   const withoutMarkdown = isPlainTree
     ? input
     : input
-        .replace(/!\[([^\]]*)\]\([^)]*\)/g, " $1 ")
-        .replace(/\[([^\]]*)\]\([^)]*\)/g, " $1 ")
-        .replace(/<[^>]+>/g, " ")
+        .replace(/!\[/g, " [")
+        .replace(/\[([^[\]]*)\]\([^()[\]]*\)/g, " $1 ")
+        .replace(/<[^<>]+>/g, " ")
         .replace(/[#>*_`~-]+/g, " ");
 
   return withoutMarkdown
