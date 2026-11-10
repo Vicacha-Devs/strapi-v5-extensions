@@ -1,0 +1,68 @@
+{
+  "kind": "collectionType",
+  "collectionName": "broadcast_delivery_logs",
+  "info": {
+    "singularName": "delivery-log",
+    "pluralName": "delivery-logs",
+    "displayName": "Broadcast Delivery Log",
+    "description": "Idempotent, PII-masked multi-channel delivery audit log"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "idempotencyKey": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "campaignSlug": {
+      "type": "string",
+      "required": true
+    },
+    "channel": {
+      "type": "enumeration",
+      "enum": ["email", "telegram", "whatsapp"],
+      "required": true
+    },
+    "driver": {
+      "type": "string",
+      "required": true
+    },
+    "recipientMasked": {
+      "type": "string",
+      "required": true
+    },
+    "locale": {
+      "type": "string",
+      "default": "es",
+      "required": true
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["sent", "simulated", "skipped_duplicate", "failed"],
+      "required": true
+    },
+    "externalMessageId": {
+      "type": "string"
+    },
+    "errorMessage": {
+      "type": "text"
+    },
+    "sentAt": {
+      "type": "datetime",
+      "required": true
+    },
+    "secondaryDateLabel": {
+      "type": "string"
+    }
+  }
+}

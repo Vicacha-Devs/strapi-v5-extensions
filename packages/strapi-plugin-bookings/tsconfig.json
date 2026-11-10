@@ -1,0 +1,30 @@
+{
+  "extends": "../typescript-config/base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "paths": {
+      "@vicacha-devs/strapi-plugin-calendar/shared": [
+        "../strapi-plugin-calendar/shared/index.ts"
+      ],
+      "@vicacha-devs/strapi-plugin-calendar/strapi-admin": [
+        "../strapi-plugin-calendar/admin/src/index.ts"
+      ],
+      "@vicacha-devs/strapi-plugin-calendar/strapi-server": [
+        "../strapi-plugin-calendar/server/src/index.ts"
+      ]
+    }
+  },
+  "include": ["admin/**/*", "server/**/*", "shared/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
