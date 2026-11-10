@@ -9,6 +9,7 @@ import {
   TextInput,
   Typography,
 } from "@strapi/design-system";
+import { trimEdgeChars } from "@vicacha-devs/plugin-shared";
 import React, { useState } from "react";
 import { useIntl } from "react-intl";
 
@@ -26,11 +27,13 @@ const cardBorderStyle: React.CSSProperties = {
 };
 
 function sanitizeCategoryKey(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+  return trimEdgeChars(
+    raw
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]+/g, "_"),
+    "_"
+  );
 }
 
 export const DonationCategoriesManager: React.FC<
