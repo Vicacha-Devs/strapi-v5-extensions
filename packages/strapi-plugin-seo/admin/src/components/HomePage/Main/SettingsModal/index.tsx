@@ -1,0 +1,299 @@
+import {
+  Box,
+  Button,
+  Grid,
+  Modal,
+  Switch,
+  Typography,
+} from "@strapi/design-system";
+import { Cog, Information } from "@strapi/icons";
+import { ContentBox, useNotification } from "@strapi/strapi/admin";
+import * as React from "react";
+import { useIntl } from "react-intl";
+
+import type {
+  ContentTypeSeoItem,
+  SeoSettingsMap,
+} from "../../../../../../shared";
+import { useSettingsApi } from "../../../../hooks/useSettingsApi";
+import { getTrad } from "../../../../utils/getTrad";
+
+interface SettingsModalProps {
+  item: ContentTypeSeoItem;
+  defaultSettings?: SeoSettingsMap | null;
+  onSettingsUpdated?: (next: SeoSettingsMap) => void;
+}
+
+export const SettingsModal = ({
+  item,
+  defaultSettings: sharedSettings = null,
+  onSettingsUpdated,
+}: SettingsModalProps) => {
+  const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
+  const { getSettings, setSettings } = useSettingsApi();
+
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const [metaTitle, setMetaTitle] = React.useState(true);
+  const [metaDescription, setMetaDescription] = React.useState(true);
+  const [metaRobots, setMetaRobots] = React.useState(true);
+  const [openGraph, setOpenGraph] = React.useState(true);
+  const [wordCount, setWordCount] = React.useState(true);
+  const [canonicalUrl, setCanonicalUrl] = React.useState(true);
+  const [keywordDensity, setKeywordDensity] = React.useState(true);
+  const [structuredData, setStructuredData] = React.useState(true);
+  const [alternativeText, setAlternativeText] = React.useState(true);
+  const [lastUpdatedAt, setLastUpdatedAt] = React.useState(true);
+
+  const [localSettings, setLocalSettings] =
+    React.useState<SeoSettingsMap | null>(sharedSettings);
+
+  const activeSettings = sharedSettings ?? localSettings;
+
+  const applyChecksToState = (settingsMap: SeoSettingsMap | null) => {
+    const seoChecks = settingsMap?.[item?.uid]?.seoChecks;
+    if (!seoChecks) {
+      return;
+    }
+
+    setMetaTitle(seoChecks.metaTitle);
+    setMetaDescription(seoChecks.metaDescription);
+    setMetaRobots(seoChecks.metaRobots);
+    setOpenGraph(seoChecks.openGraph);
+    setWordCount(seoChecks.wordCount);
+    setCanonicalUrl(seoChecks.canonicalUrl);
+    setKeywordDensity(seoChecks.keywordDensity);
+    setStructuredData(seoChecks.structuredData);
+    setAlternativeText(seoChecks.alternativeText);
+    setLastUpdatedAt(seoChecks.lastUpdatedAt);
+  };
+
+  const setupModalSettings = async () => {
+    if (activeSettings) {
+      applyChecksToState(activeSettings);
+      return;
+    }
+    try {
+      const { data } = await getSettings();
+      setLocalSettings(data);
+      onSettingsUpdated?.(data);
+      applyChecksToState(data);
+    } catch {
+      // Fall back to default switch states
+    }
+  };
+
+  const handleSavingSettingsModal = async () => {
+    const baseSettings = activeSettings ?? {};
+    const collectionName =
+      baseSettings?.[item?.uid]?.collectionName ?? item?.globalId ?? item?.uid;
+
+    const newSettings: SeoSettingsMap = {
+      ...baseSettings,
+      [item?.uid]: {
+        collectionName,
+        seoChecks: {
+          metaTitle,
+          metaDescription,
+          metaRobots,
+          openGraph,
+          wordCount,
+          canonicalUrl,
+          keywordDensity,
+          structuredData,
+          alternativeText,
+          lastUpdatedAt,
+        },
+      },
+    };
+
+    try {
+      const { data: savedSettings } = await setSettings(newSettings);
+      const resolvedSettings = savedSettings ?? newSettings;
+      setLocalSettings(resolvedSettings);
+      onSettingsUpdated?.(resolvedSettings);
+      setIsOpen(false);
+      toggleNotification({
+        type: "success",
+        message: formatMessage(
+          {
+            id: getTrad("notification.success.settings"),
+            defaultMessage: "Settings saved for {collectionName} content-type.",
+          },
+          { collectionName }
+        ),
+      });
+    } catch {
+      toggleNotification({
+        type: "danger",
+        message: formatMessage({
+          id: getTrad("notification.error.settings"),
+          defaultMessage: "Failed to save SEO settings.",
+        }),
+      });
+    }
+  };
+
+  return (
+    <Modal.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Modal.Trigger>
+        <Button
+          variant="tertiary"
+          startIcon={<Cog />}
+          onClick={() => void setupModalSettings()}
+        >
+          {formatMessage({
+            id: getTrad("SEOPage.info.settings"),
+            defaultMessage: "Settings",
+          })}
+        </Button>
+      </Modal.Trigger>
+      <Modal.Content labelledBy="title">
+        <Modal.Header>
+          <Typography
+            fontWeight="bold"
+            textColor="neutral800"
+            tag="h2"
+            id="title"
+          >
+            {formatMessage({
+              id: getTrad("SEOPage.info.settings"),
+              defaultMessage: "Settings",
+            })}
+          </Typography>
+        </Modal.Header>
+        <form
+          onSubmit={(event: React.FormEvent) => {
+            event.preventDefault();
+            void handleSavingSettingsModal();
+          }}
+        >
+          <Modal.Body>
+            <Box paddingBottom={4}>
+              <ContentBox
+                title={formatMessage({
+                  id: getTrad("Information"),
+                  defaultMessage: "Information",
+                })}
+                subtitle={formatMessage({
+                  id: getTrad("SEOPage.info.settings.information"),
+                  defaultMessage:
+                    "Disable SEO checks for this specific content-type.",
+                })}
+                icon={<Information />}
+                iconBackground="primary100"
+              />
+            </Box>
+            <Grid.Root gap={4}>
+              {[
+                {
+                  state: metaTitle,
+                  stateSetter: setMetaTitle,
+                  id: "SEOPage.info.settings.meta-title-check",
+                  defaultMessage: "Meta Title",
+                },
+                {
+                  state: metaDescription,
+                  stateSetter: setMetaDescription,
+                  id: "SEOPage.info.settings.meta-description-check",
+                  defaultMessage: "Meta Description",
+                },
+                {
+                  state: metaRobots,
+                  stateSetter: setMetaRobots,
+                  id: "SEOPage.info.settings.meta-robots-check",
+                  defaultMessage: "Meta Robots",
+                },
+                {
+                  state: openGraph,
+                  stateSetter: setOpenGraph,
+                  id: "SEOPage.info.settings.open-graph-check",
+                  defaultMessage: "Open Graph",
+                },
+                {
+                  state: wordCount,
+                  stateSetter: setWordCount,
+                  id: "SEOPage.info.settings.word-count-check",
+                  defaultMessage: "Word Count",
+                },
+                {
+                  state: canonicalUrl,
+                  stateSetter: setCanonicalUrl,
+                  id: "SEOPage.info.settings.canonical-url-check",
+                  defaultMessage: "Canonical URL",
+                },
+                {
+                  state: keywordDensity,
+                  stateSetter: setKeywordDensity,
+                  id: "SEOPage.info.settings.keyword-density-check",
+                  defaultMessage: "Keyword Density",
+                },
+                {
+                  state: structuredData,
+                  stateSetter: setStructuredData,
+                  id: "SEOPage.info.settings.structured-data-check",
+                  defaultMessage: "Structured Data",
+                },
+                {
+                  state: alternativeText,
+                  stateSetter: setAlternativeText,
+                  id: "SEOPage.info.settings.alternative-text-check",
+                  defaultMessage: "Alt Text",
+                },
+                {
+                  state: lastUpdatedAt,
+                  stateSetter: setLastUpdatedAt,
+                  id: "SEOPage.info.settings.last-updated-at-check",
+                  defaultMessage: "Last Updated At",
+                },
+              ].map(({ state, stateSetter, id, defaultMessage }) => {
+                return (
+                  <Grid.Item
+                    key={id}
+                    col={6}
+                    s={6}
+                    gap={2}
+                    padding={4}
+                    background="neutral0"
+                    borderWidth="2px"
+                    shadow="filterShadow"
+                  >
+                    <Switch
+                      checked={state}
+                      onCheckedChange={() =>
+                        stateSetter((isChecked) => !isChecked)
+                      }
+                    />
+                    <Typography variant="delta">
+                      {formatMessage({
+                        id: getTrad(id),
+                        defaultMessage,
+                      })}
+                    </Typography>
+                  </Grid.Item>
+                );
+              })}
+            </Grid.Root>
+          </Modal.Body>
+          <Modal.Footer>
+            <Modal.Close>
+              <Button variant="tertiary">
+                {formatMessage({
+                  id: getTrad("SEOPage.info.settings.cancel.button"),
+                  defaultMessage: "Cancel",
+                })}
+              </Button>
+            </Modal.Close>
+            <Button type="submit">
+              {formatMessage({
+                id: getTrad("SEOPage.info.settings.save.button"),
+                defaultMessage: "Save",
+              })}
+            </Button>
+          </Modal.Footer>
+        </form>
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
