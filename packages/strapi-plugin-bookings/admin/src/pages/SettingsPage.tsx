@@ -17,6 +17,95 @@ import type { BookingsPluginSettings } from "../../../shared/types";
 import { PLUGIN_ID } from "../pluginId";
 import { getTranslation } from "../utils/getTranslation";
 
+interface SlotNumberFieldSpec {
+  name: keyof Pick<
+    BookingsPluginSettings,
+    | "defaultSlotDurationMinutes"
+    | "defaultCapacityPerSlot"
+    | "defaultBufferBeforeMinutes"
+    | "defaultBufferAfterMinutes"
+    | "defaultMinLeadTimeHours"
+    | "defaultMaxAdvanceDays"
+  >;
+  labelId: string;
+  labelDefault: string;
+  hintId: string;
+  hintDefault: string;
+  placeholderId: string;
+  placeholderDefault: string;
+  min: number;
+  fallback: number;
+}
+
+const SLOT_NUMBER_FIELDS: SlotNumberFieldSpec[] = [
+  {
+    name: "defaultSlotDurationMinutes",
+    labelId: "settings.defaultSlotDurationMinutes",
+    labelDefault: "Slot Duration (Minutes)",
+    hintId: "settings.defaultSlotDurationMinutesHint",
+    hintDefault: "Standard length of each bookable appointment slot.",
+    placeholderId: "settings.defaultSlotDurationMinutes.placeholder",
+    placeholderDefault: "e.g., 60",
+    min: 5,
+    fallback: 60,
+  },
+  {
+    name: "defaultCapacityPerSlot",
+    labelId: "settings.defaultCapacityPerSlot",
+    labelDefault: "Default Capacity Per Slot",
+    hintId: "settings.defaultCapacityPerSlotHint",
+    hintDefault: "Concurrent reservations allowed per time slot.",
+    placeholderId: "settings.defaultCapacityPerSlot.placeholder",
+    placeholderDefault: "e.g., 1",
+    min: 1,
+    fallback: 1,
+  },
+  {
+    name: "defaultBufferBeforeMinutes",
+    labelId: "settings.defaultBufferBeforeMinutes",
+    labelDefault: "Buffer Before (Minutes)",
+    hintId: "settings.defaultBufferBeforeMinutesHint",
+    hintDefault: "Preparation gap blocked before each booking starts.",
+    placeholderId: "settings.defaultBufferBeforeMinutes.placeholder",
+    placeholderDefault: "e.g., 0",
+    min: 0,
+    fallback: 0,
+  },
+  {
+    name: "defaultBufferAfterMinutes",
+    labelId: "settings.defaultBufferAfterMinutes",
+    labelDefault: "Buffer After (Minutes)",
+    hintId: "settings.defaultBufferAfterMinutesHint",
+    hintDefault: "Cooldown gap blocked after each booking ends.",
+    placeholderId: "settings.defaultBufferAfterMinutes.placeholder",
+    placeholderDefault: "e.g., 0",
+    min: 0,
+    fallback: 0,
+  },
+  {
+    name: "defaultMinLeadTimeHours",
+    labelId: "settings.defaultMinLeadTimeHours",
+    labelDefault: "Minimum Lead Time (Hours)",
+    hintId: "settings.defaultMinLeadTimeHoursHint",
+    hintDefault: "Minimum notice required before a slot can be booked.",
+    placeholderId: "settings.defaultMinLeadTimeHours.placeholder",
+    placeholderDefault: "e.g., 2",
+    min: 0,
+    fallback: 2,
+  },
+  {
+    name: "defaultMaxAdvanceDays",
+    labelId: "settings.defaultMaxAdvanceDays",
+    labelDefault: "Max Advance Horizon (Days)",
+    hintId: "settings.defaultMaxAdvanceDaysHint",
+    hintDefault: "How far in advance visitors may schedule bookings.",
+    placeholderId: "settings.defaultMaxAdvanceDays.placeholder",
+    placeholderDefault: "e.g., 90",
+    min: 1,
+    fallback: 90,
+  },
+];
+
 export const SettingsPage: React.FC = () => {
   const { formatMessage } = useIntl();
   const { get, put } = useFetchClient();
@@ -44,28 +133,52 @@ export const SettingsPage: React.FC = () => {
     secondaryCalendars: [],
     sources: [],
   });
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const load = async () => {
+      setLoading(true);
       try {
-        const res = await get(`/${PLUGIN_ID}/settings`);
+        const res = await get<{ data?: BookingsPluginSettings }>(
+          `/${PLUGIN_ID}/settings`
+        );
+        if (!isMounted) return;
         if (res.data?.data) {
-          setSettings(res.data.data as BookingsPluginSettings);
+          setSettings(res.data.data);
+          setLoadError(false);
         }
       } catch {
-        // Ignore initial load error
+        if (!isMounted) return;
+        setLoadError(true);
+        toggleNotification({
+          type: "danger",
+          message: t("settings.loadError", "Failed to load bookings settings"),
+        });
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
     void load();
-  }, [get]);
+    return () => {
+      isMounted = false;
+    };
+  }, [get, toggleNotification, t]);
 
   const handleSave = async () => {
+    if (loadError || loading) return;
     setSaving(true);
     try {
-      const res = await put(`/${PLUGIN_ID}/settings`, settings);
+      const res = await put<{ data?: BookingsPluginSettings }>(
+        `/${PLUGIN_ID}/settings`,
+        settings
+      );
       if (res.data?.data) {
-        setSettings(res.data.data as BookingsPluginSettings);
+        setSettings(res.data.data);
       }
       toggleNotification({
         type: "success",
@@ -90,7 +203,11 @@ export const SettingsPage: React.FC = () => {
           "Configure default slot durations, capacity limits, buffer times, lead times, and reservation approval rules. Visual calendar themes and secondary calendars are managed centrally in Calendar Settings."
         )}
         primaryAction={
-          <Button loading={saving} onClick={handleSave}>
+          <Button
+            loading={saving}
+            disabled={loading || loadError || saving}
+            onClick={handleSave}
+          >
             {t("settings.save", "Save Settings")}
           </Button>
         }
@@ -139,188 +256,35 @@ export const SettingsPage: React.FC = () => {
                     gap: 16,
                   }}
                 >
-                  <Field.Root
-                    name="defaultSlotDurationMinutes"
-                    hint={t(
-                      "settings.defaultSlotDurationMinutesHint",
-                      "Standard length of each bookable appointment slot."
-                    )}
-                  >
-                    <Field.Label>
-                      {t(
-                        "settings.defaultSlotDurationMinutes",
-                        "Slot Duration (Minutes)"
-                      )}
-                    </Field.Label>
-                    <NumberInput
-                      placeholder={t(
-                        "settings.defaultSlotDurationMinutes.placeholder",
-                        "e.g., 60"
-                      )}
-                      value={settings.defaultSlotDurationMinutes}
-                      onValueChange={(v: number | undefined) =>
-                        setSettings({
-                          ...settings,
-                          defaultSlotDurationMinutes: Math.max(
-                            5,
-                            Number(v ?? 60)
-                          ),
-                        })
-                      }
-                    />
-                    <Field.Hint />
-                  </Field.Root>
-
-                  <Field.Root
-                    name="defaultCapacityPerSlot"
-                    hint={t(
-                      "settings.defaultCapacityPerSlotHint",
-                      "Concurrent reservations allowed per time slot."
-                    )}
-                  >
-                    <Field.Label>
-                      {t(
-                        "settings.defaultCapacityPerSlot",
-                        "Default Capacity Per Slot"
-                      )}
-                    </Field.Label>
-                    <NumberInput
-                      placeholder={t(
-                        "settings.defaultCapacityPerSlot.placeholder",
-                        "e.g., 1"
-                      )}
-                      value={settings.defaultCapacityPerSlot}
-                      onValueChange={(v: number | undefined) =>
-                        setSettings({
-                          ...settings,
-                          defaultCapacityPerSlot: Math.max(1, Number(v ?? 1)),
-                        })
-                      }
-                    />
-                    <Field.Hint />
-                  </Field.Root>
-
-                  <Field.Root
-                    name="defaultBufferBeforeMinutes"
-                    hint={t(
-                      "settings.defaultBufferBeforeMinutesHint",
-                      "Preparation gap blocked before each booking starts."
-                    )}
-                  >
-                    <Field.Label>
-                      {t(
-                        "settings.defaultBufferBeforeMinutes",
-                        "Buffer Before (Minutes)"
-                      )}
-                    </Field.Label>
-                    <NumberInput
-                      placeholder={t(
-                        "settings.defaultBufferBeforeMinutes.placeholder",
-                        "e.g., 0"
-                      )}
-                      value={settings.defaultBufferBeforeMinutes}
-                      onValueChange={(v: number | undefined) =>
-                        setSettings({
-                          ...settings,
-                          defaultBufferBeforeMinutes: Math.max(
-                            0,
-                            Number(v ?? 0)
-                          ),
-                        })
-                      }
-                    />
-                    <Field.Hint />
-                  </Field.Root>
-
-                  <Field.Root
-                    name="defaultBufferAfterMinutes"
-                    hint={t(
-                      "settings.defaultBufferAfterMinutesHint",
-                      "Cooldown gap blocked after each booking ends."
-                    )}
-                  >
-                    <Field.Label>
-                      {t(
-                        "settings.defaultBufferAfterMinutes",
-                        "Buffer After (Minutes)"
-                      )}
-                    </Field.Label>
-                    <NumberInput
-                      placeholder={t(
-                        "settings.defaultBufferAfterMinutes.placeholder",
-                        "e.g., 0"
-                      )}
-                      value={settings.defaultBufferAfterMinutes}
-                      onValueChange={(v: number | undefined) =>
-                        setSettings({
-                          ...settings,
-                          defaultBufferAfterMinutes: Math.max(
-                            0,
-                            Number(v ?? 0)
-                          ),
-                        })
-                      }
-                    />
-                    <Field.Hint />
-                  </Field.Root>
-
-                  <Field.Root
-                    name="defaultMinLeadTimeHours"
-                    hint={t(
-                      "settings.defaultMinLeadTimeHoursHint",
-                      "Minimum notice required before a slot can be booked."
-                    )}
-                  >
-                    <Field.Label>
-                      {t(
-                        "settings.defaultMinLeadTimeHours",
-                        "Minimum Lead Time (Hours)"
-                      )}
-                    </Field.Label>
-                    <NumberInput
-                      placeholder={t(
-                        "settings.defaultMinLeadTimeHours.placeholder",
-                        "e.g., 2"
-                      )}
-                      value={settings.defaultMinLeadTimeHours}
-                      onValueChange={(v: number | undefined) =>
-                        setSettings({
-                          ...settings,
-                          defaultMinLeadTimeHours: Math.max(0, Number(v ?? 2)),
-                        })
-                      }
-                    />
-                    <Field.Hint />
-                  </Field.Root>
-
-                  <Field.Root
-                    name="defaultMaxAdvanceDays"
-                    hint={t(
-                      "settings.defaultMaxAdvanceDaysHint",
-                      "How far in advance visitors may schedule bookings."
-                    )}
-                  >
-                    <Field.Label>
-                      {t(
-                        "settings.defaultMaxAdvanceDays",
-                        "Max Advance Horizon (Days)"
-                      )}
-                    </Field.Label>
-                    <NumberInput
-                      placeholder={t(
-                        "settings.defaultMaxAdvanceDays.placeholder",
-                        "e.g., 90"
-                      )}
-                      value={settings.defaultMaxAdvanceDays}
-                      onValueChange={(v: number | undefined) =>
-                        setSettings({
-                          ...settings,
-                          defaultMaxAdvanceDays: Math.max(1, Number(v ?? 90)),
-                        })
-                      }
-                    />
-                    <Field.Hint />
-                  </Field.Root>
+                  {SLOT_NUMBER_FIELDS.map((field) => (
+                    <Field.Root
+                      key={field.name}
+                      name={field.name}
+                      hint={t(field.hintId, field.hintDefault)}
+                    >
+                      <Field.Label>
+                        {t(field.labelId, field.labelDefault)}
+                      </Field.Label>
+                      <NumberInput
+                        placeholder={t(
+                          field.placeholderId,
+                          field.placeholderDefault
+                        )}
+                        value={settings[field.name]}
+                        onValueChange={(v: number | undefined) => {
+                          const num = Number(v ?? field.fallback);
+                          const safe = Number.isFinite(num)
+                            ? Math.max(field.min, Math.trunc(num))
+                            : field.fallback;
+                          setSettings((prev) => ({
+                            ...prev,
+                            [field.name]: safe,
+                          }));
+                        }}
+                      />
+                      <Field.Hint />
+                    </Field.Root>
+                  ))}
                 </div>
 
                 <div
@@ -348,12 +312,12 @@ export const SettingsPage: React.FC = () => {
                         "settings.defaultTimezone.placeholder",
                         "e.g., America/Bogota"
                       )}
-                      value={settings.defaultTimezone || "America/Bogota"}
+                      value={settings.defaultTimezone ?? ""}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSettings({
-                          ...settings,
+                        setSettings((prev) => ({
+                          ...prev,
                           defaultTimezone: e.target.value,
-                        })
+                        }))
                       }
                     />
                     <Field.Hint />
@@ -399,10 +363,10 @@ export const SettingsPage: React.FC = () => {
                     <Checkbox
                       checked={settings.defaultRequiresApproval}
                       onCheckedChange={(checked: boolean) =>
-                        setSettings({
-                          ...settings,
+                        setSettings((prev) => ({
+                          ...prev,
                           defaultRequiresApproval: Boolean(checked),
-                        })
+                        }))
                       }
                     >
                       {t(
@@ -446,10 +410,10 @@ export const SettingsPage: React.FC = () => {
                     <Checkbox
                       checked={settings.sendEmailNotifications}
                       onCheckedChange={(checked: boolean) =>
-                        setSettings({
-                          ...settings,
+                        setSettings((prev) => ({
+                          ...prev,
                           sendEmailNotifications: Boolean(checked),
-                        })
+                        }))
                       }
                     >
                       {t(

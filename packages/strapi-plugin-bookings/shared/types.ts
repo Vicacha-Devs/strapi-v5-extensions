@@ -256,6 +256,7 @@ export interface BookingsPluginSettings {
   secondaryCalendars: SecondaryCalendarConfig[];
   defaultSeasonalSchedules?: SeasonalScheduleOverride[];
   holidays?: HolidayScheduleRule[];
+  icalFeedToken?: string;
   sources: BookingSourceMapping[];
 }
 
@@ -268,6 +269,8 @@ export interface BookingFilterQuery {
   preferredLanguage?: string;
   search?: string;
   source?: string;
+  activeOnly?: boolean;
+  limit?: number;
 }
 
 export interface BookingStats {

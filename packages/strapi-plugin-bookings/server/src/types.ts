@@ -53,6 +53,7 @@ export interface BookingsPluginConfig {
   defaultMaxAdvanceDays?: number;
   defaultRequiresApproval?: boolean;
   sendEmailNotifications?: boolean;
+  icalFeedToken?: string;
   secondaryCalendars?: SecondaryCalendarConfig[];
   defaultSeasonalSchedules?: SeasonalScheduleOverride[];
   holidays?: HolidayScheduleRule[];
@@ -92,7 +93,10 @@ export interface SettingsService {
 }
 
 export interface AvailabilityService {
-  listResources(activeOnly?: boolean): Promise<BookingResource[]>;
+  listResources(
+    activeOnly?: boolean,
+    limit?: number
+  ): Promise<BookingResource[]>;
   getResource(idOrSlug: string): Promise<BookingResource | null>;
   saveResource(
     payload: Partial<BookingResource> & { name: string }
@@ -118,7 +122,11 @@ export interface ReservationService {
   getBooking(documentIdOrCode: string): Promise<BookingRecord | null>;
   createReservation(
     input: CreateReservationInput,
-    options?: { skipLeadTimeCheck?: boolean; referenceNow?: Date }
+    options?: {
+      isAdmin?: boolean;
+      skipLeadTimeCheck?: boolean;
+      referenceNow?: Date;
+    }
   ): Promise<CreateReservationResult>;
   updateBookingStatus(
     documentId: string,
@@ -131,8 +139,11 @@ export interface ReservationService {
   ): Promise<BookingRecord>;
   cancelBooking(
     input: CancelBookingInput,
-    options?: { isAdmin?: boolean }
+    options?: { isAdmin?: boolean; referenceNow?: Date }
   ): Promise<BookingRecord>;
   exportCsv(query?: BookingFilterQuery): Promise<string>;
-  exportICal(query?: BookingFilterQuery): Promise<string>;
+  exportICal(
+    query?: BookingFilterQuery,
+    options?: { anonymize?: boolean }
+  ): Promise<string>;
 }

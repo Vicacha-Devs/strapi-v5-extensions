@@ -182,7 +182,7 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
           >
             {BOOKING_STATUSES.map((st) => (
               <SingleSelectOption key={st} value={st}>
-                {st.toUpperCase()}
+                {t(`page.ui.${st}`, st.toUpperCase())}
               </SingleSelectOption>
             ))}
           </SingleSelect>

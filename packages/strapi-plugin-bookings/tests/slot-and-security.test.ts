@@ -90,8 +90,9 @@ describe("Slot Availability Engine (Interval, Window, Buffers, Blackouts & Hosts
     assert.equal(slots[0].slotLabel, "09:00-10:00");
     assert.equal(slots[0].bookedCount, 6);
     assert.equal(slots[0].remainingCapacity, 4);
-    assert.equal(slots[0].isAvailable, false); // requested partySize=5 > remainingCapacity=4
-    assert.equal(slots[0].availableHosts[0]?.name, "Tariq"); // Alice is busy & Tariq matches 'ar'
+    // requested partySize=5 > remainingCapacity=4; Alice is busy & Tariq matches 'ar'
+    assert.equal(slots[0].isAvailable, false);
+    assert.equal(slots[0].availableHosts[0]?.name, "Tariq");
 
     assert.equal(slots[1].slotLabel, "10:00-11:00");
     assert.equal(slots[1].remainingCapacity, 10);

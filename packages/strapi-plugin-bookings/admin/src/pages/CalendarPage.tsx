@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@strapi/design-system";
 import { Layouts, useFetchClient, useNotification } from "@strapi/strapi/admin";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 import { useNavigate } from "react-router-dom";
 
@@ -42,6 +42,14 @@ export const CalendarPage: React.FC = () => {
   const navigate = useNavigate();
   const { get, post, put } = useFetchClient();
   const { toggleNotification } = useNotification();
+  const isMountedRef = useRef<boolean>(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const t = useCallback(
     (id: string, defaultMessage: string) =>
@@ -55,12 +63,22 @@ export const CalendarPage: React.FC = () => {
   const [selectedResourceId, setSelectedResourceId] = useState<string>("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
   const [search, setSearch] = useState<string>("");
+  const [debouncedSearch, setDebouncedSearch] = useState<string>("");
   const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(
     null
   );
   const [quickCreateStartIso, setQuickCreateStartIso] = useState<string | null>(
     null
   );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isMountedRef.current) {
+        setDebouncedSearch(search);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const fetchBookingsData = useCallback(async () => {
     try {
@@ -71,8 +89,8 @@ export const CalendarPage: React.FC = () => {
       if (selectedStatus) {
         params.set("status", selectedStatus);
       }
-      if (search.trim()) {
-        params.set("search", search.trim());
+      if (debouncedSearch.trim()) {
+        params.set("search", debouncedSearch.trim());
       }
       const res = await get<{
         data?: {
@@ -81,19 +99,35 @@ export const CalendarPage: React.FC = () => {
           stats?: BookingStats;
         };
       }>(`/${PLUGIN_ID}/calendar?${params.toString()}`);
+      if (!isMountedRef.current) return;
       const payload = res.data?.data;
       if (payload) {
-        setBookings(payload.bookings ?? []);
+        const nextBookings = payload.bookings ?? [];
+        setBookings(nextBookings);
         setResources(payload.resources ?? []);
         setStats(payload.stats ?? EMPTY_STATS);
+        setSelectedBooking((prev) => {
+          if (!prev) return null;
+          return (
+            nextBookings.find((b) => b.documentId === prev.documentId) ?? null
+          );
+        });
       }
     } catch {
+      if (!isMountedRef.current) return;
       toggleNotification({
         type: "danger",
         message: t("notifications.loadError", "Failed to load bookings"),
       });
     }
-  }, [get, selectedResourceId, selectedStatus, search, toggleNotification, t]);
+  }, [
+    get,
+    selectedResourceId,
+    selectedStatus,
+    debouncedSearch,
+    toggleNotification,
+    t,
+  ]);
 
   useEffect(() => {
     void fetchBookingsData();
@@ -106,11 +140,17 @@ export const CalendarPage: React.FC = () => {
     internalNotes?: string
   ) => {
     try {
-      await put(`/${PLUGIN_ID}/bookings/${documentId}/status`, {
-        status,
-        assignedHost,
-        internalNotes,
-      });
+      const res = await put<{ data?: BookingRecord }>(
+        `/${PLUGIN_ID}/bookings/${documentId}/status`,
+        {
+          status,
+          assignedHost,
+          internalNotes,
+        }
+      );
+      if (isMountedRef.current && res.data?.data) {
+        setSelectedBooking(res.data.data);
+      }
       toggleNotification({
         type: "success",
         message: t("notifications.updated", "Booking updated"),
@@ -132,10 +172,50 @@ export const CalendarPage: React.FC = () => {
         message: t("notifications.created", "Booking created"),
       });
       await fetchBookingsData();
-    } catch {
+    } catch (err) {
       toggleNotification({
         type: "danger",
         message: t("notifications.createError", "Failed to create booking"),
+      });
+      throw err;
+    }
+  };
+
+  const handleExportCsv = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (selectedResourceId) {
+        params.set("resourceDocumentId", selectedResourceId);
+      }
+      if (selectedStatus) {
+        params.set("status", selectedStatus);
+      }
+      if (debouncedSearch.trim()) {
+        params.set("search", debouncedSearch.trim());
+      }
+      const qs = params.toString();
+      const url = qs
+        ? `/${PLUGIN_ID}/export.csv?${qs}`
+        : `/${PLUGIN_ID}/export.csv`;
+      const res = await get<string>(url);
+      const csvText =
+        typeof res.data === "string" ? res.data : String(res.data ?? "");
+      const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+      const objectUrl = URL.createObjectURL(blob);
+      try {
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.setAttribute("download", "bookings.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    } catch {
+      toggleNotification({
+        type: "danger",
+        message: t("notifications.exportError", "Failed to export CSV"),
       });
     }
   };
@@ -167,10 +247,7 @@ export const CalendarPage: React.FC = () => {
             >
               {t("actions.settings", "Settings")}
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => window.open(`/${PLUGIN_ID}/export.csv`, "_blank")}
-            >
+            <Button variant="secondary" onClick={() => void handleExportCsv()}>
               {t("actions.exportCsv", "Export CSV")}
             </Button>
             <Button

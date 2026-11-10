@@ -1,6 +1,7 @@
 import type { Core } from "@strapi/strapi";
 
 import { PLUGIN_ID } from "../../shared/pluginId";
+import { isSafeObjectKey, sanitizePlainRecord } from "./errors";
 import type { BookingsPluginConfig } from "./types";
 
 function mergeAttributeIntoTarget(
@@ -8,9 +9,12 @@ function mergeAttributeIntoTarget(
   attrName: string,
   attrDef: Record<string, unknown>
 ): void {
-  if (!attributes) return;
+  if (!attributes || !isSafeObjectKey(attrName)) return;
+  const existing = Object.hasOwn(attributes, attrName)
+    ? attributes[attrName]
+    : undefined;
   attributes[attrName] = {
-    ...attributes[attrName],
+    ...(existing && typeof existing === "object" ? existing : {}),
     ...attrDef,
   };
 }
@@ -21,7 +25,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   if (Array.isArray(pluginConfig.customFields)) {
     for (const field of pluginConfig.customFields) {
-      if (field?.name && field?.type) {
+      if (field?.name && isSafeObjectKey(field.name) && field?.type) {
         strapi.customFields.register({
           name: field.name,
           plugin: PLUGIN_ID,
@@ -41,16 +45,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   const applyExtensions = (uid: string, extra?: Record<string, unknown>) => {
     const schema =
-      extra && typeof extra === "object" ? contentTypes[uid] : undefined;
+      extra && typeof extra === "object" && Object.hasOwn(contentTypes, uid)
+        ? contentTypes[uid]
+        : undefined;
     if (!schema || !extra) return;
     for (const [attrName, attrDef] of Object.entries(extra)) {
-      if (!attrName || !attrDef || typeof attrDef !== "object") continue;
-      const typedDef = attrDef as Record<string, unknown>;
-      mergeAttributeIntoTarget(schema.attributes, attrName, typedDef);
+      if (!isSafeObjectKey(attrName) || !Object.hasOwn(extra, attrName)) {
+        continue;
+      }
+      const cleanDef = sanitizePlainRecord(attrDef);
+      if (!cleanDef) continue;
+      mergeAttributeIntoTarget(schema.attributes, attrName, cleanDef);
       mergeAttributeIntoTarget(
         schema.__schema__?.attributes,
         attrName,
-        typedDef
+        cleanDef
       );
     }
   };

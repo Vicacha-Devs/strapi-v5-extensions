@@ -6,6 +6,7 @@ import { PLUGIN_ID } from "../../../shared/pluginId";
 import {
   computeAvailableSlots,
   DEFAULT_WEEKLY_SCHEDULE,
+  normalizeTimeZone,
 } from "../../../shared/slotEngine";
 import type {
   AssignableHost,
@@ -15,18 +16,20 @@ import type {
   BookingRecord,
   BookingResource,
   BookingResourceType,
+  BookingsPluginSettings,
   BookingStats,
   BookingStatus,
   HolidayScheduleRule,
   SeasonalScheduleOverride,
   WeeklyScheduleConfig,
-  BookingsPluginSettings,
 } from "../../../shared/types";
+import { BookingNotFoundError, sanitizePlainRecord } from "../errors";
 import type {
   AvailabilityService,
   ReservationService,
   SettingsService,
 } from "../types";
+import { parseBoundaryMs } from "./reservationSources";
 
 const RESOURCE_UID = "plugin::bookings.resource";
 
@@ -39,11 +42,15 @@ const STATUS_COLORS: Record<BookingStatus, string> = {
 };
 
 function slugifyName(value: string): string {
-  return value
+  let slug = value
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/^-+/, "");
+  while (slug.endsWith("-")) {
+    slug = slug.slice(0, -1);
+  }
+  return slug;
 }
 
 function asArray<T>(val: unknown): T[] {
@@ -54,14 +61,23 @@ function asOptionalString(val: unknown): string | undefined {
   return val ? String(val) : undefined;
 }
 
-function clampNumber(val: unknown, fallback: number, min: number): number {
-  return Math.max(min, Number(val ?? fallback));
+function clampNumber(
+  val: unknown,
+  fallback: number,
+  min: number,
+  max?: number
+): number {
+  const num = typeof val === "number" ? val : Number(val);
+  const safe = Number.isFinite(num) ? Math.trunc(num) : fallback;
+  const clampedMin = Math.max(min, safe);
+  return max !== undefined ? Math.min(max, clampedMin) : clampedMin;
 }
 
 function resolveWeeklySchedule(val: unknown): WeeklyScheduleConfig {
   if (
     val &&
     typeof val === "object" &&
+    !Array.isArray(val) &&
     "days" in (val as Record<string, unknown>)
   ) {
     return val as WeeklyScheduleConfig;
@@ -71,9 +87,9 @@ function resolveWeeklySchedule(val: unknown): WeeklyScheduleConfig {
 
 function normalizeResourceLimits(raw: Record<string, unknown>) {
   return {
-    slotDurationMinutes: clampNumber(raw.slotDurationMinutes, 60, 5),
-    bufferBeforeMinutes: clampNumber(raw.bufferBeforeMinutes, 0, 0),
-    bufferAfterMinutes: clampNumber(raw.bufferAfterMinutes, 0, 0),
+    slotDurationMinutes: clampNumber(raw.slotDurationMinutes, 60, 5, 1440),
+    bufferBeforeMinutes: clampNumber(raw.bufferBeforeMinutes, 0, 0, 720),
+    bufferAfterMinutes: clampNumber(raw.bufferAfterMinutes, 0, 0, 720),
     capacityPerSlot: clampNumber(raw.capacityPerSlot, 1, 1),
     maxPartySize: clampNumber(raw.maxPartySize, 50, 1),
     minLeadTimeHours: clampNumber(raw.minLeadTimeHours, 2, 0),
@@ -86,17 +102,20 @@ function normalizeResourceDetails(raw: Record<string, unknown>) {
   const supportedLanguages = asArray<unknown>(raw.supportedLanguages).map((l) =>
     String(l)
   );
-  const metadata =
-    raw.metadata && typeof raw.metadata === "object"
-      ? (raw.metadata as Record<string, unknown>)
+  const metadata = sanitizePlainRecord(raw.metadata);
+  const rawPrice = raw.price !== undefined ? Number(raw.price) : undefined;
+  const price =
+    rawPrice !== undefined && Number.isFinite(rawPrice)
+      ? Math.max(0, rawPrice)
       : undefined;
+
   return {
     description: asOptionalString(raw.description),
     recurrenceRule: asOptionalString(raw.recurrenceRule),
     supportedLanguages,
     assignedHosts: asArray<AssignableHost>(raw.assignedHosts),
     location: asOptionalString(raw.location),
-    price: raw.price !== undefined ? Number(raw.price) : undefined,
+    price,
     currency: raw.currency ? String(raw.currency) : "USD",
     isActive: raw.isActive !== undefined ? Boolean(raw.isActive) : true,
     metadata,
@@ -113,7 +132,9 @@ export function normalizeResourceRecord(
     slug: String(raw.slug ?? slugifyName(String(raw.name ?? "resource"))),
     resourceType: (raw.resourceType as BookingResourceType) ?? "service",
     color: String(raw.color ?? "#0d9488"),
-    timezone: String(raw.timezone ?? "UTC"),
+    timezone: normalizeTimeZone(
+      raw.timezone !== undefined ? String(raw.timezone) : "UTC"
+    ),
     ...normalizeResourceLimits(raw),
     weeklySchedule: resolveWeeklySchedule(raw.weeklySchedule),
     seasonalSchedules: asArray<SeasonalScheduleOverride>(raw.seasonalSchedules),
@@ -128,18 +149,41 @@ function buildResourceScheduleData(
   settings: BookingsPluginSettings
 ): Record<string, unknown> {
   return {
-    timezone: payload.timezone ?? settings.defaultTimezone,
-    slotDurationMinutes:
-      payload.slotDurationMinutes ?? settings.defaultSlotDurationMinutes,
-    bufferBeforeMinutes:
-      payload.bufferBeforeMinutes ?? settings.defaultBufferBeforeMinutes,
-    bufferAfterMinutes:
-      payload.bufferAfterMinutes ?? settings.defaultBufferAfterMinutes,
-    capacityPerSlot: payload.capacityPerSlot ?? settings.defaultCapacityPerSlot,
-    maxPartySize: payload.maxPartySize ?? 50,
-    minLeadTimeHours:
-      payload.minLeadTimeHours ?? settings.defaultMinLeadTimeHours,
-    maxAdvanceDays: payload.maxAdvanceDays ?? settings.defaultMaxAdvanceDays,
+    timezone: normalizeTimeZone(payload.timezone ?? settings.defaultTimezone),
+    slotDurationMinutes: clampNumber(
+      payload.slotDurationMinutes,
+      settings.defaultSlotDurationMinutes,
+      5,
+      1440
+    ),
+    bufferBeforeMinutes: clampNumber(
+      payload.bufferBeforeMinutes,
+      settings.defaultBufferBeforeMinutes,
+      0,
+      720
+    ),
+    bufferAfterMinutes: clampNumber(
+      payload.bufferAfterMinutes,
+      settings.defaultBufferAfterMinutes,
+      0,
+      720
+    ),
+    capacityPerSlot: clampNumber(
+      payload.capacityPerSlot,
+      settings.defaultCapacityPerSlot,
+      1
+    ),
+    maxPartySize: clampNumber(payload.maxPartySize, 50, 1),
+    minLeadTimeHours: clampNumber(
+      payload.minLeadTimeHours,
+      settings.defaultMinLeadTimeHours,
+      0
+    ),
+    maxAdvanceDays: clampNumber(
+      payload.maxAdvanceDays,
+      settings.defaultMaxAdvanceDays,
+      1
+    ),
     requiresApproval:
       payload.requiresApproval ?? settings.defaultRequiresApproval,
   };
@@ -172,7 +216,7 @@ function buildResourceExtrasData(
     price: payload.price ?? 0,
     currency: payload.currency ?? "USD",
     isActive: payload.isActive ?? true,
-    metadata: payload.metadata ?? undefined,
+    metadata: sanitizePlainRecord(payload.metadata),
   };
 }
 
@@ -249,21 +293,41 @@ function mapBookingToOccurrence(
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
-  async listResources(activeOnly = false): Promise<BookingResource[]> {
+  async listResources(
+    activeOnly = false,
+    limit = 200
+  ): Promise<BookingResource[]> {
+    const safeLimit = clampNumber(limit, 200, 1, 500);
     const filters = activeOnly ? { isActive: { $eq: true } } : undefined;
-    const rows = (await strapi.documents(RESOURCE_UID as never).findMany({
+    const rows = await strapi.documents(RESOURCE_UID).findMany({
       filters,
       sort: "name:asc",
-    } as never)) as Array<Record<string, unknown>>;
+      limit: safeLimit,
+    });
 
-    return (Array.isArray(rows) ? rows : []).map(normalizeResourceRecord);
+    const normalized = (Array.isArray(rows) ? rows : []).map(
+      normalizeResourceRecord
+    );
+    const filtered = activeOnly
+      ? normalized.filter((r) => r.isActive)
+      : normalized;
+    return filtered.slice(0, safeLimit);
   },
 
   async getResource(idOrSlug: string): Promise<BookingResource | null> {
-    if (!idOrSlug) return null;
-    const all = await this.listResources(false);
-    const match = all.find(
-      (r) => r.documentId === idOrSlug || r.slug === idOrSlug
+    const trimmed = typeof idOrSlug === "string" ? idOrSlug.trim() : "";
+    if (!trimmed) return null;
+    const rows = await strapi.documents(RESOURCE_UID).findMany({
+      filters: {
+        $or: [{ documentId: { $eq: trimmed } }, { slug: { $eq: trimmed } }],
+      },
+      limit: 50,
+    });
+    const normalized = (Array.isArray(rows) ? rows : []).map(
+      normalizeResourceRecord
+    );
+    const match = normalized.find(
+      (r) => r.documentId === trimmed || r.slug === trimmed
     );
     return match ?? null;
   },
@@ -273,7 +337,7 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
   ): Promise<BookingResource> {
     const settingsService = strapi
       .plugin(PLUGIN_ID)
-      .service("settings") as SettingsService;
+      .service<SettingsService>("settings");
     const settings = await settingsService.getSettings();
 
     const data: Record<string, unknown> = {
@@ -283,16 +347,19 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
     };
 
     if (payload.documentId) {
-      const updated = (await strapi.documents(RESOURCE_UID as never).update({
+      const updated = await strapi.documents(RESOURCE_UID).update({
         documentId: payload.documentId,
         data,
-      } as never)) as Record<string, unknown>;
+      });
+      if (!updated) {
+        throw new BookingNotFoundError("Booking resource not found");
+      }
       return normalizeResourceRecord(updated);
     }
 
-    const created = (await strapi.documents(RESOURCE_UID as never).create({
+    const created = await strapi.documents(RESOURCE_UID).create({
       data,
-    } as never)) as Record<string, unknown>;
+    });
     return normalizeResourceRecord(created);
   },
 
@@ -309,10 +376,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
 
     const settingsService = strapi
       .plugin(PLUGIN_ID)
-      .service("settings") as SettingsService;
+      .service<SettingsService>("settings");
     const reservationService = strapi
       .plugin(PLUGIN_ID)
-      .service("reservation") as ReservationService;
+      .service<ReservationService>("reservation");
 
     const settings = await settingsService.getSettings();
     let targetResources: BookingResource[] = [];
@@ -332,9 +399,21 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
       return [];
     }
 
+    const fromMs = parseBoundaryMs(from, false);
+    const toMs = parseBoundaryMs(to, true);
+    if (fromMs === null || toMs === null || toMs < fromMs) {
+      return [];
+    }
+
     const existingBookings = await reservationService.listBookings({
-      from,
-      to,
+      from: new Date(fromMs - 86_400_000).toISOString(),
+      to: new Date(toMs + 86_400_000).toISOString(),
+      activeOnly: true,
+      limit: 1000,
+      resourceDocumentId:
+        targetResources.length === 1
+          ? targetResources[0].documentId
+          : undefined,
     });
 
     const allSlots: AvailableSlot[] = [];
@@ -360,10 +439,10 @@ export default ({ strapi }: { strapi: Core.Strapi }): AvailabilityService => ({
   async getCalendarOccurrences(query: BookingFilterQuery) {
     const settingsService = strapi
       .plugin(PLUGIN_ID)
-      .service("settings") as SettingsService;
+      .service<SettingsService>("settings");
     const reservationService = strapi
       .plugin(PLUGIN_ID)
-      .service("reservation") as ReservationService;
+      .service<ReservationService>("reservation");
 
     const [settings, resources, bookings] = await Promise.all([
       settingsService.getSettings(),

@@ -33,9 +33,11 @@ declare module "node:fs" {
     encoding: "utf8" | "utf-8"
   ): string;
   export function existsSync(path: string): boolean;
+  export function statSync(path: string): { isFile(): boolean };
   const fsDefault: {
     readFileSync: typeof readFileSync;
     existsSync: typeof existsSync;
+    statSync: typeof statSync;
   };
   export default fsDefault;
 }
@@ -98,6 +100,7 @@ declare module "@strapi/strapi" {
 
     export interface DocumentQueryOptions {
       limit?: number;
+      start?: number;
       locale?: string;
       status?: "draft" | "published";
       filters?: Record<string, unknown>;
@@ -112,14 +115,17 @@ declare module "@strapi/strapi" {
       findOne(params: {
         documentId: string;
         locale?: string;
+        populate?: string[];
       }): Promise<Record<string, unknown> | null>;
       create(params: {
         data: Record<string, unknown>;
         status?: "draft" | "published";
+        populate?: string[];
       }): Promise<Record<string, unknown>>;
       update(params: {
         documentId: string;
         data: Record<string, unknown>;
+        populate?: string[];
       }): Promise<Record<string, unknown> | null>;
     }
 
@@ -136,6 +142,9 @@ declare module "@strapi/strapi" {
         info(message: string): void;
         warn(message: string): void;
         error(message: string): void;
+      };
+      db?: {
+        transaction?<T>(cb: (ctx: { trx?: unknown }) => Promise<T>): Promise<T>;
       };
       eventHub?: {
         emit(event: string, payload?: unknown): void;
@@ -170,23 +179,6 @@ declare module "@strapi/strapi" {
       };
     }
   }
-}
-
-declare module "vitest" {
-  export function describe(name: string, fn: () => void | Promise<void>): void;
-  export function it(name: string, fn: () => void | Promise<void>): void;
-  export interface Assertion<T = unknown> {
-    toBe(expected: T): void;
-    toEqual(expected: unknown): void;
-    toContain(expected: unknown): void;
-    toBeGreaterThan(expected: number): void;
-    toBeGreaterThanOrEqual(expected: number): void;
-    toBeTruthy(): void;
-  }
-  export function expect<T = unknown>(
-    actual: T,
-    message?: string
-  ): Assertion<T>;
 }
 
 declare module "*.json" {

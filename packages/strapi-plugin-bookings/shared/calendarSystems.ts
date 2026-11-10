@@ -32,6 +32,9 @@ export function formatSecondaryCalendars(
   locale = "en"
 ): Record<string, AlternateDateValue> {
   const result: Record<string, AlternateDateValue> = {};
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+    return result;
+  }
   const dateStr = date.toISOString().slice(0, 10);
   for (const sys of systems) {
     if (!sys || !sys.enabled || !sys.id) continue;

@@ -322,5 +322,9 @@
   "modal.langAr": "العربية — Arabic (AR)",
   "bookings.modal.langAr": "العربية — Arabic (AR)",
   "modal.langTr": "Türkçe — Turkish (TR)",
-  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)",
+  "notifications.exportError": "فشل تصدير ملف CSV",
+  "bookings.notifications.exportError": "فشل تصدير ملف CSV",
+  "settings.loadError": "فشل تحميل إعدادات الحجوزات",
+  "bookings.settings.loadError": "فشل تحميل إعدادات الحجوزات"
 }

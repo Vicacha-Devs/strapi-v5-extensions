@@ -8,6 +8,11 @@ import type {
   BookingStatus,
   CreateReservationInput,
 } from "../../../shared/types";
+import {
+  BookingForbiddenError,
+  BookingNotFoundError,
+  BookingValidationError,
+} from "../errors";
 import type {
   AvailabilityService,
   ReservationService,
@@ -23,16 +28,53 @@ export interface AdminContext {
   body: unknown;
   status: number;
   set(header: string, value: string): void;
-  badRequest(message: string): void;
+  badRequest(message: string): unknown;
+  notFound?(message: string): unknown;
+  forbidden?(message: string): unknown;
+}
+
+function respondControllerError(
+  ctx: AdminContext,
+  strapi: Core.Strapi,
+  err: unknown,
+  fallbackMessage: string
+): unknown {
+  if (err instanceof BookingNotFoundError) {
+    if (typeof ctx.notFound === "function") {
+      return ctx.notFound(err.message);
+    }
+    ctx.status = 404;
+    ctx.body = {
+      error: { status: 404, name: "NotFoundError", message: err.message },
+    };
+    return undefined;
+  }
+  if (err instanceof BookingForbiddenError) {
+    if (typeof ctx.forbidden === "function") {
+      return ctx.forbidden(err.message);
+    }
+    ctx.status = 403;
+    ctx.body = {
+      error: { status: 403, name: "ForbiddenError", message: err.message },
+    };
+    return undefined;
+  }
+  if (err instanceof BookingValidationError) {
+    return ctx.badRequest(err.message);
+  }
+  strapi.log?.error?.(
+    `[bookings] ${fallbackMessage}: ${err instanceof Error ? err.message : "unknown error"}`
+  );
+  return ctx.badRequest(fallbackMessage);
 }
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsService = () =>
-    strapi.plugin(PLUGIN_ID).service("settings") as SettingsService;
+    strapi.plugin(PLUGIN_ID).service<SettingsService>("settings");
   const getAvailabilityService = () =>
-    strapi.plugin(PLUGIN_ID).service("availability") as AvailabilityService;
+    strapi.plugin(PLUGIN_ID).service<AvailabilityService>("availability");
   const getReservationService = () =>
-    strapi.plugin(PLUGIN_ID).service("reservation") as ReservationService;
+    strapi.plugin(PLUGIN_ID).service<ReservationService>("reservation");
 
   return {
     async getSettings(ctx: AdminContext) {
@@ -41,10 +83,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async updateSettings(ctx: AdminContext) {
-      const payload = (ctx.request.body ??
-        {}) as Partial<BookingsPluginSettings>;
-      const updated = await getSettingsService().updateSettings(payload);
-      ctx.body = { data: updated };
+      try {
+        const payload = (ctx.request.body ??
+          {}) as Partial<BookingsPluginSettings>;
+        const updated = await getSettingsService().updateSettings(payload);
+        ctx.body = { data: updated };
+      } catch (err) {
+        return respondControllerError(
+          ctx,
+          strapi,
+          err,
+          "Failed to update bookings settings"
+        );
+      }
     },
 
     async discoverSchemas(ctx: AdminContext) {
@@ -60,18 +111,26 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async saveResource(ctx: AdminContext) {
-      const body = (ctx.request.body ?? {}) as Partial<BookingResource> & {
-        name?: string;
-      };
-      if (!body.name || !body.name.trim()) {
-        ctx.badRequest("Resource name is required");
-        return;
+      try {
+        const body = (ctx.request.body ?? {}) as Partial<BookingResource> & {
+          name?: string;
+        };
+        if (typeof body.name !== "string" || !body.name.trim()) {
+          return ctx.badRequest("Resource name is required");
+        }
+        const saved = await getAvailabilityService().saveResource({
+          ...body,
+          name: body.name,
+        });
+        ctx.body = { data: saved };
+      } catch (err) {
+        return respondControllerError(
+          ctx,
+          strapi,
+          err,
+          "Failed to save booking resource"
+        );
       }
-      const saved = await getAvailabilityService().saveResource({
-        ...body,
-        name: body.name,
-      });
-      ctx.body = { data: saved };
     },
 
     async getCalendar(ctx: AdminContext) {
@@ -90,12 +149,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         getAvailabilityService().listResources(false),
         getSettingsService().getSettings(),
       ]);
+      const { icalFeedToken: _omit, ...safeSettings } = settings;
 
       ctx.body = {
         data: {
           ...calendarData,
           resources,
-          settings,
+          settings: safeSettings,
         },
       };
     },
@@ -105,12 +165,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const body = (ctx.request.body ??
           {}) as unknown as CreateReservationInput;
         const result = await getReservationService().createReservation(body, {
+          isAdmin: true,
           skipLeadTimeCheck: true,
         });
         ctx.body = { data: result };
       } catch (err) {
-        ctx.badRequest(
-          err instanceof Error ? err.message : "Invalid booking payload"
+        return respondControllerError(
+          ctx,
+          strapi,
+          err,
+          "Invalid booking payload"
         );
       }
     },
@@ -119,8 +183,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const documentId = ctx.params.documentId;
         if (!documentId) {
-          ctx.badRequest("documentId parameter is required");
-          return;
+          return ctx.badRequest("documentId parameter is required");
         }
         const body = (ctx.request.body ?? {}) as {
           status?: BookingStatus;
@@ -128,8 +191,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           internalNotes?: string;
         };
         if (!body.status) {
-          ctx.badRequest("status is required");
-          return;
+          return ctx.badRequest("status is required");
         }
         const updated = await getReservationService().updateBookingStatus(
           documentId,
@@ -141,9 +203,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: updated };
       } catch (err) {
-        ctx.badRequest(
-          err instanceof Error ? err.message : "Status update failed"
-        );
+        return respondControllerError(ctx, strapi, err, "Status update failed");
       }
     },
 
@@ -158,8 +218,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           partySize?: number;
         };
         if (!body.newStartDate) {
-          ctx.badRequest("newStartDate is required");
-          return;
+          return ctx.badRequest("newStartDate is required");
         }
         const updated = await getReservationService().rescheduleBooking(
           {
@@ -174,9 +233,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: updated };
       } catch (err) {
-        ctx.badRequest(
-          err instanceof Error ? err.message : "Reschedule failed"
-        );
+        return respondControllerError(ctx, strapi, err, "Reschedule failed");
       }
     },
 
@@ -195,12 +252,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async exportICal(ctx: AdminContext) {
-      const ics = await getReservationService().exportICal({
-        from: ctx.query.from,
-        to: ctx.query.to,
-        resourceDocumentId: ctx.query.resourceDocumentId,
-        status: (ctx.query.status as BookingStatus | undefined) ?? "",
-      });
+      const ics = await getReservationService().exportICal(
+        {
+          from: ctx.query.from,
+          to: ctx.query.to,
+          resourceDocumentId: ctx.query.resourceDocumentId,
+          status: (ctx.query.status as BookingStatus | undefined) ?? "",
+        },
+        { anonymize: false }
+      );
       ctx.set("Content-Type", "text/calendar; charset=utf-8");
       ctx.set("Content-Disposition", 'attachment; filename="bookings.ics"');
       ctx.set("X-Content-Type-Options", "nosniff");

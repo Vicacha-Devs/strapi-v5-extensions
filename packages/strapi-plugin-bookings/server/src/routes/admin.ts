@@ -1,10 +1,34 @@
+const READ_POLICIES = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: ["plugin::bookings.read"] },
+  },
+];
+
+const MANAGE_POLICIES = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: ["plugin::bookings.manage"] },
+  },
+];
+
+const SETTINGS_POLICIES = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: ["plugin::bookings.settings"] },
+  },
+];
+
 export default [
   {
     method: "GET",
     path: "/settings",
     handler: "admin.getSettings",
     config: {
-      policies: [],
+      policies: SETTINGS_POLICIES,
     },
   },
   {
@@ -12,7 +36,7 @@ export default [
     path: "/settings",
     handler: "admin.updateSettings",
     config: {
-      policies: [],
+      policies: SETTINGS_POLICIES,
     },
   },
   {
@@ -20,7 +44,7 @@ export default [
     path: "/schemas",
     handler: "admin.discoverSchemas",
     config: {
-      policies: [],
+      policies: SETTINGS_POLICIES,
     },
   },
   {
@@ -28,7 +52,7 @@ export default [
     path: "/resources",
     handler: "admin.listResources",
     config: {
-      policies: [],
+      policies: READ_POLICIES,
     },
   },
   {
@@ -36,7 +60,7 @@ export default [
     path: "/resources",
     handler: "admin.saveResource",
     config: {
-      policies: [],
+      policies: MANAGE_POLICIES,
     },
   },
   {
@@ -44,7 +68,7 @@ export default [
     path: "/calendar",
     handler: "admin.getCalendar",
     config: {
-      policies: [],
+      policies: READ_POLICIES,
     },
   },
   {
@@ -52,7 +76,7 @@ export default [
     path: "/bookings",
     handler: "admin.createBooking",
     config: {
-      policies: [],
+      policies: MANAGE_POLICIES,
     },
   },
   {
@@ -60,7 +84,7 @@ export default [
     path: "/bookings/:documentId/status",
     handler: "admin.updateBookingStatus",
     config: {
-      policies: [],
+      policies: MANAGE_POLICIES,
     },
   },
   {
@@ -68,7 +92,7 @@ export default [
     path: "/bookings/reschedule",
     handler: "admin.rescheduleBooking",
     config: {
-      policies: [],
+      policies: MANAGE_POLICIES,
     },
   },
   {
@@ -76,7 +100,7 @@ export default [
     path: "/export.csv",
     handler: "admin.exportCsv",
     config: {
-      policies: [],
+      policies: READ_POLICIES,
     },
   },
   {
@@ -84,7 +108,7 @@ export default [
     path: "/export.ics",
     handler: "admin.exportICal",
     config: {
-      policies: [],
+      policies: READ_POLICIES,
     },
   },
 ];

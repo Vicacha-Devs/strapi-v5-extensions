@@ -50,11 +50,11 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
     <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
       <Flex direction="column" alignItems="stretch" gap={3}>
         <Typography variant="delta" tag="h3">
-          {t("bookings.listTitle", "Reservations & Bookings Ledger")}
+          {t("listTitle", "Reservations & Bookings Ledger")}
         </Typography>
         {bookings.length === 0 ? (
           <Typography variant="omega" textColor="neutral600">
-            {t("bookings.empty", "No bookings found for the selected filters.")}
+            {t("empty", "No bookings found for the selected filters.")}
           </Typography>
         ) : (
           bookings.map((b) => (
@@ -112,7 +112,8 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
                           : "neutral700"
                     }
                   >
-                    {b.status.toUpperCase()} ({b.partySize})
+                    {t(`page.ui.${b.status}`, b.status.toUpperCase())} (
+                    {b.partySize})
                   </Badge>
                 </Flex>
                 <Button
@@ -120,7 +121,7 @@ export const BookingsGridCanvas: React.FC<BookingsGridCanvasProps> = ({
                   variant="secondary"
                   onClick={() => onSelectBooking(b)}
                 >
-                  {t("bookings.inspect", "Inspect")}
+                  {t("inspect", "Inspect")}
                 </Button>
               </Flex>
             </Box>

@@ -322,5 +322,9 @@
   "modal.langAr": "العربية — Arabic (AR)",
   "bookings.modal.langAr": "العربية — Arabic (AR)",
   "modal.langTr": "Türkçe — Turkish (TR)",
-  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)",
+  "notifications.exportError": "导出 CSV 失败",
+  "bookings.notifications.exportError": "导出 CSV 失败",
+  "settings.loadError": "加载预订设置失败",
+  "bookings.settings.loadError": "加载预订设置失败"
 }

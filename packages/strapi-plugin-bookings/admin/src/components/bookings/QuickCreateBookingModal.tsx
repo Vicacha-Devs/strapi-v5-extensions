@@ -10,8 +10,12 @@ import {
   TextInput,
   Typography,
 } from "@strapi/design-system";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
+import {
+  parseTimeMinutes,
+  wallClockToUtcMs,
+} from "../../../../shared/slotTimezone";
 import type {
   BookingResource,
   CreateReservationInput,
@@ -51,7 +55,7 @@ export const QuickCreateBookingModal: React.FC<
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setBookingDate(initialStartIso.slice(0, 10));
     setBookingTime(
       initialStartIso.includes("T") ? initialStartIso.slice(11, 16) : "09:00"
@@ -60,6 +64,19 @@ export const QuickCreateBookingModal: React.FC<
       setResourceDocumentId(resources[0].documentId);
     }
   }, [initialStartIso, resources, resourceDocumentId]);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   if (!isOpen) {
     return null;
@@ -71,9 +88,23 @@ export const QuickCreateBookingModal: React.FC<
     if (!trimmedName || !trimmedEmail || !bookingDate) {
       return;
     }
+    const selectedResource = resources.find(
+      (r) => r.documentId === resourceDocumentId
+    );
+    const targetTz = selectedResource?.timezone ?? "UTC";
+    const startMins = parseTimeMinutes(bookingTime || "09:00");
+    const startEpochMs = wallClockToUtcMs(
+      bookingDate,
+      startMins,
+      targetTz,
+      false
+    );
+    if (startEpochMs === null) {
+      return;
+    }
     setSaving(true);
     try {
-      const startIso = `${bookingDate}T${bookingTime || "09:00"}:00.000Z`;
+      const startIso = new Date(startEpochMs).toISOString();
       await onSubmit({
         resourceDocumentId: optionalTrimmed(resourceDocumentId),
         customerName: trimmedName,
@@ -81,7 +112,8 @@ export const QuickCreateBookingModal: React.FC<
         customerPhone: optionalTrimmed(customerPhone),
         organization: optionalTrimmed(organization),
         startDate: startIso,
-        partySize: Math.max(1, partySize),
+        timezone: targetTz,
+        partySize: Math.max(1, Math.trunc(partySize)),
         preferredLanguage: optionalTrimmed(preferredLanguage),
         assignedHost: optionalTrimmed(assignedHost),
         notes: optionalTrimmed(notes),
@@ -92,6 +124,8 @@ export const QuickCreateBookingModal: React.FC<
       setOrganization("");
       setNotes("");
       onClose();
+    } catch {
+      // Preserve form state when submission fails; parent notifies user
     } finally {
       setSaving(false);
     }
@@ -99,6 +133,9 @@ export const QuickCreateBookingModal: React.FC<
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="bookings-quick-create-title"
       style={{
         position: "fixed",
         inset: 0,
@@ -128,7 +165,11 @@ export const QuickCreateBookingModal: React.FC<
         <Flex direction="column" alignItems="stretch" gap={4}>
           <Flex justifyContent="space-between" alignItems="center">
             <Box>
-              <Typography variant="beta" tag="h2">
+              <Typography
+                id="bookings-quick-create-title"
+                variant="beta"
+                tag="h2"
+              >
                 {t("modal.createTitle", "New Reservation / Booking")}
               </Typography>
               <Typography variant="pi" textColor="neutral600">
@@ -138,7 +179,12 @@ export const QuickCreateBookingModal: React.FC<
                 )}
               </Typography>
             </Box>
-            <Button variant="tertiary" size="S" onClick={onClose}>
+            <Button
+              variant="tertiary"
+              size="S"
+              aria-label={t("panel.close", "Close")}
+              onClick={onClose}
+            >
               ✕
             </Button>
           </Flex>
@@ -291,9 +337,12 @@ export const QuickCreateBookingModal: React.FC<
               <NumberInput
                 placeholder={t("placeholder.1", "1")}
                 value={partySize}
-                onValueChange={(val: number | undefined) =>
-                  setPartySize(Math.max(1, Number(val ?? 1)))
-                }
+                onValueChange={(val: number | undefined) => {
+                  const num = Number(val ?? 1);
+                  setPartySize(
+                    Number.isFinite(num) ? Math.max(1, Math.trunc(num)) : 1
+                  );
+                }}
               />
             </Field.Root>
           </div>
@@ -341,7 +390,7 @@ export const QuickCreateBookingModal: React.FC<
               <TextInput
                 placeholder={t(
                   "placeholder.e_g_sheikh_ahmad_guide_team",
-                  "e.g., Sheikh Ahmad / Guide Team"
+                  "e.g., Alex Morgan / Support Team"
                 )}
                 value={assignedHost}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

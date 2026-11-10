@@ -322,5 +322,9 @@
   "modal.langAr": "العربية — Arabic (AR)",
   "bookings.modal.langAr": "العربية — Arabic (AR)",
   "modal.langTr": "Türkçe — Turkish (TR)",
-  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)",
+  "notifications.exportError": "No se pudo exportar el CSV",
+  "bookings.notifications.exportError": "No se pudo exportar el CSV",
+  "settings.loadError": "No se pudo cargar la configuración de reservas",
+  "bookings.settings.loadError": "No se pudo cargar la configuración de reservas"
 }

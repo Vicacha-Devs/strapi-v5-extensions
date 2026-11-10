@@ -265,11 +265,17 @@ describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", 
       ],
     });
 
-    // Available slots for Monday 2026-10-19
+    const futureCursor = new Date(Date.now() + 14 * 86_400_000);
+    while (futureCursor.getUTCDay() !== 1) {
+      futureCursor.setUTCDate(futureCursor.getUTCDate() + 1);
+    }
+    const targetMonday = futureCursor.toISOString().slice(0, 10);
+
+    // Available slots for future Monday
     const slotsBefore = await services.availability.getAvailableSlots({
       resourceSlug: resource.slug,
-      from: "2026-10-19",
-      to: "2026-10-19",
+      from: targetMonday,
+      to: targetMonday,
       partySize: 10,
       preferredLanguage: "es",
     });
@@ -283,8 +289,8 @@ describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", 
         customerName: "Maria Gomez",
         customerEmail: "maria@example.org",
         organization: "Tech Org",
-        startDate: "2026-10-19T09:00:00.000Z",
-        endDate: "2026-10-19T10:00:00.000Z",
+        startDate: `${targetMonday}T09:00:00.000Z`,
+        endDate: `${targetMonday}T10:00:00.000Z`,
         partySize: 10,
         preferredLanguage: "es",
       },
@@ -303,8 +309,8 @@ describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", 
             resourceDocumentId: resource.documentId,
             customerName: "Overflow Guest",
             customerEmail: "overflow@example.org",
-            startDate: "2026-10-19T09:00:00.000Z",
-            endDate: "2026-10-19T10:00:00.000Z",
+            startDate: `${targetMonday}T09:00:00.000Z`,
+            endDate: `${targetMonday}T10:00:00.000Z`,
             partySize: 8,
           },
           { skipLeadTimeCheck: true }
@@ -318,8 +324,8 @@ describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", 
         services.reservation.rescheduleBooking({
           bookingCode: res1.booking.bookingCode,
           cancelToken: "invalid-token",
-          newStartDate: "2026-10-19T10:00:00.000Z",
-          newEndDate: "2026-10-19T11:00:00.000Z",
+          newStartDate: `${targetMonday}T10:00:00.000Z`,
+          newEndDate: `${targetMonday}T11:00:00.000Z`,
         }),
       /Invalid or missing cancelToken/
     );
@@ -328,10 +334,10 @@ describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", 
     const rescheduled = await services.reservation.rescheduleBooking({
       bookingCode: res1.booking.bookingCode,
       cancelToken: res1.cancelToken,
-      newStartDate: "2026-10-19T10:00:00.000Z",
-      newEndDate: "2026-10-19T11:00:00.000Z",
+      newStartDate: `${targetMonday}T10:00:00.000Z`,
+      newEndDate: `${targetMonday}T11:00:00.000Z`,
     });
-    assert.equal(rescheduled.startDate, "2026-10-19T10:00:00.000Z");
+    assert.equal(rescheduled.startDate, `${targetMonday}T10:00:00.000Z`);
 
     // External collection source mapping test
     await services.settings.updateSettings({
@@ -357,7 +363,7 @@ describe("Strapi Plugin Bookings Services, Controllers & Calendar Integration", 
         documentId: "ext-1",
         clientName: "External Partner",
         clientEmail: "partner@example.com",
-        reservationDate: "2026-10-19",
+        reservationDate: targetMonday,
         slotWindow: "morning",
         guests: 4,
         status: "confirmed",

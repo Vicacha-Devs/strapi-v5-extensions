@@ -1,43 +1,44 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { registerHooks, stripTypeScriptTypes } from "node:module";
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const vitestShimUrl = pathToFileURL(
-  resolvePath(currentDir, "vitest-shim.ts")
-).href;
+const pluginSharedEntry = resolvePath(
+  currentDir,
+  "../../plugin-shared/src/index.ts"
+);
 const calendarPkgRoot = resolvePath(currentDir, "../../strapi-plugin-calendar");
-const intlDateShimUrl = pathToFileURL(
-  resolvePath(calendarPkgRoot, "tests/intl-date-shim.mjs")
-).href;
+
+const WORKSPACE_ALIASES: Record<string, string> = {
+  "@vicacha-devs/plugin-shared": pluginSharedEntry,
+  "@vicacha-devs/strapi-plugin-calendar/shared": resolvePath(
+    calendarPkgRoot,
+    "shared/index.ts"
+  ),
+  "@vicacha-devs/strapi-plugin-calendar/strapi-admin": resolvePath(
+    calendarPkgRoot,
+    "admin/src/index.ts"
+  ),
+  "@vicacha-devs/strapi-plugin-calendar/strapi-server": resolvePath(
+    calendarPkgRoot,
+    "server/src/index.ts"
+  ),
+};
+
+function isRegularFile(filePath: string): boolean {
+  try {
+    return existsSync(filePath) && statSync(filePath).isFile();
+  } catch {
+    return false;
+  }
+}
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (specifier === "vitest") {
-      return { url: vitestShimUrl, shortCircuit: true };
-    }
-    if (specifier === "@internationalized/date") {
-      return { url: intlDateShimUrl, shortCircuit: true };
-    }
-    if (specifier === "@vicacha-devs/strapi-plugin-calendar/shared") {
+    if (Object.hasOwn(WORKSPACE_ALIASES, specifier)) {
       return {
-        url: pathToFileURL(resolvePath(calendarPkgRoot, "shared/index.ts"))
-          .href,
-        shortCircuit: true,
-      };
-    }
-    if (specifier === "@vicacha-devs/strapi-plugin-calendar/strapi-admin") {
-      return {
-        url: pathToFileURL(resolvePath(calendarPkgRoot, "admin/src/index.ts"))
-          .href,
-        shortCircuit: true,
-      };
-    }
-    if (specifier === "@vicacha-devs/strapi-plugin-calendar/strapi-server") {
-      return {
-        url: pathToFileURL(resolvePath(calendarPkgRoot, "server/src/index.ts"))
-          .href,
+        url: pathToFileURL(WORKSPACE_ALIASES[specifier]).href,
         shortCircuit: true,
       };
     }
@@ -50,6 +51,7 @@ registerHooks({
       const baseCandidate = resolvePath(parentDir, specifier);
 
       const candidates = [
+        baseCandidate,
         `${baseCandidate}.ts`,
         `${baseCandidate}.tsx`,
         `${baseCandidate}.json`,
@@ -58,7 +60,7 @@ registerHooks({
       ];
 
       for (const candidate of candidates) {
-        if (existsSync(candidate)) {
+        if (isRegularFile(candidate)) {
           return nextResolve(pathToFileURL(candidate).href, context);
         }
       }

@@ -322,5 +322,9 @@
   "modal.langAr": "العربية — Arabic (AR)",
   "bookings.modal.langAr": "العربية — Arabic (AR)",
   "modal.langTr": "Türkçe — Turkish (TR)",
-  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)",
+  "notifications.exportError": "Gagal mengekspor CSV",
+  "bookings.notifications.exportError": "Gagal mengekspor CSV",
+  "settings.loadError": "Gagal memuat pengaturan pemesanan",
+  "bookings.settings.loadError": "Gagal memuat pengaturan pemesanan"
 }

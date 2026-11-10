@@ -322,5 +322,9 @@
   "modal.langAr": "العربية — Arabic (AR)",
   "bookings.modal.langAr": "العربية — Arabic (AR)",
   "modal.langTr": "Türkçe — Turkish (TR)",
-  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)",
+  "notifications.exportError": "CSV برآمد کرنے میں ناکامی",
+  "bookings.notifications.exportError": "CSV برآمد کرنے میں ناکامی",
+  "settings.loadError": "بکنگ کی ترتیبات لوڈ کرنے میں ناکامی",
+  "bookings.settings.loadError": "بکنگ کی ترتیبات لوڈ کرنے میں ناکامی"
 }

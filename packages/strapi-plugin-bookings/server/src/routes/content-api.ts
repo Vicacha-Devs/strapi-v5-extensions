@@ -4,7 +4,6 @@ export default [
     path: "/resources",
     handler: "content-api.listPublicResources",
     config: {
-      auth: false,
       policies: [],
     },
   },
@@ -13,7 +12,6 @@ export default [
     path: "/available-slots",
     handler: "content-api.getAvailableSlots",
     config: {
-      auth: false,
       policies: [],
     },
   },
@@ -22,7 +20,6 @@ export default [
     path: "/reserve",
     handler: "content-api.createReservation",
     config: {
-      auth: false,
       policies: [],
     },
   },
@@ -31,7 +28,6 @@ export default [
     path: "/reschedule",
     handler: "content-api.rescheduleReservation",
     config: {
-      auth: false,
       policies: [],
     },
   },
@@ -40,7 +36,6 @@ export default [
     path: "/cancel",
     handler: "content-api.cancelReservation",
     config: {
-      auth: false,
       policies: [],
     },
   },
@@ -49,7 +44,6 @@ export default [
     path: "/feed.ics",
     handler: "content-api.getICalFeed",
     config: {
-      auth: false,
       policies: [],
     },
   },

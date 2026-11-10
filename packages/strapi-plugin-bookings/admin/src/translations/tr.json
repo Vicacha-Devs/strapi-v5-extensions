@@ -322,5 +322,9 @@
   "modal.langAr": "العربية — Arabic (AR)",
   "bookings.modal.langAr": "العربية — Arabic (AR)",
   "modal.langTr": "Türkçe — Turkish (TR)",
-  "bookings.modal.langTr": "Türkçe — Turkish (TR)"
+  "bookings.modal.langTr": "Türkçe — Turkish (TR)",
+  "notifications.exportError": "CSV dışa aktarılamadı",
+  "bookings.notifications.exportError": "CSV dışa aktarılamadı",
+  "settings.loadError": "Rezervasyon ayarları yüklenemedi",
+  "bookings.settings.loadError": "Rezervasyon ayarları yüklenemedi"
 }

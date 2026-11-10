@@ -1,8 +1,24 @@
 import type { Core } from "@strapi/strapi";
 
-import { registerCalendarSystemFormatter } from "../../shared/calendarSystems";
+import {
+  registerCalendarSystemFormatter,
+  unregisterCalendarSystemFormatter,
+} from "../../shared/calendarSystems";
 import { PLUGIN_ID } from "../../shared/pluginId";
+import { isSafeObjectKey } from "./errors";
 import type { BookingsPluginConfig } from "./types";
+
+const registeredFormattersByStrapi = new WeakMap<Core.Strapi, string[]>();
+
+export function cleanupBootstrapState(strapi: Core.Strapi): void {
+  const ids = registeredFormattersByStrapi.get(strapi);
+  if (ids) {
+    for (const id of ids) {
+      unregisterCalendarSystemFormatter(id);
+    }
+    registeredFormattersByStrapi.delete(strapi);
+  }
+}
 
 const BOOKING_CALENDAR_SOURCE = {
   id: "bookings",
@@ -52,13 +68,25 @@ export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const pluginConfig = (strapi.config.get(`plugin::${PLUGIN_ID}`) ??
     {}) as BookingsPluginConfig;
 
-  if (pluginConfig.calendarSystems) {
+  if (
+    pluginConfig.calendarSystems &&
+    typeof pluginConfig.calendarSystems === "object"
+  ) {
+    const registeredIds: string[] = [];
     for (const [systemId, formatter] of Object.entries(
       pluginConfig.calendarSystems
     )) {
-      if (typeof formatter === "function") {
+      if (
+        isSafeObjectKey(systemId) &&
+        Object.hasOwn(pluginConfig.calendarSystems, systemId) &&
+        typeof formatter === "function"
+      ) {
         registerCalendarSystemFormatter(systemId, formatter);
+        registeredIds.push(systemId);
       }
+    }
+    if (registeredIds.length > 0) {
+      registeredFormattersByStrapi.set(strapi, registeredIds);
     }
   }
 
