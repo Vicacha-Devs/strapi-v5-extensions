@@ -1,3 +1,38 @@
+const VALID_LOCALE_RE = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,4}$/;
+
+function isTranslationRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function extractDictionary(
+  loaded: unknown
+): Record<string, string> | undefined {
+  if (!isTranslationRecord(loaded)) {
+    return undefined;
+  }
+  if ("default" in loaded) {
+    return isTranslationRecord(loaded.default)
+      ? (loaded.default as Record<string, string>)
+      : undefined;
+  }
+  return loaded as Record<string, string>;
+}
+
+function getLookupCandidates(
+  locale: string,
+  fallbackToLanguage: boolean
+): string[] {
+  const trimmed = locale.trim();
+  if (!VALID_LOCALE_RE.test(trimmed)) {
+    return [];
+  }
+  if (!fallbackToLanguage || !trimmed.includes("-")) {
+    return [trimmed];
+  }
+  const base = trimmed.split("-")[0];
+  return base && base !== trimmed ? [trimmed, base] : [trimmed];
+}
+
 export interface PrefixTranslationsOptions {
   /** Also retain the original unprefixed key in the returned dictionary */
   keepUnprefixed?: boolean;
@@ -10,20 +45,40 @@ export function prefixPluginTranslations(
   pluginId: string,
   options?: PrefixTranslationsOptions
 ): Record<string, string> {
-  if (!pluginId) {
+  const normalizedPluginId =
+    typeof pluginId === "string" ? pluginId.trim() : "";
+  if (!normalizedPluginId) {
     throw new TypeError("pluginId can't be empty");
   }
 
-  const result: Record<string, string> = {
-    ...options?.baseTranslations,
-  };
+  const result: Record<string, string> = {};
+  if (options?.baseTranslations) {
+    for (const [key, value] of Object.entries(options.baseTranslations)) {
+      if (typeof value === "string") {
+        result[key] = value;
+      }
+    }
+  }
+
+  const prefix = `${normalizedPluginId}.`;
+  const explicitPrefixed: Array<[string, string]> = [];
 
   for (const [key, value] of Object.entries(trad)) {
+    if (typeof value !== "string") {
+      continue;
+    }
     if (options?.keepUnprefixed) {
       result[key] = value;
     }
-    const fullKey = key.startsWith(`${pluginId}.`) ? key : `${pluginId}.${key}`;
-    result[fullKey] = value;
+    if (key.startsWith(prefix)) {
+      explicitPrefixed.push([key, value]);
+    } else {
+      result[`${prefix}${key}`] = value;
+    }
+  }
+
+  for (const [key, value] of explicitPrefixed) {
+    result[key] = value;
   }
 
   return result;
@@ -37,6 +92,8 @@ export interface CreateRegisterTradsOptions {
   supportedLocales?: readonly string[];
   /** Also retain unprefixed translation keys (default: true) */
   keepUnprefixed?: boolean;
+  /** Fall back to primary BCP-47 language subtag (e.g. `pt-BR` -> `pt`) when exact locale misses (default: true) */
+  fallbackToLanguageCode?: boolean;
   /** Loader function called per locale (e.g. `(locale) => import(\`./translations/\${locale}.json\`)`) */
   loadTranslation?: (
     locale: string
@@ -61,49 +118,91 @@ export function createRegisterTrads(
     defaultLocales = ["en", "es", "ar", "tr"],
     supportedLocales,
     keepUnprefixed = true,
+    fallbackToLanguageCode = true,
     loadTranslation,
     translations,
     getBaseTranslations,
     onLoaded,
   } = options;
 
+  const normalizedPluginId =
+    typeof pluginId === "string" ? pluginId.trim() : "";
+  if (!normalizedPluginId) {
+    throw new TypeError("pluginId can't be empty");
+  }
+
+  const supportedSet = supportedLocales ? new Set(supportedLocales) : undefined;
+  const effectiveDefaults = supportedSet
+    ? defaultLocales.filter((loc) =>
+        getLookupCandidates(loc, fallbackToLanguageCode).some((candidate) =>
+          supportedSet.has(candidate)
+        )
+      )
+    : defaultLocales;
+
   return async function registerTrads({
     locales = [],
   }: { locales?: string[] } = {}): Promise<
     Array<{ data: Record<string, string>; locale: string }>
   > {
-    const allLocales = Array.from(new Set([...locales, ...defaultLocales]));
+    const allLocales =
+      effectiveDefaults.length > 0
+        ? Array.from(new Set([...locales, ...effectiveDefaults]))
+        : Array.from(new Set(locales));
 
     return Promise.all(
       allLocales.map(async (locale) => {
-        if (supportedLocales && !supportedLocales.includes(locale)) {
+        const candidates = getLookupCandidates(locale, fallbackToLanguageCode);
+        if (candidates.length === 0) {
           return { data: {}, locale };
         }
-        try {
-          let rawData: Record<string, string> | undefined =
-            translations?.[locale];
-          if (!rawData && loadTranslation) {
-            const loaded = await loadTranslation(locale);
-            rawData = (
-              loaded && "default" in loaded && loaded.default
-                ? loaded.default
-                : loaded
-            ) as Record<string, string>;
+        if (
+          supportedSet &&
+          !candidates.some((candidate) => supportedSet.has(candidate))
+        ) {
+          return { data: {}, locale };
+        }
+
+        let rawData: Record<string, string> | undefined;
+        for (const candidate of candidates) {
+          if (translations && Object.hasOwn(translations, candidate)) {
+            rawData = extractDictionary(translations[candidate]);
+            if (rawData) {
+              break;
+            }
           }
-          if (!rawData) {
-            return { data: {}, locale };
+          if (loadTranslation) {
+            try {
+              const loaded = await loadTranslation(candidate);
+              rawData = extractDictionary(loaded);
+              if (rawData) {
+                break;
+              }
+            } catch {
+              // Expected when a locale file does not exist; try next candidate
+            }
           }
-          const prefixed = prefixPluginTranslations(rawData, pluginId, {
+        }
+
+        const baseTranslations = getBaseTranslations?.(locale);
+        const hasBase =
+          Boolean(baseTranslations) &&
+          Object.keys(baseTranslations as Record<string, string>).length > 0;
+
+        if (!rawData && !hasBase) {
+          return { data: {}, locale };
+        }
+
+        const prefixed = prefixPluginTranslations(
+          rawData ?? {},
+          normalizedPluginId,
+          {
             keepUnprefixed,
-            baseTranslations: getBaseTranslations
-              ? getBaseTranslations(locale)
-              : undefined,
-          });
-          onLoaded?.(locale, prefixed);
-          return { data: prefixed, locale };
-        } catch {
-          return { data: {}, locale };
-        }
+            baseTranslations,
+          }
+        );
+        onLoaded?.(locale, prefixed);
+        return { data: prefixed, locale };
       })
     );
   };
