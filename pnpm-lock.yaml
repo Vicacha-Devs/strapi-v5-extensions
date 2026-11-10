@@ -144,7 +144,7 @@ importers:
         specifier: workspace:*
         version: link:../typescript-config
       typescript:
-        specifier: 5.9.3
+        specifier: ^5.5.4
         version: 5.9.3
 
   packages/strapi-plugin-calendar:
