@@ -15,7 +15,7 @@
       "outputs": [".next/**", "!.next/cache/**", ".strapi/**", "dist/**"]
     },
     "test": {
-      "dependsOn": ["^build", "build"],
+      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$"],
       "outputs": []
     },

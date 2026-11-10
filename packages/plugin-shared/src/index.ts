@@ -3,6 +3,7 @@ export {
   SECONDARY_CALENDAR_OPTIONS,
   mergeSelectOptions,
   parseCsvList,
+  type SelectOption,
 } from "./options.ts";
 export {
   createRegisterTrads,
