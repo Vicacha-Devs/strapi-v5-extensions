@@ -8,6 +8,7 @@ import {
   type ESignEnvelopeStatus,
 } from "../../../shared";
 import { normalizeCertificateRecord } from "./issuanceHelpers";
+import { stripTrailingSlashes } from "./urlHelpers";
 
 const CERTIFICATE_UID = "plugin::certificates.certificate";
 
@@ -53,9 +54,7 @@ function isPrivateOrLoopbackHost(host: string): boolean {
 }
 
 export function validateDocuSignBaseUrl(rawUrl: string): string {
-  const cleaned = String(rawUrl || "")
-    .trim()
-    .replace(/\/+$/, "");
+  const cleaned = stripTrailingSlashes(String(rawUrl || "").trim());
   if (!cleaned.startsWith("https://")) {
     throw new Error("DocuSign baseUrl must use HTTPS");
   }

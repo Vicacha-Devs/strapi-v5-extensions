@@ -9,6 +9,7 @@ import {
   type DocuSignProviderConfig,
   type Ed25519KeyPairMaterial,
 } from "../../../shared";
+import { stripTrailingSlashes } from "./urlHelpers";
 
 const SETTINGS_STORE_KEY = "settings";
 const KEYPAIR_STORE_KEY = "ed25519_keypair";
@@ -108,12 +109,14 @@ function sanitizeESignConfig(
   return {
     enabled,
     provider: normalizeEsignProvider(providerRaw, Boolean(obj.enabled)),
-    baseUrl: pickFirstString(
-      obj.baseUrl,
-      envBaseUrl,
-      fallback.baseUrl,
-      DEFAULT_ESIGN_CONFIG.baseUrl
-    ).replace(/\/+$/, ""),
+    baseUrl: stripTrailingSlashes(
+      pickFirstString(
+        obj.baseUrl,
+        envBaseUrl,
+        fallback.baseUrl,
+        DEFAULT_ESIGN_CONFIG.baseUrl
+      )
+    ),
     accountId: pickFirstString(obj.accountId, envAccountId, fallback.accountId),
     integrationKey: pickFirstString(
       obj.integrationKey,
@@ -224,11 +227,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         organizationSubheader: String(
           merged.organizationSubheader ?? DEFAULT_SETTINGS.organizationSubheader
         ).trim(),
-        verificationBaseUrl: String(
-          merged.verificationBaseUrl || DEFAULT_SETTINGS.verificationBaseUrl
-        )
-          .trim()
-          .replace(/\/+$/, ""),
+        verificationBaseUrl: stripTrailingSlashes(
+          String(
+            merged.verificationBaseUrl || DEFAULT_SETTINGS.verificationBaseUrl
+          ).trim()
+        ),
         defaultTimezone: String(
           merged.defaultTimezone || DEFAULT_SETTINGS.defaultTimezone
         ).trim(),
@@ -262,7 +265,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             : current.organizationSubheader,
         verificationBaseUrl:
           typeof partial.verificationBaseUrl === "string"
-            ? partial.verificationBaseUrl.trim().replace(/\/+$/, "")
+            ? stripTrailingSlashes(partial.verificationBaseUrl.trim())
             : current.verificationBaseUrl,
         defaultTimezone:
           typeof partial.defaultTimezone === "string"
