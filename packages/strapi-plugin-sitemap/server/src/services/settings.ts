@@ -1,4 +1,5 @@
 import type { Core } from "@strapi/strapi";
+import { stripTrailingSlashes } from "@vicacha-devs/plugin-shared";
 
 import {
   CONTENT_TYPE_UID,
@@ -24,10 +25,7 @@ import type {
 import { clampPriority, isTruthyFlag, sanitizeFrequency } from "./xml-builder";
 
 export const sanitizeBaseUrl = (rawUrl: unknown): string => {
-  let trimmed = String(rawUrl ?? "").trim();
-  while (trimmed.endsWith("/")) {
-    trimmed = trimmed.slice(0, -1);
-  }
+  const trimmed = stripTrailingSlashes(String(rawUrl ?? "").trim());
   if (!trimmed) {
     return "";
   }
