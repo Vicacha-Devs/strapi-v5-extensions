@@ -1,7 +1,14 @@
 import type { Core } from "@strapi/strapi";
 
 import { generateIcsCalendar } from "../../../shared/icalGenerator";
-import { getOccurrenceService, getSettingsService } from "../types";
+import { isValidCalendarDateKey } from "../../../shared/rruleEngine";
+import {
+  PluginValidationError,
+  getOccurrenceService,
+  getSettingsService,
+} from "../types";
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
@@ -30,13 +37,34 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       occurrenceDate?: string;
       locale?: string;
     }): Promise<string> {
+      const docId = (params.documentId ?? "").trim();
+      if (!docId) {
+        throw new PluginValidationError("Event documentId is required.");
+      }
+
       const settings = await getSettingsService(strapi).getSettings();
-      const now = new Date();
-      const from = new Date(now.getFullYear() - 1, 0, 1).toISOString();
-      const to = new Date(now.getFullYear() + 2, 11, 31).toISOString();
+      let from: string;
+      let to: string;
+
+      if (params.occurrenceDate) {
+        if (!isValidCalendarDateKey(params.occurrenceDate)) {
+          throw new PluginValidationError(
+            "Invalid occurrenceDate: must be a valid YYYY-MM-DD calendar date."
+          );
+        }
+        const anchorMs = new Date(
+          `${params.occurrenceDate}T00:00:00.000Z`
+        ).getTime();
+        from = new Date(anchorMs - 2 * DAY_MS).toISOString();
+        to = new Date(anchorMs + 3 * DAY_MS).toISOString();
+      } else {
+        const nowMs = Date.now();
+        from = new Date(nowMs - 30 * DAY_MS).toISOString();
+        to = new Date(nowMs + 335 * DAY_MS).toISOString();
+      }
 
       const occurrences = await getOccurrenceService(strapi).getOccurrences({
-        documentId: params.documentId,
+        documentId: docId,
         from,
         to,
         locale: params.locale,

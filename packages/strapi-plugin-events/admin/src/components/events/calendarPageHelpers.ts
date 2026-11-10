@@ -2,6 +2,7 @@ import {
   formatDateInCalendarSystem,
   SUPPORTED_INTL_CALENDARS,
 } from "../../../../shared/calendarSystems";
+import { isSafeObjectKey } from "../../../../shared/spotlightHelpers";
 import type {
   CalendarSystemConfig,
   EventsPluginSettings,
@@ -82,7 +83,8 @@ export function groupOccurrencesByDate(
 ): Record<string, ExpandedOccurrence[]> {
   const map: Record<string, ExpandedOccurrence[]> = {};
   for (const occ of occurrences) {
-    if (!map[occ.occurrenceDate]) {
+    if (!isSafeObjectKey(occ.occurrenceDate)) continue;
+    if (!Object.hasOwn(map, occ.occurrenceDate)) {
       map[occ.occurrenceDate] = [];
     }
     map[occ.occurrenceDate].push(occ);

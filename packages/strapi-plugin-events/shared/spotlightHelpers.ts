@@ -1,210 +1,33 @@
 import type {
-  EventActionLink,
-  EventActionLinkVariant,
   EventLifecycleStatus,
-  EventPosterAsset,
   EventSourceMapping,
   EventSpotlightConfig,
   EventSpotlightPosition,
   ExpandedOccurrence,
   TimeSlotWindow,
 } from "./types";
+import {
+  getTrimmedString,
+  isSafeObjectKey,
+  normalizeEventActionLinks,
+  normalizeEventPoster,
+  parseJsonIfNeeded,
+  sanitizeEventUrl,
+  sanitizePlainRecord,
+} from "./urlAndPosterHelpers";
 
-const ALLOWED_ACTION_VARIANTS = new Set<EventActionLinkVariant>([
-  "primary",
-  "secondary",
-  "outline",
-]);
+export {
+  isSafeObjectKey,
+  normalizeEventActionLinks,
+  normalizeEventPoster,
+  sanitizeEventUrl,
+  sanitizePlainRecord,
+};
 
 const ALLOWED_SPOTLIGHT_POSITIONS = new Set<EventSpotlightPosition>([
   "bottom-end",
   "bottom-start",
 ]);
-
-const ALLOWED_PROTOCOLS = new Set(["https:", "http:", "mailto:"]);
-
-function isSafeRelativeUrl(trimmed: string): boolean {
-  return trimmed.startsWith("/") && !trimmed.startsWith("//");
-}
-
-function isAllowedAbsoluteUrl(trimmed: string): boolean {
-  try {
-    const parsed = new URL(trimmed);
-    return ALLOWED_PROTOCOLS.has(parsed.protocol.toLowerCase());
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Validates that a URL is either a safe relative path (`/path`) or uses an explicit
- * allow-listed protocol (`https:`, `http:`, `mailto:`). Blocks `javascript:`, `data:`, `vbscript:`, etc.
- */
-export function sanitizeEventUrl(rawUrl: unknown): string | null {
-  if (typeof rawUrl !== "string") return null;
-  const trimmed = rawUrl.trim();
-  if (
-    !trimmed ||
-    trimmed.length > 2048 ||
-    /[\u0000-\u001F\u007F]/.test(trimmed)
-  ) {
-    return null;
-  }
-  if (isSafeRelativeUrl(trimmed) || isAllowedAbsoluteUrl(trimmed)) {
-    return trimmed;
-  }
-  return null;
-}
-
-function parseJsonIfNeeded(raw: unknown): unknown {
-  if (typeof raw !== "string") return raw;
-  const trimmed = raw.trim();
-  const isJsonLike =
-    (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
-    (trimmed.startsWith("[") && trimmed.endsWith("]"));
-  if (!isJsonLike) return raw;
-  try {
-    return JSON.parse(trimmed);
-  } catch {
-    return raw;
-  }
-}
-
-function getTrimmedString(val: unknown, maxLen?: number): string | undefined {
-  if (typeof val !== "string") return undefined;
-  const trimmed = val.trim();
-  if (!trimmed) return undefined;
-  return maxLen ? trimmed.slice(0, maxLen) : trimmed;
-}
-
-function getPositiveInteger(val: unknown): number | undefined {
-  if (typeof val !== "number" || !Number.isFinite(val) || val <= 0)
-    return undefined;
-  return Math.round(val);
-}
-
-function unwrapPosterRecord(
-  obj: Record<string, unknown>
-): Record<string, unknown> {
-  if (obj.data && typeof obj.data === "object" && !Array.isArray(obj.data)) {
-    return unwrapPosterRecord(obj.data as Record<string, unknown>);
-  }
-  if (
-    obj.attributes &&
-    typeof obj.attributes === "object" &&
-    !Array.isArray(obj.attributes)
-  ) {
-    return unwrapPosterRecord(obj.attributes as Record<string, unknown>);
-  }
-  return obj;
-}
-
-function resolvePosterAltText(
-  obj: Record<string, unknown>,
-  fallbackAlt?: string
-): string | undefined {
-  return (
-    getTrimmedString(obj.alt) ||
-    getTrimmedString(obj.alternativeText) ||
-    getTrimmedString(obj.caption) ||
-    fallbackAlt ||
-    undefined
-  );
-}
-
-/**
- * Normalizes a Strapi Media field value (object, nested `{ data: ... }`, array, or fallback string URL)
- * into a unified `EventPosterAsset`.
- */
-export function normalizeEventPoster(
-  rawPoster: unknown,
-  fallbackAlt?: string
-): EventPosterAsset | undefined {
-  if (!rawPoster) return undefined;
-
-  if (typeof rawPoster === "string") {
-    const safeUrl = sanitizeEventUrl(rawPoster);
-    return safeUrl
-      ? { url: safeUrl, alt: fallbackAlt || undefined }
-      : undefined;
-  }
-
-  if (Array.isArray(rawPoster)) {
-    return rawPoster.length > 0
-      ? normalizeEventPoster(rawPoster[0], fallbackAlt)
-      : undefined;
-  }
-
-  if (typeof rawPoster !== "object") return undefined;
-
-  const obj = unwrapPosterRecord(rawPoster as Record<string, unknown>);
-  const safeUrl = sanitizeEventUrl(obj.url);
-  if (!safeUrl) return undefined;
-
-  return {
-    url: safeUrl,
-    alt: resolvePosterAltText(obj, fallbackAlt),
-    mime: getTrimmedString(obj.mime),
-    width: getPositiveInteger(obj.width),
-    height: getPositiveInteger(obj.height),
-  };
-}
-
-function resolveActionVariant(
-  rawVariant: unknown,
-  index: number
-): EventActionLinkVariant {
-  const candidate = getTrimmedString(rawVariant) as
-    | EventActionLinkVariant
-    | undefined;
-  if (candidate && ALLOWED_ACTION_VARIANTS.has(candidate)) {
-    return candidate;
-  }
-  return index === 0 ? "primary" : "outline";
-}
-
-function normalizeSingleActionLink(
-  item: unknown,
-  index: number
-): EventActionLink | null {
-  if (!item || typeof item !== "object") return null;
-  const rec = item as Record<string, unknown>;
-  const label = getTrimmedString(rec.label, 120);
-  const safeUrl = sanitizeEventUrl(rec.url);
-  if (!label || !safeUrl) return null;
-
-  const external =
-    typeof rec.external === "boolean"
-      ? rec.external
-      : /^https?:\/\//i.test(safeUrl);
-  const icon = getTrimmedString(rec.icon, 60);
-
-  return {
-    label,
-    url: safeUrl,
-    variant: resolveActionVariant(rec.variant, index),
-    external,
-    ...(icon ? { icon } : {}),
-  };
-}
-
-/**
- * Normalizes a JSON array of action links, validating URLs and variants.
- */
-export function normalizeEventActionLinks(
-  rawLinks: unknown
-): EventActionLink[] | undefined {
-  const parsed = parseJsonIfNeeded(rawLinks);
-  if (!Array.isArray(parsed) || parsed.length === 0) {
-    return undefined;
-  }
-
-  const normalized = parsed
-    .map((item, idx) => normalizeSingleActionLink(item, idx))
-    .filter((link): link is EventActionLink => link !== null);
-
-  return normalized.length > 0 ? normalized : undefined;
-}
 
 function resolveSpotlightPosition(
   rawPos: unknown
@@ -223,9 +46,6 @@ function resolveFiniteRoundNumber(val: unknown): number | undefined {
     : undefined;
 }
 
-/**
- * Normalizes a spotlight configuration JSON object.
- */
 export function normalizeEventSpotlightConfig(
   rawConfig: unknown
 ): EventSpotlightConfig | undefined {
@@ -284,9 +104,6 @@ function toReferenceTimestamp(referenceDate?: string | Date): number | null {
   return Number.isNaN(ts) ? null : ts;
 }
 
-/**
- * Determines whether an event's spotlight is active at the given reference date/time.
- */
 export function isEventSpotlightActiveOnDate(params: {
   spotlightConfig?: EventSpotlightConfig;
   eventStartDate: string;
@@ -314,10 +131,6 @@ export function isEventSpotlightActiveOnDate(params: {
   return afterStart && beforeEnd;
 }
 
-/**
- * Deduplicates spotlight occurrences by `(sourceId, documentId)` and sorts by
- * `spotlightConfig.priority` descending, then `startDate` ascending.
- */
 export function deduplicateAndSortSpotlights(
   occurrences: ExpandedOccurrence[]
 ): ExpandedOccurrence[] {
@@ -352,14 +165,28 @@ const DEFAULT_TIME_SLOTS: Record<string, TimeSlotWindow> = {
   evening: { start: "18:00:00", end: "20:00:00" },
 };
 
+function buildSafeSlotMap(
+  customSlots?: Record<string, TimeSlotWindow>
+): Record<string, TimeSlotWindow> {
+  const slotMap: Record<string, TimeSlotWindow> = { ...DEFAULT_TIME_SLOTS };
+  if (customSlots && typeof customSlots === "object") {
+    for (const [k, v] of Object.entries(customSlots)) {
+      if (isSafeObjectKey(k) && v && typeof v === "object") {
+        slotMap[k] = v;
+      }
+    }
+  }
+  return slotMap;
+}
+
 function resolveDateOnlySlotWindow(
   rawStart: string,
   rawSlot: unknown,
   source: EventSourceMapping
 ): { startDate: string; endDate: string | null; allDay: boolean } | null {
-  if (typeof rawSlot !== "string" || !rawSlot) return null;
-  const slotMap = { ...DEFAULT_TIME_SLOTS, ...source.timeSlotMap };
-  const mapped = slotMap[rawSlot];
+  if (!isSafeObjectKey(rawSlot)) return null;
+  const slotMap = buildSafeSlotMap(source.timeSlotMap);
+  const mapped = Object.hasOwn(slotMap, rawSlot) ? slotMap[rawSlot] : undefined;
   if (mapped) {
     return {
       startDate: `${rawStart}T${mapped.start}.000Z`,
@@ -391,7 +218,7 @@ function readOptionalDocField(
   doc: Record<string, unknown>,
   fieldName?: string
 ): unknown {
-  return fieldName ? doc[fieldName] : null;
+  return fieldName && isSafeObjectKey(fieldName) ? doc[fieldName] : null;
 }
 
 function resolveNonEmptyEnd(rawEnd: unknown): string | null {
@@ -402,7 +229,8 @@ export function resolveStartEndFromDocument(
   doc: Record<string, unknown>,
   source: EventSourceMapping
 ): { startDate: string; endDate: string | null; allDay: boolean } | null {
-  const rawStart = doc[source.fields.startDate];
+  const startField = source.fields.startDate;
+  const rawStart = isSafeObjectKey(startField) ? doc[startField] : undefined;
   if (typeof rawStart !== "string" || !rawStart) {
     return null;
   }
@@ -441,5 +269,8 @@ const EVENT_STATUS_ALIAS_MAP: Record<string, EventLifecycleStatus> = {
 
 export function mapEventStatus(rawStatus: unknown): EventLifecycleStatus {
   if (typeof rawStatus !== "string") return "scheduled";
-  return EVENT_STATUS_ALIAS_MAP[rawStatus.toLowerCase()] ?? "scheduled";
+  const lower = rawStatus.toLowerCase();
+  return Object.hasOwn(EVENT_STATUS_ALIAS_MAP, lower)
+    ? EVENT_STATUS_ALIAS_MAP[lower]
+    : "scheduled";
 }

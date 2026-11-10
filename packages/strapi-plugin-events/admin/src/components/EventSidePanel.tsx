@@ -2,9 +2,11 @@ import { Badge, Box, Button, Flex, Typography } from "@strapi/design-system";
 import { useFetchClient } from "@strapi/strapi/admin";
 import React, { useEffect, useMemo, useState } from "react";
 import { useIntl } from "react-intl";
+import { useNavigate } from "react-router-dom";
 
 import { formatDateInCalendarSystem } from "../../../shared/calendarSystems";
 import { EVENT_CONTENT_TYPE_UID, PLUGIN_ID } from "../../../shared/pluginId";
+import { isSafeObjectKey } from "../../../shared/spotlightHelpers";
 import type {
   CalendarSystemConfig,
   EventsPluginSettings,
@@ -31,7 +33,10 @@ function getStringProp(
   doc: Record<string, unknown> | undefined,
   key: string
 ): string {
-  const val = doc?.[key];
+  if (!doc || !isSafeObjectKey(key) || !Object.hasOwn(doc, key)) {
+    return "";
+  }
+  const val = doc[key];
   return typeof val === "string" ? val : "";
 }
 
@@ -175,10 +180,6 @@ const SidePanelRsvpCard: React.FC<SidePanelRsvpCardProps> = ({
   );
 };
 
-interface GlobalCmI18nWindow {
-  __CM_I18N_MESSAGES__?: Record<string, Record<string, string>>;
-}
-
 function resolveActiveContentLocale(fallbackLocale?: string): string {
   if (typeof window !== "undefined") {
     const urlLoc = new URLSearchParams(window.location.search).get(
@@ -189,27 +190,9 @@ function resolveActiveContentLocale(fallbackLocale?: string): string {
   return fallbackLocale || "en";
 }
 
-function formatPluginMessageWithUrlLocale(
-  pluginId: string,
-  id: string,
-  defaultMessage: string,
-  formatMessage: (descriptor: { id: string; defaultMessage: string }) => string
-): string {
-  const fullKey = `${pluginId}.${id}`;
-  if (typeof window !== "undefined") {
-    const urlLoc = new URLSearchParams(window.location.search).get(
-      "plugins[i18n][locale]"
-    );
-    const globalMessages = (globalThis as unknown as GlobalCmI18nWindow)
-      .__CM_I18N_MESSAGES__;
-    const override = urlLoc ? globalMessages?.[urlLoc]?.[fullKey] : undefined;
-    if (override) return override;
-  }
-  return formatMessage({ id: fullKey, defaultMessage });
-}
-
 export const EventSidePanel = (props: SidePanelProps) => {
   const { formatMessage, locale } = useIntl();
+  const navigate = useNavigate();
   const { get } = useFetchClient();
   const [stats, setStats] = useState<RsvpStats | null>(null);
   const [settings, setSettings] = useState<EventsPluginSettings | null>(null);
@@ -233,7 +216,9 @@ export const EventSidePanel = (props: SidePanelProps) => {
       .catch(() => {});
 
     if (documentId) {
-      const statsUrl = `/${PLUGIN_ID}/stats/${encodeURIComponent(documentId)}?eventUid=${encodeURIComponent(model)}`;
+      const encodedDocId = encodeURIComponent(documentId);
+      const encodedModel = encodeURIComponent(model);
+      const statsUrl = `/${PLUGIN_ID}/stats/${encodedDocId}?eventUid=${encodedModel}`;
       get(statsUrl)
         .then((res) => {
           const data = res?.data?.data as RsvpStats | undefined;
@@ -273,15 +258,11 @@ export const EventSidePanel = (props: SidePanelProps) => {
   }
 
   const t = (id: string, defaultMessage: string) =>
-    formatPluginMessageWithUrlLocale(
-      PLUGIN_ID,
-      id,
-      defaultMessage,
-      formatMessage
-    );
+    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
 
   const icsUrl = `/api/events/${encodeURIComponent(documentId)}/invite.ics`;
   const capacityPercent = computeCapacityPercent(stats);
+  const managerRoute = `/plugins/${PLUGIN_ID}?eventDocumentId=${encodeURIComponent(documentId)}`;
 
   return {
     title: t("sidePanel.title", "Events & RSVP Summary"),
@@ -343,8 +324,7 @@ export const EventSidePanel = (props: SidePanelProps) => {
             <Button
               variant="tertiary"
               size="S"
-              tag="a"
-              href={`/admin/plugins/${PLUGIN_ID}?eventDocumentId=${encodeURIComponent(documentId)}`}
+              onClick={() => navigate(managerRoute)}
             >
               {t(
                 "sidePanel.openCalendar",

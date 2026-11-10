@@ -6,7 +6,7 @@ export default {
       path: "/occurrences",
       handler: "content-api.listOccurrences",
       config: {
-        auth: false,
+        policies: [],
       },
     },
     {
@@ -14,7 +14,7 @@ export default {
       path: "/spotlights",
       handler: "content-api.listSpotlights",
       config: {
-        auth: false,
+        policies: [],
       },
     },
     {
@@ -22,7 +22,7 @@ export default {
       path: "/feed.ics",
       handler: "content-api.downloadFeedIcs",
       config: {
-        auth: false,
+        policies: [],
       },
     },
     {
@@ -30,7 +30,7 @@ export default {
       path: "/:documentId/invite.ics",
       handler: "content-api.downloadEventInviteIcs",
       config: {
-        auth: false,
+        policies: [],
       },
     },
     {
@@ -38,7 +38,7 @@ export default {
       path: "/:documentId/stats",
       handler: "content-api.getEventStats",
       config: {
-        auth: false,
+        policies: [],
       },
     },
     {
@@ -46,7 +46,7 @@ export default {
       path: "/:documentId/register",
       handler: "content-api.registerAttendee",
       config: {
-        auth: false,
+        policies: [],
       },
     },
     {
@@ -54,7 +54,7 @@ export default {
       path: "/registrations/:token/cancel",
       handler: "content-api.cancelRegistration",
       config: {
-        auth: false,
+        policies: [],
       },
     },
   ],

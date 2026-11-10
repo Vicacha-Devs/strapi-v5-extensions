@@ -2,8 +2,19 @@ declare module "node:crypto" {
   export function randomBytes(size: number): {
     toString(encoding: "hex" | "base64"): string;
   };
+  export function createHash(algorithm: "sha256" | string): {
+    update(
+      data: string | Uint8Array,
+      inputEncoding?: "utf8"
+    ): {
+      digest(encoding: "hex" | "base64"): string;
+    };
+  };
+  export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean;
   const cryptoDefault: {
     randomBytes: typeof randomBytes;
+    createHash: typeof createHash;
+    timingSafeEqual: typeof timingSafeEqual;
   };
   export default cryptoDefault;
 }
@@ -55,6 +66,7 @@ declare module "@strapi/strapi" {
         string,
         {
           type?: string;
+          private?: boolean;
           customField?: string;
           [key: string]: unknown;
         }
@@ -75,6 +87,7 @@ declare module "@strapi/strapi" {
       findOne(params: {
         documentId: string;
         locale?: string;
+        status?: "draft" | "published";
       }): Promise<Record<string, unknown> | null>;
       create(params: {
         data: Record<string, unknown>;
@@ -99,6 +112,9 @@ declare module "@strapi/strapi" {
         info(message: string): void;
         warn(message: string): void;
         error(message: string): void;
+      };
+      db?: {
+        transaction?: <T>(cb: (trx?: unknown) => Promise<T>) => Promise<T>;
       };
       contentTypes: Record<string, ContentTypeSchema>;
       store(params: { type: string; name: string }): PluginStore;
@@ -130,23 +146,6 @@ declare module "@strapi/strapi" {
       };
     }
   }
-}
-
-declare module "vitest" {
-  export function describe(name: string, fn: () => void | Promise<void>): void;
-  export function it(name: string, fn: () => void | Promise<void>): void;
-  export interface Assertion<T = unknown> {
-    toBe(expected: T): void;
-    toEqual(expected: unknown): void;
-    toContain(expected: unknown): void;
-    toBeGreaterThan(expected: number): void;
-    toBeGreaterThanOrEqual(expected: number): void;
-    toBeTruthy(): void;
-  }
-  export function expect<T = unknown>(
-    actual: T,
-    message?: string
-  ): Assertion<T>;
 }
 
 declare module "*.json" {

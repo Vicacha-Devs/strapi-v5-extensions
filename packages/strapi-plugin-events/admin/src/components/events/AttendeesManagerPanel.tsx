@@ -9,7 +9,8 @@ import {
   TextInput,
   Typography,
 } from "@strapi/design-system";
-import React from "react";
+import { useFetchClient, useNotification } from "@strapi/strapi/admin";
+import React, { useCallback, useState } from "react";
 
 import { PLUGIN_ID } from "../../../../shared/pluginId";
 import type {
@@ -38,7 +39,9 @@ const STATUS_BADGE_COLORS: Record<string, { bg: string; text: string }> = {
 };
 
 function getStatusBadgeColors(status: string): { bg: string; text: string } {
-  return STATUS_BADGE_COLORS[status] ?? STATUS_BADGE_COLORS.cancelled;
+  return Object.hasOwn(STATUS_BADGE_COLORS, status)
+    ? STATUS_BADGE_COLORS[status]
+    : STATUS_BADGE_COLORS.cancelled;
 }
 
 interface AttendeeRowProps {
@@ -61,7 +64,7 @@ const AttendeeRegistrationRow: React.FC<AttendeeRowProps> = ({
       : t("attendees.seatPlural", "seats");
   const eventDisplay = reg.eventTitle || reg.eventDocumentId;
   const phoneSuffix = reg.attendeePhone ? ` • ${reg.attendeePhone}` : "";
-  const canCheckIn = reg.status !== "checked_in" && reg.status !== "cancelled";
+  const canCheckIn = reg.status === "confirmed";
 
   return (
     <Box padding={3} background="neutral100" hasRadius>
@@ -151,9 +154,45 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
   onCheckIn,
   onStatusChange,
 }) => {
-  const exportQuery = rsvpEventFilter
-    ? `?eventDocumentId=${encodeURIComponent(rsvpEventFilter)}`
-    : "";
+  const { get } = useFetchClient();
+  const { toggleNotification } = useNotification();
+  const [exportingCsv, setExportingCsv] = useState(false);
+
+  const handleExportCsv = useCallback(async () => {
+    setExportingCsv(true);
+    try {
+      const params = new URLSearchParams();
+      if (rsvpEventFilter.trim()) {
+        params.set("eventDocumentId", rsvpEventFilter.trim());
+      }
+      if (rsvpStatusFilter && rsvpStatusFilter !== "all") {
+        params.set("status", rsvpStatusFilter);
+      }
+      const qs = params.toString();
+      const suffix = qs ? `?${qs}` : "";
+      const res = await get<string>(
+        `/${PLUGIN_ID}/registrations/export.csv${suffix}`
+      );
+      const csvText =
+        typeof res?.data === "string" ? res.data : String(res?.data ?? "");
+      const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+      const blobUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = blobUrl;
+      anchor.setAttribute("download", "event-registrations.csv");
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      toggleNotification({
+        type: "danger",
+        message: t("attendees.error.load", "Could not load registrations."),
+      });
+    } finally {
+      setExportingCsv(false);
+    }
+  }, [get, rsvpEventFilter, rsvpStatusFilter, t, toggleNotification]);
 
   return (
     <Box background="neutral0" hasRadius shadow="tableShadow" padding={4}>
@@ -227,10 +266,8 @@ export const AttendeesManagerPanel: React.FC<AttendeesManagerPanelProps> = ({
           <Button
             size="S"
             variant="secondary"
-            tag="a"
-            href={`/${PLUGIN_ID}/registrations/export.csv${exportQuery}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            loading={exportingCsv}
+            onClick={handleExportCsv}
           >
             {t("attendees.exportCsv", "Export CSV")}
           </Button>

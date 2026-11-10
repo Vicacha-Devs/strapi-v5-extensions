@@ -12,6 +12,24 @@ import type {
   RsvpStatus,
 } from "../../shared/types";
 
+export class PluginValidationError extends Error {
+  readonly statusCode = 400;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "PluginValidationError";
+  }
+}
+
+export class PluginNotFoundError extends Error {
+  readonly statusCode = 404;
+
+  constructor(message: string) {
+    super(message);
+    this.name = "PluginNotFoundError";
+  }
+}
+
 export interface StrapiKoaContext {
   query?: Record<string, unknown>;
   params?: Record<string, string | undefined>;
@@ -21,7 +39,14 @@ export interface StrapiKoaContext {
   status?: number;
   body?: unknown;
   set: (header: string, value: string) => void;
-  badRequest: (message: string, details?: unknown) => void;
+  badRequest: (message: string, details?: unknown) => unknown;
+  notFound?: (message?: string, details?: unknown) => unknown;
+}
+
+export interface PaginationParams {
+  limit?: number;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface StrapiDocumentQueryOptions {
@@ -40,6 +65,7 @@ export interface StrapiDocumentServiceClient {
   findOne: (options: {
     documentId: string;
     locale?: string;
+    status?: "draft" | "published";
   }) => Promise<Record<string, unknown> | null>;
   create: (options: {
     data: Record<string, unknown>;
@@ -74,22 +100,27 @@ export interface EventsOccurrenceService {
     locale?: string,
     options?: { compact?: boolean }
   ) => string;
-  getOccurrences: (params: {
-    from?: string;
-    to?: string;
-    locale?: string;
-    category?: string;
-    sourceId?: string;
-    documentId?: string;
-    includeDrafts?: boolean;
-  }) => Promise<ExpandedOccurrence[]>;
-  getActiveSpotlights: (params?: {
-    date?: string;
-    locale?: string;
-    sourceId?: string;
-    category?: string;
-    includeDrafts?: boolean;
-  }) => Promise<ExpandedOccurrence[]>;
+  getOccurrences: (
+    params: {
+      from?: string;
+      to?: string;
+      locale?: string;
+      category?: string;
+      sourceId?: string;
+      documentId?: string;
+      includeDrafts?: boolean;
+      onlySpotlights?: boolean;
+    } & PaginationParams
+  ) => Promise<ExpandedOccurrence[]>;
+  getActiveSpotlights: (
+    params?: {
+      date?: string;
+      locale?: string;
+      sourceId?: string;
+      category?: string;
+      includeDrafts?: boolean;
+    } & PaginationParams
+  ) => Promise<ExpandedOccurrence[]>;
   rescheduleOccurrence: (params: {
     sourceId?: string;
     uid?: string;
@@ -122,6 +153,7 @@ export interface EventsRsvpService {
     capacityOverride?: number | null;
     waitlistOverride?: boolean;
     rsvpEnabledOverride?: boolean;
+    includeDrafts?: boolean;
   }) => Promise<RsvpStats>;
   registerAttendee: (
     eventDocumentId: string,
@@ -147,12 +179,14 @@ export interface EventsRsvpService {
     documentId?: string;
     token?: string;
   }) => Promise<RsvpRegistrationRecord>;
-  listRegistrations: (filters?: {
-    eventDocumentId?: string;
-    occurrenceDate?: string;
-    status?: RsvpStatus;
-    search?: string;
-  }) => Promise<RsvpRegistrationRecord[]>;
+  listRegistrations: (
+    filters?: {
+      eventDocumentId?: string;
+      occurrenceDate?: string;
+      status?: RsvpStatus;
+      search?: string;
+    } & PaginationParams
+  ) => Promise<RsvpRegistrationRecord[]>;
   exportRegistrationsCsv: (filters?: {
     eventDocumentId?: string;
     occurrenceDate?: string;
@@ -210,9 +244,58 @@ export function getIcalService(strapi: Core.Strapi): EventsIcalService {
     .service("ical") as unknown as EventsIcalService;
 }
 
-export function getErrorMessage(err: unknown, fallback: string): string {
-  if (err instanceof Error && err.message) {
-    return err.message;
+export function clampPaginatedSlice<T>(
+  items: T[],
+  params?: PaginationParams & { defaultLimit?: number; maxLimit?: number }
+): T[] {
+  const maxLimit = params?.maxLimit ?? 500;
+  const defaultLimit = params?.defaultLimit ?? maxLimit;
+
+  if (params?.page !== undefined || params?.pageSize !== undefined) {
+    const rawPage = Number(params.page);
+    const page =
+      Number.isFinite(rawPage) && rawPage >= 1
+        ? Math.min(1000, Math.floor(rawPage))
+        : 1;
+    const rawSize = Number(params.pageSize ?? params.limit);
+    const pageSize =
+      Number.isFinite(rawSize) && rawSize >= 1
+        ? Math.min(maxLimit, Math.floor(rawSize))
+        : Math.min(50, maxLimit);
+    const offset = (page - 1) * pageSize;
+    return items.slice(offset, offset + pageSize);
   }
-  return fallback;
+
+  if (params?.limit !== undefined) {
+    const rawLimit = Number(params.limit);
+    const safeLimit =
+      Number.isFinite(rawLimit) && rawLimit >= 1
+        ? Math.min(maxLimit, Math.floor(rawLimit))
+        : Math.min(defaultLimit, maxLimit);
+    return items.slice(0, safeLimit);
+  }
+
+  return items.slice(0, defaultLimit);
+}
+
+export function handleControllerError(
+  strapi: Core.Strapi,
+  ctx: StrapiKoaContext,
+  err: unknown,
+  fallbackMessage: string
+): unknown {
+  if (err instanceof PluginNotFoundError) {
+    if (typeof ctx.notFound === "function") {
+      return ctx.notFound(err.message);
+    }
+    ctx.status = 404;
+    ctx.body = { error: { status: 404, message: err.message } };
+    return undefined;
+  }
+  if (err instanceof PluginValidationError) {
+    return ctx.badRequest(err.message);
+  }
+  const detail = err instanceof Error ? err.message : String(err);
+  strapi.log?.error?.(`[events] ${fallbackMessage}: ${detail}`);
+  return ctx.badRequest(fallbackMessage);
 }

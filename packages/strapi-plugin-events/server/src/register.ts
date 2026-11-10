@@ -5,6 +5,7 @@ import {
   PLUGIN_ID,
   REGISTRATION_CONTENT_TYPE_UID,
 } from "../../shared/pluginId";
+import { isSafeObjectKey } from "../../shared/spotlightHelpers";
 import type { EventsPluginSettings } from "../../shared/types";
 
 interface MutableContentTypeSchema {
@@ -19,10 +20,19 @@ function mergeAttributeIntoTarget(
   attrName: string,
   attrDef: Record<string, unknown>
 ): void {
-  if (!target || typeof target !== "object") return;
+  if (!target || typeof target !== "object" || !isSafeObjectKey(attrName)) {
+    return;
+  }
+  const prev = Object.hasOwn(target, attrName) ? target[attrName] : undefined;
+  const safeDef: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(attrDef)) {
+    if (isSafeObjectKey(k)) {
+      safeDef[k] = v;
+    }
+  }
   target[attrName] = {
-    ...target[attrName],
-    ...attrDef,
+    ...(prev && typeof prev === "object" ? prev : {}),
+    ...safeDef,
   };
 }
 
@@ -35,7 +45,14 @@ function applyAttributeExtensions(
   }
 
   for (const [attrName, attrDef] of Object.entries(extraAttributes)) {
-    if (!attrName || !attrDef || typeof attrDef !== "object") continue;
+    if (
+      !isSafeObjectKey(attrName) ||
+      !attrDef ||
+      typeof attrDef !== "object" ||
+      Array.isArray(attrDef)
+    ) {
+      continue;
+    }
     mergeAttributeIntoTarget(contentType.attributes, attrName, attrDef);
     mergeAttributeIntoTarget(
       contentType.__schema__?.attributes,
@@ -48,7 +65,7 @@ function applyAttributeExtensions(
 function buildCategoryEnumAttribute(
   categoryColors: Record<string, string>
 ): Record<string, unknown> {
-  const colorKeys = Object.keys(categoryColors);
+  const colorKeys = Object.keys(categoryColors).filter(isSafeObjectKey);
   const enumValues = Array.from(new Set(["general", ...colorKeys]));
   return {
     type: "enumeration",
@@ -89,11 +106,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       Boolean(s.categoryColors && Object.keys(s.categoryColors).length > 0)
   );
 
-  const eventExtensions: Record<string, Record<string, unknown>> = {
-    ...userConfig.schemaExtensions?.event,
-  };
+  const eventExtensions: Record<string, Record<string, unknown>> = {};
+  if (
+    userConfig.schemaExtensions?.event &&
+    typeof userConfig.schemaExtensions.event === "object"
+  ) {
+    for (const [k, v] of Object.entries(userConfig.schemaExtensions.event)) {
+      if (isSafeObjectKey(k) && v && typeof v === "object") {
+        eventExtensions[k] = v;
+      }
+    }
+  }
 
-  if (eventSourceWithCategories?.categoryColors && !eventExtensions.category) {
+  if (
+    eventSourceWithCategories?.categoryColors &&
+    !Object.hasOwn(eventExtensions, "category")
+  ) {
     eventExtensions.category = buildCategoryEnumAttribute(
       eventSourceWithCategories.categoryColors
     );

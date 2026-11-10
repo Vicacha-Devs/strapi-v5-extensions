@@ -149,7 +149,7 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::events.event.hijriDate":
       "Fecha Hijri (Calendario Islámico)",
     "content-manager.content-types.plugin::events.event.timeLabel":
-      "Etiqueta de Hora (ej. Después de Maghrib)",
+      "Etiqueta de Hora (ej. 18:30)",
     "content-manager.content-types.plugin::events.event.imageUrl":
       "URL de Imagen Externa",
     "content-manager.content-types.plugin::events.event.imageAlt":
@@ -250,7 +250,7 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::events.event.hijriDate":
       "التاريخ الهجري",
     "content-manager.content-types.plugin::events.event.timeLabel":
-      "تسمية الوقت (مثال: بعد صلاة المغرب)",
+      "تسمية الوقت (مثال: 06:30 مساءً)",
     "content-manager.content-types.plugin::events.event.imageUrl":
       "رابط الصورة الخارجي",
     "content-manager.content-types.plugin::events.event.imageAlt":
@@ -352,7 +352,7 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
     "content-manager.content-types.plugin::events.event.hijriDate":
       "Hicri Tarih",
     "content-manager.content-types.plugin::events.event.timeLabel":
-      "Saat Etiketi (örn. Akşam Namazı Sonrası)",
+      "Saat Etiketi (örn. 18:30)",
     "content-manager.content-types.plugin::events.event.imageUrl":
       "Harici Görsel URL",
     "content-manager.content-types.plugin::events.event.imageAlt":

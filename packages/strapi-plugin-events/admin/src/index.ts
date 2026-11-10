@@ -6,8 +6,38 @@ import { EventSidePanel } from "./components/EventSidePanel";
 import { Initializer } from "./components/Initializer";
 import { PluginIcon } from "./components/PluginIcon";
 import { rruleField } from "./fields/rruleField";
+import { pluginPermissions } from "./permissions";
 import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
 import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
+
+export { pluginPermissions };
+
+export const SUPPORTED_LOCALES = [
+  "en",
+  "es",
+  "fr",
+  "de",
+  "pt",
+  "it",
+  "nl",
+  "pl",
+  "tr",
+  "ar",
+] as const;
+
+function pickLocaleRecord(
+  dict: Record<string, Record<string, string>>,
+  locale: string,
+  baseLang: string
+): Record<string, string> {
+  if (Object.hasOwn(dict, locale)) {
+    return dict[locale];
+  }
+  if (Object.hasOwn(dict, baseLang)) {
+    return dict[baseLang];
+  }
+  return dict.en;
+}
 
 export default {
   register(app: StrapiApp) {
@@ -20,12 +50,7 @@ export default {
       },
       Component: () =>
         import("./pages/CalendarPage").then((m) => ({ default: m.default })),
-      permissions: [
-        {
-          action: `plugin::${PLUGIN_ID}.read`,
-          subject: null,
-        },
-      ],
+      permissions: pluginPermissions.read,
     });
 
     app.registerPlugin({
@@ -55,12 +80,7 @@ export default {
       to: `${PLUGIN_ID}`,
       Component: () =>
         import("./pages/SettingsPage").then((m) => ({ default: m.default })),
-      permissions: [
-        {
-          action: `plugin::${PLUGIN_ID}.settings.update`,
-          subject: null,
-        },
-      ],
+      permissions: pluginPermissions.settings,
     };
     const maybeApp = app as unknown as {
       addSettingsLink?: StrapiApp["addSettingsLink"];
@@ -100,11 +120,14 @@ export default {
   registerTrads: createRegisterTrads({
     pluginId: PLUGIN_ID,
     defaultLocales: ["en", "es", "ar", "tr"],
+    supportedLocales: SUPPORTED_LOCALES,
     loadTranslation: (locale) => import(`./translations/${locale}.json`),
-    getBaseTranslations: (locale) => ({
-      ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en),
-      ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ??
-        CM_PLACEHOLDER_TRANSLATIONS.en),
-    }),
+    getBaseTranslations: (locale) => {
+      const baseLang = locale.split("-")[0] ?? "en";
+      return {
+        ...pickLocaleRecord(CM_LABEL_TRANSLATIONS, locale, baseLang),
+        ...pickLocaleRecord(CM_PLACEHOLDER_TRANSLATIONS, locale, baseLang),
+      };
+    },
   }),
 };

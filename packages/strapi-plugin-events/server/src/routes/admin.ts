@@ -1,3 +1,29 @@
+import { PLUGIN_ID } from "../../../shared/pluginId";
+
+const readPolicies = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: [`plugin::${PLUGIN_ID}.read`] },
+  },
+];
+
+const updatePolicies = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: [`plugin::${PLUGIN_ID}.update`] },
+  },
+];
+
+const settingsPolicies = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: [`plugin::${PLUGIN_ID}.settings.update`] },
+  },
+];
+
 export default {
   type: "admin",
   routes: [
@@ -6,7 +32,7 @@ export default {
       path: "/settings",
       handler: "admin.getSettings",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: readPolicies,
       },
     },
     {
@@ -14,7 +40,7 @@ export default {
       path: "/settings",
       handler: "admin.updateSettings",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: settingsPolicies,
       },
     },
     {
@@ -22,7 +48,7 @@ export default {
       path: "/calendar",
       handler: "admin.getCalendar",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: readPolicies,
       },
     },
     {
@@ -30,7 +56,7 @@ export default {
       path: "/calendar/reschedule",
       handler: "admin.reschedule",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: updatePolicies,
       },
     },
     {
@@ -38,7 +64,7 @@ export default {
       path: "/calendar/quick-create",
       handler: "admin.quickCreate",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: updatePolicies,
       },
     },
     {
@@ -46,7 +72,7 @@ export default {
       path: "/stats/:documentId",
       handler: "admin.getEventStats",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: readPolicies,
       },
     },
     {
@@ -54,7 +80,7 @@ export default {
       path: "/registrations",
       handler: "admin.listRegistrations",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: readPolicies,
       },
     },
     {
@@ -62,7 +88,7 @@ export default {
       path: "/registrations/export.csv",
       handler: "admin.exportRegistrationsCsv",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: readPolicies,
       },
     },
     {
@@ -70,7 +96,7 @@ export default {
       path: "/registrations/:documentId/status",
       handler: "admin.updateRegistrationStatus",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: updatePolicies,
       },
     },
     {
@@ -78,7 +104,7 @@ export default {
       path: "/registrations/:documentId/check-in",
       handler: "admin.checkIn",
       config: {
-        policies: ["admin::isAuthenticatedAdmin"],
+        policies: updatePolicies,
       },
     },
   ],

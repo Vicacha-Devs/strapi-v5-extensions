@@ -5,26 +5,63 @@ import {
   registerCalendarSystemFormatter,
   unregisterCalendarSystemFormatter,
 } from "../../../shared/calendarSystems";
-import { parseRRuleFieldValue } from "../../../shared/rruleEngine";
+import {
+  isValidCalendarDateKey,
+  parseRRuleFieldValue,
+} from "../../../shared/rruleEngine";
 import {
   deduplicateAndSortSpotlights,
   isEventSpotlightActiveOnDate,
+  isSafeObjectKey,
 } from "../../../shared/spotlightHelpers";
 import type {
   CalendarSystemConfig,
   CalendarSystemFormatterFn,
   EventSourceMapping,
   ExpandedOccurrence,
+  OccurrenceOverride,
 } from "../../../shared/types";
-import { getDocumentsClient, getSettingsService } from "../types";
+import {
+  type PaginationParams,
+  PluginNotFoundError,
+  PluginValidationError,
+  clampPaginatedSlice,
+  getDocumentsClient,
+  getSettingsService,
+} from "../types";
 import {
   type GetOccurrencesParams,
+  assertValidIsoDateTime,
   buildQuickCreatePayload,
-  expandDocumentOccurrences,
+  expandDocumentOccurrencesSync,
   fetchDocumentsForSource,
   resolveOccurrenceWindow,
   resolveQuickCreateSource,
 } from "./occurrenceHelpers";
+import {
+  type PendingOccurrenceRsvpMeta,
+  attachBatchedRsvpStats,
+  isAllowedEventSourceUid,
+} from "./occurrenceRsvpBatch";
+
+function validateRescheduleDates(params: {
+  newStartDate: string;
+  newEndDate?: string;
+  cancelOccurrence?: boolean;
+}): void {
+  if (params.cancelOccurrence && !params.newStartDate) {
+    return;
+  }
+  const startMs = assertValidIsoDateTime(params.newStartDate, "newStartDate");
+  if (params.newEndDate !== undefined && params.newEndDate !== "") {
+    const endMs = assertValidIsoDateTime(params.newEndDate, "newEndDate");
+    if (endMs <= startMs) {
+      throw new PluginValidationError(
+        "Invalid newEndDate: must be after newStartDate."
+      );
+    }
+  }
+}
 
 function buildReschedulePayload(
   source: EventSourceMapping,
@@ -34,13 +71,21 @@ function buildReschedulePayload(
     cancelOccurrence?: boolean;
   }
 ): Record<string, unknown> {
-  if (params.cancelOccurrence && source.fields.status) {
+  if (
+    params.cancelOccurrence &&
+    source.fields.status &&
+    isSafeObjectKey(source.fields.status)
+  ) {
     return { [source.fields.status]: "cancelled" };
   }
   const updatePayload: Record<string, unknown> = {
     [source.fields.startDate]: params.newStartDate,
   };
-  if (params.newEndDate && source.fields.endDate) {
+  if (
+    params.newEndDate &&
+    source.fields.endDate &&
+    isSafeObjectKey(source.fields.endDate)
+  ) {
     updatePayload[source.fields.endDate] = params.newEndDate;
   }
   return updatePayload;
@@ -51,7 +96,7 @@ function resolveRescheduleSource(
   sourceId?: string,
   uid?: string
 ): EventSourceMapping | undefined {
-  const list = sources ?? [];
+  const list = (sources ?? []).filter((s) => isAllowedEventSourceUid(s.uid));
   return list.find((s) => s.id === sourceId || s.uid === uid) ?? list[0];
 }
 
@@ -65,9 +110,28 @@ function buildSingleOccurrenceOverridePatch(
     cancelOccurrence?: boolean;
   }
 ): Record<string, unknown> {
-  const nextOverrides = { ...recurrence.overrides };
+  if (
+    !isSafeObjectKey(params.occurrenceDate) ||
+    !isValidCalendarDateKey(params.occurrenceDate)
+  ) {
+    throw new PluginValidationError(
+      "Invalid occurrenceDate: must be a valid YYYY-MM-DD calendar date."
+    );
+  }
+  const nextOverrides: Record<string, OccurrenceOverride> = {};
+  if (recurrence.overrides && typeof recurrence.overrides === "object") {
+    for (const [k, v] of Object.entries(recurrence.overrides)) {
+      if (isSafeObjectKey(k) && v && typeof v === "object") {
+        nextOverrides[k] = v;
+      }
+    }
+  }
+  const prevOverride = Object.hasOwn(nextOverrides, params.occurrenceDate)
+    ? nextOverrides[params.occurrenceDate]
+    : undefined;
+
   nextOverrides[params.occurrenceDate] = {
-    ...nextOverrides[params.occurrenceDate],
+    ...prevOverride,
     originalDate: params.occurrenceDate,
     cancelled: Boolean(params.cancelOccurrence),
     startDate: params.newStartDate || undefined,
@@ -102,17 +166,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       params: GetOccurrencesParams
     ): Promise<ExpandedOccurrence[]> {
       const settings = await getSettingsService(strapi).getSettings();
-      const { windowStart, windowEnd } = resolveOccurrenceWindow(params);
+      const { windowStart, windowEnd, isEmptyWindow } =
+        resolveOccurrenceWindow(params);
+      if (isEmptyWindow) {
+        return [];
+      }
 
       const activeSources = (settings.sources ?? []).filter(
         (s: EventSourceMapping) =>
           s.enabled &&
+          isAllowedEventSourceUid(s.uid) &&
           (!params.sourceId ||
             s.id === params.sourceId ||
             s.uid === params.sourceId)
       );
 
       const allOccurrences: ExpandedOccurrence[] = [];
+      const pendingRsvpMap = new Map<string, PendingOccurrenceRsvpMeta>();
 
       for (const source of activeSources) {
         const docs = await fetchDocumentsForSource(
@@ -122,15 +192,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           settings
         );
         for (const doc of docs) {
-          const docOccurrences = await expandDocumentOccurrences(
+          const docOccurrences = expandDocumentOccurrencesSync({
             strapi,
             doc,
             source,
             params,
             settings,
             windowStart,
-            windowEnd
-          );
+            windowEnd,
+            pendingRsvpMap,
+          });
           allOccurrences.push(...docOccurrences);
         }
       }
@@ -140,16 +211,27 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       );
 
-      return allOccurrences;
+      const sliced = clampPaginatedSlice(allOccurrences, {
+        limit: params.limit,
+        page: params.page,
+        pageSize: params.pageSize,
+        defaultLimit: params.includeDrafts ? 2000 : 500,
+        maxLimit: params.includeDrafts ? 2000 : 500,
+      });
+
+      await attachBatchedRsvpStats(strapi, sliced, pendingRsvpMap);
+      return sliced;
     },
 
-    async getActiveSpotlights(params?: {
-      date?: string;
-      locale?: string;
-      sourceId?: string;
-      category?: string;
-      includeDrafts?: boolean;
-    }): Promise<ExpandedOccurrence[]> {
+    async getActiveSpotlights(
+      params?: {
+        date?: string;
+        locale?: string;
+        sourceId?: string;
+        category?: string;
+        includeDrafts?: boolean;
+      } & PaginationParams
+    ): Promise<ExpandedOccurrence[]> {
       const refDate =
         params?.date && !Number.isNaN(new Date(params.date).getTime())
           ? new Date(params.date)
@@ -169,6 +251,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         sourceId: params?.sourceId,
         category: params?.category,
         includeDrafts: params?.includeDrafts ?? false,
+        onlySpotlights: true,
       });
 
       const active = occurrences.filter((occ) =>
@@ -180,7 +263,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         })
       );
 
-      return deduplicateAndSortSpotlights(active);
+      const sorted = deduplicateAndSortSpotlights(active);
+      return clampPaginatedSlice(sorted, {
+        limit: params?.limit,
+        page: params?.page,
+        pageSize: params?.pageSize,
+        defaultLimit: 100,
+        maxLimit: 100,
+      });
     },
 
     async rescheduleOccurrence(params: {
@@ -193,6 +283,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       applyToSeries?: boolean;
       cancelOccurrence?: boolean;
     }): Promise<Record<string, unknown>> {
+      const docId = (params.documentId ?? "").trim();
+      if (!docId) {
+        throw new PluginValidationError("Event documentId is required.");
+      }
+      validateRescheduleDates(params);
+
       const settings = await getSettingsService(strapi).getSettings();
       const source = resolveRescheduleSource(
         settings.sources,
@@ -200,26 +296,34 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         params.uid
       );
 
-      if (!source) {
-        throw new Error("Target event source is not configured.");
+      if (!source || !isAllowedEventSourceUid(source.uid)) {
+        throw new PluginValidationError(
+          "Target event source is not configured."
+        );
       }
 
       const client = getDocumentsClient(strapi, source.uid);
-      const existing = await client.findOne({ documentId: params.documentId });
+      const existing = await client.findOne({ documentId: docId });
       if (!existing) {
-        throw new Error(
-          `Document ${params.documentId} not found in ${source.uid}.`
+        throw new PluginNotFoundError(
+          `Document ${docId} not found in ${source.uid}.`
         );
       }
 
       const rruleField = source.fields.rrule;
-      const recurrence = rruleField
-        ? parseRRuleFieldValue(existing[rruleField], settings.defaultTimezone)
-        : null;
+      const recurrence =
+        rruleField && isSafeObjectKey(rruleField)
+          ? parseRRuleFieldValue(existing[rruleField], settings.defaultTimezone)
+          : null;
 
-      if (recurrence?.rrule && !params.applyToSeries && rruleField) {
+      if (
+        recurrence?.rrule &&
+        !params.applyToSeries &&
+        rruleField &&
+        isSafeObjectKey(rruleField)
+      ) {
         return client.update({
-          documentId: params.documentId,
+          documentId: docId,
           data: buildSingleOccurrenceOverridePatch(
             rruleField,
             recurrence,
@@ -229,7 +333,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       return client.update({
-        documentId: params.documentId,
+        documentId: docId,
         data: buildReschedulePayload(source, params),
       });
     },
@@ -248,8 +352,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     }): Promise<Record<string, unknown>> {
       const title = (params.title ?? "").trim();
       if (!title) {
-        throw new Error("Event title is required.");
+        throw new PluginValidationError("Event title is required.");
       }
+      const startMs = assertValidIsoDateTime(params.startDate, "startDate");
+      if (params.endDate !== undefined && params.endDate !== "") {
+        const endMs = assertValidIsoDateTime(params.endDate, "endDate");
+        if (endMs <= startMs) {
+          throw new PluginValidationError(
+            "Invalid endDate: must be after startDate."
+          );
+        }
+      }
+
       const settings = await getSettingsService(strapi).getSettings();
       const source = resolveQuickCreateSource(settings, params.sourceId);
       const data = buildQuickCreatePayload(source, settings, {

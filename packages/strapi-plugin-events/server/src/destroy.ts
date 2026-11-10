@@ -1,5 +1,7 @@
 import type { Core } from "@strapi/strapi";
 
-export default ({ strapi: _strapi }: { strapi: Core.Strapi }) => {
-  // No persistent background handles requiring manual teardown
+import { clearOccurrenceLocks } from "./services/rsvpSecurity";
+
+export default ({ strapi }: { strapi: Core.Strapi }) => {
+  clearOccurrenceLocks(strapi);
 };

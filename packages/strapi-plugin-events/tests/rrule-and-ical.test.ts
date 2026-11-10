@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 
 import {
   buildCalendarLinks,
@@ -12,6 +13,7 @@ import {
   buildRRule,
   describeRRule,
   expandRuleSlots,
+  isValidCalendarDateKey,
   parseRRule,
   parseRRuleFieldValue,
 } from "../shared/rruleEngine";
@@ -23,26 +25,37 @@ describe("RRULE Engine (RFC 5545)", () => {
       "RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR;UNTIL=20261231T235959Z";
     const parsed = parseRRule(raw);
 
-    expect(parsed.freq).toBe("WEEKLY");
-    expect(parsed.interval).toBe(2);
-    expect(parsed.byDay).toEqual(["MO", "FR"]);
-    expect(parsed.until).toBe("2026-12-31");
+    assert.equal(parsed.freq, "WEEKLY");
+    assert.equal(parsed.interval, 2);
+    assert.deepEqual(parsed.byDay, ["MO", "FR"]);
+    assert.equal(parsed.until, "2026-12-31");
 
     const rebuilt = buildRRule(parsed);
-    expect(rebuilt).toBe(
+    assert.equal(
+      rebuilt,
       "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR;UNTIL=20261231T235959Z"
     );
-    expect(describeRRule(rebuilt)).toContain(
-      "Every 2 weeks on MO, FR until 2026-12-31"
+    assert.ok(
+      describeRRule(rebuilt).includes(
+        "Every 2 weeks on MO, FR until 2026-12-31"
+      )
     );
   });
 
-  it("expands weekly Friday occurrences and respects exdates and single-instance overrides", () => {
-    // 2026-10-02 is a Friday
+  it("validates calendar YYYY-MM-DD dates strictly", () => {
+    assert.equal(isValidCalendarDateKey("2026-10-16"), true);
+    assert.equal(isValidCalendarDateKey("2024-02-29"), true);
+    assert.equal(isValidCalendarDateKey("2026-02-29"), false);
+    assert.equal(isValidCalendarDateKey("2026-02-31"), false);
+    assert.equal(isValidCalendarDateKey("2026-13-01"), false);
+    assert.equal(isValidCalendarDateKey("not-a-date"), false);
+  });
+
+  it("expands weekly Friday occurrences and respects exdates and overrides", () => {
     const recurrence = parseRRuleFieldValue({
       rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR",
       timezone: "UTC",
-      exdates: ["2026-10-09"], // Skip 2nd Friday
+      exdates: ["2026-10-09"],
       overrides: {
         "2026-10-16": {
           originalDate: "2026-10-16",
@@ -65,22 +78,25 @@ describe("RRULE Engine (RFC 5545)", () => {
       windowEnd: "2026-10-31T23:59:59.000Z",
     });
 
-    // Oct 2026 Fridays: Oct 2, Oct 9 (excluded), Oct 16 (overridden), Oct 23 (cancelled), Oct 30
-    expect(slots.map((s) => s.occurrenceDate)).toEqual([
-      "2026-10-02",
-      "2026-10-16",
-      "2026-10-30",
-    ]);
-
-    expect(slots[1].isOverridden).toBe(true);
-    expect(slots[1].startDate).toBe("2026-10-16T18:00:00.000Z");
-    expect(slots[1].override?.title).toBe("Keynote Session (Rescheduled)");
+    assert.deepEqual(
+      slots.map((s) => s.occurrenceDate),
+      ["2026-10-02", "2026-10-16", "2026-10-30"]
+    );
+    assert.equal(slots[1].isOverridden, true);
+    assert.equal(slots[1].startDate, "2026-10-16T18:00:00.000Z");
+    assert.equal(slots[1].override?.title, "Keynote Session (Rescheduled)");
   });
 
-  it("expands monthly occurrences with COUNT limit", () => {
+  it("expands monthly occurrences with COUNT limit and strips malformed override dates", () => {
     const recurrence = parseRRuleFieldValue({
       rrule: "FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=15;COUNT=3",
       timezone: "UTC",
+      overrides: {
+        "2026-02-15": {
+          originalDate: "2026-02-15",
+          startDate: "invalid-date",
+        },
+      },
     });
 
     const slots = expandRuleSlots({
@@ -91,15 +107,15 @@ describe("RRULE Engine (RFC 5545)", () => {
       windowEnd: "2026-12-31T23:59:59.000Z",
     });
 
-    expect(slots.map((s) => s.occurrenceDate)).toEqual([
-      "2026-01-15",
-      "2026-02-15",
-      "2026-03-15",
-    ]);
+    assert.deepEqual(
+      slots.map((s) => s.occurrenceDate),
+      ["2026-01-15", "2026-02-15", "2026-03-15"]
+    );
+    assert.equal(slots[1].startDate, "2026-02-15T10:00:00.000Z");
   });
 });
 
-describe("iCal (.ics) & CSV Security Utilities", () => {
+describe("iCal (.ics) RFC 5545 & CSV Security Utilities", () => {
   it("generates valid RFC 5545 VCALENDAR feed and calendar links", () => {
     const links = buildCalendarLinks({
       documentId: "doc-123",
@@ -111,9 +127,10 @@ describe("iCal (.ics) & CSV Security Utilities", () => {
       occurrenceDate: "2026-10-18",
     });
 
-    expect(links.google).toContain("calendar.google.com");
-    expect(links.outlook).toContain("outlook.live.com");
-    expect(links.icsPath).toBe(
+    assert.ok(links.google.includes("calendar.google.com"));
+    assert.ok(links.outlook.includes("outlook.live.com"));
+    assert.equal(
+      links.icsPath,
       "/api/events/doc-123/invite.ics?occurrenceDate=2026-10-18"
     );
 
@@ -139,22 +156,83 @@ describe("iCal (.ics) & CSV Security Utilities", () => {
     };
 
     const ics = generateIcsCalendar([occ], "Organization Events Calendar");
-    expect(ics).toContain("BEGIN:VCALENDAR");
-    expect(ics).toContain(
-      "SUMMARY:Annual Developer Conference\\; Special Edition"
+    assert.ok(ics.includes("BEGIN:VCALENDAR"));
+    assert.ok(
+      ics.includes("SUMMARY:Annual Developer Conference\\; Special Edition")
     );
-    expect(ics).toContain("RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR");
-    expect(ics).toContain("END:VCALENDAR");
+    assert.ok(ics.includes("RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR"));
+    assert.ok(ics.includes("END:VCALENDAR"));
   });
 
-  it("folds long ICS lines and neutralizes CSV formula injection payloads", () => {
-    const longLine = `SUMMARY:${"A".repeat(120)}`;
-    const folded = foldIcsLine(longLine);
-    expect(folded).toContain("\r\n ");
+  it("strips CRLF from RRULE, escapes bare CR, advances 1-day allDay DTEND, and folds by 75 UTF-8 octets without splitting surrogates", () => {
+    assert.equal(
+      escapeIcsText("A, B; C\rD\r\nE\nF"),
+      "A\\, B\\; C\\nD\\nE\\nF"
+    );
 
-    expect(escapeIcsText("A, B; C\nD")).toBe("A\\, B\\; C\\nD");
-    expect(sanitizeCsvCell("=cmd|'/C calc'!A0")).toBe("\"'=cmd|'/C calc'!A0\"");
-    expect(sanitizeCsvCell("+SUM(A1:A2)")).toBe('"\'+SUM(A1:A2)"');
+    const emojiTitle = `SUMMARY:${"🎉".repeat(30)}`;
+    const foldedEmoji = foldIcsLine(emojiTitle);
+    const encoder = new TextEncoder();
+    const physicalLines = foldedEmoji.split("\r\n");
+    assert.ok(physicalLines.length >= 2);
+    for (const pl of physicalLines) {
+      assert.ok(
+        encoder.encode(pl).byteLength <= 75,
+        `Folded line exceeded 75 UTF-8 octets: ${encoder.encode(pl).byteLength}`
+      );
+      assert.equal(
+        /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(
+          pl
+        ),
+        false,
+        "Folded line must never split UTF-16 surrogate pairs"
+      );
+    }
+
+    const allDayLinks = buildCalendarLinks({
+      documentId: "doc-allday",
+      title: "All-Day Retreat",
+      startDate: "2026-05-31T00:00:00.000Z",
+      endDate: "2026-05-31T23:59:59.000Z",
+      allDay: true,
+    });
+    assert.ok(allDayLinks.google.includes("dates=20260531%2F20260601"));
+
+    const allDayOcc: ExpandedOccurrence = {
+      occurrenceId: "events:doc-allday:2026-05-31",
+      sourceId: "events",
+      sourceLabel: "Events",
+      uid: "api::event.event",
+      documentId: "doc-allday",
+      occurrenceDate: "2026-05-31",
+      startDate: "2026-05-31T00:00:00.000Z",
+      endDate: "2026-05-31T23:59:59.000Z",
+      allDay: true,
+      timezone: "UTC",
+      title: "All-Day Retreat",
+      status: "scheduled",
+      color: "#0D9488",
+      isRecurring: true,
+      rrule: "FREQ=YEARLY;INTERVAL=1\r\nBEGIN:VALARM\r\nACTION:AUDIO",
+      calendarLinks: allDayLinks,
+    };
+
+    const ics = generateIcsCalendar([allDayOcc], "Feed");
+    assert.ok(ics.includes("DTSTART;VALUE=DATE:20260531"));
+    assert.ok(ics.includes("DTEND;VALUE=DATE:20260601"));
+    assert.equal(ics.includes("\r\nBEGIN:VALARM"), false);
+  });
+
+  it("neutralizes CSV formula injection payloads including pipe and leading whitespace", () => {
+    assert.equal(
+      sanitizeCsvCell("=cmd|'/C calc'!A0"),
+      "\"'=cmd|'/C calc'!A0\""
+    );
+    assert.equal(sanitizeCsvCell("+SUM(A1:A2)"), '"\'+SUM(A1:A2)"');
+    assert.equal(sanitizeCsvCell("   =SUM(A1:A2)"), '"\'   =SUM(A1:A2)"');
+    assert.equal(sanitizeCsvCell("|cmd"), '"\'|cmd"');
+    assert.equal(sanitizeCsvCell("  |cmd"), '"\'  |cmd"');
+    assert.equal(sanitizeCsvCell("\n@IMPORTXML()"), '"\'\n@IMPORTXML()"');
 
     const csv = generateRegistrationsCsv([
       {
@@ -163,13 +241,13 @@ describe("iCal (.ics) & CSV Security Utilities", () => {
         eventDocumentId: "doc-123",
         eventTitle: "Weekly Workshop",
         occurrenceDate: "2026-10-23",
-        attendeeName: "=EvilFormula",
+        attendeeName: "  =EvilFormula",
         attendeeEmail: "guest@example.org",
         guestsCount: 2,
         status: "confirmed",
         locale: "en",
       },
     ]);
-    expect(csv).toContain('"\'=EvilFormula"');
+    assert.ok(csv.includes('"\'  =EvilFormula"'));
   });
 });

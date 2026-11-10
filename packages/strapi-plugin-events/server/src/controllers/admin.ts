@@ -3,10 +3,10 @@ import type { Core } from "@strapi/strapi";
 import type { EventsPluginSettings, RsvpStatus } from "../../../shared/types";
 import {
   type StrapiKoaContext,
-  getErrorMessage,
   getOccurrenceService,
   getRsvpService,
   getSettingsService,
+  handleControllerError,
 } from "../types";
 
 function optStr(val: unknown): string | undefined {
@@ -14,7 +14,16 @@ function optStr(val: unknown): string | undefined {
 }
 
 function optNum(val: unknown): number | undefined {
-  return typeof val === "number" ? val : undefined;
+  return typeof val === "number" && Number.isFinite(val) ? val : undefined;
+}
+
+function optQueryInt(val: unknown): number | undefined {
+  if (typeof val === "number" && Number.isFinite(val)) return val;
+  if (typeof val === "string" && val.trim() !== "") {
+    const parsed = Number(val);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
 }
 
 function buildRescheduleInput(body: Record<string, unknown>) {
@@ -53,10 +62,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async updateSettings(ctx: StrapiKoaContext) {
-      const payload = (ctx.request?.body ??
-        {}) as Partial<EventsPluginSettings>;
-      const data = await getSettingsService(strapi).updateSettings(payload);
-      ctx.body = { data };
+      try {
+        const payload = (ctx.request?.body ??
+          {}) as Partial<EventsPluginSettings>;
+        const data = await getSettingsService(strapi).updateSettings(payload);
+        ctx.body = { data };
+      } catch (err: unknown) {
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Unable to update settings."
+        );
+      }
     },
 
     async getCalendar(ctx: StrapiKoaContext) {
@@ -69,6 +87,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         sourceId: optStr(q.sourceId),
         locale: optStr(q.locale),
         includeDrafts: true,
+        limit: optQueryInt(q.limit),
+        page: optQueryInt(q.page),
+        pageSize: optQueryInt(q.pageSize),
       });
 
       ctx.body = {
@@ -87,8 +108,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: updated };
       } catch (err: unknown) {
-        ctx.badRequest(
-          getErrorMessage(err, "Unable to reschedule event occurrence.")
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Unable to reschedule event occurrence."
         );
       }
     },
@@ -102,7 +126,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ctx.status = 201;
         ctx.body = { data: created };
       } catch (err: unknown) {
-        ctx.badRequest(getErrorMessage(err, "Unable to create event."));
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Unable to create event."
+        );
       }
     },
 
@@ -113,6 +142,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         eventUid: optStr(q.eventUid),
         eventDocumentId: String(documentId ?? ""),
         occurrenceDate: optStr(q.occurrenceDate) ?? null,
+        includeDrafts: true,
       });
       ctx.body = { data };
     },
@@ -124,6 +154,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         occurrenceDate: optStr(q.occurrenceDate),
         status: optStr(q.status) as RsvpStatus | undefined,
         search: optStr(q.search),
+        limit: optQueryInt(q.limit),
+        page: optQueryInt(q.page),
+        pageSize: optQueryInt(q.pageSize),
       });
       ctx.body = { data };
     },
@@ -138,8 +171,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         );
         ctx.body = { data: result };
       } catch (err: unknown) {
-        ctx.badRequest(
-          getErrorMessage(err, "Failed to update registration status.")
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Failed to update registration status."
         );
       }
     },
@@ -154,7 +190,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         });
         ctx.body = { data };
       } catch (err: unknown) {
-        ctx.badRequest(getErrorMessage(err, "Check-in failed."));
+        return handleControllerError(strapi, ctx, err, "Check-in failed.");
       }
     },
 

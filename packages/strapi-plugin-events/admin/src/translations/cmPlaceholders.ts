@@ -82,7 +82,7 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<
     "content-manager.content-types.plugin::events.registration.attendeeName.placeholder":
       "Enter attendee full name...",
     "content-manager.content-types.plugin::events.registration.attendeeEmail.placeholder":
-      "info@mezquitabogota.org",
+      "attendee@example.org",
     "content-manager.content-types.plugin::events.registration.attendeePhone.placeholder":
       "+57 310 555 0199",
     "content-manager.content-types.plugin::events.registration.guestsCount.placeholder":
@@ -180,7 +180,7 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<
     "content-manager.content-types.plugin::events.registration.attendeeName.placeholder":
       "Ingresa nombre completo del asistente...",
     "content-manager.content-types.plugin::events.registration.attendeeEmail.placeholder":
-      "info@mezquitabogota.org",
+      "attendee@example.org",
     "content-manager.content-types.plugin::events.registration.attendeePhone.placeholder":
       "+57 310 555 0199",
     "content-manager.content-types.plugin::events.registration.guestsCount.placeholder":
@@ -278,7 +278,7 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<
     "content-manager.content-types.plugin::events.registration.attendeeName.placeholder":
       "أدخل الاسم الكامل للحاضر...",
     "content-manager.content-types.plugin::events.registration.attendeeEmail.placeholder":
-      "info@mezquitabogota.org",
+      "attendee@example.org",
     "content-manager.content-types.plugin::events.registration.attendeePhone.placeholder":
       "+57 310 555 0199",
     "content-manager.content-types.plugin::events.registration.guestsCount.placeholder":
@@ -376,7 +376,7 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<
     "content-manager.content-types.plugin::events.registration.attendeeName.placeholder":
       "Katılımcı Adı Soyadı girin...",
     "content-manager.content-types.plugin::events.registration.attendeeEmail.placeholder":
-      "info@mezquitabogota.org",
+      "attendee@example.org",
     "content-manager.content-types.plugin::events.registration.attendeePhone.placeholder":
       "+57 310 555 0199",
     "content-manager.content-types.plugin::events.registration.guestsCount.placeholder":

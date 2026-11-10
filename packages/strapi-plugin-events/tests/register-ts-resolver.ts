@@ -4,40 +4,29 @@ import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
-const vitestShimUrl = pathToFileURL(
-  resolvePath(currentDir, "vitest-shim.ts")
+const pluginSharedEntry = pathToFileURL(
+  resolvePath(currentDir, "../../plugin-shared/src/index.ts")
 ).href;
 const calendarPkgRoot = resolvePath(currentDir, "../../strapi-plugin-calendar");
-const intlDateShimUrl = pathToFileURL(
-  resolvePath(calendarPkgRoot, "tests/intl-date-shim.mjs")
-).href;
+
+const WORKSPACE_SPECIFIERS: Record<string, string> = {
+  "@vicacha-devs/plugin-shared": pluginSharedEntry,
+  "@vicacha-devs/strapi-plugin-calendar/shared": pathToFileURL(
+    resolvePath(calendarPkgRoot, "shared/index.ts")
+  ).href,
+  "@vicacha-devs/strapi-plugin-calendar/strapi-admin": pathToFileURL(
+    resolvePath(calendarPkgRoot, "admin/src/index.ts")
+  ).href,
+  "@vicacha-devs/strapi-plugin-calendar/strapi-server": pathToFileURL(
+    resolvePath(calendarPkgRoot, "server/src/index.ts")
+  ).href,
+};
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (specifier === "vitest") {
-      return { url: vitestShimUrl, shortCircuit: true };
-    }
-    if (specifier === "@internationalized/date") {
-      return { url: intlDateShimUrl, shortCircuit: true };
-    }
-    if (specifier === "@vicacha-devs/strapi-plugin-calendar/shared") {
+    if (Object.hasOwn(WORKSPACE_SPECIFIERS, specifier)) {
       return {
-        url: pathToFileURL(resolvePath(calendarPkgRoot, "shared/index.ts"))
-          .href,
-        shortCircuit: true,
-      };
-    }
-    if (specifier === "@vicacha-devs/strapi-plugin-calendar/strapi-admin") {
-      return {
-        url: pathToFileURL(resolvePath(calendarPkgRoot, "admin/src/index.ts"))
-          .href,
-        shortCircuit: true,
-      };
-    }
-    if (specifier === "@vicacha-devs/strapi-plugin-calendar/strapi-server") {
-      return {
-        url: pathToFileURL(resolvePath(calendarPkgRoot, "server/src/index.ts"))
-          .href,
+        url: WORKSPACE_SPECIFIERS[specifier],
         shortCircuit: true,
       };
     }

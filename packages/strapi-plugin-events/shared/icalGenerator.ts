@@ -5,6 +5,8 @@ import type {
   RsvpRegistrationRecord,
 } from "./types";
 
+const utf8Encoder = new TextEncoder();
+
 export function toIcsTimestamp(isoString: string, allDay = false): string {
   const d = new Date(isoString);
   if (Number.isNaN(d.getTime())) {
@@ -17,26 +19,65 @@ export function toIcsTimestamp(isoString: string, allDay = false): string {
   return iso.replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }
 
+function resolveExclusiveAllDayEndStamp(
+  startDate: string,
+  endDate: string,
+  dtStartStamp: string
+): string {
+  const rawEndStamp = toIcsTimestamp(endDate, true);
+  if (rawEndStamp && rawEndStamp > dtStartStamp) {
+    return rawEndStamp;
+  }
+  const startObj = new Date(startDate);
+  if (Number.isNaN(startObj.getTime())) {
+    return rawEndStamp;
+  }
+  const nextDay = new Date(
+    Date.UTC(
+      startObj.getUTCFullYear(),
+      startObj.getUTCMonth(),
+      startObj.getUTCDate() + 1
+    )
+  );
+  return nextDay.toISOString().slice(0, 10).replace(/-/g, "");
+}
+
 export function escapeIcsText(value: string | undefined | null): string {
   if (!value) return "";
   return String(value)
     .replace(/\\/g, "\\\\")
-    .replace(/\r?\n/g, "\\n")
+    .replace(/\r\n|\r|\n/g, "\\n")
     .replace(/;/g, "\\;")
     .replace(/,/g, "\\,");
 }
 
+/**
+ * Folds an iCalendar line at 75 UTF-8 octets per RFC 5545 Section 3.1,
+ * iterating over Unicode code points so surrogate pairs are never split.
+ */
 export function foldIcsLine(line: string): string {
-  if (line.length <= 75) {
+  if (utf8Encoder.encode(line).byteLength <= 75) {
     return line;
   }
   const chunks: string[] = [];
-  let remaining = line;
-  chunks.push(remaining.slice(0, 75));
-  remaining = remaining.slice(75);
-  while (remaining.length > 0) {
-    chunks.push(` ${remaining.slice(0, 74)}`);
-    remaining = remaining.slice(74);
+  let currentChunk = "";
+  let currentBytes = 0;
+  let maxBytes = 75;
+
+  for (const codePoint of line) {
+    const byteLen = utf8Encoder.encode(codePoint).byteLength;
+    if (currentBytes + byteLen > maxBytes && currentChunk.length > 0) {
+      chunks.push(chunks.length === 0 ? currentChunk : ` ${currentChunk}`);
+      currentChunk = codePoint;
+      currentBytes = byteLen;
+      maxBytes = 74;
+    } else {
+      currentChunk += codePoint;
+      currentBytes += byteLen;
+    }
+  }
+  if (currentChunk.length > 0) {
+    chunks.push(chunks.length === 0 ? currentChunk : ` ${currentChunk}`);
   }
   return chunks.join("\r\n");
 }
@@ -63,7 +104,9 @@ export function buildCalendarLinks(params: {
   } = params;
 
   const icsStart = toIcsTimestamp(startDate, allDay);
-  const icsEnd = toIcsTimestamp(endDate, allDay);
+  const icsEnd = allDay
+    ? resolveExclusiveAllDayEndStamp(startDate, endDate, icsStart)
+    : toIcsTimestamp(endDate, false);
 
   const googleParams = new URLSearchParams({
     action: "TEMPLATE",
@@ -111,29 +154,40 @@ const ICS_STATUS_MAP: Record<string, string> = {
 };
 
 function resolveIcsStatus(status: string): string {
-  return ICS_STATUS_MAP[status] ?? "CONFIRMED";
+  return Object.hasOwn(ICS_STATUS_MAP, status)
+    ? ICS_STATUS_MAP[status]
+    : "CONFIRMED";
 }
 
 function appendVEventDateLines(lines: string[], occ: ExpandedOccurrence): void {
   const isAllDay = Boolean(occ.allDay);
   const prefix = isAllDay ? ";VALUE=DATE" : "";
-  lines.push(`DTSTART${prefix}:${toIcsTimestamp(occ.startDate, isAllDay)}`);
-  lines.push(`DTEND${prefix}:${toIcsTimestamp(occ.endDate, isAllDay)}`);
+  const startStamp = toIcsTimestamp(occ.startDate, isAllDay);
+  const endStamp = isAllDay
+    ? resolveExclusiveAllDayEndStamp(occ.startDate, occ.endDate, startStamp)
+    : toIcsTimestamp(occ.endDate, false);
+  lines.push(`DTSTART${prefix}:${startStamp}`);
+  lines.push(`DTEND${prefix}:${endStamp}`);
 }
 
 function appendVEventOptionalLines(
   lines: string[],
   occ: ExpandedOccurrence
 ): void {
-  if (occ.summary)
+  if (occ.summary) {
     lines.push(foldIcsLine(`DESCRIPTION:${escapeIcsText(occ.summary)}`));
-  if (occ.location)
+  }
+  if (occ.location) {
     lines.push(foldIcsLine(`LOCATION:${escapeIcsText(occ.location)}`));
-  if (occ.virtualUrl)
+  }
+  if (occ.virtualUrl) {
     lines.push(foldIcsLine(`URL:${escapeIcsText(occ.virtualUrl)}`));
+  }
   if (occ.isRecurring && occ.rrule) {
-    const normalized = normalizeRRuleString(occ.rrule);
-    if (normalized) lines.push(foldIcsLine(`RRULE:${normalized}`));
+    const normalized = normalizeRRuleString(occ.rrule).replace(/[\r\n]+/g, "");
+    if (normalized) {
+      lines.push(foldIcsLine(`RRULE:${normalized}`));
+    }
   }
 }
 
@@ -168,14 +222,15 @@ export function generateIcsCalendar(
 }
 
 /**
- * Prevents CSV Formula Injection (CWE-1236) and escapes quotes/newlines.
+ * Prevents CSV Formula Injection (CWE-1236) including leading-whitespace
+ * bypasses and escapes quotes/newlines.
  */
 export function sanitizeCsvCell(raw: unknown): string {
   if (raw === null || raw === undefined) {
     return '""';
   }
   let text = String(raw);
-  if (/^[=+\-@\t\r]/.test(text)) {
+  if (/^[\s\u0085\u2028\u2029]*[=+\-@|]|^[\t\r\n]/.test(text)) {
     text = `'${text}`;
   }
   const escaped = text.replace(/"/g, '""');

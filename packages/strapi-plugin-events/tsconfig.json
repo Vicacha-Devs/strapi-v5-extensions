@@ -11,8 +11,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "paths": {
+      "@vicacha-devs/plugin-shared": ["../plugin-shared/src/index.ts"],
       "@vicacha-devs/strapi-plugin-calendar/shared": [
         "../strapi-plugin-calendar/shared/index.ts"
       ],
