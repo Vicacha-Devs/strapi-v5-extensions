@@ -1,0 +1,144 @@
+{
+  "kind": "collectionType",
+  "collectionName": "booking_resources",
+  "info": {
+    "singularName": "resource",
+    "pluralName": "resources",
+    "displayName": "Booking Resource",
+    "description": "Bookable service, appointment type, room, staff member, or equipment schedule"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 160
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "resourceType": {
+      "type": "enumeration",
+      "enum": ["service", "appointment", "room", "staff", "equipment", "other"],
+      "default": "service",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "color": {
+      "type": "string",
+      "default": "#0d9488",
+      "maxLength": 32
+    },
+    "timezone": {
+      "type": "string",
+      "default": "UTC",
+      "maxLength": 64
+    },
+    "slotDurationMinutes": {
+      "type": "integer",
+      "default": 60,
+      "min": 5,
+      "max": 1440,
+      "required": true
+    },
+    "bufferBeforeMinutes": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "max": 720
+    },
+    "bufferAfterMinutes": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "max": 720
+    },
+    "capacityPerSlot": {
+      "type": "integer",
+      "default": 1,
+      "min": 1,
+      "required": true
+    },
+    "maxPartySize": {
+      "type": "integer",
+      "default": 50,
+      "min": 1
+    },
+    "minLeadTimeHours": {
+      "type": "integer",
+      "default": 2,
+      "min": 0
+    },
+    "maxAdvanceDays": {
+      "type": "integer",
+      "default": 90,
+      "min": 1
+    },
+    "requiresApproval": {
+      "type": "boolean",
+      "default": false
+    },
+    "weeklySchedule": {
+      "type": "json"
+    },
+    "seasonalSchedules": {
+      "type": "json"
+    },
+    "holidayRules": {
+      "type": "json"
+    },
+    "blackoutDates": {
+      "type": "json"
+    },
+    "recurrenceRule": {
+      "type": "string"
+    },
+    "supportedLanguages": {
+      "type": "json"
+    },
+    "assignedHosts": {
+      "type": "json"
+    },
+    "location": {
+      "type": "string",
+      "maxLength": 240
+    },
+    "price": {
+      "type": "decimal",
+      "default": 0,
+      "min": 0
+    },
+    "currency": {
+      "type": "string",
+      "default": "USD",
+      "maxLength": 10
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true
+    },
+    "metadata": {
+      "type": "json"
+    },
+    "bookings": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::bookings.booking",
+      "mappedBy": "resource"
+    }
+  }
+}

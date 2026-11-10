@@ -1,0 +1,373 @@
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
+  en: {
+    "content-manager.content-types.plugin::resources.publication.title.placeholder":
+      "Enter title...",
+    "content-manager.content-types.plugin::resources.publication.slug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::resources.publication.summary.placeholder":
+      "Enter summary...",
+    "content-manager.content-types.plugin::resources.publication.authorName.placeholder":
+      "Enter author name...",
+    "content-manager.content-types.plugin::resources.publication.authorSlug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::resources.publication.isbnOrReference.placeholder":
+      "Enter isbn or institutional reference code...",
+    "content-manager.content-types.plugin::resources.publication.pageCount.placeholder":
+      "Enter number of pages...",
+    "content-manager.content-types.plugin::resources.publication.languageCode.placeholder":
+      "e.g., es, en, ar, tr",
+    "content-manager.content-types.plugin::resources.publication.publishedAtDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::resources.publication.secondaryDateOverride.placeholder":
+      "e.g., 15 Ramadan 1447 AH",
+    "content-manager.content-types.plugin::resources.publication.mediaFolderPath.placeholder":
+      "Enter media library folder path...",
+    "content-manager.content-types.plugin::resources.publication.externalDownloadUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::resources.gallery-album.title.placeholder":
+      "Enter title...",
+    "content-manager.content-types.plugin::resources.gallery-album.slug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::resources.gallery-album.description.placeholder":
+      "Enter description...",
+    "content-manager.content-types.plugin::resources.gallery-album.mediaFolderPath.placeholder":
+      "Enter media library folder path...",
+    "content-manager.content-types.plugin::resources.gallery-album.eventDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::resources.gallery-album.secondaryDateOverride.placeholder":
+      "e.g., 15 Ramadan 1447 AH",
+    "content-manager.content-types.plugin::resources.gallery-album.photographerCredit.placeholder":
+      "Enter photographer / source credit...",
+    "content-manager.content-types.plugin::resources.gallery-album.framingNotes.placeholder":
+      "Enter curatorial & framing notes...",
+    "content-manager.content-types.plugin::resources.glossary-term.term.placeholder":
+      "Enter glossary term...",
+    "content-manager.content-types.plugin::resources.glossary-term.slug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::resources.glossary-term.nativeScript.placeholder":
+      "Enter original arabic script...",
+    "content-manager.content-types.plugin::resources.glossary-term.transliteration.placeholder":
+      "Enter transliteration...",
+    "content-manager.content-types.plugin::resources.glossary-term.definition.placeholder":
+      "Enter definition & explanation...",
+    "content-manager.content-types.plugin::resources.glossary-term.letterGroup.placeholder":
+      "Enter alphabetical letter group (a–z)...",
+    "content-manager.content-types.plugin::resources.gallery-album.category.placeholder":
+      "Enter category...",
+    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto.placeholder":
+      "Enter cover photo...",
+    "content-manager.content-types.plugin::resources.gallery-album.photos.placeholder":
+      "Enter photos...",
+    "content-manager.content-types.plugin::resources.gallery-album.mediaFolderId.placeholder":
+      "Enter media library folder id...",
+    "content-manager.content-types.plugin::resources.gallery-album.featured.placeholder":
+      "Enter featured...",
+    "content-manager.content-types.plugin::resources.gallery-album.sortOrder.placeholder":
+      "Enter sort order...",
+    "content-manager.content-types.plugin::resources.gallery-album.documentId.placeholder":
+      "Enter document id...",
+    "content-manager.content-types.plugin::resources.glossary-term.category.placeholder":
+      "Enter category...",
+    "content-manager.content-types.plugin::resources.glossary-term.pronunciationAudio.placeholder":
+      "Enter pronunciation audio file...",
+    "content-manager.content-types.plugin::resources.glossary-term.relatedTerms.placeholder":
+      "Enter related glossary terms...",
+    "content-manager.content-types.plugin::resources.glossary-term.featured.placeholder":
+      "Enter featured...",
+    "content-manager.content-types.plugin::resources.glossary-term.documentId.placeholder":
+      "Enter document id...",
+    "content-manager.content-types.plugin::resources.publication.category.placeholder":
+      "Enter category...",
+    "content-manager.content-types.plugin::resources.publication.file.placeholder":
+      "Enter document / publication file (pdf)...",
+    "content-manager.content-types.plugin::resources.publication.coverImage.placeholder":
+      "Enter cover image...",
+    "content-manager.content-types.plugin::resources.publication.downloadCount.placeholder":
+      "Enter total downloads...",
+    "content-manager.content-types.plugin::resources.publication.featured.placeholder":
+      "Enter featured...",
+    "content-manager.content-types.plugin::resources.publication.allowPublicDownload.placeholder":
+      "Enter allow public download...",
+    "content-manager.content-types.plugin::resources.publication.documentId.placeholder":
+      "Enter document id...",
+  },
+  es: {
+    "content-manager.content-types.plugin::resources.publication.title.placeholder":
+      "Ingresa título...",
+    "content-manager.content-types.plugin::resources.publication.slug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::resources.publication.summary.placeholder":
+      "Ingresa resumen...",
+    "content-manager.content-types.plugin::resources.publication.authorName.placeholder":
+      "Ingresa nombre del autor...",
+    "content-manager.content-types.plugin::resources.publication.authorSlug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::resources.publication.isbnOrReference.placeholder":
+      "Ingresa isbn o código de referencia institucional...",
+    "content-manager.content-types.plugin::resources.publication.pageCount.placeholder":
+      "Ingresa número de páginas...",
+    "content-manager.content-types.plugin::resources.publication.languageCode.placeholder":
+      "ej., es, en, ar, tr",
+    "content-manager.content-types.plugin::resources.publication.publishedAtDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::resources.publication.secondaryDateOverride.placeholder":
+      "ej., 15 Ramadán 1447 AH",
+    "content-manager.content-types.plugin::resources.publication.mediaFolderPath.placeholder":
+      "Ingresa ruta de carpeta en biblioteca de medios...",
+    "content-manager.content-types.plugin::resources.publication.externalDownloadUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::resources.gallery-album.title.placeholder":
+      "Ingresa título...",
+    "content-manager.content-types.plugin::resources.gallery-album.slug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::resources.gallery-album.description.placeholder":
+      "Ingresa descripción...",
+    "content-manager.content-types.plugin::resources.gallery-album.mediaFolderPath.placeholder":
+      "Ingresa ruta de carpeta en biblioteca de medios...",
+    "content-manager.content-types.plugin::resources.gallery-album.eventDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::resources.gallery-album.secondaryDateOverride.placeholder":
+      "ej., 15 Ramadán 1447 AH",
+    "content-manager.content-types.plugin::resources.gallery-album.photographerCredit.placeholder":
+      "Ingresa crédito fotográfico / autor...",
+    "content-manager.content-types.plugin::resources.gallery-album.framingNotes.placeholder":
+      "Ingresa notas de curaduría y encuadre...",
+    "content-manager.content-types.plugin::resources.glossary-term.term.placeholder":
+      "Ingresa término del glosario...",
+    "content-manager.content-types.plugin::resources.glossary-term.slug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::resources.glossary-term.nativeScript.placeholder":
+      "Ingresa escritura original en árabe...",
+    "content-manager.content-types.plugin::resources.glossary-term.transliteration.placeholder":
+      "Ingresa transliteración (fonética)...",
+    "content-manager.content-types.plugin::resources.glossary-term.definition.placeholder":
+      "Ingresa definición y explicación...",
+    "content-manager.content-types.plugin::resources.glossary-term.letterGroup.placeholder":
+      "Ingresa letra inicial (índice alfabético)...",
+    "content-manager.content-types.plugin::resources.gallery-album.category.placeholder":
+      "Ingresa categoría...",
+    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto.placeholder":
+      "Ingresa foto de portada...",
+    "content-manager.content-types.plugin::resources.gallery-album.photos.placeholder":
+      "Ingresa fotografías...",
+    "content-manager.content-types.plugin::resources.gallery-album.mediaFolderId.placeholder":
+      "Ingresa id de carpeta en biblioteca de medios...",
+    "content-manager.content-types.plugin::resources.gallery-album.featured.placeholder":
+      "Ingresa destacado...",
+    "content-manager.content-types.plugin::resources.gallery-album.sortOrder.placeholder":
+      "Ingresa orden de clasificación...",
+    "content-manager.content-types.plugin::resources.gallery-album.documentId.placeholder":
+      "Ingresa id del documento...",
+    "content-manager.content-types.plugin::resources.glossary-term.category.placeholder":
+      "Ingresa categoría...",
+    "content-manager.content-types.plugin::resources.glossary-term.pronunciationAudio.placeholder":
+      "Ingresa audio de pronunciación...",
+    "content-manager.content-types.plugin::resources.glossary-term.relatedTerms.placeholder":
+      "Ingresa términos relacionados...",
+    "content-manager.content-types.plugin::resources.glossary-term.featured.placeholder":
+      "Ingresa destacado...",
+    "content-manager.content-types.plugin::resources.glossary-term.documentId.placeholder":
+      "Ingresa id del documento...",
+    "content-manager.content-types.plugin::resources.publication.category.placeholder":
+      "Ingresa categoría...",
+    "content-manager.content-types.plugin::resources.publication.file.placeholder":
+      "Ingresa archivo de la publicación (pdf)...",
+    "content-manager.content-types.plugin::resources.publication.coverImage.placeholder":
+      "Ingresa imagen de portada...",
+    "content-manager.content-types.plugin::resources.publication.downloadCount.placeholder":
+      "Ingresa total de descargas...",
+    "content-manager.content-types.plugin::resources.publication.featured.placeholder":
+      "Ingresa destacado...",
+    "content-manager.content-types.plugin::resources.publication.allowPublicDownload.placeholder":
+      "Ingresa permitir descarga pública...",
+    "content-manager.content-types.plugin::resources.publication.documentId.placeholder":
+      "Ingresa id del documento...",
+  },
+  ar: {
+    "content-manager.content-types.plugin::resources.publication.title.placeholder":
+      "أدخل العنوان...",
+    "content-manager.content-types.plugin::resources.publication.slug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::resources.publication.summary.placeholder":
+      "أدخل الملخص...",
+    "content-manager.content-types.plugin::resources.publication.authorName.placeholder":
+      "أدخل اسم المؤلف...",
+    "content-manager.content-types.plugin::resources.publication.authorSlug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::resources.publication.isbnOrReference.placeholder":
+      "أدخل الرقم المعياري (ISBN) أو رمز المرجع...",
+    "content-manager.content-types.plugin::resources.publication.pageCount.placeholder":
+      "أدخل عدد الصفحات...",
+    "content-manager.content-types.plugin::resources.publication.languageCode.placeholder":
+      "مثال: es, en, ar, tr",
+    "content-manager.content-types.plugin::resources.publication.publishedAtDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::resources.publication.secondaryDateOverride.placeholder":
+      "مثال: ١٥ رمضان ١٤٤٧ هـ",
+    "content-manager.content-types.plugin::resources.publication.mediaFolderPath.placeholder":
+      "أدخل مسار مجلد مكتبة الوسائط...",
+    "content-manager.content-types.plugin::resources.publication.externalDownloadUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::resources.gallery-album.title.placeholder":
+      "أدخل العنوان...",
+    "content-manager.content-types.plugin::resources.gallery-album.slug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::resources.gallery-album.description.placeholder":
+      "أدخل الوصف...",
+    "content-manager.content-types.plugin::resources.gallery-album.mediaFolderPath.placeholder":
+      "أدخل مسار مجلد مكتبة الوسائط...",
+    "content-manager.content-types.plugin::resources.gallery-album.eventDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::resources.gallery-album.secondaryDateOverride.placeholder":
+      "مثال: ١٥ رمضان ١٤٤٧ هـ",
+    "content-manager.content-types.plugin::resources.gallery-album.photographerCredit.placeholder":
+      "أدخل حقوق التصوير / المصور...",
+    "content-manager.content-types.plugin::resources.gallery-album.framingNotes.placeholder":
+      "أدخل ملاحظات العرض والتأطير...",
+    "content-manager.content-types.plugin::resources.glossary-term.term.placeholder":
+      "أدخل المصطلح...",
+    "content-manager.content-types.plugin::resources.glossary-term.slug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::resources.glossary-term.nativeScript.placeholder":
+      "أدخل الرسم العربي الأصلي...",
+    "content-manager.content-types.plugin::resources.glossary-term.transliteration.placeholder":
+      "أدخل النقل الصوتي...",
+    "content-manager.content-types.plugin::resources.glossary-term.definition.placeholder":
+      "أدخل التعريف والشرح...",
+    "content-manager.content-types.plugin::resources.glossary-term.letterGroup.placeholder":
+      "أدخل الحرف الأبجدي للتصنيف...",
+    "content-manager.content-types.plugin::resources.gallery-album.category.placeholder":
+      "أدخل الفئة...",
+    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto.placeholder":
+      "أدخل صورة الغلاف...",
+    "content-manager.content-types.plugin::resources.gallery-album.photos.placeholder":
+      "أدخل الصور...",
+    "content-manager.content-types.plugin::resources.gallery-album.mediaFolderId.placeholder":
+      "أدخل معرف مجلد مكتبة الوسائط...",
+    "content-manager.content-types.plugin::resources.gallery-album.featured.placeholder":
+      "أدخل مميز...",
+    "content-manager.content-types.plugin::resources.gallery-album.sortOrder.placeholder":
+      "أدخل ترتيب الفرز...",
+    "content-manager.content-types.plugin::resources.gallery-album.documentId.placeholder":
+      "أدخل معرف المستند...",
+    "content-manager.content-types.plugin::resources.glossary-term.category.placeholder":
+      "أدخل الفئة...",
+    "content-manager.content-types.plugin::resources.glossary-term.pronunciationAudio.placeholder":
+      "أدخل ملف صوت النطق...",
+    "content-manager.content-types.plugin::resources.glossary-term.relatedTerms.placeholder":
+      "أدخل المصطلحات ذات الصلة...",
+    "content-manager.content-types.plugin::resources.glossary-term.featured.placeholder":
+      "أدخل مميز...",
+    "content-manager.content-types.plugin::resources.glossary-term.documentId.placeholder":
+      "أدخل معرف المستند...",
+    "content-manager.content-types.plugin::resources.publication.category.placeholder":
+      "أدخل الفئة...",
+    "content-manager.content-types.plugin::resources.publication.file.placeholder":
+      "أدخل ملف المنشور / الوثيقة (PDF)...",
+    "content-manager.content-types.plugin::resources.publication.coverImage.placeholder":
+      "أدخل صورة الغلاف...",
+    "content-manager.content-types.plugin::resources.publication.downloadCount.placeholder":
+      "أدخل إجمالي مرات التحميل...",
+    "content-manager.content-types.plugin::resources.publication.featured.placeholder":
+      "أدخل مميز...",
+    "content-manager.content-types.plugin::resources.publication.allowPublicDownload.placeholder":
+      "أدخل السماح بالتحميل العام...",
+    "content-manager.content-types.plugin::resources.publication.documentId.placeholder":
+      "أدخل معرف المستند...",
+  },
+  tr: {
+    "content-manager.content-types.plugin::resources.publication.title.placeholder":
+      "Başlık girin...",
+    "content-manager.content-types.plugin::resources.publication.slug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::resources.publication.summary.placeholder":
+      "Özet girin...",
+    "content-manager.content-types.plugin::resources.publication.authorName.placeholder":
+      "Yazar Adı girin...",
+    "content-manager.content-types.plugin::resources.publication.authorSlug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::resources.publication.isbnOrReference.placeholder":
+      "ISBN veya Kurumsal Referans Kodu girin...",
+    "content-manager.content-types.plugin::resources.publication.pageCount.placeholder":
+      "Sayfa Sayısı girin...",
+    "content-manager.content-types.plugin::resources.publication.languageCode.placeholder":
+      "örn., es, en, ar, tr",
+    "content-manager.content-types.plugin::resources.publication.publishedAtDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::resources.publication.secondaryDateOverride.placeholder":
+      "örn., 15 Ramazan 1447 H",
+    "content-manager.content-types.plugin::resources.publication.mediaFolderPath.placeholder":
+      "Medya Kütüphanesi Klasör Yolu girin...",
+    "content-manager.content-types.plugin::resources.publication.externalDownloadUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::resources.gallery-album.title.placeholder":
+      "Başlık girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.slug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::resources.gallery-album.description.placeholder":
+      "Açıklama girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.mediaFolderPath.placeholder":
+      "Medya Kütüphanesi Klasör Yolu girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.eventDate.placeholder":
+      "YYYY-MM-DD",
+    "content-manager.content-types.plugin::resources.gallery-album.secondaryDateOverride.placeholder":
+      "örn., 15 Ramazan 1447 H",
+    "content-manager.content-types.plugin::resources.gallery-album.photographerCredit.placeholder":
+      "Fotoğrafçı / Kaynak Kredisi girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.framingNotes.placeholder":
+      "Kürasyon ve Çerçeveleme Notları girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.term.placeholder":
+      "Sözlük Terimi girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.slug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::resources.glossary-term.nativeScript.placeholder":
+      "Arapça Orijinal Yazımı girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.transliteration.placeholder":
+      "Okunuş (Transliterasyon) girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.definition.placeholder":
+      "Tanım ve Açıklama girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.letterGroup.placeholder":
+      "Alfabetik Harf Grubu girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.category.placeholder":
+      "Kategori girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.coverPhoto.placeholder":
+      "Kapak Fotoğrafı girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.photos.placeholder":
+      "Fotoğraflar girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.mediaFolderId.placeholder":
+      "Medya Kütüphanesi Klasör Kimliği girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.featured.placeholder":
+      "Öne Çıkan girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.sortOrder.placeholder":
+      "Sıralama Düzeni girin...",
+    "content-manager.content-types.plugin::resources.gallery-album.documentId.placeholder":
+      "Belge Kimliği (ID) girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.category.placeholder":
+      "Kategori girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.pronunciationAudio.placeholder":
+      "Telaffuz Ses Dosyası girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.relatedTerms.placeholder":
+      "İlgili Terimler girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.featured.placeholder":
+      "Öne Çıkan girin...",
+    "content-manager.content-types.plugin::resources.glossary-term.documentId.placeholder":
+      "Belge Kimliği (ID) girin...",
+    "content-manager.content-types.plugin::resources.publication.category.placeholder":
+      "Kategori girin...",
+    "content-manager.content-types.plugin::resources.publication.file.placeholder":
+      "Yayın / Belge Dosyası (PDF) girin...",
+    "content-manager.content-types.plugin::resources.publication.coverImage.placeholder":
+      "Kapak Görseli girin...",
+    "content-manager.content-types.plugin::resources.publication.downloadCount.placeholder":
+      "Toplam İndirme Sayısı girin...",
+    "content-manager.content-types.plugin::resources.publication.featured.placeholder":
+      "Öne Çıkan girin...",
+    "content-manager.content-types.plugin::resources.publication.allowPublicDownload.placeholder":
+      "Herkese Açık İndirmeye İzin Ver girin...",
+    "content-manager.content-types.plugin::resources.publication.documentId.placeholder":
+      "Belge Kimliği (ID) girin...",
+  },
+};

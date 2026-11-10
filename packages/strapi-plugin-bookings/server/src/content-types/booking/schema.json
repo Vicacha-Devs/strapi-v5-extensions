@@ -1,0 +1,114 @@
+{
+  "kind": "collectionType",
+  "collectionName": "bookings",
+  "info": {
+    "singularName": "booking",
+    "pluralName": "bookings",
+    "displayName": "Booking",
+    "description": "Reservation, appointment, or resource slot booking"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "bookingCode": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 48
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "resource": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::bookings.resource",
+      "inversedBy": "bookings"
+    },
+    "customerName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 120
+    },
+    "customerEmail": {
+      "type": "email",
+      "required": true
+    },
+    "customerPhone": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "organization": {
+      "type": "string",
+      "maxLength": 160
+    },
+    "startDate": {
+      "type": "datetime",
+      "required": true
+    },
+    "endDate": {
+      "type": "datetime",
+      "required": true
+    },
+    "slotLabel": {
+      "type": "string",
+      "maxLength": 80
+    },
+    "timezone": {
+      "type": "string",
+      "default": "UTC",
+      "maxLength": 64
+    },
+    "partySize": {
+      "type": "integer",
+      "required": true,
+      "default": 1,
+      "min": 1
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "confirmed", "completed", "cancelled", "no_show"],
+      "default": "pending",
+      "required": true
+    },
+    "preferredLanguage": {
+      "type": "string",
+      "maxLength": 16
+    },
+    "assignedHost": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "notes": {
+      "type": "text",
+      "maxLength": 2000
+    },
+    "internalNotes": {
+      "type": "text",
+      "maxLength": 2000,
+      "private": true
+    },
+    "cancelTokenHash": {
+      "type": "string",
+      "maxLength": 128,
+      "private": true
+    },
+    "sourceCollection": {
+      "type": "string",
+      "default": "plugin::bookings.booking"
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}
