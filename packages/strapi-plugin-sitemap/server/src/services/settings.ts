@@ -24,9 +24,10 @@ import type {
 import { clampPriority, isTruthyFlag, sanitizeFrequency } from "./xml-builder";
 
 export const sanitizeBaseUrl = (rawUrl: unknown): string => {
-  const trimmed = String(rawUrl ?? "")
-    .trim()
-    .replace(/\/+$/, "");
+  let trimmed = String(rawUrl ?? "").trim();
+  while (trimmed.endsWith("/")) {
+    trimmed = trimmed.slice(0, -1);
+  }
   if (!trimmed) {
     return "";
   }

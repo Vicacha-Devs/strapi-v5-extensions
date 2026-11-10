@@ -112,7 +112,7 @@ export const parseTableReferences = (
   pattern: string
 ): { populate?: PopulateMap } => {
   const populate: PopulateMap = {};
-  const placeholders = pattern.match(/\[([^\]]+)]/g) || [];
+  const placeholders = pattern.match(/\[([^[\]]+)]/g) || [];
   for (const placeholder of placeholders) {
     const content = placeholder.replace(/[[\]]/g, "");
     if (content.includes(".")) {
@@ -260,7 +260,7 @@ const interpolatePattern = (
   fallbackLangcode?: string
 ): string | null => {
   let url = pattern;
-  const placeholders = pattern.match(/\[([^\]]+)]/g) || [];
+  const placeholders = pattern.match(/\[([^[\]]+)]/g) || [];
   for (const placeholder of placeholders) {
     const key = placeholder.replace(/[[\]]/g, "");
     const value = resolvePlaceholderValue(entry, key, fallbackLangcode);

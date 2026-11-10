@@ -3,6 +3,39 @@ import { describe, it } from "node:test";
 
 import serverPlugin from "../server/src/index";
 
+const makeCrudRepo = <T extends { id: number }>(
+  getItems: () => T[],
+  setItems: (next: T[]) => void,
+  baseId = 0
+) => ({
+  async findMany() {
+    return getItems();
+  },
+  async update({
+    where,
+    data,
+  }: {
+    where: { id: number };
+    data: Record<string, unknown>;
+  }) {
+    const updated = getItems().map((item) =>
+      item.id === where.id ? ({ ...item, ...data } as T) : item
+    );
+    setItems(updated);
+    return updated.find((item) => item.id === where.id);
+  },
+  async delete({ where }: { where: { id: number } }) {
+    setItems(getItems().filter((item) => item.id !== where.id));
+  },
+  async create({ data }: { data: Record<string, unknown> }) {
+    const items = getItems();
+    const maxId = items.reduce((max, item) => Math.max(max, item.id), baseId);
+    const created = { id: maxId + 1, ...data } as unknown as T;
+    setItems([...items, created]);
+    return created;
+  },
+});
+
 const createMockStrapi = ({
   pluginConfig = {},
   optionsDoc = {
@@ -44,39 +77,6 @@ const createMockStrapi = ({
   let currentOptions = optionsDoc;
   let currentEntries = [...sitemapEntries];
   let currentCustomUrls = [...customUrls];
-
-  const makeCrudRepo = <T extends { id: number }>(
-    getItems: () => T[],
-    setItems: (next: T[]) => void,
-    baseId = 0
-  ) => ({
-    async findMany() {
-      return getItems();
-    },
-    async update({
-      where,
-      data,
-    }: {
-      where: { id: number };
-      data: Record<string, unknown>;
-    }) {
-      const updated = getItems().map((item) =>
-        item.id === where.id ? ({ ...item, ...data } as T) : item
-      );
-      setItems(updated);
-      return updated.find((item) => item.id === where.id);
-    },
-    async delete({ where }: { where: { id: number } }) {
-      setItems(getItems().filter((item) => item.id !== where.id));
-    },
-    async create({ data }: { data: Record<string, unknown> }) {
-      const items = getItems();
-      const maxId = items.reduce((max, item) => Math.max(max, item.id), baseId);
-      const created = { id: maxId + 1, ...data } as unknown as T;
-      setItems([...items, created]);
-      return created;
-    },
-  });
 
   const strapi = {
     log: { error() {} },
