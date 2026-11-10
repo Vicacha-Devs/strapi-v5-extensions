@@ -41,14 +41,12 @@ export function normalizeRRuleString(raw: string | undefined | null): string {
   if (!raw || typeof raw !== "string") {
     return "";
   }
-  return (
-    raw
-       
-      .replace(/[\u0000-\u001F\u007F]+/g, "")
-      .trim()
-      .replace(/^RRULE:/i, "")
-      .trim()
-  );
+  return raw
+
+    .replace(/[\u0000-\u001F\u007F]+/g, "")
+    .trim()
+    .replace(/^RRULE:/i, "")
+    .trim();
 }
 
 export function sanitizeOccurrenceOverrides(
