@@ -1,4 +1,5 @@
 import type { Core } from "@strapi/strapi";
+import { stripTrailingSlashes } from "@vicacha-devs/plugin-shared";
 
 import {
   PLUGIN_ID,
@@ -9,7 +10,6 @@ import {
   type DocuSignProviderConfig,
   type Ed25519KeyPairMaterial,
 } from "../../../shared";
-import { stripTrailingSlashes } from "./urlHelpers";
 
 const SETTINGS_STORE_KEY = "settings";
 const KEYPAIR_STORE_KEY = "ed25519_keypair";

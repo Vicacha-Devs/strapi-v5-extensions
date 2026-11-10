@@ -219,10 +219,7 @@ export const strapiBaseConfig: Linter.Config[] = defineConfig([
   {
     ...vitest.configs.recommended,
     name: "@vicacha-devs/eslint-config/vitest",
-    files: [
-      "packages/strapi-plugin-calendar/tests/**/*.test.{js,mjs,ts,tsx}",
-      "packages/strapi-plugin-events/tests/**/*.test.{js,mjs,ts,tsx}",
-    ],
+    files: ["packages/strapi-plugin-calendar/tests/**/*.test.{js,mjs,ts,tsx}"],
     languageOptions: {
       globals: {
         ...globals.node,

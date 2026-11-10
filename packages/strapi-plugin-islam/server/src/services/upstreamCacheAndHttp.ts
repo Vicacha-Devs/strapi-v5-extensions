@@ -1,3 +1,5 @@
+import { stripTrailingSlashes } from "@vicacha-devs/plugin-shared";
+
 import type {
   IslamPluginSettings,
   NisabStandardId,
@@ -122,7 +124,7 @@ function isTokenCacheValid(creds: QfCredentials): boolean {
 async function requestOAuth2Token(
   creds: QfCredentials
 ): Promise<QfTokenBundle | null> {
-  const tokenEndpoint = `${creds.oauth2BaseUrl.replace(/\/+$/, "")}/oauth2/token`;
+  const tokenEndpoint = `${stripTrailingSlashes(creds.oauth2BaseUrl)}/oauth2/token`;
   const basicAuth = Buffer.from(
     `${creds.clientId}:${creds.clientSecret}`
   ).toString("base64");
