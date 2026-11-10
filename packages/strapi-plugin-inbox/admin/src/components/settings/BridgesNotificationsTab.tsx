@@ -29,6 +29,19 @@ export interface BridgesNotificationsTabProps {
 export const BridgesNotificationsTab: React.FC<
   BridgesNotificationsTabProps
 > = ({ t, settings, setSettings }) => {
+  const canonicalNotifyEmails = (settings.defaultNotifyEmails || []).join(", ");
+  const [notifyEmailsDraft, setNotifyEmailsDraft] = React.useState(
+    canonicalNotifyEmails
+  );
+
+  React.useEffect(() => {
+    setNotifyEmailsDraft((prev) =>
+      parseCsvList(prev).join(", ") === canonicalNotifyEmails
+        ? prev
+        : canonicalNotifyEmails
+    );
+  }, [canonicalNotifyEmails]);
+
   return (
     <Tabs.Content value="bridges">
       <Box
@@ -268,13 +281,16 @@ export const BridgesNotificationsTab: React.FC<
                 "placeholder.e_g_info_mezquitabogota_org_imam_mezquitabogota_",
                 "e.g., info@mezquitabogota.org, imam@mezquitabogota.org"
               )}
-              value={(settings.defaultNotifyEmails || []).join(", ")}
-              onChange={(e: { target: { value: string } }) =>
+              value={notifyEmailsDraft}
+              onChange={(e: { target: { value: string } }) => {
+                const nextRaw = e.target.value;
+                setNotifyEmailsDraft(nextRaw);
                 setSettings({
                   ...settings,
-                  defaultNotifyEmails: parseCsvList(e.target.value),
-                })
-              }
+                  defaultNotifyEmails: parseCsvList(nextRaw),
+                });
+              }}
+              onBlur={() => setNotifyEmailsDraft(canonicalNotifyEmails)}
             />
             <Field.Hint />
           </Field.Root>
