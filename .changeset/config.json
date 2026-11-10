@@ -5,7 +5,11 @@
   "format": "auto",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "ignore": ["@vicacha-devs/dashboard", "@vicacha-devs/docs"],
+  "ignore": [
+    "@vicacha-devs/eslint-config",
+    "@vicacha-devs/plugin-shared",
+    "@vicacha-devs/typescript-config"
+  ],
   "fixed": [],
   "linked": [],
   "updateInternalDependencies": "patch"

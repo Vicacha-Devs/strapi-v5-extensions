@@ -20,17 +20,18 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "test": "node --test tests/*.test.ts",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "test": "node --test \"tests/**/*.test.ts\"",
     "test:ts": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {
     "@vicacha-devs/eslint-config": "workspace:*",
     "@vicacha-devs/typescript-config": "workspace:*",
-    "typescript": "^5.5.4"
+    "typescript": "5.9.3"
   },
   "engines": {
-    "node": ">=22.11.0",
+    "node": ">=22.18.0",
     "pnpm": ">=10.0.0"
   }
 }
