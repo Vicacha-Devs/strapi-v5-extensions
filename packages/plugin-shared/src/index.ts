@@ -1,3 +1,9 @@
+export {
+  slugify,
+  stripTrailingSlashes,
+  trimEdgeChars,
+  type SlugifyOptions,
+} from "./strings.ts";
 export { isValidEmail } from "./email.ts";
 export {
   LOCALE_OPTIONS,

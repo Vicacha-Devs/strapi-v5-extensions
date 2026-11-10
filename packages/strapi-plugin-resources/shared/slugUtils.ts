@@ -1,3 +1,5 @@
+import { slugify } from "@vicacha-devs/plugin-shared";
+
 export interface ValidationResult<T> {
   valid: boolean;
   errors: string[];
@@ -24,16 +26,7 @@ export function isValidBcp47Locale(val: unknown): val is string {
 }
 
 export function toSlug(input: string): string {
-  let slug = input
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+/, "");
-  while (slug.endsWith("-")) {
-    slug = slug.slice(0, -1);
-  }
-  return slug.slice(0, 96);
+  return slugify(input, { maxLength: 96 });
 }
 
 /**
