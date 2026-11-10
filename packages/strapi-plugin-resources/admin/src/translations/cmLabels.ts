@@ -12,8 +12,6 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Document / Publication File (PDF)",
     "content-manager.content-types.plugin::resources.publication.coverImage":
       "Cover Image",
-    "content-manager.content-types.plugin::resources.publication.authorProfile":
-      "Author Profile",
     "content-manager.content-types.plugin::resources.publication.authorName":
       "Author Name",
     "content-manager.content-types.plugin::resources.publication.authorSlug":
@@ -120,8 +118,6 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Archivo de la Publicación (PDF)",
     "content-manager.content-types.plugin::resources.publication.coverImage":
       "Imagen de Portada",
-    "content-manager.content-types.plugin::resources.publication.authorProfile":
-      "Perfil del Autor",
     "content-manager.content-types.plugin::resources.publication.authorName":
       "Nombre del Autor",
     "content-manager.content-types.plugin::resources.publication.authorSlug":
@@ -228,8 +224,6 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "ملف المنشور / الوثيقة (PDF)",
     "content-manager.content-types.plugin::resources.publication.coverImage":
       "صورة الغلاف",
-    "content-manager.content-types.plugin::resources.publication.authorProfile":
-      "ملف المؤلف",
     "content-manager.content-types.plugin::resources.publication.authorName":
       "اسم المؤلف",
     "content-manager.content-types.plugin::resources.publication.authorSlug":
@@ -336,8 +330,6 @@ export const CM_LABEL_TRANSLATIONS: Record<string, Record<string, string>> = {
       "Yayın / Belge Dosyası (PDF)",
     "content-manager.content-types.plugin::resources.publication.coverImage":
       "Kapak Görseli",
-    "content-manager.content-types.plugin::resources.publication.authorProfile":
-      "Yazar Profili",
     "content-manager.content-types.plugin::resources.publication.authorName":
       "Yazar Adı",
     "content-manager.content-types.plugin::resources.publication.authorSlug":

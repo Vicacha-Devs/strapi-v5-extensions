@@ -7,27 +7,21 @@ import {
   Flex,
   SingleSelect,
   SingleSelectOption,
-  Table,
-  Tbody,
-  Td,
   TextInput,
-  Th,
-  Thead,
-  Tr,
   Typography,
 } from "@strapi/design-system";
 import * as React from "react";
 
 import {
-  CONTENT_TYPE_UIDS,
   PLUGIN_ID,
   type GlossaryCategory,
   type GlossaryTermRecord,
   type MediaLibraryAsset,
 } from "../../../../shared";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
+import { GlossaryTable } from "./GlossaryTable";
 import {
   CARD_BORDER_STYLE,
-  getContentManagerUrl,
   uploadFilesToStrapiMediaLibrary,
   useResourcesTranslation,
 } from "./uploadHelper";
@@ -47,20 +41,18 @@ export interface GlossaryTabProps {
   post: (url: string, data?: unknown) => Promise<{ data?: unknown }>;
   put: (url: string, data?: unknown) => Promise<{ data?: unknown }>;
   del: (url: string) => Promise<{ data?: unknown }>;
-  onStatusMessage: (msg: string) => void;
+  onStatusMessage: (msg: string, isError?: boolean) => void;
   onReload: () => Promise<void>;
 }
 
 export const GlossaryTab: React.FC<GlossaryTabProps> = ({
   glossary,
   post,
-  put,
   del,
   onStatusMessage,
   onReload,
 }) => {
   const { t } = useResourcesTranslation();
-  const [editingDocId, setEditingDocId] = React.useState<string | null>(null);
   const [term, setTerm] = React.useState("");
   const [category, setCategory] = React.useState<GlossaryCategory>("worship");
   const [nativeScript, setNativeScript] = React.useState("");
@@ -68,16 +60,25 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
   const [definition, setDefinition] = React.useState("");
   const [audioFileId, setAudioFileId] = React.useState("none");
   const [uploading, setUploading] = React.useState(false);
+  const [audioFileName, setAudioFileName] = React.useState<string>("");
+  const [pendingDelete, setPendingDelete] =
+    React.useState<GlossaryTermRecord | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const audioInputRef = React.useRef<HTMLInputElement | null>(null);
+  const isMountedRef = React.useRef(true);
 
-  const [audioFileName, setAudioFileName] = React.useState<string>("");
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const getCategoryLabel = (cat: GlossaryCategory) =>
     t(`glossary.category.${cat}`, GLOSSARY_CATEGORY_LABELS[cat] || cat);
 
   const resetForm = () => {
-    setEditingDocId(null);
     setTerm("");
     setCategory("worship");
     setNativeScript("");
@@ -93,6 +94,7 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
     setUploading(true);
     try {
       const uploaded = await uploadFilesToStrapiMediaLibrary(files, post);
+      if (!isMountedRef.current) return;
       if (uploaded[0]?.id !== undefined) {
         setAudioFileId(String(uploaded[0].id));
         setAudioFileName(uploaded[0].name || files[0].name);
@@ -100,9 +102,13 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
         await onReload();
       }
     } catch (err) {
-      onStatusMessage(`Audio upload failed: ${(err as Error).message}`);
+      if (isMountedRef.current) {
+        onStatusMessage(`Audio upload failed: ${(err as Error).message}`, true);
+      }
     } finally {
-      setUploading(false);
+      if (isMountedRef.current) {
+        setUploading(false);
+      }
       e.target.value = "";
     }
   };
@@ -110,7 +116,8 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
   const handleSave = async () => {
     if (!term.trim() || !definition.trim()) {
       onStatusMessage(
-        t("glossary.msg.required", "Term and Definition are required.")
+        t("glossary.msg.required", "Term and Definition are required."),
+        true
       );
       return;
     }
@@ -128,34 +135,37 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
         pronunciationAudioId: audioVal,
         featured: true,
       };
-      if (editingDocId) {
-        await put(
-          `/${PLUGIN_ID}/glossary/${encodeURIComponent(editingDocId)}`,
-          payload
-        );
-        onStatusMessage(`Updated glossary term "${term.trim()}".`);
-      } else {
-        await post(`/${PLUGIN_ID}/glossary`, payload);
-        onStatusMessage(`Added glossary term "${term.trim()}".`);
-      }
+      await post(`/${PLUGIN_ID}/glossary`, payload);
+      onStatusMessage(`Added glossary term "${term.trim()}".`);
+      if (!isMountedRef.current) return;
       resetForm();
       await onReload();
     } catch (err) {
-      onStatusMessage(`Failed to save term: ${(err as Error).message}`);
+      if (isMountedRef.current) {
+        onStatusMessage(`Failed to save term: ${(err as Error).message}`, true);
+      }
     }
   };
 
-  const handleDelete = async (item: GlossaryTermRecord) => {
-    if (!item.documentId) return;
+  const confirmDelete = async () => {
+    if (!pendingDelete?.documentId || isDeleting) return;
+    setIsDeleting(true);
     try {
       await del(
-        `/${PLUGIN_ID}/glossary/${encodeURIComponent(item.documentId)}`
+        `/${PLUGIN_ID}/glossary/${encodeURIComponent(pendingDelete.documentId)}`
       );
-      onStatusMessage(`Removed glossary term "${item.term}".`);
-      if (editingDocId === item.documentId) resetForm();
+      if (!isMountedRef.current) return;
+      onStatusMessage(`Removed glossary term "${pendingDelete.term}".`);
+      setPendingDelete(null);
       await onReload();
     } catch (err) {
-      onStatusMessage(`Delete failed: ${(err as Error).message}`);
+      if (isMountedRef.current) {
+        onStatusMessage(`Delete failed: ${(err as Error).message}`, true);
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -164,9 +174,11 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
       <input
         ref={audioInputRef}
         type="file"
-        accept="audio/*,.mp3,.wav,.ogg,.m4a"
+        accept=".mp3,.m4a,.ogg,.wav,audio/mpeg,audio/mp4,audio/ogg,audio/wav"
         style={{ display: "none" }}
-        onChange={handleUploadAudio}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          void handleUploadAudio(e)
+        }
       />
 
       <Box
@@ -198,14 +210,8 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
               )}
             </Typography>
           </Flex>
-          {editingDocId && (
-            <Button variant="tertiary" size="S" onClick={resetForm}>
-              {t("common.cancel_edit", "Cancel Edit")}
-            </Button>
-          )}
         </Flex>
 
-        {/* Row 1: Term, Category, Arabic Script, Transliteration */}
         <Box
           style={{
             display: "grid",
@@ -303,7 +309,6 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
           </Box>
         </Box>
 
-        {/* Row 2: Definition */}
         <Box paddingTop={4}>
           <Field.Root
             required
@@ -375,117 +380,25 @@ export const GlossaryTab: React.FC<GlossaryTabProps> = ({
               </Flex>
             )}
           </Flex>
-          <Button onClick={handleSave}>
+          <Button onClick={() => void handleSave()}>
             {t("page.ui.add_term", "Add Term")}
           </Button>
         </Flex>
       </Box>
 
-      <Table colCount={5} rowCount={glossary.length + 1}>
-        <Thead>
-          <Tr>
-            <Th>
-              <Typography variant="sigma">
-                {t("page.ui.letter", "Letter")}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {t("glossary.table.term_script", "Term & Script")}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {t("page.ui.category", "Category")}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {t("page.ui.definition", "Definition")}
-              </Typography>
-            </Th>
-            <Th>
-              <Typography variant="sigma">
-                {t("common.actions", "Actions")}
-              </Typography>
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {glossary.map((item) => (
-            <Tr key={item.documentId || item.slug}>
-              <Td>
-                <Badge>{item.letterGroup}</Badge>
-              </Td>
-              <Td>
-                <Box paddingTop={2} paddingBottom={2}>
-                  <Flex direction="column" alignItems="flex-start" gap={1}>
-                    <Typography fontWeight="bold">
-                      {item.term}{" "}
-                      {item.nativeScript ? `(${item.nativeScript})` : ""}
-                    </Typography>
-                    {item.transliteration && (
-                      <Typography variant="pi" textColor="neutral600">
-                        {item.transliteration}
-                      </Typography>
-                    )}
-                  </Flex>
-                </Box>
-              </Td>
-              <Td>
-                <Badge>{getCategoryLabel(item.category)}</Badge>
-              </Td>
-              <Td>
-                <Box paddingTop={2} paddingBottom={2}>
-                  <Flex direction="column" alignItems="flex-start" gap={1}>
-                    <Typography variant="omega">{item.definition}</Typography>
-                    {item.pronunciationAudio?.url && (
-                      <a
-                        href={item.pronunciationAudio.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color: "#7b79ff",
-                          textDecoration: "underline",
-                        }}
-                      >
-                        {t("glossary.play_audio", "Play Audio")} (
-                        {item.pronunciationAudio.name})
-                      </a>
-                    )}
-                  </Flex>
-                </Box>
-              </Td>
-              <Td>
-                <Flex gap={2} wrap="wrap">
-                  <Button
-                    size="S"
-                    variant="tertiary"
-                    onClick={() => {
-                      window.location.href = getContentManagerUrl(
-                        CONTENT_TYPE_UIDS.glossaryTerm,
-                        item.documentId,
-                        item.locale
-                      );
-                    }}
-                  >
-                    {t("common.edit", "Edit")}
-                  </Button>
-                  <Button
-                    size="S"
-                    variant="danger-light"
-                    onClick={() => handleDelete(item)}
-                  >
-                    {t("common.delete", "Delete")}
-                  </Button>
-                </Flex>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
+      <GlossaryTable
+        glossary={glossary}
+        getCategoryLabel={getCategoryLabel}
+        onDelete={(item) => setPendingDelete(item)}
+      />
+
+      <ConfirmDeleteDialog
+        open={Boolean(pendingDelete)}
+        itemLabel={pendingDelete?.term || ""}
+        isDeleting={isDeleting}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+      />
     </Box>
   );
 };

@@ -1,38 +1,24 @@
-import {
-  Badge,
-  Box,
-  Button,
-  Divider,
-  Field,
-  Flex,
-  SingleSelect,
-  SingleSelectOption,
-  TextInput,
-  Typography,
-} from "@strapi/design-system";
+import { Box } from "@strapi/design-system";
 import * as React from "react";
 
 import {
+  BLOCKED_DOWNLOAD_EXTENSIONS,
+  DEFAULT_ALLOWED_DOWNLOAD_EXTENSIONS,
   PLUGIN_ID,
   type MediaLibraryAsset,
   type PublicationCategory,
   type PublicationRecord,
 } from "../../../../shared";
+import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
+import {
+  PUBLICATION_CATEGORY_LABELS,
+  PublicationFormCard,
+} from "./PublicationFormCard";
 import { PublicationsTable } from "./PublicationsTable";
 import {
-  CARD_BORDER_STYLE,
   uploadFilesToStrapiMediaLibrary,
   useResourcesTranslation,
 } from "./uploadHelper";
-
-const PUBLICATION_CATEGORY_LABELS: Record<PublicationCategory, string> = {
-  guide: "Visitor & Prayer Guide",
-  book: "Book / eBook",
-  pamphlet: "Pamphlet / Brochure",
-  press_kit: "Press & Media Kit",
-  academic: "Academic / Research",
-  general: "General Publication",
-};
 
 function parseFileIdValue(selectedFileId: string): number | string | null {
   if (!selectedFileId || selectedFileId === "none") return null;
@@ -42,15 +28,17 @@ function parseFileIdValue(selectedFileId: string): number | string | null {
 export interface PublicationsTabProps {
   publications: PublicationRecord[];
   mediaFiles: MediaLibraryAsset[];
+  allowedDownloadExtensions?: string[];
   post: (url: string, data?: unknown) => Promise<{ data?: unknown }>;
   put: (url: string, data?: unknown) => Promise<{ data?: unknown }>;
   del: (url: string) => Promise<{ data?: unknown }>;
-  onStatusMessage: (msg: string) => void;
+  onStatusMessage: (msg: string, isError?: boolean) => void;
   onReload: () => Promise<void>;
 }
 
 export const PublicationsTab: React.FC<PublicationsTabProps> = ({
   publications,
+  allowedDownloadExtensions = DEFAULT_ALLOWED_DOWNLOAD_EXTENSIONS,
   post,
   put,
   del,
@@ -58,7 +46,6 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
   onReload,
 }) => {
   const { t } = useResourcesTranslation();
-  const [editingDocId, setEditingDocId] = React.useState<string | null>(null);
   const [title, setTitle] = React.useState("");
   const [category, setCategory] = React.useState<PublicationCategory>("guide");
   const [authorName, setAuthorName] = React.useState("");
@@ -66,20 +53,42 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
   const [selectedFileId, setSelectedFileId] = React.useState<string>("none");
   const [externalUrl, setExternalUrl] = React.useState("");
   const [uploading, setUploading] = React.useState(false);
+  const [pendingDelete, setPendingDelete] =
+    React.useState<PublicationRecord | null>(null);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const formFileInputRef = React.useRef<HTMLInputElement | null>(null);
   const rowFileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [uploadingRowDocId, setUploadingRowDocId] = React.useState<
     string | null
   >(null);
-
   const [selectedFileName, setSelectedFileName] = React.useState<string>("");
+  const isMountedRef = React.useRef(true);
+
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const acceptExtensions = React.useMemo(() => {
+    const baseList =
+      allowedDownloadExtensions && allowedDownloadExtensions.length > 0
+        ? allowedDownloadExtensions
+        : DEFAULT_ALLOWED_DOWNLOAD_EXTENSIONS;
+    const safeList = baseList.filter(
+      (ext) => !BLOCKED_DOWNLOAD_EXTENSIONS.includes(ext.toLowerCase())
+    );
+    const active =
+      safeList.length > 0 ? safeList : DEFAULT_ALLOWED_DOWNLOAD_EXTENSIONS;
+    return active.join(",");
+  }, [allowedDownloadExtensions]);
 
   const getCategoryLabel = (cat: PublicationCategory) =>
     t(`pub.category.${cat}`, PUBLICATION_CATEGORY_LABELS[cat] || cat);
 
   const resetForm = () => {
-    setEditingDocId(null);
     setTitle("");
     setCategory("guide");
     setAuthorName("");
@@ -97,6 +106,7 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
     setUploading(true);
     try {
       const uploaded = await uploadFilesToStrapiMediaLibrary(files, post);
+      if (!isMountedRef.current) return;
       if (uploaded[0]?.id !== undefined) {
         setSelectedFileId(String(uploaded[0].id));
         setSelectedFileName(uploaded[0].name || files[0].name);
@@ -104,17 +114,19 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           t(
             "pub.msg.uploaded_attached",
             'Uploaded "{name}" and attached it to this publication.',
-            {
-              name: uploaded[0].name,
-            }
+            { name: uploaded[0].name }
           )
         );
         await onReload();
       }
     } catch (err) {
-      onStatusMessage(`Upload failed: ${(err as Error).message}`);
+      if (isMountedRef.current) {
+        onStatusMessage(`Upload failed: ${(err as Error).message}`, true);
+      }
     } finally {
-      setUploading(false);
+      if (isMountedRef.current) {
+        setUploading(false);
+      }
       e.target.value = "";
     }
   };
@@ -126,6 +138,7 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
     setUploading(true);
     try {
       const uploaded = await uploadFilesToStrapiMediaLibrary(files, post);
+      if (!isMountedRef.current) return;
       if (uploaded[0]?.id !== undefined) {
         await put(`/${PLUGIN_ID}/publications/${encodeURIComponent(docId)}`, {
           fileId: Number(uploaded[0].id) || uploaded[0].id,
@@ -143,10 +156,17 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         await onReload();
       }
     } catch (err) {
-      onStatusMessage(`Failed to attach file: ${(err as Error).message}`);
+      if (isMountedRef.current) {
+        onStatusMessage(
+          `Failed to attach file: ${(err as Error).message}`,
+          true
+        );
+      }
     } finally {
-      setUploading(false);
-      setUploadingRowDocId(null);
+      if (isMountedRef.current) {
+        setUploading(false);
+        setUploadingRowDocId(null);
+      }
       e.target.value = "";
     }
   };
@@ -154,7 +174,8 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
   const handleSave = async () => {
     if (!title.trim()) {
       onStatusMessage(
-        t("pub.msg.title_required", "Please enter a Publication Title.")
+        t("pub.msg.title_required", "Please enter a Publication Title."),
+        true
       );
       return;
     }
@@ -169,286 +190,86 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
         featured: true,
         allowPublicDownload: true,
       };
-      if (editingDocId) {
-        await put(
-          `/${PLUGIN_ID}/publications/${encodeURIComponent(editingDocId)}`,
-          payload
-        );
-        onStatusMessage(`Updated publication "${title.trim()}".`);
-      } else {
-        await post(`/${PLUGIN_ID}/publications`, payload);
-        onStatusMessage(`Created publication "${title.trim()}".`);
-      }
+      await post(`/${PLUGIN_ID}/publications`, payload);
+      onStatusMessage(`Created publication "${title.trim()}".`);
+      if (!isMountedRef.current) return;
       resetForm();
       await onReload();
     } catch (err) {
-      onStatusMessage(`Failed to save publication: ${(err as Error).message}`);
+      if (isMountedRef.current) {
+        onStatusMessage(
+          `Failed to save publication: ${(err as Error).message}`,
+          true
+        );
+      }
     }
   };
 
-  const handleDelete = async (pub: PublicationRecord) => {
-    if (!pub.documentId) return;
+  const confirmDelete = async () => {
+    if (!pendingDelete?.documentId || isDeleting) return;
+    setIsDeleting(true);
     try {
       await del(
-        `/${PLUGIN_ID}/publications/${encodeURIComponent(pub.documentId)}`
+        `/${PLUGIN_ID}/publications/${encodeURIComponent(pendingDelete.documentId)}`
       );
-      onStatusMessage(`Removed publication "${pub.title}".`);
-      if (editingDocId === pub.documentId) resetForm();
+      if (!isMountedRef.current) return;
+      onStatusMessage(`Removed publication "${pendingDelete.title}".`);
+      setPendingDelete(null);
       await onReload();
     } catch (err) {
-      onStatusMessage(`Delete failed: ${(err as Error).message}`);
+      if (isMountedRef.current) {
+        onStatusMessage(`Delete failed: ${(err as Error).message}`, true);
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsDeleting(false);
+      }
     }
   };
-
-  const uploadBtnText = uploading
-    ? t("common.uploading", "Uploading…")
-    : selectedFileId !== "none"
-      ? t("pub.btn.replace_pdf_ebook", "Replace PDF / eBook")
-      : t("pub.btn.upload_pdf_ebook", "+ Upload PDF / eBook");
 
   return (
     <Box paddingTop={6}>
       <input
         ref={formFileInputRef}
         type="file"
-        accept=".pdf,.epub,.doc,.docx,application/pdf"
+        accept={acceptExtensions}
         style={{ display: "none" }}
-        onChange={handleUploadForForm}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          void handleUploadForForm(e)
+        }
       />
       <input
         ref={rowFileInputRef}
         type="file"
-        accept=".pdf,.epub,.doc,.docx,application/pdf"
+        accept={acceptExtensions}
         style={{ display: "none" }}
-        onChange={handleUploadForRow}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+          void handleUploadForRow(e)
+        }
       />
 
-      <Box
-        padding={6}
-        marginBottom={6}
-        background="neutral0"
-        hasRadius
-        shadow="filterShadow"
-        style={CARD_BORDER_STYLE}
-      >
-        <Flex
-          justifyContent="space-between"
-          alignItems="flex-start"
-          paddingBottom={4}
-          wrap="wrap"
-          gap={3}
-        >
-          <Flex direction="column" alignItems="flex-start" gap={1}>
-            <Typography variant="delta" tag="h2" fontWeight="bold">
-              {t(
-                "page.ui.add_digital_library_publication_media_library_pd",
-                "Add Digital Library Publication (PDF / eBook)"
-              )}
-            </Typography>
-            <Typography variant="pi" textColor="neutral600">
-              {t(
-                "pub.form.subtitle",
-                "Upload a PDF or eBook from your computer using the button below, or provide an external download link."
-              )}
-            </Typography>
-          </Flex>
-          {editingDocId && (
-            <Button variant="tertiary" size="S" onClick={resetForm}>
-              {t("common.cancel_edit", "Cancel Edit")}
-            </Button>
-          )}
-        </Flex>
-
-        {/* Row 1: Title, Category, Author */}
-        <Box
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 20,
-            alignItems: "start",
-          }}
-        >
-          <Box style={{ minWidth: 0 }}>
-            <Field.Root
-              required
-              hint={t(
-                "page.ui.display_title_shown_in_the_public_digital_librar",
-                "Title shown in the public Digital Library"
-              )}
-            >
-              <Field.Label>
-                {t("field.publication_title", "Publication Title")}
-              </Field.Label>
-              <TextInput
-                placeholder={t(
-                  "placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf",
-                  "e.g., Mosque Visitor & Prayer Guide"
-                )}
-                value={title}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setTitle(e.target.value)
-                }
-              />
-              <Field.Hint />
-            </Field.Root>
-          </Box>
-
-          <Box style={{ minWidth: 0 }}>
-            <Field.Root
-              hint={t(
-                "page.ui.used_for_filtering_publications_on_the_public_po",
-                "Used to filter publications on the website"
-              )}
-            >
-              <Field.Label>{t("page.ui.category", "Category")}</Field.Label>
-              <SingleSelect
-                value={category}
-                onChange={(val: string | number) =>
-                  setCategory(String(val) as PublicationCategory)
-                }
-              >
-                {(
-                  Object.keys(
-                    PUBLICATION_CATEGORY_LABELS
-                  ) as PublicationCategory[]
-                ).map((val) => (
-                  <SingleSelectOption key={val} value={val}>
-                    {getCategoryLabel(val)}
-                  </SingleSelectOption>
-                ))}
-              </SingleSelect>
-              <Field.Hint />
-            </Field.Root>
-          </Box>
-
-          <Box style={{ minWidth: 0 }}>
-            <Field.Root
-              hint={t(
-                "pub.field.author_hint",
-                "Author or committee name (optional)"
-              )}
-            >
-              <Field.Label>
-                {t("pub.field.author_label", "Author (Optional)")}
-              </Field.Label>
-              <TextInput
-                placeholder={t(
-                  "pub.field.author_placeholder",
-                  "e.g., Department of Education"
-                )}
-                value={authorName}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setAuthorName(e.target.value)
-                }
-              />
-              <Field.Hint />
-            </Field.Root>
-          </Box>
-        </Box>
-
-        {/* Row 2: Summary & External URL */}
-        <Box
-          paddingTop={4}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 20,
-            alignItems: "start",
-          }}
-        >
-          <Box style={{ minWidth: 0 }}>
-            <Field.Root
-              hint={t(
-                "page.ui.short_description_displayed_on_the_download_card",
-                "Short description shown on the download card"
-              )}
-            >
-              <Field.Label>
-                {t("field.summary_abstract", "Summary / Abstract (Optional)")}
-              </Field.Label>
-              <TextInput
-                placeholder={t(
-                  "placeholder.e_g_introducci_n_a_la_historia_horarios_y_etique",
-                  "Brief summary of this guide, book, or brochure..."
-                )}
-                value={summary}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSummary(e.target.value)
-                }
-              />
-              <Field.Hint />
-            </Field.Root>
-          </Box>
-
-          <Box style={{ minWidth: 0 }}>
-            <Field.Root
-              hint={t(
-                "pub.field.external_url_hint",
-                "Only needed if hosted on an external link instead of uploading a PDF below"
-              )}
-            >
-              <Field.Label>
-                {t(
-                  "pub.field.external_url_label",
-                  "External Download URL (Optional)"
-                )}
-              </Field.Label>
-              <TextInput
-                placeholder="https://..."
-                value={externalUrl}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setExternalUrl(e.target.value)
-                }
-              />
-              <Field.Hint />
-            </Field.Root>
-          </Box>
-        </Box>
-
-        <Box paddingTop={4}>
-          <Divider />
-        </Box>
-
-        {/* Footer Action Bar */}
-        <Flex
-          paddingTop={4}
-          justifyContent="space-between"
-          alignItems="center"
-          wrap="wrap"
-          gap={3}
-        >
-          <Flex gap={3} alignItems="center" wrap="wrap">
-            <Button
-              variant="secondary"
-              disabled={uploading}
-              onClick={() => formFileInputRef.current?.click()}
-            >
-              {uploadBtnText}
-            </Button>
-            {selectedFileId !== "none" && (
-              <Flex gap={2} alignItems="center">
-                <Badge active>
-                  {t("common.attached", "Attached")}:{" "}
-                  {selectedFileName || `#${selectedFileId}`}
-                </Badge>
-                <Button
-                  variant="tertiary"
-                  size="S"
-                  onClick={() => {
-                    setSelectedFileId("none");
-                    setSelectedFileName("");
-                  }}
-                >
-                  {t("common.remove", "Remove")}
-                </Button>
-              </Flex>
-            )}
-          </Flex>
-          <Button onClick={handleSave}>
-            {t("page.ui.create_publication", "Create Publication")}
-          </Button>
-        </Flex>
-      </Box>
+      <PublicationFormCard
+        title={title}
+        category={category}
+        authorName={authorName}
+        summary={summary}
+        externalUrl={externalUrl}
+        selectedFileId={selectedFileId}
+        selectedFileName={selectedFileName}
+        uploading={uploading}
+        getCategoryLabel={getCategoryLabel}
+        onTitleChange={setTitle}
+        onCategoryChange={setCategory}
+        onAuthorNameChange={setAuthorName}
+        onSummaryChange={setSummary}
+        onExternalUrlChange={setExternalUrl}
+        onPickFileClick={() => formFileInputRef.current?.click()}
+        onClearFile={() => {
+          setSelectedFileId("none");
+          setSelectedFileName("");
+        }}
+        onSave={() => void handleSave()}
+      />
 
       <PublicationsTable
         publications={publications}
@@ -457,7 +278,15 @@ export const PublicationsTab: React.FC<PublicationsTabProps> = ({
           setUploadingRowDocId(docId);
           rowFileInputRef.current?.click();
         }}
-        onDelete={handleDelete}
+        onDelete={(pub) => setPendingDelete(pub)}
+      />
+
+      <ConfirmDeleteDialog
+        open={Boolean(pendingDelete)}
+        itemLabel={pendingDelete?.title || ""}
+        isDeleting={isDeleting}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
       />
     </Box>
   );

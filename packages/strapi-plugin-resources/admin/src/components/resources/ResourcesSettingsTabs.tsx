@@ -10,7 +10,11 @@ import {
 } from "@strapi/design-system";
 import * as React from "react";
 
-import type { ResourcesPluginSettings } from "../../../../shared";
+import {
+  BLOCKED_DOWNLOAD_EXTENSIONS,
+  BLOCKED_DOWNLOAD_MIME_TYPES,
+  type ResourcesPluginSettings,
+} from "../../../../shared";
 
 const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.18)",
@@ -34,7 +38,6 @@ const EXTENSION_PRESETS = [
   ".jpg",
   ".jpeg",
   ".webp",
-  ".svg",
   ".mp3",
   ".m4a",
   ".ogg",
@@ -53,7 +56,6 @@ const MIME_TYPE_PRESETS = [
   "image/png",
   "image/jpeg",
   "image/webp",
-  "image/svg+xml",
   "audio/mpeg",
   "audio/mp4",
   "audio/ogg",
@@ -208,12 +210,16 @@ export const ResourcesSecurityTab: React.FC<TabProps> = ({
   setSettings,
   t,
 }) => {
-  const selectedExtensions = settings.allowedDownloadExtensions || [];
+  const selectedExtensions = (settings.allowedDownloadExtensions || []).filter(
+    (ext) => !BLOCKED_DOWNLOAD_EXTENSIONS.includes(ext.toLowerCase())
+  );
   const extensionOptions = Array.from(
     new Set([...EXTENSION_PRESETS, ...selectedExtensions])
   );
 
-  const selectedMimes = settings.allowedDownloadMimeTypes || [];
+  const selectedMimes = (settings.allowedDownloadMimeTypes || []).filter(
+    (mime) => !BLOCKED_DOWNLOAD_MIME_TYPES.includes(mime.toLowerCase())
+  );
   const mimeOptions = Array.from(
     new Set([...MIME_TYPE_PRESETS, ...selectedMimes])
   );
@@ -265,7 +271,10 @@ export const ResourcesSecurityTab: React.FC<TabProps> = ({
                 onChange={(nextValues: string[]) =>
                   setSettings({
                     ...settings,
-                    allowedDownloadExtensions: nextValues,
+                    allowedDownloadExtensions: nextValues.filter(
+                      (ext) =>
+                        !BLOCKED_DOWNLOAD_EXTENSIONS.includes(ext.toLowerCase())
+                    ),
                   })
                 }
                 onClear={() =>
@@ -308,7 +317,12 @@ export const ResourcesSecurityTab: React.FC<TabProps> = ({
                 onChange={(nextValues: string[]) =>
                   setSettings({
                     ...settings,
-                    allowedDownloadMimeTypes: nextValues,
+                    allowedDownloadMimeTypes: nextValues.filter(
+                      (mime) =>
+                        !BLOCKED_DOWNLOAD_MIME_TYPES.includes(
+                          mime.toLowerCase()
+                        )
+                    ),
                   })
                 }
                 onClear={() =>

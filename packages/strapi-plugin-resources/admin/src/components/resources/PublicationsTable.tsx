@@ -12,9 +12,11 @@ import {
   Typography,
 } from "@strapi/design-system";
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   CONTENT_TYPE_UIDS,
+  toSafeOpenableHref,
   type PublicationCategory,
   type PublicationRecord,
 } from "../../../../shared";
@@ -41,7 +43,9 @@ const PublicationFileCell: React.FC<PublicationFileCellProps> = ({
   onUploadClick,
 }) => {
   const { t } = useResourcesTranslation();
-  const downloadHref = pub.file?.url || pub.externalDownloadUrl;
+  const safeFileHref = toSafeOpenableHref(pub.file?.url);
+  const safeExternalHref = toSafeOpenableHref(pub.externalDownloadUrl);
+  const downloadHref = safeFileHref || safeExternalHref;
 
   return (
     <Flex gap={2} alignItems="center" wrap="wrap">
@@ -54,18 +58,18 @@ const PublicationFileCell: React.FC<PublicationFileCellProps> = ({
             <a
               href={downloadHref}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               style={LINK_STYLE}
             >
               {t("common.open", "Open")}
             </a>
           )}
         </>
-      ) : pub.externalDownloadUrl ? (
+      ) : safeExternalHref ? (
         <a
-          href={pub.externalDownloadUrl}
+          href={safeExternalHref}
           target="_blank"
-          rel="noreferrer"
+          rel="noopener noreferrer"
           style={LINK_STYLE}
         >
           {t("pub.external_link", "External Link")}
@@ -100,6 +104,7 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
   onDelete,
 }) => {
   const { t } = useResourcesTranslation();
+  const navigate = useNavigate();
 
   return (
     <Table colCount={5} rowCount={publications.length + 1}>
@@ -175,13 +180,15 @@ export const PublicationsTable: React.FC<PublicationsTableProps> = ({
                 <Button
                   size="S"
                   variant="tertiary"
-                  onClick={() => {
-                    window.location.href = getContentManagerUrl(
-                      CONTENT_TYPE_UIDS.publication,
-                      pub.documentId,
-                      pub.locale
-                    );
-                  }}
+                  onClick={() =>
+                    navigate(
+                      getContentManagerUrl(
+                        CONTENT_TYPE_UIDS.publication,
+                        pub.documentId,
+                        pub.locale
+                      )
+                    )
+                  }
                 >
                   {t("common.edit", "Edit")}
                 </Button>

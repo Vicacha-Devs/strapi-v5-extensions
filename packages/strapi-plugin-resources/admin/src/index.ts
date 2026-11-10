@@ -2,6 +2,7 @@ import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
 
 import { Initializer } from "./components/Initializer";
 import { PluginIcon } from "./components/PluginIcon";
+import pluginPermissions from "./permissions";
 import { PLUGIN_ID } from "./pluginId";
 import { CM_DESCRIPTION_TRANSLATIONS } from "./translations/cmDescriptions";
 import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
@@ -102,6 +103,10 @@ function localizeField(
 export default {
   register(app: {
     addMenuLink: (link: Record<string, unknown>) => void;
+    addSettingsLink?: (
+      sectionId: string | Record<string, unknown>,
+      link: Record<string, unknown> | Record<string, unknown>[]
+    ) => void;
     createSettingSection: (
       section: Record<string, unknown>,
       links: Record<string, unknown>[]
@@ -119,33 +124,40 @@ export default {
         import("./pages/ResourcesHomePage").then((mod) => ({
           default: mod.ResourcesHomePage,
         })),
-      permissions: [],
+      permissions: pluginPermissions.read,
     });
 
-    app.createSettingSection(
-      {
-        id: PLUGIN_ID,
-        intlLabel: {
-          id: `${PLUGIN_ID}.settings.section`,
-          defaultMessage: "Resources & Media Library",
-        },
+    const settingsSection = {
+      id: PLUGIN_ID,
+      intlLabel: {
+        id: `${PLUGIN_ID}.settings.section`,
+        defaultMessage: "Resources & Media Library",
       },
-      [
-        {
-          intlLabel: {
-            id: `${PLUGIN_ID}.settings.page.title`,
-            defaultMessage: "Media Library & Catalog Settings",
-          },
-          id: `${PLUGIN_ID}-settings`,
-          to: `${PLUGIN_ID}`,
-          Component: () =>
-            import("./pages/SettingsPage").then((mod) => ({
-              default: mod.SettingsPage,
-            })),
-          permissions: [],
-        },
-      ]
-    );
+    };
+
+    const settingsLink = {
+      intlLabel: {
+        id: `${PLUGIN_ID}.settings.page.title`,
+        defaultMessage: "Media Library & Catalog Settings",
+      },
+      id: `${PLUGIN_ID}-settings`,
+      to: `${PLUGIN_ID}`,
+      Component: () =>
+        import("./pages/SettingsPage").then((mod) => ({
+          default: mod.SettingsPage,
+        })),
+      permissions: pluginPermissions.settings,
+    };
+
+    try {
+      if (typeof app.addSettingsLink === "function") {
+        app.addSettingsLink(settingsSection.id, settingsLink);
+      } else {
+        app.createSettingSection(settingsSection, [settingsLink]);
+      }
+    } catch {
+      app.createSettingSection(settingsSection, [settingsLink]);
+    }
 
     app.registerPlugin({
       id: PLUGIN_ID,
@@ -173,9 +185,15 @@ export default {
             return { layout, query };
           }
           const locale = resolveActiveLocale(query);
+          const baseLang = locale.split("-")[0] || locale;
           const globalMap = getGlobalI18nMap();
           const dict =
-            LOADED_TRADS[locale] || globalMap[locale] || LOADED_TRADS.en || {};
+            LOADED_TRADS[locale] ||
+            globalMap[locale] ||
+            LOADED_TRADS[baseLang] ||
+            globalMap[baseLang] ||
+            LOADED_TRADS.en ||
+            {};
 
           const nextPanels = layout.layout.map((panel) =>
             Array.isArray(panel)
@@ -214,14 +232,20 @@ export default {
       "zh",
     ],
     loadTranslation: (locale) => import(`./translations/${locale}.json`),
-    getBaseTranslations: (locale) => ({
-      ...CM_LABEL_TRANSLATIONS.en,
-      ...CM_PLACEHOLDER_TRANSLATIONS.en,
-      ...CM_DESCRIPTION_TRANSLATIONS.en,
-      ...CM_LABEL_TRANSLATIONS[locale],
-      ...CM_PLACEHOLDER_TRANSLATIONS[locale],
-      ...CM_DESCRIPTION_TRANSLATIONS[locale],
-    }),
+    getBaseTranslations: (locale) => {
+      const baseLang = locale.split("-")[0] || locale;
+      return {
+        ...CM_LABEL_TRANSLATIONS.en,
+        ...CM_PLACEHOLDER_TRANSLATIONS.en,
+        ...CM_DESCRIPTION_TRANSLATIONS.en,
+        ...CM_LABEL_TRANSLATIONS[baseLang],
+        ...CM_PLACEHOLDER_TRANSLATIONS[baseLang],
+        ...CM_DESCRIPTION_TRANSLATIONS[baseLang],
+        ...CM_LABEL_TRANSLATIONS[locale],
+        ...CM_PLACEHOLDER_TRANSLATIONS[locale],
+        ...CM_DESCRIPTION_TRANSLATIONS[locale],
+      };
+    },
     onLoaded: (locale, prefixed) => {
       LOADED_TRADS[locale] = prefixed;
       const globalMap = getGlobalI18nMap();

@@ -85,8 +85,6 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<
       "Enter document / publication file (pdf)...",
     "content-manager.content-types.plugin::resources.publication.coverImage.placeholder":
       "Enter cover image...",
-    "content-manager.content-types.plugin::resources.publication.authorProfile.placeholder":
-      "Enter author profile...",
     "content-manager.content-types.plugin::resources.publication.downloadCount.placeholder":
       "Enter total downloads...",
     "content-manager.content-types.plugin::resources.publication.featured.placeholder":
@@ -179,8 +177,6 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<
       "Ingresa archivo de la publicación (pdf)...",
     "content-manager.content-types.plugin::resources.publication.coverImage.placeholder":
       "Ingresa imagen de portada...",
-    "content-manager.content-types.plugin::resources.publication.authorProfile.placeholder":
-      "Ingresa perfil del autor...",
     "content-manager.content-types.plugin::resources.publication.downloadCount.placeholder":
       "Ingresa total de descargas...",
     "content-manager.content-types.plugin::resources.publication.featured.placeholder":
@@ -273,8 +269,6 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<
       "أدخل ملف المنشور / الوثيقة (PDF)...",
     "content-manager.content-types.plugin::resources.publication.coverImage.placeholder":
       "أدخل صورة الغلاف...",
-    "content-manager.content-types.plugin::resources.publication.authorProfile.placeholder":
-      "أدخل ملف المؤلف...",
     "content-manager.content-types.plugin::resources.publication.downloadCount.placeholder":
       "أدخل إجمالي مرات التحميل...",
     "content-manager.content-types.plugin::resources.publication.featured.placeholder":
@@ -367,8 +361,6 @@ export const CM_PLACEHOLDER_TRANSLATIONS: Record<
       "Yayın / Belge Dosyası (PDF) girin...",
     "content-manager.content-types.plugin::resources.publication.coverImage.placeholder":
       "Kapak Görseli girin...",
-    "content-manager.content-types.plugin::resources.publication.authorProfile.placeholder":
-      "Yazar Profili girin...",
     "content-manager.content-types.plugin::resources.publication.downloadCount.placeholder":
       "Toplam İndirme Sayısı girin...",
     "content-manager.content-types.plugin::resources.publication.featured.placeholder":

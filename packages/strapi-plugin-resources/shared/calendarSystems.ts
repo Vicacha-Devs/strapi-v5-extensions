@@ -5,6 +5,8 @@ export { SUPPORTED_INTL_CALENDARS };
 export type CalendarSystemId = string;
 export type SecondaryCalendarId = string;
 
+const BASE_BCP47_REGEX = /^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8})*$/;
+
 export const SECONDARY_CALENDAR_IDS: readonly string[] = [
   "none",
   ...SUPPORTED_INTL_CALENDARS.map((item) => item.id),
@@ -24,6 +26,22 @@ export function isSupportedCalendar(cal: unknown): cal is CalendarSystemId {
   return SUPPORTED_INTL_CALENDARS.some((item) => item.id === cal.trim());
 }
 
+function sanitizeCalendarBaseLocale(locale: unknown): string {
+  if (typeof locale !== "string" || !locale.trim()) {
+    return "es";
+  }
+  const trimmed = locale.trim();
+  const uIdx = trimmed.toLowerCase().indexOf("-u-");
+  let stripped = uIdx >= 0 ? trimmed.slice(0, uIdx) : trimmed;
+  while (stripped.endsWith("-")) {
+    stripped = stripped.slice(0, -1);
+  }
+  if (!stripped || stripped.length > 35 || !BASE_BCP47_REGEX.test(stripped)) {
+    return "es";
+  }
+  return stripped;
+}
+
 export function formatSecondaryDate(
   isoDateString: string | null | undefined,
   calendar = "islamic-umalqura",
@@ -38,11 +56,15 @@ export function formatSecondaryDate(
   }
 
   try {
-    const formatter = new Intl.DateTimeFormat(`${locale}-u-ca-${calendar}`, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    const baseLocale = sanitizeCalendarBaseLocale(locale);
+    const formatter = new Intl.DateTimeFormat(
+      `${baseLocale}-u-ca-${calendar}`,
+      {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }
+    );
     const parts = formatter.formatToParts(date);
     const year =
       Number(parts.find((p) => p.type === "year")?.value) || undefined;

@@ -45,11 +45,6 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<
       description:
         "Optional cover thumbnail displayed on the Digital Library card",
     },
-    authorProfile: {
-      label: "Author Profile",
-      description:
-        "Optional relation to a scholar or staff profile in the directory",
-    },
     authorName: {
       label: "Author Name",
       description:
@@ -186,6 +181,10 @@ const RESOURCE_FIELD_METADATA_BY_UID: Record<
       label: "Sort Order",
       description:
         "Display order in the gallery grid (lower numbers appear first)",
+    },
+    photoCount: {
+      label: "Photo Count",
+      description: "Total number of photos synchronized in this gallery album",
     },
   },
   [CONTENT_TYPE_UIDS.glossaryTerm]: {

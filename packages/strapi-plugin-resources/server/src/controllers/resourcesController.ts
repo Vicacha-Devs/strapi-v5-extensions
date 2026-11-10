@@ -1,22 +1,23 @@
 import type { Core } from "@strapi/strapi";
 
 import { PLUGIN_ID } from "../../../shared";
+import {
+  sanitizePublicGalleryAlbum,
+  sanitizePublicGlossaryTerm,
+  sanitizePublicPublication,
+} from "../services/catalogNormalizers";
 import type catalogServiceFactory from "../services/catalogService";
-import type mediaLibraryServiceFactory from "../services/mediaLibraryService";
 import type settingsFactory from "../services/settings";
+import { createAdminControllerActions } from "./adminControllerActions";
+import {
+  handleControllerError,
+  parseFeaturedParam,
+  parsePaginationParams,
+  scalarString,
+  type ControllerCtx,
+} from "./controllerHelpers";
 
-export interface ControllerCtx {
-  query?: Record<string, string | undefined>;
-  params?: Record<string, string | undefined>;
-  request?: {
-    body?: Record<string, unknown>;
-  };
-  body?: unknown;
-  status?: number;
-  set?: (key: string, value: string) => void;
-  badRequest: (msg: string) => unknown;
-  notFound: (msg: string) => unknown;
-}
+export type { ControllerCtx };
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
   const getSettingsSvc = () =>
@@ -27,304 +28,252 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     strapi
       .plugin(PLUGIN_ID)
       .service<ReturnType<typeof catalogServiceFactory>>("catalogService");
-  const getMediaSvc = () =>
-    strapi
-      .plugin(PLUGIN_ID)
-      .service<ReturnType<typeof mediaLibraryServiceFactory>>(
-        "mediaLibraryService"
-      );
+
+  const adminActions = createAdminControllerActions(strapi);
 
   return {
+    /**
+     * Public Content-API hub overview (`publishedOnly: true`, no Media Library
+     * dump, internal fields & disabled/active-script download URLs redacted).
+     */
     async getHubOverview(ctx: ControllerCtx) {
-      const locale = ctx.query?.locale;
-      const [
-        settings,
-        publications,
-        galleries,
-        glossary,
-        mediaFolders,
-        mediaFiles,
-      ] = await Promise.all([
-        getSettingsSvc().getPublicSummary(),
-        getCatalogSvc().listPublications({ locale }),
-        getCatalogSvc().listGalleryAlbums({ locale }),
-        getCatalogSvc().listGlossaryTerms({ locale }),
-        getMediaSvc().listMediaFolders(),
-        getMediaSvc().listMediaFiles
-          ? getMediaSvc().listMediaFiles({ limit: 200 })
-          : Promise.resolve([]),
-      ]);
+      try {
+        const locale = scalarString(ctx.query?.locale, 35);
+        const { pageSize } = parsePaginationParams(ctx.query);
+        const [
+          fullSettings,
+          publicSummary,
+          rawPublications,
+          rawGalleries,
+          rawGlossary,
+        ] = await Promise.all([
+          getSettingsSvc().getSettings(),
+          getSettingsSvc().getPublicSummary(),
+          getCatalogSvc().listPublications({
+            locale,
+            pageSize,
+            publishedOnly: true,
+          }),
+          getCatalogSvc().listGalleryAlbums({
+            locale,
+            pageSize,
+            publishedOnly: true,
+          }),
+          getCatalogSvc().listGlossaryTerms({
+            locale,
+            pageSize,
+            publishedOnly: true,
+          }),
+        ]);
 
-      ctx.body = {
-        data: {
-          settings,
-          publications,
-          galleries,
-          glossary,
-          mediaFolders,
-          mediaFiles,
-          counts: {
-            publications: publications.length,
-            galleries: galleries.length,
-            glossary: glossary.length,
-            mediaFolders: mediaFolders.length,
-            mediaFiles: mediaFiles.length,
+        const pubOpts = {
+          allowedExtensions: fullSettings.allowedDownloadExtensions,
+          allowedMimeTypes: fullSettings.allowedDownloadMimeTypes,
+        };
+        const publications = rawPublications.map((p) =>
+          sanitizePublicPublication(p, pubOpts)
+        );
+        const galleries = rawGalleries.map((g) =>
+          sanitizePublicGalleryAlbum(g)
+        );
+        const glossary = rawGlossary.map((t) => sanitizePublicGlossaryTerm(t));
+
+        ctx.body = {
+          data: {
+            settings: publicSummary,
+            publications,
+            galleries,
+            glossary,
+            counts: {
+              publications: publications.length,
+              galleries: galleries.length,
+              glossary: glossary.length,
+            },
           },
-        },
-      };
+        };
+      } catch (err) {
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Failed to load resources hub"
+        );
+      }
     },
 
     async listPublications(ctx: ControllerCtx) {
-      const locale = ctx.query?.locale;
-      const category = ctx.query?.category;
-      const featured =
-        ctx.query?.featured === "true"
-          ? true
-          : ctx.query?.featured === "false"
-            ? false
-            : undefined;
-      const q = ctx.query?.q;
+      try {
+        const locale = scalarString(ctx.query?.locale, 35);
+        const category = scalarString(ctx.query?.category, 40);
+        const featured = parseFeaturedParam(ctx.query?.featured);
+        const q = scalarString(ctx.query?.q, 120);
+        const { page, pageSize } = parsePaginationParams(ctx.query);
 
-      const items = await getCatalogSvc().listPublications({
-        locale,
-        category,
-        featured,
-        q,
-      });
-      ctx.body = { data: items };
+        const [fullSettings, items] = await Promise.all([
+          getSettingsSvc().getSettings(),
+          getCatalogSvc().listPublications({
+            locale,
+            category,
+            featured,
+            q,
+            page,
+            pageSize,
+            publishedOnly: true,
+          }),
+        ]);
+        const pubOpts = {
+          allowedExtensions: fullSettings.allowedDownloadExtensions,
+          allowedMimeTypes: fullSettings.allowedDownloadMimeTypes,
+        };
+        ctx.body = {
+          data: items.map((p) => sanitizePublicPublication(p, pubOpts)),
+        };
+      } catch (err) {
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Failed to list publications"
+        );
+      }
     },
 
     async getPublicationBySlug(ctx: ControllerCtx) {
-      const slug = ctx.params?.slug || "";
-      const locale = ctx.query?.locale;
-      const item = await getCatalogSvc().getPublicationBySlug(slug, locale);
-      if (!item) {
-        return ctx.notFound("Publication not found");
-      }
-      ctx.body = { data: item };
-    },
-
-    async createPublication(ctx: ControllerCtx) {
       try {
-        const locale = ctx.query?.locale;
-        const created = await getCatalogSvc().createPublication(
-          ctx.request?.body,
-          locale
+        const slug = scalarString(ctx.params?.slug, 120) || "";
+        if (!slug) {
+          return ctx.notFound("Publication not found");
+        }
+        const locale = scalarString(ctx.query?.locale, 35);
+        const [fullSettings, item] = await Promise.all([
+          getSettingsSvc().getSettings(),
+          getCatalogSvc().getPublicationBySlug(slug, locale, {
+            publishedOnly: true,
+          }),
+        ]);
+        if (!item) {
+          return ctx.notFound("Publication not found");
+        }
+        ctx.body = {
+          data: sanitizePublicPublication(item, {
+            allowedExtensions: fullSettings.allowedDownloadExtensions,
+            allowedMimeTypes: fullSettings.allowedDownloadMimeTypes,
+          }),
+        };
+      } catch (err) {
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Failed to load publication"
         );
-        ctx.status = 201;
-        ctx.body = { data: created };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
-      }
-    },
-
-    async updatePublication(ctx: ControllerCtx) {
-      try {
-        const documentId = ctx.params?.documentId || "";
-        const locale = ctx.query?.locale;
-        const updated = await getCatalogSvc().updatePublication(
-          documentId,
-          ctx.request?.body,
-          locale
-        );
-        ctx.body = { data: updated };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
-      }
-    },
-
-    async deletePublication(ctx: ControllerCtx) {
-      try {
-        const documentId = ctx.params?.documentId || "";
-        const result = await getCatalogSvc().deletePublication(documentId);
-        ctx.body = { data: result };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
       }
     },
 
     async downloadPublication(ctx: ControllerCtx) {
       try {
-        const slug = ctx.params?.slug || "";
-        const locale = ctx.query?.locale;
+        const slug = scalarString(ctx.params?.slug, 120) || "";
+        if (!slug) {
+          return ctx.notFound("Publication not found");
+        }
+        const locale = scalarString(ctx.query?.locale, 35);
         const ticket = await getCatalogSvc().recordPublicationDownload(
           slug,
           locale
         );
-        if (ctx.set && ticket.headers) {
-          for (const [k, v] of Object.entries(ticket.headers)) {
-            ctx.set(k, v as string);
-          }
+        if (ctx.set) {
+          ctx.set("X-Content-Type-Options", "nosniff");
+          ctx.set("Cache-Control", "private, no-store");
         }
         ctx.body = { data: ticket };
       } catch (err) {
-        return ctx.badRequest((err as Error).message);
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Failed to issue download ticket"
+        );
       }
     },
 
     async listGalleries(ctx: ControllerCtx) {
-      const locale = ctx.query?.locale;
-      const category = ctx.query?.category;
-      const featured =
-        ctx.query?.featured === "true"
-          ? true
-          : ctx.query?.featured === "false"
-            ? false
-            : undefined;
-      const items = await getCatalogSvc().listGalleryAlbums({
-        locale,
-        category,
-        featured,
-      });
-      ctx.body = { data: items };
+      try {
+        const locale = scalarString(ctx.query?.locale, 35);
+        const category = scalarString(ctx.query?.category, 40);
+        const featured = parseFeaturedParam(ctx.query?.featured);
+        const { page, pageSize } = parsePaginationParams(ctx.query);
+
+        const items = await getCatalogSvc().listGalleryAlbums({
+          locale,
+          category,
+          featured,
+          page,
+          pageSize,
+          publishedOnly: true,
+        });
+        ctx.body = { data: items.map((g) => sanitizePublicGalleryAlbum(g)) };
+      } catch (err) {
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Failed to list gallery albums"
+        );
+      }
     },
 
     async getGalleryBySlug(ctx: ControllerCtx) {
-      const slug = ctx.params?.slug || "";
-      const locale = ctx.query?.locale;
-      const item = await getCatalogSvc().getGalleryAlbumBySlug(slug, locale);
-      if (!item) {
-        return ctx.notFound("Gallery album not found");
-      }
-      ctx.body = { data: item };
-    },
-
-    async createGalleryAlbum(ctx: ControllerCtx) {
       try {
-        const locale = ctx.query?.locale;
-        const created = await getCatalogSvc().createGalleryAlbum(
-          ctx.request?.body,
-          locale
+        const slug = scalarString(ctx.params?.slug, 120) || "";
+        if (!slug) {
+          return ctx.notFound("Gallery album not found");
+        }
+        const locale = scalarString(ctx.query?.locale, 35);
+        const item = await getCatalogSvc().getGalleryAlbumBySlug(slug, locale, {
+          publishedOnly: true,
+        });
+        if (!item) {
+          return ctx.notFound("Gallery album not found");
+        }
+        ctx.body = { data: sanitizePublicGalleryAlbum(item) };
+      } catch (err) {
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Failed to load gallery album"
         );
-        ctx.status = 201;
-        ctx.body = { data: created };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
-      }
-    },
-
-    async updateGalleryAlbum(ctx: ControllerCtx) {
-      try {
-        const documentId = ctx.params?.documentId || "";
-        const locale = ctx.query?.locale;
-        const updated = await getCatalogSvc().updateGalleryAlbum(
-          documentId,
-          ctx.request?.body,
-          locale
-        );
-        ctx.body = { data: updated };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
-      }
-    },
-
-    async deleteGalleryAlbum(ctx: ControllerCtx) {
-      try {
-        const documentId = ctx.params?.documentId || "";
-        const result = await getCatalogSvc().deleteGalleryAlbum(documentId);
-        ctx.body = { data: result };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
       }
     },
 
     async listGlossary(ctx: ControllerCtx) {
-      const locale = ctx.query?.locale;
-      const category = ctx.query?.category;
-      const letterGroup = ctx.query?.letter;
-      const q = ctx.query?.q;
-      const items = await getCatalogSvc().listGlossaryTerms({
-        locale,
-        category,
-        letterGroup,
-        q,
-      });
-      ctx.body = { data: items };
-    },
-
-    async createGlossaryTerm(ctx: ControllerCtx) {
       try {
-        const locale = ctx.query?.locale;
-        const created = await getCatalogSvc().createGlossaryTerm(
-          ctx.request?.body,
-          locale
+        const locale = scalarString(ctx.query?.locale, 35);
+        const category = scalarString(ctx.query?.category, 40);
+        const letterGroup = scalarString(ctx.query?.letter, 4);
+        const q = scalarString(ctx.query?.q, 120);
+        const { page, pageSize } = parsePaginationParams(ctx.query);
+
+        const items = await getCatalogSvc().listGlossaryTerms({
+          locale,
+          category,
+          letterGroup,
+          q,
+          page,
+          pageSize,
+          publishedOnly: true,
+        });
+        ctx.body = { data: items.map((t) => sanitizePublicGlossaryTerm(t)) };
+      } catch (err) {
+        return handleControllerError(
+          strapi,
+          ctx,
+          err,
+          "Failed to list glossary terms"
         );
-        ctx.status = 201;
-        ctx.body = { data: created };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
       }
     },
 
-    async updateGlossaryTerm(ctx: ControllerCtx) {
-      try {
-        const documentId = ctx.params?.documentId || "";
-        const locale = ctx.query?.locale;
-        const updated = await getCatalogSvc().updateGlossaryTerm(
-          documentId,
-          ctx.request?.body,
-          locale
-        );
-        ctx.body = { data: updated };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
-      }
-    },
-
-    async deleteGlossaryTerm(ctx: ControllerCtx) {
-      try {
-        const documentId = ctx.params?.documentId || "";
-        const result = await getCatalogSvc().deleteGlossaryTerm(documentId);
-        ctx.body = { data: result };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
-      }
-    },
-
-    async listMediaFolders(ctx: ControllerCtx) {
-      const folders = await getMediaSvc().listMediaFolders();
-      ctx.body = { data: folders };
-    },
-
-    async listMediaFiles(ctx: ControllerCtx) {
-      const mimePrefix = ctx.query?.mimePrefix;
-      const files = getMediaSvc().listMediaFiles
-        ? await getMediaSvc().listMediaFiles({ mimePrefix })
-        : [];
-      ctx.body = { data: files };
-    },
-
-    async syncAlbumMediaFolder(ctx: ControllerCtx) {
-      try {
-        const documentId =
-          ctx.params?.documentId ||
-          (ctx.request?.body?.documentId as string | undefined) ||
-          "";
-        const locale = ctx.query?.locale;
-        const result = await getMediaSvc().syncAlbumFromMediaFolder(
-          documentId,
-          locale
-        );
-        ctx.body = { data: result };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
-      }
-    },
-
-    async getSettings(ctx: ControllerCtx) {
-      const data = await getSettingsSvc().getSettings();
-      ctx.body = { data };
-    },
-
-    async updateSettings(ctx: ControllerCtx) {
-      try {
-        const data = await getSettingsSvc().updateSettings(
-          ctx.request?.body || {}
-        );
-        ctx.body = { data };
-      } catch (err) {
-        return ctx.badRequest((err as Error).message);
-      }
-    },
+    ...adminActions,
   };
 };

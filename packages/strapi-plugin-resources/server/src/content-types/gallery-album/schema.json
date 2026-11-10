@@ -160,6 +160,16 @@
           "localized": false
         }
       }
+    },
+    "photoCount": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      }
     }
   }
 }

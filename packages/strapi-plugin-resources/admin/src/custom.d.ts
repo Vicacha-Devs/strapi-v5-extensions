@@ -97,6 +97,9 @@ declare module "@strapi/icons" {
   export const Book: FC<Record<string, unknown>>;
   export const Folder: FC<Record<string, unknown>>;
   export const File: FC<Record<string, unknown>>;
+  export const Trash: FC<Record<string, unknown>>;
+  export const WarningCircle: FC<Record<string, unknown>>;
+  export const ArrowClockwise: FC<Record<string, unknown>>;
 }
 
 declare module "@strapi/design-system" {
@@ -106,6 +109,7 @@ declare module "@strapi/design-system" {
     onClick?: (...args: never[]) => unknown;
     onChange?: (...args: never[]) => unknown;
     onValueChange?: (...args: never[]) => unknown;
+    onOpenChange?: (...args: never[]) => unknown;
     [key: string]: unknown;
   };
 
@@ -114,6 +118,18 @@ declare module "@strapi/design-system" {
     List: FC<DesignComponentProps>;
     Trigger: FC<DesignComponentProps>;
     Content: FC<DesignComponentProps>;
+  };
+
+  export const Dialog: {
+    Root: FC<DesignComponentProps>;
+    Trigger: FC<DesignComponentProps>;
+    Content: FC<DesignComponentProps>;
+    Header: FC<DesignComponentProps>;
+    Body: FC<DesignComponentProps>;
+    Description: FC<DesignComponentProps>;
+    Footer: FC<DesignComponentProps>;
+    Cancel: FC<DesignComponentProps>;
+    Action: FC<DesignComponentProps>;
   };
 
   export const Main: FC<DesignComponentProps>;
@@ -155,6 +171,7 @@ declare module "@strapi/strapi/admin" {
   } from "../../shared";
 
   export type FetchInnerData = ResourcesPluginSettings & {
+    settings?: Partial<ResourcesPluginSettings>;
     publications?: PublicationRecord[];
     galleries?: GalleryAlbumRecord[];
     glossary?: GlossaryTermRecord[];
@@ -168,17 +185,29 @@ declare module "@strapi/strapi/admin" {
   }
 
   export const useFetchClient: () => {
-    get: (url: string) => Promise<{ data: FetchClientResponse }>;
+    get: (
+      url: string,
+      config?: { signal?: AbortSignal }
+    ) => Promise<{ data: FetchClientResponse }>;
     post: (
       url: string,
-      data?: unknown
+      data?: unknown,
+      config?: Record<string, unknown>
     ) => Promise<{ data: FetchClientResponse }>;
     put: (
       url: string,
-      data?: unknown
+      data?: unknown,
+      config?: Record<string, unknown>
     ) => Promise<{ data: FetchClientResponse }>;
-    del: (url: string) => Promise<{ data: FetchClientResponse }>;
+    del: (
+      url: string,
+      config?: Record<string, unknown>
+    ) => Promise<{ data: FetchClientResponse }>;
   };
+}
+
+declare module "react-router-dom" {
+  export function useNavigate(): (to: string) => void;
 }
 
 declare module "styled-components" {

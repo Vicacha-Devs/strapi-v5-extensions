@@ -118,6 +118,7 @@ export interface GlossaryTermRecord {
 }
 
 export interface DownloadTicketResult {
+  documentId: string;
   slug: string;
   title: string;
   fileName: string;
@@ -125,7 +126,17 @@ export interface DownloadTicketResult {
   mime: string;
   formattedSize: string;
   downloadCount: number;
+  expiresAt: number;
+  signature: string;
+  recommendedHeaders: Record<string, string>;
   headers: Record<string, string>;
+}
+
+export interface PublicSettingsSummary {
+  organizationName: string;
+  defaultLocale: string;
+  supportedLocales: string[];
+  secondaryCalendar: string;
 }
 
 export interface ResourcesPluginSettings {

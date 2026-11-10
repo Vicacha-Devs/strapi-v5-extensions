@@ -1,8 +1,116 @@
 import {
+  BLOCKED_DOWNLOAD_EXTENSIONS,
+  BLOCKED_DOWNLOAD_MIME_TYPES,
   DEFAULT_ALLOWED_DOWNLOAD_EXTENSIONS,
   DEFAULT_ALLOWED_DOWNLOAD_MIME_TYPES,
 } from "./constants";
 import type { MediaLibraryAsset, MediaLibraryFormatVariant } from "./types";
+
+const CONTROL_CHAR_REGEX = /[\u0000-\u001f\u007f]/;
+
+/**
+ * Validates and normalizes a URL for safe use in `href`, `src`, or download
+ * redirects. Permits only `https:`, `http:`, or safe root-relative `/...`
+ * paths without `//`, `\`, or `..` traversal segments.
+ */
+export function toSafeHref(rawUrl: unknown): string | null {
+  if (typeof rawUrl !== "string") return null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed || CONTROL_CHAR_REGEX.test(trimmed) || trimmed.includes("\\")) {
+    return null;
+  }
+
+  if (trimmed.startsWith("/")) {
+    if (trimmed.startsWith("//")) return null;
+    const [pathAndQuery, hashPart] = trimmed.split("#", 2);
+    const [rawPath, queryPart] = pathAndQuery.split("?", 2);
+    if (rawPath.includes("..")) return null;
+    try {
+      const decoded = decodeURIComponent(rawPath);
+      if (
+        decoded.includes("..") ||
+        decoded.includes("\\") ||
+        CONTROL_CHAR_REGEX.test(decoded)
+      ) {
+        return null;
+      }
+    } catch {
+      return null;
+    }
+    const normalizedPath = rawPath.replace(/\/+/g, "/");
+    const withQuery =
+      queryPart !== undefined
+        ? `${normalizedPath}?${queryPart}`
+        : normalizedPath;
+    return hashPart !== undefined ? `${withQuery}#${hashPart}` : withQuery;
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extracts the lowercased file extension (e.g. `.pdf`) from a URL pathname.
+ */
+export function extractUrlExtension(rawUrl: unknown): string {
+  const safeUrl = toSafeHref(rawUrl);
+  if (!safeUrl) return "";
+  try {
+    const parsed = new URL(safeUrl, "https://resources.local");
+    const decodedPath = decodeURIComponent(parsed.pathname);
+    if (decodedPath.includes("..") || decodedPath.includes("\\")) return "";
+    const fileName = decodedPath.split("/").pop() || "";
+    const dotIdx = fileName.lastIndexOf(".");
+    if (dotIdx <= 0 || dotIdx === fileName.length - 1) return "";
+    return fileName.slice(dotIdx).toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Wraps `toSafeHref` and additionally rejects URLs whose pathname extension is
+ * in `BLOCKED_DOWNLOAD_EXTENSIONS` (`.svg`, `.html`, `.js`, `.exe`, etc.) so
+ * active-script files are never rendered as clickable `<a href>` links.
+ */
+export function toSafeOpenableHref(rawUrl: unknown): string | null {
+  const safeHref = toSafeHref(rawUrl);
+  if (!safeHref) return null;
+  const ext = extractUrlExtension(safeHref);
+  if (ext && BLOCKED_DOWNLOAD_EXTENSIONS.includes(ext)) {
+    return null;
+  }
+  return safeHref;
+}
+
+/**
+ * Checks whether an asset's extension or MIME type is in the active-script /
+ * executable blocklist.
+ */
+export function isBlockedAssetType(ext: unknown, mime: unknown): boolean {
+  const normalizedExt =
+    typeof ext === "string" && ext.trim()
+      ? (ext.trim().startsWith(".")
+          ? ext.trim()
+          : `.${ext.trim()}`
+        ).toLowerCase()
+      : "";
+  const normalizedMime =
+    typeof mime === "string" ? mime.trim().toLowerCase() : "";
+  return (
+    (normalizedExt.length > 0 &&
+      BLOCKED_DOWNLOAD_EXTENSIONS.includes(normalizedExt)) ||
+    (normalizedMime.length > 0 &&
+      BLOCKED_DOWNLOAD_MIME_TYPES.includes(normalizedMime))
+  );
+}
 
 /**
  * Strips path traversal sequences (`../`, `..\\`), directory separators,
@@ -14,21 +122,30 @@ export function sanitizeFilename(
 ): string {
   const input = typeof rawName === "string" ? rawName.trim() : "";
   const base = input.replace(/\\/g, "/").split("/").pop() || "";
-  const cleaned = base
+  const normalized = base
     .replace(/\.\.+/g, ".")
     .replace(/[^a-zA-Z0-9._-]/g, "-")
     .replace(/-+/g, "-")
-    .replace(/^[-.]+|[-.]+$/g, "")
-    .slice(0, 120);
+    .replace(/^[-.]+/, "");
+  let end = normalized.length;
+  while (
+    end > 0 &&
+    (normalized[end - 1] === "-" || normalized[end - 1] === ".")
+  ) {
+    end -= 1;
+  }
+  const cleaned = normalized.slice(0, end).slice(0, 120);
 
   if (!cleaned) {
-    return `resource${fallbackExt.startsWith(".") ? fallbackExt : `.${fallbackExt}`}`;
+    const ext = fallbackExt.startsWith(".") ? fallbackExt : `.${fallbackExt}`;
+    return `resource${ext}`;
   }
   return cleaned;
 }
 
 /**
- * Validates that a Strapi Media Library asset matches the configured extension and MIME allow-list.
+ * Validates that a Strapi Media Library asset matches the configured extension
+ * and MIME allow-list while unconditionally blocking active-script types.
  */
 export function isAllowedDownloadAsset(
   ext: unknown,
@@ -46,28 +163,54 @@ export function isAllowedDownloadAsset(
   const normalizedMime =
     typeof mime === "string" ? mime.trim().toLowerCase() : "";
 
-  const extAllowed =
-    normalizedExt.length > 0 &&
-    allowedExtensions.some((item) => item.toLowerCase() === normalizedExt);
-  const mimeAllowed =
-    normalizedMime.length > 0 &&
-    allowedMimeTypes.some((item) => item.toLowerCase() === normalizedMime);
+  if (
+    !normalizedExt ||
+    !normalizedMime ||
+    isBlockedAssetType(normalizedExt, normalizedMime)
+  ) {
+    return false;
+  }
+
+  const extAllowed = allowedExtensions.some(
+    (item) => item.toLowerCase() === normalizedExt
+  );
+  const mimeAllowed = allowedMimeTypes.some(
+    (item) => item.toLowerCase() === normalizedMime
+  );
 
   return extAllowed && mimeAllowed;
 }
 
 /**
- * Builds hardened HTTP headers for downloadable digital library publications.
+ * Validates that an external/relative download URL uses a safe scheme and an
+ * allowed file extension.
+ */
+export function isAllowedExternalDownloadUrl(
+  rawUrl: unknown,
+  allowedExtensions: string[] = DEFAULT_ALLOWED_DOWNLOAD_EXTENSIONS
+): boolean {
+  const ext = extractUrlExtension(rawUrl);
+  if (!ext || BLOCKED_DOWNLOAD_EXTENSIONS.includes(ext)) {
+    return false;
+  }
+  return allowedExtensions.some((item) => item.toLowerCase() === ext);
+}
+
+/**
+ * Builds hardened HTTP headers recommended for serving binary downloads.
  */
 export function buildAttachmentHeaders(
   fileName: string,
   mime = "application/pdf"
 ): Record<string, string> {
   const safeName = sanitizeFilename(fileName);
+  const normalizedMime =
+    typeof mime === "string" ? mime.trim().toLowerCase() : "";
   const safeMime =
-    typeof mime === "string" &&
-    /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(mime.trim())
-      ? mime.trim()
+    normalizedMime &&
+    /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(normalizedMime) &&
+    !BLOCKED_DOWNLOAD_MIME_TYPES.includes(normalizedMime)
+      ? normalizedMime
       : "application/octet-stream";
 
   return {
@@ -87,29 +230,30 @@ export function optimizeCloudinaryMediaUrl(
   enableOptimization = true,
   width?: number
 ): string {
-  if (typeof rawUrl !== "string" || !rawUrl.trim()) return "";
-  const url = rawUrl.trim();
+  const safeUrl = toSafeHref(rawUrl);
+  if (!safeUrl) return "";
   if (
     !enableOptimization ||
-    !url.includes("res.cloudinary.com") ||
-    !url.includes("/upload/")
+    !safeUrl.includes("res.cloudinary.com") ||
+    !safeUrl.includes("/upload/")
   ) {
-    return url;
+    return safeUrl;
   }
 
   const transform =
-    typeof width === "number" && width > 0
+    typeof width === "number" && Number.isFinite(width) && width > 0
       ? `f_auto,q_auto,w_${Math.round(width)}`
       : "f_auto,q_auto";
 
-  if (url.includes(`/upload/${transform}/`)) {
-    return url;
+  if (safeUrl.includes(`/upload/${transform}/`)) {
+    return safeUrl;
   }
-  return url.replace("/upload/", `/upload/${transform}/`);
+  return safeUrl.replace("/upload/", `/upload/${transform}/`);
 }
 
 /**
- * Formats Strapi Media Library `size` (stored in KB by `@strapi/upload`) into a human-readable label.
+ * Formats Strapi Media Library `size` (stored in KB by `@strapi/upload`) into
+ * a human-readable label.
  */
 export function formatMediaSizeFromKB(sizeInKB: unknown): string {
   const kb = Number(sizeInKB);
@@ -122,7 +266,7 @@ export function formatMediaSizeFromKB(sizeInKB: unknown): string {
 }
 
 function optNumber(val: unknown): number | undefined {
-  return typeof val === "number" ? val : undefined;
+  return typeof val === "number" && Number.isFinite(val) ? val : undefined;
 }
 
 function optString(val: unknown): string | undefined {
@@ -138,10 +282,14 @@ function normalizeFormatVariants(
   for (const [key, variant] of Object.entries(
     rawFormats as Record<string, Record<string, unknown>>
   )) {
-    if (variant && typeof variant.url === "string" && variant.url.trim()) {
+    if (key === "__proto__" || key === "constructor" || key === "prototype") {
+      continue;
+    }
+    const safeVariantUrl = toSafeHref(variant?.url);
+    if (variant && safeVariantUrl) {
       formats[key] = {
         url: optimizeCloudinaryMediaUrl(
-          variant.url,
+          safeVariantUrl,
           enableCloudinaryOptimization
         ),
         width: optNumber(variant.width),
@@ -168,7 +316,9 @@ function resolveThumbnailUrl(
 }
 
 function resolveAssetId(val: unknown): number | string | undefined {
-  return typeof val === "number" || typeof val === "string" ? val : undefined;
+  if (typeof val === "number" && Number.isFinite(val)) return val;
+  if (typeof val === "string" && val.trim()) return val.trim();
+  return undefined;
 }
 
 function resolveAltText(val: unknown, fallback: string): string {
@@ -176,11 +326,12 @@ function resolveAltText(val: unknown, fallback: string): string {
 }
 
 function resolveFiniteSizeKB(val: unknown): number {
-  return typeof val === "number" && Number.isFinite(val) ? val : 0;
+  return typeof val === "number" && Number.isFinite(val) && val >= 0 ? val : 0;
 }
 
 /**
- * Normalizes a raw `plugin::upload.file` record from Strapi v5 Media Library into `MediaLibraryAsset`.
+ * Normalizes a raw `plugin::upload.file` record from Strapi v5 Media Library
+ * into `MediaLibraryAsset`.
  */
 export function normalizeUploadFile(
   rawFile: unknown,
@@ -188,8 +339,8 @@ export function normalizeUploadFile(
 ): MediaLibraryAsset | null {
   if (!rawFile || typeof rawFile !== "object") return null;
   const f = rawFile as Record<string, unknown>;
-  const rawUrl = typeof f.url === "string" ? f.url.trim() : "";
-  if (!rawUrl) return null;
+  const safeRawUrl = toSafeHref(f.url);
+  if (!safeRawUrl) return null;
 
   const formats = normalizeFormatVariants(
     f.formats,
@@ -197,7 +348,7 @@ export function normalizeUploadFile(
   );
   const sizeInKB = resolveFiniteSizeKB(f.size);
   const ext = optString(f.ext) ?? "";
-  const name = sanitizeFilename(f.name || rawUrl, ext || ".bin");
+  const name = sanitizeFilename(f.name || safeRawUrl, ext || ".bin");
 
   return {
     id: resolveAssetId(f.id),
@@ -205,14 +356,14 @@ export function normalizeUploadFile(
     name,
     alternativeText: resolveAltText(f.alternativeText, name),
     caption: typeof f.caption === "string" ? f.caption.trim() : "",
-    url: rawUrl,
+    url: safeRawUrl,
     optimizedUrl: optimizeCloudinaryMediaUrl(
-      rawUrl,
+      safeRawUrl,
       enableCloudinaryOptimization
     ),
     thumbnailUrl: resolveThumbnailUrl(
       formats,
-      rawUrl,
+      safeRawUrl,
       enableCloudinaryOptimization
     ),
     mime: optString(f.mime) ?? "application/octet-stream",
@@ -227,7 +378,8 @@ export function normalizeUploadFile(
 }
 
 /**
- * Computes the normalized alphabetical letter group (`A`..`Z` or `#`) for glossary indexing.
+ * Computes the normalized alphabetical letter group (`A`..`Z` or `#`) for
+ * glossary indexing.
  */
 export function computeLetterGroup(term: unknown): string {
   if (typeof term !== "string" || !term.trim()) return "#";

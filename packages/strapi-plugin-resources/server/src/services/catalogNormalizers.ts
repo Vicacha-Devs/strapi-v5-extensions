@@ -1,9 +1,14 @@
 import {
   buildAttachmentHeaders,
+  extractMediaRelationId,
+  extractUrlExtension,
   formatSecondaryCalendarDate,
   isAllowedDownloadAsset,
+  isAllowedExternalDownloadUrl,
+  isSafeObjectKey,
   normalizeUploadFile,
   sanitizeFilename,
+  toSafeHref,
   type DownloadTicketResult,
   type GalleryAlbumCategory,
   type GalleryAlbumRecord,
@@ -15,6 +20,18 @@ import {
   type ResourcesPluginSettings,
   type SecondaryCalendarId,
 } from "../../../shared";
+import { ResourceNotFoundError, ResourceValidationError } from "./errors";
+import {
+  sanitizePublicGalleryAlbum,
+  sanitizePublicGlossaryTerm,
+  sanitizePublicPublication,
+} from "./publicSanitizers";
+
+export {
+  sanitizePublicGalleryAlbum,
+  sanitizePublicGlossaryTerm,
+  sanitizePublicPublication,
+};
 
 function asString(val: unknown, fallback = ""): string {
   return typeof val === "string" ? val : fallback;
@@ -33,11 +50,11 @@ function asTrimmedOptString(val: unknown): string | undefined {
 }
 
 function asNumber(val: unknown, fallback = 0): number {
-  return typeof val === "number" ? val : fallback;
+  return typeof val === "number" && Number.isFinite(val) ? val : fallback;
 }
 
 function asOptNumber(val: unknown): number | undefined {
-  return typeof val === "number" ? val : undefined;
+  return typeof val === "number" && Number.isFinite(val) ? val : undefined;
 }
 
 function resolveDocId(row: Record<string, unknown>): string {
@@ -77,6 +94,7 @@ export function normalizePublicationRow(
   const locale = asNonEmptyString(row.locale, settings.defaultLocale);
   const publishedAtDate = asOptString(row.publishedAtDate);
   const secondaryDateOverride = asTrimmedOptString(row.secondaryDateOverride);
+  const rawCount = Math.trunc(asNumber(row.downloadCount, 0));
 
   return {
     documentId: resolveDocId(row),
@@ -97,10 +115,10 @@ export function normalizePublicationRow(
       locale
     ),
     mediaFolderPath: asOptString(row.mediaFolderPath),
-    downloadCount: asNumber(row.downloadCount, 0),
+    downloadCount: Math.max(0, rawCount),
     featured: Boolean(row.featured),
     allowPublicDownload: row.allowPublicDownload !== false,
-    externalDownloadUrl: asOptString(row.externalDownloadUrl),
+    externalDownloadUrl: toSafeHref(row.externalDownloadUrl) ?? undefined,
     file: normalizeUploadFile(row.file, settings.enableCloudinaryOptimization),
     coverImage: normalizeUploadFile(
       row.coverImage,
@@ -128,7 +146,8 @@ export function normalizeGalleryAlbumRow(
     ) ??
     photos[0] ??
     null;
-  const storedPhotoCount = Math.max(0, asNumber(row.photoCount, 0));
+  const storedPhotoCount = Math.max(0, Math.trunc(asNumber(row.photoCount, 0)));
+  const hasPopulatedPhotos = Array.isArray(row.photos);
 
   return {
     documentId: resolveDocId(row),
@@ -145,13 +164,16 @@ export function normalizeGalleryAlbumRow(
       locale
     ),
     mediaFolderId:
-      typeof row.mediaFolderId === "number" ? row.mediaFolderId : null,
+      typeof row.mediaFolderId === "number" &&
+      Number.isFinite(row.mediaFolderId)
+        ? row.mediaFolderId
+        : null,
     mediaFolderPath: asOptString(row.mediaFolderPath),
     photographerCredit: asOptString(row.photographerCredit),
     framingNotes: asOptString(row.framingNotes),
     featured: Boolean(row.featured),
-    sortOrder: asNumber(row.sortOrder, 0),
-    photoCount: photos.length > 0 ? photos.length : storedPhotoCount,
+    sortOrder: Math.trunc(asNumber(row.sortOrder, 0)),
+    photoCount: hasPopulatedPhotos ? photos.length : storedPhotoCount,
     coverPhoto,
     photos,
     locale,
@@ -193,18 +215,38 @@ export function assertPublicationDownloadable(
   settings: ResourcesPluginSettings
 ): void {
   if (!record.allowPublicDownload) {
-    throw new Error(`Public download is disabled for "${slug}"`);
+    throw new ResourceValidationError(
+      `Public download is disabled for "${slug}"`
+    );
   }
-  if (!record.file) return;
-  const allowed = isAllowedDownloadAsset(
-    record.file.ext,
-    record.file.mime,
-    settings.allowedDownloadExtensions,
-    settings.allowedDownloadMimeTypes
+  if (record.file) {
+    const allowed = isAllowedDownloadAsset(
+      record.file.ext,
+      record.file.mime,
+      settings.allowedDownloadExtensions,
+      settings.allowedDownloadMimeTypes
+    );
+    if (!allowed) {
+      throw new ResourceValidationError(
+        `Asset type (${record.file.ext} / ${record.file.mime}) is not in the download allow-list`
+      );
+    }
+    return;
+  }
+
+  if (!record.externalDownloadUrl) {
+    throw new ResourceValidationError(
+      `Publication "${slug}" has no downloadable file attached`
+    );
+  }
+  const extAllowed = isAllowedExternalDownloadUrl(
+    record.externalDownloadUrl,
+    settings.allowedDownloadExtensions
   );
-  if (!allowed) {
-    throw new Error(
-      `Asset type (${record.file.ext} / ${record.file.mime}) is not in the download allow-list`
+  if (!extAllowed) {
+    const ext = extractUrlExtension(record.externalDownloadUrl) || "unknown";
+    throw new ResourceValidationError(
+      `External download URL extension (${ext}) is not in the download allow-list`
     );
   }
 }
@@ -213,32 +255,70 @@ export function resolvePublicationDownloadUrl(
   record: PublicationRecord,
   slug: string
 ): string {
-  const downloadUrl = record.file?.url || record.externalDownloadUrl || "";
-  if (!downloadUrl) {
-    throw new Error(`Publication "${slug}" has no downloadable file attached`);
+  const rawCandidate = record.file?.url || record.externalDownloadUrl || "";
+  if (!rawCandidate) {
+    throw new ResourceValidationError(
+      `Publication "${slug}" has no downloadable file attached`
+    );
   }
-  return downloadUrl;
+  const safeUrl = toSafeHref(rawCandidate);
+  if (!safeUrl) {
+    throw new ResourceValidationError(
+      `Publication "${slug}" has an unsafe download URL`
+    );
+  }
+  return safeUrl;
 }
+
+const EXT_TO_MIME_MAP: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".epub": "application/epub+zip",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".mp3": "audio/mpeg",
+  ".m4a": "audio/mp4",
+  ".ogg": "audio/ogg",
+  ".wav": "audio/wav",
+  ".zip": "application/zip",
+};
 
 export function buildDownloadTicket(
   record: PublicationRecord,
   downloadUrl: string,
-  nextCount: number
+  nextCount: number,
+  expiresAt: number,
+  signature: string
 ): DownloadTicketResult {
+  const resolvedExt =
+    record.file?.ext || extractUrlExtension(downloadUrl) || ".pdf";
   const fileName = sanitizeFilename(
-    record.file?.name || `${record.slug}.pdf`,
-    record.file?.ext || ".pdf"
+    record.file?.name || `${record.slug}${resolvedExt}`,
+    resolvedExt
   );
-  const mime = record.file?.mime || "application/pdf";
+  const mime =
+    record.file?.mime ||
+    EXT_TO_MIME_MAP[resolvedExt.toLowerCase()] ||
+    "application/pdf";
+  const recommendedHeaders = buildAttachmentHeaders(fileName, mime);
+
   return {
+    documentId: record.documentId || record.slug,
     slug: record.slug,
     title: record.title,
     fileName,
     downloadUrl,
     mime,
-    formattedSize: record.file?.formattedSize || "PDF",
+    formattedSize:
+      record.file?.formattedSize ||
+      resolvedExt.replace(".", "").toUpperCase() ||
+      "PDF",
     downloadCount: nextCount,
-    headers: buildAttachmentHeaders(fileName, mime),
+    expiresAt,
+    signature,
+    recommendedHeaders,
+    headers: recommendedHeaders,
   };
 }
 
@@ -261,19 +341,53 @@ export async function findExistingDocumentOrThrow(
     populate,
   });
   if (!existing) {
-    throw new Error(`${entityLabel} "${documentId}" not found`);
+    throw new ResourceNotFoundError(`${entityLabel} "${documentId}" not found`);
   }
   return existing;
 }
+
+const MEDIA_ALIAS_PAIRS: ReadonlyArray<[string, string]> = [
+  ["file", "fileId"],
+  ["coverImage", "coverImageId"],
+  ["coverPhoto", "coverPhotoId"],
+  ["photos", "photoIds"],
+  ["pronunciationAudio", "pronunciationAudioId"],
+];
 
 export function mergeRecordPayload(
   existing: Record<string, unknown>,
   payload: unknown
 ): Record<string, unknown> {
-  return {
-    ...existing,
-    ...(payload && typeof payload === "object" ? payload : {}),
-  };
+  const merged: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(existing)) {
+    if (Object.hasOwn(existing, k) && isSafeObjectKey(k)) {
+      merged[k] = v;
+    }
+  }
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return merged;
+  }
+
+  const incoming = payload as Record<string, unknown>;
+  for (const [k, v] of Object.entries(incoming)) {
+    if (Object.hasOwn(incoming, k) && isSafeObjectKey(k)) {
+      merged[k] = v;
+    }
+  }
+
+  for (const [primaryKey, aliasKey] of MEDIA_ALIAS_PAIRS) {
+    const hasPrimary = Object.hasOwn(incoming, primaryKey);
+    const hasAlias = Object.hasOwn(incoming, aliasKey);
+    if (hasPrimary) {
+      merged[primaryKey] = incoming[primaryKey];
+      delete merged[aliasKey];
+    } else if (hasAlias) {
+      merged[primaryKey] = incoming[aliasKey];
+      delete merged[aliasKey];
+    }
+  }
+
+  return merged;
 }
 
 export function buildGalleryAlbumUpdateData(
@@ -285,11 +399,12 @@ export function buildGalleryAlbumUpdateData(
 ): Record<string, unknown> {
   const photoIds = validatedData.photos;
   const hasPhotos = Array.isArray(photoIds);
+  const existingCoverId = extractMediaRelationId(existing.coverPhoto);
   const shouldDefaultCover =
     hasPhotos &&
     photoIds.length > 0 &&
     !validatedData.coverPhoto &&
-    !existing.coverPhoto;
+    !existingCoverId;
 
   return {
     ...validatedData,

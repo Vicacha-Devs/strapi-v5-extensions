@@ -1,6 +1,11 @@
+import type * as React from "react";
 import { useIntl } from "react-intl";
 
-import { PLUGIN_ID, type MediaLibraryAsset } from "../../../../shared";
+import {
+  PLUGIN_ID,
+  toSafeHref,
+  type MediaLibraryAsset,
+} from "../../../../shared";
 
 export const CARD_BORDER_STYLE: React.CSSProperties = {
   border: "1px solid rgba(128, 128, 128, 0.22)",
@@ -21,10 +26,11 @@ export function getContentManagerUrl(
   documentId?: string,
   locale?: string
 ): string {
+  const encodedUid = encodeURIComponent(uid);
   if (!documentId) {
-    return `/admin/content-manager/collection-types/${uid}`;
+    return `/content-manager/collection-types/${encodedUid}`;
   }
-  const base = `/admin/content-manager/collection-types/${uid}/${encodeURIComponent(documentId)}`;
+  const base = `/content-manager/collection-types/${encodedUid}/${encodeURIComponent(documentId)}`;
   return locale
     ? `${base}?plugins[i18n][locale]=${encodeURIComponent(locale)}`
     : base;
@@ -35,10 +41,16 @@ function strVal(val: unknown, fallback = ""): string {
 }
 
 function mapUploadedAsset(raw: Record<string, unknown>): MediaLibraryAsset {
-  const sizeKB = typeof raw.size === "number" ? raw.size : 0;
-  const url = strVal(raw.url);
+  const sizeKB =
+    typeof raw.size === "number" && Number.isFinite(raw.size)
+      ? Math.max(0, raw.size)
+      : 0;
+  const url = toSafeHref(raw.url) || "";
   return {
-    id: (raw.id as number | string) ?? undefined,
+    id:
+      typeof raw.id === "number" || typeof raw.id === "string"
+        ? raw.id
+        : undefined,
     documentId: typeof raw.documentId === "string" ? raw.documentId : undefined,
     name: strVal(raw.name, "Uploaded file"),
     alternativeText: strVal(raw.alternativeText),

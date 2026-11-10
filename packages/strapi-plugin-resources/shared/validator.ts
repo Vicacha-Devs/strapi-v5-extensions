@@ -3,58 +3,36 @@ import {
   ALLOWED_GLOSSARY_CATEGORIES,
   ALLOWED_PUBLICATION_CATEGORIES,
 } from "./constants";
-import { computeLetterGroup } from "./mediaUtils";
+import { computeLetterGroup, toSafeHref } from "./mediaUtils";
+import {
+  BCP47_LOCALE_REGEX,
+  fnv1aHex,
+  isSafeObjectKey,
+  isValidBcp47Locale,
+  resolveSlug,
+  SLUG_REGEX,
+  toSlug,
+  validateMediaFolderPath,
+  type ValidationResult,
+} from "./slugUtils";
 import type {
   GalleryAlbumCategory,
   GlossaryCategory,
   PublicationCategory,
 } from "./types";
 
-export interface ValidationResult<T> {
-  valid: boolean;
-  errors: string[];
-  data?: T;
-}
+export {
+  BCP47_LOCALE_REGEX,
+  fnv1aHex,
+  isSafeObjectKey,
+  isValidBcp47Locale,
+  resolveSlug,
+  toSlug,
+  validateMediaFolderPath,
+  type ValidationResult,
+};
 
-const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const FOLDER_PATH_REGEX = /^\/[a-zA-Z0-9/_-]*$/;
-
-export function toSlug(input: string): string {
-  return input
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 96);
-}
-
-/**
- * Strictly validates a Strapi v5 Media Library folder path (`plugin::upload.folder.path`),
- * rejecting directory traversal (`..`) or backslashes.
- */
-export function validateMediaFolderPath(
-  rawPath: unknown
-): ValidationResult<string> {
-  if (typeof rawPath !== "string" || !rawPath.trim()) {
-    return { valid: false, errors: ["Media folder path is required"] };
-  }
-  const trimmed = rawPath.trim();
-  if (trimmed.includes("..") || trimmed.includes("\\")) {
-    return {
-      valid: false,
-      errors: ["Media folder path must not contain traversal sequences"],
-    };
-  }
-  const normalized = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  if (!FOLDER_PATH_REGEX.test(normalized)) {
-    return {
-      valid: false,
-      errors: ["Media folder path contains invalid characters"],
-    };
-  }
-  return { valid: true, errors: [], data: normalized };
-}
+const MAX_INT32 = 2_147_483_647;
 
 function asTrimmed(val: unknown): string {
   return typeof val === "string" ? val.trim() : "";
@@ -62,11 +40,6 @@ function asTrimmed(val: unknown): string {
 
 function asSlicedOptString(val: unknown, maxLen: number): string | undefined {
   return typeof val === "string" ? val.trim().slice(0, maxLen) : undefined;
-}
-
-function resolveSlug(rawSlug: unknown, fallbackSource: string): string {
-  const custom = asTrimmed(rawSlug).toLowerCase();
-  return custom || toSlug(fallbackSource);
 }
 
 function pickCategory<T extends string>(
@@ -98,35 +71,68 @@ function checkOptionalExternalUrl(
 ): string | undefined {
   const trimmedUrl = asTrimmed(rawUrl);
   if (!trimmedUrl) return undefined;
-  if (trimmedUrl.startsWith("/") && !trimmedUrl.startsWith("//")) {
-    return trimmedUrl;
-  }
-  try {
-    const parsed = new URL(trimmedUrl);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-      errors.push("externalDownloadUrl must use http or https");
-      return undefined;
-    }
-    return parsed.toString();
-  } catch {
-    errors.push("externalDownloadUrl is not a valid URL");
+  if (trimmedUrl.includes("..") || trimmedUrl.includes("\\")) {
+    errors.push("externalDownloadUrl must not contain .. or backslashes");
     return undefined;
   }
+  const safeHref = toSafeHref(trimmedUrl);
+  if (!safeHref) {
+    errors.push(
+      "externalDownloadUrl must be a valid http(s) or safe root-relative URL"
+    );
+    return undefined;
+  }
+  return safeHref;
+}
+
+export function extractMediaRelationId(
+  val: unknown
+): number | string | null | undefined {
+  if (val === undefined) return undefined;
+  if (val === null) return null;
+  if (typeof val === "number") {
+    return Number.isFinite(val) && val > 0 ? Math.round(val) : null;
+  }
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (typeof val === "object" && !Array.isArray(val)) {
+    const obj = val as Record<string, unknown>;
+    if (typeof obj.id === "number" && Number.isFinite(obj.id) && obj.id > 0) {
+      return Math.round(obj.id);
+    }
+    if (typeof obj.id === "string" && obj.id.trim().length > 0) {
+      return obj.id.trim();
+    }
+  }
+  return null;
 }
 
 function normalizeOptionalMediaId(
   key: string,
-  val: unknown
+  primaryVal: unknown,
+  aliasVal?: unknown
 ): Record<string, number | string | null> {
-  if (val === undefined) return {};
-  return {
-    [key]: typeof val === "number" || typeof val === "string" ? val : null,
-  };
+  const effective = aliasVal !== undefined ? aliasVal : primaryVal;
+  if (effective === undefined) return {};
+  const extracted = extractMediaRelationId(effective);
+  return { [key]: extracted ?? null };
 }
 
-function parsePositiveInt(val: unknown): number | undefined {
+export function parsePositiveInt(val: unknown): number | undefined {
+  if (
+    val === null ||
+    val === undefined ||
+    val === "" ||
+    typeof val === "boolean"
+  ) {
+    return undefined;
+  }
   const num = Number(val);
-  return Number.isFinite(num) && num > 0 ? Math.round(num) : undefined;
+  if (!Number.isFinite(num)) return undefined;
+  const rounded = Math.round(num);
+  return rounded >= 1 && rounded <= MAX_INT32 ? rounded : undefined;
 }
 
 export interface ValidatedPublicationInput {
@@ -174,7 +180,7 @@ export function validatePublicationInput(
   }
   const raw = input as Record<string, unknown>;
   const title = asTrimmed(raw.title);
-  const slug = resolveSlug(raw.slug, title);
+  const slug = resolveSlug(raw.slug, title, raw.transliteration);
   const summary = asTrimmed(raw.summary);
   const errors = collectPublicationErrors(title, slug, summary);
 
@@ -210,10 +216,11 @@ export function validatePublicationInput(
       featured: Boolean(raw.featured),
       allowPublicDownload: raw.allowPublicDownload !== false,
       externalDownloadUrl,
-      ...normalizeOptionalMediaId("file", raw.file ?? raw.fileId),
+      ...normalizeOptionalMediaId("file", raw.file, raw.fileId),
       ...normalizeOptionalMediaId(
         "coverImage",
-        raw.coverImage ?? raw.coverImageId
+        raw.coverImage,
+        raw.coverImageId
       ),
     },
   };
@@ -255,20 +262,33 @@ function collectAlbumErrors(
 }
 
 function normalizePhotoIdList(
-  rawPhotos: unknown
+  primaryPhotos: unknown,
+  aliasPhotoIds?: unknown
 ): { photos: Array<number | string> } | Record<string, never> {
+  const rawPhotos = aliasPhotoIds !== undefined ? aliasPhotoIds : primaryPhotos;
   if (!Array.isArray(rawPhotos)) return {};
-  return {
-    photos: rawPhotos.filter(
-      (id): id is number | string =>
-        typeof id === "number" || typeof id === "string"
-    ),
-  };
+  const ids: Array<number | string> = [];
+  for (const item of rawPhotos) {
+    const extracted = extractMediaRelationId(item);
+    if (extracted !== null && extracted !== undefined) {
+      ids.push(extracted);
+    }
+  }
+  return { photos: ids };
 }
 
 function parseFiniteInt(val: unknown, fallback = 0): number {
+  if (
+    typeof val === "boolean" ||
+    val === null ||
+    val === undefined ||
+    val === ""
+  ) {
+    return fallback;
+  }
   const num = Number(val);
-  return Number.isFinite(num) ? Math.round(num) : fallback;
+  if (!Number.isFinite(num)) return fallback;
+  return Math.max(-MAX_INT32, Math.min(MAX_INT32, Math.round(num)));
 }
 
 export function validateGalleryAlbumInput(
@@ -282,7 +302,7 @@ export function validateGalleryAlbumInput(
   }
   const raw = input as Record<string, unknown>;
   const title = asTrimmed(raw.title);
-  const slug = resolveSlug(raw.slug, title);
+  const slug = resolveSlug(raw.slug, title, raw.transliteration);
   const description = asTrimmed(raw.description);
   const errors = collectAlbumErrors(title, slug, description);
   const mediaFolderPath = checkOptionalFolderPath(raw.mediaFolderPath, errors);
@@ -313,9 +333,10 @@ export function validateGalleryAlbumInput(
       sortOrder: parseFiniteInt(raw.sortOrder, 0),
       ...normalizeOptionalMediaId(
         "coverPhoto",
-        raw.coverPhoto ?? raw.coverPhotoId
+        raw.coverPhoto,
+        raw.coverPhotoId
       ),
-      ...normalizePhotoIdList(raw.photos ?? raw.photoIds),
+      ...normalizePhotoIdList(raw.photos, raw.photoIds),
     },
   };
 }
@@ -372,7 +393,7 @@ export function validateGlossaryTermInput(
   }
   const raw = input as Record<string, unknown>;
   const term = asTrimmed(raw.term);
-  const slug = resolveSlug(raw.slug, term);
+  const slug = resolveSlug(raw.slug, term, raw.transliteration);
   const definition = asTrimmed(raw.definition);
   const errors = collectGlossaryErrors(term, slug, definition);
 
@@ -399,7 +420,8 @@ export function validateGlossaryTermInput(
       featured: Boolean(raw.featured),
       ...normalizeOptionalMediaId(
         "pronunciationAudio",
-        raw.pronunciationAudio ?? raw.pronunciationAudioId
+        raw.pronunciationAudio,
+        raw.pronunciationAudioId
       ),
     },
   };

@@ -14,12 +14,26 @@ declare const process: {
   env: Record<string, string | undefined>;
 };
 
+declare module "node:crypto" {
+  export interface Hmac {
+    update(data: string | Uint8Array, inputEncoding?: "utf8" | "utf-8"): Hmac;
+    digest(encoding: "hex" | "base64" | "base64url"): string;
+    digest(): Uint8Array;
+  }
+  export function createHmac(algorithm: string, key: string | Uint8Array): Hmac;
+  export function randomBytes(size: number): Uint8Array & {
+    toString(encoding?: "hex" | "base64" | "base64url" | "utf8"): string;
+  };
+  export function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean;
+}
+
 declare module "node:assert/strict" {
   const assert: {
     equal(actual: unknown, expected: unknown, message?: string): void;
     notEqual(actual: unknown, expected: unknown, message?: string): void;
     deepEqual(actual: unknown, expected: unknown, message?: string): void;
     ok(value: unknown, message?: string): string | void;
+    throws(fn: () => unknown, regExp?: RegExp | Error): void;
     rejects(fn: () => Promise<unknown>, regExp?: RegExp | Error): Promise<void>;
   };
   export default assert;
@@ -39,6 +53,7 @@ declare module "@strapi/strapi" {
 
     export interface ContentTypeSchema {
       kind?: string;
+      collectionName?: string;
       info?: {
         displayName?: string;
         singularName?: string;
@@ -55,6 +70,7 @@ declare module "@strapi/strapi" {
     }
 
     export interface DocumentQueryOptions {
+      start?: number;
       limit?: number;
       locale?: string;
       status?: "draft" | "published";
@@ -70,6 +86,7 @@ declare module "@strapi/strapi" {
       findOne(params: {
         documentId: string;
         locale?: string;
+        status?: "draft" | "published";
         populate?: string[];
       }): Promise<Record<string, unknown> | null>;
       create(params: {
@@ -81,10 +98,14 @@ declare module "@strapi/strapi" {
       update(params: {
         documentId: string;
         locale?: string;
+        status?: "draft" | "published";
         data: Record<string, unknown>;
         populate?: string[];
       }): Promise<Record<string, unknown> | null>;
-      delete?(params: { documentId: string }): Promise<unknown>;
+      delete?(params: {
+        documentId: string;
+        locale?: string;
+      }): Promise<unknown>;
     }
 
     export interface DbQueryInstance {
@@ -119,6 +140,15 @@ declare module "@strapi/strapi" {
       };
       db?: {
         query(uid: string): DbQueryInstance;
+        connection?: (tableName: string) => {
+          where(filter: Record<string, unknown>): {
+            increment(column: string, amount?: number): Promise<number>;
+            update?(data: Record<string, unknown>): Promise<number>;
+            select(
+              ...columns: string[]
+            ): Promise<Array<Record<string, unknown>>>;
+          };
+        };
       };
       query?(uid: string): DbQueryInstance;
       contentTypes: Record<string, ContentTypeSchema>;

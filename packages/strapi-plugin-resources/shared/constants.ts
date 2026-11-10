@@ -7,6 +7,7 @@ import type {
 
 export const PLUGIN_ID = "resources";
 export const SETTINGS_STORE_KEY = "settings";
+export const DEFAULT_DOWNLOAD_TICKET_TTL_MS = 10 * 60 * 1000;
 
 export const CONTENT_TYPE_UIDS = {
   publication: "plugin::resources.publication",
@@ -44,6 +45,36 @@ export const ALLOWED_GLOSSARY_CATEGORIES: GlossaryCategory[] = [
   "history",
   "community",
   "general",
+];
+
+export const BLOCKED_DOWNLOAD_EXTENSIONS: readonly string[] = [
+  ".svg",
+  ".svgz",
+  ".html",
+  ".htm",
+  ".xhtml",
+  ".js",
+  ".mjs",
+  ".cjs",
+  ".exe",
+  ".msi",
+  ".bat",
+  ".cmd",
+  ".sh",
+  ".php",
+];
+
+export const BLOCKED_DOWNLOAD_MIME_TYPES: readonly string[] = [
+  "image/svg+xml",
+  "text/html",
+  "application/xhtml+xml",
+  "application/javascript",
+  "text/javascript",
+  "application/x-javascript",
+  "application/ecmascript",
+  "application/x-msdownload",
+  "application/x-executable",
+  "application/x-sh",
 ];
 
 export const DEFAULT_ALLOWED_DOWNLOAD_EXTENSIONS: string[] = [

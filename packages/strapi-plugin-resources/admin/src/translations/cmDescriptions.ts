@@ -43,8 +43,6 @@ export const CM_DESCRIPTION_TRANSLATIONS: Record<
       "Upload a PDF, eBook (.epub), or audio file directly to the Strapi Media Library",
     "content-manager.content-types.plugin::resources.publication.coverImage.description":
       "Optional cover thumbnail displayed on the Digital Library card",
-    "content-manager.content-types.plugin::resources.publication.authorProfile.description":
-      "Optional relation to a scholar or staff profile in the directory",
     "content-manager.content-types.plugin::resources.publication.authorName.description":
       "Author, scholar, or committee name displayed on the publication",
     "content-manager.content-types.plugin::resources.publication.authorSlug.description":
@@ -133,8 +131,6 @@ export const CM_DESCRIPTION_TRANSLATIONS: Record<
       "Sube un archivo PDF, eBook (.epub) o audio directamente a la Biblioteca Multimedia de Strapi",
     "content-manager.content-types.plugin::resources.publication.coverImage.description":
       "Miniatura de portada opcional mostrada en la tarjeta de la Biblioteca Digital",
-    "content-manager.content-types.plugin::resources.publication.authorProfile.description":
-      "Relación opcional con el perfil de un erudito o miembro del directorio",
     "content-manager.content-types.plugin::resources.publication.authorName.description":
       "Nombre del autor, erudito o comité mostrado en la publicación",
     "content-manager.content-types.plugin::resources.publication.authorSlug.description":
@@ -223,8 +219,6 @@ export const CM_DESCRIPTION_TRANSLATIONS: Record<
       "ارفع ملف PDF أو كتاباً إلكترونياً (.epub) أو ملفاً صوتياً مباشرة إلى مكتبة وسائط Strapi",
     "content-manager.content-types.plugin::resources.publication.coverImage.description":
       "صورة غلاف مصغرة اختيارية تُعرض على بطاقة المكتبة الرقمية",
-    "content-manager.content-types.plugin::resources.publication.authorProfile.description":
-      "ربط اختياري بملف تعريف عالم أو عضو في الدليل",
     "content-manager.content-types.plugin::resources.publication.authorName.description":
       "اسم المؤلف أو العالم أو اللجنة المعروض على الإصدار",
     "content-manager.content-types.plugin::resources.publication.authorSlug.description":
@@ -313,8 +307,6 @@ export const CM_DESCRIPTION_TRANSLATIONS: Record<
       "Doğrudan Strapi Medya Kütüphanesine bir PDF, e-Kitap (.epub) veya ses dosyası yükleyin",
     "content-manager.content-types.plugin::resources.publication.coverImage.description":
       "Dijital Kütüphane kartında gösterilen isteğe bağlı kapak küçük resmi",
-    "content-manager.content-types.plugin::resources.publication.authorProfile.description":
-      "Rehberdeki bir akademisyen veya personel profiliyle isteğe bağlı ilişki",
     "content-manager.content-types.plugin::resources.publication.authorName.description":
       "Yayında gösterilen yazar, akademisyen veya komite adı",
     "content-manager.content-types.plugin::resources.publication.authorSlug.description":
