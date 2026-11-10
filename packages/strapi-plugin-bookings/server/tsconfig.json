@@ -1,0 +1,15 @@
+{
+  "extends": "../../typescript-config/strapi-server.json",
+  "compilerOptions": {
+    "paths": {
+      "@vicacha-devs/strapi-plugin-calendar/shared": [
+        "../../strapi-plugin-calendar/shared/index.ts"
+      ],
+      "@vicacha-devs/strapi-plugin-calendar/strapi-server": [
+        "../../strapi-plugin-calendar/server/src/index.ts"
+      ]
+    }
+  },
+  "include": ["./src/**/*", "./src/custom.d.ts", "../shared/**/*"],
+  "exclude": ["node_modules", "../dist"]
+}
