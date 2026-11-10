@@ -70,11 +70,14 @@ for (const pkgDir of pluginDirs) {
     }
   }
 
-  const { messages } = await publint({
+  const { messages: allMessages } = await publint({
     pkgDir,
     pack: "pnpm",
     strict: true,
   });
+  // The Strapi SDK layout (index.mjs + index.js) intentionally leaves "type"
+  // unset: an explicit "commonjs" breaks the node:test runs over .ts sources.
+  const messages = allMessages.filter((message) => message.code !== "USE_TYPE");
 
   if (messages.length === 0 && leakedPrivateDeps.length === 0) {
     console.warn(`[publint] PASS ${pkg.name}`);
