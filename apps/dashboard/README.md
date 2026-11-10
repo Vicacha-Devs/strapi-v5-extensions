@@ -1,18 +1,9 @@
 # `@vicacha-devs/dashboard`
 
-Strapi v5 host application for developing, testing, and demonstrating all 12 `@vicacha-devs/strapi-v5-extensions` workspace plugins:
+Strapi v5 host application for developing, testing, and demonstrating the `@vicacha-devs/strapi-v5-extensions` workspace packages:
 
 - `@vicacha-devs/strapi-plugin-calendar` — FullCalendar v6 multi-source scheduling engine, 79-locale localization, RTL/LTR auto-direction, CLDR/custom secondary calendar overlays, RFC 5545 RRULE engine, and iCal (`.ics`) syndication.
-- `@vicacha-devs/strapi-plugin-events` — Event management, RSVP & seat capacity enforcement, automatic waitlist promotion, corner spotlights, attendee check-in, and CSV export.
-- `@vicacha-devs/strapi-plugin-bookings` — Bookable resources, time-slot availability calculation, and token-authenticated reservations.
-- `@vicacha-devs/strapi-plugin-certificates` — Credential templates, Ed25519 digital signatures, printable HTML/PDF credentials, and public verification.
-- `@vicacha-devs/strapi-plugin-donations` — Fundraising campaigns, pledges, utility invoice sponsorship, threshold calculator, and tax certificate issuance.
-- `@vicacha-devs/strapi-plugin-inbox` — Visual form builder, service-desk casework inbox, double opt-in subscribers, and site-wide alert banners.
-- `@vicacha-devs/strapi-plugin-islam` — Salah/Iqamah calculation engine, Qibla compass, Hilal moon-sighting, Quran/Hadith/Dua explorer, and Zakat calculators.
-- `@vicacha-devs/strapi-plugin-media-feeds` — Audio/video archive, YouTube OEmbed enricher, Apple/Spotify Podcast RSS 2.0, and live broadcast status.
-- `@vicacha-devs/strapi-plugin-broadcasts` — Omnichannel WhatsApp, Telegram, and Email campaigns with event-driven automation rules.
-- `@vicacha-devs/strapi-plugin-resources` — Downloadable PDF publications, photo gallery albums, and searchable phonetic glossary.
-- `@vicacha-devs/strapi-plugin-seo` & `@vicacha-devs/strapi-plugin-sitemap` — Multilingual SEO analysis and XML sitemap generation.
+- `@vicacha-devs/strapi-plugin-events` — Event management, RSVP & seat capacity enforcement, automatic waitlist promotion, attendee check-in, CSV export, and automatic source registration into `@vicacha-devs/strapi-plugin-calendar`.
 
 ## Usage
 

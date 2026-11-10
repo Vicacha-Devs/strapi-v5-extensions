@@ -51,14 +51,46 @@ export default ({
       ],
     },
   },
-  notes: {
+  events: {
     enabled: true,
     config: {
-      defaultSortOrder: "DESC",
-      enableLocaleScoping: true,
+      defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
+      defaultCapacity: 100,
+      waitlistEnabledByDefault: true,
+      defaultMaxGuestsPerRegistration: 5,
+      sendRsvpEmails: true,
+      feedTitle: "Events & Workshops Calendar",
+      secondaryCalendars: [
+        {
+          id: "hijri",
+          label: "Hijri (Umm al-Qura)",
+          intlCalendar: "islamic-umalqura",
+          dayOffset: 0,
+          overrideField: "hijriDate",
+          enabled: true,
+        },
+      ],
     },
   },
-  seo: {
+  bookings: {
     enabled: true,
+    config: {
+      defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
+      defaultSlotDurationMinutes: 60,
+      defaultCapacityPerSlot: 20,
+      defaultMinLeadTimeHours: 2,
+      defaultMaxAdvanceDays: 90,
+      defaultRequiresApproval: false,
+      sendEmailNotifications: true,
+      secondaryCalendars: [
+        {
+          id: "hijri",
+          label: "Hijri (Umm al-Qura)",
+          intlCalendar: "islamic-umalqura",
+          dayOffset: 0,
+          enabled: true,
+        },
+      ],
+    },
   },
 });

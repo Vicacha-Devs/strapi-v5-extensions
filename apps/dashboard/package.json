@@ -1,8 +1,8 @@
 {
   "name": "@vicacha-devs/dashboard",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
-  "description": "Strapi v5 host dashboard app for developing and testing @vicacha-devs/strapi-plugin-calendar and other extensions",
+  "description": "Strapi v5 host dashboard app for developing and testing @vicacha-devs/strapi-plugin-calendar, @vicacha-devs/strapi-plugin-events, and other extensions",
   "license": "MIT",
   "author": "Vicacha Devs",
   "scripts": {
@@ -15,15 +15,10 @@
     "test:ts": "tsc --noEmit"
   },
   "dependencies": {
-    "@strapi/design-system": "^2.0.0",
-    "@strapi/icons": "^2.0.0",
     "@strapi/plugin-cloud": "5.39.0",
     "@strapi/plugin-users-permissions": "5.39.0",
     "@strapi/strapi": "5.39.0",
-    "@vicacha-devs/strapi-plugin-calendar": "workspace:*",
-    "@vicacha-devs/strapi-plugin-notes": "workspace:*",
-    "@vicacha-devs/strapi-plugin-seo": "workspace:*",
-    "better-sqlite3": "^13.0.3",
+    "better-sqlite3": "11.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.3",
