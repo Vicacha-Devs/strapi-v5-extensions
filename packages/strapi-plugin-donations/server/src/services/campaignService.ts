@@ -1,4 +1,5 @@
 import type { Core } from "@strapi/strapi";
+import { randomBytes } from "node:crypto";
 
 import {
   PLUGIN_ID,
@@ -378,7 +379,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (!existing) return null;
 
       const current = this.normalizeCampaign(existing, settings);
-      const fallbackId = `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+      const fallbackId = `ev-${Date.now()}-${randomBytes(3).toString("hex")}`;
       const newEvidence = this.normalizeEvidence(
         {
           ...evidenceInput,
@@ -442,7 +443,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       contributionAmount: number;
     }): Promise<DonationCampaignItem | null> {
       const { campaignSlug, contributionAmount } = params;
-      if (!campaignSlug || !(contributionAmount > 0)) return null;
+      if (
+        !campaignSlug ||
+        Number.isNaN(contributionAmount) ||
+        contributionAmount <= 0
+      ) {
+        return null;
+      }
 
       const settings = await getSettingsSvc().getSettings();
       const uid = this.getTargetUid(settings);
