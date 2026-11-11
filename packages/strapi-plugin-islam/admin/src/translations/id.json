@@ -110,6 +110,7 @@
   "placeholder.select_arabic_script": "Select Arabic script",
   "settings.ui.uthmani_madinah_mushaf_uthmani": "uthmani — Madinah Mushaf Uthmani",
   "settings.ui.uthmani_tajweed_color_coded_tajweed": "uthmani_tajweed — Color-Coded Tajweed",
+  "settings.ui.uthmani_simple_script": "uthmani_simple — Rasm Utsmani Sederhana",
   "settings.ui.imlaei_standard_imlaei_script": "imlaei — Standard Imlaei Script",
   "settings.ui.indopak_nastaleeq_indopak_nastaleeq": "indopak_nastaleeq — IndoPak Nastaleeq",
   "settings.ui.primary_arabic_script_returned_for_quranic_verse": "Primary Arabic script returned for Quranic verses.",
@@ -148,7 +149,10 @@
   "settings.ui.badge_method_school": "Method: #{method} (School: {school})",
   "settings.ui.badge_hijri_offset": "Hijri Offset: {days}d",
   "settings.ui.badge_quran_api": "Quran API: {env}",
+  "settings.ui.badge_reciter": "Qari: {name} (#{id})",
   "settings.ui.save_settings": "Save Settings",
+  "settings.ui.error_loading_settings": "Gagal memuat pengaturan Suite Islam.",
+  "settings.ui.error_saving_settings": "Gagal menyimpan pengaturan Suite Islam.",
   "settings.tab.calculation": "Mosque & Astronomical Calculation",
   "settings.tab.fiqh": "Fiqh & Nisab Benchmarks (COP)",
   "settings.tab.quran": "Quran Foundation API v4",
@@ -175,6 +179,9 @@
   "page.ui.curated_ayat_section_title": "Curated Quranic Ayat ({count}) • 114 Surahs Indexed",
   "page.ui.pin_ayah_btn": "Pin as Ayah of the Day",
   "page.ui.hadiths_duas_section_title": "Prophetic Hadiths ({hadithCount}) & Hisnul Muslim Duas ({duaCount})",
+  "page.ui.hadith_collection": "Hadits & Kitab",
+  "page.ui.grading": "Derajat",
+  "page.ui.pin_hadith_btn": "Sematkan sebagai Hadits Hari Ini",
   "page.ui.pin_dua_btn": "Pin as Dua of the Day",
   "page.ui.gold_nisab_line": "Gold Nisab ({grams}g): {prefix}{amount} {currency}",
   "page.ui.silver_nisab_line": "Silver Nisab ({grams}g): {prefix}{amount} {currency}",
@@ -188,5 +195,8 @@
   "page.ui.hijri_calendar_label": "Hijri Calendar",
   "page.ui.cockpit_header_subtitle": "{mosque} • {hijri} • Qibla {degrees}° ({cardinal})",
   "page.ui.hilal_confirmed_status": "Official Hilal sighting and Hijri offset updated successfully.",
-  "page.ui.daily_pin_updated_status": "Daily Inspiration pin updated."
+  "page.ui.daily_pin_updated_status": "Daily Inspiration pin updated.",
+  "page.ui.error_loading_overview": "Gagal memuat ringkasan Suite Islam.",
+  "page.ui.error_action_failed": "Tindakan tidak dapat diselesaikan. Periksa kembali masukan Anda.",
+  "page.ui.retry_btn": "Coba Lagi"
 }

@@ -8,6 +8,7 @@ import type {
   SupportedLocale,
   TasbihPresetItem,
 } from "./types";
+import { sanitizeIsoDateYmd, sanitizeLocale } from "./validation";
 
 export { CURATED_AYAT, CURATED_DUAS, CURATED_HADITHS, SURAH_DIRECTORY };
 
@@ -303,10 +304,14 @@ export function getDailyInspirationBundle(
   locale: SupportedLocale = "es",
   pins?: DailyInspirationPins
 ): DailyInspirationBundle {
-  const cleanDate = dateIso.slice(0, 10);
-  const seed = cleanDate
-    .split("-")
-    .reduce((acc, part) => acc * 31 + Number(part || 1), 7);
+  const cleanDate = sanitizeIsoDateYmd(dateIso);
+  const safeLocale = sanitizeLocale(locale, "es");
+  const rawSeed = cleanDate.split("-").reduce((acc, part) => {
+    const parsed = Number(part);
+    const safePart = Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+    return acc * 31 + safePart;
+  }, 7);
+  const seed = Number.isFinite(rawSeed) ? Math.abs(Math.trunc(rawSeed)) : 7;
 
   const pinnedAyah = findById(CURATED_AYAT, pins?.pinnedAyahId);
   const pinnedHadith = findById(CURATED_HADITHS, pins?.pinnedHadithId);
@@ -317,16 +322,13 @@ export function getDailyInspirationBundle(
 
   return {
     date: cleanDate,
-    locale,
-    ayahOfTheDay:
-      pinnedAyah ?? CURATED_AYAT[Math.abs(seed) % CURATED_AYAT.length],
+    locale: safeLocale,
+    ayahOfTheDay: pinnedAyah ?? CURATED_AYAT[seed % CURATED_AYAT.length],
     hadithOfTheDay:
-      pinnedHadith ??
-      CURATED_HADITHS[Math.abs(seed + 3) % CURATED_HADITHS.length],
-    duaOfTheDay:
-      pinnedDua ?? CURATED_DUAS[Math.abs(seed + 5) % CURATED_DUAS.length],
+      pinnedHadith ?? CURATED_HADITHS[(seed + 3) % CURATED_HADITHS.length],
+    duaOfTheDay: pinnedDua ?? CURATED_DUAS[(seed + 5) % CURATED_DUAS.length],
     nameOfAllahOfTheDay:
-      pinnedAsma ?? ASMA_UL_HUSNA[Math.abs(seed + 7) % ASMA_UL_HUSNA.length],
+      pinnedAsma ?? ASMA_UL_HUSNA[(seed + 7) % ASMA_UL_HUSNA.length],
     isPinnedOverride: {
       ayah: Boolean(pinnedAyah),
       hadith: Boolean(pinnedHadith),

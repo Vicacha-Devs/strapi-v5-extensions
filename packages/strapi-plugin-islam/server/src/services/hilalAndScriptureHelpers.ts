@@ -12,10 +12,15 @@ import {
   TASBIH_PRESETS,
   getDailyInspirationBundle,
   gregorianToHijri,
+  isPlainRecord,
+  isValidIsoDateYmd,
+  sanitizeHijriMonth,
   sanitizeHijriShift,
+  sanitizeHijriYear,
   sanitizeIsoDateYmd,
   sanitizeLocale,
   sanitizePlainText,
+  stripDangerousKeysDeep,
   type CuratedAyahItem,
   type CuratedDuaItem,
   type CuratedHadithItem,
@@ -256,19 +261,37 @@ export async function confirmHilalSightingOperation(
   },
   input: ConfirmHilalSightingInput
 ) {
+  if (!isValidIsoDateYmd(input.confirmedGregorianDate)) {
+    const err = new Error(
+      "Invalid confirmedGregorianDate: expected a valid YYYY-MM-DD calendar date"
+    ) as Error & { status?: number };
+    err.status = 400;
+    throw err;
+  }
+  const confirmedDate = input.confirmedGregorianDate.trim();
   const current = await settingsService.getSettings();
-  const confirmedDate = sanitizeIsoDateYmd(input.confirmedGregorianDate);
   const shifting = sanitizeHijriShift(
     input.shifting ?? current.shifting,
     current.shifting
   );
-  const hijriDetails = gregorianToHijri(confirmedDate, Number(shifting), "es");
+  const hijriDetails = gregorianToHijri(
+    confirmedDate,
+    Number(shifting),
+    "es",
+    current.calender
+  );
 
-  const hijriYear = Number(input.hijriYear) || hijriDetails.year;
-  const hijriMonth = Number(input.hijriMonth) || hijriDetails.monthNumber;
+  const hijriYear = sanitizeHijriYear(input.hijriYear, hijriDetails.year);
+  const hijriMonth = sanitizeHijriMonth(
+    input.hijriMonth,
+    hijriDetails.monthNumber
+  );
   const approvedByImam =
     sanitizePlainText(input.approvedByImam, 120) ||
     "Sheikh Principal de la Mezquita";
+  const safeNotes = isPlainRecord(input.notes)
+    ? stripDangerousKeysDeep(input.notes)
+    : {};
 
   const { nextRamadan, nextEid } = applyOccasionUpdates(
     input.occasion,
@@ -297,7 +320,7 @@ export async function confirmHilalSightingOperation(
           confirmedGregorianDate: confirmedDate,
           shiftingApplied: shifting,
           approvedByImam,
-          notes: input.notes || {},
+          notes: safeNotes,
           broadcastDispatched: Boolean(input.dispatchBroadcast),
         },
       });

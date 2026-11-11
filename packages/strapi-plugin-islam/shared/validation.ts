@@ -10,11 +10,69 @@ import type {
   AsrSchoolId,
   CalendarMethodId,
   HijriShiftId,
+  IslamPluginSettings,
   NisabStandardId,
   QuranScriptType,
   SupportedCurrency,
   SupportedLocale,
 } from "./types";
+
+const DANGEROUS_OBJECT_KEYS = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+]);
+const SAFE_API_UID_REGEX = /^api::[a-z0-9-]+(\.[a-z0-9-]+)?$/;
+const SAFE_FIELD_NAME_REGEX = /^[a-zA-Z][a-zA-Z0-9_]{0,63}$/;
+
+export function isPlainRecord(raw: unknown): raw is Record<string, unknown> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    return false;
+  }
+  const proto = Object.getPrototypeOf(raw);
+  return proto === null || proto === Object.prototype;
+}
+
+export function stripDangerousKeysDeep<T>(value: T, depth = 0): T {
+  if (depth > 12 || value === null || typeof value !== "object") {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      stripDangerousKeysDeep(item, depth + 1)
+    ) as unknown as T;
+  }
+  if (!isPlainRecord(value)) {
+    return value;
+  }
+  const cleaned: Record<string, unknown> = {};
+  for (const [key, entryVal] of Object.entries(value)) {
+    if (DANGEROUS_OBJECT_KEYS.has(key)) {
+      continue;
+    }
+    cleaned[key] = stripDangerousKeysDeep(entryVal, depth + 1);
+  }
+  return cleaned as T;
+}
+
+export function isValidApiContentTypeUid(rawUid: unknown): rawUid is string {
+  return typeof rawUid === "string" && SAFE_API_UID_REGEX.test(rawUid.trim());
+}
+
+export function sanitizeSafeFieldName(
+  rawField: unknown,
+  fallback: string
+): string {
+  if (typeof rawField !== "string") return fallback;
+  const trimmed = rawField.trim();
+  if (
+    !SAFE_FIELD_NAME_REGEX.test(trimmed) ||
+    DANGEROUS_OBJECT_KEYS.has(trimmed)
+  ) {
+    return fallback;
+  }
+  return trimmed;
+}
 
 export function sanitizeCoordinates(
   rawLat: unknown,
@@ -38,6 +96,25 @@ export function sanitizeCoordinates(
     lat: Math.round(validLat * 1_000_000) / 1_000_000,
     lon: Math.round(validLon * 1_000_000) / 1_000_000,
   };
+}
+
+export function isValidTimezone(rawTz: unknown): rawTz is string {
+  if (typeof rawTz !== "string") return false;
+  const trimmed = rawTz.trim();
+  if (!trimmed || trimmed.length > 100) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: trimmed });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function sanitizeTimezone(rawTz: unknown, fallback = "UTC"): string {
+  if (isValidTimezone(rawTz)) {
+    return rawTz.trim();
+  }
+  return isValidTimezone(fallback) ? fallback.trim() : "UTC";
 }
 
 export function sanitizeLocale(
@@ -109,6 +186,80 @@ export function sanitizeHijriShift(
     : fallback;
 }
 
+export function sanitizeHighLatitudeRule(
+  rawRule: unknown,
+  fallback: IslamPluginSettings["highLatitudeRule"] = "AngleBased"
+): IslamPluginSettings["highLatitudeRule"] {
+  if (
+    rawRule === "AngleBased" ||
+    rawRule === "MiddleOfTheNight" ||
+    rawRule === "OneSeventh"
+  ) {
+    return rawRule;
+  }
+  return fallback;
+}
+
+function clampFiniteInt(
+  rawVal: unknown,
+  fallback: number,
+  min: number,
+  max: number
+): number {
+  const num = typeof rawVal === "number" ? rawVal : Number(rawVal);
+  if (!Number.isFinite(num)) return fallback;
+  return Math.max(min, Math.min(max, Math.trunc(num)));
+}
+
+export function sanitizeMinuteAdjustments(
+  rawAdj: unknown,
+  fallback: IslamPluginSettings["minuteAdjustments"] = {
+    fajr: 0,
+    sunrise: 0,
+    dhuhr: 0,
+    asr: 0,
+    maghrib: 0,
+    isha: 0,
+  }
+): IslamPluginSettings["minuteAdjustments"] {
+  const src = isPlainRecord(rawAdj) ? rawAdj : {};
+  return {
+    fajr: clampFiniteInt(src.fajr, fallback.fajr ?? 0, -120, 120),
+    sunrise: clampFiniteInt(src.sunrise, fallback.sunrise ?? 0, -120, 120),
+    dhuhr: clampFiniteInt(src.dhuhr, fallback.dhuhr ?? 0, -120, 120),
+    asr: clampFiniteInt(src.asr, fallback.asr ?? 0, -120, 120),
+    maghrib: clampFiniteInt(src.maghrib, fallback.maghrib ?? 0, -120, 120),
+    isha: clampFiniteInt(src.isha, fallback.isha ?? 0, -120, 120),
+  };
+}
+
+export function sanitizeElevationMeters(rawVal: unknown, fallback = 0): number {
+  const num = typeof rawVal === "number" ? rawVal : Number(rawVal);
+  if (!Number.isFinite(num)) {
+    return Math.max(0, Math.min(9000, fallback));
+  }
+  return Math.max(0, Math.min(9000, num));
+}
+
+export function sanitizeImsakOffsetMinutes(
+  rawVal: unknown,
+  fallback = 10
+): number {
+  return clampFiniteInt(rawVal, fallback, 0, 120);
+}
+
+export function sanitizeHijriYear(rawVal: unknown, fallback = 1448): number {
+  const num = typeof rawVal === "number" ? rawVal : Number(rawVal);
+  if (!Number.isFinite(num) || num === 0) return fallback;
+  return Math.max(1300, Math.min(1700, Math.trunc(num)));
+}
+
+export function sanitizeHijriMonth(rawVal: unknown, fallback = 1): number {
+  const num = typeof rawVal === "number" ? rawVal : Number(rawVal);
+  if (!Number.isFinite(num) || num === 0) return fallback;
+  return Math.max(1, Math.min(12, Math.trunc(num)));
+}
+
 export function sanitizeNonNegativeNumber(
   rawVal: unknown,
   maxAllowed = 1_000_000_000_000
@@ -118,20 +269,28 @@ export function sanitizeNonNegativeNumber(
   return Math.min(num, maxAllowed);
 }
 
+export function isValidIsoDateYmd(rawDate: unknown): rawDate is string {
+  if (typeof rawDate !== "string") return false;
+  const trimmed = rawDate.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return false;
+  const parsed = new Date(`${trimmed}T12:00:00Z`);
+  return (
+    !Number.isNaN(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === trimmed
+  );
+}
+
 export function sanitizeIsoDateYmd(
   rawDate: unknown,
   fallbackDate = new Date()
 ): string {
-  if (
-    typeof rawDate === "string" &&
-    /^\d{4}-\d{2}-\d{2}$/.test(rawDate.trim())
-  ) {
-    const parsed = new Date(`${rawDate.trim()}T12:00:00Z`);
-    if (!Number.isNaN(parsed.getTime())) {
-      return rawDate.trim();
-    }
+  if (isValidIsoDateYmd(rawDate)) {
+    return rawDate.trim();
   }
-  return fallbackDate.toISOString().slice(0, 10);
+  const safeFallback = Number.isNaN(fallbackDate.getTime())
+    ? new Date()
+    : fallbackDate;
+  return safeFallback.toISOString().slice(0, 10);
 }
 
 export function sanitizeIsoYearMonth(
@@ -195,6 +354,35 @@ export function sanitizePositiveInt(
   if (!Number.isFinite(num)) return fallback;
   const intVal = Math.trunc(num);
   return Math.max(min, Math.min(max, intVal));
+}
+
+export function sanitizeResourceIdsCsv(
+  rawCsv: unknown,
+  fallbackIds: readonly number[] = [],
+  maxCount = 5
+): string {
+  const unique = new Set<number>();
+  if (typeof rawCsv === "string" && rawCsv.trim()) {
+    for (const part of rawCsv.split(",")) {
+      const token = part.trim();
+      if (!/^\d{1,4}$/.test(token)) continue;
+      const id = Number(token);
+      if (id >= 1 && id <= 9999) {
+        unique.add(id);
+        if (unique.size >= maxCount) break;
+      }
+    }
+  }
+  if (unique.size === 0) {
+    for (const rawId of fallbackIds) {
+      const id = Math.trunc(Number(rawId));
+      if (Number.isFinite(id) && id >= 1 && id <= 9999) {
+        unique.add(id);
+        if (unique.size >= maxCount) break;
+      }
+    }
+  }
+  return Array.from(unique).slice(0, maxCount).join(",");
 }
 
 const ALLOWED_QURAN_SCRIPTS: readonly QuranScriptType[] = [

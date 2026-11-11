@@ -34,7 +34,9 @@ const SalahPrayerRow: React.FC<{
   t: TranslateFn;
 }> = ({ pKey, timetable, settings, t }) => {
   const p = timetable.prayers[pKey];
-  const rule = settings?.iqamahRules?.find((r) => r.prayerName === pKey);
+  const rule = Array.isArray(settings?.iqamahRules)
+    ? settings.iqamahRules.find((r) => r.prayerName === pKey)
+    : undefined;
   const noteText =
     rule?.notes ||
     t("page.ui.iqamah_offset_note", "+{minutes} min", {

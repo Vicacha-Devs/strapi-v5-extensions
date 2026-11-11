@@ -15,6 +15,8 @@ import {
   hijriToGregorian,
   sanitizeCoordinates,
   sanitizeCurrency,
+  sanitizeHijriMonth,
+  sanitizeHijriYear,
   sanitizeIsoDateYmd,
   sanitizeIsoYearMonth,
   sanitizeLocale,
@@ -46,12 +48,13 @@ import {
 } from "./quranFoundationOperations";
 import {
   clearQuranFoundationCaches,
+  getUpstreamCacheSize,
   resolveExternalNisabSpotPrices,
   resolveExternalPrayerTimesOverride,
   resolveQuranFoundationCredentials,
 } from "./upstreamCacheAndHttp";
 
-export { clearQuranFoundationCaches };
+export { clearQuranFoundationCaches, getUpstreamCacheSize };
 
 interface LocationQueryParams {
   lat?: number | string;
@@ -179,7 +182,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const locale = sanitizeLocale(params?.locale, settings.defaultLocale);
       const shiftingNum = Number(settings.shifting || 0);
 
-      const hijri = gregorianToHijri(date, shiftingNum, locale);
+      const hijri = gregorianToHijri(
+        date,
+        shiftingNum,
+        locale,
+        settings.calender
+      );
       const upcomingObservances = computeUpcomingObservances(
         date,
         shiftingNum,
@@ -188,7 +196,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           ramadanStartGregorian: settings.ramadan.confirmedStartGregorian,
           eidAlFitrDateGregorian: settings.eid.eidAlFitrDateGregorian,
           eidAlAdhaDateGregorian: settings.eid.eidAlAdhaDateGregorian,
-        }
+        },
+        settings.calender
       );
 
       let recentHilalAnnouncements: Array<Record<string, unknown>>;
@@ -224,14 +233,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const shiftingNum = Number(settings.shifting || 0);
 
       if (params?.direction === "hijri_to_gregorian") {
-        const y = Math.max(
-          1300,
-          Math.min(1600, Number(params.hijriYear) || 1448)
+        const y = sanitizeHijriYear(params.hijriYear, 1448);
+        const m = sanitizeHijriMonth(params.hijriMonth, 1);
+        const d = Math.max(
+          1,
+          Math.min(30, Math.trunc(Number(params.hijriDay)) || 1)
         );
-        const m = Math.max(1, Math.min(12, Number(params.hijriMonth) || 1));
-        const d = Math.max(1, Math.min(30, Number(params.hijriDay) || 1));
-        const gregorian = hijriToGregorian(y, m, d, shiftingNum);
-        const hijri = gregorianToHijri(gregorian, shiftingNum, locale);
+        const gregorian = hijriToGregorian(
+          y,
+          m,
+          d,
+          shiftingNum,
+          settings.calender
+        );
+        const hijri = gregorianToHijri(
+          gregorian,
+          shiftingNum,
+          locale,
+          settings.calender
+        );
         return {
           direction: "hijri_to_gregorian",
           gregorianDate: gregorian,
@@ -240,8 +260,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       const gregorian = sanitizeIsoDateYmd(params?.date);
-      const hijri = gregorianToHijri(gregorian, shiftingNum, locale);
-      const hawl = calculateHawlMaturity(gregorian, shiftingNum);
+      const hijri = gregorianToHijri(
+        gregorian,
+        shiftingNum,
+        locale,
+        settings.calender
+      );
+      const hawl = calculateHawlMaturity(
+        gregorian,
+        shiftingNum,
+        settings.calender
+      );
       return {
         direction: "gregorian_to_hijri",
         gregorianDate: gregorian,

@@ -2,6 +2,8 @@ import type { Core } from "@strapi/strapi";
 
 import {
   PLUGIN_ID,
+  isPlainRecord,
+  stripDangerousKeysDeep,
   type FitranaFidyahKaffarahInput,
   type ZakatAlMalCalculationInput,
 } from "../../../shared";
@@ -13,7 +15,7 @@ export interface KoaContentContext {
   query?: Record<string, string | undefined>;
   params?: Record<string, string | undefined>;
   request?: {
-    body?: Record<string, unknown>;
+    body?: unknown;
   };
   body?: unknown;
   status?: number;
@@ -30,7 +32,7 @@ function getParams(ctx: KoaContentContext): Record<string, string | undefined> {
 
 function getRequestBody<T>(ctx: KoaContentContext): T {
   const rawBody = ctx.request?.body;
-  return (rawBody && typeof rawBody === "object" ? rawBody : {}) as T;
+  return (isPlainRecord(rawBody) ? stripDangerousKeysDeep(rawBody) : {}) as T;
 }
 
 function setNoTranslateHeader(ctx: KoaContentContext): void {

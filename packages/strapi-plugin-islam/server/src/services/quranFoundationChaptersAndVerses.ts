@@ -2,9 +2,9 @@ import {
   CURATED_AYAT,
   SURAH_DIRECTORY,
   sanitizeLocale,
-  sanitizePlainText,
   sanitizePositiveInt,
   sanitizeQuranScript,
+  sanitizeResourceIdsCsv,
   sanitizeSurahNumber,
   sanitizeVerseKey,
   type CuratedAyahItem,
@@ -88,14 +88,12 @@ function resolveTranslationsCsv(
   qf: QuranFoundationConfig,
   locale: SupportedLocale
 ): string {
-  const cleaned = sanitizePlainText(rawTranslations, 80).replace(
-    /[^0-9,]/g,
-    ""
-  );
-  if (cleaned) return cleaned;
-  const baseIds = qf.defaultTranslationIdsByLocale?.[locale] || [83];
-  const ids = qf.includeTransliterationByDefault ? [...baseIds, 57] : baseIds;
-  return Array.from(new Set(ids)).join(",");
+  const rawBase = qf.defaultTranslationIdsByLocale?.[locale];
+  const baseIds = Array.isArray(rawBase) && rawBase.length > 0 ? rawBase : [83];
+  const fallbackIds = qf.includeTransliterationByDefault
+    ? [...baseIds, 57]
+    : baseIds;
+  return sanitizeResourceIdsCsv(rawTranslations, fallbackIds, 5);
 }
 
 function resolveTafsirsCsv(
@@ -104,10 +102,13 @@ function resolveTafsirsCsv(
   locale: SupportedLocale,
   useDefaultWhenEmpty: boolean
 ): string {
-  const cleaned = sanitizePlainText(rawTafsirs, 80).replace(/[^0-9,]/g, "");
-  if (cleaned || !useDefaultWhenEmpty) return cleaned;
-  const defaultTafsirIds = qf.defaultTafsirIdsByLocale?.[locale] || [169];
-  return defaultTafsirIds.join(",");
+  const rawDefault = qf.defaultTafsirIdsByLocale?.[locale];
+  const defaultTafsirIds = useDefaultWhenEmpty
+    ? Array.isArray(rawDefault) && rawDefault.length > 0
+      ? rawDefault
+      : [169]
+    : [];
+  return sanitizeResourceIdsCsv(rawTafsirs, defaultTafsirIds, 5);
 }
 
 export function findLocalSurah(chapterNumber: number): SurahMetadata {

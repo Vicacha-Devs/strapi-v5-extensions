@@ -2,11 +2,12 @@ import { KAABA_COORDINATES } from "./constants";
 import type {
   DailyFivePrayerId,
   IqamahRule,
+  IslamPluginSettings,
   ProhibitedTimesWindow,
   QiblaCompassResult,
   SupportedLocale,
 } from "./types";
-import { sanitizeCoordinates } from "./validation";
+import { sanitizeCoordinates, sanitizeTimezone } from "./validation";
 
 export const DEG_TO_RAD = Math.PI / 180;
 export const RAD_TO_DEG = 180 / Math.PI;
@@ -77,20 +78,40 @@ export function calculateQiblaCompass(
   const lat2 = KAABA_COORDINATES.lat * DEG_TO_RAD;
   const lon2 = KAABA_COORDINATES.lon * DEG_TO_RAD;
 
-  const dLon = lon2 - lon1;
-  const y = Math.sin(dLon);
-  const x = Math.cos(lat1) * Math.tan(lat2) - Math.sin(lat1) * Math.cos(dLon);
-  const rawBearing = Math.atan2(y, x) * RAD_TO_DEG;
-  const degrees = Math.round(((rawBearing + 360) % 360) * 100) / 100;
-
   const dLat = lat2 - lat1;
+  const dLon = lon2 - lon1;
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(Math.max(0, 1 - a)));
+
+  if (c < 1e-9) {
+    return {
+      origin: { lat, lon, city, country },
+      kaaba: { lat: KAABA_COORDINATES.lat, lon: KAABA_COORDINATES.lon },
+      direction: {
+        degrees: 0,
+        from: "True North",
+        clockwise: true,
+        cardinal: "N",
+      },
+      distance: {
+        kilometers: 0,
+        miles: 0,
+      },
+    };
+  }
+
+  const y = Math.sin(dLon);
+  const x = Math.cos(lat1) * Math.tan(lat2) - Math.sin(lat1) * Math.cos(dLon);
+  const rawBearing = Math.atan2(y, x) * RAD_TO_DEG;
+  const normalized = ((rawBearing % 360) + 360) % 360;
+  const rounded = Math.round(normalized * 100) / 100;
+  const wrappedDeg = ((rounded % 360) + 360) % 360;
+  const degrees = wrappedDeg === 0 ? 0 : wrappedDeg;
+
   const kilometers = Math.round(EARTH_RADIUS_KM * c * 100) / 100;
   const miles = Math.round(kilometers * 0.621371 * 100) / 100;
-
   const compassIdx = Math.round(degrees / 22.5) % 16;
 
   return {
@@ -110,12 +131,38 @@ export function calculateQiblaCompass(
 }
 
 export function getTimezoneOffsetHours(date: Date, timeZone: string): number {
+  const safeTz = sanitizeTimezone(timeZone, "UTC");
   try {
-    const utcDate = new Date(date.toLocaleString("en-US", { timeZone: "UTC" }));
-    const tzDate = new Date(date.toLocaleString("en-US", { timeZone }));
-    return (tzDate.getTime() - utcDate.getTime()) / 3_600_000;
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: safeTz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(date);
+    const readPart = (type: string): number =>
+      Number(parts.find((p) => p.type === type)?.value ?? 0);
+    const year = readPart("year");
+    const month = readPart("month");
+    const day = readPart("day");
+    const hour = readPart("hour") % 24;
+    const minute = readPart("minute");
+    const second = readPart("second");
+    const wallClockAsUtcMs = Date.UTC(
+      year,
+      month - 1,
+      day,
+      hour,
+      minute,
+      second
+    );
+    const instantSecMs = Math.floor(date.getTime() / 1000) * 1000;
+    return (wallClockAsUtcMs - instantSecMs) / 3_600_000;
   } catch {
-    return -5;
+    return 0;
   }
 }
 
@@ -143,19 +190,54 @@ export function solarPosition(julianDay: number): {
   return { declinationRad, equationOfTimeHours: eqt };
 }
 
+export function tryComputeHourAngleHours(
+  latRad: number,
+  declinationRad: number,
+  altitudeDeg: number
+): number | null {
+  const altRad = altitudeDeg * DEG_TO_RAD;
+  const num = Math.sin(altRad) - Math.sin(latRad) * Math.sin(declinationRad);
+  const den = Math.cos(latRad) * Math.cos(declinationRad);
+  if (Math.abs(den) < 1e-9) return null;
+  const ratio = num / den;
+  if (ratio < -1 || ratio > 1) return null;
+  return (Math.acos(ratio) * RAD_TO_DEG) / 15;
+}
+
 export function computeHourAngleHours(
   latRad: number,
   declinationRad: number,
   altitudeDeg: number
 ): number {
+  const exact = tryComputeHourAngleHours(latRad, declinationRad, altitudeDeg);
+  if (exact !== null) return exact;
   const altRad = altitudeDeg * DEG_TO_RAD;
   const num = Math.sin(altRad) - Math.sin(latRad) * Math.sin(declinationRad);
   const den = Math.cos(latRad) * Math.cos(declinationRad);
-  const cosH = Math.max(-1, Math.min(1, num / den));
+  const cosH = den === 0 ? -1 : Math.max(-1, Math.min(1, num / den));
   return (Math.acos(cosH) * RAD_TO_DEG) / 15;
 }
 
+export function computeHighLatitudeNightPortionHours(
+  rule: IslamPluginSettings["highLatitudeRule"],
+  angleDeg: number,
+  nightHours: number
+): number {
+  const safeNight = Math.max(1, Math.min(23, nightHours));
+  if (rule === "OneSeventh") {
+    return safeNight / 7;
+  }
+  if (rule === "MiddleOfTheNight") {
+    return safeNight / 2;
+  }
+  const safeAngle = Number.isFinite(angleDeg) && angleDeg > 0 ? angleDeg : 18;
+  return (safeAngle / 60) * safeNight;
+}
+
 export function minutesToHhMm(totalMinutes: number): string {
+  if (!Number.isFinite(totalMinutes)) {
+    return "00:00";
+  }
   const wrapped = ((Math.round(totalMinutes) % 1440) + 1440) % 1440;
   const hh = Math.floor(wrapped / 60);
   const mm = wrapped % 60;
@@ -180,6 +262,7 @@ export function parseHhMmToMinutes(
   const rawHours = Number(match[1]);
   const minutes = Number(match[2]);
   if (minutes > 59 || rawHours > 23) return null;
+  if (match[3] && (rawHours < 1 || rawHours > 12)) return null;
   const hours = applyMeridiemAdjustment(rawHours, match[3]);
   return hours * 60 + minutes;
 }
@@ -189,24 +272,27 @@ export function resolveIqamahTime(
   adhanMinutes: number,
   rules: IqamahRule[]
 ): { iqamah: string; iqamahMinutes: number } {
-  const rule = rules.find((r) => r.prayerName === prayerName);
+  const safeAdhan = Number.isFinite(adhanMinutes) ? adhanMinutes : 0;
+  const rule = Array.isArray(rules)
+    ? rules.find((r) => r.prayerName === prayerName)
+    : undefined;
   if (!rule) {
     const defaultOffset = prayerName === "maghrib" ? 10 : 15;
-    const mins = adhanMinutes + defaultOffset;
+    const mins = safeAdhan + defaultOffset;
     return { iqamah: minutesToHhMm(mins), iqamahMinutes: mins };
   }
 
   if (rule.mode === "fixed_time" && rule.fixedTime) {
     const parsed = parseHhMmToMinutes(rule.fixedTime);
-    if (parsed !== null && parsed >= adhanMinutes) {
+    if (parsed !== null && parsed >= safeAdhan) {
       return { iqamah: minutesToHhMm(parsed), iqamahMinutes: parsed };
     }
   }
 
   const offset = Number.isFinite(rule.offsetMinutes)
-    ? Math.max(0, rule.offsetMinutes)
+    ? Math.max(0, Math.min(180, Math.trunc(rule.offsetMinutes)))
     : 15;
-  const mins = adhanMinutes + offset;
+  const mins = safeAdhan + offset;
   return { iqamah: minutesToHhMm(mins), iqamahMinutes: mins };
 }
 

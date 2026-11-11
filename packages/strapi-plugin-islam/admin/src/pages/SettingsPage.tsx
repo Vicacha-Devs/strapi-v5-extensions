@@ -8,7 +8,7 @@ import {
   Tabs,
   Typography,
 } from "@strapi/design-system";
-import { useFetchClient } from "@strapi/strapi/admin";
+import { useFetchClient, useNotification } from "@strapi/strapi/admin";
 import React, { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 
@@ -110,23 +110,60 @@ export const SettingsPage: React.FC = () => {
   const t: TranslateFn = (id, defaultMessage, values) =>
     formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
   const { get, put } = useFetchClient();
+  const { toggleNotification } = useNotification();
+
   const [settings, setSettings] = useState<IslamPluginSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedBanner, setSavedBanner] = useState(false);
 
-  useEffect(() => {
-    void (async () => {
+  const fetchSettings = async (checkMounted?: () => boolean) => {
+    const isAlive = () => (checkMounted ? checkMounted() : true);
+    if (!isAlive()) return;
+    setLoading(true);
+    setLoadError(null);
+    try {
       const res = await get<SettingsApiResponse>(`/${PLUGIN_ID}/settings`);
+      if (!isAlive()) return;
       if (res?.data?.data) {
         setSettings(res.data.data);
+      } else {
+        const msg = t(
+          "settings.ui.error_loading_settings",
+          "Failed to load Islam Suite settings."
+        );
+        setLoadError(msg);
       }
-    })();
+    } catch {
+      if (!isAlive()) return;
+      const msg = t(
+        "settings.ui.error_loading_settings",
+        "Failed to load Islam Suite settings."
+      );
+      setLoadError(msg);
+      toggleNotification({ type: "danger", message: msg });
+    } finally {
+      if (isAlive()) {
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    void fetchSettings(() => isMounted);
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleSave = async () => {
     if (!settings) return;
     setSaving(true);
     setSavedBanner(false);
+    setSaveError(null);
     try {
       const res = await put<SettingsApiResponse>(
         `/${PLUGIN_ID}/settings`,
@@ -135,7 +172,21 @@ export const SettingsPage: React.FC = () => {
       if (res?.data?.data) {
         setSettings(res.data.data);
         setSavedBanner(true);
+        toggleNotification({
+          type: "success",
+          message: t(
+            "settings.ui.settings_saved_and_synchronized_with_mapped_coll",
+            "Settings saved and synchronized with mapped collections."
+          ),
+        });
       }
+    } catch {
+      const msg = t(
+        "settings.ui.error_saving_settings",
+        "Failed to save Islam Suite settings."
+      );
+      setSaveError(msg);
+      toggleNotification({ type: "danger", message: msg });
     } finally {
       setSaving(false);
     }
@@ -145,12 +196,30 @@ export const SettingsPage: React.FC = () => {
     return (
       <Main>
         <Box padding={8}>
-          <Typography>
-            {t(
-              "settings.ui.loading_islam_suite_settings",
-              "Loading Islam Suite settings..."
-            )}
-          </Typography>
+          {loadError ? (
+            <Box padding={4} background="danger100" hasRadius>
+              <Flex justifyContent="space-between" alignItems="center" gap={3}>
+                <Typography textColor="danger700" fontWeight="bold">
+                  {loadError}
+                </Typography>
+                <Button
+                  size="S"
+                  variant="secondary"
+                  loading={loading}
+                  onClick={() => void fetchSettings()}
+                >
+                  {t("page.ui.retry_btn", "Retry")}
+                </Button>
+              </Flex>
+            </Box>
+          ) : (
+            <Typography>
+              {t(
+                "settings.ui.loading_islam_suite_settings",
+                "Loading Islam Suite settings..."
+              )}
+            </Typography>
+          )}
         </Box>
       </Main>
     );
@@ -165,6 +234,14 @@ export const SettingsPage: React.FC = () => {
           onSave={() => void handleSave()}
           t={t}
         />
+
+        {saveError && (
+          <Box marginBottom={4} padding={3} background="danger100" hasRadius>
+            <Typography textColor="danger700" fontWeight="bold">
+              {saveError}
+            </Typography>
+          </Box>
+        )}
 
         {savedBanner && (
           <Box marginBottom={4} padding={3} background="success100" hasRadius>

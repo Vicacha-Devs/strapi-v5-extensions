@@ -1,5 +1,5 @@
 import { Main, Box, Flex, Typography, Button } from "@strapi/design-system";
-import { useFetchClient } from "@strapi/strapi/admin";
+import { useFetchClient, useNotification } from "@strapi/strapi/admin";
 import React, { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 
@@ -104,24 +104,28 @@ const CockpitHeaderBar: React.FC<{
       </Flex>
       <Flex gap={2} wrap="wrap">
         <Button
+          aria-pressed={activeTab === "salah"}
           variant={activeTab === "salah" ? "default" : "tertiary"}
           onClick={() => setActiveTab("salah")}
         >
           {t("page.ui.1_salah_adhan_iqamah", "Salah, Adhan & Iqamah")}
         </Button>
         <Button
+          aria-pressed={activeTab === "hilal"}
           variant={activeTab === "hilal" ? "default" : "tertiary"}
           onClick={() => setActiveTab("hilal")}
         >
           {t("page.ui.2_hilal_ramadan_eid", "Hilal, Ramadan & Eid")}
         </Button>
         <Button
+          aria-pressed={activeTab === "scripture"}
           variant={activeTab === "scripture" ? "default" : "tertiary"}
           onClick={() => setActiveTab("scripture")}
         >
           {t("page.ui.3_quran_hadith_dua", "Quran, Hadith & Dua")}
         </Button>
         <Button
+          aria-pressed={activeTab === "fiqh"}
           variant={activeTab === "fiqh" ? "default" : "tertiary"}
           onClick={() => setActiveTab("fiqh")}
         >
@@ -136,14 +140,17 @@ const CockpitHeaderBar: React.FC<{
 };
 
 export const IslamPage: React.FC = () => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const t: TranslateFn = (id, defaultMessage, values) =>
     formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }, values);
   const { get, post } = useFetchClient();
+  const { toggleNotification } = useNotification();
+
   const [activeTab, setActiveTab] = useState<CockpitTab>("salah");
   const [loading, setLoading] = useState(true);
   const [savingAction, setSavingAction] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [settings, setSettings] = useState<IslamPluginSettings | null>(null);
   const [timetable, setTimetable] = useState<DailyPrayerTimetable | null>(null);
@@ -187,25 +194,47 @@ export const IslamPage: React.FC = () => {
     if (payload.nisab?.USD) setNisabUsd(payload.nisab.USD);
   };
 
-  const loadOverview = async () => {
+  const loadOverview = async (checkMounted?: () => boolean) => {
+    const isAlive = () => (checkMounted ? checkMounted() : true);
+    if (!isAlive()) return;
     setLoading(true);
+    setErrorMessage(null);
     try {
-      const res = await get<OverviewApiResponse>(`/${PLUGIN_ID}/overview`);
+      const encodedLocale = encodeURIComponent(locale || "en");
+      const res = await get<OverviewApiResponse>(
+        `/${PLUGIN_ID}/overview?locale=${encodedLocale}`
+      );
+      if (!isAlive()) return;
       const payload = res?.data?.data || {};
       applyOverviewPayload(payload);
       applyCorpusAndNisabPayload(payload);
+    } catch {
+      if (!isAlive()) return;
+      const msg = t(
+        "page.ui.error_loading_overview",
+        "Failed to load Islam Suite overview."
+      );
+      setErrorMessage(msg);
+      toggleNotification({ type: "danger", message: msg });
     } finally {
-      setLoading(false);
+      if (isAlive()) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    void loadOverview();
-  }, []);
+    let isMounted = true;
+    void loadOverview(() => isMounted);
+    return () => {
+      isMounted = false;
+    };
+  }, [locale]);
 
   const handleConfirmHilal = async () => {
     setSavingAction(true);
     setStatusMessage(null);
+    setErrorMessage(null);
     try {
       await post(`/${PLUGIN_ID}/hilal/confirm`, {
         occasion: hilalOccasion,
@@ -214,13 +243,20 @@ export const IslamPage: React.FC = () => {
         approvedByImam: hilalImamName,
         activateBanner: hilalActivateBanner,
       });
-      setStatusMessage(
-        t(
-          "page.ui.hilal_confirmed_status",
-          "Official Hilal sighting and Hijri offset updated successfully."
-        )
+      const successMsg = t(
+        "page.ui.hilal_confirmed_status",
+        "Official Hilal sighting and Hijri offset updated successfully."
       );
+      setStatusMessage(successMsg);
+      toggleNotification({ type: "success", message: successMsg });
       await loadOverview();
+    } catch {
+      const failMsg = t(
+        "page.ui.error_action_failed",
+        "Action could not be completed. Please verify your input and try again."
+      );
+      setErrorMessage(failMsg);
+      toggleNotification({ type: "danger", message: failMsg });
     } finally {
       setSavingAction(false);
     }
@@ -229,16 +265,27 @@ export const IslamPage: React.FC = () => {
   const handlePinInspiration = async (patch: InspirationPinPatch) => {
     setSavingAction(true);
     setStatusMessage(null);
+    setErrorMessage(null);
     try {
       const currentPins = settings?.dailyPins || {};
       await post(`/${PLUGIN_ID}/scripture/pins`, {
         ...currentPins,
         ...patch,
       });
-      setStatusMessage(
-        t("page.ui.daily_pin_updated_status", "Daily Inspiration pin updated.")
+      const successMsg = t(
+        "page.ui.daily_pin_updated_status",
+        "Daily Inspiration pin updated."
       );
+      setStatusMessage(successMsg);
+      toggleNotification({ type: "success", message: successMsg });
       await loadOverview();
+    } catch {
+      const failMsg = t(
+        "page.ui.error_action_failed",
+        "Action could not be completed. Please verify your input and try again."
+      );
+      setErrorMessage(failMsg);
+      toggleNotification({ type: "danger", message: failMsg });
     } finally {
       setSavingAction(false);
     }
@@ -256,6 +303,23 @@ export const IslamPage: React.FC = () => {
           onRefresh={() => void loadOverview()}
           t={t}
         />
+
+        {errorMessage && (
+          <Box marginBottom={4} padding={4} background="danger100" hasRadius>
+            <Flex justifyContent="space-between" alignItems="center" gap={3}>
+              <Typography textColor="danger700" fontWeight="bold">
+                {errorMessage}
+              </Typography>
+              <Button
+                size="S"
+                variant="secondary"
+                onClick={() => void loadOverview()}
+              >
+                {t("page.ui.retry_btn", "Retry")}
+              </Button>
+            </Flex>
+          </Box>
+        )}
 
         {statusMessage && (
           <Box marginBottom={4} padding={4} background="success100" hasRadius>

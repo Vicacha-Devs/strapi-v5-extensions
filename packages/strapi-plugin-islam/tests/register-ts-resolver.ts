@@ -1,13 +1,24 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { registerHooks, stripTypeScriptTypes } from "node:module";
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const calendarPkgRoot = resolvePath(currentDir, "../../strapi-plugin-calendar");
+const pluginSharedEntryUrl = pathToFileURL(
+  resolvePath(currentDir, "../../plugin-shared/src/index.ts")
+).href;
 const intlDateShimUrl = pathToFileURL(
   resolvePath(calendarPkgRoot, "tests/intl-date-shim.mjs")
 ).href;
+
+function isExistingFile(filePath: string): boolean {
+  try {
+    return existsSync(filePath) && statSync(filePath).isFile();
+  } catch {
+    return false;
+  }
+}
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
@@ -16,6 +27,9 @@ registerHooks({
         url: "data:text/javascript,export const createElement = (type, props, ...children) => ({ type, props: { ...props, children } }); export default { createElement };",
         shortCircuit: true,
       };
+    }
+    if (specifier === "@vicacha-devs/plugin-shared") {
+      return { url: pluginSharedEntryUrl, shortCircuit: true };
     }
     if (specifier === "@internationalized/date") {
       return { url: intlDateShimUrl, shortCircuit: true };
@@ -36,6 +50,7 @@ registerHooks({
       const baseCandidate = resolvePath(parentDir, specifier);
 
       const candidates = [
+        baseCandidate,
         `${baseCandidate}.ts`,
         `${baseCandidate}.tsx`,
         `${baseCandidate}.json`,
@@ -44,8 +59,8 @@ registerHooks({
       ];
 
       for (const candidate of candidates) {
-        if (existsSync(candidate)) {
-          return nextResolve(pathToFileURL(candidate).href, context);
+        if (isExistingFile(candidate)) {
+          return { url: pathToFileURL(candidate).href, shortCircuit: true };
         }
       }
     }

@@ -2,6 +2,7 @@ import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
 
 import { PLUGIN_ID } from "../../shared";
 import { PluginIcon } from "./components/PluginIcon";
+import { pluginPermissions } from "./permissions";
 import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";
 import { CM_PLACEHOLDER_TRANSLATIONS } from "./translations/cmPlaceholders";
 
@@ -39,7 +40,7 @@ export default {
         import("./pages/IslamPage").then((mod) => ({
           default: mod.IslamPage,
         })),
-      permissions: [],
+      permissions: pluginPermissions.main,
     });
 
     app.createSettingSection(
@@ -62,7 +63,7 @@ export default {
             import("./pages/SettingsPage").then((mod) => ({
               default: mod.SettingsPage,
             })),
-          permissions: [],
+          permissions: pluginPermissions.settings,
         },
       ]
     );
@@ -79,10 +80,16 @@ export default {
     pluginId: PLUGIN_ID,
     defaultLocales: ["en", "es", "ar", "tr"],
     loadTranslation: (locale) => import(`./translations/${locale}.json`),
-    getBaseTranslations: (locale) => ({
-      ...(CM_LABEL_TRANSLATIONS[locale] ?? CM_LABEL_TRANSLATIONS.en),
-      ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ??
-        CM_PLACEHOLDER_TRANSLATIONS.en),
-    }),
+    getBaseTranslations: (locale) => {
+      const baseLang = locale.split("-")[0];
+      return {
+        ...(CM_LABEL_TRANSLATIONS[locale] ??
+          CM_LABEL_TRANSLATIONS[baseLang] ??
+          CM_LABEL_TRANSLATIONS.en),
+        ...(CM_PLACEHOLDER_TRANSLATIONS[locale] ??
+          CM_PLACEHOLDER_TRANSLATIONS[baseLang] ??
+          CM_PLACEHOLDER_TRANSLATIONS.en),
+      };
+    },
   }),
 };

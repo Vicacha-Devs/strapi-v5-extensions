@@ -3,6 +3,7 @@ import {
   NISAB_STANDARDS,
   TROY_OUNCE_IN_GRAMS,
 } from "./constants";
+import { DEFAULT_ISLAM_SETTINGS } from "./defaultSettings";
 import type {
   FiqhRatesConfig,
   FitranaFidyahKaffarahInput,
@@ -20,21 +21,43 @@ import {
 } from "./validation";
 
 function roundMoney(value: number, currency: SupportedCurrency): number {
+  if (!Number.isFinite(value)) return 0;
   if (currency === "COP") {
     return Math.round(value);
   }
   return Math.round(value * 100) / 100;
 }
 
-function resolveSpotPricePerGram(
-  overridePrice: number | undefined,
-  ratesByCurrency: Record<SupportedCurrency, number>,
+function isPositiveFinite(val: unknown): val is number {
+  return typeof val === "number" && Number.isFinite(val) && val > 0;
+}
+
+function resolvePositiveCurrencyRate(
+  ratesByCurrency: Partial<Record<SupportedCurrency, number>> | undefined,
+  defaultRatesByCurrency: Record<SupportedCurrency, number>,
   currency: SupportedCurrency
 ): number {
-  if (overridePrice && overridePrice > 0) {
+  const configured = ratesByCurrency?.[currency];
+  if (isPositiveFinite(configured)) {
+    return configured;
+  }
+  return defaultRatesByCurrency[currency] ?? defaultRatesByCurrency.COP;
+}
+
+function resolveSpotPricePerGram(
+  overridePrice: number | undefined,
+  ratesByCurrency: Partial<Record<SupportedCurrency, number>> | undefined,
+  defaultRatesByCurrency: Record<SupportedCurrency, number>,
+  currency: SupportedCurrency
+): number {
+  if (isPositiveFinite(overridePrice)) {
     return overridePrice;
   }
-  return ratesByCurrency[currency] || ratesByCurrency.COP;
+  return resolvePositiveCurrencyRate(
+    ratesByCurrency,
+    defaultRatesByCurrency,
+    currency
+  );
 }
 
 function convertGramToUnitPrice(
@@ -74,25 +97,28 @@ export function calculateNisabThresholds(
     source?: "configured_or_live" | "external_api";
   }
 ): NisabThresholdResult {
+  const defaultRates = DEFAULT_ISLAM_SETTINGS.fiqhRates;
   const currency = sanitizeCurrency(
     options?.currency,
-    ratesConfig.defaultCurrency
+    ratesConfig?.defaultCurrency ?? defaultRates.defaultCurrency
   );
   const standard = sanitizeNisabStandard(
     options?.standard,
-    ratesConfig.defaultStandard
+    ratesConfig?.defaultStandard ?? defaultRates.defaultStandard
   );
   const isTroyOz = options?.unit === "oz";
   const spec = NISAB_STANDARDS[standard];
 
   const goldPerGram = resolveSpotPricePerGram(
     options?.goldSpotOverridePerGram,
-    ratesConfig.goldPricePerGramByCurrency,
+    ratesConfig?.goldPricePerGramByCurrency,
+    defaultRates.goldPricePerGramByCurrency,
     currency
   );
   const silverPerGram = resolveSpotPricePerGram(
     options?.silverSpotOverridePerGram,
-    ratesConfig.silverPricePerGramByCurrency,
+    ratesConfig?.silverPricePerGramByCurrency,
+    defaultRates.silverPricePerGramByCurrency,
     currency
   );
 
@@ -167,14 +193,17 @@ export function calculateZakatAlMal(
       ? nisabDetails.silver.nisabAmount
       : nisabDetails.gold.nisabAmount;
 
+  const defaultRates = DEFAULT_ISLAM_SETTINGS.fiqhRates;
   const goldPerGram24K = resolveSpotPricePerGram(
     undefined,
-    ratesConfig.goldPricePerGramByCurrency,
+    ratesConfig?.goldPricePerGramByCurrency,
+    defaultRates.goldPricePerGramByCurrency,
     currency
   );
   const silverPerGram = resolveSpotPricePerGram(
     undefined,
-    ratesConfig.silverPricePerGramByCurrency,
+    ratesConfig?.silverPricePerGramByCurrency,
+    defaultRates.silverPricePerGramByCurrency,
     currency
   );
 
@@ -225,7 +254,8 @@ export function calculateZakatAlMal(
     currency
   );
 
-  const meetsNisab = netZakatableWealth >= nisabThresholdAmount;
+  const meetsNisab =
+    nisabThresholdAmount > 0 && netZakatableWealth >= nisabThresholdAmount;
   const wealthZakatDue = meetsNisab
     ? roundMoney(netZakatableWealth * 0.025, currency)
     : 0;
@@ -273,25 +303,30 @@ export function calculateFitranaFidyahKaffarah(
   input: FitranaFidyahKaffarahInput,
   ratesConfig: FiqhRatesConfig
 ): FitranaFidyahKaffarahResult {
+  const defaultRates = DEFAULT_ISLAM_SETTINGS.fiqhRates;
   const currency = sanitizeCurrency(
     input.currency,
-    ratesConfig.defaultCurrency
+    ratesConfig?.defaultCurrency ?? defaultRates.defaultCurrency
   );
 
   const householdMembers = Math.trunc(
     sanitizeNonNegativeNumber(input.householdMembersForFitrana, 500)
   );
-  const fitranaRate =
-    ratesConfig.zakatAlFitrPerPersonByCurrency[currency] ||
-    ratesConfig.zakatAlFitrPerPersonByCurrency.COP;
+  const fitranaRate = resolvePositiveCurrencyRate(
+    ratesConfig?.zakatAlFitrPerPersonByCurrency,
+    defaultRates.zakatAlFitrPerPersonByCurrency,
+    currency
+  );
   const fitranaDue = roundMoney(householdMembers * fitranaRate, currency);
 
   const missedDays = Math.trunc(
     sanitizeNonNegativeNumber(input.missedFastDaysForFidyah, 3650)
   );
-  const fidyahRate =
-    ratesConfig.fidyahPerDayByCurrency[currency] ||
-    ratesConfig.fidyahPerDayByCurrency.COP;
+  const fidyahRate = resolvePositiveCurrencyRate(
+    ratesConfig?.fidyahPerDayByCurrency,
+    defaultRates.fidyahPerDayByCurrency,
+    currency
+  );
   const fidyahDue = roundMoney(missedDays * fidyahRate, currency);
 
   const brokenFastCount = Math.trunc(
@@ -300,12 +335,16 @@ export function calculateFitranaFidyahKaffarah(
   const brokenOathCount = Math.trunc(
     sanitizeNonNegativeNumber(input.brokenOathKaffarahCount, 100)
   );
-  const kaffarahFastRate =
-    ratesConfig.kaffarahFastByCurrency[currency] ||
-    ratesConfig.kaffarahFastByCurrency.COP;
-  const kaffarahOathRate =
-    ratesConfig.kaffarahOathByCurrency[currency] ||
-    ratesConfig.kaffarahOathByCurrency.COP;
+  const kaffarahFastRate = resolvePositiveCurrencyRate(
+    ratesConfig?.kaffarahFastByCurrency,
+    defaultRates.kaffarahFastByCurrency,
+    currency
+  );
+  const kaffarahOathRate = resolvePositiveCurrencyRate(
+    ratesConfig?.kaffarahOathByCurrency,
+    defaultRates.kaffarahOathByCurrency,
+    currency
+  );
   const kaffarahTotal = roundMoney(
     brokenFastCount * kaffarahFastRate + brokenOathCount * kaffarahOathRate,
     currency
@@ -315,16 +354,16 @@ export function calculateFitranaFidyahKaffarah(
     sanitizeNonNegativeNumber(input.voluntarySadaqahAmount),
     currency
   );
+  const foodWeightKg = isPositiveFinite(ratesConfig?.stapleFoodWeightKg)
+    ? ratesConfig.stapleFoodWeightKg
+    : defaultRates.stapleFoodWeightKg;
 
   return {
     currency,
     zakatAlFitr: {
       householdMembers,
       perPersonRate: fitranaRate,
-      equivalentFoodKg:
-        Math.round(
-          householdMembers * (ratesConfig.stapleFoodWeightKg || 2.5) * 10
-        ) / 10,
+      equivalentFoodKg: Math.round(householdMembers * foodWeightKg * 10) / 10,
       totalDue: fitranaDue,
     },
     fidyah: {
