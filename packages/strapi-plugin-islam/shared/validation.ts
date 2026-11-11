@@ -103,8 +103,12 @@ export function isValidTimezone(rawTz: unknown): rawTz is string {
   const trimmed = rawTz.trim();
   if (!trimmed || trimmed.length > 100) return false;
   try {
-    new Intl.DateTimeFormat("en-US", { timeZone: trimmed });
-    return true;
+    // The constructor throws a RangeError for unknown time zones.
+    return (
+      typeof new Intl.DateTimeFormat("en-US", {
+        timeZone: trimmed,
+      }).resolvedOptions().timeZone === "string"
+    );
   } catch {
     return false;
   }
