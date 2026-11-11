@@ -1,0 +1,782 @@
+openapi: 3.0.3
+info:
+  title: Digital Certificates (Ed25519) (@vicacha-devs/strapi-plugin-certificates)
+  version: 1.0.0
+  description: Generic Strapi v5 Official Certificates, Cryptographic Ed25519 Signing, Printable Credentials &
+    QR Verification Plugin powered by @vicacha-devs/strapi-plugin-calendar
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /certificates/settings:
+    get:
+      operationId: getCertificatesSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putCertificatesSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /certificates/settings/rotate-keys:
+    post:
+      operationId: postCertificatesSettingsRotateKeys
+      summary: Rotate Keys
+      description: Strapi v5 Admin API endpoint handled by `admin.rotateKeys`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /certificates/templates:
+    get:
+      operationId: getCertificatesTemplates
+      summary: List Templates
+      description: Strapi v5 Admin API endpoint handled by `admin.listTemplates`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postCertificatesTemplates
+      summary: Create Template
+      description: Strapi v5 Admin API endpoint handled by `admin.createTemplate`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssuedCertificate"
+  /certificates/templates/seed:
+    post:
+      operationId: postCertificatesTemplatesSeed
+      summary: Seed Templates
+      description: Strapi v5 Admin API endpoint handled by `admin.seedTemplates`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /certificates/certificates:
+    get:
+      operationId: getCertificatesCertificates
+      summary: List Certificates
+      description: Strapi v5 Admin API endpoint handled by `admin.listCertificates`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /certificates/certificates/issue:
+    post:
+      operationId: postCertificatesCertificatesIssue
+      summary: Issue Certificate
+      description: Strapi v5 Admin API endpoint handled by `admin.issueCertificate`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssuedCertificate"
+  /certificates/certificates/{documentId}/send-docusign:
+    post:
+      operationId: postCertificatesCertificatesByDocumentIdSendDocusign
+      summary: Send Docu Sign Envelope
+      description: Strapi v5 Admin API endpoint handled by `admin.sendDocuSignEnvelope`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssuedCertificate"
+  /certificates/certificates/{documentId}/approve:
+    put:
+      operationId: putCertificatesCertificatesByDocumentIdApprove
+      summary: Approve Certificate
+      description: Strapi v5 Admin API endpoint handled by `admin.approveCertificate`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /certificates/certificates/{documentId}/revoke:
+    put:
+      operationId: putCertificatesCertificatesByDocumentIdRevoke
+      summary: Revoke Certificate
+      description: Strapi v5 Admin API endpoint handled by `admin.revokeCertificate`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssuedCertificate"
+  /certificates/certificates/{documentId}/print:
+    get:
+      operationId: getCertificatesCertificatesByDocumentIdPrint
+      summary: Print Certificate
+      description: Strapi v5 Admin API endpoint handled by `admin.printCertificate`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/html:
+              schema:
+                type: string
+                description: Printable credential HTML document
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /certificates/certificates/export/csv:
+    get:
+      operationId: getCertificatesCertificatesExportCsv
+      summary: Export Csv
+      description: Strapi v5 Admin API endpoint handled by `admin.exportCsv`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/csv:
+              schema:
+                type: string
+                description: Formula-injection-safe CSV export
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /api/certificates/templates:
+    get:
+      operationId: getApiCertificatesTemplates
+      summary: List Public Templates
+      description: Strapi v5 Content API endpoint handled by `content-api.listPublicTemplates`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/certificates/public-key:
+    get:
+      operationId: getApiCertificatesPublicKey
+      summary: Get Public Key
+      description: Strapi v5 Content API endpoint handled by `content-api.getPublicKey`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/certificates/apply:
+    post:
+      operationId: postApiCertificatesApply
+      summary: Apply Certificate
+      description: Strapi v5 Content API endpoint handled by `content-api.applyCertificate`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssuedCertificate"
+  /api/certificates/verify/{serial}:
+    get:
+      operationId: getApiCertificatesVerifyBySerial
+      summary: Verify By Serial
+      description: Strapi v5 Content API endpoint handled by `content-api.verifyBySerial`.
+      tags:
+        - Content API
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          description: Target serial identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/certificates/verify/{serial}/print:
+    get:
+      operationId: getApiCertificatesVerifyBySerialPrint
+      summary: Download Printable Html
+      description: Strapi v5 Content API endpoint handled by `content-api.downloadPrintableHtml`.
+      tags:
+        - Content API
+      parameters:
+        - name: serial
+          in: path
+          required: true
+          description: Target serial identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/html:
+              schema:
+                type: string
+                description: Printable credential HTML document
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/certificates/webhooks/docusign:
+    post:
+      operationId: postApiCertificatesWebhooksDocusign
+      summary: Docusign Webhook
+      description: Strapi v5 Content API endpoint handled by `content-api.docusignWebhook`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/IssuedCertificate"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssuedCertificate"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    IssuedCertificate:
+      type: object
+      description: Cryptographically signed official certificate record with signatory and witness attestation
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        serialNumber:
+          type: string
+          maxLength: 64
+        templateDocumentId:
+          type: string
+          maxLength: 120
+        templateSlug:
+          type: string
+          maxLength: 120
+        templateName:
+          type: string
+          maxLength: 160
+        status:
+          type: string
+          enum:
+            - pending_approval
+            - issued
+            - revoked
+            - expired
+          default: pending_approval
+        recipientFullName:
+          type: string
+          maxLength: 200
+        recipientChosenName:
+          type: string
+          maxLength: 200
+        recipientEmail:
+          type: string
+          format: email
+        recipientPhone:
+          type: string
+          maxLength: 64
+        recipientNationality:
+          type: string
+          maxLength: 120
+        nationalIdMasked:
+          type: string
+          maxLength: 32
+        issuedAt:
+          type: string
+          maxLength: 40
+        expiresAt:
+          type: string
+          maxLength: 40
+        revokedAt:
+          type: string
+          maxLength: 40
+        revocationReason:
+          type: string
+        signatories:
+          type: object
+          additionalProperties: true
+        witnesses:
+          type: object
+          additionalProperties: true
+        customData:
+          type: object
+          additionalProperties: true
+        secondaryDates:
+          type: object
+          additionalProperties: true
+        canonicalPayloadHash:
+          type: string
+          maxLength: 128
+        cryptographicSignature:
+          type: string
+        publicKeyFingerprint:
+          type: string
+          maxLength: 96
+        esignProvider:
+          type: string
+          enum:
+            - none
+            - docusign
+            - webhook
+          default: none
+        esignEnvelopeId:
+          type: string
+          maxLength: 128
+        esignEnvelopeStatus:
+          type: string
+          enum:
+            - not_sent
+            - sent
+            - delivered
+            - completed
+            - declined
+            - voided
+          default: not_sent
+        esignCompletedAt:
+          type: string
+          maxLength: 40
+        linkedBookingCode:
+          type: string
+          maxLength: 64
+        notes:
+          type: string
+      required:
+        - serialNumber
+        - templateDocumentId
+        - templateSlug
+        - templateName
+        - status
+        - recipientFullName
+        - issuedAt
+        - canonicalPayloadHash
+        - cryptographicSignature
+        - publicKeyFingerprint
+    CertificateTemplate:
+      type: object
+      description: Reusable official certificate template with signatory rules, witness requirements, and body statement
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        name:
+          type: string
+          maxLength: 160
+        slug:
+          type: string
+        description:
+          type: string
+        serialPrefix:
+          type: string
+          maxLength: 8
+          default: CERT
+        defaultValidityDays:
+          type: integer
+          minimum: 0
+        requiresWitnesses:
+          type: boolean
+          default: false
+        minWitnesses:
+          type: integer
+          minimum: 0
+          default: 0
+        requiresApproval:
+          type: boolean
+          default: true
+        esignEnabled:
+          type: boolean
+          default: false
+        esignProvider:
+          type: string
+          enum:
+            - none
+            - docusign
+            - webhook
+          default: none
+        organizationName:
+          type: string
+          maxLength: 200
+        organizationSubheader:
+          type: string
+          maxLength: 240
+        headerText:
+          type: string
+          maxLength: 240
+        titleText:
+          type: string
+          maxLength: 200
+        bodyTemplate:
+          type: string
+        footerText:
+          type: string
+        defaultSignatories:
+          type: object
+          additionalProperties: true
+        customFieldsSchema:
+          type: object
+          additionalProperties: true
+        secondaryCalendars:
+          type: object
+          additionalProperties: true
+        accentColor:
+          type: string
+          maxLength: 16
+          default: "#14532d"
+        active:
+          type: boolean
+          default: true
+      required:
+        - name
+        - slug
+        - serialPrefix
+        - organizationName
+        - titleText
+        - bodyTemplate

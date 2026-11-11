@@ -1,0 +1,767 @@
+openapi: 3.0.3
+info:
+  title: Events, RSVP & Check-In (@vicacha-devs/strapi-plugin-events)
+  version: 1.0.0
+  description: Production-grade Strapi v5 Events, RSVP Capacity, Automatic Waitlist Promotion, Attendee Check-In
+    & iCal Plugin powered by @vicacha-devs/strapi-plugin-calendar
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /events/settings:
+    get:
+      operationId: getEventsSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putEventsSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /events/calendar:
+    get:
+      operationId: getEventsCalendar
+      summary: Get Calendar
+      description: Strapi v5 Admin API endpoint handled by `admin.getCalendar`.
+      tags:
+        - Admin API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: false
+          description: End of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: sourceId
+          in: query
+          required: false
+          description: Filter by registered calendar collection source ID
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: Filter by category name
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: BCP-47 content/display locale (e.g. en, es, ar, tr)
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /events/calendar/reschedule:
+    post:
+      operationId: postEventsCalendarReschedule
+      summary: Reschedule
+      description: Strapi v5 Admin API endpoint handled by `admin.reschedule`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Event"
+  /events/calendar/quick-create:
+    post:
+      operationId: postEventsCalendarQuickCreate
+      summary: Quick Create
+      description: Strapi v5 Admin API endpoint handled by `admin.quickCreate`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Event"
+  /events/stats/{documentId}:
+    get:
+      operationId: getEventsStatsByDocumentId
+      summary: Get Event Stats
+      description: Strapi v5 Admin API endpoint handled by `admin.getEventStats`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /events/registrations:
+    get:
+      operationId: getEventsRegistrations
+      summary: List Registrations
+      description: Strapi v5 Admin API endpoint handled by `admin.listRegistrations`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /events/registrations/export.csv:
+    get:
+      operationId: getEventsRegistrationsExportCsv
+      summary: Export Registrations Csv
+      description: Strapi v5 Admin API endpoint handled by `admin.exportRegistrationsCsv`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/csv:
+              schema:
+                type: string
+                description: Formula-injection-safe CSV export
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /events/registrations/{documentId}/status:
+    post:
+      operationId: postEventsRegistrationsByDocumentIdStatus
+      summary: Update Registration Status
+      description: Strapi v5 Admin API endpoint handled by `admin.updateRegistrationStatus`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Event"
+  /events/registrations/{documentId}/check-in:
+    post:
+      operationId: postEventsRegistrationsByDocumentIdCheckIn
+      summary: Check In
+      description: Strapi v5 Admin API endpoint handled by `admin.checkIn`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /api/events/occurrences:
+    get:
+      operationId: getApiEventsOccurrences
+      summary: List Occurrences
+      description: Strapi v5 Content API endpoint handled by `content-api.listOccurrences`.
+      tags:
+        - Content API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: false
+          description: End of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: sourceId
+          in: query
+          required: false
+          description: Filter by registered calendar collection source ID
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: Filter by category name
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: BCP-47 content/display locale (e.g. en, es, ar, tr)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/events/spotlights:
+    get:
+      operationId: getApiEventsSpotlights
+      summary: List Spotlights
+      description: Strapi v5 Content API endpoint handled by `content-api.listSpotlights`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/events/feed.ics:
+    get:
+      operationId: getApiEventsFeedIcs
+      summary: Download Feed Ics
+      description: Strapi v5 Content API endpoint handled by `content-api.downloadFeedIcs`.
+      tags:
+        - Content API
+      parameters:
+        - name: from
+          in: query
+          required: false
+          description: Start of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: to
+          in: query
+          required: false
+          description: End of ISO-8601 date/time query window
+          schema:
+            type: string
+        - name: sourceId
+          in: query
+          required: false
+          description: Filter by registered calendar collection source ID
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: Filter by category name
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: BCP-47 content/display locale (e.g. en, es, ar, tr)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/calendar:
+              schema:
+                type: string
+                description: RFC 5545 iCalendar (.ics) stream
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/events/{documentId}/invite.ics:
+    get:
+      operationId: getApiEventsByDocumentIdInviteIcs
+      summary: Download Event Invite Ics
+      description: Strapi v5 Content API endpoint handled by `content-api.downloadEventInviteIcs`.
+      tags:
+        - Content API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            text/calendar:
+              schema:
+                type: string
+                description: RFC 5545 iCalendar (.ics) stream
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/events/{documentId}/stats:
+    get:
+      operationId: getApiEventsByDocumentIdStats
+      summary: Get Event Stats
+      description: Strapi v5 Content API endpoint handled by `content-api.getEventStats`.
+      tags:
+        - Content API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/events/{documentId}/register:
+    post:
+      operationId: postApiEventsByDocumentIdRegister
+      summary: Register Attendee
+      description: Strapi v5 Content API endpoint handled by `content-api.registerAttendee`.
+      tags:
+        - Content API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Event"
+  /api/events/registrations/{token}/cancel:
+    post:
+      operationId: postApiEventsRegistrationsByTokenCancel
+      summary: Cancel Registration
+      description: Strapi v5 Content API endpoint handled by `content-api.cancelRegistration`.
+      tags:
+        - Content API
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Target token identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Event"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    Event:
+      type: object
+      description: Recurring & single events managed by strapi-plugin-events
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        title:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+        summary:
+          type: string
+          maxLength: 500
+        description:
+          type: string
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+        allDay:
+          type: boolean
+          default: false
+        timezone:
+          type: string
+          default: UTC
+        recurrence:
+          type: string
+        eventStatus:
+          type: string
+          enum:
+            - scheduled
+            - cancelled
+            - postponed
+            - rescheduled
+          default: scheduled
+        locationType:
+          type: string
+          enum:
+            - in_person
+            - online
+            - hybrid
+          default: in_person
+        location:
+          type: string
+        virtualUrl:
+          type: string
+        category:
+          type: string
+          default: general
+        speaker:
+          type: string
+        speakerSlug:
+          type: string
+        color:
+          type: string
+          default: "#0D9488"
+        featured:
+          type: boolean
+          default: false
+        rsvpEnabled:
+          type: boolean
+          default: false
+        capacity:
+          type: integer
+          minimum: 1
+        waitlistEnabled:
+          type: boolean
+          default: true
+        maxGuestsPerRegistration:
+          type: integer
+          minimum: 1
+          default: 5
+        registrationDeadline:
+          type: string
+          format: date-time
+        alternateDates:
+          type: object
+          additionalProperties: true
+        poster:
+          type: object
+          description: Strapi Media Library asset reference
+          properties:
+            id:
+              type: integer
+            url:
+              type: string
+            mime:
+              type: string
+        actionLinks:
+          type: object
+          additionalProperties: true
+        spotlightConfig:
+          type: object
+          additionalProperties: true
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - title
+        - slug
+        - startDate
+        - eventStatus
+    EventRegistrationRSVP:
+      type: object
+      description: Attendee RSVPs, waitlists, and check-ins managed by strapi-plugin-events
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        eventUid:
+          type: string
+          default: plugin::events.event
+        eventDocumentId:
+          type: string
+        eventTitle:
+          type: string
+        occurrenceDate:
+          type: string
+        attendeeName:
+          type: string
+          maxLength: 160
+        attendeeEmail:
+          type: string
+          format: email
+        attendeePhone:
+          type: string
+          maxLength: 50
+        guestsCount:
+          type: integer
+          minimum: 1
+          default: 1
+        status:
+          type: string
+          enum:
+            - confirmed
+            - waitlisted
+            - cancelled
+            - checked_in
+          default: confirmed
+        checkedInAt:
+          type: string
+          format: date-time
+        locale:
+          type: string
+          default: es
+        notes:
+          type: string
+          maxLength: 2000
+        metadata:
+          type: object
+          additionalProperties: true
+      required:
+        - eventUid
+        - eventDocumentId
+        - occurrenceDate
+        - attendeeName
+        - attendeeEmail
+        - guestsCount
+        - status

@@ -1,0 +1,939 @@
+openapi: 3.0.3
+info:
+  title: Inbox, Forms & Alert Banners (@vicacha-devs/strapi-plugin-inbox)
+  version: 1.0.0
+  description: Generic Strapi v5 Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscriber
+    Lists & Site-Wide Alert Banners (forked & extended from devCluna/strapi-plugin-form-builder-cms)
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /api/inbox/forms:
+    get:
+      operationId: getApiInboxForms
+      summary: List Forms
+      description: Strapi v5 Content API endpoint handled by `inboxController.listForms`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/inbox/forms/{slug}:
+    get:
+      operationId: getApiInboxFormsBySlug
+      summary: Get Form By Slug
+      description: Strapi v5 Content API endpoint handled by `inboxController.getFormBySlug`.
+      tags:
+        - Content API
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Target slug identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/inbox/forms/{slug}/submit:
+    post:
+      operationId: postApiInboxFormsBySlugSubmit
+      summary: Submit Form
+      description: Strapi v5 Content API endpoint handled by `inboxController.submitForm`.
+      tags:
+        - Content API
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Target slug identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /api/inbox/subscribers:
+    post:
+      operationId: postApiInboxSubscribers
+      summary: Subscribe
+      description: Strapi v5 Content API endpoint handled by `inboxController.subscribe`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubscriber"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InboxSubscriber"
+  /api/inbox/subscribers/confirm/{token}:
+    get:
+      operationId: getApiInboxSubscribersConfirmByToken
+      summary: Confirm Subscription
+      description: Strapi v5 Content API endpoint handled by `inboxController.confirmSubscription`.
+      tags:
+        - Content API
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Target token identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubscriber"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/inbox/subscribers/unsubscribe/{token}:
+    get:
+      operationId: getApiInboxSubscribersUnsubscribeByToken
+      summary: Unsubscribe
+      description: Strapi v5 Content API endpoint handled by `inboxController.unsubscribe`.
+      tags:
+        - Content API
+      parameters:
+        - name: token
+          in: path
+          required: true
+          description: Target token identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubscriber"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/inbox/alerts:
+    get:
+      operationId: getApiInboxAlerts
+      summary: Get Active Alerts
+      description: Strapi v5 Content API endpoint handled by `inboxController.getActiveAlerts`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxAlertBanner"
+        "400":
+          description: Bad Request — validation or parameter error
+  /inbox/settings:
+    get:
+      operationId: getInboxSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `inboxController.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putInboxSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `inboxController.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /inbox/templates:
+    get:
+      operationId: getInboxTemplates
+      summary: List Templates
+      description: Strapi v5 Admin API endpoint handled by `inboxController.listTemplates`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /inbox/form-builder-forms:
+    get:
+      operationId: getInboxFormBuilderForms
+      summary: List Form Builder Forms
+      description: Strapi v5 Admin API endpoint handled by `inboxController.listFormBuilderForms`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /inbox/forms/sync-builder:
+    post:
+      operationId: postInboxFormsSyncBuilder
+      summary: Sync Form Builder
+      description: Strapi v5 Admin API endpoint handled by `inboxController.syncFormBuilder`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /inbox/forms:
+    get:
+      operationId: getInboxForms
+      summary: List Forms
+      description: Strapi v5 Admin API endpoint handled by `inboxController.listForms`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postInboxForms
+      summary: Save Form
+      description: Strapi v5 Admin API endpoint handled by `inboxController.saveForm`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /inbox/forms/from-template:
+    post:
+      operationId: postInboxFormsFromTemplate
+      summary: Create From Template
+      description: Strapi v5 Admin API endpoint handled by `inboxController.createFromTemplate`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /inbox/submissions:
+    get:
+      operationId: getInboxSubmissions
+      summary: List Submissions
+      description: Strapi v5 Admin API endpoint handled by `inboxController.listSubmissions`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubmission"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /inbox/submissions/{documentId}/casework:
+    put:
+      operationId: putInboxSubmissionsByDocumentIdCasework
+      summary: Update Casework
+      description: Strapi v5 Admin API endpoint handled by `inboxController.updateCasework`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubmission"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InboxSubmission"
+  /inbox/submissions/{documentId}/schedule-booking:
+    post:
+      operationId: postInboxSubmissionsByDocumentIdScheduleBooking
+      summary: Schedule Booking
+      description: Strapi v5 Admin API endpoint handled by `inboxController.scheduleBooking`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubmission"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InboxSubmission"
+  /inbox/submissions/{documentId}/issue-certificate:
+    post:
+      operationId: postInboxSubmissionsByDocumentIdIssueCertificate
+      summary: Issue Certificate
+      description: Strapi v5 Admin API endpoint handled by `inboxController.issueCertificate`.
+      tags:
+        - Admin API
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubmission"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InboxSubmission"
+  /inbox/submissions/export-csv:
+    get:
+      operationId: getInboxSubmissionsExportCsv
+      summary: Export Csv
+      description: Strapi v5 Admin API endpoint handled by `inboxController.exportCsv`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubmission"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /inbox/captcha/test:
+    post:
+      operationId: postInboxCaptchaTest
+      summary: Test Captcha
+      description: Strapi v5 Admin API endpoint handled by `inboxController.testCaptcha`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /inbox/subscribers:
+    get:
+      operationId: getInboxSubscribers
+      summary: List Subscribers
+      description: Strapi v5 Admin API endpoint handled by `inboxController.listSubscribers`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxSubscriber"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /inbox/alerts:
+    get:
+      operationId: getInboxAlerts
+      summary: Get Active Alerts
+      description: Strapi v5 Admin API endpoint handled by `inboxController.getActiveAlerts`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxAlertBanner"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    post:
+      operationId: postInboxAlerts
+      summary: Upsert Alert Banner
+      description: Strapi v5 Admin API endpoint handled by `inboxController.upsertAlertBanner`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/InboxAlertBanner"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InboxAlertBanner"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    InboxAlertBanner:
+      type: object
+      description: Time-bounded multi-language urgent announcement ticker / banner
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        code:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        severity:
+          type: string
+          enum:
+            - info
+            - warning
+            - urgent
+            - celebration
+          default: info
+        ctaLabel:
+          type: string
+        ctaUrl:
+          type: string
+        dismissible:
+          type: boolean
+          default: true
+        active:
+          type: boolean
+          default: true
+        priority:
+          type: integer
+          default: 10
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        translations:
+          type: object
+          additionalProperties: true
+      required:
+        - code
+        - title
+        - message
+        - severity
+    InboxSubmission:
+      type: object
+      description: Form submission & Service-Desk Casework ticket
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        referenceCode:
+          type: string
+        formSlug:
+          type: string
+        formTitle:
+          type: string
+        category:
+          type: string
+          enum:
+            - contact
+            - service_desk
+            - inquiry
+            - application
+            - volunteer
+            - custom
+          default: contact
+        status:
+          type: string
+          enum:
+            - new
+            - read
+            - under_review
+            - scheduled
+            - completed
+            - rejected
+            - archived
+          default: new
+        priority:
+          type: string
+          enum:
+            - low
+            - normal
+            - high
+            - urgent
+          default: normal
+        department:
+          type: string
+          default: general
+        locale:
+          type: string
+          default: es
+        applicantName:
+          type: string
+        applicantEmail:
+          type: string
+          format: email
+        applicantPhone:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+        checklistItems:
+          type: object
+          additionalProperties: true
+        staffNotes:
+          type: string
+        assignedTo:
+          type: string
+        linkedBookingId:
+          type: string
+        linkedCertificateNumber:
+          type: string
+        formBuilderSubmissionId:
+          type: integer
+        submittedAt:
+          type: string
+          format: date-time
+        secondaryDate:
+          type: object
+          additionalProperties: true
+      required:
+        - referenceCode
+        - formSlug
+        - status
+        - priority
+        - data
+        - submittedAt
+    InboxSubscriber:
+      type: object
+      description: Double Opt-In newsletter and community topic subscriber
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        email:
+          type: string
+          format: email
+        fullName:
+          type: string
+        phone:
+          type: string
+        locale:
+          type: string
+          default: es
+        topics:
+          type: object
+          additionalProperties: true
+        status:
+          type: string
+          enum:
+            - pending
+            - confirmed
+            - unsubscribed
+          default: pending
+        confirmedAt:
+          type: string
+          format: date-time
+        unsubscribedAt:
+          type: string
+          format: date-time
+        sourceFormSlug:
+          type: string
+      required:
+        - email
+        - status

@@ -1,0 +1,697 @@
+openapi: 3.0.3
+info:
+  title: Donations & Campaigns (@vicacha-devs/strapi-plugin-donations)
+  version: 1.0.0
+  description: Generic Strapi v5 Crowdfunding Campaigns, Pledges, Rule-Based Assessment & Commodity Threshold
+    Calculator, Payment Webhooks & Tax Certificate Bridge powered by @vicacha-devs/strapi-plugin-calendar and
+    @vicacha-devs/strapi-plugin-certificates
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /api/donations/campaigns:
+    get:
+      operationId: getApiDonationsCampaigns
+      summary: List Campaigns
+      description: Strapi v5 Content API endpoint handled by `content-api.listCampaigns`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DonationCampaignInvoice"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/donations/invoices:
+    get:
+      operationId: getApiDonationsInvoices
+      summary: List Utility Invoices
+      description: Strapi v5 Content API endpoint handled by `content-api.listUtilityInvoices`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/donations/utility-invoices:
+    get:
+      operationId: getApiDonationsUtilityInvoices
+      summary: List Utility Invoices
+      description: Strapi v5 Content API endpoint handled by `content-api.listUtilityInvoices`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/donations/campaigns/{slug}:
+    get:
+      operationId: getApiDonationsCampaignsBySlug
+      summary: Get Campaign By Slug
+      description: Strapi v5 Content API endpoint handled by `content-api.getCampaignBySlug`.
+      tags:
+        - Content API
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Target slug identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DonationCampaignInvoice"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/donations/calculator:
+    get:
+      operationId: getApiDonationsCalculator
+      summary: Get Calculator And Directory
+      description: Strapi v5 Content API endpoint handled by `content-api.getCalculatorAndDirectory`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/donations/calculate:
+    post:
+      operationId: postApiDonationsCalculate
+      summary: Calculate Assessment
+      description: Strapi v5 Content API endpoint handled by `content-api.calculateAssessment`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /api/donations/pledges:
+    post:
+      operationId: postApiDonationsPledges
+      summary: Submit Pledge
+      description: Strapi v5 Content API endpoint handled by `content-api.submitPledge`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DonationPledgeContribution"
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DonationPledgeContribution"
+  /api/donations/webhook:
+    post:
+      operationId: postApiDonationsWebhook
+      summary: Handle Webhook
+      description: Strapi v5 Content API endpoint handled by `content-api.handleWebhook`.
+      tags:
+        - Content API
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /donations/settings:
+    get:
+      operationId: getDonationsSettings
+      summary: Get Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.getSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putDonationsSettings
+      summary: Update Settings
+      description: Strapi v5 Admin API endpoint handled by `admin.updateSettings`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /donations/overview:
+    get:
+      operationId: getDonationsOverview
+      summary: Get Overview
+      description: Strapi v5 Admin API endpoint handled by `admin.getOverview`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /donations/campaigns:
+    post:
+      operationId: postDonationsCampaigns
+      summary: Create Campaign
+      description: Strapi v5 Admin API endpoint handled by `admin.createCampaign`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DonationCampaignInvoice"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DonationCampaignInvoice"
+  /donations/campaigns/{identifier}:
+    put:
+      operationId: putDonationsCampaignsByIdentifier
+      summary: Update Campaign
+      description: Strapi v5 Admin API endpoint handled by `admin.updateCampaign`.
+      tags:
+        - Admin API
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: Target identifier identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DonationCampaignInvoice"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DonationCampaignInvoice"
+  /donations/campaigns/{identifier}/evidences:
+    post:
+      operationId: postDonationsCampaignsByIdentifierEvidences
+      summary: Add Evidence
+      description: Strapi v5 Admin API endpoint handled by `admin.addEvidence`.
+      tags:
+        - Admin API
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: Target identifier identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DonationCampaignInvoice"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DonationCampaignInvoice"
+  /donations/campaigns/{identifier}/evidences/{evidenceId}:
+    delete:
+      operationId: deleteDonationsCampaignsByIdentifierEvidencesByEvidenceId
+      summary: Remove Evidence
+      description: Strapi v5 Admin API endpoint handled by `admin.removeEvidence`.
+      tags:
+        - Admin API
+      parameters:
+        - name: identifier
+          in: path
+          required: true
+          description: Target identifier identifier
+          schema:
+            type: string
+        - name: evidenceId
+          in: path
+          required: true
+          description: Target evidenceId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DonationCampaignInvoice"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /donations/pledges/{referenceCode}/verify:
+    post:
+      operationId: postDonationsPledgesByReferenceCodeVerify
+      summary: Verify Pledge
+      description: Strapi v5 Admin API endpoint handled by `admin.verifyPledge`.
+      tags:
+        - Admin API
+      parameters:
+        - name: referenceCode
+          in: path
+          required: true
+          description: Target referenceCode identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/DonationPledgeContribution"
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DonationPledgeContribution"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication
+  schemas:
+    DonationCampaignInvoice:
+      type: object
+      description: Generic fundraising campaign, operational utility invoice, or micro-need
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        body:
+          type: string
+        campaignKind:
+          type: string
+          enum:
+            - major_campaign
+            - utility_invoice
+            - micro_need
+          default: major_campaign
+        categoryKey:
+          type: string
+          default: general_fund
+        goalAmount:
+          type: number
+        raisedAmount:
+          type: number
+        currency:
+          type: string
+          default: COP
+        donorCount:
+          type: integer
+          minimum: 0
+          default: 0
+        isUrgent:
+          type: boolean
+          default: false
+        isFeatured:
+          type: boolean
+          default: false
+        isActive:
+          type: boolean
+          default: true
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        billingPeriod:
+          type: string
+        invoiceReference:
+          type: string
+        invoiceProvider:
+          type: string
+        invoiceStatus:
+          type: string
+          enum:
+            - open
+            - partially_funded
+            - paid
+            - overdue
+          default: open
+        suggestedAmounts:
+          type: object
+          additionalProperties: true
+        allowCustomAmount:
+          type: boolean
+          default: true
+        allowFullBalancePayoff:
+          type: boolean
+          default: true
+        ctaLabel:
+          type: string
+        ctaHref:
+          type: string
+        coverUrl:
+          type: string
+        invoiceDocumentUrl:
+          type: string
+        paymentGatewayUrl:
+          type: string
+        icon:
+          type: string
+        evidences:
+          type: object
+          additionalProperties: true
+      required:
+        - title
+        - slug
+        - description
+        - campaignKind
+        - categoryKey
+        - goalAmount
+        - currency
+    DonationPledgeContribution:
+      type: object
+      description: Donor pledge, utility bill payment, or verified donation record
+      properties:
+        documentId:
+          type: string
+          description: Strapi v5 Document Service unique identifier
+        referenceCode:
+          type: string
+        donorName:
+          type: string
+        donorEmail:
+          type: string
+          format: email
+        donorPhone:
+          type: string
+        donorTaxId:
+          type: string
+        donorTaxIdType:
+          type: string
+        isAnonymous:
+          type: boolean
+          default: false
+        amount:
+          type: number
+        currency:
+          type: string
+          default: COP
+        convertedBaseAmount:
+          type: number
+        categoryKey:
+          type: string
+          default: general_fund
+        campaignSlug:
+          type: string
+        campaignKind:
+          type: string
+          enum:
+            - major_campaign
+            - utility_invoice
+            - micro_need
+          default: major_campaign
+        coversRemainingBalance:
+          type: boolean
+          default: false
+        paymentChannel:
+          type: string
+          enum:
+            - bank_transfer
+            - digital_wallet
+            - card_gateway
+            - qr_code
+            - cash
+            - other
+          default: bank_transfer
+        paymentProvider:
+          type: string
+        transactionReference:
+          type: string
+        receiptProofUrl:
+          type: string
+        donorNotes:
+          type: string
+        status:
+          type: string
+          enum:
+            - pending
+            - verified
+            - rejected
+            - certificate_issued
+          default: pending
+        verifiedAt:
+          type: string
+          format: date-time
+        verifiedBy:
+          type: string
+        certificateSerialNumber:
+          type: string
+        certificateVerifyUrl:
+          type: string
+        locale:
+          type: string
+          default: en
+      required:
+        - referenceCode
+        - donorName
+        - donorEmail
+        - amount
+        - currency
+        - categoryKey
+        - paymentChannel
+        - status
