@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-notes",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Strapi v5 Entity Notes plugin (forked & evolved from strapi-community/strapi-plugin-notes) with Audit Logs-style modal metadata (Created/Updated At & By), pinned notes, category badges, document/locale scoping, and a Global Notes Hub.",
   "keywords": [
     "audit-metadata",

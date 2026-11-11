@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-events",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Production-grade Strapi v5 Events, RSVP Capacity, Automatic Waitlist Promotion, Attendee Check-In & iCal Plugin powered by @vicacha-devs/strapi-plugin-calendar",
   "keywords": [
     "calendar",
@@ -93,7 +93,7 @@
     "@strapi/icons": "^2.0.0",
     "@strapi/sdk-plugin": "^5.0.0 || ^6.0.0",
     "@strapi/strapi": "^5.0.0",
-    "@vicacha-devs/strapi-plugin-calendar": "^1.0.0",
+    "@vicacha-devs/strapi-plugin-calendar": "^1.1.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",

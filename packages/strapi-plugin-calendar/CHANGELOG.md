@@ -1,5 +1,11 @@
 # @vicacha-devs/strapi-plugin-calendar
 
+## 1.1.2
+
+### Patch Changes
+
+- e11a0f7: Use the Strapi SDK default export layout: ESM in `index.mjs` and CJS in `index.js`, without `"type": "module"` or post-build file renaming.
+
 ## 1.1.1
 
 ### Patch Changes

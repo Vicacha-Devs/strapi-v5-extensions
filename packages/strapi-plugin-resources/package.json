@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-resources",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Generic Strapi v5 Digital Library Publications, Media Library Folder-Synced Photo Galleries & Multilingual A-Z Glossary Plugin powered by @strapi/upload and @vicacha-devs/strapi-plugin-calendar",
   "keywords": [
     "digital-library",
@@ -91,7 +91,7 @@
     "@strapi/design-system": "^2.0.0",
     "@strapi/icons": "^2.0.0",
     "@strapi/strapi": "^5.0.0",
-    "@vicacha-devs/strapi-plugin-calendar": "^1.0.0",
+    "@vicacha-devs/strapi-plugin-calendar": "^1.1.2",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

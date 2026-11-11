@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+- 4e9305e: Add the global-search plugin: ESM-first package with shared i18n registration through `@vicacha-devs/plugin-shared`.
+
 All notable changes to this project are documented in this file.
 
 ## [2.0.0] - 2026-08-15
