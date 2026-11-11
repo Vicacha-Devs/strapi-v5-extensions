@@ -1,77 +1,81 @@
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  calendar: {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  "calendar": {
     enabled: true,
     config: {
-      defaultView: 'dayGridMonth',
-      defaultTimezone: env('CALENDAR_DEFAULT_TIMEZONE', 'UTC'),
-      defaultLocale: 'auto',
+      defaultView: "dayGridMonth",
+      defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
+      defaultLocale: "auto",
       firstDay: 1,
       weekNumbers: true,
-      weekNumberCalculation: 'ISO',
+      weekNumberCalculation: "ISO",
       hour24: false,
       weekends: true,
-      slotMinTime: '07:00:00',
-      slotMaxTime: '22:00:00',
-      slotDuration: '00:30:00',
-      feedTitle: 'Unified Organization Calendar',
+      slotMinTime: "07:00:00",
+      slotMaxTime: "22:00:00",
+      slotDuration: "00:30:00",
+      feedTitle: "Unified Organization Calendar",
       secondaryCalendars: [
         {
-          id: 'hijri',
-          label: 'Hijri (Umm al-Qura)',
-          intlCalendar: 'islamic-umalqura',
+          id: "hijri",
+          label: "Hijri (Umm al-Qura)",
+          intlCalendar: "islamic-umalqura",
           dayOffset: 0,
-          overrideField: 'hijriDate',
+          overrideField: "hijriDate",
           enabled: true,
         },
       ],
       sources: [
         {
-          id: 'bookings',
-          label: 'Bookings & Tours',
-          uid: 'api::booking.booking',
-          color: '#2563EB',
+          id: "bookings",
+          label: "Bookings & Tours",
+          uid: "api::booking.booking",
+          color: "#2563EB",
           enabled: true,
           fields: {
-            title: 'visitorName',
-            startDate: 'preferredDate',
-            timeSlot: 'preferredTimeSlot',
-            status: 'bookingStatus',
-            notes: 'notes',
+            title: "visitorName",
+            startDate: "preferredDate",
+            timeSlot: "preferredTimeSlot",
+            status: "bookingStatus",
+            notes: "notes",
           },
           categoryColors: {
-            confirmed: '#16A34A',
-            pending: '#D97706',
-            cancelled: '#DC2626',
+            confirmed: "#16A34A",
+            pending: "#D97706",
+            cancelled: "#DC2626",
           },
         },
       ],
     },
   },
-  events: {
+  "events": {
     enabled: true,
     config: {
-      defaultTimezone: env('CALENDAR_DEFAULT_TIMEZONE', 'UTC'),
+      defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
       defaultCapacity: 100,
       waitlistEnabledByDefault: true,
       defaultMaxGuestsPerRegistration: 5,
       sendRsvpEmails: true,
-      feedTitle: 'Events & Workshops Calendar',
+      feedTitle: "Events & Workshops Calendar",
       secondaryCalendars: [
         {
-          id: 'hijri',
-          label: 'Hijri (Umm al-Qura)',
-          intlCalendar: 'islamic-umalqura',
+          id: "hijri",
+          label: "Hijri (Umm al-Qura)",
+          intlCalendar: "islamic-umalqura",
           dayOffset: 0,
-          overrideField: 'hijriDate',
+          overrideField: "hijriDate",
           enabled: true,
         },
       ],
     },
   },
-  bookings: {
+  "bookings": {
     enabled: true,
     config: {
-      defaultTimezone: env('CALENDAR_DEFAULT_TIMEZONE', 'UTC'),
+      defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
       defaultSlotDurationMinutes: 60,
       defaultCapacityPerSlot: 20,
       defaultMinLeadTimeHours: 2,
@@ -80,13 +84,50 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
       sendEmailNotifications: true,
       secondaryCalendars: [
         {
-          id: 'hijri',
-          label: 'Hijri (Umm al-Qura)',
-          intlCalendar: 'islamic-umalqura',
+          id: "hijri",
+          label: "Hijri (Umm al-Qura)",
+          intlCalendar: "islamic-umalqura",
           dayOffset: 0,
           enabled: true,
         },
       ],
     },
+  },
+  "notes": {
+    enabled: true,
+    config: {
+      defaultSortOrder: "DESC",
+      enableLocaleScoping: true,
+    },
+  },
+  "broadcasts": {
+    enabled: true,
+  },
+  "certificates": {
+    enabled: true,
+  },
+  "donations": {
+    enabled: true,
+  },
+  "global-search": {
+    enabled: true,
+  },
+  "inbox": {
+    enabled: true,
+  },
+  "islam": {
+    enabled: true,
+  },
+  "media-feeds": {
+    enabled: true,
+  },
+  "resources": {
+    enabled: true,
+  },
+  "seo": {
+    enabled: true,
+  },
+  "sitemap": {
+    enabled: true,
   },
 });

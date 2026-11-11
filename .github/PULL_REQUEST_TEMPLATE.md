@@ -43,5 +43,5 @@
 ## How to Test in Sandbox (`apps/dashboard`)
 
 1. Run `pnpm build && pnpm --filter @vicacha-devs/dashboard develop`
-2. 
-3. 
+2.
+3.

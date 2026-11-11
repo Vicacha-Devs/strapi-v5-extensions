@@ -1,0 +1,349 @@
+export const CM_PLACEHOLDER_TRANSLATIONS: Record<
+  string,
+  Record<string, string>
+> = {
+  en: {
+    "content-manager.content-types.plugin::media-feeds.media-item.title.placeholder":
+      "Enter title...",
+    "content-manager.content-types.plugin::media-feeds.media-item.slug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::media-feeds.media-item.description.placeholder":
+      "Enter description...",
+    "content-manager.content-types.plugin::media-feeds.media-item.transcript.placeholder":
+      "Write the full Khutbah or transcript in this language...",
+    "content-manager.content-types.plugin::media-feeds.media-item.type.placeholder":
+      "Enter type...",
+    "content-manager.content-types.plugin::media-feeds.media-item.provider.placeholder":
+      "Enter media hosting provider...",
+    "content-manager.content-types.plugin::media-feeds.media-item.externalId.placeholder":
+      "Enter external platform video / episode id...",
+    "content-manager.content-types.plugin::media-feeds.media-item.sourceUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.embedUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speaker.placeholder":
+      "Enter speaker / lecturer...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speakerProfile.placeholder":
+      "Enter speaker profile...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speakerSlug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::media-feeds.media-item.seriesSlug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::media-feeds.media-item.duration.placeholder":
+      "e.g., 5 min",
+    "content-manager.content-types.plugin::media-feeds.media-item.publishedAtLabel.placeholder":
+      "e.g., 15 Ramadan 1447 AH",
+    "content-manager.content-types.plugin::media-feeds.media-item.imageUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.imageAlt.placeholder":
+      "Enter image alt text...",
+    "content-manager.content-types.plugin::media-feeds.media-item.thumbnail.placeholder":
+      "Enter thumbnail image...",
+    "content-manager.content-types.plugin::media-feeds.media-item.audioFile.placeholder":
+      "Enter uploaded audio file...",
+    "content-manager.content-types.plugin::media-feeds.media-item.transcriptFile.placeholder":
+      "Enter transcript / subtitles file...",
+    "content-manager.content-types.plugin::media-feeds.media-item.spokenLanguages.placeholder":
+      "e.g., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-item.languageTracks.placeholder":
+      "e.g., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-item.chapters.placeholder":
+      "Enter timestamp chapters...",
+    "content-manager.content-types.plugin::media-feeds.media-item.featured.placeholder":
+      "Enter featured...",
+    "content-manager.content-types.plugin::media-feeds.media-item.isLive.placeholder":
+      "Enter active live broadcast...",
+    "content-manager.content-types.plugin::media-feeds.media-item.hijriDate.placeholder":
+      "e.g., 15 Ramadan 1447 AH",
+    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.documentId.placeholder":
+      "Enter document id...",
+    "content-manager.content-types.plugin::media-feeds.media-series.title.placeholder":
+      "Enter title...",
+    "content-manager.content-types.plugin::media-feeds.media-series.slug.placeholder":
+      "auto-generated-url-slug",
+    "content-manager.content-types.plugin::media-feeds.media-series.description.placeholder":
+      "Enter description...",
+    "content-manager.content-types.plugin::media-feeds.media-series.author.placeholder":
+      "Enter author name...",
+    "content-manager.content-types.plugin::media-feeds.media-series.coverImageUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.category.placeholder":
+      "Enter category...",
+    "content-manager.content-types.plugin::media-feeds.media-series.defaultType.placeholder":
+      "Enter default media format...",
+    "content-manager.content-types.plugin::media-feeds.media-series.spokenLanguages.placeholder":
+      "e.g., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-series.rssEnabled.placeholder":
+      "Enter enable podcast rss feed...",
+    "content-manager.content-types.plugin::media-feeds.media-series.youtubePlaylistId.placeholder":
+      "Enter youtube playlist id...",
+    "content-manager.content-types.plugin::media-feeds.media-series.spotifyShowUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.applePodcastsUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.active.placeholder":
+      "Enter active...",
+    "content-manager.content-types.plugin::media-feeds.media-series.documentId.placeholder":
+      "Enter document id...",
+  },
+  es: {
+    "content-manager.content-types.plugin::media-feeds.media-item.title.placeholder":
+      "Ingresa título...",
+    "content-manager.content-types.plugin::media-feeds.media-item.slug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::media-feeds.media-item.description.placeholder":
+      "Ingresa descripción...",
+    "content-manager.content-types.plugin::media-feeds.media-item.transcript.placeholder":
+      "Escribe aquí el texto completo de la Khutbah o transcripción en este idioma...",
+    "content-manager.content-types.plugin::media-feeds.media-item.type.placeholder":
+      "Ingresa tipo...",
+    "content-manager.content-types.plugin::media-feeds.media-item.provider.placeholder":
+      "Ingresa plataforma o proveedor multimedia...",
+    "content-manager.content-types.plugin::media-feeds.media-item.externalId.placeholder":
+      "Ingresa id externo del video o episodio...",
+    "content-manager.content-types.plugin::media-feeds.media-item.sourceUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.embedUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speaker.placeholder":
+      "Ingresa orador / conferencista...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speakerProfile.placeholder":
+      "Ingresa perfil del orador...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speakerSlug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::media-feeds.media-item.seriesSlug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::media-feeds.media-item.duration.placeholder":
+      "ej., 5 min",
+    "content-manager.content-types.plugin::media-feeds.media-item.publishedAtLabel.placeholder":
+      "ej., 15 Ramadán 1447 AH",
+    "content-manager.content-types.plugin::media-feeds.media-item.imageUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.imageAlt.placeholder":
+      "Ingresa texto alternativo de imagen...",
+    "content-manager.content-types.plugin::media-feeds.media-item.thumbnail.placeholder":
+      "Ingresa imagen miniatura...",
+    "content-manager.content-types.plugin::media-feeds.media-item.audioFile.placeholder":
+      "Ingresa archivo de audio subido...",
+    "content-manager.content-types.plugin::media-feeds.media-item.transcriptFile.placeholder":
+      "Ingresa archivo de transcripción o subtítulos...",
+    "content-manager.content-types.plugin::media-feeds.media-item.spokenLanguages.placeholder":
+      "ej., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-item.languageTracks.placeholder":
+      "ej., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-item.chapters.placeholder":
+      "Ingresa capítulos y marcas de tiempo...",
+    "content-manager.content-types.plugin::media-feeds.media-item.featured.placeholder":
+      "Ingresa destacado...",
+    "content-manager.content-types.plugin::media-feeds.media-item.isLive.placeholder":
+      "Ingresa transmisión en vivo activa...",
+    "content-manager.content-types.plugin::media-feeds.media-item.hijriDate.placeholder":
+      "ej., 15 Ramadán 1447 AH",
+    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.documentId.placeholder":
+      "Ingresa id del documento...",
+    "content-manager.content-types.plugin::media-feeds.media-series.title.placeholder":
+      "Ingresa título...",
+    "content-manager.content-types.plugin::media-feeds.media-series.slug.placeholder":
+      "slug-generado-automaticamente",
+    "content-manager.content-types.plugin::media-feeds.media-series.description.placeholder":
+      "Ingresa descripción...",
+    "content-manager.content-types.plugin::media-feeds.media-series.author.placeholder":
+      "Ingresa nombre del autor...",
+    "content-manager.content-types.plugin::media-feeds.media-series.coverImageUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.category.placeholder":
+      "Ingresa categoría...",
+    "content-manager.content-types.plugin::media-feeds.media-series.defaultType.placeholder":
+      "Ingresa formato multimedia predeterminado...",
+    "content-manager.content-types.plugin::media-feeds.media-series.spokenLanguages.placeholder":
+      "ej., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-series.rssEnabled.placeholder":
+      "Ingresa habilitar feed rss de podcast...",
+    "content-manager.content-types.plugin::media-feeds.media-series.youtubePlaylistId.placeholder":
+      "Ingresa id de lista de reproducción de youtube...",
+    "content-manager.content-types.plugin::media-feeds.media-series.spotifyShowUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.applePodcastsUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.active.placeholder":
+      "Ingresa activo...",
+    "content-manager.content-types.plugin::media-feeds.media-series.documentId.placeholder":
+      "Ingresa id del documento...",
+  },
+  ar: {
+    "content-manager.content-types.plugin::media-feeds.media-item.title.placeholder":
+      "أدخل العنوان...",
+    "content-manager.content-types.plugin::media-feeds.media-item.slug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::media-feeds.media-item.description.placeholder":
+      "أدخل الوصف...",
+    "content-manager.content-types.plugin::media-feeds.media-item.transcript.placeholder":
+      "اكتب النص الكامل للخطبة أو التفريغ النصي بهذه اللغة...",
+    "content-manager.content-types.plugin::media-feeds.media-item.type.placeholder":
+      "أدخل النوع...",
+    "content-manager.content-types.plugin::media-feeds.media-item.provider.placeholder":
+      "أدخل منصة استضافة الوسائط...",
+    "content-manager.content-types.plugin::media-feeds.media-item.externalId.placeholder":
+      "أدخل معرف الفيديو أو الحلقة الخارجي...",
+    "content-manager.content-types.plugin::media-feeds.media-item.sourceUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.embedUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speaker.placeholder":
+      "أدخل المتحدث / المحاضر...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speakerProfile.placeholder":
+      "أدخل ملف المتحدث...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speakerSlug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::media-feeds.media-item.seriesSlug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::media-feeds.media-item.duration.placeholder":
+      "مثال: 5 دقائق",
+    "content-manager.content-types.plugin::media-feeds.media-item.publishedAtLabel.placeholder":
+      "مثال: ١٥ رمضان ١٤٤٧ هـ",
+    "content-manager.content-types.plugin::media-feeds.media-item.imageUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.imageAlt.placeholder":
+      "أدخل النص البديل للصورة...",
+    "content-manager.content-types.plugin::media-feeds.media-item.thumbnail.placeholder":
+      "أدخل الصورة المصغرة...",
+    "content-manager.content-types.plugin::media-feeds.media-item.audioFile.placeholder":
+      "أدخل ملف الصوت المرفوع...",
+    "content-manager.content-types.plugin::media-feeds.media-item.transcriptFile.placeholder":
+      "أدخل ملف التفريغ النصي أو الترجمة...",
+    "content-manager.content-types.plugin::media-feeds.media-item.spokenLanguages.placeholder":
+      "مثال: es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-item.languageTracks.placeholder":
+      "مثال: es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-item.chapters.placeholder":
+      "أدخل الفصول والعلامات الزمنية...",
+    "content-manager.content-types.plugin::media-feeds.media-item.featured.placeholder":
+      "أدخل مميز...",
+    "content-manager.content-types.plugin::media-feeds.media-item.isLive.placeholder":
+      "أدخل بث مباشر نشط...",
+    "content-manager.content-types.plugin::media-feeds.media-item.hijriDate.placeholder":
+      "مثال: ١٥ رمضان ١٤٤٧ هـ",
+    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.documentId.placeholder":
+      "أدخل معرف المستند...",
+    "content-manager.content-types.plugin::media-feeds.media-series.title.placeholder":
+      "أدخل العنوان...",
+    "content-manager.content-types.plugin::media-feeds.media-series.slug.placeholder":
+      "معرف-الرابط-التلقائي",
+    "content-manager.content-types.plugin::media-feeds.media-series.description.placeholder":
+      "أدخل الوصف...",
+    "content-manager.content-types.plugin::media-feeds.media-series.author.placeholder":
+      "أدخل اسم المؤلف...",
+    "content-manager.content-types.plugin::media-feeds.media-series.coverImageUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.category.placeholder":
+      "أدخل الفئة...",
+    "content-manager.content-types.plugin::media-feeds.media-series.defaultType.placeholder":
+      "أدخل نوع الوسائط الافتراضي...",
+    "content-manager.content-types.plugin::media-feeds.media-series.spokenLanguages.placeholder":
+      "مثال: es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-series.rssEnabled.placeholder":
+      "أدخل تفعيل خلاصة البودكاست (RSS)...",
+    "content-manager.content-types.plugin::media-feeds.media-series.youtubePlaylistId.placeholder":
+      "أدخل معرف قائمة تشغيل يوتيوب...",
+    "content-manager.content-types.plugin::media-feeds.media-series.spotifyShowUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.applePodcastsUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.active.placeholder":
+      "أدخل نشط...",
+    "content-manager.content-types.plugin::media-feeds.media-series.documentId.placeholder":
+      "أدخل معرف المستند...",
+  },
+  tr: {
+    "content-manager.content-types.plugin::media-feeds.media-item.title.placeholder":
+      "Başlık girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.slug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::media-feeds.media-item.description.placeholder":
+      "Açıklama girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.transcript.placeholder":
+      "Bu dilde hutbe tam metnini veya yazılı transkripti buraya yazın...",
+    "content-manager.content-types.plugin::media-feeds.media-item.type.placeholder":
+      "Tür girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.provider.placeholder":
+      "Medya Sağlayıcısı / Platform girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.externalId.placeholder":
+      "Harici Video / Bölüm Kimliği girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.sourceUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.embedUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speaker.placeholder":
+      "Konuşmacı / Hatip girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speakerProfile.placeholder":
+      "Konuşmacı Profili girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.speakerSlug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::media-feeds.media-item.seriesSlug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::media-feeds.media-item.duration.placeholder":
+      "örn., 5 dk",
+    "content-manager.content-types.plugin::media-feeds.media-item.publishedAtLabel.placeholder":
+      "örn., 15 Ramazan 1447 H",
+    "content-manager.content-types.plugin::media-feeds.media-item.imageUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.imageAlt.placeholder":
+      "Görsel Alternatif Metni girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.thumbnail.placeholder":
+      "Küçük Resim girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.audioFile.placeholder":
+      "Yüklenen Ses Dosyası girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.transcriptFile.placeholder":
+      "Transkript / Altyazı Dosyası girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.spokenLanguages.placeholder":
+      "örn., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-item.languageTracks.placeholder":
+      "örn., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-item.chapters.placeholder":
+      "Zaman Damgalı Bölümler girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.featured.placeholder":
+      "Öne Çıkan girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.isLive.placeholder":
+      "Aktif Canlı Yayın girin...",
+    "content-manager.content-types.plugin::media-feeds.media-item.hijriDate.placeholder":
+      "örn., 15 Ramazan 1447 H",
+    "content-manager.content-types.plugin::media-feeds.media-item.href.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-item.documentId.placeholder":
+      "Belge Kimliği (ID) girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.title.placeholder":
+      "Başlık girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.slug.placeholder":
+      "otomatik-url-kisa-adi",
+    "content-manager.content-types.plugin::media-feeds.media-series.description.placeholder":
+      "Açıklama girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.author.placeholder":
+      "Yazar Adı girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.coverImageUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.category.placeholder":
+      "Kategori girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.defaultType.placeholder":
+      "Varsayılan Medya Formatı girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.spokenLanguages.placeholder":
+      "örn., es, en, ar, tr",
+    "content-manager.content-types.plugin::media-feeds.media-series.rssEnabled.placeholder":
+      "Podcast RSS Beslemesini Etkinleştir girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.youtubePlaylistId.placeholder":
+      "YouTube Oynatma Listesi Kimliği girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.spotifyShowUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.applePodcastsUrl.placeholder":
+      "https://...",
+    "content-manager.content-types.plugin::media-feeds.media-series.active.placeholder":
+      "Aktif girin...",
+    "content-manager.content-types.plugin::media-feeds.media-series.documentId.placeholder":
+      "Belge Kimliği (ID) girin...",
+  },
+};
