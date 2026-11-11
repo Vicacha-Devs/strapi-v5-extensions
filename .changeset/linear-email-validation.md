@@ -1,6 +1,7 @@
 ---
 "@vicacha-devs/strapi-plugin-bookings": patch
 "@vicacha-devs/strapi-plugin-certificates": patch
+"@vicacha-devs/strapi-plugin-donations": patch
 "@vicacha-devs/strapi-plugin-events": patch
 "@vicacha-devs/strapi-plugin-inbox": patch
 "@vicacha-devs/strapi-plugin-resources": patch
