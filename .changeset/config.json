@@ -1,11 +1,16 @@
 {
-  "$schema": "https://unpkg.com/@changesets/config@3.0.4/schema.json",
+  "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
+  "baseBranch": "main",
+  "access": "public",
+  "format": "auto",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
+  "ignore": [
+    "@vicacha-devs/eslint-config",
+    "@vicacha-devs/plugin-shared",
+    "@vicacha-devs/typescript-config"
+  ],
   "fixed": [],
   "linked": [],
-  "access": "public",
-  "baseBranch": "main",
-  "updateInternalDependencies": "patch",
-  "ignore": ["@vicacha-devs/dashboard"]
+  "updateInternalDependencies": "patch"
 }

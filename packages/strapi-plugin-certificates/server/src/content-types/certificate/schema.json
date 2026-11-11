@@ -1,0 +1,162 @@
+{
+  "kind": "collectionType",
+  "collectionName": "certificates_records",
+  "info": {
+    "singularName": "certificate",
+    "pluralName": "certificates",
+    "displayName": "Issued Certificate",
+    "description": "Cryptographically signed official certificate record with signatory and witness attestation"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "serialNumber": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 64
+    },
+    "templateDocumentId": {
+      "type": "string",
+      "required": true,
+      "maxLength": 120
+    },
+    "templateSlug": {
+      "type": "string",
+      "required": true,
+      "maxLength": 120
+    },
+    "templateName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 160
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending_approval", "issued", "revoked", "expired"],
+      "default": "pending_approval",
+      "required": true
+    },
+    "recipientFullName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "recipientChosenName": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "recipientEmail": {
+      "type": "email"
+    },
+    "recipientPhone": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "recipientNationality": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "nationalIdMasked": {
+      "type": "string",
+      "maxLength": 32
+    },
+    "nationalIdHash": {
+      "type": "string",
+      "private": true,
+      "maxLength": 128
+    },
+    "issuedAt": {
+      "type": "string",
+      "required": true,
+      "maxLength": 40
+    },
+    "expiresAt": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "revokedAt": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "revocationReason": {
+      "type": "text"
+    },
+    "signatories": {
+      "type": "json",
+      "default": []
+    },
+    "witnesses": {
+      "type": "json",
+      "default": []
+    },
+    "customData": {
+      "type": "json",
+      "default": {}
+    },
+    "secondaryDates": {
+      "type": "json",
+      "default": {}
+    },
+    "canonicalPayloadHash": {
+      "type": "string",
+      "required": true,
+      "maxLength": 128
+    },
+    "cryptographicSignature": {
+      "type": "text",
+      "required": true
+    },
+    "publicKeyFingerprint": {
+      "type": "string",
+      "required": true,
+      "maxLength": 96
+    },
+    "verificationToken": {
+      "type": "string",
+      "private": true,
+      "maxLength": 128
+    },
+    "esignProvider": {
+      "type": "enumeration",
+      "enum": ["none", "docusign", "webhook"],
+      "default": "none"
+    },
+    "esignEnvelopeId": {
+      "type": "string",
+      "maxLength": 128
+    },
+    "esignEnvelopeStatus": {
+      "type": "enumeration",
+      "enum": [
+        "not_sent",
+        "sent",
+        "delivered",
+        "completed",
+        "declined",
+        "voided"
+      ],
+      "default": "not_sent"
+    },
+    "esignCompletedAt": {
+      "type": "string",
+      "maxLength": 40
+    },
+    "linkedBookingCode": {
+      "type": "string",
+      "maxLength": 64
+    },
+    "notes": {
+      "type": "text"
+    }
+  }
+}

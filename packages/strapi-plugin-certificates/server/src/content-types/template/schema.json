@@ -1,0 +1,115 @@
+{
+  "kind": "collectionType",
+  "collectionName": "certificates_templates",
+  "info": {
+    "singularName": "template",
+    "pluralName": "templates",
+    "displayName": "Certificate Template",
+    "description": "Reusable official certificate template with signatory rules, witness requirements, and body statement"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 160
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "serialPrefix": {
+      "type": "string",
+      "required": true,
+      "default": "CERT",
+      "maxLength": 8
+    },
+    "defaultValidityDays": {
+      "type": "integer",
+      "min": 0
+    },
+    "requiresWitnesses": {
+      "type": "boolean",
+      "default": false
+    },
+    "minWitnesses": {
+      "type": "integer",
+      "default": 0,
+      "min": 0,
+      "max": 10
+    },
+    "requiresApproval": {
+      "type": "boolean",
+      "default": true
+    },
+    "esignEnabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "esignProvider": {
+      "type": "enumeration",
+      "enum": ["none", "docusign", "webhook"],
+      "default": "none"
+    },
+    "organizationName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "organizationSubheader": {
+      "type": "string",
+      "maxLength": 240
+    },
+    "headerText": {
+      "type": "string",
+      "maxLength": 240
+    },
+    "titleText": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "bodyTemplate": {
+      "type": "text",
+      "required": true
+    },
+    "footerText": {
+      "type": "text"
+    },
+    "defaultSignatories": {
+      "type": "json",
+      "default": []
+    },
+    "customFieldsSchema": {
+      "type": "json",
+      "default": []
+    },
+    "secondaryCalendars": {
+      "type": "json",
+      "default": []
+    },
+    "accentColor": {
+      "type": "string",
+      "default": "#14532d",
+      "maxLength": 16
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

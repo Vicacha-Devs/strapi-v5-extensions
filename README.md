@@ -8,50 +8,77 @@ Enterprise **pnpm + Turborepo + Changesets** monorepo for Strapi v5 plugins and 
 
 ```text
 strapi-v5-extensions/
-├── .changeset/                      # Changesets versioning & release configuration
+├── .changeset/                         # Changesets configuration & per-PR release notes
+├── .github/workflows/                  # CI (ci.yml) & Changesets npm release (npm-release.yml)
+├── .husky/                             # Git hooks (commit-msg, pre-commit, pre-push)
 ├── apps/
-│   └── dashboard/                   # @vicacha-devs/dashboard — Strapi v5 host app wiring all workspace plugins
+│   ├── dashboard/                      # @vicacha-devs/dashboard — Strapi v5 host app wiring all workspace plugins
+│   └── docs/                           # @vicacha-devs/docs — Starlight documentation site & OpenAPI reference
 ├── packages/
-│   ├── eslint-config/               # @vicacha-devs/eslint-config — Shared ESLint rules (enforces max-lines < 500)
-│   ├── typescript-config/           # @vicacha-devs/typescript-config — Shared base, strapi-admin & strapi-server tsconfigs
-│   ├── strapi-plugin-calendar/      # @vicacha-devs/strapi-plugin-calendar — FullCalendar v6 multi-source scheduling engine
-│   └── strapi-plugin-events/        # @vicacha-devs/strapi-plugin-events — Events, RRULE, RSVP/Waitlist & check-in plugin
-├── package.json                     # Monorepo root scripts (build, dev, test, test:ts, verify, release)
-├── pnpm-workspace.yaml              # Workspace globs + hoistPattern: ["*", "!@strapi/*"]
-└── turbo.json                       # Turborepo task pipeline & dependency graph
+│   ├── eslint-config/                  # @vicacha-devs/eslint-config — Shared ESLint rules (enforces max-lines <= 500)
+│   ├── plugin-shared/                  # @vicacha-devs/plugin-shared — Shared i18n registration, locale & option utilities
+│   ├── typescript-config/              # @vicacha-devs/typescript-config — Shared base, strapi-admin & strapi-server tsconfigs
+│   ├── strapi-plugin-bookings/         # @vicacha-devs/strapi-plugin-bookings — Resources, time slots & appointment reservations
+│   ├── strapi-plugin-broadcasts/       # @vicacha-devs/strapi-plugin-broadcasts — Omnichannel WhatsApp/Telegram/Email broadcasts
+│   ├── strapi-plugin-calendar/         # @vicacha-devs/strapi-plugin-calendar — FullCalendar v6 multi-source scheduling engine
+│   ├── strapi-plugin-certificates/     # @vicacha-devs/strapi-plugin-certificates — Ed25519 digital signing & QR verification
+│   ├── strapi-plugin-donations/        # @vicacha-devs/strapi-plugin-donations — Campaigns, pledges, utility bills & calculators
+│   ├── strapi-plugin-events/           # @vicacha-devs/strapi-plugin-events — Events, spotlights, RRULE, RSVP/Waitlist & check-in
+│   ├── strapi-plugin-global-search/    # @vicacha-devs/strapi-plugin-global-search — Command-palette global search across content types
+│   ├── strapi-plugin-inbox/            # @vicacha-devs/strapi-plugin-inbox — Visual form builder, service-desk inbox & alert banners
+│   ├── strapi-plugin-islam/            # @vicacha-devs/strapi-plugin-islam — Salah, Qibla, Hijri/Hilal, Quran/Hadith & Zakat suite
+│   ├── strapi-plugin-media-feeds/      # @vicacha-devs/strapi-plugin-media-feeds — Audio/video archive, YouTube sync & Podcast RSS 2.0
+│   ├── strapi-plugin-notes/            # @vicacha-devs/strapi-plugin-notes — Polymorphic editorial notes, pins & activity logs
+│   ├── strapi-plugin-resources/        # @vicacha-devs/strapi-plugin-resources — Publications library, photo galleries & glossary
+│   ├── strapi-plugin-seo/              # @vicacha-devs/strapi-plugin-seo — Strapi v5 SEO metadata & SERP analyzer
+│   └── strapi-plugin-sitemap/          # @vicacha-devs/strapi-plugin-sitemap — Multilingual XML sitemap & robots.txt generator
+├── scripts/
+│   ├── ensure-dist-types.ts            # Stubs missing entry .d.ts files so strapi-plugin verify passes (SDK layout: index.mjs + index.js)
+│   └── publint-all.ts                  # Strict publint validation across all 14 publishable plugins
+├── commitlint.config.ts                # Conventional Commits + optional [TICKET-123] prefix (style check)
+├── eslint.config.ts                    # Root ESLint v10 flat configuration
+├── .oxfmtrc.json                       # Oxfmt code formatting configuration
+├── .oxlintrc.json                      # Oxlint fast static analysis configuration
+├── package.json                        # Monorepo root scripts (format, lint, check, build, publint, verify, changeset, release)
+├── pnpm-workspace.yaml                 # Workspace globs, linkWorkspacePackages, onlyBuiltDependencies & peerDependencyRules
+└── turbo.json                          # Turborepo task pipeline & dependency graph
 ```
 
 ---
 
-## Included Strapi v5 Plugins
+## Included Strapi v5 Plugins (14 Packages)
 
-### 1. [`@vicacha-devs/strapi-plugin-calendar`](./packages/strapi-plugin-calendar)
-Universal FullCalendar v6 scheduling and calendar visualization engine for any Strapi v5 Content-Type:
-- **5 Interactive FullCalendar v6 Views**: Month (`dayGridMonth`), TimeGrid Week (`timeGridWeek`), TimeGrid Day (`timeGridDay`), Agenda List (`listMonth`), and Multi-Month Year (`multiMonthYear`).
-- **Full Localization (`@fullcalendar/core/locales-all`)**: 79 locales, live Admin toolbar locale switcher, automatic **RTL (`ar`, `he`, `fa`, `ur`) / LTR** layout switching, configurable `firstDay`, `weekNumbers`, `weekNumberCalculation` (`ISO` | `local`), and `hour24` formatting.
-- **Multi-Source Registry**: Aggregates any Strapi v5 collection type (`api::booking.booking`, `api::event.event`, `plugin::events.event`, editorial schedules) with drag-and-drop rescheduling, resize duration updates, and click/drag range quick-create.
-- **Secondary & Alternative Calendar Overlays**: Built-in CLDR support (`islamic-umalqura`, `islamic-civil`, `hebrew`, `persian`, `buddhist`, `japanese`, `chinese`, `indian`, `coptic`, `ethiopic`) + custom programmatic date formatters.
-- **RFC 5545 RRULE Custom Field (`plugin::calendar.rrule`) & iCal (`.ics`) Feeds**.
-
-### 2. [`@vicacha-devs/strapi-plugin-events`](./packages/strapi-plugin-events)
-End-to-end event lifecycle, RSVP capacity, waitlist automation, and attendee management for Strapi v5:
-- **Built-in Content-Types**: `plugin::events.event` and `plugin::events.registration` with declarative `schemaExtensions` support.
-- **RSVP, Capacity & Automatic Waitlist Promotion**: Seat tracking, party size limits, registration deadlines, token-based cancellation, and automatic FIFO promotion from waitlist when seats open up.
-- **Attendee Check-In & CSV Export**: Admin check-in manager and CWE-1236 formula-injection-safe CSV export.
-- **Automatic Calendar Bridge**: When installed alongside `@vicacha-devs/strapi-plugin-calendar`, `strapi-plugin-events` automatically registers all of its configured event sources into the unified `calendar` registry on `bootstrap`.
+| Package | Strapi Plugin ID | Summary |
+| :--- | :--- | :--- |
+| [`@vicacha-devs/strapi-plugin-calendar`](./packages/strapi-plugin-calendar) | `calendar` | Unified FullCalendar v6 scheduling workspace (`/admin/plugins/calendar`, 5 views, 79 locales, RTL/LTR auto-direction, CLDR Hijri/Hebrew/Persian secondary calendars, RFC 5545 RRULE custom field, `.ics` feeds). Shared calendar/date engine for `events`, `bookings`, `broadcasts`, `certificates`, `donations`, `islam`, `media-feeds`, and `resources` (optional bridge in `inbox`). |
+| [`@vicacha-devs/strapi-plugin-events`](./packages/strapi-plugin-events) | `events` | Event lifecycle (`plugin::events.event`, `plugin::events.registration`), dedicated RSVP, Waitlist Auto-Promotion & Attendee Check-In Workspace (`/admin/plugins/events`), corner spotlights, and automatic source registration into `calendar` |
+| [`@vicacha-devs/strapi-plugin-bookings`](./packages/strapi-plugin-bookings) | `bookings` | Bookable resources (`plugin::bookings.resource`), timezone-aware interval/window slot availability, token-verified reservations (`plugin::bookings.booking`), dedicated Reservations Approval & Ledger Workspace (`/admin/plugins/bookings`), and automatic registration into `calendar` |
+| [`@vicacha-devs/strapi-plugin-certificates`](./packages/strapi-plugin-certificates) | `certificates` | Official credential templates (`plugin::certificates.template`), Ed25519 cryptographic signing (`plugin::certificates.certificate`), printable HTML/PDF, and public serial verification |
+| [`@vicacha-devs/strapi-plugin-donations`](./packages/strapi-plugin-donations) | `donations` | Crowdfunding campaigns (`plugin::donations.campaign`), donor pledges (`plugin::donations.pledge`), utility invoice sponsorship, commodity threshold calculator, and certificate bridge |
+| [`@vicacha-devs/strapi-plugin-global-search`](./packages/strapi-plugin-global-search) | `global-search` | Instant `Cmd/Ctrl+K` global command-palette search across Strapi v5 content types, fuzzy matching, and recent-item navigation with `ar`, `en`, `es`, `fr`, and `tr` translations |
+| [`@vicacha-devs/strapi-plugin-inbox`](./packages/strapi-plugin-inbox) | `inbox` | Visual form builder (`plugin::inbox.form`), service-desk casework (`plugin::inbox.submission`), double opt-in subscribers (`plugin::inbox.subscriber`), and alert banners (`plugin::inbox.alert-banner`) |
+| [`@vicacha-devs/strapi-plugin-islam`](./packages/strapi-plugin-islam) | `islam` | Astronomical Salah/Iqamah/Jumu'ah engine, Qibla bearing, Hilal moon-sighting (`plugin::islam.hilal-announcement`), Quran/Hadith/Dua hub (`plugin::islam.scripture-entry`), and Zakat/Nisab calculators |
+| [`@vicacha-devs/strapi-plugin-media-feeds`](./packages/strapi-plugin-media-feeds) | `media-feeds` | Multi-language audio/video episodes (`plugin::media-feeds.media-item`, `plugin::media-feeds.media-series`), YouTube/OEmbed enricher, Apple/Spotify Podcast RSS 2.0, and live stream status |
+| [`@vicacha-devs/strapi-plugin-notes`](./packages/strapi-plugin-notes) | `notes` | Polymorphic editorial notes (`plugin::notes.note`), pinned entry annotations, color labels, and content-manager sidebar integration |
+| [`@vicacha-devs/strapi-plugin-broadcasts`](./packages/strapi-plugin-broadcasts) | `broadcasts` | Omnichannel campaigns (`plugin::broadcasts.campaign`), event-driven automation rules (`plugin::broadcasts.automation-rule`), and delivery logs (`plugin::broadcasts.delivery-log`) |
+| [`@vicacha-devs/strapi-plugin-resources`](./packages/strapi-plugin-resources) | `resources` | Downloadable publications (`plugin::resources.publication`), photo gallery albums (`plugin::resources.gallery-album`), and bilingual/phonetic glossary (`plugin::resources.glossary-term`) |
+| [`@vicacha-devs/strapi-plugin-seo`](./packages/strapi-plugin-seo) | `seo` | Strapi v5 SEO component management, meta/social preview, and keyword density analysis with `ar`, `en`, `es`, `fr`, `pt-BR`, and `tr` translations |
+| [`@vicacha-devs/strapi-plugin-sitemap`](./packages/strapi-plugin-sitemap) | `sitemap` | Multilingual XML sitemap (`hreflang`), sitemap index, and custom URL management with `ar`, `en`, `es`, `fr`, `pt-BR`, and `tr` translations |
 
 ---
 
 ## Key Architectural Conventions
 
-1. **Strapi Peer Isolation (`pnpm-workspace.yaml`)**:
-   Uses `hoistPattern: ["*", "!@strapi/*"]` so `@strapi/*` packages are never hoisted across workspace boundaries, preventing duplicate context or peer dependency collisions during `strapi-plugin build` and `strapi develop`.
-2. **Strict Modularity (`< 500` lines per file)**:
-   Every file in the monorepo is strictly `< 500` lines, enforced via `@vicacha-devs/eslint-config`.
+1. **Workspace Linking & Peer Rules (`pnpm-workspace.yaml`)**:
+   Uses `linkWorkspacePackages: true`, `hoistPattern: ["*"]`, `onlyBuiltDependencies`, and `peerDependencyRules` so inter-plugin `@vicacha-devs/*` peer dependencies link locally with consistent `@strapi/*` singleton resolution.
+2. **Strict Modularity (`<= 500` lines per file)**:
+   Every file in the monorepo is strictly `<= 500` lines, enforced via `eslint.config.ts` and `@vicacha-devs/eslint-config`.
 3. **Strict TypeScript (`tsc --noEmit`)**:
    Every plugin validates both its Admin (`admin/tsconfig.json`) and Server (`server/tsconfig.json`) bundles against `@vicacha-devs/typescript-config` with zero `any` leaks in implementation code.
-4. **10-Locale Admin i18n Parity**:
-   Every plugin ships with verified translation parity across `en`, `es`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `tr`, and `ar`.
+4. **Multilingual Admin i18n Parity**:
+   Every plugin ships with verified translation key parity across the 5 core locales (`en`, `es`, `ar`, `tr`, `fr`), with **10 Admin locales** across the 11 domain and operations plugins (`calendar`, `events`, `bookings`, `broadcasts`, `certificates`, `donations`, `inbox`, `islam`, `media-feeds`, `notes`, `resources` — covering regional sets across `de`, `pt`, `it`, `nl`, `pl`, `ru`, `id`, `ms`, `ur`, `zh`), **6 locales** (`+ pt-BR`) in `seo` and `sitemap`, and **5 locales** in `global-search`.
+5. **NPM Package Quality & Changesets Releases (`publint` + `@strapi/sdk-plugin` + Trusted Publishing)**:
+   All 14 plugins are validated with `strapi-plugin verify` and strict `publint` (`pack: "pnpm"`). Independent per-package versions and changelogs are managed via [Changesets](https://changesets.dev) ("Version Packages" PRs) and published via npm OIDC Trusted Publishing with provenance.
 
 ---
 
@@ -61,40 +88,38 @@ End-to-end event lifecycle, RSVP capacity, waitlist automation, and attendee man
 # Install all workspace dependencies
 pnpm install
 
-# Build all plugins and apps via Turborepo
+# Format and check formatting across the monorepo (oxfmt)
+pnpm format
+pnpm format:check
+
+# Run static analysis across the monorepo (oxlint + ESLint v10)
+pnpm lint
+pnpm lint:fix
+
+# Build or clean all 14 Strapi v5 plugins via Turborepo
 pnpm build
+pnpm clean
+
+# Run strict TypeScript checks (Admin + Server) across all packages
+pnpm check
+
+# Validate all 14 plugin packages with @strapi/sdk-plugin and strict publint
+pnpm verify:sdk
+pnpm publint
 
 # Run unit test suites across all workspace packages
 pnpm test
 
-# Run strict TypeScript checks (Admin + Server) across all packages
-pnpm test:ts
-
-# Verify all Strapi plugins with @strapi/sdk-plugin
+# Run the complete verification pipeline (format:check + lint + build + check + verify:sdk + publint + test)
 pnpm verify
 
-# Start watch mode for all plugins + Strapi v5 dashboard
-pnpm dev
+# Develop the Strapi v5 host dashboard app or Starlight documentation site
+pnpm dashboard:dev
+pnpm docs:dev
+pnpm docs:build
 
-# Create a changeset for versioning & publishing
+# Add a changeset, apply version bumps, or publish packages
 pnpm changeset
+pnpm version-packages
+pnpm release
 ```
-
----
-
-## Adding a New Plugin (e.g. `packages/strapi-plugin-bookings`)
-
-1. Create `packages/strapi-plugin-<name>/package.json` with `"@vicacha-devs/typescript-config": "workspace:*"` and `"@vicacha-devs/eslint-config": "workspace:*"`.
-2. Extend `../../typescript-config/strapi-admin.json` in `admin/tsconfig.json` and `../../typescript-config/strapi-server.json` in `server/tsconfig.json`.
-3. Optionally register its schedulable collection type in `bootstrap.ts` via:
-   ```ts
-   await strapi.plugin('calendar')?.service('registry')?.registerSource({
-     id: 'bookings',
-     label: 'Bookings',
-     uid: 'plugin::bookings.booking',
-     color: '#2563EB',
-     enabled: true,
-     fields: { title: 'guestName', startDate: 'checkInDate', endDate: 'checkOutDate' },
-   });
-   ```
-4. Add `"@vicacha-devs/strapi-plugin-<name>": "workspace:*"` to `apps/dashboard/package.json`.

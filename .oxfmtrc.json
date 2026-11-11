@@ -1,0 +1,52 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 80,
+  "arrowParens": "always",
+  "semi": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "useTabs": false,
+  "quoteProps": "consistent",
+  "bracketSameLine": false,
+  "endOfLine": "lf",
+  "insertFinalNewline": true,
+  "sortImports": {
+    "groups": [
+      ["type-import"],
+      ["builtin", "external"],
+      ["internal"],
+      ["parent", "sibling", "index"],
+      ["style"]
+    ],
+    "newlinesBetween": true,
+    "internalPattern": ["^@vicacha-devs/(.*)$"]
+  },
+  "ignorePatterns": [
+    "coverage",
+    "**/coverage/**",
+    "dist",
+    "**/dist/**",
+    "build",
+    "**/build/**",
+    ".strapi",
+    "**/.strapi/**",
+    "**/.strapi-updater.json",
+    ".astro",
+    "**/.astro/**",
+    "apps/docs/schemas/**",
+    ".turbo",
+    "**/.turbo/**",
+    "node_modules",
+    "**/node_modules/**",
+    "yarn.lock",
+    "package-lock.json",
+    "pnpm-lock.yaml",
+    "**/CHANGELOG.md",
+    "**/README.md",
+    "**/public/vendor/**",
+    "LICENSE*"
+  ],
+  "sortPackageJson": {
+    "sortScripts": true
+  }
+}
