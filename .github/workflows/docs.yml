@@ -57,6 +57,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The docs generators import plugin sources that resolve sibling plugins
+      # through their built dist output (for example calendar/shared).
+      - name: Build workspace packages
+        run: pnpm build
+
       - name: Build documentation site
         run: pnpm --filter @vicacha-devs/docs build
 
