@@ -58,7 +58,7 @@
   },
   "scripts": {
     "build": "strapi-plugin build && node ../../scripts/ensure-dist-types.ts",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist .strapi",
     "test": "node --import ./tests/register-ts-resolver.ts --test tests/*.test.ts",
     "test:ts": "npm run test:ts:front && npm run test:ts:back",
     "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
@@ -93,6 +93,8 @@
     "vitest": "4.1.0"
   },
   "peerDependencies": {
+    "@strapi/design-system": "^2.0.0",
+    "@strapi/icons": "^2.0.0",
     "@strapi/sdk-plugin": "^5.0.0 || ^6.0.0",
     "@strapi/strapi": "^5.0.0",
     "@vicacha-devs/strapi-plugin-calendar": "^1.0.0",

@@ -7,15 +7,50 @@ import {
 
 export type { AlternateDateValue, CalendarSystemConfig };
 
+const FORBIDDEN_OBJECT_KEYS = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+]);
+
+const BLOCKED_OVERRIDE_FIELDS = new Set([
+  "password",
+  "resetpasswordtoken",
+  "registrationtoken",
+  "confirmationtoken",
+  "accesskey",
+  "secret",
+  "createdby",
+  "updatedby",
+]);
+
+function isSafeCalendarKey(key: unknown): key is string {
+  return (
+    typeof key === "string" &&
+    key.length > 0 &&
+    key.length <= 64 &&
+    !FORBIDDEN_OBJECT_KEYS.has(key)
+  );
+}
+
 function readOverrideDateString(
   sys: CalendarSystemConfig,
   rawDoc?: Record<string, unknown>,
   alternateDateFields?: Record<string, string>
 ): string {
-  const overrideFieldName = alternateDateFields?.[sys.id] || sys.overrideField;
+  if (!isSafeCalendarKey(sys.id)) return "";
+
+  const mappedField =
+    alternateDateFields && Object.hasOwn(alternateDateFields, sys.id)
+      ? alternateDateFields[sys.id]
+      : undefined;
+  const overrideFieldName = mappedField || sys.overrideField;
+
   if (
-    !overrideFieldName ||
+    !isSafeCalendarKey(overrideFieldName) ||
+    BLOCKED_OVERRIDE_FIELDS.has(overrideFieldName.toLowerCase()) ||
     !rawDoc ||
+    !Object.hasOwn(rawDoc, overrideFieldName) ||
     typeof rawDoc[overrideFieldName] !== "string"
   ) {
     return "";
@@ -86,7 +121,7 @@ export function computeSecondaryDates(
   const dateStr = safeDate.toISOString().slice(0, 10);
 
   for (const sys of systems) {
-    if (!sys || !sys.enabled || !sys.id) continue;
+    if (!sys || !sys.enabled || !isSafeCalendarKey(sys.id)) continue;
     const rawOverride = readOverrideDateString(
       sys,
       rawDoc,

@@ -3,17 +3,26 @@ import type { Core } from "@strapi/strapi";
 import {
   computeSecondaryDates,
   generatePodcastRssXml,
+  isAllowedMediaSourceUid,
   MEDIA_ITEM_UID,
   MEDIA_SERIES_UID,
-  parseMediaUrl,
   PLUGIN_ID,
-  type AlternateDateValue,
   type LiveBroadcastState,
   type MediaFeedItem,
   type MediaFeedsSettings,
   type MediaSeriesItem,
 } from "../../../shared";
-import { normalizeRawMediaRecord } from "./feedNormalizer";
+import {
+  isBlockedRecordFieldName,
+  normalizeRawMediaRecord,
+} from "./feedNormalizer";
+import {
+  buildActiveLiveBroadcastState,
+  buildStandbyLiveBroadcastState,
+  findActiveRecurringSlot,
+} from "./liveStatusHelper";
+
+export { findActiveRecurringSlot };
 
 export interface QueryMediaFeedOptions {
   locale?: string;
@@ -24,6 +33,28 @@ export interface QueryMediaFeedOptions {
   featured?: boolean;
   search?: string;
   limit?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+function safeTimestamp(iso?: string | null): number {
+  if (typeof iso !== "string" || !iso.trim()) return 0;
+  const ts = Date.parse(iso);
+  return Number.isFinite(ts) ? ts : 0;
+}
+
+function clampServiceInt(
+  value: number | undefined,
+  min: number,
+  max: number,
+  fallback: number
+): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.min(max, Math.max(min, Math.trunc(value)));
+}
+
+function capFilterStr(raw?: string): string {
+  return typeof raw === "string" ? raw.trim().slice(0, 120) : "";
 }
 
 function matchesSpokenLanguage(item: MediaFeedItem, lang: string): boolean {
@@ -45,16 +76,18 @@ function matchesCategoryAndProvider(
   item: MediaFeedItem,
   options: QueryMediaFeedOptions
 ): boolean {
+  const typeFilter = capFilterStr(options.type).toLowerCase();
+  const providerFilter = capFilterStr(options.provider).toLowerCase();
+  const seriesFilter = capFilterStr(options.seriesSlug).toLowerCase();
+
   const typeMatch =
-    !options.type ||
-    options.type === "all" ||
-    item.type.toLowerCase() === options.type.toLowerCase();
+    !typeFilter ||
+    typeFilter === "all" ||
+    item.type.toLowerCase() === typeFilter;
   const providerMatch =
-    !options.provider ||
-    item.provider.toLowerCase() === options.provider.toLowerCase();
+    !providerFilter || item.provider.toLowerCase() === providerFilter;
   const seriesMatch =
-    !options.seriesSlug ||
-    (item.seriesSlug ?? "").toLowerCase() === options.seriesSlug.toLowerCase();
+    !seriesFilter || (item.seriesSlug ?? "").toLowerCase() === seriesFilter;
   return typeMatch && providerMatch && seriesMatch;
 }
 
@@ -63,10 +96,8 @@ function matchesSingleEpisodeFilter(
   options: QueryMediaFeedOptions
 ): boolean {
   if (!matchesCategoryAndProvider(item, options)) return false;
-  if (
-    options.spokenLanguage &&
-    !matchesSpokenLanguage(item, options.spokenLanguage.toLowerCase())
-  ) {
+  const spoken = capFilterStr(options.spokenLanguage).toLowerCase();
+  if (spoken && !matchesSpokenLanguage(item, spoken)) {
     return false;
   }
   if (typeof options.featured === "boolean") {
@@ -75,25 +106,32 @@ function matchesSingleEpisodeFilter(
   return true;
 }
 
-function filterAndSortEpisodes(
+export function filterAndSortEpisodes(
   items: MediaFeedItem[],
   options: QueryMediaFeedOptions
 ): MediaFeedItem[] {
-  const searchQuery = options.search?.trim().toLowerCase() ?? "";
+  const searchQuery = capFilterStr(options.search).toLowerCase();
   const filtered = items.filter((item) => {
     if (!matchesSingleEpisodeFilter(item, options)) return false;
     return !searchQuery || matchesSearchQuery(item, searchQuery);
   });
 
   filtered.sort(
-    (a, b) =>
-      new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+    (a, b) => safeTimestamp(b.publishedAt) - safeTimestamp(a.publishedAt)
   );
 
-  if (options.limit && options.limit > 0) {
-    return filtered.slice(0, options.limit);
+  const hasPaging =
+    options.page !== undefined ||
+    options.pageSize !== undefined ||
+    options.limit !== undefined;
+  if (!hasPaging) {
+    return filtered.slice(0, 100);
   }
-  return filtered;
+
+  const page = clampServiceInt(options.page, 1, 10_000, 1);
+  const size = clampServiceInt(options.pageSize ?? options.limit, 1, 100, 25);
+  const offset = (page - 1) * size;
+  return filtered.slice(offset, offset + size);
 }
 
 function stringOrNull(value: unknown): string | null {
@@ -108,7 +146,7 @@ function mapRawSeriesItem(
   const id = (r.id as string | number) ?? slug;
   const documentId = String(r.documentId ?? id);
   const spokenLanguages = Array.isArray(r.spokenLanguages)
-    ? (r.spokenLanguages as string[])
+    ? r.spokenLanguages.filter((v): v is string => typeof v === "string")
     : supportedLocales;
 
   return {
@@ -130,60 +168,6 @@ function mapRawSeriesItem(
   };
 }
 
-function buildActiveLiveBroadcastState(
-  liveEpisode: MediaFeedItem,
-  settings: MediaFeedsSettings,
-  secondaryDates?: Record<string, AlternateDateValue>
-): LiveBroadcastState {
-  return {
-    status: "live",
-    title: liveEpisode.title,
-    description: liveEpisode.description,
-    scheduleLabel:
-      liveEpisode.publishedAtLabel || settings.liveStream.scheduleLabel,
-    provider: liveEpisode.provider,
-    watchUrl: liveEpisode.sourceUrl || settings.liveStream.watchUrl,
-    embedUrl: liveEpisode.embedUrl ?? null,
-    thumbnailUrl:
-      liveEpisode.thumbnailUrl ?? settings.liveStream.thumbnailUrl ?? null,
-    spokenLanguages: liveEpisode.spokenLanguages,
-    activeEpisodeDocumentId: liveEpisode.documentId,
-    secondaryDates,
-    streams: settings.liveStreams ?? [],
-  };
-}
-
-function buildStandbyLiveBroadcastState(
-  settings: MediaFeedsSettings,
-  episodes: MediaFeedItem[],
-  secondaryDates?: Record<string, AlternateDateValue>
-): LiveBroadcastState {
-  const parsedWatch = parseMediaUrl(
-    settings.liveStream.watchUrl,
-    settings.liveStream.provider
-  );
-  const thumbnailUrl =
-    settings.liveStream.thumbnailUrl ??
-    parsedWatch.thumbnailUrl ??
-    episodes[0]?.thumbnailUrl ??
-    null;
-
-  return {
-    status: settings.liveStream.enabled ? "upcoming" : "offline",
-    title: settings.liveStream.title,
-    description: settings.liveStream.description,
-    scheduleLabel: settings.liveStream.scheduleLabel,
-    provider: parsedWatch.provider,
-    watchUrl: settings.liveStream.watchUrl,
-    embedUrl: settings.liveStream.embedUrl ?? parsedWatch.embedUrl,
-    thumbnailUrl,
-    spokenLanguages: settings.liveStream.spokenLanguages ?? ["es"],
-    activeEpisodeDocumentId: null,
-    secondaryDates,
-    streams: settings.liveStreams ?? [],
-  };
-}
-
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   getSettingsService() {
     return strapi.plugin(PLUGIN_ID).service("settings") as {
@@ -197,7 +181,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     settings: MediaFeedsSettings,
     populate: string[] = []
   ): Promise<Array<Record<string, unknown>>> {
-    if (!strapi.contentTypes?.[uid]) return [];
+    const isPermittedUid =
+      uid === MEDIA_SERIES_UID || isAllowedMediaSourceUid(uid);
+    if (!isPermittedUid || !Object.hasOwn(strapi.contentTypes ?? {}, uid)) {
+      return [];
+    }
 
     try {
       const primary = await strapi.documents(uid).findMany({
@@ -231,28 +219,36 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     settings: MediaFeedsSettings
   ): Promise<MediaFeedItem[]> {
     const allItems: MediaFeedItem[] = [];
-    const builtInRecords = await this.fetchRecordsWithLocaleFallback(
-      MEDIA_ITEM_UID,
-      activeLocale,
-      settings,
-      ["thumbnail", "audioFile", "transcriptFile"]
+    const validSources = (settings.sources ?? []).filter(
+      (s) => s && s.enabled && isAllowedMediaSourceUid(s.uid)
     );
-    for (const rec of builtInRecords) {
-      allItems.push(
-        normalizeRawMediaRecord(rec, {
-          settings,
-          requestedLocale: activeLocale,
-        })
+    const hasCustomBuiltInSource = validSources.some(
+      (s) => s.uid === MEDIA_ITEM_UID
+    );
+
+    if (!hasCustomBuiltInSource) {
+      const builtInRecords = await this.fetchRecordsWithLocaleFallback(
+        MEDIA_ITEM_UID,
+        activeLocale,
+        settings,
+        ["thumbnail", "audioFile", "transcriptFile"]
       );
+      for (const rec of builtInRecords) {
+        allItems.push(
+          normalizeRawMediaRecord(rec, {
+            settings,
+            requestedLocale: activeLocale,
+          })
+        );
+      }
     }
 
-    for (const source of settings.sources ?? []) {
-      if (!source.enabled || !source.uid) continue;
+    for (const source of validSources) {
       const populateFields = [
-        source.fields.thumbnail,
-        source.fields.audioFile,
-        source.fields.transcriptFile,
-      ].filter((f): f is string => Boolean(f));
+        source.fields?.thumbnail,
+        source.fields?.audioFile,
+        source.fields?.transcriptFile,
+      ].filter((f): f is string => Boolean(f) && !isBlockedRecordFieldName(f));
 
       const sourceRecords = await this.fetchRecordsWithLocaleFallback(
         source.uid,
@@ -277,18 +273,36 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     options: QueryMediaFeedOptions = {}
   ): Promise<MediaFeedItem[]> {
     const settings = await this.getSettingsService().getSettings();
-    const activeLocale = (options.locale || settings.defaultLocale)
-      .trim()
-      .toLowerCase();
+    const activeLocale = (
+      capFilterStr(options.locale) || settings.defaultLocale
+    ).toLowerCase();
     const allItems = await this.collectSourceEpisodes(activeLocale, settings);
     return filterAndSortEpisodes(allItems, options);
   },
 
+  async getEpisodeBySlug(
+    slug: string,
+    locale?: string
+  ): Promise<MediaFeedItem | null> {
+    const cleanSlug = capFilterStr(slug).toLowerCase();
+    if (!cleanSlug) return null;
+
+    const settings = await this.getSettingsService().getSettings();
+    const activeLocale = (
+      capFilterStr(locale) || settings.defaultLocale
+    ).toLowerCase();
+    const allItems = await this.collectSourceEpisodes(activeLocale, settings);
+    allItems.sort(
+      (a, b) => safeTimestamp(b.publishedAt) - safeTimestamp(a.publishedAt)
+    );
+    return allItems.find((ep) => ep.slug.toLowerCase() === cleanSlug) ?? null;
+  },
+
   async getSeriesList(locale?: string): Promise<MediaSeriesItem[]> {
     const settings = await this.getSettingsService().getSettings();
-    const activeLocale = (locale || settings.defaultLocale)
-      .trim()
-      .toLowerCase();
+    const activeLocale = (
+      capFilterStr(locale) || settings.defaultLocale
+    ).toLowerCase();
     const records = await this.fetchRecordsWithLocaleFallback(
       MEDIA_SERIES_UID,
       activeLocale,
@@ -300,7 +314,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       .map((r) => mapRawSeriesItem(r, settings.supportedLocales));
   },
 
-  async getLiveStatus(locale?: string): Promise<LiveBroadcastState> {
+  async getLiveStatus(
+    locale?: string,
+    now: Date = new Date()
+  ): Promise<LiveBroadcastState> {
+    const safeNow = Number.isNaN(now.getTime()) ? new Date() : now;
     const settings = await this.getSettingsService().getSettings();
     const episodes = await this.getEpisodes({ locale, limit: 50 });
     const liveEpisode = episodes.find((ep) => ep.isLive);
@@ -308,7 +326,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const secondaryDates =
       settings.secondaryCalendars?.length > 0
         ? computeSecondaryDates(
-            new Date().toISOString(),
+            safeNow.toISOString(),
             settings.secondaryCalendars
           )
         : undefined;
@@ -320,7 +338,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         secondaryDates
       );
     }
-    return buildStandbyLiveBroadcastState(settings, episodes, secondaryDates);
+    return buildStandbyLiveBroadcastState(
+      settings,
+      episodes,
+      secondaryDates,
+      safeNow
+    );
   },
 
   async generateRssFeed(
@@ -330,17 +353,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     } = {}
   ): Promise<string> {
     const settings = await this.getSettingsService().getSettings();
+    const cleanLocale = capFilterStr(options.locale) || settings.defaultLocale;
+    const cleanSeries = capFilterStr(options.seriesSlug) || undefined;
     const episodes = await this.getEpisodes({
-      locale: options.locale,
-      seriesSlug: options.seriesSlug,
+      locale: cleanLocale,
+      seriesSlug: cleanSeries,
       limit: 100,
     });
 
     let seriesTitle: string | undefined;
     let seriesDescription: string | undefined;
-    if (options.seriesSlug) {
-      const seriesList = await this.getSeriesList(options.locale);
-      const matched = seriesList.find((s) => s.slug === options.seriesSlug);
+    if (cleanSeries) {
+      const seriesList = await this.getSeriesList(cleanLocale);
+      const matched = seriesList.find(
+        (s) => s.slug.toLowerCase() === cleanSeries.toLowerCase()
+      );
       if (matched) {
         seriesTitle = matched.title;
         seriesDescription = matched.description;
@@ -349,7 +376,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     return generatePodcastRssXml(episodes, {
       feed: settings.podcastFeed,
-      locale: options.locale || settings.defaultLocale,
+      locale: cleanLocale,
       defaultLocale: settings.defaultLocale,
       seriesTitle,
       seriesDescription,

@@ -1,10 +1,22 @@
+import { PLUGIN_ID } from "../../../shared";
+
+function adminPermissionPolicies(action: string) {
+  return [
+    "admin::isAuthenticatedAdmin",
+    {
+      name: "admin::hasPermissions",
+      config: { actions: [action] },
+    },
+  ];
+}
+
 export default [
   {
     method: "GET",
     path: "/overview",
     handler: "admin.getOverview",
     config: {
-      policies: [],
+      policies: adminPermissionPolicies(`plugin::${PLUGIN_ID}.read`),
     },
   },
   {
@@ -12,7 +24,7 @@ export default [
     path: "/settings",
     handler: "admin.getSettings",
     config: {
-      policies: [],
+      policies: adminPermissionPolicies(`plugin::${PLUGIN_ID}.settings.update`),
     },
   },
   {
@@ -20,7 +32,7 @@ export default [
     path: "/settings",
     handler: "admin.updateSettings",
     config: {
-      policies: [],
+      policies: adminPermissionPolicies(`plugin::${PLUGIN_ID}.settings.update`),
     },
   },
   {
@@ -28,7 +40,7 @@ export default [
     path: "/enrich-url",
     handler: "admin.enrichUrl",
     config: {
-      policies: [],
+      policies: adminPermissionPolicies(`plugin::${PLUGIN_ID}.sync`),
     },
   },
   {
@@ -36,7 +48,7 @@ export default [
     path: "/sync-youtube",
     handler: "admin.syncYouTube",
     config: {
-      policies: [],
+      policies: adminPermissionPolicies(`plugin::${PLUGIN_ID}.sync`),
     },
   },
 ];

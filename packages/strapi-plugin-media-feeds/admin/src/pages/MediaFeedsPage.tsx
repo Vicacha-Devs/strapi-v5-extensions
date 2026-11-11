@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@strapi/design-system";
 import { Layouts, useFetchClient, useNotification } from "@strapi/strapi/admin";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 
 import {
@@ -24,7 +24,7 @@ import {
 } from "../../../shared";
 
 interface OverviewPayload {
-  settings: MediaFeedsSettings;
+  settings: Omit<MediaFeedsSettings, "youtubeApiKey">;
   episodes: MediaFeedItem[];
   series: MediaSeriesItem[];
   live: LiveBroadcastState;
@@ -51,7 +51,12 @@ const LiveStatusBanner: React.FC<LiveStatusBannerProps> = ({
   const statusText = (live?.status ?? "upcoming").toUpperCase();
   const titleText =
     live?.title ?? t("page.ui.live_broadcast_default", "Live Broadcast");
-  const languagesText = (live?.spokenLanguages ?? []).join(", ").toUpperCase();
+  const languagesText = (
+    Array.isArray(live?.spokenLanguages) ? live.spokenLanguages : []
+  )
+    .filter((lang): lang is string => typeof lang === "string")
+    .join(", ")
+    .toUpperCase();
 
   return (
     <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius>
@@ -82,7 +87,7 @@ const LiveStatusBanner: React.FC<LiveStatusBannerProps> = ({
                 "Select preview locale"
               )}
               value={selectedLocale}
-              onChange={onSelectLocale}
+              onChange={(val: string | number) => onSelectLocale(String(val))}
             >
               {locales.map((loc) => (
                 <SingleSelectOption key={loc} value={loc}>
@@ -100,6 +105,7 @@ const LiveStatusBanner: React.FC<LiveStatusBannerProps> = ({
 interface UrlInspectorBoxProps {
   t: TranslateFn;
   inspectUrl: string;
+  inspecting: boolean;
   onChangeUrl: (val: string) => void;
   onInspect: () => void;
   inspectedInfo: (ParsedMediaProviderInfo & { title?: string | null }) | null;
@@ -108,6 +114,7 @@ interface UrlInspectorBoxProps {
 const UrlInspectorBox: React.FC<UrlInspectorBoxProps> = ({
   t,
   inspectUrl,
+  inspecting,
   onChangeUrl,
   onInspect,
   inspectedInfo,
@@ -140,7 +147,11 @@ const UrlInspectorBox: React.FC<UrlInspectorBoxProps> = ({
           />
         </Field.Root>
       </Box>
-      <Button onClick={onInspect}>
+      <Button
+        onClick={onInspect}
+        loading={inspecting}
+        disabled={inspecting || !inspectUrl.trim()}
+      >
         {t("page.ui.inspect_url", "Inspect URL")}
       </Button>
     </Flex>
@@ -209,7 +220,7 @@ const EpisodesListSection: React.FC<EpisodesListSectionProps> = ({
   episodes,
   selectedLocale,
 }) => {
-  const rssLocale = selectedLocale || "es";
+  const rssLocale = encodeURIComponent(selectedLocale || "en");
   const rssPath = `/api/${PLUGIN_ID}/rss.xml?locale=${rssLocale}`;
 
   return (
@@ -263,17 +274,30 @@ export const MediaFeedsPage: React.FC = () => {
   const { get, post } = useFetchClient();
   const { toggleNotification } = useNotification();
 
+  const isMountedRef = useRef(true);
+  const overviewReqIdRef = useRef(0);
+  const inspectReqIdRef = useRef(0);
+
   const [loading, setLoading] = useState(true);
   const [selectedLocale, setSelectedLocale] = useState<string>("");
   const [overview, setOverview] = useState<OverviewPayload | null>(null);
   const [inspectUrl, setInspectUrl] = useState("");
+  const [inspecting, setInspecting] = useState(false);
   const [inspectedInfo, setInspectedInfo] = useState<
     (ParsedMediaProviderInfo & { title?: string | null }) | null
   >(null);
   const [syncing, setSyncing] = useState(false);
 
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const loadOverview = useCallback(
     async (localeParam?: string) => {
+      const reqId = ++overviewReqIdRef.current;
       setLoading(true);
       try {
         const query = localeParam
@@ -282,6 +306,9 @@ export const MediaFeedsPage: React.FC = () => {
         const res = await get<{ data: OverviewPayload }>(
           `/${PLUGIN_ID}/overview${query}`
         );
+        if (!isMountedRef.current || reqId !== overviewReqIdRef.current) {
+          return;
+        }
         const data = res.data?.data;
         if (data) {
           setOverview(data);
@@ -290,6 +317,9 @@ export const MediaFeedsPage: React.FC = () => {
           }
         }
       } catch {
+        if (!isMountedRef.current || reqId !== overviewReqIdRef.current) {
+          return;
+        }
         toggleNotification({
           type: "danger",
           message: t(
@@ -298,7 +328,9 @@ export const MediaFeedsPage: React.FC = () => {
           ),
         });
       } finally {
-        setLoading(false);
+        if (isMountedRef.current && reqId === overviewReqIdRef.current) {
+          setLoading(false);
+        }
       }
     },
     [get, toggleNotification, t]
@@ -309,16 +341,21 @@ export const MediaFeedsPage: React.FC = () => {
   }, [loadOverview]);
 
   const handleInspectUrl = async () => {
-    if (!inspectUrl.trim()) return;
+    const trimmed = inspectUrl.trim();
+    if (!trimmed || inspecting) return;
+    const reqId = ++inspectReqIdRef.current;
+    setInspecting(true);
     try {
       const res = await post<{
         data: ParsedMediaProviderInfo & { title?: string | null };
       }>(`/${PLUGIN_ID}/enrich-url`, {
-        url: inspectUrl.trim(),
+        url: trimmed,
         fetchOembed: true,
       });
+      if (!isMountedRef.current || reqId !== inspectReqIdRef.current) return;
       setInspectedInfo(res.data?.data ?? null);
     } catch {
+      if (!isMountedRef.current || reqId !== inspectReqIdRef.current) return;
       toggleNotification({
         type: "warning",
         message: t(
@@ -326,15 +363,21 @@ export const MediaFeedsPage: React.FC = () => {
           "Could not parse or enrich the provided URL"
         ),
       });
+    } finally {
+      if (isMountedRef.current && reqId === inspectReqIdRef.current) {
+        setInspecting(false);
+      }
     }
   };
 
   const handleSyncYouTube = async () => {
+    if (syncing) return;
     setSyncing(true);
     try {
       const res = await post<{
         data: { syncedCount: number; skippedCount: number };
       }>(`/${PLUGIN_ID}/sync-youtube`, {});
+      if (!isMountedRef.current) return;
       const { syncedCount = 0, skippedCount = 0 } = res.data?.data ?? {};
       toggleNotification({
         type: "success",
@@ -342,6 +385,7 @@ export const MediaFeedsPage: React.FC = () => {
       });
       await loadOverview(selectedLocale);
     } catch {
+      if (!isMountedRef.current) return;
       toggleNotification({
         type: "danger",
         message: t(
@@ -350,13 +394,15 @@ export const MediaFeedsPage: React.FC = () => {
         ),
       });
     } finally {
-      setSyncing(false);
+      if (isMountedRef.current) {
+        setSyncing(false);
+      }
     }
   };
 
   const locales = overview?.settings?.supportedLocales ?? [
-    "es",
     "en",
+    "es",
     "ar",
     "tr",
   ];
@@ -398,6 +444,7 @@ export const MediaFeedsPage: React.FC = () => {
           <UrlInspectorBox
             t={t}
             inspectUrl={inspectUrl}
+            inspecting={inspecting}
             onChangeUrl={setInspectUrl}
             onInspect={handleInspectUrl}
             inspectedInfo={inspectedInfo}

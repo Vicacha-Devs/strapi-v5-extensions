@@ -7,6 +7,18 @@ export const MEDIA_SERIES_UID = "plugin::media-feeds.media-series";
 
 export const SETTINGS_STORE_KEY = "settings";
 
+export const MASKED_SECRET_VALUE = "••••••••";
+export const MASKED_SECRET_REGEX = /^[•*]+$/;
+
+export const ALLOWED_SOURCE_API_UID_REGEX = /^api::[a-z0-9-]+\.[a-z0-9-]+$/;
+
+export function isAllowedMediaSourceUid(uid: unknown): uid is string {
+  return (
+    typeof uid === "string" &&
+    (uid === MEDIA_ITEM_UID || ALLOWED_SOURCE_API_UID_REGEX.test(uid))
+  );
+}
+
 export const DEFAULT_MEDIA_FEEDS_SETTINGS: MediaFeedsSettings = {
   defaultTimezone: "UTC",
   defaultLocale: "en",

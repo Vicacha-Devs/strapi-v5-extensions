@@ -1,6 +1,8 @@
 import {
   computeSecondaryDates,
   formatSecondsToDuration,
+  isSafeUploadPath,
+  MAX_MEDIA_URL_LENGTH,
   MEDIA_ITEM_UID,
   normalizeChapterMarkers,
   normalizeLanguageTracks,
@@ -14,6 +16,34 @@ import {
   type MediaFeedsSourceFieldMap,
   type ParsedMediaProviderInfo,
 } from "../../../shared";
+
+const BLOCKED_CUSTOM_FIELDS = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+  "password",
+  "resetPasswordToken",
+  "registrationToken",
+  "confirmationToken",
+  "accessKey",
+  "secret",
+  "createdBy",
+  "updatedBy",
+]);
+
+const BLOCKED_CUSTOM_FIELDS_LOWER = new Set(
+  Array.from(BLOCKED_CUSTOM_FIELDS, (key) => key.toLowerCase())
+);
+
+export function isBlockedRecordFieldName(fieldName: unknown): boolean {
+  if (typeof fieldName !== "string" || !fieldName.trim()) {
+    return true;
+  }
+  return (
+    BLOCKED_CUSTOM_FIELDS.has(fieldName) ||
+    BLOCKED_CUSTOM_FIELDS_LOWER.has(fieldName.toLowerCase())
+  );
+}
 
 const DEFAULT_BUILT_IN_FIELDS: MediaFeedsSourceFieldMap = {
   title: "title",
@@ -47,11 +77,19 @@ function readField(
   mappedKey?: string,
   fallbackKey?: string
 ): unknown {
-  if (mappedKey && raw[mappedKey] !== undefined && raw[mappedKey] !== null) {
+  if (
+    mappedKey &&
+    !isBlockedRecordFieldName(mappedKey) &&
+    Object.hasOwn(raw, mappedKey) &&
+    raw[mappedKey] !== undefined &&
+    raw[mappedKey] !== null
+  ) {
     return raw[mappedKey];
   }
   if (
     fallbackKey &&
+    !isBlockedRecordFieldName(fallbackKey) &&
+    Object.hasOwn(raw, fallbackKey) &&
     raw[fallbackKey] !== undefined &&
     raw[fallbackKey] !== null
   ) {
@@ -79,23 +117,49 @@ function readStringWithDefault(
   return val !== undefined ? String(val) : defaultValue;
 }
 
+function sanitizeOptionalMediaLink(rawUrl: string | null): string | null {
+  if (!rawUrl) return null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed || trimmed.length > MAX_MEDIA_URL_LENGTH) return null;
+  if (trimmed.startsWith("/")) {
+    return isSafeUploadPath(trimmed) ? trimmed : null;
+  }
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "https:" || parsed.protocol === "http:"
+      ? trimmed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 function extractMediaFieldUrl(mediaField: unknown): {
   url: string | null;
   mime?: string;
   sizeBytes?: number;
 } {
   if (!mediaField) return { url: null };
-  if (typeof mediaField === "string") return { url: mediaField };
+  if (typeof mediaField === "string") {
+    return { url: sanitizeOptionalMediaLink(mediaField) };
+  }
   if (typeof mediaField !== "object") return { url: null };
 
   const obj = mediaField as Record<string, unknown>;
   if (typeof obj.url !== "string") return { url: null };
+  const safeUrl = sanitizeOptionalMediaLink(obj.url);
+  if (!safeUrl) return { url: null };
 
-  const sizeKb = typeof obj.size === "number" ? obj.size : undefined;
+  const sizeKb =
+    typeof obj.size === "number" &&
+    Number.isFinite(obj.size) &&
+    Math.max(0, obj.size) === obj.size
+      ? obj.size
+      : undefined;
   return {
-    url: obj.url,
+    url: safeUrl,
     mime: typeof obj.mime === "string" ? obj.mime : undefined,
-    sizeBytes: sizeKb ? Math.round(sizeKb * 1024) : undefined,
+    sizeBytes: sizeKb !== undefined ? Math.round(sizeKb * 1024) : undefined,
   };
 }
 
@@ -104,7 +168,11 @@ function resolveRecordLocale(
   requestedLocale: string | undefined,
   defaultLocale: string
 ): string {
-  if (typeof raw.locale === "string" && raw.locale) {
+  if (
+    Object.hasOwn(raw, "locale") &&
+    typeof raw.locale === "string" &&
+    raw.locale
+  ) {
     return raw.locale;
   }
   return requestedLocale || defaultLocale;
@@ -166,23 +234,36 @@ function resolveTypeLabel(
   defaultLocale: string,
   source?: MediaFeedsSourceConfig
 ): string {
-  if (typeof raw.typeLabel === "string" && raw.typeLabel) {
+  if (
+    Object.hasOwn(raw, "typeLabel") &&
+    typeof raw.typeLabel === "string" &&
+    raw.typeLabel
+  ) {
     return raw.typeLabel;
   }
-  const labels =
-    source?.typeLabels?.[recordLocale] ??
-    source?.typeLabels?.[defaultLocale] ??
-    {};
-  return labels[type] || type;
+  const typeLabels = source?.typeLabels;
+  const localeMap =
+    (typeLabels && Object.hasOwn(typeLabels, recordLocale)
+      ? typeLabels[recordLocale]
+      : undefined) ??
+    (typeLabels && Object.hasOwn(typeLabels, defaultLocale)
+      ? typeLabels[defaultLocale]
+      : undefined);
+
+  if (localeMap && Object.hasOwn(localeMap, type) && localeMap[type]) {
+    return localeMap[type];
+  }
+  return type;
 }
 
-function extractCustomFields(
+export function extractCustomFields(
   raw: Record<string, unknown>,
   customFieldNames?: string[]
 ): Record<string, unknown> | undefined {
   const customData: Record<string, unknown> = {};
   for (const fieldName of customFieldNames ?? []) {
-    if (fieldName in raw) {
+    if (isBlockedRecordFieldName(fieldName)) continue;
+    if (Object.hasOwn(raw, fieldName)) {
       customData[fieldName] = raw[fieldName];
     }
   }
@@ -194,18 +275,23 @@ function resolveMediaUrls(
   f: MediaFeedsSourceFieldMap,
   parsedProvider: ParsedMediaProviderInfo
 ) {
+  const fallbackAudio = Object.hasOwn(raw, "audioUrl")
+    ? raw.audioUrl
+    : undefined;
   const audioExtracted = extractMediaFieldUrl(
-    readField(raw, f.audioFile, "audioFile") ?? raw.audioUrl
+    readField(raw, f.audioFile, "audioFile") ?? fallbackAudio
   );
   const transcriptCandidate =
     readField(raw, f.transcriptFile, "transcriptFile") ??
-    raw.transcriptPdf ??
-    raw.transcriptUrl;
+    (Object.hasOwn(raw, "transcriptPdf") ? raw.transcriptPdf : undefined) ??
+    (Object.hasOwn(raw, "transcriptUrl") ? raw.transcriptUrl : undefined);
   const transcriptExtracted = extractMediaFieldUrl(transcriptCandidate);
   const thumbExtracted = extractMediaFieldUrl(
     readField(raw, f.thumbnail, "thumbnail")
   );
-  const explicitImageUrl = readStringField(raw, f.imageUrl, "imageUrl");
+  const explicitImageUrl = sanitizeOptionalMediaLink(
+    readStringField(raw, f.imageUrl, "imageUrl")
+  );
 
   return {
     audioUrl: audioExtracted.url,
@@ -221,11 +307,15 @@ function resolveProviderFields(
   raw: Record<string, unknown>,
   f: MediaFeedsSourceFieldMap
 ) {
+  const fallbackHref = Object.hasOwn(raw, "href") ? raw.href : undefined;
   const rawSourceUrl = String(
-    readField(raw, f.sourceUrl, "sourceUrl") ?? raw.href ?? ""
+    readField(raw, f.sourceUrl, "sourceUrl") ?? fallbackHref ?? ""
   );
   const explicitProvider = readStringField(raw, f.provider, "provider");
   const parsedProvider = parseMediaUrl(rawSourceUrl, explicitProvider);
+  const explicitEmbedUrl = sanitizeOptionalMediaLink(
+    readStringField(raw, f.embedUrl, "embedUrl")
+  );
 
   return {
     parsedProvider,
@@ -233,9 +323,8 @@ function resolveProviderFields(
     externalId:
       readStringField(raw, f.externalId, "externalId") ??
       parsedProvider.externalId,
-    sourceUrl: parsedProvider.canonicalUrl || rawSourceUrl,
-    embedUrl:
-      readStringField(raw, f.embedUrl, "embedUrl") ?? parsedProvider.embedUrl,
+    sourceUrl: parsedProvider.canonicalUrl,
+    embedUrl: explicitEmbedUrl ?? parsedProvider.embedUrl,
   };
 }
 

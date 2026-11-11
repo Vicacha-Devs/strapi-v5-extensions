@@ -39,9 +39,12 @@ declare module "react" {
 
   export type ComponentType<P = {}> = FC<P>;
 
+  export type SetStateAction<S> = S | ((prevState: S) => S);
+  export type Dispatch<A> = (value: A) => void;
+
   export function useState<T>(
     initialState: T | (() => T)
-  ): [T, (next: T | ((prev: T) => T)) => void];
+  ): [T, Dispatch<SetStateAction<T>>];
   export function useEffect(
     effect: () => void | (() => void),
     deps?: readonly unknown[]
@@ -51,6 +54,10 @@ declare module "react" {
     callback: T,
     deps: readonly unknown[]
   ): T;
+  export interface MutableRefObject<T> {
+    current: T;
+  }
+  export function useRef<T>(initialValue: T): MutableRefObject<T>;
   export function useRef<T>(initialValue: T | null): RefObject<T>;
   export function createElement(...args: unknown[]): ReactElement;
   export const Fragment: unknown;

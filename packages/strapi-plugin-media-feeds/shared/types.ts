@@ -130,6 +130,9 @@ export interface LiveBroadcastChannelItem {
   eventSlug?: string;
   provider: MediaProviderType;
   watchUrl: string;
+  embedUrl?: string | null;
+  thumbnailUrl?: string | null;
+  spokenLanguages?: string[];
 }
 
 export interface LiveBroadcastConfig {

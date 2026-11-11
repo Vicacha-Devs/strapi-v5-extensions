@@ -1,13 +1,28 @@
+import { DEFAULT_MEDIA_FEEDS_SETTINGS } from "./constants";
 import type {
   MediaFeedItem,
   MediaLanguageTrack,
   PodcastFeedConfig,
 } from "./types";
-import { formatSecondsToDuration, resolveEpisodeForLocale } from "./urlParser";
+import {
+  formatSecondsToDuration,
+  isSafeUploadPath,
+  MAX_MEDIA_URL_LENGTH,
+  resolveEpisodeForLocale,
+} from "./urlParser";
+
+const INVALID_XML_10_CHARS =
+  /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g;
+
+export function stripInvalidXmlChars(value?: string | null): string {
+  if (!value) return "";
+  return String(value).replace(INVALID_XML_10_CHARS, "");
+}
 
 export function escapeXml(value?: string | null): string {
-  if (!value) return "";
-  return String(value)
+  const cleaned = stripInvalidXmlChars(value);
+  if (!cleaned) return "";
+  return cleaned
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -15,12 +30,23 @@ export function escapeXml(value?: string | null): string {
     .replace(/'/g, "&apos;");
 }
 
+export function wrapCdata(value?: string | null): string {
+  const cleaned = stripInvalidXmlChars(value).replace(
+    /]]>/g,
+    "]]]]><![CDATA[>"
+  );
+  return `<![CDATA[${cleaned}]]>`;
+}
+
 export function toRfc2822Date(isoDate?: string | null): string {
-  const parsed = isoDate ? new Date(isoDate) : new Date();
-  if (Number.isNaN(parsed.getTime())) {
-    return new Date("2026-01-01T00:00:00Z").toUTCString();
+  if (typeof isoDate === "string" && isoDate.trim()) {
+    const parsed = new Date(isoDate.trim());
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toUTCString();
+    }
+    return new Date(0).toUTCString();
   }
-  return parsed.toUTCString();
+  return new Date().toUTCString();
 }
 
 export interface GeneratePodcastRssOptions {
@@ -31,25 +57,115 @@ export interface GeneratePodcastRssOptions {
   seriesDescription?: string;
 }
 
-function toAbsoluteUrl(rawUrl: string, siteUrl: string): string {
-  if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
-  return `${siteUrl}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
+function trimTrailingSlashes(value: string): string {
+  let out = value;
+  while (out.endsWith("/")) {
+    out = out.slice(0, -1);
+  }
+  return out;
+}
+
+function sanitizeSiteUrl(rawSiteUrl?: string | null): string {
+  const fallback = trimTrailingSlashes(
+    DEFAULT_MEDIA_FEEDS_SETTINGS.podcastFeed.siteUrl
+  );
+  if (typeof rawSiteUrl !== "string") return fallback;
+  const trimmed = rawSiteUrl.trim();
+  if (!trimmed || trimmed.length > MAX_MEDIA_URL_LENGTH) return fallback;
+
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return fallback;
+    }
+    parsed.username = "";
+    parsed.password = "";
+    const cleanPath =
+      parsed.pathname === "/" ? "" : trimTrailingSlashes(parsed.pathname);
+    return `${parsed.origin}${cleanPath}`;
+  } catch {
+    return fallback;
+  }
+}
+
+function toSafeAbsoluteHttpUrl(
+  rawUrl: string | null | undefined,
+  siteUrl: string
+): string | null {
+  if (typeof rawUrl !== "string") return null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed || trimmed.length > MAX_MEDIA_URL_LENGTH) return null;
+
+  if (trimmed.startsWith("//")) return null;
+
+  if (trimmed.startsWith("/")) {
+    if (!isSafeUploadPath(trimmed)) return null;
+    try {
+      return new URL(trimmed, `${siteUrl}/`).href;
+    } catch {
+      return null;
+    }
+  }
+
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+        return null;
+      }
+      parsed.username = "";
+      parsed.password = "";
+      return parsed.href;
+    } catch {
+      return null;
+    }
+  }
+
+  const relCandidate = `/${trimmed}`;
+  if (!isSafeUploadPath(relCandidate)) return null;
+  try {
+    return new URL(relCandidate, `${siteUrl}/`).href;
+  } catch {
+    return null;
+  }
+}
+
+function extractLowerPathname(absUrl: string): string {
+  try {
+    return new URL(absUrl).pathname.toLowerCase();
+  } catch {
+    return absUrl.split(/[?#]/)[0]?.toLowerCase() ?? "";
+  }
 }
 
 function resolveEnclosureMimeType(
   audioMimeType: string | undefined,
   enclosureUrl: string
 ): string {
-  if (audioMimeType) return audioMimeType;
-  if (enclosureUrl.endsWith(".m4a")) return "audio/x-m4a";
-  if (enclosureUrl.endsWith(".mp4")) return "video/mp4";
+  if (
+    typeof audioMimeType === "string" &&
+    /^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(audioMimeType.trim())
+  ) {
+    return audioMimeType.trim();
+  }
+  const pathname = extractLowerPathname(enclosureUrl);
+  if (pathname.endsWith(".m4a")) return "audio/x-m4a";
+  if (pathname.endsWith(".mp4")) return "video/mp4";
   return "audio/mpeg";
 }
 
 function resolveTranscriptMimeType(absUrl: string): string {
-  if (absUrl.endsWith(".vtt")) return "text/vtt";
-  if (absUrl.endsWith(".srt")) return "application/x-subrip";
+  const pathname = extractLowerPathname(absUrl);
+  if (pathname.endsWith(".vtt")) return "text/vtt";
+  if (pathname.endsWith(".srt")) return "application/x-subrip";
   return "application/pdf";
+}
+
+function sanitizeAudioByteLength(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    return 0;
+  }
+  return Math.trunc(value);
 }
 
 function renderTranscriptLines(
@@ -57,13 +173,14 @@ function renderTranscriptLines(
   siteUrl: string
 ): string {
   return tracks
-    .filter((t) => Boolean(t.transcriptUrl || t.captionsUrl))
     .map((t) => {
       const trUrl = t.transcriptUrl || t.captionsUrl || "";
-      const absUrl = toAbsoluteUrl(trUrl, siteUrl);
+      const absUrl = toSafeAbsoluteHttpUrl(trUrl, siteUrl);
+      if (!absUrl) return "";
       const trType = resolveTranscriptMimeType(absUrl);
       return `      <podcast:transcript url="${escapeXml(absUrl)}" type="${trType}" language="${escapeXml(t.locale)}" />`;
     })
+    .filter(Boolean)
     .join("\n");
 }
 
@@ -72,18 +189,22 @@ function resolveItemUrl(
   siteUrl: string,
   activeLocale: string
 ): string {
-  if (item.sourceUrl && /^https?:\/\//i.test(item.sourceUrl)) {
-    return item.sourceUrl;
+  if (item.sourceUrl && /^https?:\/\//i.test(item.sourceUrl.trim())) {
+    const safeSource = toSafeAbsoluteHttpUrl(item.sourceUrl, siteUrl);
+    if (safeSource) return safeSource;
   }
-  return `${siteUrl}/${activeLocale}/media#${item.slug}`;
+  const encodedLocale = encodeURIComponent(activeLocale);
+  const encodedSlug = encodeURIComponent(item.slug || "episode");
+  return `${siteUrl}/${encodedLocale}/media#${encodedSlug}`;
 }
 
 function renderItemImageTag(
   thumbnailUrl: string | null | undefined,
   siteUrl: string
 ): string {
-  if (!thumbnailUrl) return "";
-  return `\n      <itunes:image href="${escapeXml(toAbsoluteUrl(thumbnailUrl, siteUrl))}" />`;
+  const safeImg = toSafeAbsoluteHttpUrl(thumbnailUrl, siteUrl);
+  if (!safeImg) return "";
+  return `\n      <itunes:image href="${escapeXml(safeImg)}" />`;
 }
 
 function renderPodcastItemXml(
@@ -93,11 +214,9 @@ function renderPodcastItemXml(
   activeLocale: string
 ): string {
   const itemUrl = resolveItemUrl(item, siteUrl, activeLocale);
-  const enclosureUrl = item.audioUrl
-    ? toAbsoluteUrl(item.audioUrl, siteUrl)
-    : itemUrl;
+  const enclosureUrl = toSafeAbsoluteHttpUrl(item.audioUrl, siteUrl) ?? itemUrl;
   const mimeType = resolveEnclosureMimeType(item.audioMimeType, enclosureUrl);
-  const byteLength = item.audioByteLength ?? 0;
+  const byteLength = sanitizeAudioByteLength(item.audioByteLength);
   const durationFormatted =
     formatSecondsToDuration(item.durationSeconds) ||
     item.duration ||
@@ -152,14 +271,14 @@ export function generatePodcastRssXml(
     seriesTitle,
     seriesDescription,
   } = options;
-  const activeLocale = (locale || defaultLocale).trim().toLowerCase();
+  const activeLocale = (locale || defaultLocale || "es").trim().toLowerCase();
   const channelTitle = seriesTitle
     ? `${feed.title} — ${seriesTitle}`
     : feed.title;
   const channelDescription = seriesDescription || feed.description;
-  const siteUrl = feed.siteUrl.replace(/\/$/, "");
+  const siteUrl = sanitizeSiteUrl(feed.siteUrl);
   const selfFeedUrl =
-    feed.feedUrl ||
+    toSafeAbsoluteHttpUrl(feed.feedUrl, siteUrl) ||
     `${siteUrl}/api/media-feeds/rss.xml?locale=${encodeURIComponent(activeLocale)}`;
 
   const itemXmlBlocks = episodes.map((ep) =>
@@ -171,8 +290,9 @@ export function generatePodcastRssXml(
     )
   );
 
-  const channelImageXml = feed.imageUrl
-    ? `    <itunes:image href="${escapeXml(feed.imageUrl)}" />`
+  const safeChannelImage = toSafeAbsoluteHttpUrl(feed.imageUrl, siteUrl);
+  const channelImageXml = safeChannelImage
+    ? `    <itunes:image href="${escapeXml(safeChannelImage)}" />`
     : "";
   const ownerXml = renderOwnerXml(feed);
 

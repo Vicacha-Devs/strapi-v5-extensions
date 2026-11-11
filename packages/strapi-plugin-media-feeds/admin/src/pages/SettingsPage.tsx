@@ -1,21 +1,6 @@
-import {
-  Box,
-  Button,
-  Checkbox,
-  Divider,
-  Field,
-  MultiSelect,
-  MultiSelectOption,
-  SingleSelect,
-  SingleSelectOption,
-  Tabs,
-  Textarea,
-  TextInput,
-  Typography,
-} from "@strapi/design-system";
+import { Box, Button, Tabs, Typography } from "@strapi/design-system";
 import { Layouts, useFetchClient, useNotification } from "@strapi/strapi/admin";
-import { LOCALE_OPTIONS } from "@vicacha-devs/plugin-shared";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useIntl } from "react-intl";
 
 import {
@@ -25,20 +10,8 @@ import {
   type MediaFeedsSettings,
 } from "../../../shared";
 import { LiveStreamsSection } from "../components/LiveStreamsSection";
-
-const SUB_CARD_BORDER_STYLE: React.CSSProperties = {
-  border: "1px solid rgba(128, 128, 128, 0.18)",
-};
-
-const INLINE_CODE_STYLE: React.CSSProperties = {
-  fontFamily:
-    "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-  fontSize: "0.88em",
-  padding: "2px 6px",
-  borderRadius: 4,
-  background: "rgba(128, 128, 128, 0.16)",
-  border: "1px solid rgba(128, 128, 128, 0.25)",
-};
+import { LocalizationSettingsSection } from "../components/LocalizationSettingsSection";
+import { PodcastSettingsSection } from "../components/PodcastSettingsSection";
 
 function buildLegacyPrimaryStream(
   liveStream: MediaFeedsSettings["liveStream"]
@@ -58,7 +31,7 @@ function buildLegacyPrimaryStream(
 function buildInitialStreams(
   data: MediaFeedsSettings
 ): LiveBroadcastChannelItem[] {
-  if (Array.isArray(data.liveStreams) && data.liveStreams.length > 0) {
+  if (Array.isArray(data.liveStreams)) {
     return data.liveStreams;
   }
   const defaultList = DEFAULT_MEDIA_FEEDS_SETTINGS.liveStreams ?? [];
@@ -70,34 +43,71 @@ function buildInitialStreams(
 
 export const SettingsPage: React.FC = () => {
   const { formatMessage } = useIntl();
-  const t = (id: string, defaultMessage: string) =>
-    formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage });
+  const t = useCallback(
+    (id: string, defaultMessage: string) =>
+      formatMessage({ id: `${PLUGIN_ID}.${id}`, defaultMessage }),
+    [formatMessage]
+  );
   const { get, put } = useFetchClient();
   const { toggleNotification } = useNotification();
 
   const [settings, setSettings] = useState<MediaFeedsSettings>(
     DEFAULT_MEDIA_FEEDS_SETTINGS
   );
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [saving, setSaving] = useState(false);
+  const isMountedRef = useRef(true);
+  const loadSeqRef = useRef(0);
 
   useEffect(() => {
-    let active = true;
+    isMountedRef.current = true;
+    const seq = ++loadSeqRef.current;
+    setLoading(true);
+    setLoadError(false);
+
     get<{ data: MediaFeedsSettings }>(`/${PLUGIN_ID}/settings`)
       .then((res) => {
-        if (!active || !res.data?.data) return;
-        const incoming = res.data.data;
+        if (!isMountedRef.current || seq !== loadSeqRef.current) return;
+        const incoming = res.data?.data;
+        if (!incoming) {
+          setLoadError(true);
+          toggleNotification({
+            type: "danger",
+            message: t(
+              "settings.ui.msg_failed_to_load_media_feeds_settings",
+              "Failed to load Media Feeds settings"
+            ),
+          });
+          return;
+        }
         setSettings({
           ...incoming,
           liveStreams: buildInitialStreams(incoming),
         });
+        setLoadError(false);
       })
       .catch(() => {
-        // Keep defaults
+        if (!isMountedRef.current || seq !== loadSeqRef.current) return;
+        setLoadError(true);
+        toggleNotification({
+          type: "danger",
+          message: t(
+            "settings.ui.msg_failed_to_load_media_feeds_settings",
+            "Failed to load Media Feeds settings"
+          ),
+        });
+      })
+      .finally(() => {
+        if (isMountedRef.current && seq === loadSeqRef.current) {
+          setLoading(false);
+        }
       });
+
     return () => {
-      active = false;
+      isMountedRef.current = false;
     };
-  }, [get]);
+  }, [get, toggleNotification, t]);
 
   const updateLiveStreams = (nextStreams: LiveBroadcastChannelItem[]) => {
     const primary = nextStreams.find((s) => s.enabled) ?? nextStreams[0];
@@ -113,7 +123,7 @@ export const SettingsPage: React.FC = () => {
             provider: primary.provider || "youtube",
             watchUrl: primary.watchUrl,
           }
-        : prev.liveStream,
+        : { ...prev.liveStream, enabled: false },
     }));
   };
 
@@ -147,22 +157,25 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (loading || loadError || saving) return;
     setSaving(true);
     try {
+      const defaultLoc = settings.defaultLocale || "en";
       const supportedLocales = Array.isArray(settings.supportedLocales)
         ? settings.supportedLocales
-        : ["es", "en", "ar", "tr"];
+        : [defaultLoc];
 
       const payload: Partial<MediaFeedsSettings> = {
         ...settings,
         supportedLocales:
-          supportedLocales.length > 0 ? supportedLocales : ["es", "en"],
+          supportedLocales.length > 0 ? supportedLocales : [defaultLoc],
       };
 
       const res = await put<{ data: MediaFeedsSettings }>(
         `/${PLUGIN_ID}/settings`,
         payload
       );
+      if (!isMountedRef.current) return;
       if (res.data?.data) {
         setSettings({
           ...res.data.data,
@@ -177,6 +190,7 @@ export const SettingsPage: React.FC = () => {
         ),
       });
     } catch {
+      if (!isMountedRef.current) return;
       toggleNotification({
         type: "danger",
         message: t(
@@ -185,7 +199,9 @@ export const SettingsPage: React.FC = () => {
         ),
       });
     } finally {
-      setSaving(false);
+      if (isMountedRef.current) {
+        setSaving(false);
+      }
     }
   };
 
@@ -203,12 +219,27 @@ export const SettingsPage: React.FC = () => {
           "Configure multi-language locales, Apple/Spotify RSS 2.0 metadata, and Live Event Broadcast streams"
         )}
         primaryAction={
-          <Button onClick={handleSave} loading={saving}>
+          <Button
+            onClick={handleSave}
+            loading={saving}
+            disabled={loading || loadError || saving}
+          >
             {t("settings.ui.save_settings", "Save Settings")}
           </Button>
         }
       />
       <Layouts.Content>
+        {loadError && (
+          <Box marginBottom={4} padding={4} background="danger100" hasRadius>
+            <Typography textColor="danger700" fontWeight="semiBold">
+              {t(
+                "settings.ui.msg_failed_to_load_media_feeds_settings",
+                "Failed to load Media Feeds settings"
+              )}
+            </Typography>
+          </Box>
+        )}
+
         <Tabs.Root defaultValue="localization">
           <Tabs.List
             aria-label={t(
@@ -228,246 +259,22 @@ export const SettingsPage: React.FC = () => {
             </Tabs.Trigger>
           </Tabs.List>
 
-          {/* Tab 1: Multi-Language Configuration */}
           <Tabs.Content value="localization">
-            <Box
-              background="neutral0"
-              padding={6}
-              shadow="filterShadow"
-              hasRadius
-              style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
-            >
-              <Typography variant="beta" tag="h2">
-                {t(
-                  "settings.ui.1_multi_language_localization_3_languages",
-                  "Multi-Language & Localization (3+ Languages)"
-                )}
-              </Typography>
-              <Divider marginTop={2} marginBottom={4} />
-              <Box
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                  gap: 20,
-                }}
-              >
-                <Field.Root
-                  name="defaultLocale"
-                  hint={t(
-                    "settings.ui.primary_language_code_e_g_es_used_when_no_locale",
-                    "Primary language code (e.g., es) used when no ?locale= query is supplied."
-                  )}
-                >
-                  <Field.Label>
-                    {t("field.default_locale", "Default Locale")}
-                  </Field.Label>
-                  <SingleSelect
-                    placeholder={t(
-                      "placeholder.e_g_es",
-                      "Select default locale"
-                    )}
-                    value={settings.defaultLocale || "es"}
-                    onChange={(val: string | number) =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        defaultLocale: String(val),
-                      }))
-                    }
-                  >
-                    {LOCALE_OPTIONS.map((opt) => (
-                      <SingleSelectOption key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SingleSelectOption>
-                    ))}
-                  </SingleSelect>
-                  <Field.Hint />
-                </Field.Root>
-                <Field.Root
-                  name="supportedLocales"
-                  hint={t(
-                    "settings.ui.active_locales_exposed_in_localized_news_blog_an",
-                    "Active locales exposed in localized News, Blog, and Podcast RSS feeds."
-                  )}
-                >
-                  <Field.Label>
-                    {t("field.supported_locales", "Supported Locales")}
-                  </Field.Label>
-                  <MultiSelect
-                    name="supportedLocales"
-                    withTags
-                    placeholder={t(
-                      "placeholder.select_supported_locales",
-                      "Select supported locales..."
-                    )}
-                    value={
-                      settings.supportedLocales || ["es", "en", "ar", "tr"]
-                    }
-                    onChange={(nextValues: string[]) =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        supportedLocales:
-                          nextValues.length > 0 ? nextValues : ["es"],
-                      }))
-                    }
-                    onClear={() =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        supportedLocales: ["es"],
-                      }))
-                    }
-                  >
-                    {LOCALE_OPTIONS.map((opt) => (
-                      <MultiSelectOption key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </MultiSelectOption>
-                    ))}
-                  </MultiSelect>
-                  <Field.Hint />
-                </Field.Root>
-              </Box>
-              <Box
-                marginTop={4}
-                padding={4}
-                background="neutral100"
-                hasRadius
-                style={SUB_CARD_BORDER_STYLE}
-              >
-                <Checkbox
-                  checked={settings.fallbackToDefaultLocale}
-                  onCheckedChange={(checked: boolean) =>
-                    setSettings((prev) => ({
-                      ...prev,
-                      fallbackToDefaultLocale: Boolean(checked),
-                    }))
-                  }
-                >
-                  {t(
-                    "settings.ui.automatically_fall_back_to_default_locale_when_a",
-                    "Automatically fall back to Default Locale when a translation is not yet published"
-                  )}{" "}
-                  (
-                  <code style={INLINE_CODE_STYLE}>
-                    {settings.defaultLocale || "es"}
-                  </code>
-                  )
-                </Checkbox>
-              </Box>
-            </Box>
+            <LocalizationSettingsSection
+              t={t}
+              settings={settings}
+              onChangeSettings={setSettings}
+            />
           </Tabs.Content>
 
-          {/* Tab 2: Podcast RSS 2.0 Metadata */}
           <Tabs.Content value="podcast">
-            <Box
-              background="neutral0"
-              padding={6}
-              shadow="filterShadow"
-              hasRadius
-              style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
-            >
-              <Typography variant="beta" tag="h2">
-                {t(
-                  "settings.ui.2_apple_podcasts_spotify_rss_2_0_feed",
-                  "Apple Podcasts & Spotify RSS 2.0 Feed"
-                )}
-              </Typography>
-              <Divider marginTop={2} marginBottom={4} />
-              <Box
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                  gap: 20,
-                }}
-              >
-                {(
-                  [
-                    [
-                      "title",
-                      t(
-                        "settings.ui.channel_title_published_in_get_api_media_feeds_p",
-                        "Channel <title> published in GET /api/media-feeds/podcasts/rss.xml."
-                      ),
-                      t("field.podcast_feed_title", "Podcast Feed Title"),
-                      t(
-                        "placeholder.e_g_mezquita_central_de_bogot_jumu_ah_lectures",
-                        "e.g., Mezquita Central de Bogotá — Jumu'ah & Lectures"
-                      ),
-                    ],
-                    [
-                      "author",
-                      t(
-                        "settings.ui.populates_the_itunes_author_rss_tag",
-                        "Populates the <itunes:author> RSS tag."
-                      ),
-                      t("field.author_organization", "Author / Organization"),
-                      t(
-                        "placeholder.e_g_mezquita_central_al_qurtubi_de_bogot",
-                        "e.g., Central Mosque of Bogotá"
-                      ),
-                    ],
-                    [
-                      "category",
-                      t(
-                        "settings.ui.populates_the_itunes_category_rss_tag",
-                        "Populates the <itunes:category> RSS tag."
-                      ),
-                      t("field.primary_category", "Primary Category"),
-                      t(
-                        "placeholder.e_g_religion_spirituality",
-                        "e.g., Religion & Spirituality"
-                      ),
-                    ],
-                  ] as const
-                ).map(([fieldKey, hint, label, placeholder]) => (
-                  <Field.Root key={fieldKey} hint={hint}>
-                    <Field.Label>{label}</Field.Label>
-                    <TextInput
-                      placeholder={placeholder}
-                      value={settings.podcastFeed[fieldKey]}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSettings((prev) => ({
-                          ...prev,
-                          podcastFeed: {
-                            ...prev.podcastFeed,
-                            [fieldKey]: e.target.value,
-                          },
-                        }))
-                      }
-                    />
-                    <Field.Hint />
-                  </Field.Root>
-                ))}
-                <Field.Root
-                  hint={t(
-                    "settings.ui.summary_shown_in_apple_podcasts_spotify_and_rss_",
-                    "Summary shown in Apple Podcasts, Spotify, and RSS reader directories."
-                  )}
-                >
-                  <Field.Label>
-                    {t("field.podcast_description", "Podcast Description")}
-                  </Field.Label>
-                  <Textarea
-                    placeholder={t(
-                      "placeholder.enter_a_description_for_apple_podcasts_and_spoti",
-                      "Enter a description for Apple Podcasts and Spotify RSS 2.0 feeds..."
-                    )}
-                    value={settings.podcastFeed.description}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                      setSettings((prev) => ({
-                        ...prev,
-                        podcastFeed: {
-                          ...prev.podcastFeed,
-                          description: e.target.value,
-                        },
-                      }))
-                    }
-                  />
-                  <Field.Hint />
-                </Field.Root>
-              </Box>
-            </Box>
+            <PodcastSettingsSection
+              t={t}
+              settings={settings}
+              onChangeSettings={setSettings}
+            />
           </Tabs.Content>
 
-          {/* Tab 3: Multiple Live Broadcasts & Event Streams */}
           <Tabs.Content value="livestream">
             <LiveStreamsSection
               t={t}

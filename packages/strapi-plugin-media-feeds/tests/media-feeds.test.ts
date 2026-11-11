@@ -232,7 +232,9 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
           <published>2026-02-13T17:30:00+00:00</published>
           <author><name>Mezquita Central Bogotá</name></author>
           <media:group>
-            <media:description>Sermón bilingüe en árabe y español.</media:description>
+            <media:description>
+              Sermón bilingüe en árabe y español.
+            </media:description>
             <media:thumbnail url="https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg" />
           </media:group>
         </entry>
@@ -386,5 +388,48 @@ describe("@vicacha-devs/strapi-plugin-media-feeds", () => {
     assert.equal(hostEp.provider, "youtube");
     assert.equal(hostEp.externalId, "dQw4w9WgXcQ");
     assert.equal(hostEp.secondaryDates?.hijri?.formatted, "25 Sha’ban 1447 AH");
+  });
+
+  it("enforces timeout, redirect:error, size cap, and HTTPS thumbnail_url in enrichUrl", async () => {
+    const syncService = createSyncService({ strapi: {} as any });
+    const originalFetch = globalThis.fetch;
+    let capturedInit: RequestInit | undefined;
+
+    try {
+      globalThis.fetch = (async (_input: unknown, init?: RequestInit) => {
+        capturedInit = init;
+        return new Response(
+          JSON.stringify({
+            title: "Safe Title",
+            author_name: "Safe Speaker",
+            thumbnail_url: "http://insecure.example.com/thumb.jpg",
+          }),
+          { status: 200 }
+        );
+      }) as typeof fetch;
+
+      const res = await syncService.enrichUrl(
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        true
+      );
+      assert.equal(capturedInit?.redirect, "error");
+      assert.ok(capturedInit?.signal);
+      assert.equal(res.title, "Safe Title");
+      assert.equal(res.authorName, "Safe Speaker");
+      assert.equal(
+        res.thumbnailUrl,
+        "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg"
+      );
+
+      globalThis.fetch = (async () =>
+        new Response("x".repeat(100_000), { status: 200 })) as typeof fetch;
+      const oversized = await syncService.enrichUrl(
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        true
+      );
+      assert.equal(oversized.title, undefined);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 });

@@ -1,19 +1,27 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { registerHooks, stripTypeScriptTypes } from "node:module";
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const calendarPkgRoot = resolvePath(currentDir, "../../strapi-plugin-calendar");
-const intlDateShimUrl = pathToFileURL(
-  resolvePath(calendarPkgRoot, "tests/intl-date-shim.mjs")
-).href;
+const pluginSharedRoot = resolvePath(currentDir, "../../plugin-shared");
+
+const ICONS_SHIM_URL =
+  "data:text/javascript," +
+  encodeURIComponent(
+    "export const Play = () => null; export const Microphone = () => null; export const Television = () => null;"
+  );
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (specifier === "@internationalized/date") {
-      return { url: intlDateShimUrl, shortCircuit: true };
+    if (specifier === "@vicacha-devs/plugin-shared") {
+      return {
+        url: pathToFileURL(resolvePath(pluginSharedRoot, "src/index.ts")).href,
+        shortCircuit: true,
+      };
     }
+
     if (specifier === "@vicacha-devs/strapi-plugin-calendar/shared") {
       return {
         url: pathToFileURL(resolvePath(calendarPkgRoot, "shared/index.ts"))
@@ -22,14 +30,22 @@ registerHooks({
       };
     }
 
+    if (specifier === "@strapi/icons") {
+      // The real package is browser ESM that needs named exports from CJS
+      // `react`, which Node cannot load; tests only need inert icon stubs.
+      return { url: ICONS_SHIM_URL, shortCircuit: true };
+    }
+
     if (
       (specifier.startsWith("./") || specifier.startsWith("../")) &&
-      context.parentURL
+      context.parentURL &&
+      context.parentURL.startsWith("file:")
     ) {
       const parentDir = dirname(fileURLToPath(context.parentURL));
       const baseCandidate = resolvePath(parentDir, specifier);
 
       const candidates = [
+        baseCandidate,
         `${baseCandidate}.ts`,
         `${baseCandidate}.tsx`,
         `${baseCandidate}.json`,
@@ -38,8 +54,16 @@ registerHooks({
       ];
 
       for (const candidate of candidates) {
-        if (existsSync(candidate)) {
-          return nextResolve(pathToFileURL(candidate).href, context);
+        if (existsSync(candidate) && statSync(candidate).isFile()) {
+          const candidateUrl = pathToFileURL(candidate).href;
+          if (
+            candidate.endsWith(".json") ||
+            candidate.endsWith(".ts") ||
+            candidate.endsWith(".tsx")
+          ) {
+            return { url: candidateUrl, shortCircuit: true };
+          }
+          return nextResolve(candidateUrl, context);
         }
       }
     }
@@ -48,7 +72,11 @@ registerHooks({
   },
 
   load(url, context, nextLoad) {
-    if (url.endsWith(".json") && !url.includes("/node_modules/")) {
+    if (
+      url.startsWith("file:") &&
+      url.endsWith(".json") &&
+      !url.includes("/node_modules/")
+    ) {
       const filePath = fileURLToPath(url);
       const source = readFileSync(filePath, "utf8");
       return {
@@ -59,6 +87,7 @@ registerHooks({
     }
 
     if (
+      url.startsWith("file:") &&
       (url.endsWith(".ts") || url.endsWith(".tsx")) &&
       !url.includes("/node_modules/")
     ) {
