@@ -33,7 +33,7 @@ strapi-v5-extensions/
 │   ├── strapi-plugin-seo/              # @vicacha-devs/strapi-plugin-seo — Strapi v5 SEO metadata & SERP analyzer
 │   └── strapi-plugin-sitemap/          # @vicacha-devs/strapi-plugin-sitemap — Multilingual XML sitemap & robots.txt generator
 ├── scripts/
-│   ├── ensure-esm-dist.ts              # Ensures dist/package.json ({"type":"module"}), index.cjs & entry .d.ts files
+│   ├── ensure-dist-types.ts            # Stubs missing entry .d.ts files so strapi-plugin verify passes (SDK layout: index.mjs + index.js)
 │   └── publint-all.ts                  # Strict publint validation across all 14 publishable plugins
 ├── commitlint.config.ts                # Conventional Commits + optional [TICKET-123] prefix (style check)
 ├── eslint.config.ts                    # Root ESLint v10 flat configuration
