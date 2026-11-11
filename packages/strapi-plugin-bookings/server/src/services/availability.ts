@@ -1,4 +1,5 @@
 import type { Core } from "@strapi/strapi";
+import { slugify } from "@vicacha-devs/plugin-shared";
 import type { ExpandedCalendarOccurrence as CalendarOccurrence } from "@vicacha-devs/strapi-plugin-calendar/shared";
 
 import { formatSecondaryCalendars } from "../../../shared/calendarSystems";
@@ -42,15 +43,7 @@ const STATUS_COLORS: Record<BookingStatus, string> = {
 };
 
 function slugifyName(value: string): string {
-  let slug = value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+/, "");
-  while (slug.endsWith("-")) {
-    slug = slug.slice(0, -1);
-  }
-  return slug;
+  return slugify(value, { normalization: false });
 }
 
 function asArray<T>(val: unknown): T[] {

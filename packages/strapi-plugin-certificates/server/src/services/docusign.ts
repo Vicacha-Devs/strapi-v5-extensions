@@ -1,4 +1,5 @@
 import type { Core } from "@strapi/strapi";
+import { stripTrailingSlashes } from "@vicacha-devs/plugin-shared";
 
 import {
   PLUGIN_ID,
@@ -8,7 +9,6 @@ import {
   type ESignEnvelopeStatus,
 } from "../../../shared";
 import { normalizeCertificateRecord } from "./issuanceHelpers";
-import { stripTrailingSlashes } from "./urlHelpers";
 
 const CERTIFICATE_UID = "plugin::certificates.certificate";
 
