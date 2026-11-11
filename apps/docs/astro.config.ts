@@ -6,6 +6,10 @@ import starlightLlmsTxt from "starlight-llms-txt";
 import starlightOpenAPI from "starlight-openapi";
 
 import { guides, type PluginPackageMeta, plugins } from "./docs-packages.ts";
+import {
+  normalizeBase,
+  rehypeBaseLinks,
+} from "./src/plugins/rehype-base-links.ts";
 import { remarkPele } from "./src/plugins/remark-pele.ts";
 
 interface SidebarLinkItem {
@@ -83,14 +87,20 @@ function buildPluginSidebar(p: PluginPackageMeta) {
   };
 }
 
+// Defaults serve the custom domain from "/". For a GitHub Pages project URL set
+// DOCS_SITE=https://vicacha-devs.github.io and DOCS_BASE=/strapi-v5-extensions.
+const docsBase = normalizeBase(process.env.DOCS_BASE);
+
 export default defineConfig({
-  site: "https://strapi-extensions.vicacha.dev",
+  site: process.env.DOCS_SITE || "https://strapi-extensions.vicacha.dev",
+  ...(docsBase ? { base: docsBase } : {}),
   output: "static",
   image: {
     service: passthroughImageService(),
   },
   markdown: {
     remarkPlugins: [remarkPele],
+    rehypePlugins: [[rehypeBaseLinks, { base: docsBase }]],
   },
   vite: { plugins: [tailwindcss()] },
   integrations: [
@@ -126,11 +136,11 @@ export default defineConfig({
       head: [
         {
           tag: "script",
-          attrs: { src: "/vendor/pele.global.js", defer: true },
+          attrs: { src: `${docsBase}/vendor/pele.global.js`, defer: true },
         },
         {
           tag: "script",
-          attrs: { src: "/vendor/pele-init.js", defer: true },
+          attrs: { src: `${docsBase}/vendor/pele-init.js`, defer: true },
         },
       ],
       plugins: [starlightOpenAPI(apiPluginConfigs), starlightLlmsTxt()],
@@ -158,6 +168,7 @@ export default defineConfig({
         },
       ],
       customCss: ["./src/styles/global.css"],
+      routeMiddleware: "./src/route-middleware.ts",
       favicon: "/favicon.svg",
     }),
   ],
