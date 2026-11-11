@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-calendar",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Universal Multi-Source Calendar, FullCalendar v6 Scheduler, RFC 5545/7529 Recurrence (RRULE & RSCALE), Multi-Calendar Systems (Hijri, Hebrew, Persian, etc.), and iCal (.ics) plugin for Strapi v5.",
   "keywords": [
     "calendar",
