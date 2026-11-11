@@ -3,7 +3,7 @@ export default ({
 }: {
   env: (key: string, defaultValue?: string) => string;
 }) => ({
-  calendar: {
+  "calendar": {
     enabled: true,
     config: {
       defaultView: "dayGridMonth",
@@ -51,7 +51,7 @@ export default ({
       ],
     },
   },
-  events: {
+  "events": {
     enabled: true,
     config: {
       defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
@@ -72,7 +72,7 @@ export default ({
       ],
     },
   },
-  bookings: {
+  "bookings": {
     enabled: true,
     config: {
       defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
@@ -92,5 +92,42 @@ export default ({
         },
       ],
     },
+  },
+  "notes": {
+    enabled: true,
+    config: {
+      defaultSortOrder: "DESC",
+      enableLocaleScoping: true,
+    },
+  },
+  "broadcasts": {
+    enabled: true,
+  },
+  "certificates": {
+    enabled: true,
+  },
+  "donations": {
+    enabled: true,
+  },
+  "global-search": {
+    enabled: true,
+  },
+  "inbox": {
+    enabled: true,
+  },
+  "islam": {
+    enabled: true,
+  },
+  "media-feeds": {
+    enabled: true,
+  },
+  "resources": {
+    enabled: true,
+  },
+  "seo": {
+    enabled: true,
+  },
+  "sitemap": {
+    enabled: true,
   },
 });
