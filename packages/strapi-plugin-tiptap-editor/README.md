@@ -104,7 +104,7 @@ export default () => ({
 
 ## Custom Components
 
-Components are enabled per preset under a `components` key mapping component names (`^[a-zA-Z][\w-]*$`, excluding `RESERVED_NODE_NAMES`) to `true`, `false`, or an options object. See [docs/adding-a-component.md](docs/adding-a-component.md) for the full guide.
+Components are enabled per preset under a `components` key mapping component names (`^[a-zA-Z][\w-]*$`, excluding `RESERVED_NODE_NAMES`) to `true`, `false`, or an options object:
 
 ```tsx
 import type { StrapiApp } from '@strapi/strapi/admin';

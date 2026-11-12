@@ -38,6 +38,7 @@ pnpm add @vicacha-devs/strapi-plugin-islam \
 # Editorial Productivity & Search/SEO
 pnpm add @vicacha-devs/strapi-plugin-notes \
   @vicacha-devs/strapi-plugin-global-search \
+  @vicacha-devs/strapi-plugin-tiptap-editor \
   @vicacha-devs/strapi-plugin-seo \
   @vicacha-devs/strapi-plugin-sitemap
 ```
@@ -116,6 +117,7 @@ export default ({
   "resources": { enabled: true },
   "notes": { enabled: true },
   "global-search": { enabled: true },
+  "tiptap-editor": { enabled: true },
   "seo": { enabled: true },
   "sitemap": { enabled: true },
 });
@@ -132,7 +134,7 @@ pnpm strapi build
 pnpm strapi develop
 ```
 
-![Strapi v5 Host Dashboard with All 14 Plugins Enabled](/screenshots/dashboard-overview.png)
+![Strapi v5 Host Dashboard with All 15 Plugins Enabled](/screenshots/dashboard-overview.png)
 
 ---
 
@@ -144,7 +146,7 @@ If you are developing inside the `strapi-v5-extensions` monorepo:
 # 1. Install all dependencies across apps/* and packages/*
 pnpm install
 
-# 2. Build all 14 plugins (ESM + CJS + TypeScript declarations)
+# 2. Build all 15 plugins (ESM + CJS + TypeScript declarations)
 pnpm build
 
 # 3. Run the full verification pipeline (oxfmt, oxlint, eslint, tsc, sdk-plugin, publint, tests)

@@ -189,7 +189,7 @@ function judge2Completeness(): JudgeResult {
     }
   }
   return {
-    name: "Judge 2 — Documentation Completeness, Content Manager Integration, Per-Plugin Entities, Use Cases, Pele Mermaid & OpenAPI (14 Plugins)",
+    name: `Judge 2 — Documentation Completeness, Content Manager Integration, Per-Plugin Entities, Use Cases, Pele Mermaid & OpenAPI (${plugins.length} Plugins)`,
     checked: `${plugins.length} plugins × (Overview + Use Cases + Guide + Content Manager + Pele Mermaid + OpenAPI YAML)`,
     failures,
   };
@@ -364,7 +364,7 @@ function judge4VisualAndLinks(): JudgeResult {
 
   return {
     name: "Judge 4 — Playwright Visual Captures, Pele Diagrams, Built Assets & llms.txt Integrity",
-    checked: `${expectedShots.length} Playwright PNGs + 14×4 Pele Use-Case pages + llms.txt`,
+    checked: `${expectedShots.length} Playwright PNGs + ${plugins.length}×4 Pele Use-Case pages + llms.txt`,
     failures,
   };
 }

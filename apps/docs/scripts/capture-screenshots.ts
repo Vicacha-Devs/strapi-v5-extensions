@@ -428,6 +428,18 @@ async function captureFromLiveStrapi(
       continue;
     }
 
+    if (plugin.pluginId === "tiptap-editor") {
+      await page.goto(`${baseUrl}/admin/settings/tiptap-editor`, {
+        waitUntil: "domcontentloaded",
+      });
+      await waitForStrapiPageReady(page, 2400);
+      await page.screenshot({ path: adminOutPath, fullPage: false });
+      if (settingsOutPath) {
+        await page.screenshot({ path: settingsOutPath, fullPage: false });
+      }
+      continue;
+    }
+
     await page.goto(`${baseUrl}/admin/plugins/${plugin.pluginId}`, {
       waitUntil: "domcontentloaded",
     });

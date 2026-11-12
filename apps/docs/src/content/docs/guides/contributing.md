@@ -13,7 +13,7 @@ The monorepo uses a fast, modern Rust + TypeScript quality toolchain modeled aft
 | **Oxlint**              | `.oxlintrc.json`                        | `pnpm lint:oxc`                     | Fast static analysis (`typescript`, `unicorn`, `oxc`, `import` plugins)                                                |
 | **ESLint v10**          | `eslint.config.ts`                      | `pnpm lint:eslint`                  | Flat config enforcing `max-lines: 500`, `sonarjs`, `jsx-a11y`, and JSON validation                                     |
 | **TypeScript 5.9**      | `tsconfig.json`                         | `pnpm check`                        | Strict `tsc --noEmit` across both `admin/tsconfig.json` and `server/tsconfig.json`                                     |
-| **Strapi SDK**          | `package.json`                          | `pnpm verify:sdk`                   | Runs `strapi-plugin verify` across all 14 plugins                                                                      |
+| **Strapi SDK**          | `package.json`                          | `pnpm verify:sdk`                   | Runs `strapi-plugin verify` across all 15 plugins                                                                      |
 | **Publint**             | `scripts/publint-all.ts`                | `pnpm publint`                      | Packs each plugin with `pnpm` and enforces `publint({ strict: true })`                                                 |
 | **Husky + lint-staged** | `.husky/*`, `.lintstagedrc.json`        | Git hooks                           | Runs `commitlint` on `commit-msg`, `lint-staged` on `pre-commit`, and `lint + check + test` on `pre-push`              |
 | **Semantic Release**    | `.releaserc.json`, `scripts/release.ts` | `pnpm release` / `pnpm release:dry` | Per-package conventional-commit version calculation, changelog generation, and `pnpm publish` with npm OIDC provenance |
@@ -56,7 +56,7 @@ The documentation site in `apps/docs` automatically synchronizes with the plugin
 # Start interactive local development server at http://localhost:4321
 pnpm --filter @vicacha-devs/docs dev
 
-# 1. Generate OpenAPI 3.0.3 YAML schemas from all 14 plugins' server routes & content-types
+# 1. Generate OpenAPI 3.0.3 YAML schemas from all 15 plugins' server routes & content-types
 pnpm --filter @vicacha-devs/docs generate:openapi
 
 # 2. Sync package README.md files + generate localized (en, es, ar, tr) Overview & Guide pages
