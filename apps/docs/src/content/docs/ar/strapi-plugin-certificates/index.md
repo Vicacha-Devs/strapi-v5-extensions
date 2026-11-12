@@ -4,7 +4,7 @@ description: "إصدار الشهادات الرسمية والتوقيع الر
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-certificates` · **Plugin ID**: `certificates` · **Category**: `Trust & Finance` · **Version**: `1.0.0` · **Routes**: `19`
+> **Package**: `@vicacha-devs/strapi-plugin-certificates` · **Plugin ID**: `certificates` · **Category**: `Trust & Finance` · **Version**: `1.1.1` · **Routes**: `19`
 
 إصدار الشهادات الرسمية والتوقيع الرقمي Ed25519 وبوابة التحقق الفوري عبر QR وتعمية البيانات الشخصية وتكامل DocuSign.
 

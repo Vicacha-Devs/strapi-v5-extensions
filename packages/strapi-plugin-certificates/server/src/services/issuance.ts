@@ -254,7 +254,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       const settings = await getSettingsService().getSettings();
       const keyPair = await getSettingsService().getSigningKeyPair();
-      const isIssued = input.autoApprove === true || !template.requiresApproval;
+      const isIssued =
+        input.autoApprove !== undefined
+          ? input.autoApprove === true
+          : !template.requiresApproval;
       const status: CertificateStatus = isIssued
         ? "issued"
         : "pending_approval";
@@ -279,21 +282,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         trimStr(input.locale, trimStr(settings.defaultLocale, "en"))
       );
 
-      const signed = signCanonicalPayload(
-        buildCanonicalPayload({
-          ...fields,
-          templateSlug: template.slug,
-          organizationName: trimStr(
-            template.organizationName,
-            settings.organizationName
-          ),
-          recipientFullName,
-          recipientChosenName: input.recipientChosenName,
-          signatories,
-          witnesses,
-        }),
-        keyPair.privateKeyPem
-      );
+      const signed = isIssued
+        ? signCanonicalPayload(
+            buildCanonicalPayload({
+              ...fields,
+              templateSlug: template.slug,
+              organizationName: trimStr(
+                template.organizationName,
+                settings.organizationName
+              ),
+              recipientFullName,
+              recipientChosenName: input.recipientChosenName,
+              signatories,
+              witnesses,
+            }),
+            keyPair.privateKeyPem
+          )
+        : { payloadHash: "", signature: "" };
       const created = await strapi.documents(CERTIFICATE_UID).create({
         data: {
           ...fields,
@@ -312,7 +317,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           secondaryDates,
           canonicalPayloadHash: signed.payloadHash,
           cryptographicSignature: signed.signature,
-          publicKeyFingerprint: keyPair.fingerprint,
+          publicKeyFingerprint: isIssued ? keyPair.fingerprint : "",
           linkedBookingCode: trimStr(input.linkedBookingCode),
           notes: trimStr(input.notes),
         },
@@ -337,6 +342,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       if (!existingDoc) throw new Error("Certificate record not found");
 
       const existing = normalizeCertificateRecord(existingDoc, true);
+      if (existing.status === "revoked") {
+        throw new Error("Cannot approve a revoked certificate");
+      }
       const template = await this.findTemplate({
         templateDocumentId: existing.templateDocumentId,
         templateSlug: existing.templateSlug,
@@ -413,20 +421,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     ): Promise<CertificateVerificationResult | null> {
       const cleanSerial = trimStr(serialNumber).toUpperCase();
       if (!cleanSerial) return null;
-
       const [match] = await strapi.documents(CERTIFICATE_UID).findMany({
         filters: { serialNumber: cleanSerial },
         limit: 1,
       });
       if (!match) return null;
-
       const cert = normalizeCertificateRecord(match, true);
       const settings = await getSettingsService().getSettings();
       const template = await this.findTemplate({
         templateDocumentId: cert.templateDocumentId,
         templateSlug: cert.templateSlug,
       });
-
       return evaluateCertificateVerification({
         cert,
         template,
@@ -454,20 +459,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         rawDoc = first || null;
       }
       if (!rawDoc) return null;
-
       const cert = normalizeCertificateRecord(rawDoc, true);
       const settings = await getSettingsService().getSettings();
       const template = await this.findTemplate({
         templateDocumentId: cert.templateDocumentId,
         templateSlug: cert.templateSlug,
       });
-
-      return renderPrintableFromRecord({
-        cert,
-        template,
-        settings,
-        options,
-      });
+      return renderPrintableFromRecord({ cert, template, settings, options });
     },
 
     async listCertificates(filters?: {

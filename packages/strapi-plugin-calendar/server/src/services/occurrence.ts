@@ -36,16 +36,47 @@ import {
   type ContentTypeSchemaShape,
 } from "./quickCreateHelpers";
 
+const MAX_QUERY_WINDOW_MS = 1850 * 86_400_000;
+const BLOCKED_SOURCE_UID_PREFIXES = [
+  "admin::",
+  "strapi::",
+  "plugin::users-permissions.",
+  "plugin::inbox.",
+  "plugin::donations.",
+  "plugin::certificates.",
+  "plugin::notes.",
+  "plugin::broadcasts.",
+];
+const SENSITIVE_CUSTOM_FIELD_RE =
+  /^(__proto__|constructor|prototype)$|password|token|secret|hash|privatekey|apikey/i;
+
+export function isAllowedCalendarSourceUid(uid: unknown): uid is string {
+  if (typeof uid !== "string" || !uid.trim()) return false;
+  return !BLOCKED_SOURCE_UID_PREFIXES.some((p) => uid.startsWith(p));
+}
+
 function resolveQueryWindow(params: OccurrenceQueryParams) {
   const y = new Date().getUTCFullYear();
   const defaultFrom = new Date(Date.UTC(y, 0, 1, 0, 0, 0)).toISOString();
   const defaultTo = new Date(Date.UTC(y, 11, 31, 23, 59, 59)).toISOString();
-  const validFrom =
-    params.from && !Number.isNaN(new Date(params.from).getTime());
-  const validTo = params.to && !Number.isNaN(new Date(params.to).getTime());
+  const fromMs = params.from ? new Date(params.from).getTime() : Number.NaN;
+  const toMs = params.to ? new Date(params.to).getTime() : Number.NaN;
+  const startMs = !Number.isNaN(fromMs)
+    ? fromMs
+    : new Date(defaultFrom).getTime();
+  const rawEndMs = !Number.isNaN(toMs) ? toMs : new Date(defaultTo).getTime();
+  const safeEndMs =
+    rawEndMs < startMs
+      ? startMs
+      : Math.min(rawEndMs, startMs + MAX_QUERY_WINDOW_MS);
   return {
-    windowStart: validFrom ? params.from! : defaultFrom,
-    windowEnd: validTo ? params.to! : defaultTo,
+    windowStart: !Number.isNaN(fromMs)
+      ? params.from!
+      : new Date(startMs).toISOString(),
+    windowEnd:
+      !Number.isNaN(toMs) && rawEndMs >= startMs && rawEndMs === safeEndMs
+        ? params.to!
+        : new Date(safeEndMs).toISOString(),
   };
 }
 
@@ -100,6 +131,7 @@ async function fetchDocumentsForSource(
   windowStart: string,
   windowEnd: string
 ): Promise<Array<Record<string, unknown>>> {
+  if (!isAllowedCalendarSourceUid(source.uid)) return [];
   const find = (withLocale: boolean) =>
     strapi
       .documents(source.uid)
@@ -117,7 +149,14 @@ function extractCustomFields(doc: Record<string, unknown>, keys?: string[]) {
   if (!Array.isArray(keys) || keys.length === 0) return undefined;
   const extracted: Record<string, unknown> = {};
   for (const key of keys) {
-    if (key && doc[key] !== undefined) extracted[key] = doc[key];
+    if (
+      key &&
+      !SENSITIVE_CUSTOM_FIELD_RE.test(key) &&
+      Object.hasOwn(doc, key) &&
+      doc[key] !== undefined
+    ) {
+      extracted[key] = doc[key];
+    }
   }
   return Object.keys(extracted).length > 0 ? extracted : undefined;
 }

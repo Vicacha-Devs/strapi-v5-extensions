@@ -1,4 +1,8 @@
 import { PLUGIN_ID } from "../../../shared";
+import {
+  CountryCustomFieldInput,
+  CurrencyCustomFieldInput,
+} from "../components/CurrencyCountryInput";
 import { PluginIcon } from "../components/PluginIcon";
 
 export const currencyCustomField = {
@@ -16,10 +20,7 @@ export const currencyCustomField = {
   },
   icon: PluginIcon,
   components: {
-    Input: async () =>
-      import("../components/CurrencyCountryInput").then((mod) => ({
-        default: mod.CurrencyCustomFieldInput,
-      })),
+    Input: async () => ({ default: CurrencyCustomFieldInput }),
   },
 };
 
@@ -38,9 +39,6 @@ export const countryCustomField = {
   },
   icon: PluginIcon,
   components: {
-    Input: async () =>
-      import("../components/CurrencyCountryInput").then((mod) => ({
-        default: mod.CountryCustomFieldInput,
-      })),
+    Input: async () => ({ default: CountryCustomFieldInput }),
   },
 };

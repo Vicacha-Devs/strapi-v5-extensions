@@ -7,6 +7,7 @@ import {
   MEDIA_ITEM_UID,
   MEDIA_SERIES_UID,
   PLUGIN_ID,
+  sanitizeOptionalMediaUrl,
   type LiveBroadcastState,
   type MediaFeedItem,
   type MediaFeedsSettings,
@@ -156,14 +157,14 @@ function mapRawSeriesItem(
     slug,
     description: String(r.description ?? ""),
     author: stringOrNull(r.author),
-    coverImageUrl: stringOrNull(r.coverImageUrl),
+    coverImageUrl: sanitizeOptionalMediaUrl(r.coverImageUrl),
     category: stringOrNull(r.category) ?? "Education",
     defaultType: String(r.defaultType ?? "podcast"),
     spokenLanguages,
     rssEnabled: r.rssEnabled !== false,
     youtubePlaylistId: stringOrNull(r.youtubePlaylistId),
-    spotifyShowUrl: stringOrNull(r.spotifyShowUrl),
-    applePodcastsUrl: stringOrNull(r.applePodcastsUrl),
+    spotifyShowUrl: sanitizeOptionalMediaUrl(r.spotifyShowUrl),
+    applePodcastsUrl: sanitizeOptionalMediaUrl(r.applePodcastsUrl),
     active: r.active !== false,
   };
 }
@@ -363,19 +364,33 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     let seriesTitle: string | undefined;
     let seriesDescription: string | undefined;
+    let feed = settings.podcastFeed;
     if (cleanSeries) {
       const seriesList = await this.getSeriesList(cleanLocale);
       const matched = seriesList.find(
         (s) => s.slug.toLowerCase() === cleanSeries.toLowerCase()
       );
       if (matched) {
+        if (!matched.rssEnabled) {
+          return generatePodcastRssXml([], {
+            feed,
+            locale: cleanLocale,
+            defaultLocale: settings.defaultLocale,
+          });
+        }
         seriesTitle = matched.title;
         seriesDescription = matched.description;
+        feed = {
+          ...feed,
+          author: matched.author || feed.author,
+          imageUrl: matched.coverImageUrl || feed.imageUrl,
+          category: matched.category || feed.category,
+        };
       }
     }
 
     return generatePodcastRssXml(episodes, {
-      feed: settings.podcastFeed,
+      feed,
       locale: cleanLocale,
       defaultLocale: settings.defaultLocale,
       seriesTitle,

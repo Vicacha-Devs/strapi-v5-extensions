@@ -18,7 +18,7 @@ const createMockStrapi = () => {
   let createdComponentPayload: Record<string, unknown> | null = null;
   let registeredActions: Array<Record<string, unknown>> = [];
 
-  const strapi: Record<string, any> = {
+  const strapi: any = {
     reload: {
       isWatching: true,
     },
@@ -113,7 +113,7 @@ const createMockStrapi = () => {
     },
   };
 
-  return strapi;
+  return strapi as any;
 };
 
 describe("strapi-plugin-seo", () => {
@@ -210,7 +210,7 @@ describe("strapi-plugin-seo", () => {
     });
 
     const controller = serverPlugin.controllers.seo({ strapi });
-    const ctx: Record<string, any> = {};
+    const ctx: any = {};
     await controller.createSeoComponent(ctx);
 
     assert.equal(strapi.reload.isWatching, true);
@@ -244,7 +244,7 @@ describe("strapi-plugin-seo", () => {
     // Rejects prototype pollution keys and non-object controller bodies
     const settingsCtrl = serverPlugin.controllers.settings({ strapi });
     let badRequestCalled = false;
-    const badCtx: Record<string, any> = {
+    const badCtx: any = {
       request: { body: ["invalid"] },
       badRequest() {
         badRequestCalled = true;
@@ -339,6 +339,36 @@ describe("strapi-plugin-seo", () => {
     assert.equal(
       lastUpdatedAtPreview({ updatedAt: "invalid-date" }).qualityVerdict,
       "bad"
+    );
+
+    // Tiptap envelope JSON & prototype keyword filtering regression check
+    const tiptapResult = getRichTextData(
+      {
+        body: JSON.stringify({
+          doc: {
+            type: "doc",
+            content: [
+              {
+                type: "paragraph",
+                content: [{ type: "text", text: "Hello Tiptap SEO world" }],
+              },
+            ],
+          },
+          metrics: { readingTimeMinutes: 1 },
+        }),
+        seo: { keywords: "__proto__, constructor, prototype, tiptap" },
+      },
+      componentsMock,
+      contentType
+    );
+    assert.equal(tiptapResult.wordCount, 4);
+    assert.equal(tiptapResult.keywordsDensity.tiptap?.count, 1);
+    assert.equal(
+      Object.prototype.hasOwnProperty.call(
+        tiptapResult.keywordsDensity,
+        "__proto__"
+      ),
+      false
     );
   });
 });

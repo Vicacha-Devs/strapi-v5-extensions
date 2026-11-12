@@ -1,9 +1,9 @@
 ---
 title: Vicacha Strapi v5 Extensions
-description: Enterprise Strapi v5 plugins for scheduling, events, bookings, digital certificates, donations, omnichannel broadcasts, media feeds, global search, and SEO.
+description: Enterprise Strapi v5 plugins for scheduling, events, bookings, digital certificates, donations, omnichannel broadcasts, media feeds, global search, rich-text editing, and SEO.
 template: splash
 hero:
-  tagline: 14 modular, cryptographically hardened, 13-locale Strapi v5 plugins with interactive OpenAPI specs and zero-config inter-plugin bridges.
+  tagline: 15 modular, cryptographically hardened, multi-locale Strapi v5 plugins with interactive OpenAPI specs and zero-config inter-plugin bridges.
   image:
     file: ../../../public/screenshots/dashboard-overview.png
   actions:
@@ -21,7 +21,7 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 ## Core Pillars
 
 <CardGrid stagger>
-  <Card title="14 Production Strapi v5 Plugins" icon="puzzle">
+  <Card title="15 Production Strapi v5 Plugins" icon="puzzle">
     Built natively on the Strapi v5 Document Service API
     (`strapi.documents(uid)`), Design System v2, and `@strapi/sdk-plugin`
     dual-bundle architecture.
@@ -33,16 +33,17 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
   </Card>
   <Card title="Cryptographic & Webhook Hardening" icon="approve-check-circle">
     Ed25519 digital signatures, constant-time HMAC-SHA256 webhook verification,
-    SSRF & path-traversal defenses, and salted PII masking out of the box.
+    DOMPurify HTML sanitization, SSRF & path-traversal defenses, and salted PII
+    masking.
   </Card>
   <Card title="13-Locale Admin i18n & RTL" icon="translate">
     Full Admin UI translation parity across `en`, `es`, `ar` (RTL), `tr`, `fr`,
-    `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL), and `zh`, plus CLDR
-    Hijri/Hebrew/Persian secondary calendars.
+    `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL), and `zh` (plus `cs` in
+    `tiptap-editor`), alongside CLDR Hijri/Hebrew/Persian secondary calendars.
   </Card>
 </CardGrid>
 
-## Complete Plugin Matrix (14 Packages)
+## Complete Plugin Matrix (15 Packages)
 
 | Package                                                      | Strapi Plugin ID | Category               | Key Capabilities                                                                                                                               |
 | :----------------------------------------------------------- | :--------------- | :--------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -60,6 +61,7 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 | [Global Command Search](/strapi-plugin-global-search/)       | `global-search`  | Editorial DX           | Instant `Cmd/Ctrl+K` command-palette search across all Strapi v5 content types with fuzzy matching and recent-item navigation                  |
 | [SEO & SERP Analyzer](/strapi-plugin-seo/)                   | `seo`            | SEO & Discovery        | Shared `shared.seo` component manager, live Google SERP & social card previews, and real-time keyword density analyzer                         |
 | [XML Sitemap & Hreflang](/strapi-plugin-sitemap/)            | `sitemap`        | SEO & Discovery        | Multilingual XML sitemap (`hreflang`), sitemap index splitting, custom URL rules, and `robots.txt` integration                                 |
+| [Tiptap Rich Text Editor](/strapi-plugin-tiptap-editor/)     | `tiptap-editor`  | Editorial DX           | TipTap v3 + Edifice IO WYSIWYG custom field, 49 features & 4 presets, custom components, Canvas image studio, voice recorder, SSRF/DOMPurify   |
 
 ## Quick Installation
 
@@ -78,5 +80,6 @@ pnpm add @vicacha-devs/strapi-plugin-calendar \
   @vicacha-devs/strapi-plugin-notes \
   @vicacha-devs/strapi-plugin-global-search \
   @vicacha-devs/strapi-plugin-seo \
-  @vicacha-devs/strapi-plugin-sitemap
+  @vicacha-devs/strapi-plugin-sitemap \
+  @vicacha-devs/strapi-plugin-tiptap-editor
 ```

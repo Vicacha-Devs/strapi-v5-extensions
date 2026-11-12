@@ -1,5 +1,5 @@
 // Content-Type Entity architecture, locations, Pele Mermaid diagrams, and real-world use cases
-// for all 14 @vicacha-devs Strapi v5 plugins.
+// for all 15 @vicacha-devs Strapi v5 plugins.
 
 import { PLUGIN_ENTITY_GUIDE_A } from "./plugin-use-cases-a.ts";
 import { PLUGIN_ENTITY_GUIDE_B } from "./plugin-use-cases-b.ts";

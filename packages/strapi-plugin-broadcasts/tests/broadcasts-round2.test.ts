@@ -23,11 +23,11 @@ describe("@vicacha-devs/strapi-plugin-broadcasts Round 2 regressions", () => {
       dryRun: true,
     });
 
-    let notifyEnteredBarrier: () => void = () => {};
+    let notifyEnteredBarrier!: () => void;
     const enteredBarrier = new Promise<void>((resolve) => {
       notifyEnteredBarrier = resolve;
     });
-    let releaseBarrier: () => void = () => {};
+    let releaseBarrier!: () => void;
     const barrier = new Promise<void>((resolve) => {
       releaseBarrier = resolve;
     });
@@ -50,7 +50,7 @@ describe("@vicacha-devs/strapi-plugin-broadcasts Round 2 regressions", () => {
               ];
             },
           }),
-        } as ReturnType<typeof origPlugin>;
+        } as unknown as ReturnType<typeof origPlugin>;
       }
       return origPlugin(name);
     }) as typeof strapi.plugin;

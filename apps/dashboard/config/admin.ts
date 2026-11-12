@@ -5,6 +5,13 @@ function resolveSecret(envKey: string): string {
   if (fromEnv && fromEnv.trim().length > 0) {
     return fromEnv.trim();
   }
+  const isProdRuntime =
+    process.env.NODE_ENV === "production" && !process.argv.includes("build");
+  if (isProdRuntime) {
+    throw new Error(
+      `[dashboard] Missing required production environment variable: ${envKey}`
+    );
+  }
   console.warn(
     `[dashboard] Generating instance-isolated ephemeral secret for ${envKey}`
   );
@@ -22,5 +29,8 @@ export default () => ({
     token: {
       salt: resolveSecret("TRANSFER_TOKEN_SALT"),
     },
+  },
+  secrets: {
+    encryptionKey: resolveSecret("ENCRYPTION_KEY"),
   },
 });

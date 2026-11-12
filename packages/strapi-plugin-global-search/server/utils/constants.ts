@@ -53,6 +53,19 @@ export const BLOCKLISTED_ATTRIBUTE_NAMES = [
   "resetPasswordToken",
   "registrationToken",
   "confirmationToken",
+  "cancelToken",
+  "confirmToken",
+  "verificationToken",
+  "unsubscribeToken",
+  "secret",
+  "privateKey",
+  "apiKey",
+  "accessKey",
+  "webhookSecret",
+  "accessToken",
+  "refreshToken",
+  "cancelTokenHash",
+  "cancellationTokenHash",
 ];
 
 /**

@@ -55,8 +55,8 @@ describe("Adversarial Security, RBAC, Settings & RSS Hardening", () => {
       "plugin::media-feeds.settings.update"
     );
 
-    let capturedMenu: Record<string, unknown> | null = null;
-    let capturedSection: Record<string, any> | null = null;
+    let capturedMenu: Record<string, any> = {};
+    let capturedSection: Record<string, any> = {};
     let capturedSettingsLinks: Array<Record<string, unknown>> = [];
 
     adminPlugin.register({

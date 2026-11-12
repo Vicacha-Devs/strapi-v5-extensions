@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Events, RSVP & Check-In (@vicacha-devs/strapi-plugin-events)
-  version: 1.0.0
+  version: 1.1.0
   description: Production-grade Strapi v5 Events, RSVP Capacity, Automatic Waitlist Promotion, Attendee Check-In
     & iCal Plugin powered by @vicacha-devs/strapi-plugin-calendar
 servers:
@@ -359,7 +359,9 @@ paths:
     get:
       operationId: getApiEventsOccurrences
       summary: List Occurrences
-      description: Strapi v5 Content API endpoint handled by `content-api.listOccurrences`.
+      description: Strapi v5 Content API endpoint handled by `content-api.listOccurrences`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
       parameters:
@@ -393,6 +395,8 @@ paths:
           description: BCP-47 content/display locale (e.g. en, es, ar, tr)
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -405,11 +409,16 @@ paths:
                     $ref: "#/components/schemas/Event"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
   /api/events/spotlights:
     get:
       operationId: getApiEventsSpotlights
       summary: List Spotlights
-      description: Strapi v5 Content API endpoint handled by `content-api.listSpotlights`.
+      description: Strapi v5 Content API endpoint handled by `content-api.listSpotlights`. Protected by Strapi Users
+        & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
       tags:
         - Content API
       parameters:
@@ -419,6 +428,8 @@ paths:
           description: Optional Strapi i18n locale filter
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -431,11 +442,17 @@ paths:
                     $ref: "#/components/schemas/Event"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
   /api/events/feed.ics:
     get:
       operationId: getApiEventsFeedIcs
       summary: Download Feed Ics
-      description: Strapi v5 Content API endpoint handled by `content-api.downloadFeedIcs`.
+      description: Strapi v5 Content API endpoint handled by `content-api.downloadFeedIcs`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
       parameters:
@@ -469,6 +486,8 @@ paths:
           description: BCP-47 content/display locale (e.g. en, es, ar, tr)
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -479,11 +498,17 @@ paths:
                 description: RFC 5545 iCalendar (.ics) stream
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
   /api/events/{documentId}/invite.ics:
     get:
       operationId: getApiEventsByDocumentIdInviteIcs
       summary: Download Event Invite Ics
-      description: Strapi v5 Content API endpoint handled by `content-api.downloadEventInviteIcs`.
+      description: Strapi v5 Content API endpoint handled by `content-api.downloadEventInviteIcs`. Protected by
+        Strapi Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
       parameters:
@@ -493,6 +518,8 @@ paths:
           description: Target documentId identifier
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -503,11 +530,16 @@ paths:
                 description: RFC 5545 iCalendar (.ics) stream
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
   /api/events/{documentId}/stats:
     get:
       operationId: getApiEventsByDocumentIdStats
       summary: Get Event Stats
-      description: Strapi v5 Content API endpoint handled by `content-api.getEventStats`.
+      description: Strapi v5 Content API endpoint handled by `content-api.getEventStats`. Protected by Strapi Users
+        & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
       tags:
         - Content API
       parameters:
@@ -517,6 +549,8 @@ paths:
           description: Target documentId identifier
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -529,11 +563,17 @@ paths:
                     $ref: "#/components/schemas/Event"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
   /api/events/{documentId}/register:
     post:
       operationId: postApiEventsByDocumentIdRegister
       summary: Register Attendee
-      description: Strapi v5 Content API endpoint handled by `content-api.registerAttendee`.
+      description: Strapi v5 Content API endpoint handled by `content-api.registerAttendee`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
       parameters:
@@ -543,6 +583,8 @@ paths:
           description: Target documentId identifier
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -555,6 +597,10 @@ paths:
                     $ref: "#/components/schemas/Event"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
       requestBody:
         required: true
         content:
@@ -565,7 +611,9 @@ paths:
     post:
       operationId: postApiEventsRegistrationsByTokenCancel
       summary: Cancel Registration
-      description: Strapi v5 Content API endpoint handled by `content-api.cancelRegistration`.
+      description: Strapi v5 Content API endpoint handled by `content-api.cancelRegistration`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
       parameters:
@@ -575,6 +623,8 @@ paths:
           description: Target token identifier
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -587,6 +637,10 @@ paths:
                     $ref: "#/components/schemas/Event"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
       requestBody:
         required: false
         content:

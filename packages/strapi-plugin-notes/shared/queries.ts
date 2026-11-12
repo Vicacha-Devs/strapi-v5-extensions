@@ -43,6 +43,9 @@ function matchesEntityIdentifier(
     if (note.entityDocumentId === docIdFilter || noteIdStr === docIdFilter) {
       return true;
     }
+    if (note.entityDocumentId && note.entityDocumentId !== noteIdStr) {
+      return false;
+    }
   }
   if (entityIdFilter !== null) {
     const filterStr = String(entityIdFilter);

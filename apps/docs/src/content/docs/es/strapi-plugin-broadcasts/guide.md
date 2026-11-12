@@ -40,16 +40,16 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción                                                  | Texto en Interfaz                                |
-| :------------------------------------------------------------------- | :----------------------------------------------- |
-| `broadcasts.checkbox.enable_dry_run_sandbox_mode`                    | Habilitar Dry-Run Sandbox Mode                   |
-| `broadcasts.checkbox.enable_eventhub_auto_broadcast_triggers`        | Habilitar EventHub Auto-Transmisión Triggers     |
-| `broadcasts.checkbox.enable_telegram_transport`                      | Habilitar Telegram Transport                     |
-| `broadcasts.checkbox.enable_whatsapp_transport`                      | Habilitar WhatsApp Transport                     |
-| `broadcasts.checkbox.segment_confirmed_subscribers_via_inbox_bridge` | Segment confirmed subscribers via Inbox Bridge   |
-| `broadcasts.field.broadcast_topic_segments_comma_separated`          | Transmisión Topic Segments (separados por comas) |
-| `broadcasts.field.campaign_slug`                                     | Campaña Slug                                     |
-| `broadcasts.field.campaign_title`                                    | Campaña Título                                   |
+| Clave de Traducción                                       | Texto en Interfaz                                              |
+| :-------------------------------------------------------- | :------------------------------------------------------------- |
+| `checkbox.enable_dry_run_sandbox_mode`                    | Activar modo de simulación (Dry-Run)                           |
+| `checkbox.enable_email_designer_5_html_template_bridge`   | Activar puente de plantillas HTML de Email Designer 5          |
+| `checkbox.enable_eventhub_auto_broadcast_triggers`        | Activar disparadores automáticos de difusión por EventHub      |
+| `checkbox.enable_telegram_transport`                      | Activar transporte de Telegram                                 |
+| `checkbox.enable_whatsapp_transport`                      | Activar transporte de WhatsApp                                 |
+| `checkbox.segment_confirmed_subscribers_via_inbox_bridge` | Segmentar suscriptores confirmados mediante el puente de Inbox |
+| `common.activate`                                         | Activar                                                        |
+| `common.active`                                           | activo                                                         |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 

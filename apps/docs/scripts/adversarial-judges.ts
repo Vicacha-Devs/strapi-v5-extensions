@@ -189,7 +189,7 @@ function judge2Completeness(): JudgeResult {
     }
   }
   return {
-    name: "Judge 2 — Documentation Completeness, Content Manager Integration, Per-Plugin Entities, Use Cases, Pele Mermaid & OpenAPI (14 Plugins)",
+    name: `Judge 2 — Documentation Completeness, Content Manager Integration, Per-Plugin Entities, Use Cases, Pele Mermaid & OpenAPI (${plugins.length} Plugins)`,
     checked: `${plugins.length} plugins × (Overview + Use Cases + Guide + Content Manager + Pele Mermaid + OpenAPI YAML)`,
     failures,
   };
@@ -335,13 +335,24 @@ function judge4VisualAndLinks(): JudgeResult {
     }
     collectHtml(DIST_ROOT);
 
+    const docsBase = (process.env.DOCS_BASE ?? "")
+      .trim()
+      .split("/")
+      .filter(Boolean)
+      .join("/");
+    const basePrefix = docsBase ? `/${docsBase}/` : "";
+
     for (const htmlFile of htmlFiles) {
       const html = readFileSync(htmlFile, "utf8");
       const imgMatches = [...html.matchAll(/<img[^>]+src="(\/[^"#?]+)"/g)].map(
         (m) => m[1]
       );
       for (const src of imgMatches) {
-        const assetPath = join(DIST_ROOT, src);
+        const normalizedSrc =
+          basePrefix && src.startsWith(basePrefix)
+            ? `/${src.slice(basePrefix.length)}`
+            : src;
+        const assetPath = join(DIST_ROOT, normalizedSrc);
         if (!existsSync(assetPath)) {
           failures.push(
             `Broken image src="${src}" in ${relative(DIST_ROOT, htmlFile)}`
@@ -353,7 +364,7 @@ function judge4VisualAndLinks(): JudgeResult {
 
   return {
     name: "Judge 4 — Playwright Visual Captures, Pele Diagrams, Built Assets & llms.txt Integrity",
-    checked: `${expectedShots.length} Playwright PNGs + 14×4 Pele Use-Case pages + llms.txt`,
+    checked: `${expectedShots.length} Playwright PNGs + ${plugins.length}×4 Pele Use-Case pages + llms.txt`,
     failures,
   };
 }

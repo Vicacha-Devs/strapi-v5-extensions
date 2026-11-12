@@ -26,7 +26,7 @@ import { clampPriority, isTruthyFlag, sanitizeFrequency } from "./xml-builder";
 
 export const sanitizeBaseUrl = (rawUrl: unknown): string => {
   const trimmed = stripTrailingSlashes(String(rawUrl ?? "").trim());
-  if (!trimmed) {
+  if (!trimmed || trimmed.startsWith("//")) {
     return "";
   }
   if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed) && !/^https?:\/\//i.test(trimmed)) {
@@ -51,6 +51,14 @@ const EXCLUDED_PLUGIN_PREFIXES = [
   "plugin::review-workflows.",
   `plugin::${PLUGIN_ID}.`,
   "plugin::strapi-5-sitemap-plugin.",
+  "plugin::bookings.",
+  "plugin::donations.",
+  "plugin::inbox.",
+  "plugin::notes.",
+  "plugin::broadcasts.",
+  "plugin::certificates.",
+  "plugin::global-search.",
+  "plugin::seo.",
 ];
 
 export interface DbQueryRepo<T = Record<string, unknown>> {

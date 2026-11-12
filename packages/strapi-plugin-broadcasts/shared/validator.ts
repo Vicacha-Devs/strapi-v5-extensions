@@ -52,6 +52,17 @@ function isBlockedIpv4(
   return false;
 }
 
+function parseIpv6Part(part: string): number[] | null {
+  if (!part) return [];
+  const tokens = part.split(":");
+  const nums: number[] = [];
+  for (const tok of tokens) {
+    if (!/^[0-9a-f]{1,4}$/i.test(tok)) return null;
+    nums.push(Number.parseInt(tok, 16));
+  }
+  return nums;
+}
+
 function expandIpv6Groups(rawHost: string): number[] | null {
   if (!rawHost.includes(":") || rawHost.includes("%")) return null;
   let candidate = rawHost;
@@ -68,25 +79,14 @@ function expandIpv6Groups(rawHost: string): number[] | null {
   const dblParts = candidate.split("::");
   if (dblParts.length > 2) return null;
 
-  const parsePart = (part: string): number[] | null => {
-    if (!part) return [];
-    const tokens = part.split(":");
-    const nums: number[] = [];
-    for (const tok of tokens) {
-      if (!/^[0-9a-f]{1,4}$/i.test(tok)) return null;
-      nums.push(Number.parseInt(tok, 16));
-    }
-    return nums;
-  };
-
-  const left = parsePart(dblParts[0]);
+  const left = parseIpv6Part(dblParts[0]);
   if (!left) return null;
 
   if (dblParts.length === 1) {
     return left.length === 8 ? left : null;
   }
 
-  const right = parsePart(dblParts[1]);
+  const right = parseIpv6Part(dblParts[1]);
   if (!right) return null;
   const missing = 8 - (left.length + right.length);
   if (missing < 1) return null;

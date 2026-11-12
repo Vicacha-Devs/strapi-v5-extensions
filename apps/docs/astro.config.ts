@@ -112,7 +112,7 @@ export default defineConfig({
         tr: "Vicacha Strapi v5 Eklentileri",
       },
       description:
-        "Enterprise Strapi v5 plugins for scheduling, events, bookings, digital certificates, donations, omnichannel broadcasts, media feeds, global search, and SEO.",
+        "Enterprise Strapi v5 plugins for scheduling, events, bookings, digital certificates, donations, omnichannel broadcasts, media feeds, global search, rich-text editing, and SEO.",
       defaultLocale: "root",
       locales: {
         root: {

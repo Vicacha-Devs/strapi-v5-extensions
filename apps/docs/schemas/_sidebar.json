@@ -521,6 +521,10 @@
           "link": "/strapi-plugin-inbox/api/operations/getapiinboxsubscribersunsubscribebytoken/"
         },
         {
+          "label": "Unsubscribe",
+          "link": "/strapi-plugin-inbox/api/operations/getapiinboxpublicunsubscribe/"
+        },
+        {
           "label": "Get Active Alerts",
           "link": "/strapi-plugin-inbox/api/operations/getapiinboxalerts/"
         }
@@ -747,6 +751,10 @@
           "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedsepisodes/"
         },
         {
+          "label": "Get Episode By Slug",
+          "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedsepisodesbyslug/"
+        },
+        {
           "label": "List Series",
           "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedsseries/"
         },
@@ -757,6 +765,10 @@
         {
           "label": "Get Rss Xml",
           "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedsrssxml/"
+        },
+        {
+          "label": "Get Rss Xml",
+          "link": "/strapi-plugin-media-feeds/api/operations/getapimediafeedspodcastxml/"
         }
       ]
     }
@@ -813,11 +825,11 @@
       "collapsed": true,
       "items": [
         {
-          "label": "Get Hub Overview",
+          "label": "Get Admin Hub Overview",
           "link": "/strapi-plugin-resources/api/operations/getresourceshub/"
         },
         {
-          "label": "List Publications",
+          "label": "List Admin Publications",
           "link": "/strapi-plugin-resources/api/operations/getresourcespublications/"
         },
         {
@@ -833,7 +845,7 @@
           "link": "/strapi-plugin-resources/api/operations/deleteresourcespublicationsbydocumentid/"
         },
         {
-          "label": "List Galleries",
+          "label": "List Admin Galleries",
           "link": "/strapi-plugin-resources/api/operations/getresourcesgalleries/"
         },
         {
@@ -853,7 +865,7 @@
           "link": "/strapi-plugin-resources/api/operations/postresourcesgalleriesbydocumentidsyncmediafolder/"
         },
         {
-          "label": "List Glossary",
+          "label": "List Admin Glossary",
           "link": "/strapi-plugin-resources/api/operations/getresourcesglossary/"
         },
         {
@@ -987,6 +999,54 @@
         {
           "label": "Get Allowed Fields",
           "link": "/strapi-plugin-sitemap/api/operations/getsitemapallowedfields/"
+        }
+      ]
+    }
+  ],
+  "strapi-plugin-tiptap-editor": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorpresets/"
+        },
+        {
+          "label": "Find One",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorpresetsbyname/"
+        },
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditortheme/"
+        },
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorsettings/"
+        },
+        {
+          "label": "Update",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/puttiptapeditorsettings/"
+        },
+        {
+          "label": "Search",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorsearch/"
+        },
+        {
+          "label": "Get Document",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorgetbycollectionnamebydocumentid/"
+        },
+        {
+          "label": "Identify",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditoridentifybycollectionname/"
+        },
+        {
+          "label": "Link Preview",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorlinkpreview/"
+        },
+        {
+          "label": "Upload By Url",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/posttiptapeditoruploadbyurl/"
         }
       ]
     }

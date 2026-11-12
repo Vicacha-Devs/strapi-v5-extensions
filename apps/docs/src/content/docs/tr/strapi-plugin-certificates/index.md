@@ -4,7 +4,7 @@ description: "Resmi sertifika düzenleme, Ed25519 kriptografik imzalama, sabit z
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-certificates` · **Plugin ID**: `certificates` · **Category**: `Trust & Finance` · **Version**: `1.0.0` · **Routes**: `19`
+> **Package**: `@vicacha-devs/strapi-plugin-certificates` · **Plugin ID**: `certificates` · **Category**: `Trust & Finance` · **Version**: `1.1.1` · **Routes**: `19`
 
 Resmi sertifika düzenleme, Ed25519 kriptografik imzalama, sabit zamanlı QR doğrulama portalı, tuzlanmış PII özeti ve DocuSign entegrasyonu.
 

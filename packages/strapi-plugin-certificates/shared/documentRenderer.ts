@@ -1,4 +1,8 @@
+import { escapeCsvCell, escapeHtml } from "@vicacha-devs/plugin-shared";
+
 import type { CertificateRecord, CertificateTemplate } from "./types";
+
+export { escapeCsvCell, escapeHtml };
 
 function computeDeterministicHex(input: string): string {
   const out: string[] = [];
@@ -11,15 +15,6 @@ function computeDeterministicHex(input: string): string {
     out.push(h.toString(16).padStart(8, "0"));
   }
   return out.join("");
-}
-
-export function escapeHtml(input: unknown): string {
-  return String(input ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 }
 
 export function sanitizeHexColor(input?: string, fallback = "#14532d"): string {
@@ -87,6 +82,7 @@ function buildTemplateVariables(
   secondaryFormattedList: string
 ): Record<string, string> {
   return {
+    ...certificate.customData,
     recipientFullName: certificate.recipientFullName,
     recipientChosenName:
       certificate.recipientChosenName || certificate.recipientFullName,
@@ -97,7 +93,6 @@ function buildTemplateVariables(
     secondaryDateFormatted: secondaryFormattedList || issuedDateFormatted,
     serialNumber: certificate.serialNumber,
     organizationName: template.organizationName,
-    ...certificate.customData,
   };
 }
 
@@ -427,19 +422,6 @@ export function renderPrintableCertificateHtml(params: {
   </div>
 </body>
 </html>`;
-}
-
-export function escapeCsvCell(value: unknown): string {
-  let str = String(value ?? "")
-    .replace(/\r?\n/g, " ")
-    .trim();
-  if (/^[=+\-@\t\r]/.test(str)) {
-    str = `'${str}`;
-  }
-  if (str.includes(",") || str.includes('"') || str.includes("'")) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
 }
 
 export function exportCertificatesToCsv(records: CertificateRecord[]): string {

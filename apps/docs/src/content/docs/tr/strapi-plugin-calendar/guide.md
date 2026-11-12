@@ -181,9 +181,9 @@ flowchart LR
 | `GET`  | `/calendar/settings`                    | `admin`       | `admin.getSettings`            | Bearer JWT       |
 | `PUT`  | `/calendar/settings`                    | `admin`       | `admin.updateSettings`         | Bearer JWT       |
 | `POST` | `/calendar/clear-settings`              | `admin`       | `admin.clearSettings`          | Bearer JWT       |
-| `GET`  | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Public           |
-| `GET`  | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Public           |
-| `GET`  | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Public           |
+| `GET`  | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Bearer JWT       |
+| `GET`  | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Bearer JWT       |
+| `GET`  | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT       |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

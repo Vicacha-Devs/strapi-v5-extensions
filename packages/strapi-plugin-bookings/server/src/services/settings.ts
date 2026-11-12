@@ -41,6 +41,15 @@ const VALID_THEMES = new Set([
   "sand",
   "midnight",
   "classic",
+  "minimal",
+  "warm",
+  "ocean",
+  "forest",
+  "monarch",
+  "forma",
+  "pulse",
+  "shadcn",
+  "mui",
 ]);
 const VALID_SECONDARY_LANGS = new Set(["local", "ar", "off"]);
 const IGNORED_SYSTEM_UIDS = new Set([
@@ -54,6 +63,11 @@ const BLOCKED_UID_PREFIXES = [
   "admin::",
   "strapi::",
   "plugin::users-permissions.",
+  "plugin::inbox.",
+  "plugin::donations.",
+  "plugin::certificates.",
+  "plugin::notes.",
+  "plugin::broadcasts.",
 ];
 const STRING_ATTR_TYPES = new Set(["string", "text", "email", "uid"]);
 const NUMBER_ATTR_TYPES = new Set([

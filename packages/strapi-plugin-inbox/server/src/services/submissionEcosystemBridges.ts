@@ -114,24 +114,36 @@ async function tryIssuePluginCertificate(
 ): Promise<string> {
   try {
     const certsPlugin = strapi.plugin("certificates");
-    const certSvc = certsPlugin?.service<{
-      issueCertificate?: (data: Record<string, unknown>) => Promise<{
-        certificateNumber?: string;
-      }>;
-    }>("certificateService");
+    const certSvc =
+      certsPlugin?.service<{
+        issueCertificate?: (data: Record<string, unknown>) => Promise<{
+          serialNumber?: string;
+          certificateNumber?: string;
+        }>;
+      }>("issuance") ??
+      certsPlugin?.service<{
+        issueCertificate?: (data: Record<string, unknown>) => Promise<{
+          serialNumber?: string;
+          certificateNumber?: string;
+        }>;
+      }>("certificateService");
 
     if (!certSvc?.issueCertificate) return fallbackCertNumber;
+    const recipientFullName =
+      certInput?.recipientName || existing.applicantName || "Applicant";
     const issued = await certSvc.issueCertificate({
       templateSlug: certInput?.templateSlug || "official-service-certificate",
-      recipientName:
-        certInput?.recipientName || existing.applicantName || "Applicant",
+      recipientName: recipientFullName,
+      recipientFullName,
       recipientEmail: existing.applicantEmail,
       metadata: {
         submissionReference: existing.referenceCode,
         formSlug: existing.formSlug,
       },
     });
-    return issued?.certificateNumber || fallbackCertNumber;
+    return (
+      issued?.serialNumber || issued?.certificateNumber || fallbackCertNumber
+    );
   } catch {
     return fallbackCertNumber;
   }

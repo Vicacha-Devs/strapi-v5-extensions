@@ -1,3 +1,9 @@
+import {
+  escapeXml,
+  stripInvalidXmlChars,
+  wrapCdata,
+} from "@vicacha-devs/plugin-shared";
+
 import { DEFAULT_MEDIA_FEEDS_SETTINGS } from "./constants";
 import type {
   MediaFeedItem,
@@ -11,32 +17,7 @@ import {
   resolveEpisodeForLocale,
 } from "./urlParser";
 
-const INVALID_XML_10_CHARS =
-  /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g;
-
-export function stripInvalidXmlChars(value?: string | null): string {
-  if (!value) return "";
-  return String(value).replace(INVALID_XML_10_CHARS, "");
-}
-
-export function escapeXml(value?: string | null): string {
-  const cleaned = stripInvalidXmlChars(value);
-  if (!cleaned) return "";
-  return cleaned
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
-
-export function wrapCdata(value?: string | null): string {
-  const cleaned = stripInvalidXmlChars(value).replace(
-    /]]>/g,
-    "]]]]><![CDATA[>"
-  );
-  return `<![CDATA[${cleaned}]]>`;
-}
+export { escapeXml, stripInvalidXmlChars, wrapCdata };
 
 export function toRfc2822Date(isoDate?: string | null): string {
   if (typeof isoDate === "string" && isoDate.trim()) {

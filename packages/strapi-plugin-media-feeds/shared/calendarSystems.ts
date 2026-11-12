@@ -1,3 +1,4 @@
+import { FORBIDDEN_OBJECT_KEYS } from "@vicacha-devs/plugin-shared";
 import {
   extractCalendarParts,
   formatDateInCalendarSystem,
@@ -6,12 +7,6 @@ import {
 } from "@vicacha-devs/strapi-plugin-calendar/shared";
 
 export type { AlternateDateValue, CalendarSystemConfig };
-
-const FORBIDDEN_OBJECT_KEYS = new Set([
-  "__proto__",
-  "constructor",
-  "prototype",
-]);
 
 const BLOCKED_OVERRIDE_FIELDS = new Set([
   "password",

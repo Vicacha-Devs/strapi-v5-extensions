@@ -5,20 +5,21 @@ description: Deep dive into the pnpm + Turborepo workspace layout, Strapi v5 dua
 
 ## Workspace Layout
 
-The `strapi-v5-extensions` repository is organized as a **pnpm + Turborepo** monorepo containing two applications (`apps/dashboard` and `apps/docs`), two shared configuration packages, and 14 publishable Strapi v5 plugins:
+The `strapi-v5-extensions` repository is organized as a **pnpm + Turborepo** monorepo containing two applications (`apps/dashboard` and `apps/docs`), shared configuration/utility packages, and 15 publishable Strapi v5 plugins:
 
 ```text
 strapi-v5-extensions/
 ├── apps/
-│   ├── dashboard/                      # @vicacha-devs/dashboard — Strapi v5 host app (SQLite + all 14 plugins)
+│   ├── dashboard/                      # @vicacha-devs/dashboard — Strapi v5 host app (SQLite + all 15 plugins)
 │   └── docs/                           # @vicacha-devs/docs — Astro Starlight documentation & OpenAPI portal
 ├── packages/
 │   ├── eslint-config/                  # @vicacha-devs/eslint-config — Shared ESLint rules (max-lines <= 500)
+│   ├── plugin-shared/                  # @vicacha-devs/plugin-shared — Shared i18n, locale & validation utilities
 │   ├── typescript-config/              # @vicacha-devs/typescript-config — Shared Admin & Server tsconfigs
-│   └── strapi-plugin-*/                # 14 publishable @vicacha-devs/strapi-plugin-* packages
+│   └── strapi-plugin-*/                # 15 publishable @vicacha-devs/strapi-plugin-* packages
 ├── scripts/
 │   ├── ensure-esm-dist.ts              # Guarantees dist/package.json ({"type":"module"}) & entry .d.ts files
-│   ├── publint-all.ts                  # Strict publint validation across all 14 plugins
+│   ├── publint-all.ts                  # Strict publint validation across all 15 plugins
 │   └── release.ts                      # Per-package semantic-release & pnpm publish orchestrator
 ├── pnpm-workspace.yaml                 # Peer isolation & workspace linking rules
 └── turbo.json                          # Dependency-aware task pipeline

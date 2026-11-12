@@ -1,0 +1,11 @@
+import type { TiptapThemeConfig } from "../../../shared/src/types";
+
+let cache: TiptapThemeConfig | null = null;
+
+export function setThemeCache(theme: TiptapThemeConfig | null): void {
+  cache = theme;
+}
+
+export function getThemeCache(): TiptapThemeConfig | null {
+  return cache;
+}

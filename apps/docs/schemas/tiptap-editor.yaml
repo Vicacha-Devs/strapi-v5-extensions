@@ -1,0 +1,352 @@
+openapi: 3.0.3
+info:
+  title: Tiptap Rich Text Editor (@vicacha-devs/strapi-plugin-tiptap-editor)
+  version: 1.3.0
+  description: Customizable Tiptap Rich Text Editor for Strapi v5 with presets, media embeds, tables,
+    mathematics, callouts, slash commands, and custom components (forked & extended from
+    @notum-cz/strapi-plugin-tiptap-editor)
+servers:
+  - url: http://127.0.0.1:1337
+    description: Local Strapi v5 development server
+paths:
+  /tiptap-editor/presets:
+    get:
+      operationId: getTiptapEditorPresets
+      summary: Find
+      description: Strapi v5 Admin API endpoint handled by `preset.find`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /tiptap-editor/presets/{name}:
+    get:
+      operationId: getTiptapEditorPresetsByName
+      summary: Find One
+      description: Strapi v5 Admin API endpoint handled by `preset.findOne`.
+      tags:
+        - Admin API
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: Target name identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /tiptap-editor/theme:
+    get:
+      operationId: getTiptapEditorTheme
+      summary: Find
+      description: Strapi v5 Admin API endpoint handled by `theme.find`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /tiptap-editor/settings:
+    get:
+      operationId: getTiptapEditorSettings
+      summary: Find
+      description: Strapi v5 Admin API endpoint handled by `settings.find`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+    put:
+      operationId: putTiptapEditorSettings
+      summary: Update
+      description: Strapi v5 Admin API endpoint handled by `settings.update`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+  /tiptap-editor/search:
+    get:
+      operationId: getTiptapEditorSearch
+      summary: Search
+      description: Strapi v5 Admin API endpoint handled by `search.search`.
+      tags:
+        - Admin API
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: Search query string
+          schema:
+            type: string
+        - name: locale
+          in: query
+          required: false
+          description: Filter matches by Strapi locale
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /tiptap-editor/get/{collectionName}/{documentId}:
+    get:
+      operationId: getTiptapEditorGetByCollectionNameByDocumentId
+      summary: Get Document
+      description: Strapi v5 Admin API endpoint handled by `search.getDocument`.
+      tags:
+        - Admin API
+      parameters:
+        - name: collectionName
+          in: path
+          required: true
+          description: Target collectionName identifier
+          schema:
+            type: string
+        - name: documentId
+          in: path
+          required: true
+          description: Target documentId identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /tiptap-editor/identify/{collectionName}:
+    get:
+      operationId: getTiptapEditorIdentifyByCollectionName
+      summary: Identify
+      description: Strapi v5 Admin API endpoint handled by `search.identify`.
+      tags:
+        - Admin API
+      parameters:
+        - name: collectionName
+          in: path
+          required: true
+          description: Target collectionName identifier
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /tiptap-editor/link-preview:
+    get:
+      operationId: getTiptapEditorLinkPreview
+      summary: Link Preview
+      description: Strapi v5 Admin API endpoint handled by `media.linkPreview`.
+      tags:
+        - Admin API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+  /tiptap-editor/upload-by-url:
+    post:
+      operationId: postTiptapEditorUploadByUrl
+      summary: Upload By Url
+      description: Strapi v5 Admin API endpoint handled by `media.uploadByUrl`.
+      tags:
+        - Admin API
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        "400":
+          description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Strapi v5 API Token or Admin JWT Bearer authentication

@@ -1,3 +1,5 @@
+import { FORBIDDEN_OBJECT_KEYS as FORBIDDEN_TRANSLATION_KEYS } from "./security.ts";
+
 const VALID_LOCALE_RE = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,4}$/;
 
 function isTranslationRecord(value: unknown): value is Record<string, unknown> {
@@ -22,15 +24,22 @@ function getLookupCandidates(
   locale: string,
   fallbackToLanguage: boolean
 ): string[] {
-  const trimmed = locale.trim();
+  const trimmed = locale.trim().replace(/_/g, "-");
   if (!VALID_LOCALE_RE.test(trimmed)) {
     return [];
   }
-  if (!fallbackToLanguage || !trimmed.includes("-")) {
-    return [trimmed];
+  const lower = trimmed.toLowerCase();
+  const list: string[] = [trimmed];
+  if (lower !== trimmed) {
+    list.push(lower);
   }
-  const base = trimmed.split("-")[0];
-  return base && base !== trimmed ? [trimmed, base] : [trimmed];
+  if (fallbackToLanguage && trimmed.includes("-")) {
+    const base = lower.split("-")[0];
+    if (base && !list.includes(base)) {
+      list.push(base);
+    }
+  }
+  return list;
 }
 
 export interface PrefixTranslationsOptions {
@@ -54,7 +63,7 @@ export function prefixPluginTranslations(
   const result: Record<string, string> = {};
   if (options?.baseTranslations) {
     for (const [key, value] of Object.entries(options.baseTranslations)) {
-      if (typeof value === "string") {
+      if (typeof value === "string" && !FORBIDDEN_TRANSLATION_KEYS.has(key)) {
         result[key] = value;
       }
     }
@@ -64,7 +73,7 @@ export function prefixPluginTranslations(
   const explicitPrefixed: Array<[string, string]> = [];
 
   for (const [key, value] of Object.entries(trad)) {
-    if (typeof value !== "string") {
+    if (typeof value !== "string" || FORBIDDEN_TRANSLATION_KEYS.has(key)) {
       continue;
     }
     if (options?.keepUnprefixed) {
@@ -78,7 +87,9 @@ export function prefixPluginTranslations(
   }
 
   for (const [key, value] of explicitPrefixed) {
-    result[key] = value;
+    if (!FORBIDDEN_TRANSLATION_KEYS.has(key)) {
+      result[key] = value;
+    }
   }
 
   return result;
@@ -164,10 +175,12 @@ export function createRegisterTrads(
         }
 
         let rawData: Record<string, string> | undefined;
+        let matchedCandidate: string | undefined;
         for (const candidate of candidates) {
           if (translations && Object.hasOwn(translations, candidate)) {
             rawData = extractDictionary(translations[candidate]);
             if (rawData) {
+              matchedCandidate = candidate;
               break;
             }
           }
@@ -176,6 +189,7 @@ export function createRegisterTrads(
               const loaded = await loadTranslation(candidate);
               rawData = extractDictionary(loaded);
               if (rawData) {
+                matchedCandidate = candidate;
                 break;
               }
             } catch {
@@ -184,7 +198,9 @@ export function createRegisterTrads(
           }
         }
 
-        const baseTranslations = getBaseTranslations?.(locale);
+        const baseTranslations = getBaseTranslations?.(
+          matchedCandidate ?? locale
+        );
         const hasBase =
           Boolean(baseTranslations) &&
           Object.keys(baseTranslations as Record<string, string>).length > 0;

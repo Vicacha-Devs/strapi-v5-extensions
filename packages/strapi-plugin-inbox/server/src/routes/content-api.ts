@@ -57,6 +57,15 @@ export default {
     },
     {
       method: "GET",
+      path: "/public/unsubscribe",
+      handler: "inboxController.unsubscribe",
+      config: {
+        policies: [],
+        auth: false,
+      },
+    },
+    {
+      method: "GET",
       path: "/alerts",
       handler: "inboxController.getActiveAlerts",
       config: {

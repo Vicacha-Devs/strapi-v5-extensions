@@ -19,8 +19,6 @@ export function createMockStrapi() {
     [SUBMISSION_UID]: [],
     [SUBSCRIBER_UID]: [],
     [ALERT_BANNER_UID]: [],
-    [FORM_BUILDER_CMS_FORM_UID]: [],
-    [FORM_BUILDER_CMS_SUBMISSION_UID]: [],
   };
   let idCounter = 1;
   const emittedEvents: Array<{ event: string; payload: unknown }> = [];

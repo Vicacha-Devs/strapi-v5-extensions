@@ -20,6 +20,7 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       .service("service")
       .getSitemap();
     ctx.set("Content-Type", "application/xml");
+    ctx.set("X-Content-Type-Options", "nosniff");
     ctx.body = sitemap;
   },
   getSitemapBySlug: async (ctx: SitemapControllerContext) => {
@@ -29,6 +30,7 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       .service("service")
       .getSitemap(slug);
     ctx.set("Content-Type", "application/xml");
+    ctx.set("X-Content-Type-Options", "nosniff");
     ctx.body = sitemap;
   },
   getSettings: async (ctx: SitemapControllerContext) => {

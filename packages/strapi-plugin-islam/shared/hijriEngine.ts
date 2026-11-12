@@ -201,8 +201,12 @@ function normalizeGregorianInputDate(isoDateOrDate: string | Date): Date {
     const clean = sanitizeIsoDateYmd(isoDateOrDate);
     return new Date(`${clean}T12:00:00Z`);
   }
-  const copy = new Date(isoDateOrDate.getTime());
-  return Number.isNaN(copy.getTime()) ? new Date() : copy;
+  if (Number.isNaN(isoDateOrDate.getTime())) {
+    const today = new Date().toISOString().slice(0, 10);
+    return new Date(`${today}T12:00:00Z`);
+  }
+  const ymd = isoDateOrDate.toISOString().slice(0, 10);
+  return new Date(`${ymd}T12:00:00Z`);
 }
 
 export function gregorianToHijri(

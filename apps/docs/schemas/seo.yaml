@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: SEO & SERP Analyzer (@vicacha-devs/strapi-plugin-seo)
-  version: 2.0.12
+  version: 2.1.1
   description: Make your Strapi content SEO friendly.
 servers:
   - url: http://127.0.0.1:1337

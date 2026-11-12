@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Inbox, Forms & Alert Banners (@vicacha-devs/strapi-plugin-inbox)
-  version: 1.0.0
+  version: 1.1.0
   description: Generic Strapi v5 Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscriber
     Lists & Site-Wide Alert Banners (forked & extended from devCluna/strapi-plugin-form-builder-cms)
 servers:
@@ -171,6 +171,33 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/InboxSubscriber"
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/inbox/public/unsubscribe:
+    get:
+      operationId: getApiInboxPublicUnsubscribe
+      summary: Unsubscribe
+      description: Strapi v5 Content API endpoint handled by `inboxController.unsubscribe`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
         "400":
           description: Bad Request — validation or parameter error
   /api/inbox/alerts:

@@ -44,6 +44,7 @@
     "**/CHANGELOG.md",
     "**/README.md",
     "**/public/vendor/**",
+    "**/fixtures/**",
     "LICENSE*"
   ],
   "sortPackageJson": {

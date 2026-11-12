@@ -7,15 +7,16 @@ description: Ed25519 digital signatures, constant-time HMAC-SHA256 webhooks, SSR
 
 Every `@vicacha-devs/strapi-plugin-*` package is engineered against OWASP Top 10 and CWE security standards, validated by unit tests and our automated Security Judge.
 
-| Security Control                           | Plugin(s)                                         | Cryptographic / Validation Primitive                                                                                                         |
-| :----------------------------------------- | :------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ed25519 Digital Signatures**             | `certificates`                                    | Node.js `node:crypto` (`crypto.sign(null, canonicalPayload, privateKey)`) + canonical JSON serialization                                     |
-| **HMAC-SHA256 Webhook Verification**       | `donations`, `certificates`                       | `crypto.createHmac('sha256', secret)` + `crypto.timingSafeEqual` constant-time digest comparison                                             |
-| **Salted PII Hashing & Masking**           | `certificates`, `donations`                       | Per-serial SHA-256 salted national ID hashes + masked public verification (`***-***-4821`)                                                   |
-| **SSRF & Outbound URL Validation**         | `certificates`, `media-feeds`                     | Strict HTTPS protocol enforcement + RFC 1918 / loopback (`127.0.0.0/8`, `169.254.169.254`, `10.0.0.0/8`, `::1`) blocklists                   |
-| **Path Traversal & MIME Hardening**        | `resources`                                       | `path.basename()` sanitization, strict extension/MIME allow-lists, and `Content-Disposition: attachment` + `X-Content-Type-Options: nosniff` |
-| **CSV & Formula Injection Neutralization** | `bookings`, `events`, `certificates`, `donations` | Prefixes leading `=`, `+`, `-`, `@`, `\t`, `\r` cells with a safe single quote before CSV export                                             |
-| **Token-Verified Public Mutations**        | `bookings`, `events`, `inbox`                     | SHA-256 hashed cancellation, check-in, and double opt-in tokens stored as `private: true` attributes                                         |
+| Security Control                            | Plugin(s)                                         | Cryptographic / Validation Primitive                                                                                                         |
+| :------------------------------------------ | :------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ed25519 Digital Signatures**              | `certificates`                                    | Node.js `node:crypto` (`crypto.sign(null, canonicalPayload, privateKey)`) + canonical JSON serialization                                     |
+| **HMAC-SHA256 Webhook Verification**        | `donations`, `certificates`                       | `crypto.createHmac('sha256', secret)` + `crypto.timingSafeEqual` constant-time digest comparison                                             |
+| **Salted PII Hashing & Masking**            | `certificates`, `donations`                       | Per-serial SHA-256 salted national ID hashes + masked public verification (`***-***-4821`)                                                   |
+| **SSRF & Outbound URL Validation**          | `certificates`, `media-feeds`, `tiptap-editor`    | Strict HTTPS enforcement, RFC 1918/loopback blocklists, DNS pinning (`undici`), and capped response streams                                  |
+| **HTML, Markdown & Attribute Sanitization** | `tiptap-editor`                                   | `DOMPurify` + `isSafeUrl` checks, disallowed `on*`/`srcdoc` attribute stripping, and strict `sandbox` iframe allowlisting                    |
+| **Path Traversal & MIME Hardening**         | `resources`                                       | `path.basename()` sanitization, strict extension/MIME allow-lists, and `Content-Disposition: attachment` + `X-Content-Type-Options: nosniff` |
+| **CSV & Formula Injection Neutralization**  | `bookings`, `events`, `certificates`, `donations` | Prefixes leading `=`, `+`, `-`, `@`, `\t`, `\r` cells with a safe single quote before CSV export                                             |
+| **Token-Verified Public Mutations**         | `bookings`, `events`, `inbox`                     | SHA-256 hashed cancellation, check-in, and double opt-in tokens stored as `private: true` attributes                                         |
 
 ---
 

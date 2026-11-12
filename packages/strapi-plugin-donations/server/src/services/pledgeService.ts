@@ -305,7 +305,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           strVal(settings.baseCurrency, "COP")
         );
 
-      if (!(resolvedAmount > 0)) {
+      if (!Number.isFinite(resolvedAmount) || resolvedAmount <= 0) {
         throw new Error("Contribution amount must be greater than zero.");
       }
 
@@ -377,6 +377,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const wasAlreadyVerified =
         currentPledge.status === "verified" ||
         currentPledge.status === "certificate_issued";
+      if (wasAlreadyVerified && params.decision === "rejected") {
+        throw new Error("Cannot reject an already verified pledge.");
+      }
 
       let nextStatus: PledgeStatus = params.decision;
       let certificateSerialNumber = currentPledge.certificateSerialNumber;
@@ -426,16 +429,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       payload: Record<string, unknown>;
     }): Promise<{ handled: boolean; pledge: DonationPledgeItem | null }> {
       const settings = await getSettingsSvc().getSettings();
-
-      if (settings.webhookSigningSecret) {
-        const valid = verifyWebhookSignature(
-          params.rawBody,
-          params.signatureHeader,
-          settings.webhookSigningSecret
-        );
-        if (!valid) {
-          throw new Error("Invalid webhook HMAC-SHA256 signature.");
-        }
+      const secret = (
+        settings.webhookSigningSecret ||
+        process.env.DONATIONS_WEBHOOK_SECRET ||
+        ""
+      ).trim();
+      if (!secret) {
+        throw new Error("Webhook signing secret is not configured.");
+      }
+      const valid = verifyWebhookSignature(
+        params.rawBody,
+        params.signatureHeader,
+        secret
+      );
+      if (!valid) {
+        throw new Error("Invalid webhook HMAC-SHA256 signature.");
       }
 
       const event = parseGatewayWebhookPayload(params.payload);

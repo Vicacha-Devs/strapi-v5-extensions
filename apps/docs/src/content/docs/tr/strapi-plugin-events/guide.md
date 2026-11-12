@@ -41,16 +41,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı                | Arayüz Metni             |
-| :----------------------------- | :----------------------- |
-| `sidePanel.title`              | Etkinlik ve RSVP Özeti   |
-| `sidePanel.secondaryCalendars` | Alternative Takvim Dates |
-| `sidePanel.rsvpStatus`         | RSVP ve Kontenjan        |
-| `sidePanel.full`               | Dolu / Yedek Liste       |
-| `sidePanel.open`               | Açık                     |
-| `sidePanel.confirmedSeats`     | Onaylanan Koltuk         |
-| `sidePanel.checkedIn`          | Giriş Yapanlar           |
-| `sidePanel.waitlisted`         | Yedek Listede            |
+| Çeviri Anahtarı                | Arayüz Metni                |
+| :----------------------------- | :-------------------------- |
+| `sidePanel.title`              | Etkinlik ve RSVP Özeti      |
+| `sidePanel.secondaryCalendars` | Alternatif Takvim Tarihleri |
+| `sidePanel.rsvpStatus`         | RSVP ve Kontenjan           |
+| `sidePanel.full`               | Dolu / Yedek Liste          |
+| `sidePanel.open`               | Açık                        |
+| `sidePanel.confirmedSeats`     | Onaylanan Koltuk            |
+| `sidePanel.checkedIn`          | Giriş Yapanlar              |
+| `sidePanel.waitlisted`         | Yedek Listede               |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -238,13 +238,13 @@ flowchart LR
 | `GET`  | `/events/registrations/export.csv`            | `admin`       | `admin.exportRegistrationsCsv`       | Bearer JWT       |
 | `POST` | `/events/registrations/{documentId}/status`   | `admin`       | `admin.updateRegistrationStatus`     | Bearer JWT       |
 | `POST` | `/events/registrations/{documentId}/check-in` | `admin`       | `admin.checkIn`                      | Bearer JWT       |
-| `GET`  | `/api/events/occurrences`                     | `content-api` | `content-api.listOccurrences`        | Public           |
-| `GET`  | `/api/events/spotlights`                      | `content-api` | `content-api.listSpotlights`         | Public           |
-| `GET`  | `/api/events/feed.ics`                        | `content-api` | `content-api.downloadFeedIcs`        | Public           |
-| `GET`  | `/api/events/{documentId}/invite.ics`         | `content-api` | `content-api.downloadEventInviteIcs` | Public           |
-| `GET`  | `/api/events/{documentId}/stats`              | `content-api` | `content-api.getEventStats`          | Public           |
-| `POST` | `/api/events/{documentId}/register`           | `content-api` | `content-api.registerAttendee`       | Public           |
-| `POST` | `/api/events/registrations/{token}/cancel`    | `content-api` | `content-api.cancelRegistration`     | Public           |
+| `GET`  | `/api/events/occurrences`                     | `content-api` | `content-api.listOccurrences`        | Bearer JWT       |
+| `GET`  | `/api/events/spotlights`                      | `content-api` | `content-api.listSpotlights`         | Bearer JWT       |
+| `GET`  | `/api/events/feed.ics`                        | `content-api` | `content-api.downloadFeedIcs`        | Bearer JWT       |
+| `GET`  | `/api/events/{documentId}/invite.ics`         | `content-api` | `content-api.downloadEventInviteIcs` | Bearer JWT       |
+| `GET`  | `/api/events/{documentId}/stats`              | `content-api` | `content-api.getEventStats`          | Bearer JWT       |
+| `POST` | `/api/events/{documentId}/register`           | `content-api` | `content-api.registerAttendee`       | Bearer JWT       |
+| `POST` | `/api/events/registrations/{token}/cancel`    | `content-api` | `content-api.cancelRegistration`     | Bearer JWT       |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

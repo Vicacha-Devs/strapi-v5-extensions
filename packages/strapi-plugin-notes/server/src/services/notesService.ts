@@ -226,6 +226,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ...(hasWhere ? { where } : {}),
         populate: ["createdBy", "updatedBy"],
         orderBy: { isPinned: "desc", createdAt: sortDir },
+        limit: 1000,
       });
       return Array.isArray(rows) ? rows : [];
     }
@@ -236,6 +237,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         ...(hasWhere ? { filters: where } : {}),
         populate: ["createdBy", "updatedBy"],
         sort: { isPinned: "desc", createdAt: sortDir },
+        limit: 1000,
       });
       return Array.isArray(docs) ? docs : [];
     }

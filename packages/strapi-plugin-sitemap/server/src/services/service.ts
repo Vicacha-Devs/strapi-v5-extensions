@@ -15,6 +15,7 @@ import {
   isVisibleCollectionType,
   persistOptionsRecord,
   readUnifiedSettings,
+  sanitizeBaseUrl,
   toArray,
   writeUnifiedSettings,
 } from "./settings";
@@ -38,6 +39,7 @@ import {
   generateSitemapIndexXml,
   generateUrlsetXml,
   getNestedValue,
+  insertNestedPath,
   isTruthyFlag,
   parseTableReferences,
 } from "./xml-builder";
@@ -52,9 +54,7 @@ const filterEntriesForSitemapDef = (
     const byId = allSitemapEntries.filter((e) =>
       configIds.includes(Number(e.id))
     );
-    if (byId.length > 0 || configIndices.length === 0) {
-      return byId;
-    }
+    if (byId.length > 0 || configIndices.length === 0) return byId;
   }
   if (configIndices.length > 0) {
     return configIndices
@@ -75,15 +75,11 @@ const fetchRawI18nLocales = async (strapi: Core.Strapi): Promise<unknown[]> => {
     .plugin?.("i18n")
     ?.service?.("locales")
     ?.find?.();
-  if (Array.isArray(fromService) && fromService.length > 0) {
-    return fromService;
-  }
+  if (Array.isArray(fromService) && fromService.length > 0) return fromService;
   const fromDocs = await getDocuments(strapi)<Record<string, unknown>>(
     "plugin::i18n.locale"
   ).findMany();
-  if (Array.isArray(fromDocs) && fromDocs.length > 0) {
-    return fromDocs;
-  }
+  if (Array.isArray(fromDocs) && fromDocs.length > 0) return fromDocs;
   return (await getDbQuery(strapi, "plugin::i18n.locale")?.findMany()) ?? [];
 };
 
@@ -109,17 +105,13 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
 
   resolveContentTypeUid(typeName: string): string | undefined {
     const allContentTypes = getContentTypesMap(strapi);
-    if (allContentTypes[typeName]) {
-      return typeName;
-    }
+    if (allContentTypes[typeName]) return typeName;
     const visibleMatch = Object.keys(allContentTypes).find(
       (uid) =>
         isVisibleCollectionType(uid, allContentTypes[uid]) &&
         allContentTypes[uid]?.info?.singularName === typeName
     );
-    if (visibleMatch) {
-      return visibleMatch;
-    }
+    if (visibleMatch) return visibleMatch;
     return Object.keys(allContentTypes).find(
       (uid) => allContentTypes[uid]?.info?.singularName === typeName
     );
@@ -140,9 +132,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     const def = sitemapDefinitions.find(
       (d) => String(d.name ?? "").trim() === targetSlug
     );
-    if (!def) {
-      return this.generateUrlsetXml([]);
-    }
+    if (!def) return this.generateUrlsetXml([]);
     const sitemapEntries = filterEntriesForSitemapDef(def, allSitemapEntries);
     const customURLs = def.includeCustomUrls ? allCustomURLs : [];
     return this.buildAndReturnSitemapXml(
@@ -160,16 +150,16 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     if (!baseURLObject && !pluginCfg.hostname) {
       return this.generateUrlsetXml([]);
     }
-    const baseURL = baseURLObject?.baseUrl || pluginCfg.hostname || "";
+    const baseURL = sanitizeBaseUrl(
+      baseURLObject?.baseUrl || pluginCfg.hostname || ""
+    );
     const excludedUrls = toArray<string>(baseURLObject?.excludedUrls);
     const sitemapDefinitions = toArray<SitemapDefinitionRecord>(
       baseURLObject?.sitemapDefinitions
     );
     const allSitemapEntries =
       (await getDbQuery<SitemapEntryConfig>(strapi, CONTENT_TYPE_UID)?.findMany(
-        {
-          orderBy: { id: "asc" },
-        }
+        { orderBy: { id: "asc" } }
       )) ?? [];
     const allCustomURLs =
       (await getDbQuery<CustomUrlRecord>(strapi, SINGLE_URL_UID)?.findMany()) ??
@@ -208,21 +198,29 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
     const thumbField = sitemapEntry.thumbnail
       ? String(sitemapEntry.thumbnail)
       : "";
-    const attrDef = thumbField ? ctSchema?.attributes?.[thumbField] : undefined;
-    const isValidThumbnail = Boolean(
-      thumbField && thumbField !== "-" && (!attrDef || attrDef.type === "media")
-    );
-    let populate: PopulateMap | undefined = isValidThumbnail
-      ? { [thumbField]: true }
-      : undefined;
-
-    if (isTruthyFlag(sitemapEntry.populateLinkedModels)) {
-      const linkedModels = this.parseTableReferences(sitemapEntry.pattern);
-      if (linkedModels.populate) {
-        populate = { ...populate, ...linkedModels.populate };
+    const populate: PopulateMap = {};
+    if (thumbField && thumbField !== "-") {
+      if (thumbField.includes(".")) {
+        insertNestedPath(populate, thumbField.split("."));
+      } else {
+        const attrDef = ctSchema?.attributes?.[thumbField];
+        if (!attrDef || attrDef.type === "media") {
+          populate[thumbField] = true;
+        }
       }
     }
-    return populate;
+    if (isTruthyFlag(sitemapEntry.populateLinkedModels)) {
+      const placeholders = sitemapEntry.pattern.match(/\[([^[\]]+)]/g) || [];
+      for (const placeholder of placeholders) {
+        const content = placeholder.replace(/[[\]]/g, "");
+        if (content.includes(".")) {
+          const parts = content.split(".");
+          parts.pop();
+          insertNestedPath(populate, parts);
+        }
+      }
+    }
+    return Object.keys(populate).length > 0 ? populate : undefined;
   },
 
   async fetchEntriesForConfig(
@@ -233,9 +231,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       resolvedUid ?? `api::${sitemapEntry.type}.${sitemapEntry.type}`;
     const contentTypes = getContentTypesMap(strapi);
     const ctSchema = contentTypes[targetUid];
-    if (!ctSchema) {
-      return [];
-    }
+    if (!ctSchema) return [];
     const populate = this.buildPopulateForConfig(sitemapEntry, ctSchema);
     const isLocalized = ctSchema.pluginOptions?.i18n?.localized !== false;
     const locale =
@@ -253,6 +249,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
         locale,
         status: "published",
         populate,
+        limit: 5000,
       });
       if (Array.isArray(docsResult)) {
         entries = docsResult;
@@ -262,7 +259,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       entries = [];
     }
 
-    if (!documentsSucceeded || entries.length === 0) {
+    if (!documentsSucceeded) {
       const fallbackQuery = getDbQuery<Record<string, unknown>>(
         strapi,
         targetUid
@@ -274,18 +271,19 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
             (await fallbackQuery.findMany({
               ...(where ? { where } : {}),
               ...(populate ? { populate } : {}),
+              limit: 5000,
             })) ?? [];
-          if (fallbackRows.length > 0) {
-            entries = fallbackRows;
-          }
+          if (fallbackRows.length > 0) entries = fallbackRows;
         } catch {
-          // Ignore fallback query errors when documents already ran
+          // Ignore fallback query errors
         }
       }
     }
 
     if (hasDraftAndPublish) {
-      return entries.filter((entry) => entry.publishedAt !== null);
+      return entries.filter(
+        (entry) => entry.publishedAt !== null && entry.status !== "draft"
+      );
     }
     return entries;
   },
@@ -305,9 +303,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
         const entries = await this.fetchEntriesForConfig(sitemapEntry);
         for (const entry of entries) {
           const built = buildCollectionUrlEntry(baseURL, sitemapEntry, entry);
-          if (built) {
-            collectionUrls.push(built);
-          }
+          if (built) collectionUrls.push(built);
         }
       }
 
@@ -362,9 +358,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       const rawLocales = await fetchRawI18nLocales(strapi);
       const locales = rawLocales
         .map((item) => {
-          if (typeof item === "string") {
-            return item;
-          }
+          if (typeof item === "string") return item;
           if (item && typeof item === "object" && "code" in item) {
             return String((item as { code: unknown }).code);
           }
@@ -411,7 +405,7 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       const results =
         await getDocuments(strapi)<SitemapOptionRecord>(OPTION_UID).findFirst();
       return {
-        baseUrl: results?.baseUrl || pluginCfg.hostname || "",
+        baseUrl: sanitizeBaseUrl(results?.baseUrl || pluginCfg.hostname || ""),
         excludedUrls: toArray<string>(results?.excludedUrls),
         useSitemapIndex: Boolean(results?.useSitemapIndex),
         sitemapDefinitions: toArray<SitemapDefinitionRecord>(
@@ -431,7 +425,9 @@ const service = ({ strapi }: { strapi: Core.Strapi }) => ({
       const results =
         await getDocuments(strapi)<SitemapOptionRecord>(OPTION_UID).findFirst();
       const updateData: SitemapOptionRecord = {
-        baseUrl: String(data.baseUrl ?? data.baseURL ?? results?.baseUrl ?? ""),
+        baseUrl: sanitizeBaseUrl(
+          data.baseUrl ?? data.baseURL ?? results?.baseUrl ?? ""
+        ),
         excludedUrls:
           data.excludedUrls !== undefined
             ? toArray<string>(data.excludedUrls)

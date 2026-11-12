@@ -49,7 +49,10 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     const readable = strapi
       .plugin(PLUGIN_ID)
       .service("permissions")
-      .filterReadableTypes(types, ctx.state.userAbility);
+      .filterReadableTypes(
+        types,
+        ctx.state?.userAbility ?? { can: () => false }
+      );
 
     const settings = await strapi.plugin(PLUGIN_ID).service("settings").get();
 

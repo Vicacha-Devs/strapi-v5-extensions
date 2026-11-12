@@ -40,16 +40,16 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key                                                      | Rendered UI Label                              |
-| :------------------------------------------------------------------- | :--------------------------------------------- |
-| `broadcasts.checkbox.enable_dry_run_sandbox_mode`                    | Enable Dry-Run Sandbox Mode                    |
-| `broadcasts.checkbox.enable_eventhub_auto_broadcast_triggers`        | Enable EventHub Auto-Broadcast Triggers        |
-| `broadcasts.checkbox.enable_telegram_transport`                      | Enable Telegram Transport                      |
-| `broadcasts.checkbox.enable_whatsapp_transport`                      | Enable WhatsApp Transport                      |
-| `broadcasts.checkbox.segment_confirmed_subscribers_via_inbox_bridge` | Segment confirmed subscribers via Inbox Bridge |
-| `broadcasts.field.broadcast_topic_segments_comma_separated`          | Broadcast Topic Segments (comma-separated)     |
-| `broadcasts.field.campaign_slug`                                     | Campaign Slug                                  |
-| `broadcasts.field.campaign_title`                                    | Campaign Title                                 |
+| Translation Key                                           | Rendered UI Label                              |
+| :-------------------------------------------------------- | :--------------------------------------------- |
+| `checkbox.enable_dry_run_sandbox_mode`                    | Enable Dry-Run Sandbox Mode                    |
+| `checkbox.enable_email_designer_5_html_template_bridge`   | Enable Email Designer 5 HTML Template Bridge   |
+| `checkbox.enable_eventhub_auto_broadcast_triggers`        | Enable EventHub Auto-Broadcast Triggers        |
+| `checkbox.enable_telegram_transport`                      | Enable Telegram Transport                      |
+| `checkbox.enable_whatsapp_transport`                      | Enable WhatsApp Transport                      |
+| `checkbox.segment_confirmed_subscribers_via_inbox_bridge` | Segment confirmed subscribers via Inbox Bridge |
+| `common.activate`                                         | Activate                                       |
+| `common.active`                                           | active                                         |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 

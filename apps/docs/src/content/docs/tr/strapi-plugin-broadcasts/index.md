@@ -4,7 +4,7 @@ description: "Strapi EventHub otomasyon kuralları ve PII maskeli teslimat günl
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-broadcasts` · **Plugin ID**: `broadcasts` · **Category**: `Community & Engagement` · **Version**: `0.1.0` · **Routes**: `15`
+> **Package**: `@vicacha-devs/strapi-plugin-broadcasts` · **Plugin ID**: `broadcasts` · **Category**: `Community & Engagement` · **Version**: `0.2.0` · **Routes**: `15`
 
 Strapi EventHub otomasyon kuralları ve PII maskeli teslimat günlükleri ile WhatsApp, Telegram ve E-posta üzerinden çok kanallı yayınlar.
 

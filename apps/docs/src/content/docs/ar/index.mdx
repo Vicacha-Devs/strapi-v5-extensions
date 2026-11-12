@@ -1,9 +1,9 @@
 ---
 title: "إضافات Strapi v5 — فيكاتشا"
-description: "منظومة مؤسسية تضم 14 إضافة لنظام Strapi v5 تشمل التقويم والفعاليات والحجوزات والشهادات الرقمية والتبرعات والبث متعدد القنوات والبحث الشامل و SEO."
+description: "منظومة مؤسسية تضم 15 إضافة لنظام Strapi v5 تشمل التقويم والفعاليات والحجوزات والشهادات الرقمية والتبرعات والبث متعدد القنوات ومحرر النصوص Tiptap و SEO."
 template: splash
 hero:
-  tagline: "14 إضافة معيارية لنظام Strapi v5 مدعومة بالتوقيع الرقمي Ed25519 و 13 لغة (بما فيها العربية RTL) ومراجع OpenAPI التفاعلية والتكامل التلقائي."
+  tagline: "15 إضافة معيارية لنظام Strapi v5 مدعومة بالتوقيع الرقمي Ed25519 و 13 لغة (بما فيها العربية RTL) ومراجع OpenAPI التفاعلية والتكامل التلقائي."
   image:
     file: ../../../../public/screenshots/dashboard-overview.png
   actions:
@@ -21,7 +21,7 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 ## الركائز الأساسية للمنظومة
 
 <CardGrid stagger>
-  <Card title="14 إضافة جاهزة للإنتاج على Strapi v5" icon="puzzle">
+  <Card title="15 إضافة جاهزة للإنتاج على Strapi v5" icon="puzzle">
     مبنية بالكامل باستخدام Document Service API (`strapi.documents(uid)`) ونظام
     التصميم Strapi Design System v2 وبنية الحزم المزدوجة.
   </Card>
@@ -33,16 +33,17 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
     title="تأمين التشفير الرقمي وحماية Webhooks"
     icon="approve-check-circle"
   >
-    توقيع Ed25519 الرقمي، والتحقق من تواقيع HMAC-SHA256 بزمن ثابت، والحماية من
-    ثغرات SSRF وعبور المسارات وتعمية البيانات الشخصية.
+    توقيع Ed25519 الرقمي، والتحقق من تواقيع HMAC-SHA256 بزمن ثابت، وتنقية
+    DOMPurify والحماية من ثغرات SSRF وعبور المسارات وتعمية البيانات الشخصية.
   </Card>
   <Card title="دعم كامل لـ 13 لغة واتجاه RTL والتقويم الهجري" icon="translate">
-    تكافؤ كامل في ترجمات لوحة التحكم لـ 13 لغة مع دعم كامل للغة العربية والأردية
-    (RTL) وتقويم أم القرى الهجري والعبري والفارسي.
+    تكافؤ كامل في ترجمات لوحة التحكم لـ 13 لغة (بالإضافة إلى التشيكية في
+    `tiptap-editor`) مع دعم كامل للغة العربية والأردية (RTL) وتقويم أم القرى
+    الهجري.
   </Card>
 </CardGrid>
 
-## دليل الإضافات الكامل (14 حزمة)
+## دليل الإضافات الكامل (15 حزمة)
 
 | الإضافة                                                                 | معرف Strapi     | حزمة NPM                                    |
 | :---------------------------------------------------------------------- | :-------------- | :------------------------------------------ |
@@ -60,3 +61,4 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 | [الموارد والمعارض والمسرد](/ar/strapi-plugin-resources/)                | `resources`     | `@vicacha-devs/strapi-plugin-resources`     |
 | [تحسين محركات البحث (SEO)](/ar/strapi-plugin-seo/)                      | `seo`           | `@vicacha-devs/strapi-plugin-seo`           |
 | [خريطة الموقع XML و Hreflang](/ar/strapi-plugin-sitemap/)               | `sitemap`       | `@vicacha-devs/strapi-plugin-sitemap`       |
+| [محرر النصوص المنسقة Tiptap](/ar/strapi-plugin-tiptap-editor/)          | `tiptap-editor` | `@vicacha-devs/strapi-plugin-tiptap-editor` |

@@ -4,7 +4,7 @@ description: "Campañas de recaudación multidivisa, patrocinio de facturas de s
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-donations` · **Plugin ID**: `donations` · **Category**: `Trust & Finance` · **Version**: `1.0.0` · **Routes**: `16`
+> **Package**: `@vicacha-devs/strapi-plugin-donations` · **Plugin ID**: `donations` · **Category**: `Trust & Finance` · **Version**: `1.1.0` · **Routes**: `16`
 
 Campañas de recaudación multidivisa, patrocinio de facturas de servicios públicos, calculadora de umbrales en metales preciosos, webhooks HMAC-SHA256 y puente de certificados fiscales.
 

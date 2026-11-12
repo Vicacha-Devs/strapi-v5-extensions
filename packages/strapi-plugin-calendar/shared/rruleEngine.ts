@@ -257,7 +257,9 @@ function buildEffectiveSlot(
   isRecurring: boolean
 ): ExpandedSlot | null {
   if (ctx.exdatesSet.has(dateKey)) return null;
-  const override = ctx.overridesMap[dateKey];
+  const override = Object.hasOwn(ctx.overridesMap, dateKey)
+    ? ctx.overridesMap[dateKey]
+    : undefined;
   if (override?.cancelled) return null;
   const effStart = override?.startDate
     ? new Date(override.startDate)
@@ -265,7 +267,14 @@ function buildEffectiveSlot(
   const effEnd = override?.endDate
     ? new Date(override.endDate)
     : new Date(effStart.getTime() + ctx.durationMs);
-  if (effEnd.getTime() < ctx.winStartMs || effStart.getTime() > ctx.winEndMs)
+  const startMs = effStart.getTime();
+  const endMs = effEnd.getTime();
+  if (
+    Number.isNaN(startMs) ||
+    Number.isNaN(endMs) ||
+    endMs < ctx.winStartMs ||
+    startMs > ctx.winEndMs
+  )
     return null;
   return {
     occurrenceDate: dateKey,
@@ -372,10 +381,9 @@ function resolveCalendarTargets(
       ? extractCalendarParts(startObj, effectiveRScale)
       : null;
   const targetMonth =
-    parsed.byMonth ??
-    (baseParts ? baseParts.month : startObj.getUTCMonth() + 1);
+    parsed.byMonth ?? baseParts?.month ?? startObj.getUTCMonth() + 1;
   const targetDayOfMonth =
-    parsed.byMonthDay ?? (baseParts ? baseParts.day : startObj.getUTCDate());
+    parsed.byMonthDay ?? baseParts?.day ?? startObj.getUTCDate();
   const targetWeekdays =
     parsed.byDay.length > 0
       ? parsed.byDay
@@ -399,11 +407,9 @@ function createSlotContext(
   const endObj = resolveEndDate(startObj, baseEndDate);
   const parsed = parseRRule(recurrence?.rrule);
   const effectiveRScale = recurrence?.rscale || parsed.rscale;
-  const targets = resolveCalendarTargets(startObj, parsed, effectiveRScale);
   const untilMs = parsed.until
     ? new Date(`${parsed.until}T23:59:59.999Z`).getTime()
     : Number.POSITIVE_INFINITY;
-
   return {
     startObj,
     durationMs: Math.max(0, endObj.getTime() - startObj.getTime()),
@@ -416,7 +422,7 @@ function createSlotContext(
     exdatesSet: new Set(recurrence?.exdates ?? []),
     overridesMap: recurrence?.overrides ?? {},
     effectiveRScale,
-    ...targets,
+    ...resolveCalendarTargets(startObj, parsed, effectiveRScale),
     anchorMidnightMs: Date.UTC(
       startObj.getUTCFullYear(),
       startObj.getUTCMonth(),
@@ -481,13 +487,8 @@ export function expandRuleSlots(params: {
     maxOccurrences: params.maxOccurrences ?? 366,
   });
   if (ctx.parsed.freq === "NONE") {
-    const slot = buildEffectiveSlot(
-      startObj,
-      toDateKeyUTC(startObj),
-      ctx,
-      false
-    );
-    return slot ? [slot] : [];
+    const s = buildEffectiveSlot(startObj, toDateKeyUTC(startObj), ctx, false);
+    return s ? [s] : [];
   }
   return scanRecurringSlots(ctx);
 }

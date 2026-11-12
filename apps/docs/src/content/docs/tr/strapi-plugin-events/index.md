@@ -4,7 +4,7 @@ description: "Etkinlik yönetimi, kontenjan kontrolü, otomatik bekleme listesi 
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-events` · **Plugin ID**: `events` · **Category**: `Scheduling & Operations` · **Version**: `1.0.0` · **Routes**: `17`
+> **Package**: `@vicacha-devs/strapi-plugin-events` · **Plugin ID**: `events` · **Category**: `Scheduling & Operations` · **Version**: `1.1.0` · **Routes**: `17`
 
 Etkinlik yönetimi, kontenjan kontrolü, otomatik bekleme listesi terfisi, tek tıkla katılımcı girişi, CSV dışa aktarma ve birleşik Takvim köprüsü.
 

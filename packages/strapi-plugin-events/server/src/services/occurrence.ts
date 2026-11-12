@@ -78,9 +78,10 @@ function buildReschedulePayload(
   ) {
     return { [source.fields.status]: "cancelled" };
   }
-  const updatePayload: Record<string, unknown> = {
-    [source.fields.startDate]: params.newStartDate,
-  };
+  const updatePayload: Record<string, unknown> = {};
+  if (params.newStartDate && isSafeObjectKey(source.fields.startDate)) {
+    updatePayload[source.fields.startDate] = params.newStartDate;
+  }
   if (
     params.newEndDate &&
     source.fields.endDate &&

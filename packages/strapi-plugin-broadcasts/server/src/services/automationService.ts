@@ -72,12 +72,18 @@ function doesRuleMatchTrigger(
   payload: Record<string, unknown>
 ): boolean {
   if (!rule.active || rule.eventName !== eventName) return false;
-  if (
-    rule.targetContentType &&
-    payload.model &&
-    String(payload.model) !== rule.targetContentType
-  ) {
-    return false;
+  if (rule.targetContentType) {
+    const target = rule.targetContentType.trim();
+    const uid = typeof payload.uid === "string" ? payload.uid.trim() : "";
+    const model = typeof payload.model === "string" ? payload.model.trim() : "";
+    if (
+      (uid || model) &&
+      uid !== target &&
+      model !== target &&
+      !target.endsWith(`.${model}`)
+    ) {
+      return false;
+    }
   }
   return true;
 }
@@ -90,7 +96,7 @@ function firstNonEmptyString(
   for (const key of keys) {
     const val = record[key];
     if (val !== undefined && val !== null && String(val) !== "") {
-      return String(val);
+      return String(val).replace(/\{\{|\}\}/g, "");
     }
   }
   return fallback;

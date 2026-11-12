@@ -10,6 +10,39 @@ interface MutableContentType {
 }
 
 export default async ({ strapi }: { strapi: Core.Strapi }) => {
+  await (
+    strapi.admin as
+      | {
+          services?: {
+            permission?: {
+              actionProvider?: {
+                registerMany?: (actions: unknown[]) => Promise<void>;
+              };
+            };
+          };
+        }
+      | undefined
+  )?.services?.permission?.actionProvider?.registerMany?.([
+    {
+      section: "plugins",
+      displayName: "View Donations & Campaigns",
+      uid: "read",
+      pluginName: PLUGIN_ID,
+    },
+    {
+      section: "plugins",
+      displayName: "Manage Campaigns, Evidences & Verify Pledges",
+      uid: "manage",
+      pluginName: PLUGIN_ID,
+    },
+    {
+      section: "plugins",
+      displayName: "Manage Donations Settings",
+      uid: "settings",
+      pluginName: PLUGIN_ID,
+    },
+  ]);
+
   const settingsService = strapi.plugin(PLUGIN_ID).service("settings") as {
     getSettings: () => Promise<{
       richTextCustomField?: string;

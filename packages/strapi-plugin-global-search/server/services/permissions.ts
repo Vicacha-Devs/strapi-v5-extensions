@@ -12,7 +12,10 @@ export default () => ({
     types: ContentTypeDescriptor[],
     userAbility?: { can: (action: string, subject: string) => boolean } | null
   ): ContentTypeDescriptor[] {
-    if (!userAbility || typeof userAbility.can !== "function") return types;
+    if (userAbility === undefined) return types;
+    if (userAbility === null || typeof userAbility.can !== "function") {
+      return [];
+    }
 
     return types.filter((type) => {
       try {

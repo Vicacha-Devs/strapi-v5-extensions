@@ -45,16 +45,16 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción                                                  | Texto en Interfaz                                      |
-| :------------------------------------------------------------------- | :----------------------------------------------------- |
-| `page.ui.resources_media_galleries_glossary`                         | Recursos, Galerías Multimedia y Glosario               |
-| `resources.page.ui.resources_media_galleries_glossary`               | Recursos, Galerías Multimedia y Glosario               |
-| `page.ui.add_digital_library_publication_media_library_pd`           | Añadir Publicación de Biblioteca Digital (PDF / eBook) |
-| `resources.page.ui.add_digital_library_publication_media_library_pd` | Añadir Publicación de Biblioteca Digital (PDF / eBook) |
-| `field.publication_title`                                            | Título de la Publicación                               |
-| `resources.field.publication_title`                                  | Título de la Publicación                               |
-| `placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf`               | ej., Guía de Bienvenida y Etiqueta de la Mezquita      |
-| `resources.placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf`     | ej., Guía de Bienvenida y Etiqueta de la Mezquita      |
+| Clave de Traducción                                        | Texto en Interfaz                                      |
+| :--------------------------------------------------------- | :----------------------------------------------------- |
+| `page.ui.resources_media_galleries_glossary`               | Recursos, Galerías Multimedia y Glosario               |
+| `page.ui.add_digital_library_publication_media_library_pd` | Añadir Publicación de Biblioteca Digital (PDF / eBook) |
+| `field.publication_title`                                  | Título de la Publicación                               |
+| `placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf`     | ej., Guía de Bienvenida y Etiqueta de la Mezquita      |
+| `page.ui.display_title_shown_in_the_public_digital_librar` | Título visible en la Biblioteca Digital pública        |
+| `field.publication_category`                               | Categoría de Publicación                               |
+| `placeholder.select_category`                              | Seleccionar categoría                                  |
+| `page.ui.guide_visitor_prayer_guide`                       | Guía de Visita y Oración                               |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 
@@ -97,6 +97,7 @@ Curated photo and video albums synced with Strapi v5 Media Library folders and C
 | `framingNotes`          | `string`       | No        | max: 500                                                                                      |
 | `featured`              | `boolean`      | No        | default: `false`                                                                              |
 | `sortOrder`             | `integer`      | No        | default: `0`                                                                                  |
+| `photoCount`            | `integer`      | No        | default: `0`                                                                                  |
 
 ### `plugin::resources.glossary-term` — Resource Glossary Term
 
@@ -239,33 +240,33 @@ flowchart LR
 
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
-| Método   | Ruta del Endpoint                                     | Ámbito        | Controlador                                | Autenticación |
-| :------- | :---------------------------------------------------- | :------------ | :----------------------------------------- | :------------ |
-| `GET`    | `/resources/hub`                                      | `admin`       | `resourcesController.getHubOverview`       | Bearer JWT    |
-| `GET`    | `/resources/publications`                             | `admin`       | `resourcesController.listPublications`     | Bearer JWT    |
-| `POST`   | `/resources/publications`                             | `admin`       | `resourcesController.createPublication`    | Bearer JWT    |
-| `PUT`    | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.updatePublication`    | Bearer JWT    |
-| `DELETE` | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.deletePublication`    | Bearer JWT    |
-| `GET`    | `/resources/galleries`                                | `admin`       | `resourcesController.listGalleries`        | Bearer JWT    |
-| `POST`   | `/resources/galleries`                                | `admin`       | `resourcesController.createGalleryAlbum`   | Bearer JWT    |
-| `PUT`    | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.updateGalleryAlbum`   | Bearer JWT    |
-| `DELETE` | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.deleteGalleryAlbum`   | Bearer JWT    |
-| `POST`   | `/resources/galleries/{documentId}/sync-media-folder` | `admin`       | `resourcesController.syncAlbumMediaFolder` | Bearer JWT    |
-| `GET`    | `/resources/glossary`                                 | `admin`       | `resourcesController.listGlossary`         | Bearer JWT    |
-| `POST`   | `/resources/glossary`                                 | `admin`       | `resourcesController.createGlossaryTerm`   | Bearer JWT    |
-| `PUT`    | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.updateGlossaryTerm`   | Bearer JWT    |
-| `DELETE` | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.deleteGlossaryTerm`   | Bearer JWT    |
-| `GET`    | `/resources/media-folders`                            | `admin`       | `resourcesController.listMediaFolders`     | Bearer JWT    |
-| `GET`    | `/resources/media-files`                              | `admin`       | `resourcesController.listMediaFiles`       | Bearer JWT    |
-| `GET`    | `/resources/settings`                                 | `admin`       | `resourcesController.getSettings`          | Bearer JWT    |
-| `PUT`    | `/resources/settings`                                 | `admin`       | `resourcesController.updateSettings`       | Bearer JWT    |
-| `GET`    | `/api/resources/hub`                                  | `content-api` | `resourcesController.getHubOverview`       | Public        |
-| `GET`    | `/api/resources/publications`                         | `content-api` | `resourcesController.listPublications`     | Public        |
-| `GET`    | `/api/resources/publications/{slug}`                  | `content-api` | `resourcesController.getPublicationBySlug` | Public        |
-| `POST`   | `/api/resources/publications/{slug}/download`         | `content-api` | `resourcesController.downloadPublication`  | Public        |
-| `GET`    | `/api/resources/galleries`                            | `content-api` | `resourcesController.listGalleries`        | Public        |
-| `GET`    | `/api/resources/galleries/{slug}`                     | `content-api` | `resourcesController.getGalleryBySlug`     | Public        |
-| `GET`    | `/api/resources/glossary`                             | `content-api` | `resourcesController.listGlossary`         | Public        |
+| Método   | Ruta del Endpoint                                     | Ámbito        | Controlador                                 | Autenticación |
+| :------- | :---------------------------------------------------- | :------------ | :------------------------------------------ | :------------ |
+| `GET`    | `/resources/hub`                                      | `admin`       | `resourcesController.getAdminHubOverview`   | Bearer JWT    |
+| `GET`    | `/resources/publications`                             | `admin`       | `resourcesController.listAdminPublications` | Bearer JWT    |
+| `POST`   | `/resources/publications`                             | `admin`       | `resourcesController.createPublication`     | Bearer JWT    |
+| `PUT`    | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.updatePublication`     | Bearer JWT    |
+| `DELETE` | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.deletePublication`     | Bearer JWT    |
+| `GET`    | `/resources/galleries`                                | `admin`       | `resourcesController.listAdminGalleries`    | Bearer JWT    |
+| `POST`   | `/resources/galleries`                                | `admin`       | `resourcesController.createGalleryAlbum`    | Bearer JWT    |
+| `PUT`    | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.updateGalleryAlbum`    | Bearer JWT    |
+| `DELETE` | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.deleteGalleryAlbum`    | Bearer JWT    |
+| `POST`   | `/resources/galleries/{documentId}/sync-media-folder` | `admin`       | `resourcesController.syncAlbumMediaFolder`  | Bearer JWT    |
+| `GET`    | `/resources/glossary`                                 | `admin`       | `resourcesController.listAdminGlossary`     | Bearer JWT    |
+| `POST`   | `/resources/glossary`                                 | `admin`       | `resourcesController.createGlossaryTerm`    | Bearer JWT    |
+| `PUT`    | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.updateGlossaryTerm`    | Bearer JWT    |
+| `DELETE` | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.deleteGlossaryTerm`    | Bearer JWT    |
+| `GET`    | `/resources/media-folders`                            | `admin`       | `resourcesController.listMediaFolders`      | Bearer JWT    |
+| `GET`    | `/resources/media-files`                              | `admin`       | `resourcesController.listMediaFiles`        | Bearer JWT    |
+| `GET`    | `/resources/settings`                                 | `admin`       | `resourcesController.getSettings`           | Bearer JWT    |
+| `PUT`    | `/resources/settings`                                 | `admin`       | `resourcesController.updateSettings`        | Bearer JWT    |
+| `GET`    | `/api/resources/hub`                                  | `content-api` | `resourcesController.getHubOverview`        | Public        |
+| `GET`    | `/api/resources/publications`                         | `content-api` | `resourcesController.listPublications`      | Public        |
+| `GET`    | `/api/resources/publications/{slug}`                  | `content-api` | `resourcesController.getPublicationBySlug`  | Public        |
+| `POST`   | `/api/resources/publications/{slug}/download`         | `content-api` | `resourcesController.downloadPublication`   | Public        |
+| `GET`    | `/api/resources/galleries`                            | `content-api` | `resourcesController.listGalleries`         | Public        |
+| `GET`    | `/api/resources/galleries/{slug}`                     | `content-api` | `resourcesController.getGalleryBySlug`      | Public        |
+| `GET`    | `/api/resources/glossary`                             | `content-api` | `resourcesController.listGlossary`          | Public        |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 

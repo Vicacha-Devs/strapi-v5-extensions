@@ -234,7 +234,8 @@ function buildHostPrayerDataPayload(
   next: IslamPluginSettings,
   f: PrayerMappingFields
 ): Record<string, unknown> {
-  const primaryJumuah = next.jumuahShifts?.[0];
+  const primaryJumuah =
+    next.jumuahShifts?.find((s) => s.isPrimary) ?? next.jumuahShifts?.[0];
   return {
     [f.method]: next.method,
     [f.school]: next.school,
@@ -242,8 +243,8 @@ function buildHostPrayerDataPayload(
     [f.shifting]: next.shifting,
     [f.defaultLat]: next.defaultLat,
     [f.defaultLon]: next.defaultLon,
-    [f.jumuahKhutbahTime]: primaryJumuah?.khutbahTime || "12:15 PM",
-    [f.jumuahPrayerTime]: primaryJumuah?.prayerTime || "12:45 PM",
+    [f.jumuahKhutbahTime]: primaryJumuah?.khutbahTime || "12:15",
+    [f.jumuahPrayerTime]: primaryJumuah?.prayerTime || "12:45",
     [f.ramadanBannerActive]: next.ramadan.bannerActive,
     [f.ramadanNotes]:
       next.ramadan.notes[next.defaultLocale] || next.ramadan.notes.es || "",

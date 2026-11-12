@@ -281,12 +281,20 @@ function extractLifecycleFormId(event: {
   return fromResult ?? undefined;
 }
 
+const subscribedStrapiInstances = new WeakSet<object>();
+
+export function clearSubscribedStrapiInstance(strapi: Core.Strapi): void {
+  subscribedStrapiInstances.delete(strapi as unknown as object);
+}
+
 function subscribeFormBuilderLifecycles(
   strapi: Core.Strapi,
   formService: FormServiceApi,
   submissionService: SubmissionServiceApi
 ): void {
   if (!strapi.db?.lifecycles?.subscribe) return;
+  if (subscribedStrapiInstances.has(strapi as unknown as object)) return;
+  subscribedStrapiInstances.add(strapi as unknown as object);
 
   if (
     strapi.contentTypes?.[

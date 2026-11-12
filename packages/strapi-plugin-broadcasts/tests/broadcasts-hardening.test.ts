@@ -171,7 +171,10 @@ describe("@vicacha-devs/strapi-plugin-broadcasts hardening, RBAC & i18n", () => 
       ...JSON.parse('{"__proto__":{"polluted":true},"rogueField":"blocked"}'),
     });
     assert.equal(updated.telegramBotToken, "123456:RealStoredToken_ABC");
-    assert.equal((updated as Record<string, unknown>).rogueField, undefined);
+    assert.equal(
+      (updated as unknown as Record<string, unknown>).rogueField,
+      undefined
+    );
     assert.equal(({} as Record<string, unknown>).polluted, undefined);
 
     const controller = broadcastControllerFactory({ strapi });

@@ -1,9 +1,9 @@
 ---
 title: "Extensiones Strapi v5 — Vicacha"
-description: "Suite empresarial de 14 plugins Strapi v5 para calendarios, eventos, reservas, certificados digitales, donaciones, difusiones omnicanal, búsqueda global y SEO."
+description: "Suite empresarial de 15 plugins Strapi v5 para calendarios, eventos, reservas, certificados digitales, donaciones, difusiones omnicanal, búsqueda global, editor Tiptap y SEO."
 template: splash
 hero:
-  tagline: "14 plugins modulares para Strapi v5 con firmas criptográficas Ed25519, soporte en 13 idiomas (incluyendo RTL), especificaciones OpenAPI interactivas y puentes de integración automática."
+  tagline: "15 plugins modulares para Strapi v5 con firmas criptográficas Ed25519, soporte multilingüe (incluyendo RTL), especificaciones OpenAPI interactivas y puentes de integración automática."
   image:
     file: ../../../../public/screenshots/dashboard-overview.png
   actions:
@@ -21,7 +21,7 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 ## Pilares Fundamentales
 
 <CardGrid stagger>
-  <Card title="14 Plugins de Producción para Strapi v5" icon="puzzle">
+  <Card title="15 Plugins de Producción para Strapi v5" icon="puzzle">
     Construidos nativamente sobre la Document Service API
     (`strapi.documents(uid)`), Design System v2 y compilación dual Admin +
     Server con `@strapi/sdk-plugin`.
@@ -33,31 +33,32 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
   </Card>
   <Card title="Seguridad Criptográfica y Webhooks" icon="approve-check-circle">
     Firmas digitales Ed25519, validación HMAC-SHA256 en tiempo constante,
-    protección contra SSRF/Path Traversal y enmascaramiento de datos personales
-    (PII).
+    sanitización DOMPurify, protección contra SSRF/Path Traversal y
+    enmascaramiento de PII.
   </Card>
   <Card title="Paridad i18n en 13 Idiomas y RTL" icon="translate">
     Traducciones completas para `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`,
-    `it`, `nl`, `pl`, `id`, `ur` (RTL) y `zh`, más calendarios secundarios
-    Hijri, Hebreo y Persa.
+    `it`, `nl`, `pl`, `id`, `ur` (RTL) y `zh` (más `cs` en `tiptap-editor`), y
+    calendarios secundarios CLDR.
   </Card>
 </CardGrid>
 
-## Catálogo Completo de Plugins (14 Paquetes)
+## Catálogo Completo de Plugins (15 Paquetes)
 
-| Paquete                                                             | Plugin ID       | Paquete NPM                                 |
-| :------------------------------------------------------------------ | :-------------- | :------------------------------------------ |
-| [Reservas y Citas](/es/strapi-plugin-bookings/)                     | `bookings`      | `@vicacha-devs/strapi-plugin-bookings`      |
-| [Difusiones Omnicanal](/es/strapi-plugin-broadcasts/)               | `broadcasts`    | `@vicacha-devs/strapi-plugin-broadcasts`    |
-| [Calendario y Programación](/es/strapi-plugin-calendar/)            | `calendar`      | `@vicacha-devs/strapi-plugin-calendar`      |
-| [Certificados Digitales (Ed25519)](/es/strapi-plugin-certificates/) | `certificates`  | `@vicacha-devs/strapi-plugin-certificates`  |
-| [Donaciones y Campañas](/es/strapi-plugin-donations/)               | `donations`     | `@vicacha-devs/strapi-plugin-donations`     |
-| [Eventos, RSVP y Check-In](/es/strapi-plugin-events/)               | `events`        | `@vicacha-devs/strapi-plugin-events`        |
-| [Búsqueda Global (Cmd+K)](/es/strapi-plugin-global-search/)         | `global-search` | `@vicacha-devs/strapi-plugin-global-search` |
-| [Bandeja, Formularios y Alertas](/es/strapi-plugin-inbox/)          | `inbox`         | `@vicacha-devs/strapi-plugin-inbox`         |
-| [Suite Islámica (Salah, Qibla, Hijri)](/es/strapi-plugin-islam/)    | `islam`         | `@vicacha-devs/strapi-plugin-islam`         |
-| [Canales Multimedia y Podcast RSS](/es/strapi-plugin-media-feeds/)  | `media-feeds`   | `@vicacha-devs/strapi-plugin-media-feeds`   |
-| [Notas Editoriales y Anotaciones](/es/strapi-plugin-notes/)         | `notes`         | `@vicacha-devs/strapi-plugin-notes`         |
-| [Recursos, Galerías y Glosario](/es/strapi-plugin-resources/)       | `resources`     | `@vicacha-devs/strapi-plugin-resources`     |
-| [SEO y Analizador SERP](/es/strapi-plugin-seo/)                     | `seo`           | `@vicacha-devs/strapi-plugin-seo`           |
-| [Mapa del Sitio XML y Hreflang](/es/strapi-plugin-sitemap/)         | `sitemap`       | `@vicacha-devs/strapi-plugin-sitemap`       |
+| Paquete                                                                | Plugin ID       | Paquete NPM                                 |
+| :--------------------------------------------------------------------- | :-------------- | :------------------------------------------ |
+| [Reservas y Citas](/es/strapi-plugin-bookings/)                        | `bookings`      | `@vicacha-devs/strapi-plugin-bookings`      |
+| [Difusiones Omnicanal](/es/strapi-plugin-broadcasts/)                  | `broadcasts`    | `@vicacha-devs/strapi-plugin-broadcasts`    |
+| [Calendario y Programación](/es/strapi-plugin-calendar/)               | `calendar`      | `@vicacha-devs/strapi-plugin-calendar`      |
+| [Certificados Digitales (Ed25519)](/es/strapi-plugin-certificates/)    | `certificates`  | `@vicacha-devs/strapi-plugin-certificates`  |
+| [Donaciones y Campañas](/es/strapi-plugin-donations/)                  | `donations`     | `@vicacha-devs/strapi-plugin-donations`     |
+| [Eventos, RSVP y Check-In](/es/strapi-plugin-events/)                  | `events`        | `@vicacha-devs/strapi-plugin-events`        |
+| [Búsqueda Global (Cmd+K)](/es/strapi-plugin-global-search/)            | `global-search` | `@vicacha-devs/strapi-plugin-global-search` |
+| [Bandeja, Formularios y Alertas](/es/strapi-plugin-inbox/)             | `inbox`         | `@vicacha-devs/strapi-plugin-inbox`         |
+| [Suite Islámica (Salah, Qibla, Hijri)](/es/strapi-plugin-islam/)       | `islam`         | `@vicacha-devs/strapi-plugin-islam`         |
+| [Canales Multimedia y Podcast RSS](/es/strapi-plugin-media-feeds/)     | `media-feeds`   | `@vicacha-devs/strapi-plugin-media-feeds`   |
+| [Notas Editoriales y Anotaciones](/es/strapi-plugin-notes/)            | `notes`         | `@vicacha-devs/strapi-plugin-notes`         |
+| [Recursos, Galerías y Glosario](/es/strapi-plugin-resources/)          | `resources`     | `@vicacha-devs/strapi-plugin-resources`     |
+| [SEO y Analizador SERP](/es/strapi-plugin-seo/)                        | `seo`           | `@vicacha-devs/strapi-plugin-seo`           |
+| [Mapa del Sitio XML y Hreflang](/es/strapi-plugin-sitemap/)            | `sitemap`       | `@vicacha-devs/strapi-plugin-sitemap`       |
+| [Editor de Texto Enriquecido Tiptap](/es/strapi-plugin-tiptap-editor/) | `tiptap-editor` | `@vicacha-devs/strapi-plugin-tiptap-editor` |

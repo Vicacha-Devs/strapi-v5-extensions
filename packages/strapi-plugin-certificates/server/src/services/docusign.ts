@@ -55,24 +55,30 @@ function isPrivateOrLoopbackHost(host: string): boolean {
 
 export function validateDocuSignBaseUrl(rawUrl: string): string {
   const cleaned = stripTrailingSlashes(String(rawUrl || "").trim());
-  if (!cleaned.startsWith("https://")) {
-    throw new Error("DocuSign baseUrl must use HTTPS");
+  let parsed: URL;
+  try {
+    parsed = new URL(cleaned);
+  } catch {
+    throw new Error("DocuSign baseUrl must be a valid HTTPS URL");
   }
-  const withoutScheme = cleaned.slice("https://".length);
-  const host = withoutScheme.split("/")[0].split(":")[0].toLowerCase();
-
+  if (
+    parsed.protocol !== "https:" ||
+    parsed.username ||
+    parsed.password ||
+    parsed.search ||
+    parsed.hash
+  ) {
+    throw new Error("DocuSign baseUrl must use HTTPS without credentials/hash");
+  }
+  const host = parsed.hostname.toLowerCase();
   if (isPrivateOrLoopbackHost(host)) {
     throw new Error("DocuSign baseUrl cannot target private or loopback hosts");
   }
-
-  const isOfficialDocuSign =
-    host.endsWith(".docusign.net") || host.endsWith(".docusign.com");
-  if (!isOfficialDocuSign) {
+  if (!host.endsWith(".docusign.net") && !host.endsWith(".docusign.com")) {
     throw new Error(
       "DocuSign baseUrl must belong to *.docusign.net or *.docusign.com"
     );
   }
-
   return cleaned;
 }
 
@@ -369,10 +375,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async sendEnvelopeForCertificate(
       documentId: string,
-      options?: {
-        fetchImpl?: FetchLikeFn;
-        accessToken?: string;
-      }
+      options?: { fetchImpl?: FetchLikeFn; accessToken?: string }
     ): Promise<{
       envelopeId: string;
       envelopeStatus: ESignEnvelopeStatus;
@@ -381,15 +384,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       const settings = await getSettingsService().getSettings();
       const { safeBaseUrl, accountId, accessToken, fetchFn } =
         resolveDocuSignCredentials(settings, options);
-
       const rawDoc = await strapi
         .documents(CERTIFICATE_UID)
         .findOne({ documentId });
-      if (!rawDoc) {
-        throw new Error("Certificate record not found");
-      }
+      if (!rawDoc) throw new Error("Certificate record not found");
       const cert = normalizeCertificateRecord(rawDoc, true);
-
       const rendered = await getIssuanceService().renderCertificateDocument(
         { documentId },
         { isAdmin: true }
@@ -399,13 +398,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           "Failed to render certificate HTML for DocuSign envelope"
         );
       }
-
       const envelopePayload = buildDocuSignEnvelopePayload({
         certificate: cert,
         htmlDocument: rendered.html,
         emailSubjectPrefix: settings.esign.emailSubjectPrefix,
       });
-
       const endpoint = `${safeBaseUrl}/v2.1/accounts/${encodeURIComponent(accountId)}/envelopes`;
       const envelopeId = await dispatchDocuSignEnvelopeRequest(
         fetchFn,
@@ -413,7 +410,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         accessToken,
         envelopePayload
       );
-
       const updated = await strapi.documents(CERTIFICATE_UID).update({
         documentId,
         data: {
@@ -422,13 +418,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           esignEnvelopeStatus: "sent",
         },
       });
-
       const updatedRecord = normalizeCertificateRecord(updated || rawDoc, true);
       strapi.eventHub?.emit("certificates.docusign.sent", {
         serialNumber: updatedRecord.serialNumber,
         envelopeId,
       });
-
       return {
         envelopeId,
         envelopeStatus: "sent",
@@ -450,10 +444,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         params.webhookSecret,
         process.env.DOCUSIGN_WEBHOOK_SECRET
       );
-      if (!secret) {
-        throw new Error("DOCUSIGN_WEBHOOK_SECRET is not configured");
-      }
-
+      if (!secret) throw new Error("DOCUSIGN_WEBHOOK_SECRET is not configured");
       if (
         !verifyDocuSignWebhookHmac(
           params.rawBody,
@@ -463,11 +454,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       ) {
         throw new Error("Invalid DocuSign webhook HMAC-SHA256 signature");
       }
-
       const { envelopeId, envelopeStatus } = parseWebhookEnvelopeInfo(
         params.payload
       );
-
       const matches = await strapi.documents(CERTIFICATE_UID).findMany({
         filters: { esignEnvelopeId: envelopeId },
         limit: 1,
@@ -477,17 +466,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           `No certificate found for DocuSign envelopeId ${envelopeId}`
         );
       }
-
       const existing = normalizeCertificateRecord(matches[0], true);
       if (envelopeStatus === "completed") {
         return completeWebhookEnvelope(existing, matches[0], envelopeId);
       }
-
       const updated = await strapi.documents(CERTIFICATE_UID).update({
         documentId: existing.documentId,
         data: { esignEnvelopeStatus: envelopeStatus },
       });
-
       return {
         envelopeId,
         envelopeStatus,

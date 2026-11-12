@@ -40,16 +40,16 @@ export default ({
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة                                                        | النص المعروض في الواجهة                        |
-| :------------------------------------------------------------------- | :--------------------------------------------- |
-| `broadcasts.checkbox.enable_dry_run_sandbox_mode`                    | تفعيل Dry-Run Sandbox Mode                     |
-| `broadcasts.checkbox.enable_eventhub_auto_broadcast_triggers`        | تفعيل EventHub Auto-البث Triggers              |
-| `broadcasts.checkbox.enable_telegram_transport`                      | تفعيل Telegram Transport                       |
-| `broadcasts.checkbox.enable_whatsapp_transport`                      | تفعيل WhatsApp Transport                       |
-| `broadcasts.checkbox.segment_confirmed_subscribers_via_inbox_bridge` | Segment confirmed subscribers via Inbox Bridge |
-| `broadcasts.field.broadcast_topic_segments_comma_separated`          | البث Topic Segments (مفصولة بفواصل)            |
-| `broadcasts.field.campaign_slug`                                     | الحملة Slug                                    |
-| `broadcasts.field.campaign_title`                                    | الحملة العنوان                                 |
+| مفتاح الترجمة                                             | النص المعروض في الواجهة                  |
+| :-------------------------------------------------------- | :--------------------------------------- |
+| `checkbox.enable_dry_run_sandbox_mode`                    | تفعيل وضع المحاكاة التجريبي (Dry-Run)    |
+| `checkbox.enable_email_designer_5_html_template_bridge`   | تفعيل جسر قوالب HTML لـ Email Designer 5 |
+| `checkbox.enable_eventhub_auto_broadcast_triggers`        | تفعيل مشغلات البث التلقائي عبر EventHub   |
+| `checkbox.enable_telegram_transport`                      | تفعيل النقل عبر تيليغرام                 |
+| `checkbox.enable_whatsapp_transport`                      | تفعيل النقل عبر واتساب                   |
+| `checkbox.segment_confirmed_subscribers_via_inbox_bridge` | تقسيم المشتركين المؤكدين عبر جسر Inbox   |
+| `common.activate`                                         | تفعيل                                    |
+| `common.active`                                           | نشط                                      |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 

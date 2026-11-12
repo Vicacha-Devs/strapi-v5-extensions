@@ -84,8 +84,11 @@ export function resolveOccurrenceWindow(params: GetOccurrencesParams): {
   const startMs = isValidIso(params.from)
     ? new Date(String(params.from)).getTime()
     : defaultFromMs;
-  const rawEndMs = isValidIso(params.to)
-    ? new Date(String(params.to)).getTime()
+  const rawToStr = typeof params.to === "string" ? params.to.trim() : "";
+  const rawEndMs = isValidIso(rawToStr)
+    ? /^\d{4}-\d{2}-\d{2}$/.test(rawToStr)
+      ? new Date(`${rawToStr}T23:59:59.999Z`).getTime()
+      : new Date(rawToStr).getTime()
     : defaultToMs;
 
   if (rawEndMs < startMs) {

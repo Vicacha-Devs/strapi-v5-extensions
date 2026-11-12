@@ -4,7 +4,7 @@ description: "Difusiones comunitarias omnicanal por WhatsApp, Telegram y correo 
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-broadcasts` · **Plugin ID**: `broadcasts` · **Category**: `Community & Engagement` · **Version**: `0.1.0` · **Routes**: `15`
+> **Package**: `@vicacha-devs/strapi-plugin-broadcasts` · **Plugin ID**: `broadcasts` · **Category**: `Community & Engagement` · **Version**: `0.2.0` · **Routes**: `15`
 
 Difusiones comunitarias omnicanal por WhatsApp, Telegram y correo electrónico con reglas de automatización EventHub y registros con PII enmascarado.
 

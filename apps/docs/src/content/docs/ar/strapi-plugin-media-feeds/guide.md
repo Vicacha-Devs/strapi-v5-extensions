@@ -46,10 +46,10 @@ export default ({
 | `common.enabled`             | مفعّل                             |
 | `common.remove`              | إزالة                            |
 | `field.author_organization`  | المؤلف / المنظمة                 |
-| `field.default_locale`       | الافتراضي اللغة                   |
-| `field.live_broadcast_title` | مباشر البث العنوان               |
+| `field.default_locale`       | اللغة الافتراضية                  |
+| `field.live_broadcast_title` | عنوان البث المباشر               |
 | `field.live_event_slug`      | معرّف الفعالية المرتبطة (اختياري) |
-| `field.live_schedule_label`  | جدول / تسمية نافذة البث          |
+| `field.live_schedule_label`  | الجدول الزمني / تسمية نافذة البث |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -212,17 +212,19 @@ flowchart LR
 
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية           | النطاق        | المعالج (Handler)           | المصادقة   |
-| :------ | :-------------------------- | :------------ | :-------------------------- | :--------- |
-| `GET`   | `/media-feeds/overview`     | `admin`       | `admin.getOverview`         | Bearer JWT |
-| `GET`   | `/media-feeds/settings`     | `admin`       | `admin.getSettings`         | Bearer JWT |
-| `PUT`   | `/media-feeds/settings`     | `admin`       | `admin.updateSettings`      | Bearer JWT |
-| `POST`  | `/media-feeds/enrich-url`   | `admin`       | `admin.enrichUrl`           | Bearer JWT |
-| `POST`  | `/media-feeds/sync-youtube` | `admin`       | `admin.syncYouTube`         | Bearer JWT |
-| `GET`   | `/api/media-feeds/episodes` | `content-api` | `content-api.listEpisodes`  | Public     |
-| `GET`   | `/api/media-feeds/series`   | `content-api` | `content-api.listSeries`    | Public     |
-| `GET`   | `/api/media-feeds/live`     | `content-api` | `content-api.getLiveStatus` | Public     |
-| `GET`   | `/api/media-feeds/rss.xml`  | `content-api` | `content-api.getRssXml`     | Public     |
+| الطريقة | مسار نقطة النهاية                  | النطاق        | المعالج (Handler)              | المصادقة   |
+| :------ | :--------------------------------- | :------------ | :----------------------------- | :--------- |
+| `GET`   | `/media-feeds/overview`            | `admin`       | `admin.getOverview`            | Bearer JWT |
+| `GET`   | `/media-feeds/settings`            | `admin`       | `admin.getSettings`            | Bearer JWT |
+| `PUT`   | `/media-feeds/settings`            | `admin`       | `admin.updateSettings`         | Bearer JWT |
+| `POST`  | `/media-feeds/enrich-url`          | `admin`       | `admin.enrichUrl`              | Bearer JWT |
+| `POST`  | `/media-feeds/sync-youtube`        | `admin`       | `admin.syncYouTube`            | Bearer JWT |
+| `GET`   | `/api/media-feeds/episodes`        | `content-api` | `content-api.listEpisodes`     | Public     |
+| `GET`   | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public     |
+| `GET`   | `/api/media-feeds/series`          | `content-api` | `content-api.listSeries`       | Public     |
+| `GET`   | `/api/media-feeds/live`            | `content-api` | `content-api.getLiveStatus`    | Public     |
+| `GET`   | `/api/media-feeds/rss.xml`         | `content-api` | `content-api.getRssXml`        | Public     |
+| `GET`   | `/api/media-feeds/podcast.xml`     | `content-api` | `content-api.getRssXml`        | Public     |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 

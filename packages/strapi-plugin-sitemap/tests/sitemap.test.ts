@@ -73,7 +73,7 @@ const createMockStrapi = ({
     },
   ],
   localeDocs = [{ code: "en" }, { code: "es" }],
-} = {}) => {
+}: Record<string, any> = {}): any => {
   let currentOptions = optionsDoc;
   let currentEntries = [...sitemapEntries];
   let currentCustomUrls = [...customUrls];
@@ -236,7 +236,7 @@ const createMockStrapi = ({
     },
   };
 
-  return strapi;
+  return strapi as any;
 };
 
 describe("strapi-plugin-sitemap", () => {

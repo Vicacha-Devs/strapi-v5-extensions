@@ -4,7 +4,7 @@ description: "Gestor del componente compartido SEO y redes sociales, vista previ
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.0.12` · **Routes**: `5`
+> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.1.1` · **Routes**: `5`
 
 Gestor del componente compartido SEO y redes sociales, vista previa en vivo de Google SERP y OpenGraph/X, y analizador de densidad de palabras clave.
 

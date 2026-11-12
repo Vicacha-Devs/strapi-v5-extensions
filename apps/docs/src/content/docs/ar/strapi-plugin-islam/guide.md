@@ -55,8 +55,8 @@ export default ({
 | `page.ui.3_quran_hadith_dua`                       | القرآن والحديث والدعاء                     |
 | `page.ui.4_zakat_nisab_qibla`                      | الزكاة والنصاب والقبلة                     |
 | `page.ui.refresh`                                  | تحديث                                      |
-| `page.ui.prayer_salah`                             | Prayer (Salah)                             |
-| `page.ui.adhan_time`                               | Adhan الوقت                                |
+| `page.ui.prayer_salah`                             | الصلاة                                      |
+| `page.ui.adhan_time`                               | وقت الأذان                                  |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 

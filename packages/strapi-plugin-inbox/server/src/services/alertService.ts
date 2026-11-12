@@ -9,6 +9,20 @@ import {
 } from "../../../shared";
 import { getDocuments } from "./docHelper";
 
+function sanitizeSafeCtaUrl(raw?: string): string {
+  if (typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  if (
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("http://") ||
+    (trimmed.startsWith("/") && !trimmed.startsWith("//"))
+  ) {
+    return trimmed;
+  }
+  return "";
+}
+
 function buildAlertBannerPayload(
   input: Partial<AlertBannerRecord> & {
     code: string;
@@ -22,7 +36,7 @@ function buildAlertBannerPayload(
     message: input.message,
     severity: input.severity ?? "info",
     ctaLabel: input.ctaLabel ?? "",
-    ctaUrl: input.ctaUrl ?? "",
+    ctaUrl: sanitizeSafeCtaUrl(input.ctaUrl),
     dismissible: input.dismissible ?? true,
     active: input.active ?? true,
     priority: input.priority ?? 10,
@@ -42,7 +56,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }>("settings");
     const settings = await settingsService.getSettings();
     const locale = params?.locale || settings.defaultLocale || "es";
-    const nowMs = new Date(params?.nowIso || Date.now()).getTime();
+    const parsedNowMs = new Date(params?.nowIso || Date.now()).getTime();
+    const nowMs = Number.isNaN(parsedNowMs) ? Date.now() : parsedNowMs;
 
     const docs = (await getDocuments(strapi, ALERT_BANNER_UID).findMany({
       filters: { active: true },
@@ -79,7 +94,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
         title: tr?.title || banner.title,
         message: tr?.message || banner.message,
         ctaLabel: tr?.ctaLabel || banner.ctaLabel,
-        ctaUrl: tr?.ctaUrl || banner.ctaUrl,
+        ctaUrl: sanitizeSafeCtaUrl(tr?.ctaUrl || banner.ctaUrl),
         secondaryDateLabel: secondaryDate.formatted,
       };
     });
@@ -102,17 +117,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const existing = existingDocs[0] || null;
     const payload = buildAlertBannerPayload(input);
 
+    let saved: AlertBannerRecord;
     if (existing?.documentId) {
       const updated = await getDocuments(strapi, ALERT_BANNER_UID).update({
         documentId: existing.documentId,
         data: payload,
       });
-      return updated as unknown as AlertBannerRecord;
+      saved = updated as unknown as AlertBannerRecord;
+    } else {
+      const created = await getDocuments(strapi, ALERT_BANNER_UID).create({
+        data: payload,
+      });
+      saved = created as unknown as AlertBannerRecord;
     }
 
-    const created = await getDocuments(strapi, ALERT_BANNER_UID).create({
-      data: payload,
-    });
-    return created as unknown as AlertBannerRecord;
+    if (saved.active) {
+      strapi.eventHub?.emit("inbox.alert.published", { entry: saved });
+    }
+    return saved;
   },
 });

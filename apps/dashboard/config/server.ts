@@ -5,6 +5,13 @@ function resolveEphemeralSecret(envKey: string): string {
   if (fromEnv && fromEnv.trim().length > 0) {
     return fromEnv.trim();
   }
+  const isProdRuntime =
+    process.env.NODE_ENV === "production" && !process.argv.includes("build");
+  if (isProdRuntime) {
+    throw new Error(
+      `[dashboard] Missing required production environment variable: ${envKey}`
+    );
+  }
   console.warn(
     `[dashboard] Generating instance-isolated ephemeral secret for ${envKey}`
   );
@@ -17,7 +24,7 @@ export default ({
   env: (key: string, defaultValue?: string) => string;
 }) => ({
   host: env("HOST", "127.0.0.1"),
-  port: Number(env("PORT", "1337")),
+  port: Number(env("PORT", "1337")) || 1337,
   app: {
     keys: [
       resolveEphemeralSecret("APP_KEY_1"),

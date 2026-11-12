@@ -92,6 +92,8 @@ export const PLUGIN_SAMPLE_CONFIG: Record<string, string> = {
   "seo": "      autoCreateComponent: true,",
   "sitemap":
     '      hostname: env("SITEMAP_HOSTNAME", "https://example.org"),\n      includeHreflang: true,',
+  "tiptap-editor":
+    '      presets: {\n        editorial: { bold: true, italic: true, heading: { levels: [1, 2, 3] }, link: true, mediaLibrary: true, table: true },\n      },\n      settings: {\n        defaultPreset: "editorial",\n        defaultOutputFormat: "json",\n        enableRelationalSync: true,\n      },',
 };
 
 export const SITEMAP_INLINE_CONTENT_TYPES: ContentTypeDoc[] = [

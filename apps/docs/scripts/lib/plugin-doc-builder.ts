@@ -95,7 +95,8 @@ export function inspectPluginDetails(
         attributes: raw.attributes || {},
       });
     }
-    if (contentTypes.length === 0 && existsSync(join(ctDir, "index.ts"))) {
+    const isSitemap = basename(pkgDir) === "strapi-plugin-sitemap";
+    if (contentTypes.length === 0 && isSitemap) {
       contentTypes.push(...SITEMAP_INLINE_CONTENT_TYPES);
     }
   }
@@ -184,11 +185,12 @@ function optShot(
   url: string | undefined,
   kind: "settings" | "palette"
 ): string[] {
+  if (!url) return [];
   const suffix =
     kind === "settings"
       ? "Strapi v5 Settings Panel"
       : "Spotlight Cmd+K Command Palette";
-  return url ? [`![${label} — ${suffix}](${url})`, ""] : [];
+  return [`![${label} — ${suffix}](${url})`, ""];
 }
 
 function localeMeta(meta: PluginPackageMeta, locale: SupportedLocale) {

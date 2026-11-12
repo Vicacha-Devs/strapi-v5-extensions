@@ -47,7 +47,7 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 | `common.remove`              | Kaldır                                 |
 | `field.author_organization`  | Yazar / Kurum                          |
 | `field.default_locale`       | Varsayılan Dil                         |
-| `field.live_broadcast_title` | Canlı Yayın Başlık                     |
+| `field.live_broadcast_title` | Canlı Yayın Başlığı                    |
 | `field.live_event_slug`      | Bağlı Etkinlik Kısa Adı (İsteğe Bağlı) |
 | `field.live_schedule_label`  | Program / Yayın Penceresi Etiketi      |
 
@@ -212,17 +212,19 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot  | Uç Nokta Yolu               | Kapsam        | Denetleyici (Handler)       | Kimlik Doğrulama |
-| :----- | :-------------------------- | :------------ | :-------------------------- | :--------------- |
-| `GET`  | `/media-feeds/overview`     | `admin`       | `admin.getOverview`         | Bearer JWT       |
-| `GET`  | `/media-feeds/settings`     | `admin`       | `admin.getSettings`         | Bearer JWT       |
-| `PUT`  | `/media-feeds/settings`     | `admin`       | `admin.updateSettings`      | Bearer JWT       |
-| `POST` | `/media-feeds/enrich-url`   | `admin`       | `admin.enrichUrl`           | Bearer JWT       |
-| `POST` | `/media-feeds/sync-youtube` | `admin`       | `admin.syncYouTube`         | Bearer JWT       |
-| `GET`  | `/api/media-feeds/episodes` | `content-api` | `content-api.listEpisodes`  | Public           |
-| `GET`  | `/api/media-feeds/series`   | `content-api` | `content-api.listSeries`    | Public           |
-| `GET`  | `/api/media-feeds/live`     | `content-api` | `content-api.getLiveStatus` | Public           |
-| `GET`  | `/api/media-feeds/rss.xml`  | `content-api` | `content-api.getRssXml`     | Public           |
+| Metot  | Uç Nokta Yolu                      | Kapsam        | Denetleyici (Handler)          | Kimlik Doğrulama |
+| :----- | :--------------------------------- | :------------ | :----------------------------- | :--------------- |
+| `GET`  | `/media-feeds/overview`            | `admin`       | `admin.getOverview`            | Bearer JWT       |
+| `GET`  | `/media-feeds/settings`            | `admin`       | `admin.getSettings`            | Bearer JWT       |
+| `PUT`  | `/media-feeds/settings`            | `admin`       | `admin.updateSettings`         | Bearer JWT       |
+| `POST` | `/media-feeds/enrich-url`          | `admin`       | `admin.enrichUrl`              | Bearer JWT       |
+| `POST` | `/media-feeds/sync-youtube`        | `admin`       | `admin.syncYouTube`            | Bearer JWT       |
+| `GET`  | `/api/media-feeds/episodes`        | `content-api` | `content-api.listEpisodes`     | Public           |
+| `GET`  | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public           |
+| `GET`  | `/api/media-feeds/series`          | `content-api` | `content-api.listSeries`       | Public           |
+| `GET`  | `/api/media-feeds/live`            | `content-api` | `content-api.getLiveStatus`    | Public           |
+| `GET`  | `/api/media-feeds/rss.xml`         | `content-api` | `content-api.getRssXml`        | Public           |
+| `GET`  | `/api/media-feeds/podcast.xml`     | `content-api` | `content-api.getRssXml`        | Public           |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

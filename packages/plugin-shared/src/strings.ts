@@ -8,10 +8,12 @@
 
 /** Removes every leading and trailing occurrence of `char` in one pass. */
 export function trimEdgeChars(value: string, char: string): string {
+  if (!value || !char) return value;
   let start = 0;
   let end = value.length;
-  while (start < end && value[start] === char) start++;
-  while (end > start && value[end - 1] === char) end--;
+  const step = char.length;
+  while (start + step <= end && value.startsWith(char, start)) start += step;
+  while (end - step >= start && value.endsWith(char, end)) end -= step;
   return value.slice(start, end);
 }
 
