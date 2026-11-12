@@ -15,7 +15,9 @@ import register from "./register";
 import routes from "./routes";
 import services from "./services";
 
-export default {
+// Explicit annotation: the inferred type references @strapi/types internals
+// that declaration emit cannot name portably (TS2742).
+const plugin: Record<string, unknown> = {
   register,
   bootstrap,
   destroy,
@@ -26,11 +28,9 @@ export default {
   contentTypes,
   policies,
   middlewares,
-} as const; // Type Assertion necessary due to the error below
+};
 
-/**
- * [ERROR]  server/src/index.ts:19:1 - TS2742: The inferred type of 'default' cannot be named without a reference to '@strapi/core/node_modules/@strapi/types/dist/core'. This is likely not portable. A type annotation is necessary.
- */
+export default plugin;
 
 // Re-export shared types for host app developer access via the ./strapi-server entry point
 export type {
