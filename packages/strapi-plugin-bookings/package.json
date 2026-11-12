@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-bookings",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Generic Strapi v5 Bookings, Appointments, Resource Scheduling & Time-Slot Availability Engine powered by @vicacha-devs/strapi-plugin-calendar",
   "keywords": [
     "appointments",
@@ -95,7 +95,7 @@
   "peerDependencies": {
     "@strapi/sdk-plugin": "^5.0.0 || ^6.0.0",
     "@strapi/strapi": "^5.0.0",
-    "@vicacha-devs/strapi-plugin-calendar": "^1.1.2",
+    "@vicacha-devs/strapi-plugin-calendar": "^1.1.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",
