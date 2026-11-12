@@ -300,13 +300,13 @@ export const NotesHomePage: React.FC = () => {
   };
 
   const handleTogglePin = async (note: NoteRecord) => {
-    const id = note.id || note.documentId;
+    const id = note.documentId || note.id;
     if (!id) return;
     await updateNote(id, { isPinned: !note.isPinned });
   };
 
   const handleConfirmDelete = async (note: NoteRecord) => {
-    const id = note.id || note.documentId;
+    const id = note.documentId || note.id;
     if (!id) return;
     const deleted = await deleteNote(id);
     if (deleted) {

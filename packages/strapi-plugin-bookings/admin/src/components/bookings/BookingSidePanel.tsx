@@ -136,8 +136,8 @@ export const BookingSidePanel: React.FC<BookingSidePanelProps> = ({
       await onUpdateStatus(
         booking.documentId,
         status,
-        assignedHost.trim() || undefined,
-        internalNotes.trim() || undefined
+        assignedHost.trim(),
+        internalNotes.trim()
       );
     } finally {
       setSaving(false);

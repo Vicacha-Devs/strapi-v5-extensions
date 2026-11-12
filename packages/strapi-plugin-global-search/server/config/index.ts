@@ -1,4 +1,8 @@
+import { isPlainObject } from "@vicacha-devs/plugin-shared";
+
 import type { PluginSettings } from "../types";
+
+export { isPlainObject };
 
 /**
  * Every value here has a working default: the plugin must run on a fresh app
@@ -32,11 +36,6 @@ export const defaults: PluginSettings = {
   /** Up to two extra fields shown next to the main field, keyed by content type UID. */
   displayFields: {},
 };
-
-export const isPlainObject = (
-  value: unknown
-): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === "string");

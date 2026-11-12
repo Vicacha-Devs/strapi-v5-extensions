@@ -406,9 +406,15 @@ export function buildGalleryAlbumUpdateData(
     !validatedData.coverPhoto &&
     !existingCoverId;
 
+  const shouldClearCover =
+    hasPhotos &&
+    photoIds.length === 0 &&
+    validatedData.coverPhoto === undefined;
+
   return {
     ...validatedData,
     ...(hasPhotos ? { photoCount: photoIds.length } : {}),
     ...(shouldDefaultCover ? { coverPhoto: photoIds[0] } : {}),
+    ...(shouldClearCover ? { coverPhoto: null } : {}),
   };
 }

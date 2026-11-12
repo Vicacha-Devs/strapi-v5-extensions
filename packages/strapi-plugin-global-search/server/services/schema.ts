@@ -76,7 +76,11 @@ export default ({ strapi }: { strapi: StrapiLike }) => {
       name: string,
       attribute: AttributeLike | undefined
     ): boolean {
-      if (!attribute || BLOCKLISTED_ATTRIBUTE_NAMES.includes(name))
+      if (
+        !attribute ||
+        BLOCKLISTED_ATTRIBUTE_NAMES.includes(name) ||
+        /token|secret|password|privatekey|apikey|hash/i.test(name)
+      )
         return false;
       if (attribute.private === true) return false;
       if (attribute.searchable === false) return false;
@@ -93,7 +97,11 @@ export default ({ strapi }: { strapi: StrapiLike }) => {
       attribute: AttributeLike | undefined
     ): boolean {
       if (!name || typeof name !== "string") return false;
-      if (BLOCKLISTED_ATTRIBUTE_NAMES.includes(name)) return false;
+      if (
+        BLOCKLISTED_ATTRIBUTE_NAMES.includes(name) ||
+        /token|secret|password|privatekey|apikey|hash/i.test(name)
+      )
+        return false;
       if (!attribute || attribute.private === true) return false;
       if (attribute.type && SKIPPED_ATTRIBUTE_TYPES.includes(attribute.type))
         return false;

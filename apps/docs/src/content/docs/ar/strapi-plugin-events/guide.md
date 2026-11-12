@@ -41,16 +41,16 @@ export default ({
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة                  | النص المعروض في الواجهة   |
-| :----------------------------- | :------------------------ |
-| `sidePanel.title`              | ملخص الفعالية والحجوزات   |
-| `sidePanel.secondaryCalendars` | Alternative التقويم Dates |
-| `sidePanel.rsvpStatus`         | الحجوزات والسعة           |
-| `sidePanel.full`               | مكتمل / قائمة الانتظار     |
-| `sidePanel.open`               | متاح                      |
-| `sidePanel.confirmedSeats`     | المقاعد المؤكدة           |
-| `sidePanel.checkedIn`          | تم تسجيل حضورهم           |
-| `sidePanel.waitlisted`         | في قائمة الانتظار          |
+| مفتاح الترجمة                  | النص المعروض في الواجهة      |
+| :----------------------------- | :--------------------------- |
+| `sidePanel.title`              | ملخص الفعالية والحجوزات      |
+| `sidePanel.secondaryCalendars` | التواريخ في التقاويم البديلة |
+| `sidePanel.rsvpStatus`         | الحجوزات والسعة              |
+| `sidePanel.full`               | مكتمل / قائمة الانتظار        |
+| `sidePanel.open`               | متاح                         |
+| `sidePanel.confirmedSeats`     | المقاعد المؤكدة              |
+| `sidePanel.checkedIn`          | تم تسجيل حضورهم              |
+| `sidePanel.waitlisted`         | في قائمة الانتظار             |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -238,13 +238,13 @@ flowchart LR
 | `GET`   | `/events/registrations/export.csv`            | `admin`       | `admin.exportRegistrationsCsv`       | Bearer JWT |
 | `POST`  | `/events/registrations/{documentId}/status`   | `admin`       | `admin.updateRegistrationStatus`     | Bearer JWT |
 | `POST`  | `/events/registrations/{documentId}/check-in` | `admin`       | `admin.checkIn`                      | Bearer JWT |
-| `GET`   | `/api/events/occurrences`                     | `content-api` | `content-api.listOccurrences`        | Public     |
-| `GET`   | `/api/events/spotlights`                      | `content-api` | `content-api.listSpotlights`         | Public     |
-| `GET`   | `/api/events/feed.ics`                        | `content-api` | `content-api.downloadFeedIcs`        | Public     |
-| `GET`   | `/api/events/{documentId}/invite.ics`         | `content-api` | `content-api.downloadEventInviteIcs` | Public     |
-| `GET`   | `/api/events/{documentId}/stats`              | `content-api` | `content-api.getEventStats`          | Public     |
-| `POST`  | `/api/events/{documentId}/register`           | `content-api` | `content-api.registerAttendee`       | Public     |
-| `POST`  | `/api/events/registrations/{token}/cancel`    | `content-api` | `content-api.cancelRegistration`     | Public     |
+| `GET`   | `/api/events/occurrences`                     | `content-api` | `content-api.listOccurrences`        | Bearer JWT |
+| `GET`   | `/api/events/spotlights`                      | `content-api` | `content-api.listSpotlights`         | Bearer JWT |
+| `GET`   | `/api/events/feed.ics`                        | `content-api` | `content-api.downloadFeedIcs`        | Bearer JWT |
+| `GET`   | `/api/events/{documentId}/invite.ics`         | `content-api` | `content-api.downloadEventInviteIcs` | Bearer JWT |
+| `GET`   | `/api/events/{documentId}/stats`              | `content-api` | `content-api.getEventStats`          | Bearer JWT |
+| `POST`  | `/api/events/{documentId}/register`           | `content-api` | `content-api.registerAttendee`       | Bearer JWT |
+| `POST`  | `/api/events/registrations/{token}/cancel`    | `content-api` | `content-api.cancelRegistration`     | Bearer JWT |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 

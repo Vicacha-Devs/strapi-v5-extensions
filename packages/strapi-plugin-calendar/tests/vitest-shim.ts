@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-function createExpect(actual) {
+function createExpect(actual: any) {
   return {
-    toBe(expected) {
+    toBe(expected: any) {
       assert.strictEqual(actual, expected);
     },
-    toEqual(expected) {
+    toEqual(expected: any) {
       assert.deepStrictEqual(actual, expected);
     },
-    toContain(substring) {
+    toContain(substring: any) {
       if (typeof actual === "string") {
         assert.ok(
           actual.includes(substring),
@@ -26,10 +26,10 @@ function createExpect(actual) {
         );
       }
     },
-    toBeGreaterThan(num) {
+    toBeGreaterThan(num: number) {
       assert.ok(actual > num, `Expected ${actual} > ${num}`);
     },
-    toBeGreaterThanOrEqual(num) {
+    toBeGreaterThanOrEqual(num: number) {
       assert.ok(actual >= num, `Expected ${actual} >= ${num}`);
     },
     toBeTruthy() {

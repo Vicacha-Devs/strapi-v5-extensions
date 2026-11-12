@@ -45,16 +45,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı                                                      | Arayüz Metni                                  |
-| :------------------------------------------------------------------- | :-------------------------------------------- |
-| `page.ui.resources_media_galleries_glossary`                         | Kaynaklar, Fotoğraf Galerileri ve Sözlük      |
-| `resources.page.ui.resources_media_galleries_glossary`               | Kaynaklar, Fotoğraf Galerileri ve Sözlük      |
-| `page.ui.add_digital_library_publication_media_library_pd`           | Dijital Kütüphane Yayını Ekle (PDF / e-Kitap) |
-| `resources.page.ui.add_digital_library_publication_media_library_pd` | Dijital Kütüphane Yayını Ekle (PDF / e-Kitap) |
-| `field.publication_title`                                            | Yayın Başlığı                                 |
-| `resources.field.publication_title`                                  | Yayın Başlığı                                 |
-| `placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf`               | örn., Cami Ziyaret ve İbadet Rehberi          |
-| `resources.placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf`     | örn., Cami Ziyaret ve İbadet Rehberi          |
+| Çeviri Anahtarı                                            | Arayüz Metni                                       |
+| :--------------------------------------------------------- | :------------------------------------------------- |
+| `page.ui.resources_media_galleries_glossary`               | Kaynaklar, Fotoğraf Galerileri ve Sözlük           |
+| `page.ui.add_digital_library_publication_media_library_pd` | Dijital Kütüphane Yayını Ekle (PDF / e-Kitap)      |
+| `field.publication_title`                                  | Yayın Başlığı                                      |
+| `placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf`     | örn., Cami Ziyaret ve İbadet Rehberi               |
+| `page.ui.display_title_shown_in_the_public_digital_librar` | Herkese açık Dijital Kütüphanede gösterilen başlık |
+| `field.publication_category`                               | Yayın Kategorisi                                   |
+| `placeholder.select_category`                              | Kategori seçin                                     |
+| `page.ui.guide_visitor_prayer_guide`                       | Ziyaretçi ve İbadet Rehberi                        |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -97,6 +97,7 @@ Curated photo and video albums synced with Strapi v5 Media Library folders and C
 | `framingNotes`          | `string`      | No      | max: 500                                                                                      |
 | `featured`              | `boolean`     | No      | default: `false`                                                                              |
 | `sortOrder`             | `integer`     | No      | default: `0`                                                                                  |
+| `photoCount`            | `integer`     | No      | default: `0`                                                                                  |
 
 ### `plugin::resources.glossary-term` — Resource Glossary Term
 
@@ -239,33 +240,33 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot    | Uç Nokta Yolu                                         | Kapsam        | Denetleyici (Handler)                      | Kimlik Doğrulama |
-| :------- | :---------------------------------------------------- | :------------ | :----------------------------------------- | :--------------- |
-| `GET`    | `/resources/hub`                                      | `admin`       | `resourcesController.getHubOverview`       | Bearer JWT       |
-| `GET`    | `/resources/publications`                             | `admin`       | `resourcesController.listPublications`     | Bearer JWT       |
-| `POST`   | `/resources/publications`                             | `admin`       | `resourcesController.createPublication`    | Bearer JWT       |
-| `PUT`    | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.updatePublication`    | Bearer JWT       |
-| `DELETE` | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.deletePublication`    | Bearer JWT       |
-| `GET`    | `/resources/galleries`                                | `admin`       | `resourcesController.listGalleries`        | Bearer JWT       |
-| `POST`   | `/resources/galleries`                                | `admin`       | `resourcesController.createGalleryAlbum`   | Bearer JWT       |
-| `PUT`    | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.updateGalleryAlbum`   | Bearer JWT       |
-| `DELETE` | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.deleteGalleryAlbum`   | Bearer JWT       |
-| `POST`   | `/resources/galleries/{documentId}/sync-media-folder` | `admin`       | `resourcesController.syncAlbumMediaFolder` | Bearer JWT       |
-| `GET`    | `/resources/glossary`                                 | `admin`       | `resourcesController.listGlossary`         | Bearer JWT       |
-| `POST`   | `/resources/glossary`                                 | `admin`       | `resourcesController.createGlossaryTerm`   | Bearer JWT       |
-| `PUT`    | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.updateGlossaryTerm`   | Bearer JWT       |
-| `DELETE` | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.deleteGlossaryTerm`   | Bearer JWT       |
-| `GET`    | `/resources/media-folders`                            | `admin`       | `resourcesController.listMediaFolders`     | Bearer JWT       |
-| `GET`    | `/resources/media-files`                              | `admin`       | `resourcesController.listMediaFiles`       | Bearer JWT       |
-| `GET`    | `/resources/settings`                                 | `admin`       | `resourcesController.getSettings`          | Bearer JWT       |
-| `PUT`    | `/resources/settings`                                 | `admin`       | `resourcesController.updateSettings`       | Bearer JWT       |
-| `GET`    | `/api/resources/hub`                                  | `content-api` | `resourcesController.getHubOverview`       | Public           |
-| `GET`    | `/api/resources/publications`                         | `content-api` | `resourcesController.listPublications`     | Public           |
-| `GET`    | `/api/resources/publications/{slug}`                  | `content-api` | `resourcesController.getPublicationBySlug` | Public           |
-| `POST`   | `/api/resources/publications/{slug}/download`         | `content-api` | `resourcesController.downloadPublication`  | Public           |
-| `GET`    | `/api/resources/galleries`                            | `content-api` | `resourcesController.listGalleries`        | Public           |
-| `GET`    | `/api/resources/galleries/{slug}`                     | `content-api` | `resourcesController.getGalleryBySlug`     | Public           |
-| `GET`    | `/api/resources/glossary`                             | `content-api` | `resourcesController.listGlossary`         | Public           |
+| Metot    | Uç Nokta Yolu                                         | Kapsam        | Denetleyici (Handler)                       | Kimlik Doğrulama |
+| :------- | :---------------------------------------------------- | :------------ | :------------------------------------------ | :--------------- |
+| `GET`    | `/resources/hub`                                      | `admin`       | `resourcesController.getAdminHubOverview`   | Bearer JWT       |
+| `GET`    | `/resources/publications`                             | `admin`       | `resourcesController.listAdminPublications` | Bearer JWT       |
+| `POST`   | `/resources/publications`                             | `admin`       | `resourcesController.createPublication`     | Bearer JWT       |
+| `PUT`    | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.updatePublication`     | Bearer JWT       |
+| `DELETE` | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.deletePublication`     | Bearer JWT       |
+| `GET`    | `/resources/galleries`                                | `admin`       | `resourcesController.listAdminGalleries`    | Bearer JWT       |
+| `POST`   | `/resources/galleries`                                | `admin`       | `resourcesController.createGalleryAlbum`    | Bearer JWT       |
+| `PUT`    | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.updateGalleryAlbum`    | Bearer JWT       |
+| `DELETE` | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.deleteGalleryAlbum`    | Bearer JWT       |
+| `POST`   | `/resources/galleries/{documentId}/sync-media-folder` | `admin`       | `resourcesController.syncAlbumMediaFolder`  | Bearer JWT       |
+| `GET`    | `/resources/glossary`                                 | `admin`       | `resourcesController.listAdminGlossary`     | Bearer JWT       |
+| `POST`   | `/resources/glossary`                                 | `admin`       | `resourcesController.createGlossaryTerm`    | Bearer JWT       |
+| `PUT`    | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.updateGlossaryTerm`    | Bearer JWT       |
+| `DELETE` | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.deleteGlossaryTerm`    | Bearer JWT       |
+| `GET`    | `/resources/media-folders`                            | `admin`       | `resourcesController.listMediaFolders`      | Bearer JWT       |
+| `GET`    | `/resources/media-files`                              | `admin`       | `resourcesController.listMediaFiles`        | Bearer JWT       |
+| `GET`    | `/resources/settings`                                 | `admin`       | `resourcesController.getSettings`           | Bearer JWT       |
+| `PUT`    | `/resources/settings`                                 | `admin`       | `resourcesController.updateSettings`        | Bearer JWT       |
+| `GET`    | `/api/resources/hub`                                  | `content-api` | `resourcesController.getHubOverview`        | Public           |
+| `GET`    | `/api/resources/publications`                         | `content-api` | `resourcesController.listPublications`      | Public           |
+| `GET`    | `/api/resources/publications/{slug}`                  | `content-api` | `resourcesController.getPublicationBySlug`  | Public           |
+| `POST`   | `/api/resources/publications/{slug}/download`         | `content-api` | `resourcesController.downloadPublication`   | Public           |
+| `GET`    | `/api/resources/galleries`                            | `content-api` | `resourcesController.listGalleries`         | Public           |
+| `GET`    | `/api/resources/galleries/{slug}`                     | `content-api` | `resourcesController.getGalleryBySlug`      | Public           |
+| `GET`    | `/api/resources/glossary`                             | `content-api` | `resourcesController.listGlossary`          | Public           |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

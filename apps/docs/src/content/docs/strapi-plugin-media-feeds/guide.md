@@ -212,17 +212,19 @@ flowchart LR
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path               | Scope         | Controller Handler          | Auth       |
-| :----- | :-------------------------- | :------------ | :-------------------------- | :--------- |
-| `GET`  | `/media-feeds/overview`     | `admin`       | `admin.getOverview`         | Bearer JWT |
-| `GET`  | `/media-feeds/settings`     | `admin`       | `admin.getSettings`         | Bearer JWT |
-| `PUT`  | `/media-feeds/settings`     | `admin`       | `admin.updateSettings`      | Bearer JWT |
-| `POST` | `/media-feeds/enrich-url`   | `admin`       | `admin.enrichUrl`           | Bearer JWT |
-| `POST` | `/media-feeds/sync-youtube` | `admin`       | `admin.syncYouTube`         | Bearer JWT |
-| `GET`  | `/api/media-feeds/episodes` | `content-api` | `content-api.listEpisodes`  | Public     |
-| `GET`  | `/api/media-feeds/series`   | `content-api` | `content-api.listSeries`    | Public     |
-| `GET`  | `/api/media-feeds/live`     | `content-api` | `content-api.getLiveStatus` | Public     |
-| `GET`  | `/api/media-feeds/rss.xml`  | `content-api` | `content-api.getRssXml`     | Public     |
+| Method | Endpoint Path                      | Scope         | Controller Handler             | Auth       |
+| :----- | :--------------------------------- | :------------ | :----------------------------- | :--------- |
+| `GET`  | `/media-feeds/overview`            | `admin`       | `admin.getOverview`            | Bearer JWT |
+| `GET`  | `/media-feeds/settings`            | `admin`       | `admin.getSettings`            | Bearer JWT |
+| `PUT`  | `/media-feeds/settings`            | `admin`       | `admin.updateSettings`         | Bearer JWT |
+| `POST` | `/media-feeds/enrich-url`          | `admin`       | `admin.enrichUrl`              | Bearer JWT |
+| `POST` | `/media-feeds/sync-youtube`        | `admin`       | `admin.syncYouTube`            | Bearer JWT |
+| `GET`  | `/api/media-feeds/episodes`        | `content-api` | `content-api.listEpisodes`     | Public     |
+| `GET`  | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public     |
+| `GET`  | `/api/media-feeds/series`          | `content-api` | `content-api.listSeries`       | Public     |
+| `GET`  | `/api/media-feeds/live`            | `content-api` | `content-api.getLiveStatus`    | Public     |
+| `GET`  | `/api/media-feeds/rss.xml`         | `content-api` | `content-api.getRssXml`        | Public     |
+| `GET`  | `/api/media-feeds/podcast.xml`     | `content-api` | `content-api.getRssXml`        | Public     |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

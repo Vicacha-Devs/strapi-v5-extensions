@@ -4,7 +4,7 @@ description: "إدارة مكونات تحسين محركات البحث وال�
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.0.12` · **Routes**: `5`
+> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.1.1` · **Routes**: `5`
 
 إدارة مكونات تحسين محركات البحث والشبكات الاجتماعية ومعاينة نتائج بحث Google وبطاقات OpenGraph وتحليل الكلمات المفتاحية الفوري.
 

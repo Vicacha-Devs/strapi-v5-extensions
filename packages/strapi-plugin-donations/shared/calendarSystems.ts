@@ -1,3 +1,5 @@
+import { formatSecondaryDate } from "@vicacha-devs/plugin-shared";
+
 export interface SecondaryCalendarDate {
   calendar: string;
   formatted: string;
@@ -17,21 +19,10 @@ export function computeSecondaryDates(
   }
 
   return calendars.map((calendar) => {
-    try {
-      const formatter = new Intl.DateTimeFormat(`${locale}-u-ca-${calendar}`, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-      return {
-        calendar,
-        formatted: formatter.format(date),
-      };
-    } catch {
-      return {
-        calendar,
-        formatted: date.toISOString().slice(0, 10),
-      };
-    }
+    const res = formatSecondaryDate(isoDateString, calendar, locale);
+    return {
+      calendar,
+      formatted: res.formatted,
+    };
   });
 }

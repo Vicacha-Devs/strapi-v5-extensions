@@ -244,6 +244,7 @@ flowchart LR
 | `POST` | `/api/inbox/subscribers`                            | `content-api` | `inboxController.subscribe`            | Public        |
 | `GET`  | `/api/inbox/subscribers/confirm/{token}`            | `content-api` | `inboxController.confirmSubscription`  | Public        |
 | `GET`  | `/api/inbox/subscribers/unsubscribe/{token}`        | `content-api` | `inboxController.unsubscribe`          | Public        |
+| `GET`  | `/api/inbox/public/unsubscribe`                     | `content-api` | `inboxController.unsubscribe`          | Public        |
 | `GET`  | `/api/inbox/alerts`                                 | `content-api` | `inboxController.getActiveAlerts`      | Public        |
 | `GET`  | `/inbox/settings`                                   | `admin`       | `inboxController.getSettings`          | Bearer JWT    |
 | `PUT`  | `/inbox/settings`                                   | `admin`       | `inboxController.updateSettings`       | Bearer JWT    |

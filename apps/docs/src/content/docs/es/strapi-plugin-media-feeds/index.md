@@ -4,7 +4,7 @@ description: "Centro de episodios de audio y video multilingüe, enriquecedor OE
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-media-feeds` · **Plugin ID**: `media-feeds` · **Category**: `Community & Engagement` · **Version**: `1.0.0` · **Routes**: `9`
+> **Package**: `@vicacha-devs/strapi-plugin-media-feeds` · **Plugin ID**: `media-feeds` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `11`
 
 Centro de episodios de audio y video multilingüe, enriquecedor OEmbed seguro contra SSRF, generador XML de Podcast RSS 2.0 para Apple/Spotify y estado de transmisión en vivo.
 
@@ -183,14 +183,15 @@ flowchart LR
 
 ## 4. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint           | Ámbito        | Controlador                 | Autenticación |
-| :----- | :-------------------------- | :------------ | :-------------------------- | :------------ |
-| `GET`  | `/media-feeds/overview`     | `admin`       | `admin.getOverview`         | Bearer JWT    |
-| `GET`  | `/media-feeds/settings`     | `admin`       | `admin.getSettings`         | Bearer JWT    |
-| `PUT`  | `/media-feeds/settings`     | `admin`       | `admin.updateSettings`      | Bearer JWT    |
-| `POST` | `/media-feeds/enrich-url`   | `admin`       | `admin.enrichUrl`           | Bearer JWT    |
-| `POST` | `/media-feeds/sync-youtube` | `admin`       | `admin.syncYouTube`         | Bearer JWT    |
-| `GET`  | `/api/media-feeds/episodes` | `content-api` | `content-api.listEpisodes`  | Public        |
-| `GET`  | `/api/media-feeds/series`   | `content-api` | `content-api.listSeries`    | Public        |
-| `GET`  | `/api/media-feeds/live`     | `content-api` | `content-api.getLiveStatus` | Public        |
-| `GET`  | `/api/media-feeds/rss.xml`  | `content-api` | `content-api.getRssXml`     | Public        |
+| Método | Ruta del Endpoint                  | Ámbito        | Controlador                    | Autenticación |
+| :----- | :--------------------------------- | :------------ | :----------------------------- | :------------ |
+| `GET`  | `/media-feeds/overview`            | `admin`       | `admin.getOverview`            | Bearer JWT    |
+| `GET`  | `/media-feeds/settings`            | `admin`       | `admin.getSettings`            | Bearer JWT    |
+| `PUT`  | `/media-feeds/settings`            | `admin`       | `admin.updateSettings`         | Bearer JWT    |
+| `POST` | `/media-feeds/enrich-url`          | `admin`       | `admin.enrichUrl`              | Bearer JWT    |
+| `POST` | `/media-feeds/sync-youtube`        | `admin`       | `admin.syncYouTube`            | Bearer JWT    |
+| `GET`  | `/api/media-feeds/episodes`        | `content-api` | `content-api.listEpisodes`     | Public        |
+| `GET`  | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public        |
+| `GET`  | `/api/media-feeds/series`          | `content-api` | `content-api.listSeries`       | Public        |
+| `GET`  | `/api/media-feeds/live`            | `content-api` | `content-api.getLiveStatus`    | Public        |
+| `GET`  | `/api/media-feeds/rss.xml`         | `content-api` | `content-api.getRssXml`        | Public        |

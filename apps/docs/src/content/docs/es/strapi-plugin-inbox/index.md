@@ -4,7 +4,7 @@ description: "Constructor de formularios dinámicos, bandeja de atención con se
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-inbox` · **Plugin ID**: `inbox` · **Category**: `Community & Engagement` · **Version**: `1.0.0` · **Routes**: `24`
+> **Package**: `@vicacha-devs/strapi-plugin-inbox` · **Plugin ID**: `inbox` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `25`
 
 Constructor de formularios dinámicos, bandeja de atención con seguimiento SLA, suscriptores con doble opt-in y cintillos de alerta global.
 
@@ -215,7 +215,7 @@ flowchart LR
 | `POST` | `/api/inbox/subscribers`                     | `content-api` | `inboxController.subscribe`           | Public        |
 | `GET`  | `/api/inbox/subscribers/confirm/{token}`     | `content-api` | `inboxController.confirmSubscription` | Public        |
 | `GET`  | `/api/inbox/subscribers/unsubscribe/{token}` | `content-api` | `inboxController.unsubscribe`         | Public        |
+| `GET`  | `/api/inbox/public/unsubscribe`              | `content-api` | `inboxController.unsubscribe`         | Public        |
 | `GET`  | `/api/inbox/alerts`                          | `content-api` | `inboxController.getActiveAlerts`     | Public        |
 | `GET`  | `/inbox/settings`                            | `admin`       | `inboxController.getSettings`         | Bearer JWT    |
 | `PUT`  | `/inbox/settings`                            | `admin`       | `inboxController.updateSettings`      | Bearer JWT    |
-| `GET`  | `/inbox/templates`                           | `admin`       | `inboxController.listTemplates`       | Bearer JWT    |

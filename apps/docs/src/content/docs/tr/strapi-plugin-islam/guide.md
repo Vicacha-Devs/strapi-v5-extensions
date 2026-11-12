@@ -47,16 +47,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı                                    | Arayüz Metni                        |
-| :------------------------------------------------- | :---------------------------------- |
-| `page.ui.islam_liturgical_scriptural_fiqh_cockpit` | İslami İbadet, النص ve Fıkıh Paneli |
-| `page.ui.1_salah_adhan_iqamah`                     | Namaz, Ezan ve İkamet               |
-| `page.ui.2_hilal_ramadan_eid`                      | Hilal, Ramazan ve Bayram            |
-| `page.ui.3_quran_hadith_dua`                       | Kur’ân, Hadis ve Dua                |
-| `page.ui.4_zakat_nisab_qibla`                      | Zekât, Nisap ve Kıble               |
-| `page.ui.refresh`                                  | Yenile                              |
-| `page.ui.prayer_salah`                             | Prayer (Salah)                      |
-| `page.ui.adhan_time`                               | Adhan Saat                          |
+| Çeviri Anahtarı                                    | Arayüz Metni                                   |
+| :------------------------------------------------- | :--------------------------------------------- |
+| `page.ui.islam_liturgical_scriptural_fiqh_cockpit` | İslami İbadet, Kutsal Metinler ve Fıkıh Paneli |
+| `page.ui.1_salah_adhan_iqamah`                     | Namaz, Ezan ve İkamet                          |
+| `page.ui.2_hilal_ramadan_eid`                      | Hilal, Ramazan ve Bayram                       |
+| `page.ui.3_quran_hadith_dua`                       | Kur’ân, Hadis ve Dua                           |
+| `page.ui.4_zakat_nisab_qibla`                      | Zekât, Nisap ve Kıble                          |
+| `page.ui.refresh`                                  | Yenile                                         |
+| `page.ui.prayer_salah`                             | Namaz (Salât)                                  |
+| `page.ui.adhan_time`                               | Ezan Vakti                                     |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 

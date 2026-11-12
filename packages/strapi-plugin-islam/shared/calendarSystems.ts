@@ -1,18 +1,16 @@
-import { SUPPORTED_INTL_CALENDARS } from "@vicacha-devs/strapi-plugin-calendar/shared";
+import {
+  SUPPORTED_INTL_CALENDARS,
+  isSupportedCalendar as isSupportedCalendarShared,
+  type CalendarSystemId,
+  type SecondaryDateDisplay,
+} from "@vicacha-devs/plugin-shared";
 
-export { SUPPORTED_INTL_CALENDARS };
-
-export type CalendarSystemId = string;
-
-export interface SecondaryDateDisplay {
-  calendar: string;
-  formatted: string;
-  year?: number;
-  month?: number;
-  day?: number;
-}
+export {
+  SUPPORTED_INTL_CALENDARS,
+  type CalendarSystemId,
+  type SecondaryDateDisplay,
+};
 
 export function isSupportedCalendar(cal: unknown): cal is CalendarSystemId {
-  if (typeof cal !== "string" || !cal.trim()) return false;
-  return SUPPORTED_INTL_CALENDARS.some((item) => item.id === cal.trim());
+  return isSupportedCalendarShared(cal, { allowNone: false });
 }

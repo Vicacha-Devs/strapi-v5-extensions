@@ -10,6 +10,8 @@ describe("trimEdgeChars", () => {
     assert.equal(trimEdgeChars("a", "-"), "a");
     assert.equal(trimEdgeChars("", "-"), "");
     assert.equal(trimEdgeChars("-a_", "-"), "a_");
+    assert.equal(trimEdgeChars("a-b", ""), "a-b");
+    assert.equal(trimEdgeChars("::a::b::", "::"), "a::b");
   });
 });
 

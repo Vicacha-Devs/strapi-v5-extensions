@@ -1,3 +1,8 @@
+import {
+  FORBIDDEN_OBJECT_KEYS as FORBIDDEN_KEYS,
+  escapeXml,
+} from "@vicacha-devs/plugin-shared";
+
 import type {
   ComponentSchema,
   ContentTypeAttribute,
@@ -10,6 +15,8 @@ import type {
   SitemapEntryConfig,
   UrlsetEntry,
 } from "./types";
+
+export { escapeXml };
 
 const SYSTEM_FIELDS = [
   "createdAt",
@@ -28,7 +35,6 @@ const FALLBACK_IMAGE_URL_KEYS = [
   "thumbnailUrl",
 ] as const;
 const FALLBACK_TITLE_KEYS = ["title", "name", "term", "slug"] as const;
-const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
 const VALID_FREQUENCIES = new Set([
   "always",
   "hourly",
@@ -39,8 +45,10 @@ const VALID_FREQUENCIES = new Set([
   "never",
 ]);
 
+const SENSITIVE_FIELD_RE = /password|token|secret|privatekey|apikey|hash/i;
+
 const isSafeKey = (key: string): boolean =>
-  Boolean(key) && !FORBIDDEN_KEYS.has(key);
+  Boolean(key) && !FORBIDDEN_KEYS.has(key) && !SENSITIVE_FIELD_RE.test(key);
 
 export const clampPriority = (value: unknown, fallback = 0.5): number => {
   const num = Number(value);
@@ -59,22 +67,12 @@ export const sanitizeFrequency = (
   return VALID_FREQUENCIES.has(normalized) ? normalized : fallback;
 };
 
-export const escapeXml = (value: string): string =>
-  String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-
 export const isTruthyFlag = (value: unknown): boolean =>
   value === true || value === "true";
 
 export const getNestedValue = (obj: unknown, path: string): unknown => {
   const segments = path.split(".");
-  if (!segments.every(isSafeKey)) {
-    return null;
-  }
+  if (!segments.every(isSafeKey)) return null;
   return segments.reduce<unknown>((current, key) => {
     if (
       current !== null &&
@@ -91,10 +89,11 @@ export const getNestedValue = (obj: unknown, path: string): unknown => {
 const ensureNestedPopulate = (node: PopulateNode | undefined): PopulateMap =>
   !node || node === true ? {} : node.populate;
 
-const insertNestedPath = (populate: PopulateMap, parts: string[]): void => {
-  if (parts.length === 0 || !parts.every(isSafeKey)) {
-    return;
-  }
+export const insertNestedPath = (
+  populate: PopulateMap,
+  parts: string[]
+): void => {
+  if (parts.length === 0 || !parts.every(isSafeKey)) return;
   let current = populate;
   for (let i = 0; i < parts.length - 1; i++) {
     const tableName = parts[i];
@@ -105,7 +104,10 @@ const insertNestedPath = (populate: PopulateMap, parts: string[]): void => {
     current[tableName] = { populate: nextPopulate };
     current = nextPopulate;
   }
-  current[parts[parts.length - 1]] = true;
+  const lastKey = parts[parts.length - 1];
+  if (typeof current[lastKey] !== "object" || current[lastKey] === null) {
+    current[lastKey] = true;
+  }
 };
 
 export const parseTableReferences = (
@@ -140,24 +142,18 @@ export const generateSitemapIndexXml = (
     })
     .join("");
   const ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
-  return (
-    `<?xml version="1.0" encoding="UTF-8"?>` +
-    `<sitemapindex xmlns="${ns}">${sitemaps}</sitemapindex>`
-  );
+  return `<?xml version="1.0" encoding="UTF-8"?><sitemapindex xmlns="${ns}">${sitemaps}</sitemapindex>`;
 };
 
-const formatAlternatesXml = (alternates?: HreflangLink[]): string => {
-  if (!alternates || alternates.length === 0) {
-    return "";
-  }
-  return alternates
-    .map((alt) => {
-      const lang = escapeXml(alt.lang);
-      const href = escapeXml(alt.url);
-      return `<xhtml:link rel="alternate" hreflang="${lang}" href="${href}" />`;
-    })
-    .join("");
-};
+const formatAlternatesXml = (alternates?: HreflangLink[]): string =>
+  !alternates || alternates.length === 0
+    ? ""
+    : alternates
+        .map(
+          (alt) =>
+            `<xhtml:link rel="alternate" hreflang="${escapeXml(alt.lang)}" href="${escapeXml(alt.url)}" />`
+        )
+        .join("");
 
 const formatUrlEntryXml = (entry: UrlsetEntry): string => {
   const lastmodXml = entry.lastmod
@@ -166,8 +162,7 @@ const formatUrlEntryXml = (entry: UrlsetEntry): string => {
   const titleText = escapeXml(entry.thumbnailTitle ?? "");
   const imageLoc = entry.thumbnail ? escapeXml(entry.thumbnail) : "";
   const imageXml = entry.thumbnail
-    ? `<image:image><image:loc>${imageLoc}</image:loc>` +
-      `<image:title>${titleText}</image:title></image:image>`
+    ? `<image:image><image:loc>${imageLoc}</image:loc><image:title>${titleText}</image:title></image:image>`
     : "";
   const alternatesXml = formatAlternatesXml(entry.alternates);
   const priority = clampPriority(entry.priority);
@@ -188,26 +183,19 @@ export const generateUrlsetXml = (sitemap: UrlsetEntry[]): string => {
   const ns = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"';
   const imgNs = 'xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"';
   const xhtmlNs = 'xmlns:xhtml="http://www.w3.org/1999/xhtml"';
-  return (
-    `<?xml version="1.0" encoding="UTF-8"?>` +
-    `<urlset ${ns} ${imgNs} ${xhtmlNs}>${urlSet}</urlset>`
-  );
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset ${ns} ${imgNs} ${xhtmlNs}>${urlSet}</urlset>`;
 };
 
 export const attachHreflangAlternates = (
   entries: UrlsetEntry[],
   includeHreflang = true
 ): UrlsetEntry[] => {
-  if (!includeHreflang) {
-    return entries;
-  }
+  if (!includeHreflang) return entries;
   const byDocId = new Map<string, HreflangLink[]>();
   for (const entry of entries) {
     const docId = entry.documentId?.trim();
     const lang = entry.langcode?.trim();
-    if (!docId || !lang || lang === "-") {
-      continue;
-    }
+    if (!docId || !lang || lang === "-") continue;
     const existing = byDocId.get(docId) ?? [];
     if (!existing.some((item) => item.lang === lang)) {
       existing.push({ lang, url: entry.url });
@@ -234,9 +222,7 @@ const resolvePlaceholderValue = (
   ) {
     return fallbackLangcode;
   }
-  if (key.includes(".")) {
-    return getNestedValue(entry, key);
-  }
+  if (key.includes(".")) return getNestedValue(entry, key);
   if (!isSafeKey(key) || !Object.prototype.hasOwnProperty.call(entry, key)) {
     return undefined;
   }
@@ -294,9 +280,7 @@ const findFallbackStringValue = (
 ): string | undefined => {
   for (const key of keys) {
     const val = entry[key];
-    if (typeof val === "string" && val.trim() !== "") {
-      return val.trim();
-    }
+    if (typeof val === "string" && val.trim() !== "") return val.trim();
   }
   return undefined;
 };
@@ -306,10 +290,10 @@ const extractThumbnailMedia = (
   entry: Record<string, unknown>,
   thumbnailField?: string
 ): { url: string; name: string } | undefined => {
-  if (!thumbnailField || thumbnailField === "-") {
-    return undefined;
-  }
-  const raw = entry[thumbnailField];
+  if (!thumbnailField || thumbnailField === "-") return undefined;
+  const raw = thumbnailField.includes(".")
+    ? getNestedValue(entry, thumbnailField)
+    : entry[thumbnailField];
   const candidate = Array.isArray(raw) ? raw[0] : raw;
   const mediaObj =
     candidate && typeof candidate === "object"
@@ -317,9 +301,7 @@ const extractThumbnailMedia = (
       : undefined;
   const rawMediaUrl =
     mediaObj?.url ?? findFallbackStringValue(entry, FALLBACK_IMAGE_URL_KEYS);
-  if (!rawMediaUrl || rawMediaUrl.trim() === "") {
-    return undefined;
-  }
+  if (!rawMediaUrl || rawMediaUrl.trim() === "") return undefined;
   return {
     url: resolveMediaUrlString(baseURL, rawMediaUrl),
     name:
@@ -339,9 +321,7 @@ export const buildCollectionUrlEntry = (
     entry,
     config.langcode
   );
-  if (relativePath === null) {
-    return null;
-  }
+  if (relativePath === null) return null;
   const resolvedLang =
     typeof entry.locale === "string" && entry.locale.trim() !== ""
       ? entry.locale
@@ -406,7 +386,10 @@ const isScalarAttribute = (
   fieldName: string,
   field: ContentTypeAttribute
 ): boolean =>
+  isSafeKey(fieldName) &&
   !SYSTEM_FIELDS.includes(fieldName) &&
+  field.private !== true &&
+  field.type !== "password" &&
   field.type !== "relation" &&
   field.type !== "component" &&
   field.type !== "media";

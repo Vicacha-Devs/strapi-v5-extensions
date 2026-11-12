@@ -40,7 +40,9 @@ function buildSubscriberPayload(
 ): Omit<SubscriberRecord, "documentId"> {
   const doubleOptIn = settings.enableDoubleOptIn !== false;
   const nowIso = new Date().toISOString();
-  const status: SubscriberStatus = doubleOptIn ? "pending" : "confirmed";
+  const alreadyConfirmed = existing?.status === "confirmed";
+  const status: SubscriberStatus =
+    alreadyConfirmed || !doubleOptIn ? "confirmed" : "pending";
 
   return {
     email,
@@ -49,12 +51,17 @@ function buildSubscriberPayload(
     locale: pickSubscriberStr(input.locale, settings.defaultLocale, "es"),
     topics: normalizeSubscriberTopics(input.topics),
     status,
-    confirmToken: doubleOptIn ? randomBytes(20).toString("hex") : null,
+    confirmToken:
+      alreadyConfirmed || !doubleOptIn ? null : randomBytes(20).toString("hex"),
     unsubscribeToken: pickSubscriberStr(
       existing?.unsubscribeToken,
       randomBytes(20).toString("hex")
     ),
-    confirmedAt: doubleOptIn ? null : nowIso,
+    confirmedAt: alreadyConfirmed
+      ? existing.confirmedAt || nowIso
+      : doubleOptIn
+        ? null
+        : nowIso,
     unsubscribedAt: null,
     sourceFormSlug: pickSubscriberStr(
       input.sourceFormSlug,

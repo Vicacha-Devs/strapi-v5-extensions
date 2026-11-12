@@ -2,7 +2,7 @@ import { createRegisterTrads } from "@vicacha-devs/plugin-shared";
 
 import { Initializer } from "./components/Initializer";
 import { PluginIcon } from "./components/PluginIcon";
-import pluginPermissions from "./permissions";
+import { pluginPermissions } from "./permissions";
 import { PLUGIN_ID } from "./pluginId";
 import { CM_DESCRIPTION_TRANSLATIONS } from "./translations/cmDescriptions";
 import { CM_LABEL_TRANSLATIONS } from "./translations/cmLabels";

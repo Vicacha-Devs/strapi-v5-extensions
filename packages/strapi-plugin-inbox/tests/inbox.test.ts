@@ -266,6 +266,13 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     assert.equal(confirmed.confirmToken, null);
     assert.ok(confirmed.confirmedAt);
 
+    const reSub = await services.subscriberService.subscribe({
+      email: "fatima@example.org",
+      topics: ["events"],
+    });
+    assert.equal(reSub.status, "confirmed");
+    assert.equal(reSub.confirmToken, null);
+
     const unsubscribed = await services.subscriberService.unsubscribe(
       sub.unsubscribeToken
     );
@@ -459,5 +466,26 @@ describe("@vicacha-devs/strapi-plugin-inbox", () => {
     const allCasework = await services.submissionService.listSubmissions();
     assert.equal(allCasework.length, 2);
     assert.ok(allCasework.some((s) => s.applicantName === "Layla Hassan"));
+  });
+
+  it("7. prevents prototype pollution and ReDoS regex patterns in form validation", () => {
+    const fields: FormRecord["fields"] = [
+      { id: "p", type: "text", name: "__proto__", label: "P", required: false },
+      {
+        id: "r",
+        type: "text",
+        name: "code",
+        label: "Code",
+        required: false,
+        validation: [{ type: "pattern", value: "(a+)+$" }],
+      },
+    ];
+    const res = validateFormSubmission(fields, {
+      __proto__: { polluted: true },
+      code: "aaaaX",
+    });
+    assert.equal(res.valid, false);
+    assert.equal(Object.hasOwn(res.cleanedData, "__proto__"), false);
+    assert.ok(res.errors.code?.length);
   });
 });

@@ -1,25 +1,9 @@
+import { escapeCsvCell } from "@vicacha-devs/plugin-shared";
+
 import { DECORATIVE_FIELD_TYPES } from "./constants";
 import type { FormField, SubmissionRecord } from "./types";
 
-const FORMULA_PREFIXES = ["=", "+", "-", "@", "\t", "\r"];
-
-export function escapeCsvCell(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  const raw = typeof value === "object" ? JSON.stringify(value) : String(value);
-
-  const sanitized =
-    raw.length > 0 && FORMULA_PREFIXES.includes(raw[0]) ? `'${raw}` : raw;
-
-  if (
-    sanitized.includes('"') ||
-    sanitized.includes(",") ||
-    sanitized.includes("\n") ||
-    sanitized.includes("\r")
-  ) {
-    return `"${sanitized.replace(/"/g, '""')}"`;
-  }
-  return sanitized;
-}
+export { escapeCsvCell };
 
 function collectDataFieldNames(
   submissions: SubmissionRecord[],

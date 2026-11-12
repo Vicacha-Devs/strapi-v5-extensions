@@ -1,4 +1,9 @@
 import type { Core } from "@strapi/strapi";
+import {
+  FORBIDDEN_OBJECT_KEYS,
+  isPlainObject,
+  stripDangerousKeys,
+} from "@vicacha-devs/plugin-shared";
 
 import {
   ALLOWED_SOURCE_API_UID_REGEX,
@@ -21,11 +26,7 @@ import {
   type YouTubeSyncSourceConfig,
 } from "../../../shared";
 
-const FORBIDDEN_OBJECT_KEYS = new Set([
-  "__proto__",
-  "constructor",
-  "prototype",
-]);
+export { isPlainObject, stripDangerousKeys };
 
 const settingsLocks = new WeakMap<object, Promise<void>>();
 
@@ -53,31 +54,6 @@ async function withSettingsLock<T>(
       settingsLocks.delete(lockTarget);
     }
   }
-}
-
-export function isPlainObject(
-  value: unknown
-): value is Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return false;
-  }
-  const proto = Object.getPrototypeOf(value);
-  return proto === Object.prototype || proto === null;
-}
-
-export function stripDangerousKeys<T>(value: T): T {
-  if (Array.isArray(value)) {
-    return value.map((item) => stripDangerousKeys(item)) as unknown as T;
-  }
-  if (isPlainObject(value)) {
-    const cleaned: Record<string, unknown> = {};
-    for (const key of Object.keys(value)) {
-      if (FORBIDDEN_OBJECT_KEYS.has(key)) continue;
-      cleaned[key] = stripDangerousKeys(value[key]);
-    }
-    return cleaned as T;
-  }
-  return value;
 }
 
 export function maskSettingsSecrets(

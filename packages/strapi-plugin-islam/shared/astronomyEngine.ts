@@ -131,12 +131,9 @@ function resolveCurrentMinutesInTimezone(
 
 function determineActivePrayer(
   nowMinutes: number,
-  isProhibited: boolean,
+  _isProhibited: boolean,
   times: BaseSolarMinutes
 ): DailyFivePrayerId | null {
-  if (isProhibited) {
-    return null;
-  }
   if (nowMinutes >= times.ishaMin || nowMinutes < times.fajrMin) return "isha";
   const windows: Array<[DailyFivePrayerId, number, number]> = [
     ["fajr", times.fajrMin, times.sunriseMin],

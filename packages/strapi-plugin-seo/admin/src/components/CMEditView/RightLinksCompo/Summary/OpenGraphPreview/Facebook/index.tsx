@@ -14,7 +14,7 @@ const toSafeImageUrl = (rawUrl?: string): string => {
   if (
     trimmed.startsWith("https://") ||
     trimmed.startsWith("http://") ||
-    trimmed.startsWith("/")
+    (trimmed.startsWith("/") && !trimmed.startsWith("//"))
   ) {
     return trimmed;
   }

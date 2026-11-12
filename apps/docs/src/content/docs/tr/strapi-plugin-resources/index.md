@@ -4,7 +4,7 @@ description: "Güvenli indirmelere sahip dijital yayın kütüphanesi, Medya Kü
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-resources` · **Plugin ID**: `resources` · **Category**: `Community & Engagement` · **Version**: `1.0.0` · **Routes**: `25`
+> **Package**: `@vicacha-devs/strapi-plugin-resources` · **Plugin ID**: `resources` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `25`
 
 Güvenli indirmelere sahip dijital yayın kütüphanesi, Medya Kütüphanesi klasörleriyle senkronize fotoğraf galerileri ve sesli çok dilli sözlük.
 
@@ -63,6 +63,7 @@ Curated photo and video albums synced with Strapi v5 Media Library folders and C
 | `framingNotes`          | `string`      | No      | max: 500                                                                                      |
 | `featured`              | `boolean`     | No      | default: `false`                                                                              |
 | `sortOrder`             | `integer`     | No      | default: `0`                                                                                  |
+| `photoCount`            | `integer`     | No      | default: `0`                                                                                  |
 
 ### `plugin::resources.glossary-term` — Resource Glossary Term
 
@@ -205,15 +206,15 @@ flowchart LR
 
 ## 4. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot    | Uç Nokta Yolu                                         | Kapsam  | Denetleyici (Handler)                      | Kimlik Doğrulama |
-| :------- | :---------------------------------------------------- | :------ | :----------------------------------------- | :--------------- |
-| `GET`    | `/resources/hub`                                      | `admin` | `resourcesController.getHubOverview`       | Bearer JWT       |
-| `GET`    | `/resources/publications`                             | `admin` | `resourcesController.listPublications`     | Bearer JWT       |
-| `POST`   | `/resources/publications`                             | `admin` | `resourcesController.createPublication`    | Bearer JWT       |
-| `PUT`    | `/resources/publications/{documentId}`                | `admin` | `resourcesController.updatePublication`    | Bearer JWT       |
-| `DELETE` | `/resources/publications/{documentId}`                | `admin` | `resourcesController.deletePublication`    | Bearer JWT       |
-| `GET`    | `/resources/galleries`                                | `admin` | `resourcesController.listGalleries`        | Bearer JWT       |
-| `POST`   | `/resources/galleries`                                | `admin` | `resourcesController.createGalleryAlbum`   | Bearer JWT       |
-| `PUT`    | `/resources/galleries/{documentId}`                   | `admin` | `resourcesController.updateGalleryAlbum`   | Bearer JWT       |
-| `DELETE` | `/resources/galleries/{documentId}`                   | `admin` | `resourcesController.deleteGalleryAlbum`   | Bearer JWT       |
-| `POST`   | `/resources/galleries/{documentId}/sync-media-folder` | `admin` | `resourcesController.syncAlbumMediaFolder` | Bearer JWT       |
+| Metot    | Uç Nokta Yolu                                         | Kapsam  | Denetleyici (Handler)                       | Kimlik Doğrulama |
+| :------- | :---------------------------------------------------- | :------ | :------------------------------------------ | :--------------- |
+| `GET`    | `/resources/hub`                                      | `admin` | `resourcesController.getAdminHubOverview`   | Bearer JWT       |
+| `GET`    | `/resources/publications`                             | `admin` | `resourcesController.listAdminPublications` | Bearer JWT       |
+| `POST`   | `/resources/publications`                             | `admin` | `resourcesController.createPublication`     | Bearer JWT       |
+| `PUT`    | `/resources/publications/{documentId}`                | `admin` | `resourcesController.updatePublication`     | Bearer JWT       |
+| `DELETE` | `/resources/publications/{documentId}`                | `admin` | `resourcesController.deletePublication`     | Bearer JWT       |
+| `GET`    | `/resources/galleries`                                | `admin` | `resourcesController.listAdminGalleries`    | Bearer JWT       |
+| `POST`   | `/resources/galleries`                                | `admin` | `resourcesController.createGalleryAlbum`    | Bearer JWT       |
+| `PUT`    | `/resources/galleries/{documentId}`                   | `admin` | `resourcesController.updateGalleryAlbum`    | Bearer JWT       |
+| `DELETE` | `/resources/galleries/{documentId}`                   | `admin` | `resourcesController.deleteGalleryAlbum`    | Bearer JWT       |
+| `POST`   | `/resources/galleries/{documentId}/sync-media-folder` | `admin` | `resourcesController.syncAlbumMediaFolder`  | Bearer JWT       |

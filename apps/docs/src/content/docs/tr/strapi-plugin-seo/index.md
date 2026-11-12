@@ -4,7 +4,7 @@ description: "Paylaşılan SEO ve sosyal meta bileşen yöneticisi, canlı Googl
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.0.12` · **Routes**: `5`
+> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.1.1` · **Routes**: `5`
 
 Paylaşılan SEO ve sosyal meta bileşen yöneticisi, canlı Google SERP ve OpenGraph/X önizleme kartları ve gerçek zamanlı anahtar kelime yoğunluğu analizörü.
 

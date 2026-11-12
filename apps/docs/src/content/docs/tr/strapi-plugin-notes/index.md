@@ -4,7 +4,7 @@ description: "Çok biçimli editöryal notlar, renk kodlu kategori rozetleri, İ
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-notes` · **Plugin ID**: `notes` · **Category**: `Editorial & SEO` · **Version**: `1.0.0` · **Routes**: `8`
+> **Package**: `@vicacha-devs/strapi-plugin-notes` · **Plugin ID**: `notes` · **Category**: `Editorial & SEO` · **Version**: `1.1.2` · **Routes**: `8`
 
 Çok biçimli editöryal notlar, renk kodlu kategori rozetleri, İçerik Yöneticisi yan panelinde sabitlenmiş notlar ve merkezi Küresel Notlar Merkezi.
 

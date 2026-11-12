@@ -27,6 +27,7 @@ import {
   type IslamPluginSettings,
   type SupportedLocale,
 } from "../../../shared";
+import { sanitizeSafeAudioUrl } from "./settingsNestedSanitizers";
 
 type DuaCategorySlug = CuratedDuaItem["category"];
 type RamadanConfig = IslamPluginSettings["ramadan"];
@@ -118,7 +119,7 @@ function mapCustomAyahEntry(e: Record<string, unknown>): CuratedAyahItem {
     translations: normalizeLocaleRecord(e.translations),
     reflections: normalizeLocaleRecord(e.reflections),
     topicTags: normalizeTopicTags(e.topicTags),
-    audioUrl: typeof e.audioUrl === "string" ? e.audioUrl : "",
+    audioUrl: sanitizeSafeAudioUrl(e.audioUrl, ""),
   };
 }
 

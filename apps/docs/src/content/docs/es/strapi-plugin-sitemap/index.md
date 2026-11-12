@@ -4,7 +4,7 @@ description: "Generador automático de Sitemap XML e Índice de Sitemaps para St
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-sitemap` · **Plugin ID**: `sitemap` · **Category**: `Editorial & SEO` · **Version**: `1.1.0` · **Routes**: `7`
+> **Package**: `@vicacha-devs/strapi-plugin-sitemap` · **Plugin ID**: `sitemap` · **Category**: `Editorial & SEO` · **Version**: `1.2.0` · **Routes**: `7`
 
 Generador automático de Sitemap XML e Índice de Sitemaps para Strapi v5 con enlaces alternativos hreflang multilingües, URLs estáticas y hoja de estilo XSL.
 

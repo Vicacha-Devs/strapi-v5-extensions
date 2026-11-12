@@ -8,7 +8,7 @@
  * that an export's `types` field points to but that is missing.
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, sep } from "node:path";
 
 interface PackageExportTarget {
   types?: string;
@@ -30,11 +30,13 @@ if (existsSync(pkgPath)) {
       continue;
     }
     const dtsPath = resolve(cwd, target.types);
-    if (existsSync(dtsPath)) continue;
+    if (!dtsPath.startsWith(`${cwd}${sep}`) || existsSync(dtsPath)) {
+      continue;
+    }
     mkdirSync(dirname(dtsPath), { recursive: true });
     const stub =
       exportKey === "./shared"
-        ? "export * from '../../shared/index.js';\n"
+        ? "declare const shared: Record<string, unknown>;\nexport default shared;\n"
         : "declare const plugin: Record<string, unknown>;\nexport default plugin;\n";
     writeFileSync(dtsPath, stub, "utf8");
   }

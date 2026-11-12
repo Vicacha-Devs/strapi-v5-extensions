@@ -1,9 +1,13 @@
+import { escapeIcsText } from "@vicacha-devs/plugin-shared";
+
 import { normalizeRRuleString } from "./rruleEngine";
 import type {
   CalendarLinkSet,
   ExpandedOccurrence,
   RsvpRegistrationRecord,
 } from "./types";
+
+export { escapeIcsText };
 
 const utf8Encoder = new TextEncoder();
 
@@ -40,15 +44,6 @@ function resolveExclusiveAllDayEndStamp(
     )
   );
   return nextDay.toISOString().slice(0, 10).replace(/-/g, "");
-}
-
-export function escapeIcsText(value: string | undefined | null): string {
-  if (!value) return "";
-  return String(value)
-    .replace(/\\/g, "\\\\")
-    .replace(/\r\n|\r|\n/g, "\\n")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,");
 }
 
 /**

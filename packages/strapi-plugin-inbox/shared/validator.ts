@@ -2,7 +2,11 @@
  * Field validation, Honeypot check, Sliding-Window IP Rate Limiter & CAPTCHA Verifier.
  * Adapted and extended from devCluna/strapi-plugin-form-builder-cms (MIT License).
  */
-import { isValidEmail } from "@vicacha-devs/plugin-shared";
+import {
+  FORBIDDEN_OBJECT_KEYS as FORBIDDEN_FIELD_KEYS,
+  SlidingWindowRateLimiter,
+  isValidEmail,
+} from "@vicacha-devs/plugin-shared";
 
 import { CAPTCHA_ENDPOINTS, DECORATIVE_FIELD_TYPES } from "./constants";
 import type {
@@ -149,6 +153,10 @@ function checkNumericBoundRule(
   return null;
 }
 
+function hasNestedQuantifier(pattern: string): boolean {
+  return /[+*?}]\s*\)\s*[+*?{]/.test(pattern.replaceAll(/\\./g, ""));
+}
+
 function checkLengthOrNumberRule(
   rule: ValidationRule,
   rawValue: unknown,
@@ -156,10 +164,16 @@ function checkLengthOrNumberRule(
   fieldLabel: string,
   locale: string
 ): string | null {
-  if (typeof rule.value !== "number") return null;
+  const numRuleVal =
+    typeof rule.value === "number"
+      ? rule.value
+      : typeof rule.value === "string" && rule.value.trim() !== ""
+        ? Number(rule.value)
+        : Number.NaN;
+  if (!Number.isFinite(numRuleVal)) return null;
   return (
-    checkLengthRule(rule, rule.value, strVal, fieldLabel, locale) ??
-    checkNumericBoundRule(rule, rule.value, rawValue, fieldLabel, locale)
+    checkLengthRule(rule, numRuleVal, strVal, fieldLabel, locale) ??
+    checkNumericBoundRule(rule, numRuleVal, rawValue, fieldLabel, locale)
   );
 }
 
@@ -171,6 +185,17 @@ function checkPatternOrEmailRule(
   locale: string
 ): string | null {
   if (rule.type === "pattern" && typeof rule.value === "string") {
+    if (
+      strVal.length > 4096 ||
+      rule.value.length > 512 ||
+      hasNestedQuantifier(rule.value)
+    ) {
+      return resolveRuleMessage(
+        rule,
+        locale,
+        `${fieldLabel} format is invalid`
+      );
+    }
     try {
       const regex = new RegExp(rule.value);
       if (!regex.test(strVal)) {
@@ -189,6 +214,13 @@ function checkPatternOrEmailRule(
       rule,
       locale,
       `${fieldLabel} must be a valid email address`
+    );
+  }
+  if (rule.type === "url" && fieldType !== "url" && !isValidHttpUrl(strVal)) {
+    return resolveRuleMessage(
+      rule,
+      locale,
+      `${fieldLabel} must be a valid URL`
     );
   }
   return null;
@@ -245,7 +277,9 @@ function validateSingleField(
   data: Record<string, unknown>,
   locale: string
 ): { fieldErrors: string[]; cleanedValue: unknown } {
-  const rawValue = data[field.name] ?? field.defaultValue;
+  const rawValue = Object.hasOwn(data, field.name)
+    ? data[field.name]
+    : field.defaultValue;
   const fieldLabel = resolveFieldLabel(field, locale);
   const rules = field.validation || [];
 
@@ -287,7 +321,12 @@ export function validateFormSubmission(
   const cleanedData: Record<string, unknown> = {};
 
   for (const field of fields) {
-    if (DECORATIVE_FIELD_TYPES.includes(field.type)) continue;
+    if (
+      DECORATIVE_FIELD_TYPES.includes(field.type) ||
+      FORBIDDEN_FIELD_KEYS.has(field.name)
+    ) {
+      continue;
+    }
     const { fieldErrors, cleanedValue } = validateSingleField(
       field,
       data,
@@ -311,55 +350,12 @@ export function isHoneypotTriggered(
   payload: Record<string, unknown>,
   honeypotField = "_website_url"
 ): boolean {
-  if (!honeypotField) return false;
+  if (!honeypotField || !Object.hasOwn(payload, honeypotField)) return false;
   const val = payload[honeypotField];
   return typeof val === "string" && val.trim().length > 0;
 }
 
-export class SlidingWindowRateLimiter {
-  private readonly hits = new Map<string, number[]>();
-
-  public check(
-    ip: string,
-    bucketKey: string,
-    limitPerHour: number,
-    nowMs = Date.now()
-  ): { allowed: boolean; remaining: number; retryAfterSeconds: number } {
-    if (limitPerHour <= 0) {
-      return { allowed: true, remaining: 999, retryAfterSeconds: 0 };
-    }
-    const windowMs = 60 * 60 * 1000;
-    const key = `${bucketKey}::${ip || "unknown"}`;
-    const cutoff = nowMs - windowMs;
-    const previous = (this.hits.get(key) || []).filter((ts) => ts > cutoff);
-
-    if (previous.length >= limitPerHour) {
-      const oldest = previous[0] ?? nowMs;
-      const retryAfterSeconds = Math.max(
-        1,
-        Math.ceil((oldest + windowMs - nowMs) / 1000)
-      );
-      this.hits.set(key, previous);
-      return {
-        allowed: false,
-        remaining: 0,
-        retryAfterSeconds,
-      };
-    }
-
-    previous.push(nowMs);
-    this.hits.set(key, previous);
-    return {
-      allowed: true,
-      remaining: Math.max(0, limitPerHour - previous.length),
-      retryAfterSeconds: 0,
-    };
-  }
-
-  public reset(): void {
-    this.hits.clear();
-  }
-}
+export { SlidingWindowRateLimiter };
 
 export const defaultRateLimiter = new SlidingWindowRateLimiter();
 

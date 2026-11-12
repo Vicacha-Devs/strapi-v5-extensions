@@ -238,13 +238,13 @@ flowchart LR
 | `GET`  | `/events/registrations/export.csv`            | `admin`       | `admin.exportRegistrationsCsv`       | Bearer JWT |
 | `POST` | `/events/registrations/{documentId}/status`   | `admin`       | `admin.updateRegistrationStatus`     | Bearer JWT |
 | `POST` | `/events/registrations/{documentId}/check-in` | `admin`       | `admin.checkIn`                      | Bearer JWT |
-| `GET`  | `/api/events/occurrences`                     | `content-api` | `content-api.listOccurrences`        | Public     |
-| `GET`  | `/api/events/spotlights`                      | `content-api` | `content-api.listSpotlights`         | Public     |
-| `GET`  | `/api/events/feed.ics`                        | `content-api` | `content-api.downloadFeedIcs`        | Public     |
-| `GET`  | `/api/events/{documentId}/invite.ics`         | `content-api` | `content-api.downloadEventInviteIcs` | Public     |
-| `GET`  | `/api/events/{documentId}/stats`              | `content-api` | `content-api.getEventStats`          | Public     |
-| `POST` | `/api/events/{documentId}/register`           | `content-api` | `content-api.registerAttendee`       | Public     |
-| `POST` | `/api/events/registrations/{token}/cancel`    | `content-api` | `content-api.cancelRegistration`     | Public     |
+| `GET`  | `/api/events/occurrences`                     | `content-api` | `content-api.listOccurrences`        | Bearer JWT |
+| `GET`  | `/api/events/spotlights`                      | `content-api` | `content-api.listSpotlights`         | Bearer JWT |
+| `GET`  | `/api/events/feed.ics`                        | `content-api` | `content-api.downloadFeedIcs`        | Bearer JWT |
+| `GET`  | `/api/events/{documentId}/invite.ics`         | `content-api` | `content-api.downloadEventInviteIcs` | Bearer JWT |
+| `GET`  | `/api/events/{documentId}/stats`              | `content-api` | `content-api.getEventStats`          | Bearer JWT |
+| `POST` | `/api/events/{documentId}/register`           | `content-api` | `content-api.registerAttendee`       | Bearer JWT |
+| `POST` | `/api/events/registrations/{token}/cancel`    | `content-api` | `content-api.cancelRegistration`     | Bearer JWT |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

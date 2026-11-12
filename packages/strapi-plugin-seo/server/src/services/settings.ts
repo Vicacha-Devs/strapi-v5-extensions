@@ -1,4 +1,8 @@
 import type { Core } from "@strapi/strapi";
+import {
+  FORBIDDEN_OBJECT_KEYS as FORBIDDEN_KEYS,
+  isPlainObject as isPlainRecord,
+} from "@vicacha-devs/plugin-shared";
 
 import {
   DEFAULT_SEO_CHECKS,
@@ -6,14 +10,9 @@ import {
   type SeoSettingsMap,
 } from "../../../shared";
 
-const FORBIDDEN_KEYS = new Set(["__proto__", "prototype", "constructor"]);
-
 const SEO_CHECK_KEYS = Object.keys(DEFAULT_SEO_CHECKS) as Array<
   keyof SeoChecksConfig
 >;
-
-const isPlainRecord = (value: unknown): value is Record<string, unknown> =>
-  Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
 export const sanitizeSeoChecks = (raw: unknown): SeoChecksConfig => {
   const source = isPlainRecord(raw) ? raw : {};

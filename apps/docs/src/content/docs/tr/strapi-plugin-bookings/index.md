@@ -4,7 +4,7 @@ description: "Strapi v5 için rezerve edilebilir kaynaklar, zaman dilimi uygunlu
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-bookings` · **Plugin ID**: `bookings` · **Category**: `Scheduling & Operations` · **Version**: `1.0.0` · **Routes**: `17`
+> **Package**: `@vicacha-devs/strapi-plugin-bookings` · **Plugin ID**: `bookings` · **Category**: `Scheduling & Operations` · **Version**: `1.1.0` · **Routes**: `17`
 
 Strapi v5 için rezerve edilebilir kaynaklar, zaman dilimi uygunluk motoru, görevli ataması ve self-servis rezervasyon iş akışları.
 

@@ -6,6 +6,14 @@ const READ_POLICIES = [
   },
 ];
 
+const UPDATE_POLICIES = [
+  "admin::isAuthenticatedAdmin",
+  {
+    name: "admin::hasPermissions",
+    config: { actions: ["plugin::seo.settings.update"] },
+  },
+];
+
 export const seoRoutes = {
   type: "admin",
   routes: [
@@ -22,7 +30,7 @@ export const seoRoutes = {
       path: "/component",
       handler: "seo.createSeoComponent",
       config: {
-        policies: READ_POLICIES,
+        policies: UPDATE_POLICIES,
       },
     },
     {

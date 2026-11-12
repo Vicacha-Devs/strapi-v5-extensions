@@ -14,7 +14,9 @@ interface HastNode {
 const LINK_ATTRIBUTES: Record<string, string> = { a: "href", img: "src" };
 
 export function normalizeBase(base: string | undefined): string {
-  const trimmed = (base ?? "").trim().replace(/^\/+/, "").replace(/\/+$/, "");
+  let trimmed = (base ?? "").trim();
+  while (trimmed.startsWith("/")) trimmed = trimmed.slice(1);
+  while (trimmed.endsWith("/")) trimmed = trimmed.slice(0, -1);
   return trimmed ? `/${trimmed}` : "";
 }
 

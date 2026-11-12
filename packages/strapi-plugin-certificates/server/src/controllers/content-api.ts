@@ -113,7 +113,17 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         const body = (ctx.request.body ||
           {}) as unknown as CertificateIssueInput;
         const created = await getIssuance().issueCertificate({
-          ...body,
+          templateDocumentId: body.templateDocumentId,
+          templateSlug: body.templateSlug,
+          recipientFullName: body.recipientFullName,
+          recipientChosenName: body.recipientChosenName,
+          recipientEmail: body.recipientEmail,
+          recipientPhone: body.recipientPhone,
+          recipientNationality: body.recipientNationality,
+          nationalIdRaw: body.nationalIdRaw,
+          witnesses: body.witnesses,
+          customData: body.customData,
+          locale: body.locale,
           autoApprove: false,
         });
         ctx.body = {
@@ -125,7 +135,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             recipientFullName: created.recipientFullName,
             recipientChosenName: created.recipientChosenName,
             issuedAt: created.issuedAt,
-            verificationToken: created.verificationToken,
+            ...(created.status === "issued"
+              ? { verificationToken: created.verificationToken }
+              : {}),
           },
         };
       } catch (err) {

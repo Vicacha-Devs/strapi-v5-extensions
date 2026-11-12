@@ -4,7 +4,7 @@ description: "بث مجتمعي متعدد القنوات عبر واتساب و
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-broadcasts` · **Plugin ID**: `broadcasts` · **Category**: `Community & Engagement` · **Version**: `0.1.0` · **Routes**: `15`
+> **Package**: `@vicacha-devs/strapi-plugin-broadcasts` · **Plugin ID**: `broadcasts` · **Category**: `Community & Engagement` · **Version**: `0.2.0` · **Routes**: `15`
 
 بث مجتمعي متعدد القنوات عبر واتساب وتيليجرام والبريد الإلكتروني مع قواعد أتمتة EventHub وسجلات تسليم محمية.
 

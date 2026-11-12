@@ -46,7 +46,7 @@
     },
     "clean": {
       "cache": false,
-      "outputs": ["./.next", "./dist", "./.strapi"]
+      "outputs": []
     }
   }
 }

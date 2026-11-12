@@ -26,6 +26,10 @@ export function checkRateLimit(
   windowMs = 60_000
 ): boolean {
   const now = Date.now();
+  if (rateLimitStore.size > 10_000) {
+    const oldestKey = rateLimitStore.keys().next().value;
+    if (oldestKey !== undefined) rateLimitStore.delete(oldestKey);
+  }
   const existing = rateLimitStore.get(key) || [];
   const recent = existing.filter((ts) => now - ts < windowMs);
   if (recent.length >= maxRequests) {
@@ -336,6 +340,11 @@ export function renderPrintableFromRecord(params: {
 }): { html: string; serialNumber: string } {
   const { cert, template, settings, options } = params;
   if (!options?.isAdmin) {
+    if (cert.status !== "issued") {
+      throw new Error(
+        "Certificate must be approved and issued before printing"
+      );
+    }
     const tokenOk = verifyTokenConstantTime(
       options?.token,
       cert.verificationToken

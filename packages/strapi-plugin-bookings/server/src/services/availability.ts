@@ -43,7 +43,7 @@ const STATUS_COLORS: Record<BookingStatus, string> = {
 };
 
 function slugifyName(value: string): string {
-  return slugify(value, { normalization: false });
+  return slugify(value) || `resource-${Date.now()}`;
 }
 
 function asArray<T>(val: unknown): T[] {
