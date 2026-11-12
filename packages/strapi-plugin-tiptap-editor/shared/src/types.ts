@@ -1,0 +1,427 @@
+// shared/src/types.ts
+import { isPlainObject } from "@vicacha-devs/plugin-shared";
+
+// ─── Option types ───────────────────────────────────────────────────────────
+
+export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
+export type TiptapOutputFormat = "json" | "html" | "markdown";
+
+export type LinkConfig = {
+  openOnClick?: boolean;
+  HTMLAttributes?: Record<string, string>;
+  allowInternalLinks?: boolean;
+};
+
+export type TableConfig = {
+  resizable?: boolean;
+  /** Shows the cell background color picker, fed by `theme.colors`. */
+  cellBackground?: boolean;
+  /** Legacy alias for `cellBackground`. */
+  allowCellBackgroundColor?: boolean;
+  allowCaption?: boolean;
+};
+
+export type TextAlignConfig = {
+  types?: string[];
+  alignments?: Array<"left" | "center" | "right" | "justify">;
+};
+
+export type HeadingConfig = {
+  levels?: HeadingLevel[];
+  autoSlugId?: boolean;
+};
+
+export type FontFamilyConfig = {
+  fonts?: Array<{ label: string; value: string }>;
+};
+
+export type FontSizeConfig = {
+  sizes?: string[];
+};
+
+export type LineHeightConfig = {
+  heights?: string[];
+};
+
+export type CharacterCountConfig = {
+  limit?: number | null;
+  wordsPerMinute?: number;
+};
+
+export type IframeConfig = {
+  allowedDomains?: string[];
+  allowFullscreen?: boolean;
+};
+
+export type InformationPaneConfig = {
+  variants?: Array<
+    "info" | "warning" | "success" | "danger" | "neutral" | "tip"
+  >;
+};
+
+export type TextColorConfig = {
+  customColorPicker?: boolean | { enabled?: boolean };
+};
+
+export type HighlightColorConfig = {
+  customColorPicker?: boolean | { enabled?: boolean };
+};
+
+/** Per-preset switch map for rich-text components: `true`, `false`, or an options object. */
+export type RichTextComponentsConfig = Record<
+  string,
+  boolean | Record<string, unknown>
+>;
+
+// ─── Theme types ─────────────────────────────────────────────────────────────
+
+export type ThemeColorEntry = {
+  label: string;
+  color: string;
+};
+
+type ThemeStyleSource =
+  | {
+      /** A browser-fetchable URL for an external stylesheet */
+      stylesheet?: string;
+      css?: never;
+    }
+  | {
+      stylesheet?: never;
+      /** Inline CSS content to inject via a <style> tag */
+      css?: string;
+    };
+
+export type TiptapThemeConfig = {
+  colors?: ThemeColorEntry[];
+} & ThemeStyleSource;
+
+// ─── Core types ──────────────────────────────────────────────────────────────
+
+export interface TiptapPresetConfig {
+  bold?: boolean | Record<string, unknown>;
+  italic?: boolean | Record<string, unknown>;
+  strike?: boolean | Record<string, unknown>;
+  underline?: boolean | Record<string, unknown>;
+  code?: boolean | Record<string, unknown>;
+  codeBlock?: boolean | Record<string, unknown>;
+  blockquote?: boolean | Record<string, unknown>;
+  bulletList?: boolean | Record<string, unknown>;
+  orderedList?: boolean | Record<string, unknown>;
+  hardBreak?: boolean | Record<string, unknown>;
+  horizontalRule?: boolean | Record<string, unknown>;
+  history?: boolean | Record<string, unknown>;
+  heading?: boolean | HeadingConfig;
+  link?: boolean | LinkConfig;
+  table?: boolean | TableConfig;
+  textAlign?: boolean | TextAlignConfig;
+  superscript?: boolean | Record<string, unknown>;
+  subscript?: boolean | Record<string, unknown>;
+  textColor?: boolean | TextColorConfig;
+  highlightColor?: boolean | HighlightColorConfig;
+  mediaLibrary?: boolean | Record<string, unknown>;
+  components?: RichTextComponentsConfig;
+  // Edifice IO & Advanced Typography
+  fontFamily?: boolean | FontFamilyConfig;
+  fontSize?: boolean | FontSizeConfig;
+  lineHeight?: boolean | LineHeightConfig;
+  clearFormatting?: boolean | Record<string, unknown>;
+  typography?: boolean | Record<string, unknown>;
+  leadParagraph?: boolean | Record<string, unknown>;
+  language?: boolean | Record<string, unknown>;
+  abbr?: boolean | Record<string, unknown>;
+  // Edifice IO Multimedia & Embeds
+  video?: boolean | Record<string, unknown>;
+  audio?: boolean | Record<string, unknown>;
+  attachment?: boolean | Record<string, unknown>;
+  iframe?: boolean | IframeConfig;
+  // Internal Content Linker & Bookmarks
+  linker?: boolean | Record<string, unknown>;
+  // Rich Callouts, Structured Panes & Layouts
+  informationPane?: boolean | InformationPaneConfig;
+  accordion?: boolean | Record<string, unknown>;
+  conversationHistory?: boolean | Record<string, unknown>;
+  columns?: boolean | Record<string, unknown>;
+  taskList?: boolean | Record<string, unknown>;
+  mathematics?: boolean | Record<string, unknown>;
+  emoji?: boolean | Record<string, unknown>;
+  slashCommands?: boolean | Record<string, unknown>;
+  pageBreak?: boolean | Record<string, unknown>;
+  tableOfContents?: boolean | Record<string, unknown>;
+  // Assistive & Accessibility Tools (Edifice IO + WCAG)
+  speechToText?: boolean | Record<string, unknown>;
+  textToSpeech?: boolean | Record<string, unknown>;
+  characterCount?: boolean | CharacterCountConfig;
+  fullscreen?: boolean | Record<string, unknown>;
+  customExtensions?: Record<string, boolean | Record<string, unknown>>;
+  // Custom registered block / mark extensions
+  [customFeatureKey: string]: boolean | Record<string, unknown> | undefined;
+}
+
+export interface TiptapRuntimeSettings {
+  defaultPreset?: string;
+  defaultOutputFormat?: TiptapOutputFormat;
+  allowedIframeDomains?: string[];
+  enableRelationalSync?: boolean;
+  presetOverrides?: Record<string, Partial<TiptapPresetConfig>>;
+}
+
+export interface TiptapPluginConfig {
+  presets: Record<string, TiptapPresetConfig>;
+  theme?: TiptapThemeConfig;
+  settings?: TiptapRuntimeSettings;
+}
+
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+export type BuiltInPresetFeatureKey =
+  | "bold"
+  | "italic"
+  | "strike"
+  | "underline"
+  | "code"
+  | "codeBlock"
+  | "blockquote"
+  | "bulletList"
+  | "orderedList"
+  | "hardBreak"
+  | "horizontalRule"
+  | "history"
+  | "heading"
+  | "link"
+  | "table"
+  | "textAlign"
+  | "superscript"
+  | "subscript"
+  | "textColor"
+  | "highlightColor"
+  | "mediaLibrary"
+  | "fontFamily"
+  | "fontSize"
+  | "lineHeight"
+  | "clearFormatting"
+  | "typography"
+  | "leadParagraph"
+  | "language"
+  | "abbr"
+  | "video"
+  | "audio"
+  | "attachment"
+  | "iframe"
+  | "linker"
+  | "informationPane"
+  | "accordion"
+  | "conversationHistory"
+  | "columns"
+  | "taskList"
+  | "mathematics"
+  | "emoji"
+  | "slashCommands"
+  | "pageBreak"
+  | "tableOfContents"
+  | "speechToText"
+  | "textToSpeech"
+  | "characterCount"
+  | "fullscreen"
+  | "components";
+
+export type PresetFeatureKey = BuiltInPresetFeatureKey;
+
+export const PRESET_FEATURE_KEYS: BuiltInPresetFeatureKey[] = [
+  "bold",
+  "italic",
+  "strike",
+  "underline",
+  "code",
+  "codeBlock",
+  "blockquote",
+  "bulletList",
+  "orderedList",
+  "hardBreak",
+  "horizontalRule",
+  "history",
+  "heading",
+  "link",
+  "table",
+  "textAlign",
+  "superscript",
+  "subscript",
+  "textColor",
+  "highlightColor",
+  "mediaLibrary",
+  "fontFamily",
+  "fontSize",
+  "lineHeight",
+  "clearFormatting",
+  "typography",
+  "leadParagraph",
+  "language",
+  "abbr",
+  "video",
+  "audio",
+  "attachment",
+  "iframe",
+  "linker",
+  "informationPane",
+  "accordion",
+  "conversationHistory",
+  "columns",
+  "taskList",
+  "mathematics",
+  "emoji",
+  "slashCommands",
+  "pageBreak",
+  "tableOfContents",
+  "speechToText",
+  "textToSpeech",
+  "characterCount",
+  "fullscreen",
+  "components",
+];
+
+// Fallback for unconfigured fields — deliberately minimal to prompt developers to configure
+export const MINIMAL_PRESET_CONFIG: TiptapPresetConfig = {
+  bold: true,
+  italic: true,
+};
+
+export const DEFAULT_PRESET_CONFIG: TiptapPresetConfig = {
+  bold: true,
+  italic: true,
+  underline: true,
+  strike: true,
+  code: true,
+  codeBlock: true,
+  blockquote: true,
+  bulletList: true,
+  orderedList: true,
+  hardBreak: true,
+  horizontalRule: true,
+  history: true,
+  heading: { levels: [1, 2, 3, 4, 5, 6], autoSlugId: true },
+  link: { openOnClick: false, allowInternalLinks: true },
+  table: {
+    resizable: true,
+    cellBackground: true,
+    allowCellBackgroundColor: true,
+    allowCaption: true,
+  },
+  textAlign: {
+    types: ["heading", "paragraph"],
+    alignments: ["left", "center", "right", "justify"],
+  },
+  superscript: true,
+  subscript: true,
+  textColor: true,
+  highlightColor: true,
+  mediaLibrary: true,
+  clearFormatting: true,
+  characterCount: true,
+  fullscreen: true,
+};
+
+export const FULL_PRESET_CONFIG: TiptapPresetConfig =
+  PRESET_FEATURE_KEYS.reduce<TiptapPresetConfig>((acc, key) => {
+    if (key === "components") {
+      acc.components = { button: true };
+    } else if (key === "table") {
+      acc.table = {
+        resizable: true,
+        cellBackground: true,
+        allowCellBackgroundColor: true,
+        allowCaption: true,
+      };
+    } else {
+      acc[key] = true;
+    }
+    return acc;
+  }, {});
+
+export const BUILT_IN_PRESETS: Record<string, TiptapPresetConfig> = {
+  minimal: MINIMAL_PRESET_CONFIG,
+  default: DEFAULT_PRESET_CONFIG,
+  full: FULL_PRESET_CONFIG,
+  edifice: {
+    ...FULL_PRESET_CONFIG,
+    components: { ...FULL_PRESET_CONFIG.components },
+  },
+};
+
+export const DEFAULT_RUNTIME_SETTINGS: Required<TiptapRuntimeSettings> = {
+  defaultPreset: "default",
+  defaultOutputFormat: "json",
+  allowedIframeDomains: [],
+  enableRelationalSync: true,
+  presetOverrides: {},
+};
+
+// ─── Utility functions ───────────────────────────────────────────────────────
+
+/**
+ * Returns true when a preset feature value is enabled.
+ * undefined (absent key) returns false — a preset defines what's ON, everything else is OFF.
+ */
+export const isFeatureEnabled = (value: unknown): boolean => {
+  if (value === undefined) {
+    return false; // absent key = disabled
+  }
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (!isPlainObject(value)) {
+    return false;
+  }
+  const obj = value as Record<string, unknown>;
+  if (typeof obj.enabled === "boolean") {
+    return obj.enabled;
+  }
+  if (typeof obj.disabled === "boolean") {
+    return !obj.disabled;
+  }
+  return true;
+};
+
+/**
+ * Returns the effective options for a feature.
+ * - false → null (feature explicitly disabled, no options)
+ * - true | undefined → defaults (feature enabled with default options)
+ * - object → merged with defaults (feature enabled with custom options)
+ *
+ * NOTE: false returns null — DIVERGES from dist where false returns defaults.
+ */
+export const getFeatureOptions = <T extends Record<string, unknown>>(
+  value: boolean | T | undefined,
+  defaults: T
+): T | null => {
+  if (value === false) {
+    return null; // TYPES-05: explicitly disabled
+  }
+  if (!isPlainObject(value)) {
+    return defaults; // true or undefined: return defaults
+  }
+  const {
+    enabled: _e,
+    disabled: _d,
+    ...rest
+  } = value as Record<string, unknown>;
+  return { ...defaults, ...rest } as T;
+};
+
+/** True when the preset lists `name` under `components` with an enabled value. */
+export const isComponentEnabled = (
+  config: TiptapPresetConfig,
+  name: string
+): boolean => isFeatureEnabled(config.components?.[name]);
+
+/** Options for one component: `{}` for `true`, the object minus enabled/disabled, null when absent or disabled. */
+export const getComponentOptions = (
+  config: TiptapPresetConfig,
+  name: string
+): Record<string, unknown> | null => {
+  const value = config.components?.[name];
+  if (value === undefined || !isComponentEnabled(config, name)) {
+    return null;
+  }
+  return getFeatureOptions(value, {});
+};

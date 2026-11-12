@@ -1,0 +1,133 @@
+{
+  "name": "@vicacha-devs/strapi-plugin-tiptap-editor",
+  "version": "1.3.0",
+  "description": "Customizable Tiptap Rich Text Editor for Strapi v5 with presets, media embeds, tables, mathematics, callouts, slash commands, and custom components (forked & extended from @notum-cz/strapi-plugin-tiptap-editor)",
+  "keywords": [
+    "editor",
+    "markdown",
+    "prosemirror",
+    "rich-text",
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5",
+    "tiptap",
+    "wysiwyg"
+  ],
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions/tree/main/packages/strapi-plugin-tiptap-editor#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
+  },
+  "license": "MIT",
+  "author": "Vicacha Devs (originally Notum Technologies s.r.o.)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
+    "directory": "packages/strapi-plugin-tiptap-editor"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "commonjs",
+  "exports": {
+    "./package.json": "./package.json",
+    "./shared": {
+      "types": "./dist/shared/src/index.d.ts",
+      "source": "./shared/src/index.ts",
+      "import": "./dist/shared/index.mjs",
+      "require": "./dist/shared/index.js",
+      "default": "./dist/shared/index.js"
+    },
+    "./strapi-admin": {
+      "types": "./dist/admin/src/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "strapi-plugin build && node ../../scripts/ensure-dist-types.ts",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:ts": "npm run test:ts:shared && npm run test:ts:front && npm run test:ts:back",
+    "test:ts:back": "tsc -p server/tsconfig.json --noEmit",
+    "test:ts:front": "tsc -p admin/tsconfig.json --noEmit",
+    "test:ts:shared": "tsc -p shared/tsconfig.json --noEmit",
+    "test:watch": "vitest",
+    "verify": "strapi-plugin verify",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link"
+  },
+  "dependencies": {
+    "@strapi/design-system": "2.2.0",
+    "@strapi/icons": "2.2.0",
+    "isomorphic-dompurify": "3.19.0",
+    "react-intl": "8.1.3",
+    "undici": "7.30.1"
+  },
+  "devDependencies": {
+    "@strapi/sdk-plugin": "6.1.1",
+    "@strapi/strapi": "5.39.0",
+    "@strapi/typescript-utils": "5.39.0",
+    "@tiptap/core": "3.20.1",
+    "@tiptap/extension-color": "3.20.1",
+    "@tiptap/extension-document": "3.20.1",
+    "@tiptap/extension-heading": "3.20.1",
+    "@tiptap/extension-highlight": "3.20.1",
+    "@tiptap/extension-image": "3.20.1",
+    "@tiptap/extension-paragraph": "3.20.1",
+    "@tiptap/extension-subscript": "3.20.1",
+    "@tiptap/extension-superscript": "3.20.1",
+    "@tiptap/extension-table": "3.20.1",
+    "@tiptap/extension-text": "3.20.1",
+    "@tiptap/extension-text-align": "3.20.1",
+    "@tiptap/extension-text-style": "3.20.1",
+    "@tiptap/extension-underline": "3.20.1",
+    "@tiptap/extensions": "3.20.1",
+    "@tiptap/pm": "3.20.1",
+    "@tiptap/react": "3.20.1",
+    "@tiptap/starter-kit": "3.20.1",
+    "@types/node": "22.10.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vicacha-devs/eslint-config": "workspace:*",
+    "@vicacha-devs/plugin-shared": "workspace:*",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "jsdom": "29.1.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-router-dom": "6.30.3",
+    "styled-components": "6.3.11",
+    "typescript": "5.9.3",
+    "vitest": "4.1.0"
+  },
+  "peerDependencies": {
+    "@strapi/sdk-plugin": "^5.0.0 || ^6.0.0",
+    "@strapi/strapi": "^5.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  },
+  "strapi": {
+    "kind": "plugin",
+    "name": "tiptap-editor",
+    "displayName": "Tiptap Editor",
+    "description": "Customizable Tiptap Rich Text Editor for Strapi v5"
+  }
+}
