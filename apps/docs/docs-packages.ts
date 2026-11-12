@@ -352,6 +352,29 @@ export const plugins: PluginPackageMeta[] = [
     contentManagerScreenshot: "/screenshots/sitemap-content-manager.png",
     settingsScreenshot: "/screenshots/sitemap-settings.png",
   },
+  {
+    slug: "strapi-plugin-tiptap-editor",
+    npmName: "@vicacha-devs/strapi-plugin-tiptap-editor",
+    pluginId: "tiptap-editor",
+    category: "Editorial & SEO",
+    label: "Tiptap Rich Text Editor",
+    translations: {
+      es: "Editor de Texto Enriquecido Tiptap",
+      ar: "محرر النصوص المنسقة Tiptap",
+      tr: "Tiptap Zengin Metin Düzenleyicisi",
+    },
+    summary: {
+      en: "Customizable TipTap v3 + Edifice IO WYSIWYG custom field with 49 configurable features, schema-driven custom components, HTML5 Canvas image studio, voice recorder, and DOMPurify + SSRF hardening.",
+      es: "Campo personalizado WYSIWYG TipTap v3 + Edifice IO con 49 funciones configurables, componentes personalizados por esquema, estudio de imagen Canvas HTML5, grabadora de voz y sanitización DOMPurify + SSRF.",
+      ar: "حقل محرر نصوص منسقة TipTap v3 + Edifice IO مع 49 ميزة قابلة للتخصيص ومكونات مخصصة واستوديو صور Canvas ومسجل صوتي وحماية DOMPurify و SSRF.",
+      tr: "49 yapılandırılabilir özellik, şema tabanlı özel bileşenler, HTML5 Canvas görsel stüdyosu, ses kaydedici ve DOMPurify + SSRF korumasıyla TipTap v3 + Edifice IO zengin metin düzenleyicisi.",
+    },
+    schemaFile: "tiptap-editor",
+    dir: "strapi-plugin-tiptap-editor",
+    screenshot: "/screenshots/tiptap-editor-admin.png",
+    contentManagerScreenshot: "/screenshots/tiptap-editor-content-manager.png",
+    settingsScreenshot: "/screenshots/tiptap-editor-settings.png",
+  },
 ];
 
 export const guides: GuideMeta[] = [

@@ -24,15 +24,15 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
   es: {
     title: "Extensiones Strapi v5 — Vicacha",
     description:
-      "Suite empresarial de 14 plugins Strapi v5 para calendarios, eventos, reservas, certificados digitales, donaciones, difusiones omnicanal, búsqueda global y SEO.",
+      "Suite empresarial de 15 plugins Strapi v5 para calendarios, eventos, reservas, certificados digitales, donaciones, difusiones omnicanal, búsqueda global, editor Tiptap y SEO.",
     tagline:
-      "14 plugins modulares para Strapi v5 con firmas criptográficas Ed25519, soporte en 13 idiomas (incluyendo RTL), especificaciones OpenAPI interactivas y puentes de integración automática.",
+      "15 plugins modulares para Strapi v5 con firmas criptográficas Ed25519, soporte multilingüe (incluyendo RTL), especificaciones OpenAPI interactivas y puentes de integración automática.",
     ctaPrimary: "Primeros Pasos",
     ctaSecondary: "Arquitectura del Monorepo",
     pillarsHeading: "Pilares Fundamentales",
     pillars: [
       [
-        "14 Plugins de Producción para Strapi v5",
+        "15 Plugins de Producción para Strapi v5",
         "Construidos nativamente sobre la Document Service API (`strapi.documents(uid)`), Design System v2 y compilación dual Admin + Server con `@strapi/sdk-plugin`.",
       ],
       [
@@ -41,14 +41,14 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
       ],
       [
         "Seguridad Criptográfica y Webhooks",
-        "Firmas digitales Ed25519, validación HMAC-SHA256 en tiempo constante, protección contra SSRF/Path Traversal y enmascaramiento de datos personales (PII).",
+        "Firmas digitales Ed25519, validación HMAC-SHA256 en tiempo constante, sanitización DOMPurify, protección contra SSRF/Path Traversal y enmascaramiento de PII.",
       ],
       [
         "Paridad i18n en 13 Idiomas y RTL",
-        "Traducciones completas para `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL) y `zh`, más calendarios secundarios Hijri, Hebreo y Persa.",
+        "Traducciones completas para `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL) y `zh` (más `cs` en `tiptap-editor`), y calendarios secundarios CLDR.",
       ],
     ],
-    matrixHeading: "Catálogo Completo de Plugins (14 Paquetes)",
+    matrixHeading: "Catálogo Completo de Plugins (15 Paquetes)",
     colPkg: "Paquete",
     colId: "Plugin ID",
     colNpm: "Paquete NPM",
@@ -56,15 +56,15 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
   ar: {
     title: "إضافات Strapi v5 — فيكاتشا",
     description:
-      "منظومة مؤسسية تضم 14 إضافة لنظام Strapi v5 تشمل التقويم والفعاليات والحجوزات والشهادات الرقمية والتبرعات والبث متعدد القنوات والبحث الشامل و SEO.",
+      "منظومة مؤسسية تضم 15 إضافة لنظام Strapi v5 تشمل التقويم والفعاليات والحجوزات والشهادات الرقمية والتبرعات والبث متعدد القنوات ومحرر النصوص Tiptap و SEO.",
     tagline:
-      "14 إضافة معيارية لنظام Strapi v5 مدعومة بالتوقيع الرقمي Ed25519 و 13 لغة (بما فيها العربية RTL) ومراجع OpenAPI التفاعلية والتكامل التلقائي.",
+      "15 إضافة معيارية لنظام Strapi v5 مدعومة بالتوقيع الرقمي Ed25519 و 13 لغة (بما فيها العربية RTL) ومراجع OpenAPI التفاعلية والتكامل التلقائي.",
     ctaPrimary: "البدء السريع",
     ctaSecondary: "هندسة المستودع الموحد",
     pillarsHeading: "الركائز الأساسية للمنظومة",
     pillars: [
       [
-        "14 إضافة جاهزة للإنتاج على Strapi v5",
+        "15 إضافة جاهزة للإنتاج على Strapi v5",
         "مبنية بالكامل باستخدام Document Service API (`strapi.documents(uid)`) ونظام التصميم Strapi Design System v2 وبنية الحزم المزدوجة.",
       ],
       [
@@ -73,14 +73,14 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
       ],
       [
         "تأمين التشفير الرقمي وحماية Webhooks",
-        "توقيع Ed25519 الرقمي، والتحقق من تواقيع HMAC-SHA256 بزمن ثابت، والحماية من ثغرات SSRF وعبور المسارات وتعمية البيانات الشخصية.",
+        "توقيع Ed25519 الرقمي، والتحقق من تواقيع HMAC-SHA256 بزمن ثابت، وتنقية DOMPurify والحماية من ثغرات SSRF وعبور المسارات وتعمية البيانات الشخصية.",
       ],
       [
         "دعم كامل لـ 13 لغة واتجاه RTL والتقويم الهجري",
-        "تكافؤ كامل في ترجمات لوحة التحكم لـ 13 لغة مع دعم كامل للغة العربية والأردية (RTL) وتقويم أم القرى الهجري والعبري والفارسي.",
+        "تكافؤ كامل في ترجمات لوحة التحكم لـ 13 لغة (بالإضافة إلى التشيكية في `tiptap-editor`) مع دعم كامل للغة العربية والأردية (RTL) وتقويم أم القرى الهجري.",
       ],
     ],
-    matrixHeading: "دليل الإضافات الكامل (14 حزمة)",
+    matrixHeading: "دليل الإضافات الكامل (15 حزمة)",
     colPkg: "الإضافة",
     colId: "معرف Strapi",
     colNpm: "حزمة NPM",
@@ -88,15 +88,15 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
   tr: {
     title: "Vicacha Strapi v5 Eklentileri",
     description:
-      "Takvim, etkinlikler, rezervasyonlar, dijital sertifikalar, bağışlar, çok kanallı yayınlar, medya akışları, küresel arama ve SEO için 14 kurumsal Strapi v5 eklentisi.",
+      "Takvim, etkinlikler, rezervasyonlar, dijital sertifikalar, bağışlar, çok kanallı yayınlar, medya akışları, Tiptap düzenleyici, küresel arama ve SEO için 15 kurumsal Strapi v5 eklentisi.",
     tagline:
-      "Ed25519 kriptografik imzalama, 13 dil desteği (RTL dahil), etkileşimli OpenAPI referansları ve sıfır yapılandırmalı eklentiler arası köprülerle 14 modüler Strapi v5 eklentisi.",
+      "Ed25519 kriptografik imzalama, 13 dil desteği (RTL dahil), etkileşimli OpenAPI referansları ve sıfır yapılandırmalı eklentiler arası köprülerle 15 modüler Strapi v5 eklentisi.",
     ctaPrimary: "Başlangıç Kılavuzu",
     ctaSecondary: "Monorepo Mimarisi",
     pillarsHeading: "Temel Mimari Sütunlar",
     pillars: [
       [
-        "14 Üretime Hazır Strapi v5 Eklentisi",
+        "15 Üretime Hazır Strapi v5 Eklentisi",
         "Strapi v5 Document Service API (`strapi.documents(uid)`), Design System v2 ve `@strapi/sdk-plugin` çift paket mimarisi üzerine inşa edilmiştir.",
       ],
       [
@@ -105,14 +105,14 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
       ],
       [
         "Kriptografik Güvenlik ve Webhook Koruması",
-        "Ed25519 dijital imzalar, sabit zamanlı HMAC-SHA256 webhook doğrulaması, SSRF/Path Traversal koruması ve tuzlanmış PII maskeleme.",
+        "Ed25519 dijital imzalar, sabit zamanlı HMAC-SHA256 webhook doğrulaması, DOMPurify HTML temizleme, SSRF/Path Traversal koruması ve tuzlanmış PII maskeleme.",
       ],
       [
         "13 Dilde Yönetim Arayüzü ve RTL Desteği",
-        "`en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL) ve `zh` dillerinde tam çeviri eşitliği ve Hicri/İbranice/Farsça ikincil takvimler.",
+        "`en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL) ve `zh` (`tiptap-editor` içinde ayrıca `cs`) dillerinde tam çeviri eşitliği ve ikincil takvimler.",
       ],
     ],
-    matrixHeading: "Tüm Eklenti Matrisi (14 Paket)",
+    matrixHeading: "Tüm Eklenti Matrisi (15 Paket)",
     colPkg: "Eklenti",
     colId: "Strapi Eklenti Kimliği",
     colNpm: "NPM Paketi",

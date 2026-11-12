@@ -32,7 +32,7 @@ strapi-v5-extensions/
 │   ├── strapi-plugin-resources/        # @vicacha-devs/strapi-plugin-resources — Publications library, photo galleries & glossary
 │   ├── strapi-plugin-seo/              # @vicacha-devs/strapi-plugin-seo — Strapi v5 SEO metadata & SERP analyzer
 │   ├── strapi-plugin-sitemap/          # @vicacha-devs/strapi-plugin-sitemap — Multilingual XML sitemap & robots.txt generator
-│   └── strapi-plugin-tiptap-editor/    # @vicacha-devs/strapi-plugin-tiptap-editor — Customizable Tiptap rich-text editor with presets & media embeds
+│   └── strapi-plugin-tiptap-editor/    # @vicacha-devs/strapi-plugin-tiptap-editor — TipTap v3 + Edifice IO WYSIWYG editor, presets & custom components
 ├── scripts/
 │   ├── ensure-dist-types.ts            # Stubs missing entry .d.ts files so strapi-plugin verify passes (SDK layout: index.mjs + index.js)
 │   └── publint-all.ts                  # Strict publint validation across all 15 publishable plugins
@@ -65,7 +65,7 @@ strapi-v5-extensions/
 | [`@vicacha-devs/strapi-plugin-resources`](./packages/strapi-plugin-resources) | `resources` | Downloadable publications (`plugin::resources.publication`), photo gallery albums (`plugin::resources.gallery-album`), and bilingual/phonetic glossary (`plugin::resources.glossary-term`) |
 | [`@vicacha-devs/strapi-plugin-seo`](./packages/strapi-plugin-seo) | `seo` | Strapi v5 SEO component management, meta/social preview, and keyword density analysis with `ar`, `en`, `es`, `fr`, `pt-BR`, and `tr` translations |
 | [`@vicacha-devs/strapi-plugin-sitemap`](./packages/strapi-plugin-sitemap) | `sitemap` | Multilingual XML sitemap (`hreflang`), sitemap index, and custom URL management with `ar`, `en`, `es`, `fr`, `pt-BR`, and `tr` translations |
-| [`@vicacha-devs/strapi-plugin-tiptap-editor`](./packages/strapi-plugin-tiptap-editor) | `tiptap-editor` | Customizable Tiptap rich-text editor custom field with presets, media embeds, tables, math, callouts, slash commands and custom components (extended fork of `@notum-cz/strapi-plugin-tiptap-editor`) |
+| [`@vicacha-devs/strapi-plugin-tiptap-editor`](./packages/strapi-plugin-tiptap-editor) | `tiptap-editor` | TipTap v3 + Edifice IO rich-text custom field (`plugin::tiptap-editor.RichText`) with 49 configurable features, 4 built-in presets, schema-driven custom components, JSON/HTML/Markdown serializers with DOMPurify & SSRF protection, HTML5 Canvas image studio, voice recorder, and 11-locale parity (`ar`, `cs`, `de`, `en`, `es`, `fr`, `it`, `nl`, `pl`, `pt`, `tr`) |
 
 ---
 
@@ -78,7 +78,7 @@ strapi-v5-extensions/
 3. **Strict TypeScript (`tsc --noEmit`)**:
    Every plugin validates both its Admin (`admin/tsconfig.json`) and Server (`server/tsconfig.json`) bundles against `@vicacha-devs/typescript-config` with zero `any` leaks in implementation code.
 4. **Multilingual Admin i18n Parity**:
-   Every plugin ships with verified translation key parity across the 5 core locales (`en`, `es`, `ar`, `tr`, `fr`), with **10 Admin locales** across the 11 domain and operations plugins (`calendar`, `events`, `bookings`, `broadcasts`, `certificates`, `donations`, `inbox`, `islam`, `media-feeds`, `notes`, `resources` — covering regional sets across `de`, `pt`, `it`, `nl`, `pl`, `ru`, `id`, `ms`, `ur`, `zh`), **6 locales** (`+ pt-BR`) in `seo` and `sitemap`, and **5 locales** in `global-search`.
+   Every plugin ships with verified translation key parity across the 5 core locales (`en`, `es`, `ar`, `tr`, `fr`), with **10 Admin locales** across the 11 domain and operations plugins (`calendar`, `events`, `bookings`, `broadcasts`, `certificates`, `donations`, `inbox`, `islam`, `media-feeds`, `notes`, `resources` — covering regional sets across `de`, `pt`, `it`, `nl`, `pl`, `ru`, `id`, `ms`, `ur`, `zh`), **11 locales** (`ar`, `cs`, `de`, `en`, `es`, `fr`, `it`, `nl`, `pl`, `pt`, `tr`) in `tiptap-editor`, **6 locales** (`+ pt-BR`) in `seo` and `sitemap`, and **5 locales** in `global-search`.
 5. **NPM Package Quality & Changesets Releases (`publint` + `@strapi/sdk-plugin` + Trusted Publishing)**:
    All 15 plugins are validated with `strapi-plugin verify` and strict `publint` (`pack: "pnpm"`). Independent per-package versions and changelogs are managed via [Changesets](https://changesets.dev) ("Version Packages" PRs) and published via npm OIDC Trusted Publishing with provenance.
 

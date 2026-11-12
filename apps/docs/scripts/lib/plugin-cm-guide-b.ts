@@ -242,4 +242,36 @@ export const PLUGIN_CM_GUIDE_B: Record<string, PluginContentManagerGuide> = {
       ],
     ],
   },
+  "tiptap-editor": {
+    sidebarGroup:
+      "Operates Inside Every Content Manager Entry Using plugin::tiptap-editor.RichText",
+    cmEntities: [
+      "Custom Field `plugin::tiptap-editor.RichText` (attached to `api::article.article`, `api::page.page`, or any Collection/Single Type in `/admin/content-manager`)",
+      "Companion `<FieldName>Media` & `<FieldName>Links` fields automatically synchronized on edit (`enableRelationalSync`)",
+      "Settings Store `plugin::tiptap-editor.settings` (`core-store` managed via `/admin/settings/tiptap-editor`)",
+    ],
+    whySummary:
+      "`@vicacha-devs/strapi-plugin-tiptap-editor` delivers a WCAG 2.1 AA WYSIWYG editing workspace directly inside **Strapi v5 Content Manager** edit views via custom field `plugin::tiptap-editor.RichText` without creating intrusive standalone tables:",
+    whyBullets: [
+      "**Hybrid Code + Runtime Presets**: Fields inherit code-first presets (`minimal`, `default`, `full`, `edifice`, or custom `config/plugins.ts` presets) and respect live overrides saved at `/admin/settings/tiptap-editor`.",
+      "**Automatic Relational Media & Document Linker Sync**: `useRelationalSync` extracts embedded Media Library assets (`<FieldName>Media`) and internal `linker` document references (`<FieldName>Links`) as editors type.",
+      "**Zero-Data-Loss Fallback**: Disabling an extension renders existing nodes read-only rather than dropping structured content on publish.",
+    ],
+    howToUseSteps: [
+      "**Add the Custom Field in Content-Type Builder**: Open `/admin/plugins/content-type-builder`, add custom field **Rich Text (Tiptap)** (`plugin::tiptap-editor.RichText`), and pick a preset and output format (`json`, `html`, or `markdown`).",
+      "**Edit Content in Content Manager**: Open `/admin/content-manager` for the entry, format text using the roving toolbar, `/` slash menu, HTML5 Canvas image studio, voice recorder, or custom components, and click **Publish**.",
+      "**Review Global Overrides**: Visit `/admin/settings/tiptap-editor` (`Settings -> Global Settings -> Tiptap Editor`) to tune allowed iframe domains and runtime feature toggles.",
+    ],
+    cmMermaid: `flowchart LR
+  CTB["Content-Type Builder (Select Preset & Format)"] --> CM["Content Manager Edit View (RichTextInput + Toolbars)"]
+  CM --> Sync["Auto-Sync <Field>Media & <Field>Links"]
+  Sync --> Output["Persist Sanitized JSON / HTML / Markdown"]`,
+    cmUseCases: [
+      [
+        "Content Manager Use Case 1 — Authoring Accessible Multilingual Rich Content & Linked Assets",
+        "Compose localized articles in `/admin/content-manager` with WCAG `language` spans (`dir='rtl'|'ltr'`), semantic headings, internal document links, cropped images, and automatic relational asset tracking.",
+        "Open an entry in `/admin/content-manager`, switch locale via i18n, insert media/links/blocks in the `RichText` field, verify the inspector preview (JSON/HTML/Markdown), and click **Publish**.",
+      ],
+    ],
+  },
 };

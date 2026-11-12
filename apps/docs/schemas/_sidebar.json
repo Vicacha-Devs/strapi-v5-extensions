@@ -1002,5 +1002,53 @@
         }
       ]
     }
+  ],
+  "strapi-plugin-tiptap-editor": [
+    {
+      "label": "Admin API",
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorpresets/"
+        },
+        {
+          "label": "Find One",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorpresetsbyname/"
+        },
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditortheme/"
+        },
+        {
+          "label": "Find",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorsettings/"
+        },
+        {
+          "label": "Update",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/puttiptapeditorsettings/"
+        },
+        {
+          "label": "Search",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorsearch/"
+        },
+        {
+          "label": "Get Document",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorgetbycollectionnamebydocumentid/"
+        },
+        {
+          "label": "Identify",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditoridentifybycollectionname/"
+        },
+        {
+          "label": "Link Preview",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/gettiptapeditorlinkpreview/"
+        },
+        {
+          "label": "Upload By Url",
+          "link": "/strapi-plugin-tiptap-editor/api/operations/posttiptapeditoruploadbyurl/"
+        }
+      ]
+    }
   ]
 }
