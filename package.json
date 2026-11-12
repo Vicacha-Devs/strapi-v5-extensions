@@ -46,7 +46,7 @@
     "test:ts": "turbo run test:ts",
     "verify": "pnpm format:check && pnpm lint && pnpm build && pnpm check && pnpm verify:sdk && pnpm publint && pnpm test",
     "verify:sdk": "turbo run verify",
-    "version-packages": "changeset version"
+    "version-packages": "changeset version && pnpm install --lockfile-only"
   },
   "devDependencies": {
     "@changesets/cli": "3.0.3",
