@@ -130,4 +130,7 @@ export default ({
   "sitemap": {
     enabled: true,
   },
+  "tiptap-editor": {
+    enabled: true,
+  },
 });

@@ -31,10 +31,11 @@ strapi-v5-extensions/
 │   ├── strapi-plugin-notes/            # @vicacha-devs/strapi-plugin-notes — Polymorphic editorial notes, pins & activity logs
 │   ├── strapi-plugin-resources/        # @vicacha-devs/strapi-plugin-resources — Publications library, photo galleries & glossary
 │   ├── strapi-plugin-seo/              # @vicacha-devs/strapi-plugin-seo — Strapi v5 SEO metadata & SERP analyzer
-│   └── strapi-plugin-sitemap/          # @vicacha-devs/strapi-plugin-sitemap — Multilingual XML sitemap & robots.txt generator
+│   ├── strapi-plugin-sitemap/          # @vicacha-devs/strapi-plugin-sitemap — Multilingual XML sitemap & robots.txt generator
+│   └── strapi-plugin-tiptap-editor/    # @vicacha-devs/strapi-plugin-tiptap-editor — Customizable Tiptap rich-text editor with presets & media embeds
 ├── scripts/
 │   ├── ensure-dist-types.ts            # Stubs missing entry .d.ts files so strapi-plugin verify passes (SDK layout: index.mjs + index.js)
-│   └── publint-all.ts                  # Strict publint validation across all 14 publishable plugins
+│   └── publint-all.ts                  # Strict publint validation across all 15 publishable plugins
 ├── commitlint.config.ts                # Conventional Commits + optional [TICKET-123] prefix (style check)
 ├── eslint.config.ts                    # Root ESLint v10 flat configuration
 ├── .oxfmtrc.json                       # Oxfmt code formatting configuration
@@ -46,7 +47,7 @@ strapi-v5-extensions/
 
 ---
 
-## Included Strapi v5 Plugins (14 Packages)
+## Included Strapi v5 Plugins (15 Packages)
 
 | Package | Strapi Plugin ID | Summary |
 | :--- | :--- | :--- |
@@ -64,6 +65,7 @@ strapi-v5-extensions/
 | [`@vicacha-devs/strapi-plugin-resources`](./packages/strapi-plugin-resources) | `resources` | Downloadable publications (`plugin::resources.publication`), photo gallery albums (`plugin::resources.gallery-album`), and bilingual/phonetic glossary (`plugin::resources.glossary-term`) |
 | [`@vicacha-devs/strapi-plugin-seo`](./packages/strapi-plugin-seo) | `seo` | Strapi v5 SEO component management, meta/social preview, and keyword density analysis with `ar`, `en`, `es`, `fr`, `pt-BR`, and `tr` translations |
 | [`@vicacha-devs/strapi-plugin-sitemap`](./packages/strapi-plugin-sitemap) | `sitemap` | Multilingual XML sitemap (`hreflang`), sitemap index, and custom URL management with `ar`, `en`, `es`, `fr`, `pt-BR`, and `tr` translations |
+| [`@vicacha-devs/strapi-plugin-tiptap-editor`](./packages/strapi-plugin-tiptap-editor) | `tiptap-editor` | Customizable Tiptap rich-text editor custom field with presets, media embeds, tables, math, callouts, slash commands and custom components (extended fork of `@notum-cz/strapi-plugin-tiptap-editor`) |
 
 ---
 
@@ -78,7 +80,7 @@ strapi-v5-extensions/
 4. **Multilingual Admin i18n Parity**:
    Every plugin ships with verified translation key parity across the 5 core locales (`en`, `es`, `ar`, `tr`, `fr`), with **10 Admin locales** across the 11 domain and operations plugins (`calendar`, `events`, `bookings`, `broadcasts`, `certificates`, `donations`, `inbox`, `islam`, `media-feeds`, `notes`, `resources` — covering regional sets across `de`, `pt`, `it`, `nl`, `pl`, `ru`, `id`, `ms`, `ur`, `zh`), **6 locales** (`+ pt-BR`) in `seo` and `sitemap`, and **5 locales** in `global-search`.
 5. **NPM Package Quality & Changesets Releases (`publint` + `@strapi/sdk-plugin` + Trusted Publishing)**:
-   All 14 plugins are validated with `strapi-plugin verify` and strict `publint` (`pack: "pnpm"`). Independent per-package versions and changelogs are managed via [Changesets](https://changesets.dev) ("Version Packages" PRs) and published via npm OIDC Trusted Publishing with provenance.
+   All 15 plugins are validated with `strapi-plugin verify` and strict `publint` (`pack: "pnpm"`). Independent per-package versions and changelogs are managed via [Changesets](https://changesets.dev) ("Version Packages" PRs) and published via npm OIDC Trusted Publishing with provenance.
 
 ---
 
@@ -96,14 +98,14 @@ pnpm format:check
 pnpm lint
 pnpm lint:fix
 
-# Build or clean all 14 Strapi v5 plugins via Turborepo
+# Build or clean all 15 Strapi v5 plugins via Turborepo
 pnpm build
 pnpm clean
 
 # Run strict TypeScript checks (Admin + Server) across all packages
 pnpm check
 
-# Validate all 14 plugin packages with @strapi/sdk-plugin and strict publint
+# Validate all 15 plugin packages with @strapi/sdk-plugin and strict publint
 pnpm verify:sdk
 pnpm publint
 

@@ -34,6 +34,7 @@
     "@vicacha-devs/strapi-plugin-resources": "workspace:*",
     "@vicacha-devs/strapi-plugin-seo": "workspace:*",
     "@vicacha-devs/strapi-plugin-sitemap": "workspace:*",
+    "@vicacha-devs/strapi-plugin-tiptap-editor": "workspace:*",
     "better-sqlite3": "^13.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
