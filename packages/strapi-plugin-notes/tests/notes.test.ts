@@ -89,12 +89,10 @@ describe("@vicacha-devs/strapi-plugin-notes — Issue #18 & v5", () => {
       assert.equal(sanitized.lastname, "Lovelace");
       assert.equal(sanitized.username, "adal");
       assert.equal(sanitized.displayName, "Ada Lovelace");
-      assert.equal("password" in (sanitized as Record<string, unknown>), false);
-      assert.equal("email" in (sanitized as Record<string, unknown>), false);
-      assert.equal(
-        "resetPasswordToken" in (sanitized as Record<string, unknown>),
-        false
-      );
+      const sanitizedObj = sanitized as unknown as Record<string, unknown>;
+      assert.equal("password" in sanitizedObj, false);
+      assert.equal("email" in sanitizedObj, false);
+      assert.equal("resetPasswordToken" in sanitizedObj, false);
       assert.equal(formatNoteAuthorDisplay(sanitized), "Ada Lovelace");
     });
 

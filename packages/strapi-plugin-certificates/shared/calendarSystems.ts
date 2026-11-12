@@ -1,15 +1,8 @@
 import {
-  SUPPORTED_INTL_CALENDARS,
-  applyDayOffset,
   extractCalendarParts,
   formatDateInCalendarSystem,
-  getRegisteredCalendarFormatters,
-  registerCalendarSystemFormatter,
-  resolveOccurrenceAlternateDates,
-  unregisterCalendarSystemFormatter,
   type AlternateDateValue,
   type CalendarSystemConfig,
-  type CalendarSystemFormatterFn,
 } from "@vicacha-devs/strapi-plugin-calendar/shared";
 
 export {
@@ -24,7 +17,7 @@ export {
   type AlternateDateValue,
   type CalendarSystemConfig,
   type CalendarSystemFormatterFn,
-};
+} from "@vicacha-devs/strapi-plugin-calendar/shared";
 
 export function formatSecondaryCalendars(
   date: Date,

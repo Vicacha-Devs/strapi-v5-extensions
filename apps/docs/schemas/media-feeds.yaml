@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Media Feeds & Podcast RSS (@vicacha-devs/strapi-plugin-media-feeds)
-  version: 1.0.0
+  version: 1.1.0
   description: Generic Strapi v5 Multi-Language Media Hub, YouTube & OEmbed Enricher, Apple/Spotify Podcast RSS
     2.0 Generator & Live Broadcast Status Plugin powered by @vicacha-devs/strapi-plugin-calendar
 servers:
@@ -187,6 +187,32 @@ paths:
                     $ref: "#/components/schemas/MediaEpisodeFeedItem"
         "400":
           description: Bad Request — validation or parameter error
+  /api/media-feeds/episodes/{slug}:
+    get:
+      operationId: getApiMediaFeedsEpisodesBySlug
+      summary: Get Episode By Slug
+      description: Strapi v5 Content API endpoint handled by `content-api.getEpisodeBySlug`.
+      tags:
+        - Content API
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          description: Target slug identifier
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/MediaEpisodeFeedItem"
+        "400":
+          description: Bad Request — validation or parameter error
   /api/media-feeds/series:
     get:
       operationId: getApiMediaFeedsSeries
@@ -243,6 +269,30 @@ paths:
   /api/media-feeds/rss.xml:
     get:
       operationId: getApiMediaFeedsRssXml
+      summary: Get Rss Xml
+      description: Strapi v5 Content API endpoint handled by `content-api.getRssXml`.
+      tags:
+        - Content API
+      parameters:
+        - name: locale
+          in: query
+          required: false
+          description: Optional Strapi i18n locale filter
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/xml:
+              schema:
+                type: string
+                description: UTF-8 XML feed / Sitemap document
+        "400":
+          description: Bad Request — validation or parameter error
+  /api/media-feeds/podcast.xml:
+    get:
+      operationId: getApiMediaFeedsPodcastXml
       summary: Get Rss Xml
       description: Strapi v5 Content API endpoint handled by `content-api.getRssXml`.
       tags:

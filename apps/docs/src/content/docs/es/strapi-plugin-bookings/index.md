@@ -4,7 +4,7 @@ description: "Recursos reservables, motor de disponibilidad por intervalos y fra
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-bookings` · **Plugin ID**: `bookings` · **Category**: `Scheduling & Operations` · **Version**: `1.0.0` · **Routes**: `17`
+> **Package**: `@vicacha-devs/strapi-plugin-bookings` · **Plugin ID**: `bookings` · **Category**: `Scheduling & Operations` · **Version**: `1.1.0` · **Routes**: `17`
 
 Recursos reservables, motor de disponibilidad por intervalos y franjas, asignación de anfitriones y reservas de autoservicio para Strapi v5.
 

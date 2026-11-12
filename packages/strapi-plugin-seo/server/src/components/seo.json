@@ -29,12 +29,10 @@
       "component": "shared.open-graph"
     },
     "keywords": {
-      "type": "text",
-      "regex": "[^,]+"
+      "type": "text"
     },
     "metaRobots": {
-      "type": "string",
-      "regex": "[^,]+"
+      "type": "string"
     },
     "metaViewport": {
       "type": "string"

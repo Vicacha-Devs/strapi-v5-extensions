@@ -4,7 +4,7 @@ description: "Paleta de comandos estilo Spotlight (Cmd+K / Ctrl+K) y búsqueda g
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-global-search` · **Plugin ID**: `global-search` · **Category**: `Editorial & SEO` · **Version**: `2.0.3` · **Routes**: `6`
+> **Package**: `@vicacha-devs/strapi-plugin-global-search` · **Plugin ID**: `global-search` · **Category**: `Editorial & SEO` · **Version**: `2.1.0` · **Routes**: `6`
 
 Paleta de comandos estilo Spotlight (Cmd+K / Ctrl+K) y búsqueda global en todas las colecciones, tipos únicos y componentes anidados de Strapi v5.
 

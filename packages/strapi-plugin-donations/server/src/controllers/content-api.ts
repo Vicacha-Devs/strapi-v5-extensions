@@ -154,7 +154,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             : undefined,
           payload,
         });
-        ctx.body = { data: result };
+        ctx.body = {
+          data: {
+            handled: result.handled,
+            referenceCode: result.pledge?.referenceCode ?? null,
+            status: result.pledge?.status ?? null,
+          },
+        };
       } catch (err: unknown) {
         ctx.status = 401;
         ctx.body = {

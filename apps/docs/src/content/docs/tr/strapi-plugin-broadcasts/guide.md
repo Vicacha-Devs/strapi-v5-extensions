@@ -40,16 +40,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı                                                      | Arayüz Metni                                   |
-| :------------------------------------------------------------------- | :--------------------------------------------- |
-| `broadcasts.checkbox.enable_dry_run_sandbox_mode`                    | Etkinleştir: Dry-Run Sandbox Mode              |
-| `broadcasts.checkbox.enable_eventhub_auto_broadcast_triggers`        | Etkinleştir: EventHub Auto-Yayın Triggers      |
-| `broadcasts.checkbox.enable_telegram_transport`                      | Etkinleştir: Telegram Transport                |
-| `broadcasts.checkbox.enable_whatsapp_transport`                      | Etkinleştir: WhatsApp Transport                |
-| `broadcasts.checkbox.segment_confirmed_subscribers_via_inbox_bridge` | Segment confirmed subscribers via Inbox Bridge |
-| `broadcasts.field.broadcast_topic_segments_comma_separated`          | Yayın Topic Segments (virgülle ayrılmış)       |
-| `broadcasts.field.campaign_slug`                                     | Kampanya Slug                                  |
-| `broadcasts.field.campaign_title`                                    | Kampanya Başlık                                |
+| Çeviri Anahtarı                                           | Arayüz Metni                                          |
+| :-------------------------------------------------------- | :---------------------------------------------------- |
+| `checkbox.enable_dry_run_sandbox_mode`                    | Deneme (Dry-Run) Simülasyon Modunu Etkinleştir        |
+| `checkbox.enable_email_designer_5_html_template_bridge`   | Email Designer 5 HTML Şablon Köprüsünü Etkinleştir    |
+| `checkbox.enable_eventhub_auto_broadcast_triggers`        | EventHub Otomatik Yayın Tetikleyicilerini Etkinleştir |
+| `checkbox.enable_telegram_transport`                      | Telegram İletimini Etkinleştir                        |
+| `checkbox.enable_whatsapp_transport`                      | WhatsApp İletimini Etkinleştir                        |
+| `checkbox.segment_confirmed_subscribers_via_inbox_bridge` | Onaylı aboneleri Inbox Köprüsü üzerinden bölümlendir  |
+| `common.activate`                                         | Etkinleştir                                           |
+| `common.active`                                           | aktif                                                 |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 

@@ -1,12 +1,8 @@
+import { escapeHtml } from "@vicacha-devs/plugin-shared";
+
 import type { CampaignRecord, CampaignTranslation } from "./types";
 
-const HTML_ESCAPE_MAP: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-};
+export { escapeHtml };
 
 const TELEGRAM_INLINE_TAGS = new Set([
   "b",
@@ -22,13 +18,6 @@ const TELEGRAM_INLINE_TAGS = new Set([
   "pre",
   "tg-spoiler",
 ]);
-
-export function escapeHtml(raw: string): string {
-  return String(raw).replace(
-    /[&<>"']/g,
-    (char) => HTML_ESCAPE_MAP[char] || char
-  );
-}
 
 export function stripHeaderControlChars(raw: string): string {
   return String(raw || "")
@@ -60,8 +49,7 @@ export function sanitizeTelegramHtml(rawHtml: string): string {
   if (!rawHtml) return "";
 
   let text = String(rawHtml)
-    // eslint-disable-next-line sonarjs/no-control-regex -- strips private sentinel chars
-    .replace(/[\u0001\u0002]/g, "")
+    .replace(/[\uE000\uE001]/g, "")
     .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, "")
     .replace(/<br\s*\/?>/gi, "\n")
@@ -81,26 +69,26 @@ export function sanitizeTelegramHtml(rawHtml: string): string {
       const tag = rawName.toLowerCase();
       if (selfClose === "/") return "";
       if (slash === "/") {
-        if (TELEGRAM_INLINE_TAGS.has(tag)) return `\u0001/${tag}\u0002`;
+        if (TELEGRAM_INLINE_TAGS.has(tag)) return `\uE000/${tag}\uE001`;
         if (tag === "a" && openAnchors > 0) {
           openAnchors -= 1;
-          return "\u0001/a\u0002";
+          return "\uE000/a\uE001";
         }
         return "";
       }
-      if (TELEGRAM_INLINE_TAGS.has(tag)) return `\u0001${tag}\u0002`;
+      if (TELEGRAM_INLINE_TAGS.has(tag)) return `\uE000${tag}\uE001`;
       if (tag === "a") {
         const safeHref = extractSafeAnchorHref(attrs);
         if (!safeHref) return "";
         openAnchors += 1;
-        return `\u0001a href="${escapeHtml(safeHref)}"\u0002`;
+        return `\uE000a href="${escapeHtml(safeHref)}"\uE001`;
       }
       return "";
     }
   );
 
   while (openAnchors > 0) {
-    text += "\u0001/a\u0002";
+    text += "\uE000/a\uE001";
     openAnchors -= 1;
   }
 
@@ -108,9 +96,11 @@ export function sanitizeTelegramHtml(rawHtml: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-f]+);)/gi, "&amp;")
-    // eslint-disable-next-line sonarjs/no-control-regex -- restores private sentinel chars
-    .replace(/\u0001([^\u0002]+)\u0002/g, "<$1>")
-    .replace(/[ \t]+\n/g, "\n")
+    .replaceAll("\uE000", "<")
+    .replaceAll("\uE001", ">")
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
@@ -127,6 +117,9 @@ export function interpolateBroadcastTemplate(
   return template.replace(
     /\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g,
     (_match, key: string) => {
+      if (!Object.hasOwn(variables, key)) {
+        return "";
+      }
       const rawValue = variables[key];
       if (rawValue === undefined || rawValue === null) {
         return "";

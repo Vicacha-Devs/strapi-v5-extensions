@@ -46,6 +46,7 @@ Curated photo and video albums synced with Strapi v5 Media Library folders and C
 | `framingNotes`          | `string`       | No        | max: 500                                                                                      |
 | `featured`              | `boolean`      | No        | default: `false`                                                                              |
 | `sortOrder`             | `integer`      | No        | default: `0`                                                                                  |
+| `photoCount`            | `integer`      | No        | default: `0`                                                                                  |
 
 ### `plugin::resources.glossary-term` — Resource Glossary Term
 

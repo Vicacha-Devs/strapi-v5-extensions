@@ -47,7 +47,7 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
           locale: typeof locale === "string" ? locale : undefined,
           page: page !== undefined ? Number(page) : undefined,
           pageSize: pageSize !== undefined ? Number(pageSize) : undefined,
-          userAbility: ctx.state.userAbility,
+          userAbility: ctx.state?.userAbility ?? { can: () => false },
         });
     } catch (error) {
       const detail = (error as Error).stack || (error as Error).message;

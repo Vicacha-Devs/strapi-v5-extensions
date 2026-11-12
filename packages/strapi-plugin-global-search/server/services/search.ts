@@ -59,10 +59,42 @@ export default ({ strapi }: { strapi: StrapiLike }) => ({
     if (!params) return [];
 
     const result = await strapi.documents(descriptor.uid).findMany(params);
-
-    return (
+    const entries = (
       Array.isArray(result) ? result : [result].filter(Boolean)
     ) as EntryLike[];
+
+    if (
+      descriptor.draftAndPublish &&
+      settings.includeDrafts &&
+      entries.some((e) => !e.publishedAt && e.documentId)
+    ) {
+      try {
+        const pubResult = await strapi
+          .documents(descriptor.uid)
+          .findMany({ ...params, status: "published" });
+        const pubList = (
+          Array.isArray(pubResult) ? pubResult : [pubResult].filter(Boolean)
+        ) as EntryLike[];
+        const pubMap = new Map<string, string>();
+        for (const pub of pubList) {
+          if (pub.documentId && pub.publishedAt) {
+            pubMap.set(
+              `${pub.documentId}:${pub.locale ?? ""}`,
+              pub.publishedAt
+            );
+          }
+        }
+        return entries.map((e) => {
+          const key = `${e.documentId ?? ""}:${e.locale ?? ""}`;
+          const pubAt = pubMap.get(key);
+          return !e.publishedAt && pubAt ? { ...e, publishedAt: pubAt } : e;
+        });
+      } catch {
+        // Fallback to raw entries if published status lookup fails
+      }
+    }
+
+    return entries;
   },
 
   resolveEntryTitle(

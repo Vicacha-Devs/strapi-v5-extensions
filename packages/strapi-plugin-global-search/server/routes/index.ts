@@ -2,6 +2,7 @@ import { PLUGIN_ID } from "../utils/constants";
 
 const withPermission = (action: string) => ({
   policies: [
+    "admin::isAuthenticatedAdmin",
     {
       name: "admin::hasPermissions",
       config: { actions: [`plugin::${PLUGIN_ID}.${action}`] },

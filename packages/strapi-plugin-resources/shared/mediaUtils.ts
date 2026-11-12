@@ -386,7 +386,9 @@ export function computeLetterGroup(term: unknown): string {
   const normalized = term
     .trim()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/^[^A-Za-z0-9]+/, "");
+  if (!normalized) return "#";
   const firstChar = normalized.charAt(0).toUpperCase();
   return /^[A-Z]$/.test(firstChar) ? firstChar : "#";
 }

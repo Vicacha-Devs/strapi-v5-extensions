@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Bookings & Reservations (@vicacha-devs/strapi-plugin-bookings)
-  version: 1.0.0
+  version: 1.1.0
   description: Generic Strapi v5 Bookings, Appointments, Resource Scheduling & Time-Slot Availability Engine
     powered by @vicacha-devs/strapi-plugin-calendar
 servers:
@@ -380,7 +380,9 @@ paths:
     get:
       operationId: getApiBookingsResources
       summary: List Public Resources
-      description: Strapi v5 Content API endpoint handled by `content-api.listPublicResources`.
+      description: Strapi v5 Content API endpoint handled by `content-api.listPublicResources`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
       parameters:
@@ -390,6 +392,8 @@ paths:
           description: Optional Strapi i18n locale filter
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -402,11 +406,17 @@ paths:
                     $ref: "#/components/schemas/Booking"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
   /api/bookings/available-slots:
     get:
       operationId: getApiBookingsAvailableSlots
       summary: Get Available Slots
-      description: Strapi v5 Content API endpoint handled by `content-api.getAvailableSlots`.
+      description: Strapi v5 Content API endpoint handled by `content-api.getAvailableSlots`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
       parameters:
@@ -416,6 +426,8 @@ paths:
           description: Optional Strapi i18n locale filter
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -428,13 +440,21 @@ paths:
                     $ref: "#/components/schemas/Booking"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
   /api/bookings/reserve:
     post:
       operationId: postApiBookingsReserve
       summary: Create Reservation
-      description: Strapi v5 Content API endpoint handled by `content-api.createReservation`.
+      description: Strapi v5 Content API endpoint handled by `content-api.createReservation`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -447,6 +467,10 @@ paths:
                     $ref: "#/components/schemas/Booking"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
       requestBody:
         required: true
         content:
@@ -457,9 +481,13 @@ paths:
     post:
       operationId: postApiBookingsReschedule
       summary: Reschedule Reservation
-      description: Strapi v5 Content API endpoint handled by `content-api.rescheduleReservation`.
+      description: Strapi v5 Content API endpoint handled by `content-api.rescheduleReservation`. Protected by
+        Strapi Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -472,6 +500,10 @@ paths:
                     $ref: "#/components/schemas/Booking"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
       requestBody:
         required: true
         content:
@@ -482,9 +514,13 @@ paths:
     post:
       operationId: postApiBookingsCancel
       summary: Cancel Reservation
-      description: Strapi v5 Content API endpoint handled by `content-api.cancelReservation`.
+      description: Strapi v5 Content API endpoint handled by `content-api.cancelReservation`. Protected by Strapi
+        Users & Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi
+        Settings.
       tags:
         - Content API
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -497,6 +533,10 @@ paths:
                     $ref: "#/components/schemas/Booking"
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
       requestBody:
         required: false
         content:
@@ -508,7 +548,8 @@ paths:
     get:
       operationId: getApiBookingsFeedIcs
       summary: Get ICal Feed
-      description: Strapi v5 Content API endpoint handled by `content-api.getICalFeed`.
+      description: Strapi v5 Content API endpoint handled by `content-api.getICalFeed`. Protected by Strapi Users &
+        Permissions / API Token (`bearerAuth`); can be granted to the `Public` role in Strapi Settings.
       tags:
         - Content API
       parameters:
@@ -542,6 +583,8 @@ paths:
           description: BCP-47 content/display locale (e.g. en, es, ar, tr)
           schema:
             type: string
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Successful response
@@ -552,6 +595,10 @@ paths:
                 description: RFC 5545 iCalendar (.ics) stream
         "400":
           description: Bad Request — validation or parameter error
+        "401":
+          description: Unauthorized — missing or invalid Bearer token
+        "403":
+          description: Forbidden — insufficient Strapi RBAC permissions
 components:
   securitySchemes:
     bearerAuth:

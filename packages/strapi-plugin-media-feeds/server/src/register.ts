@@ -1,4 +1,8 @@
 import type { Core } from "@strapi/strapi";
+import {
+  FORBIDDEN_OBJECT_KEYS as FORBIDDEN_KEYS,
+  isPlainObject as isPlainRecord,
+} from "@vicacha-devs/plugin-shared";
 
 import {
   ALLOWED_SOURCE_API_UID_REGEX,
@@ -10,16 +14,6 @@ import {
 interface SchemaContainer {
   attributes?: Record<string, Record<string, unknown>>;
   __schema__?: { attributes?: Record<string, Record<string, unknown>> };
-}
-
-const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
-
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return false;
-  }
-  const proto = Object.getPrototypeOf(value);
-  return proto === Object.prototype || proto === null;
 }
 
 function resolveExtensionUid(targetKey: string): string | null {

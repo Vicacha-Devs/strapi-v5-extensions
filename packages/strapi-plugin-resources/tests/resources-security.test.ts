@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import pluginPermissions from "../admin/src/permissions.ts";
+import { pluginPermissions } from "../admin/src/permissions.ts";
 import adminRoutes from "../server/src/routes/admin.ts";
 import {
   resolveDownloadSecret,

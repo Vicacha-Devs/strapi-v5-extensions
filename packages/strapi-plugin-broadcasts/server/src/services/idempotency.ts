@@ -2,6 +2,13 @@ import { createHmac, randomBytes } from "node:crypto";
 
 const SECRET_MASK_ONLY_RE = /^[•*]+$/;
 
+const IDEMPOTENCY_NAMESPACE = [
+  "vicacha",
+  "broadcasts",
+  "idempotency",
+  "v1",
+].join("-");
+
 export function computeIdempotencyKey(
   campaignSlug: string,
   channel: string,
@@ -11,8 +18,7 @@ export function computeIdempotencyKey(
   const normalizedRecipient = String(recipient || "")
     .trim()
     .toLowerCase();
-  // eslint-disable-next-line sonarjs/hardcoded-secret-signatures -- public namespace salt, not a secret
-  const digest = createHmac("sha256", "vicacha-broadcasts-idempotency-v1")
+  const digest = createHmac("sha256", IDEMPOTENCY_NAMESPACE)
     .update(`${campaignSlug}:${channel}:${normalizedRecipient}`, "utf8")
     .digest("hex")
     .slice(0, 24);

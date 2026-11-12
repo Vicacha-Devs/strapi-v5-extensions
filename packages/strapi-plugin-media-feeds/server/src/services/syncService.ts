@@ -232,6 +232,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
             speaker: video.authorName,
             seriesSlug: video.seriesSlug,
             spokenLanguages: video.spokenLanguages,
+            publishedAt: video.publishedAt,
             featured: false,
             isLive: false,
           },

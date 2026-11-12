@@ -165,13 +165,13 @@ const NotesSidePanelContent: React.FC<NotesSidePanelContentProps> = ({
   };
 
   const handleTogglePin = async (note: NoteRecord) => {
-    const targetId = note.id || note.documentId;
+    const targetId = note.documentId || note.id;
     if (!targetId) return;
     await updateNote(targetId, { isPinned: !note.isPinned });
   };
 
   const handleConfirmDelete = async (note: NoteRecord) => {
-    const targetId = note.id || note.documentId;
+    const targetId = note.documentId || note.id;
     if (!targetId) return;
     const deleted = await deleteNote(targetId);
     if (deleted) {

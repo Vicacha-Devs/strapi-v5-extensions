@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Resources, Galleries & Glossary (@vicacha-devs/strapi-plugin-resources)
-  version: 1.0.0
+  version: 1.1.0
   description: Generic Strapi v5 Digital Library Publications, Media Library Folder-Synced Photo Galleries &
     Multilingual A-Z Glossary Plugin powered by @strapi/upload and @vicacha-devs/strapi-plugin-calendar
 servers:
@@ -11,8 +11,8 @@ paths:
   /resources/hub:
     get:
       operationId: getResourcesHub
-      summary: Get Hub Overview
-      description: Strapi v5 Admin API endpoint handled by `resourcesController.getHubOverview`.
+      summary: Get Admin Hub Overview
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.getAdminHubOverview`.
       tags:
         - Admin API
       parameters:
@@ -44,8 +44,8 @@ paths:
   /resources/publications:
     get:
       operationId: getResourcesPublications
-      summary: List Publications
-      description: Strapi v5 Admin API endpoint handled by `resourcesController.listPublications`.
+      summary: List Admin Publications
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.listAdminPublications`.
       tags:
         - Admin API
       parameters:
@@ -175,8 +175,8 @@ paths:
   /resources/galleries:
     get:
       operationId: getResourcesGalleries
-      summary: List Galleries
-      description: Strapi v5 Admin API endpoint handled by `resourcesController.listGalleries`.
+      summary: List Admin Galleries
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.listAdminGalleries`.
       tags:
         - Admin API
       parameters:
@@ -346,8 +346,8 @@ paths:
   /resources/glossary:
     get:
       operationId: getResourcesGlossary
-      summary: List Glossary
-      description: Strapi v5 Admin API endpoint handled by `resourcesController.listGlossary`.
+      summary: List Admin Glossary
+      description: Strapi v5 Admin API endpoint handled by `resourcesController.listAdminGlossary`.
       tags:
         - Admin API
       parameters:
@@ -862,6 +862,10 @@ components:
           default: false
         sortOrder:
           type: integer
+          default: 0
+        photoCount:
+          type: integer
+          minimum: 0
           default: 0
       required:
         - title

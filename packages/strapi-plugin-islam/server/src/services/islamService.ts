@@ -56,7 +56,7 @@ import {
 
 export { clearQuranFoundationCaches, getUpstreamCacheSize };
 
-interface LocationQueryParams {
+export interface LocationQueryParams {
   lat?: number | string;
   lon?: number | string;
   city?: string;

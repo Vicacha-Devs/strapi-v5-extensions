@@ -8,7 +8,7 @@ export default ({
   connection: {
     client: "sqlite",
     connection: {
-      filename: path.join(
+      filename: path.resolve(
         process.cwd(),
         env("DATABASE_FILENAME", ".tmp/data.db")
       ),

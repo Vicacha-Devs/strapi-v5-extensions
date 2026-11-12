@@ -4,7 +4,7 @@ description: "Planificador FullCalendar v6 multicolección, motor de recurrencia
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-calendar` · **Plugin ID**: `calendar` · **Category**: `Scheduling & Operations` · **Version**: `1.0.0` · **Routes**: `10`
+> **Package**: `@vicacha-devs/strapi-plugin-calendar` · **Plugin ID**: `calendar` · **Category**: `Scheduling & Operations` · **Version**: `1.1.2` · **Routes**: `10`
 
 Planificador FullCalendar v6 multicolección, motor de recurrencia RRULE + RSCALE, calendarios secundarios CLDR (Hijri, Hebreo, Persa) y canales iCal (.ics).
 
@@ -152,6 +152,6 @@ flowchart LR
 | `GET`  | `/calendar/settings`                    | `admin`       | `admin.getSettings`            | Bearer JWT    |
 | `PUT`  | `/calendar/settings`                    | `admin`       | `admin.updateSettings`         | Bearer JWT    |
 | `POST` | `/calendar/clear-settings`              | `admin`       | `admin.clearSettings`          | Bearer JWT    |
-| `GET`  | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Public        |
-| `GET`  | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Public        |
-| `GET`  | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Public        |
+| `GET`  | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Bearer JWT    |
+| `GET`  | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Bearer JWT    |
+| `GET`  | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT    |

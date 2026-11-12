@@ -55,8 +55,8 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 | `page.ui.3_quran_hadith_dua`                       | Corán, Hadiz y Dua                             |
 | `page.ui.4_zakat_nisab_qibla`                      | Zakat, Nisab y Qibla                           |
 | `page.ui.refresh`                                  | Actualizar                                     |
-| `page.ui.prayer_salah`                             | Prayer (Salah)                                 |
-| `page.ui.adhan_time`                               | Adhan Hora                                     |
+| `page.ui.prayer_salah`                             | Oración (Salah)                                |
+| `page.ui.adhan_time`                               | Hora del Adhan                                 |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 

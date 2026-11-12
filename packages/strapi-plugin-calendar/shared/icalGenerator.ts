@@ -1,13 +1,6 @@
-import type { CalendarLinkSet, ExpandedCalendarOccurrence } from "./types";
+import { escapeIcsText } from "@vicacha-devs/plugin-shared";
 
-function escapeIcsText(value?: string): string {
-  if (!value) return "";
-  return String(value)
-    .replace(/\\/g, "\\\\")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,")
-    .replace(/\r?\n/g, "\\n");
-}
+import type { CalendarLinkSet, ExpandedCalendarOccurrence } from "./types";
 
 const utf8Encoder = new TextEncoder();
 

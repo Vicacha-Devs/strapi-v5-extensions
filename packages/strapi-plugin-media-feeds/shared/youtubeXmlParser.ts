@@ -82,6 +82,7 @@ function extractXmlTagContent(source: string, tagName: string): string | null {
     const afterNameChar = lower[startIdx + openToken.length];
     if (
       afterNameChar !== ">" &&
+      afterNameChar !== "/" &&
       afterNameChar !== " " &&
       afterNameChar !== "\t" &&
       afterNameChar !== "\r" &&
@@ -93,11 +94,15 @@ function extractXmlTagContent(source: string, tagName: string): string | null {
 
     const openEndIdx = lower.indexOf(">", startIdx + openToken.length);
     if (openEndIdx === -1) return null;
+    if (lower[openEndIdx - 1] === "/") return null;
 
     const closeIdx = lower.indexOf(closeToken, openEndIdx + 1);
     if (closeIdx === -1) return null;
 
-    const content = source.slice(openEndIdx + 1, closeIdx).trim();
+    let content = source.slice(openEndIdx + 1, closeIdx).trim();
+    if (content.startsWith("<![CDATA[") && content.endsWith("]]>")) {
+      content = content.slice(9, -3).trim();
+    }
     return content || null;
   }
   return null;

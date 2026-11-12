@@ -115,6 +115,7 @@ export interface ContentTypeAttribute {
   target?: string;
   repeatable?: boolean;
   component?: string;
+  private?: boolean;
 }
 
 export interface ContentTypeSchema {

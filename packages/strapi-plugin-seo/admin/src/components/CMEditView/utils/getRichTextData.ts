@@ -70,6 +70,12 @@ const countMissingBlockImageAlts = (nodes: RichTextBlockNode[]): number => {
   return missingCount;
 };
 
+const FORBIDDEN_KEYWORD_KEYS = new Set([
+  "__proto__",
+  "constructor",
+  "prototype",
+]);
+
 const extractNodesFromParsedObject = (
   value: unknown
 ): RichTextBlockNode[] | null => {
@@ -77,9 +83,16 @@ const extractNodesFromParsedObject = (
     return value as RichTextBlockNode[];
   }
   if (value && typeof value === "object") {
-    const obj = value as { content?: unknown };
+    const obj = value as { content?: unknown; doc?: { content?: unknown } };
     if (Array.isArray(obj.content)) {
       return obj.content as RichTextBlockNode[];
+    }
+    if (
+      obj.doc &&
+      typeof obj.doc === "object" &&
+      Array.isArray(obj.doc.content)
+    ) {
+      return obj.doc.content as RichTextBlockNode[];
     }
   }
   return null;
@@ -208,14 +221,16 @@ const buildKeywordDensityObject = (
 ): KeywordDensityMap => {
   const tempKeywordsDensity: KeywordDensityMap = {};
   Object.keys(keywordsDensity).forEach((key) => {
-    tempKeywordsDensity[key] = { count: keywordsDensity[key].count };
+    if (!FORBIDDEN_KEYWORD_KEYS.has(key)) {
+      tempKeywordsDensity[key] = { count: keywordsDensity[key].count };
+    }
   });
 
   const joinedWords = words.join(" ");
 
   keywords.forEach((keyword) => {
     const trimmedKeyword = keyword.trim();
-    if (!trimmedKeyword) return;
+    if (!trimmedKeyword || FORBIDDEN_KEYWORD_KEYS.has(trimmedKeyword)) return;
 
     const regex = new RegExp(
       trimmedKeyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
@@ -390,7 +405,7 @@ export const getRichTextData = (
           .toLowerCase()
           .split(",")
           .map((k) => k.trim())
-          .filter((k) => k.length > 0)
+          .filter((k) => k.length > 0 && !FORBIDDEN_KEYWORD_KEYS.has(k))
       : [];
 
   const initialKeywordsDensity: KeywordDensityMap = {};

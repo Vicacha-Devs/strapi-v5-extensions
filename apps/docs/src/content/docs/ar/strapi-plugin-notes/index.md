@@ -4,7 +4,7 @@ description: "ملاحظات تحريرية متعددة الأنواع وشار
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-notes` · **Plugin ID**: `notes` · **Category**: `Editorial & SEO` · **Version**: `1.0.0` · **Routes**: `8`
+> **Package**: `@vicacha-devs/strapi-plugin-notes` · **Plugin ID**: `notes` · **Category**: `Editorial & SEO` · **Version**: `1.1.2` · **Routes**: `8`
 
 ملاحظات تحريرية متعددة الأنواع وشارات تصنيف ملونة وتثبيت الملاحظات في الشريط الجانبي لمدير المحتوى ومركز ملاحظات شامل.
 

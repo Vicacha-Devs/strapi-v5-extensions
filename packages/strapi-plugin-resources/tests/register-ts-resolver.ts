@@ -1,5 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
-import { registerHooks, stripTypeScriptTypes } from "node:module";
+import * as nodeModule from "node:module";
+const { registerHooks, stripTypeScriptTypes } = nodeModule as Record<
+  string,
+  any
+>;
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -11,7 +15,7 @@ const pluginSharedSrcEntry = resolvePath(
 );
 
 registerHooks({
-  resolve(specifier, context, nextResolve) {
+  resolve(specifier: string, context: any, nextResolve: any) {
     if (specifier === "@vicacha-devs/plugin-shared") {
       return {
         url: pathToFileURL(pluginSharedSrcEntry).href,
@@ -68,7 +72,7 @@ registerHooks({
     return nextResolve(specifier, context);
   },
 
-  load(url, context, nextLoad) {
+  load(url: string, context: any, nextLoad: any) {
     if (url.endsWith(".json") && !url.includes("/node_modules/")) {
       const filePath = fileURLToPath(url);
       const source = readFileSync(filePath, "utf8");

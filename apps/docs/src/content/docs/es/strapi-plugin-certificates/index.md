@@ -4,7 +4,7 @@ description: "Emisión de certificados oficiales, firma criptográfica Ed25519, 
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-certificates` · **Plugin ID**: `certificates` · **Category**: `Trust & Finance` · **Version**: `1.0.0` · **Routes**: `19`
+> **Package**: `@vicacha-devs/strapi-plugin-certificates` · **Plugin ID**: `certificates` · **Category**: `Trust & Finance` · **Version**: `1.1.1` · **Routes**: `19`
 
 Emisión de certificados oficiales, firma criptográfica Ed25519, portal de verificación QR en tiempo constante, hash salado de PII y webhooks de DocuSign.
 

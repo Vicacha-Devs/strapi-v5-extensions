@@ -1,3 +1,9 @@
+import {
+  extractRichTextPlainText,
+  generateReferenceCode,
+  normalizeRichTextValue,
+} from "@vicacha-devs/plugin-shared";
+
 import type {
   AssessmentAssetFieldConfig as AssessmentFieldConfig,
   AssessmentBenchmarkConfig as AssessmentBenchmark,
@@ -198,91 +204,7 @@ export function convertToBaseCurrency(
  * Generates a deterministic-format human-readable donation reference code.
  */
 export function generateDonationReferenceCode(prefix = "DON"): string {
-  const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
-  return `${prefix.toUpperCase()}-${datePart}-${randomPart}`;
+  return generateReferenceCode(prefix);
 }
 
-interface RichTextNode {
-  type?: string;
-  text?: string;
-  content?: unknown[];
-  children?: unknown[];
-}
-
-function getNodeChildren(node: RichTextNode): unknown[] {
-  if (Array.isArray(node.content)) return node.content;
-  if (Array.isArray(node.children)) return node.children;
-  return [];
-}
-
-function formatBlockNodeText(type: string | undefined, joined: string): string {
-  if (type === "heading" || type === "paragraph" || type === "blockquote") {
-    return `${joined}\n`;
-  }
-  if (type === "listItem" || type === "list-item") {
-    return `• ${joined.trim()}\n`;
-  }
-  return joined;
-}
-
-function extractNodeText(node: unknown): string {
-  if (!node) return "";
-  if (typeof node === "string") return node;
-  const obj = node as RichTextNode;
-  if (typeof obj.text === "string") return obj.text;
-  const children = getNodeChildren(obj);
-  const separator = obj.type === "doc" ? "\n\n" : "";
-  const joined = children.map(extractNodeText).filter(Boolean).join(separator);
-  return formatBlockNodeText(obj.type, joined);
-}
-
-/**
- * Normalizes a Rich Text field value from Strapi default Richtext (Markdown),
- * Tiptap Editor (Markdown, HTML, or ProseMirror JSON), CKEditor (HTML), or Strapi Blocks.
- */
-export function normalizeRichTextValue(value: unknown): string {
-  if (value === null || value === undefined) return "";
-  if (typeof value === "string") return value;
-  if (typeof value === "object") {
-    const obj = value as Record<string, unknown>;
-    if (obj.type === "doc" && Array.isArray(obj.content)) {
-      return extractNodeText(obj).trim();
-    }
-    if (Array.isArray(value)) {
-      return value.map(extractNodeText).join("\n").trim();
-    }
-    try {
-      return JSON.stringify(value);
-    } catch {
-      return String(value);
-    }
-  }
-  return String(value);
-}
-
-/**
- * Extracts human-readable text from any Rich Text representation (Markdown, HTML, Tiptap JSON, or Blocks).
- */
-export function extractRichTextPlainText(value: unknown): string {
-  const raw = normalizeRichTextValue(value).trim();
-  if (!raw) return "";
-  if (raw.startsWith("{") || raw.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(raw) as Record<string, unknown> | unknown[];
-      if (
-        parsed &&
-        (Array.isArray(parsed) ||
-          (typeof parsed === "object" && parsed.type === "doc"))
-      ) {
-        return extractNodeText(parsed).trim();
-      }
-    } catch {
-      // treat as regular string
-    }
-  }
-  return raw
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+export { extractRichTextPlainText, normalizeRichTextValue };

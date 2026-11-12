@@ -388,7 +388,8 @@ describe("@vicacha-devs/strapi-plugin-resources", () => {
       assert.deepEqual(keys, enKeys, `Locale ${loc} keys must match en.json`);
     }
 
-    const serverEntry = (await import("../server/src/index.ts")).default;
+    const serverEntry = (await import("../server/src/index.ts"))
+      .default as Record<string, any>;
     assert.ok(serverEntry.contentTypes.publication);
     assert.ok(serverEntry.contentTypes["gallery-album"]);
     assert.ok(serverEntry.contentTypes["glossary-term"]);

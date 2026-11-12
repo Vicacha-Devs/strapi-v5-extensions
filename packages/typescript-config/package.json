@@ -9,5 +9,10 @@
     "base.json",
     "strapi-admin.json",
     "strapi-server.json"
-  ]
+  ],
+  "exports": {
+    "./base.json": "./base.json",
+    "./strapi-admin.json": "./strapi-admin.json",
+    "./strapi-server.json": "./strapi-server.json"
+  }
 }

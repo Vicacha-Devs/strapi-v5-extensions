@@ -415,7 +415,11 @@ export function validateGlossaryTermInput(
         ALLOWED_GLOSSARY_CATEGORIES,
         "general"
       ),
-      letterGroup: computeLetterGroup(term),
+      letterGroup: (() => {
+        const fromTerm = computeLetterGroup(term);
+        if (fromTerm !== "#") return fromTerm;
+        return computeLetterGroup(raw.transliteration);
+      })(),
       relatedTerms: parseRelatedTerms(raw.relatedTerms),
       featured: Boolean(raw.featured),
       ...normalizeOptionalMediaId(

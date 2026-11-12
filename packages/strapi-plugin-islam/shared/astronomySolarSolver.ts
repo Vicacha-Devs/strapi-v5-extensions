@@ -75,8 +75,8 @@ function enforceMonotonicDayBounds(raw: BaseSolarMinutes): BaseSolarMinutes {
   const sunriseMin = Math.max(1, Math.min(dhuhrMin - 15, raw.sunriseMin));
   const fajrMin = Math.max(0, Math.min(sunriseMin - 1, raw.fajrMin));
   const sunsetMin = Math.max(dhuhrMin + 15, Math.min(1437, raw.sunsetMin));
-  const maghribMin = Math.max(sunsetMin, Math.min(1438, raw.maghribMin));
-  const asrMin = Math.max(dhuhrMin + 1, Math.min(maghribMin - 1, raw.asrMin));
+  const asrMin = Math.max(dhuhrMin + 1, Math.min(sunsetMin - 1, raw.asrMin));
+  const maghribMin = Math.max(asrMin + 1, Math.min(1438, raw.maghribMin));
   const ishaMin = Math.max(maghribMin + 1, Math.min(1439, raw.ishaMin));
   return {
     fajrMin,

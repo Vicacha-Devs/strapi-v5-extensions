@@ -22,9 +22,9 @@ export const MetaChecks = ({
 
   const getIcon = () => {
     if (
-      item.length >= max ||
+      item.length > max ||
       (label === "title" && item.length === 0) ||
-      (minLimit && label === "description" && item.length <= 50)
+      (minLimit && label === "description" && item.length < 50)
     ) {
       return <WarningCircle aria-hidden={true} fill="warning600" />;
     }

@@ -33,7 +33,7 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
   const { formatMessage } = useIntl();
   const [url, setUrl] = useState<string>(existingData?.url || "");
   const [priority, setPriority] = useState<number>(
-    existingData?.priority || 0.5
+    existingData?.priority ?? 0.5
   );
   const [frequency, setFrequency] = useState<string>(
     existingData?.frequency || "monthly"
@@ -51,11 +51,13 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
     }
   }, [existingData, isOpen]);
 
+  const canSave = Boolean(url.trim() && Number.isFinite(priority) && frequency);
+
   const handleSave = () => {
-    if (!priority || !frequency) return;
+    if (!canSave) return;
 
     onSave({
-      url: url.replace(/^\/+/, ""),
+      url: url.trim().replace(/^\/+/, ""),
       priority,
       frequency,
     });
@@ -147,11 +149,7 @@ const CustomURLModal: React.FC<CustomURLModalProps> = ({
               defaultMessage: "Cancel",
             })}
           </Button>
-          <Button
-            onClick={handleSave}
-            variant="default"
-            disabled={!priority || !frequency}
-          >
+          <Button onClick={handleSave} variant="default" disabled={!canSave}>
             {formatMessage({
               id: getTrad("action.save"),
               defaultMessage: "Save",

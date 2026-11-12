@@ -257,12 +257,12 @@ flowchart LR
 | `POST` | `/bookings/bookings/reschedule`          | `admin`       | `admin.rescheduleBooking`           | Bearer JWT |
 | `GET`  | `/bookings/export.csv`                   | `admin`       | `admin.exportCsv`                   | Bearer JWT |
 | `GET`  | `/bookings/export.ics`                   | `admin`       | `admin.exportICal`                  | Bearer JWT |
-| `GET`  | `/api/bookings/resources`                | `content-api` | `content-api.listPublicResources`   | Public     |
-| `GET`  | `/api/bookings/available-slots`          | `content-api` | `content-api.getAvailableSlots`     | Public     |
-| `POST` | `/api/bookings/reserve`                  | `content-api` | `content-api.createReservation`     | Public     |
-| `POST` | `/api/bookings/reschedule`               | `content-api` | `content-api.rescheduleReservation` | Public     |
-| `POST` | `/api/bookings/cancel`                   | `content-api` | `content-api.cancelReservation`     | Public     |
-| `GET`  | `/api/bookings/feed.ics`                 | `content-api` | `content-api.getICalFeed`           | Public     |
+| `GET`  | `/api/bookings/resources`                | `content-api` | `content-api.listPublicResources`   | Bearer JWT |
+| `GET`  | `/api/bookings/available-slots`          | `content-api` | `content-api.getAvailableSlots`     | Bearer JWT |
+| `POST` | `/api/bookings/reserve`                  | `content-api` | `content-api.createReservation`     | Bearer JWT |
+| `POST` | `/api/bookings/reschedule`               | `content-api` | `content-api.rescheduleReservation` | Bearer JWT |
+| `POST` | `/api/bookings/cancel`                   | `content-api` | `content-api.cancelReservation`     | Bearer JWT |
+| `GET`  | `/api/bookings/feed.ics`                 | `content-api` | `content-api.getICalFeed`           | Bearer JWT |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

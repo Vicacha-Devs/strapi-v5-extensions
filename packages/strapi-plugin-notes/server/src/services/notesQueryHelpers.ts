@@ -144,10 +144,13 @@ export function parseNoteQueryFilters(
     isPinned: parseOptionalBoolean(rawPinned),
     search: sanitizePlainText(rawQuery.search ?? rawQuery._q, 160) || undefined,
     sort: resolveSortDirection(rawQuery, sortObj, defaultSortOrder),
-    limit: parseOptionalNonNegativeInt(
-      rawQuery.limit ?? paginationObj.limit ?? paginationObj.pageSize,
-      1
-    ),
+    limit: (() => {
+      const rawLimit = parseOptionalNonNegativeInt(
+        rawQuery.limit ?? paginationObj.limit ?? paginationObj.pageSize,
+        1
+      );
+      return rawLimit !== undefined ? Math.min(rawLimit, 500) : undefined;
+    })(),
     offset: parseOptionalNonNegativeInt(
       rawQuery.offset ?? paginationObj.offset ?? paginationObj.start,
       0

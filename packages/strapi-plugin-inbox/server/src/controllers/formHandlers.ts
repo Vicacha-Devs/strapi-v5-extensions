@@ -25,10 +25,29 @@ function normalizeSubmitPayload(
 }
 
 function resolveClientIp(ctx: ControllerCtx): string {
+  const directIp = (ctx as unknown as { ip?: string }).ip || ctx.request.ip;
+  if (directIp && directIp.trim()) return directIp.trim();
   const forwarded = ctx.request.headers?.["x-forwarded-for"]
     ?.split(",")[0]
     ?.trim();
-  return forwarded || ctx.request.ip || "127.0.0.1";
+  return forwarded || "127.0.0.1";
+}
+
+function isAuthenticatedAdminContext(ctx: ControllerCtx): boolean {
+  const state = (
+    ctx as unknown as {
+      state?: {
+        user?: unknown;
+        isAuthenticatedAdmin?: boolean;
+        route?: { info?: { type?: string } };
+      };
+    }
+  ).state;
+  return Boolean(
+    state?.user ||
+    state?.isAuthenticatedAdmin ||
+    state?.route?.info?.type === "admin"
+  );
 }
 
 const ERROR_STATUS_MAP: Record<string, number> = {
@@ -94,11 +113,12 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
       }): Promise<FormRecord[]>;
     }>("formService");
 
+    const isAdmin = isAuthenticatedAdminContext(ctx);
     const data = await svc.listForms({
       category: ctx.query?.category as FormCategory | undefined,
-      activeOnly: ctx.query?.activeOnly !== "false",
+      activeOnly: isAdmin ? ctx.query?.activeOnly !== "false" : true,
       locale: ctx.query?.locale,
-      publicSafe: ctx.query?.admin !== "true",
+      publicSafe: isAdmin ? ctx.query?.admin !== "true" : true,
     });
     ctx.body = { data };
   },
@@ -179,8 +199,14 @@ export const createFormHandlers = (strapi: Core.Strapi) => ({
           (rawBody.captchaToken as string) ||
           (payload.captchaToken as string | undefined),
       });
+      const {
+        ipAddress: _ipAddress,
+        userAgent: _userAgent,
+        staffNotes: _staffNotes,
+        ...publicData
+      } = data;
       ctx.status = 201;
-      ctx.body = { data };
+      ctx.body = { data: publicData };
     } catch (err) {
       const error = err as Error & { details?: Record<string, string[]> };
       ctx.status = ERROR_STATUS_MAP[error.name] ?? 400;

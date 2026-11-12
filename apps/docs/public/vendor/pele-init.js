@@ -15,7 +15,29 @@
   function sanitizeSvgToNode(svgMarkup) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgMarkup, "image/svg+xml");
-    return doc.documentElement;
+    const root = doc.documentElement;
+    const dangerousNodes = root.querySelectorAll(
+      "script, foreignObject, iframe, object, embed"
+    );
+    for (const node of dangerousNodes) {
+      node.remove();
+    }
+    const allElements = [root, ...root.querySelectorAll("*")];
+    for (const el of allElements) {
+      if (!el.attributes) continue;
+      for (const attr of Array.from(el.attributes)) {
+        const name = attr.name.toLowerCase();
+        const val = attr.value.trim().toLowerCase();
+        if (
+          name.startsWith("on") ||
+          ((name === "href" || name === "xlink:href") &&
+            (val.startsWith("javascript:") || val.startsWith("data:")))
+        ) {
+          el.removeAttribute(attr.name);
+        }
+      }
+    }
+    return root;
   }
 
   function mountAllDiagrams() {

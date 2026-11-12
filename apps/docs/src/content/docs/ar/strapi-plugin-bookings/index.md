@@ -4,7 +4,7 @@ description: "إدارة الموارد القابلة للحجز ومحرك ح�
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-bookings` · **Plugin ID**: `bookings` · **Category**: `Scheduling & Operations` · **Version**: `1.0.0` · **Routes**: `17`
+> **Package**: `@vicacha-devs/strapi-plugin-bookings` · **Plugin ID**: `bookings` · **Category**: `Scheduling & Operations` · **Version**: `1.1.0` · **Routes**: `17`
 
 إدارة الموارد القابلة للحجز ومحرك حساب الفترات المتاحة وتعيين المضيفين ومسارات الحجز الذاتي لنظام Strapi v5.
 

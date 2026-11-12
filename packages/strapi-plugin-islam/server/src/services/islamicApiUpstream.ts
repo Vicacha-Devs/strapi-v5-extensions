@@ -63,7 +63,15 @@ export async function tryFetchUpstreamJson(
     "islamic_api"
   );
   if (!res?.ok) return null;
+  const contentLength = Number(res.headers?.get?.("content-length") ?? 0);
+  if (contentLength > 2 * 1024 * 1024) return null;
   try {
+    if (typeof res.text === "function") {
+      const rawText = await res.text();
+      if (rawText.length > 2 * 1024 * 1024) return null;
+      const parsed = JSON.parse(rawText);
+      return isPlainRecord(parsed) ? parsed : null;
+    }
     const parsed = await res.json();
     return isPlainRecord(parsed) ? parsed : null;
   } catch {

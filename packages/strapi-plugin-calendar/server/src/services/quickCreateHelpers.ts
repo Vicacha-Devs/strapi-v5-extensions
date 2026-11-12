@@ -313,11 +313,19 @@ export function buildRecurrenceOverridePayload(
   rruleField: string,
   params: RescheduleOccurrenceParams
 ): Record<string, unknown> {
+  const dateKey = String(params.occurrenceDate ?? "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+    throw new Error("Invalid occurrenceDate: expected YYYY-MM-DD");
+  }
+  const existingOverride =
+    recurrence.overrides && Object.hasOwn(recurrence.overrides, dateKey)
+      ? recurrence.overrides[dateKey]
+      : undefined;
   const overrides = {
     ...recurrence.overrides,
-    [params.occurrenceDate]: {
-      ...recurrence.overrides?.[params.occurrenceDate],
-      originalDate: params.occurrenceDate,
+    [dateKey]: {
+      ...existingOverride,
+      originalDate: dateKey,
       cancelled: Boolean(params.cancelOccurrence),
       startDate: params.newStartDate || undefined,
       endDate: params.newEndDate || undefined,

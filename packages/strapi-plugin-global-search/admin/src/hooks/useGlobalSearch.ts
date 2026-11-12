@@ -51,7 +51,7 @@ const useGlobalSearch = ({
   // Any change to the criteria invalidates the current page.
   useEffect(() => {
     setPage(1);
-  }, [query, typesKey, locale]);
+  }, [query, typesKey, locale, pageSize]);
 
   useEffect(() => {
     const trimmed = query.trim();

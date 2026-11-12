@@ -102,7 +102,9 @@ export function createStrictMockStrapi(
         const list = collections[uid] || [];
         const idx = list.findIndex((item) => item.documentId === documentId);
         if (idx === -1) return null;
-        return (list[idx] = { ...list[idx], ...data });
+        const updated = { ...list[idx], ...data };
+        list[idx] = updated;
+        return updated;
       },
     }),
     plugin: (name: string) => {

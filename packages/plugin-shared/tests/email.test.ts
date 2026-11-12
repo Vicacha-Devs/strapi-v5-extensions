@@ -28,6 +28,15 @@ describe("isValidEmail", () => {
       "a b@c.co",
       "a@b .co",
       "a@b.co\n",
+      "a@b.co\u0000",
+      "a@example..com",
+      "a@-example.com",
+      "a@example-.com",
+      ".a@example.com",
+      "a.@example.com",
+      "a..b@example.com",
+      `${"a".repeat(65)}@example.com`,
+      `a@${"b".repeat(250)}.com`,
     ]) {
       assert.equal(isValidEmail(email), false, JSON.stringify(email));
     }

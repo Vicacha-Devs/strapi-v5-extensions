@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Digital Certificates (Ed25519) (@vicacha-devs/strapi-plugin-certificates)
-  version: 1.0.0
+  version: 1.1.1
   description: Generic Strapi v5 Official Certificates, Cryptographic Ed25519 Signing, Printable Credentials &
     QR Verification Plugin powered by @vicacha-devs/strapi-plugin-calendar
 servers:

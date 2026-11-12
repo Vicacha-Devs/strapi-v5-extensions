@@ -178,7 +178,10 @@ const isConfigReadyToSave = (
   pattern: string,
   priority: number,
   frequency: string
-): boolean => Boolean(type && pattern && priority && frequency);
+): boolean =>
+  Boolean(
+    type.trim() && pattern.trim() && Number.isFinite(priority) && frequency
+  );
 
 const CollectionTypeModal: React.FC<CollectionTypeModalProps> = ({
   isOpen,

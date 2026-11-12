@@ -7,10 +7,27 @@
  * one character on each side.
  */
 export function isValidEmail(value: string): boolean {
-  if (/\s/.test(value)) return false;
+  if (typeof value !== "string" || value.length < 3 || value.length > 254) {
+    return false;
+  }
+  if (/[\u0000-\u0020\u007f]/.test(value) || /\s/.test(value)) return false;
   const at = value.indexOf("@");
-  if (at < 1 || at !== value.lastIndexOf("@")) return false;
+  if (at < 1 || at > 64 || at !== value.lastIndexOf("@")) return false;
+  const local = value.slice(0, at);
+  if (local.startsWith(".") || local.endsWith(".") || local.includes("..")) {
+    return false;
+  }
   const domain = value.slice(at + 1);
-  const dot = domain.indexOf(".");
-  return dot > 0 && dot < domain.length - 1;
+  if (domain.startsWith(".") || domain.endsWith(".") || domain.includes("..")) {
+    return false;
+  }
+  const labels = domain.split(".");
+  if (labels.length < 2) return false;
+  return labels.every(
+    (label) =>
+      label.length > 0 &&
+      label.length <= 63 &&
+      !label.startsWith("-") &&
+      !label.endsWith("-")
+  );
 }

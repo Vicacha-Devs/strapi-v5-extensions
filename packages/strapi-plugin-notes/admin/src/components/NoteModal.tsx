@@ -254,7 +254,7 @@ export const NoteModal: React.FC<NoteModalProps> = ({
       entity,
     });
 
-    const targetId = normalizedExisting?.id || normalizedExisting?.documentId;
+    const targetId = normalizedExisting?.documentId || normalizedExisting?.id;
     await onSubmit(payload, targetId);
   };
 
