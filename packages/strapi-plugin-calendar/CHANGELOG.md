@@ -1,5 +1,11 @@
 # @vicacha-devs/strapi-plugin-calendar
 
+## 1.1.3
+
+### Patch Changes
+
+- 690dcda: Security and consistency hardening: plugins now share prototype-pollution guards, output escapers (HTML, XML, CSV formula-injection, iCalendar), a bounded rate limiter, CSPRNG reference codes, a rich-text normalizer and the calendar registry from `@vicacha-devs/plugin-shared`, with tighter admin/content-api route checks and new security tests.
+
 ## 1.1.2
 
 ### Patch Changes

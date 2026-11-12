@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-global-search",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Spotlight-style global search across every collection type and single type in the Strapi v5 admin panel. Zero configuration.",
   "keywords": [
     "admin",

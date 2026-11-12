@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-islam",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Comprehensive Strapi v5 Islamic Liturgical, Scriptural & Fiqh Suite: Salah/Adhan/Iqamah Astronomical Engine, Qibla Spherical Compass, Hilal Moon-Sighting & Eid/Ramadan Operations, Quran/Hadith/Dua Hub, and Zakat/Nisab/Fitrana/Fidyah/Kaffarah Calculators powered by @vicacha-devs/strapi-plugin-calendar",
   "keywords": [
     "adhan",
@@ -101,7 +101,7 @@
   "peerDependencies": {
     "@strapi/sdk-plugin": "^5.0.0 || ^6.0.0",
     "@strapi/strapi": "^5.0.0",
-    "@vicacha-devs/strapi-plugin-calendar": "^1.1.2",
+    "@vicacha-devs/strapi-plugin-calendar": "^1.1.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",

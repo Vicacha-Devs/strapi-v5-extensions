@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-inbox",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Generic Strapi v5 Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscriber Lists & Site-Wide Alert Banners (forked & extended from devCluna/strapi-plugin-form-builder-cms)",
   "keywords": [
     "alert-banners",
@@ -96,9 +96,9 @@
   "peerDependencies": {
     "@strapi/sdk-plugin": "^5.0.0 || ^6.0.0",
     "@strapi/strapi": "^5.0.0",
-    "@vicacha-devs/strapi-plugin-bookings": "^1.1.0",
-    "@vicacha-devs/strapi-plugin-calendar": "^1.1.2",
-    "@vicacha-devs/strapi-plugin-certificates": "^1.1.1",
+    "@vicacha-devs/strapi-plugin-bookings": "^1.1.1",
+    "@vicacha-devs/strapi-plugin-calendar": "^1.1.3",
+    "@vicacha-devs/strapi-plugin-certificates": "^1.1.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^6.0.0",
