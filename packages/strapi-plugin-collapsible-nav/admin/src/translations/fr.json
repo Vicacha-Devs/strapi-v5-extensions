@@ -1,0 +1,7 @@
+{
+  "plugin.name": "Navigation rétractable",
+  "toggle.expand": "Déplier la navigation",
+  "toggle.collapse": "Replier la navigation",
+  "pin.pin": "Épingler la barre latérale",
+  "pin.unpin": "Désépingler la barre latérale (repli auto)"
+}

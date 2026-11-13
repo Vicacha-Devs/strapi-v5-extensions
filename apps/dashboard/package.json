@@ -24,6 +24,7 @@
     "@vicacha-devs/strapi-plugin-broadcasts": "workspace:*",
     "@vicacha-devs/strapi-plugin-calendar": "workspace:*",
     "@vicacha-devs/strapi-plugin-certificates": "workspace:*",
+    "@vicacha-devs/strapi-plugin-collapsible-nav": "workspace:*",
     "@vicacha-devs/strapi-plugin-donations": "workspace:*",
     "@vicacha-devs/strapi-plugin-events": "workspace:*",
     "@vicacha-devs/strapi-plugin-global-search": "workspace:*",

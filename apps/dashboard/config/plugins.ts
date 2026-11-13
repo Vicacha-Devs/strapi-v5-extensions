@@ -106,6 +106,9 @@ export default ({
   "certificates": {
     enabled: true,
   },
+  "collapsible-nav": {
+    enabled: true,
+  },
   "donations": {
     enabled: true,
   },
