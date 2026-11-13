@@ -24,15 +24,15 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
   es: {
     title: "Extensiones Strapi v5 — Vicacha",
     description:
-      "Suite empresarial de 15 plugins Strapi v5 para calendarios, eventos, reservas, certificados digitales, donaciones, difusiones omnicanal, búsqueda global, editor Tiptap y SEO.",
+      "Suite empresarial de 17 plugins Strapi v5 para calendarios, eventos, reservas, certificados digitales, donaciones, difusiones omnicanal, búsqueda global, editor Tiptap y SEO.",
     tagline:
-      "15 plugins modulares para Strapi v5 con firmas criptográficas Ed25519, soporte multilingüe (incluyendo RTL), especificaciones OpenAPI interactivas y puentes de integración automática.",
+      "17 plugins modulares para Strapi v5 con firmas criptográficas Ed25519, soporte multilingüe (incluyendo RTL), especificaciones OpenAPI interactivas y puentes de integración automática.",
     ctaPrimary: "Primeros Pasos",
     ctaSecondary: "Arquitectura del Monorepo",
     pillarsHeading: "Pilares Fundamentales",
     pillars: [
       [
-        "15 Plugins de Producción para Strapi v5",
+        "17 Plugins de Producción para Strapi v5",
         "Construidos nativamente sobre la Document Service API (`strapi.documents(uid)`), Design System v2 y compilación dual Admin + Server con `@strapi/sdk-plugin`.",
       ],
       [
@@ -48,7 +48,7 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
         "Traducciones completas para `en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL) y `zh` (más `cs` en `tiptap-editor`), y calendarios secundarios CLDR.",
       ],
     ],
-    matrixHeading: "Catálogo Completo de Plugins (15 Paquetes)",
+    matrixHeading: "Catálogo Completo de Plugins (17 Paquetes)",
     colPkg: "Paquete",
     colId: "Plugin ID",
     colNpm: "Paquete NPM",
@@ -56,15 +56,15 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
   ar: {
     title: "إضافات Strapi v5 — فيكاتشا",
     description:
-      "منظومة مؤسسية تضم 15 إضافة لنظام Strapi v5 تشمل التقويم والفعاليات والحجوزات والشهادات الرقمية والتبرعات والبث متعدد القنوات ومحرر النصوص Tiptap و SEO.",
+      "منظومة مؤسسية تضم 17 إضافة لنظام Strapi v5 تشمل التقويم والفعاليات والحجوزات والشهادات الرقمية والتبرعات والبث متعدد القنوات ومحرر النصوص Tiptap و SEO.",
     tagline:
-      "15 إضافة معيارية لنظام Strapi v5 مدعومة بالتوقيع الرقمي Ed25519 و 13 لغة (بما فيها العربية RTL) ومراجع OpenAPI التفاعلية والتكامل التلقائي.",
+      "17 إضافة معيارية لنظام Strapi v5 مدعومة بالتوقيع الرقمي Ed25519 و 13 لغة (بما فيها العربية RTL) ومراجع OpenAPI التفاعلية والتكامل التلقائي.",
     ctaPrimary: "البدء السريع",
     ctaSecondary: "هندسة المستودع الموحد",
     pillarsHeading: "الركائز الأساسية للمنظومة",
     pillars: [
       [
-        "15 إضافة جاهزة للإنتاج على Strapi v5",
+        "17 إضافة جاهزة للإنتاج على Strapi v5",
         "مبنية بالكامل باستخدام Document Service API (`strapi.documents(uid)`) ونظام التصميم Strapi Design System v2 وبنية الحزم المزدوجة.",
       ],
       [
@@ -80,7 +80,7 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
         "تكافؤ كامل في ترجمات لوحة التحكم لـ 13 لغة (بالإضافة إلى التشيكية في `tiptap-editor`) مع دعم كامل للغة العربية والأردية (RTL) وتقويم أم القرى الهجري.",
       ],
     ],
-    matrixHeading: "دليل الإضافات الكامل (15 حزمة)",
+    matrixHeading: "دليل الإضافات الكامل (17 حزمة)",
     colPkg: "الإضافة",
     colId: "معرف Strapi",
     colNpm: "حزمة NPM",
@@ -88,15 +88,15 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
   tr: {
     title: "Vicacha Strapi v5 Eklentileri",
     description:
-      "Takvim, etkinlikler, rezervasyonlar, dijital sertifikalar, bağışlar, çok kanallı yayınlar, medya akışları, Tiptap düzenleyici, küresel arama ve SEO için 15 kurumsal Strapi v5 eklentisi.",
+      "Takvim, etkinlikler, rezervasyonlar, dijital sertifikalar, bağışlar, çok kanallı yayınlar, medya akışları, Tiptap düzenleyici, küresel arama ve SEO için 17 kurumsal Strapi v5 eklentisi.",
     tagline:
-      "Ed25519 kriptografik imzalama, 13 dil desteği (RTL dahil), etkileşimli OpenAPI referansları ve sıfır yapılandırmalı eklentiler arası köprülerle 15 modüler Strapi v5 eklentisi.",
+      "Ed25519 kriptografik imzalama, 13 dil desteği (RTL dahil), etkileşimli OpenAPI referansları ve sıfır yapılandırmalı eklentiler arası köprülerle 17 modüler Strapi v5 eklentisi.",
     ctaPrimary: "Başlangıç Kılavuzu",
     ctaSecondary: "Monorepo Mimarisi",
     pillarsHeading: "Temel Mimari Sütunlar",
     pillars: [
       [
-        "15 Üretime Hazır Strapi v5 Eklentisi",
+        "17 Üretime Hazır Strapi v5 Eklentisi",
         "Strapi v5 Document Service API (`strapi.documents(uid)`), Design System v2 ve `@strapi/sdk-plugin` çift paket mimarisi üzerine inşa edilmiştir.",
       ],
       [
@@ -112,7 +112,7 @@ export const LOCALE_LANDING: Record<NonDefaultLocale, LocaleLandingConfig> = {
         "`en`, `es`, `ar` (RTL), `tr`, `fr`, `de`, `pt`, `it`, `nl`, `pl`, `id`, `ur` (RTL) ve `zh` (`tiptap-editor` içinde ayrıca `cs`) dillerinde tam çeviri eşitliği ve ikincil takvimler.",
       ],
     ],
-    matrixHeading: "Tüm Eklenti Matrisi (15 Paket)",
+    matrixHeading: "Tüm Eklenti Matrisi (17 Paket)",
     colPkg: "Eklenti",
     colId: "Strapi Eklenti Kimliği",
     colNpm: "NPM Paketi",

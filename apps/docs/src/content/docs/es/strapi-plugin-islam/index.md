@@ -4,7 +4,7 @@ description: "Motor astronómico de Salah, Adhan e Iqamah, brújula esférica de
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-islam` · **Plugin ID**: `islam` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `24`
+> **Package**: `@vicacha-devs/strapi-plugin-islam` · **Plugin ID**: `islam` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `24`
 
 Motor astronómico de Salah, Adhan e Iqamah, brújula esférica de Qibla, confirmación de avistamiento de Hilal, centro de Corán/Hadiz/Dua y calculadoras de Zakat/Nisab.
 

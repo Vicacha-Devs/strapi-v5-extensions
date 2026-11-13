@@ -4,7 +4,7 @@ description: "Gestión de eventos, control de cupos, promoción automática desd
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-events` · **Plugin ID**: `events` · **Category**: `Scheduling & Operations` · **Version**: `1.1.0` · **Routes**: `17`
+> **Package**: `@vicacha-devs/strapi-plugin-events` · **Plugin ID**: `events` · **Category**: `Scheduling & Operations` · **Version**: `1.1.1` · **Routes**: `17`
 
 Gestión de eventos, control de cupos, promoción automática desde lista de espera, check-in en 1 clic, exportación CSV segura e integración con el Calendario unificado.
 

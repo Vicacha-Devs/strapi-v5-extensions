@@ -13,9 +13,11 @@ export interface PluginPackageMeta {
   label: string;
   translations: Record<NonDefaultLocale, string>;
   summary: Record<SupportedLocale, string>;
+  /** Empty when the plugin exposes no HTTP routes (no OpenAPI reference). */
   schemaFile: string;
   dir: string;
-  screenshot: string;
+  /** Omitted when the plugin has no admin UI worth capturing. */
+  screenshot?: string;
   contentManagerScreenshot?: string;
   paletteScreenshot?: string;
   settingsScreenshot?: string;
@@ -374,6 +376,46 @@ export const plugins: PluginPackageMeta[] = [
     screenshot: "/screenshots/tiptap-editor-admin.png",
     contentManagerScreenshot: "/screenshots/tiptap-editor-content-manager.png",
     settingsScreenshot: "/screenshots/tiptap-editor-settings.png",
+  },
+  {
+    slug: "strapi-plugin-collapsible-nav",
+    npmName: "@vicacha-devs/strapi-plugin-collapsible-nav",
+    pluginId: "collapsible-nav",
+    category: "Admin Experience",
+    label: "Collapsible Navigation",
+    translations: {
+      es: "Navegación Colapsable",
+      ar: "التنقل القابل للطي",
+      tr: "Daraltılabilir Gezinme",
+    },
+    summary: {
+      en: "Strapi v4-style collapsible and pinnable left navigation for the Strapi v5 admin, with Pin/Unpin hover-to-peek, localStorage persistence, and zero-jump desktop transitions.",
+      es: "Navegación lateral colapsable y anclable al estilo Strapi v4 para el panel de Strapi v5, con anclar/desanclar y vista al pasar el cursor, persistencia en localStorage y transiciones de escritorio sin saltos.",
+      ar: "قائمة تنقل جانبية قابلة للطي والتثبيت بأسلوب Strapi v4 للوحة إدارة Strapi v5، مع التثبيت وإلغاء التثبيت والمعاينة عند التمرير وحفظ الحالة في localStorage وانتقالات سلسة على سطح المكتب.",
+      tr: "Strapi v5 yönetim paneli için Strapi v4 tarzı daraltılabilir ve sabitlenebilir sol gezinme; sabitle/sabitlemeyi kaldır, üzerine gelince önizleme, localStorage kalıcılığı ve sıçramasız masaüstü geçişleri.",
+    },
+    schemaFile: "",
+    dir: "strapi-plugin-collapsible-nav",
+  },
+  {
+    slug: "strapi-plugin-opentelemetry",
+    npmName: "@vicacha-devs/strapi-plugin-opentelemetry",
+    pluginId: "opentelemetry",
+    category: "Observability",
+    label: "OpenTelemetry Observability",
+    translations: {
+      es: "Observabilidad con OpenTelemetry",
+      ar: "المراقبة عبر OpenTelemetry",
+      tr: "OpenTelemetry Gözlemlenebilirliği",
+    },
+    summary: {
+      en: "Vendor-neutral OpenTelemetry error tracking and APM: OTLP/HTTP traces and metrics, Document Service child spans, strapi.log.error capture, per-plugin attribution, and automatic secret and PII redaction.",
+      es: "Seguimiento de errores y APM con OpenTelemetry sin dependencia de proveedor: trazas y métricas OTLP/HTTP, spans hijos del Document Service, captura de strapi.log.error, atribución por plugin y redacción automática de secretos y datos personales.",
+      ar: "تتبع الأخطاء ومراقبة الأداء عبر OpenTelemetry دون الارتباط بمزوّد: آثار ومقاييس OTLP/HTTP وفترات فرعية لـ Document Service والتقاط strapi.log.error ونسبة الأعطال لكل إضافة وإخفاء تلقائي للأسرار والبيانات الشخصية.",
+      tr: "Sağlayıcıdan bağımsız OpenTelemetry hata izleme ve APM: OTLP/HTTP izleri ve metrikleri, Document Service alt span'ları, strapi.log.error yakalama, eklenti bazlı atıf ve gizli bilgi/kişisel veri maskeleme.",
+    },
+    schemaFile: "",
+    dir: "strapi-plugin-opentelemetry",
   },
 ];
 

@@ -4,7 +4,7 @@ description: "Astronomik Namaz, Ezan ve Kamet motoru, küresel Kıble pusulası,
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-islam` · **Plugin ID**: `islam` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `24`
+> **Package**: `@vicacha-devs/strapi-plugin-islam` · **Plugin ID**: `islam` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `24`
 
 Astronomik Namaz, Ezan ve Kamet motoru, küresel Kıble pusulası, Hilal gözlem onayı, Kur'an/Hadis/Dua merkezi ve Zekat/Nisap hesaplayıcıları.
 

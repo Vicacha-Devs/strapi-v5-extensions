@@ -4,7 +4,7 @@ description: "Constructor de formularios dinámicos, bandeja de atención con se
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-inbox` · **Plugin ID**: `inbox` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `25`
+> **Package**: `@vicacha-devs/strapi-plugin-inbox` · **Plugin ID**: `inbox` · **Category**: `Community & Engagement` · **Version**: `1.1.2` · **Routes**: `25`
 
 Constructor de formularios dinámicos, bandeja de atención con seguimiento SLA, suscriptores con doble opt-in y cintillos de alerta global.
 

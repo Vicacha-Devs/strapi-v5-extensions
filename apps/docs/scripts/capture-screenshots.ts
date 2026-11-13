@@ -243,6 +243,8 @@ async function captureFromLiveStrapi(
       );
     }
     if (cmOnly) continue;
+    // Plugins without a capturable admin UI (for example server-only ones).
+    if (!plugin.screenshot) continue;
 
     const adminFile = basename(plugin.screenshot);
     const adminOutPath = assertWithinBoundary(

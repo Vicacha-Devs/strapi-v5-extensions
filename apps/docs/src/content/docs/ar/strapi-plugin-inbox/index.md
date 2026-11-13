@@ -4,7 +4,7 @@ description: "منشئ نماذج ديناميكي وصندوق وارد لطل�
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-inbox` · **Plugin ID**: `inbox` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `25`
+> **Package**: `@vicacha-devs/strapi-plugin-inbox` · **Plugin ID**: `inbox` · **Category**: `Community & Engagement` · **Version**: `1.1.2` · **Routes**: `25`
 
 منشئ نماذج ديناميكي وصندوق وارد لطلبات الخدمة مع تتبع SLA ومشتركي النشرات البريدية وأشرطة التنبيه العاجلة للموقع.
 

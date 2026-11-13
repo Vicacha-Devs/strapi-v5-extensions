@@ -4,7 +4,7 @@ description: "49 yapılandırılabilir özellik, şema tabanlı özel bileşenle
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-tiptap-editor` · **Plugin ID**: `tiptap-editor` · **Category**: `Editorial & SEO` · **Version**: `1.3.0` · **Routes**: `10`
+> **Package**: `@vicacha-devs/strapi-plugin-tiptap-editor` · **Plugin ID**: `tiptap-editor` · **Category**: `Editorial & SEO` · **Version**: `1.3.1` · **Routes**: `10`
 
 49 yapılandırılabilir özellik, şema tabanlı özel bileşenler, HTML5 Canvas görsel stüdyosu, ses kaydedici ve DOMPurify + SSRF korumasıyla TipTap v3 + Edifice IO zengin metin düzenleyicisi.
 

@@ -4,7 +4,7 @@ description: "حقل محرر نصوص منسقة TipTap v3 + Edifice IO مع 49
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-tiptap-editor` · **Plugin ID**: `tiptap-editor` · **Category**: `Editorial & SEO` · **Version**: `1.3.0` · **Routes**: `10`
+> **Package**: `@vicacha-devs/strapi-plugin-tiptap-editor` · **Plugin ID**: `tiptap-editor` · **Category**: `Editorial & SEO` · **Version**: `1.3.1` · **Routes**: `10`
 
 حقل محرر نصوص منسقة TipTap v3 + Edifice IO مع 49 ميزة قابلة للتخصيص ومكونات مخصصة واستوديو صور Canvas ومسجل صوتي وحماية DOMPurify و SSRF.
 

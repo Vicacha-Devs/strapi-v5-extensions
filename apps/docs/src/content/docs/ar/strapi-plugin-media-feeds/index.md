@@ -4,7 +4,7 @@ description: "مركز الحلقات الصوتية والمرئية متعدد
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-media-feeds` · **Plugin ID**: `media-feeds` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `11`
+> **Package**: `@vicacha-devs/strapi-plugin-media-feeds` · **Plugin ID**: `media-feeds` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `11`
 
 مركز الحلقات الصوتية والمرئية متعدد اللغات ومثري بيانات يوتيوب وفيميو الآمن ومولد خلاصات البودكاست RSS 2.0 وحالة البث المباشر.
 

@@ -4,7 +4,7 @@ description: "Çoklu koleksiyon FullCalendar v6 planlayıcı, RRULE + RSCALE tek
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-calendar` · **Plugin ID**: `calendar` · **Category**: `Scheduling & Operations` · **Version**: `1.1.2` · **Routes**: `10`
+> **Package**: `@vicacha-devs/strapi-plugin-calendar` · **Plugin ID**: `calendar` · **Category**: `Scheduling & Operations` · **Version**: `1.1.3` · **Routes**: `10`
 
 Çoklu koleksiyon FullCalendar v6 planlayıcı, RRULE + RSCALE tekrarlama motoru, CLDR ikincil takvimler (Hicri, İbranice, Farsça) ve iCal (.ics) beslemeleri.
 

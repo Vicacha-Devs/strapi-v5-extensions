@@ -4,7 +4,7 @@ description: "Çok para birimli bağış kampanyaları, fatura sponsorluğu, kı
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-donations` · **Plugin ID**: `donations` · **Category**: `Trust & Finance` · **Version**: `1.1.0` · **Routes**: `16`
+> **Package**: `@vicacha-devs/strapi-plugin-donations` · **Plugin ID**: `donations` · **Category**: `Trust & Finance` · **Version**: `1.1.1` · **Routes**: `16`
 
 Çok para birimli bağış kampanyaları, fatura sponsorluğu, kıymetli maden eşik hesaplayıcısı, HMAC-SHA256 ödeme webhook'ları ve otomatik vergi sertifikası köprüsü.
 

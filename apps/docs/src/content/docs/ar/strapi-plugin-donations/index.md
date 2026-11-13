@@ -4,7 +4,7 @@ description: "حملات التبرعات متعددة العملات ورعاي
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-donations` · **Plugin ID**: `donations` · **Category**: `Trust & Finance` · **Version**: `1.1.0` · **Routes**: `16`
+> **Package**: `@vicacha-devs/strapi-plugin-donations` · **Plugin ID**: `donations` · **Category**: `Trust & Finance` · **Version**: `1.1.1` · **Routes**: `16`
 
 حملات التبرعات متعددة العملات ورعاية فواتير المرافق وحاسبة النصاب والتحقق من بوابات الدفع عبر HMAC-SHA256 وإصدار شهادات التبرع تلقائياً.
 

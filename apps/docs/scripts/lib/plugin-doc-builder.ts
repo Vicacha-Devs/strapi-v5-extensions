@@ -180,17 +180,19 @@ function resolveUseCaseScreenshot(
   return { url: entry[0], caption: `${pluginMeta.label} — ${entry[1]}` };
 }
 
+const SHOT_SUFFIX = {
+  admin: "Strapi v5 Admin UI",
+  settings: "Strapi v5 Settings Panel",
+  palette: "Spotlight Cmd+K Command Palette",
+} as const;
+
 function optShot(
   label: string,
   url: string | undefined,
-  kind: "settings" | "palette"
+  kind: keyof typeof SHOT_SUFFIX
 ): string[] {
   if (!url) return [];
-  const suffix =
-    kind === "settings"
-      ? "Strapi v5 Settings Panel"
-      : "Spotlight Cmd+K Command Palette";
-  return [`![${label} — ${suffix}](${url})`, ""];
+  return [`![${label} — ${SHOT_SUFFIX[kind]}](${url})`, ""];
 }
 
 function localeMeta(meta: PluginPackageMeta, locale: SupportedLocale) {
@@ -310,7 +312,7 @@ export function buildUseCasesPageMarkdown(
     `description: ${yamlQuote(description)}`,
     "---",
     "",
-    `> **Package**: \`${meta.npmName}\` · **Plugin ID**: \`${meta.pluginId}\` · **Admin Workspace**: \`/admin/plugins/${meta.pluginId}\``,
+    `> **Package**: \`${meta.npmName}\` · **Plugin ID**: \`${meta.pluginId}\`${meta.screenshot ? ` · **Admin Workspace**: \`/admin/plugins/${meta.pluginId}\`` : ""}`,
     "",
     buildContentTypesMarkdown(meta, details.contentTypes, t, h1),
     buildContentManagerSectionMarkdown(meta, locale),
@@ -318,7 +320,7 @@ export function buildUseCasesPageMarkdown(
     "---",
     "",
     `- [${t.exploreGuideLink}](${prefixUrl}/${meta.slug}/guide/)`,
-    `- [${t.exploreApiLink}](/${meta.slug}/api/)`,
+    ...(meta.schemaFile ? [`- [${t.exploreApiLink}](/${meta.slug}/api/)`] : []),
     "",
   ].join("\n");
 }
@@ -410,8 +412,7 @@ export function buildGuidePageMarkdown(
     "",
     t.adminIntro,
     "",
-    `![${label} — Strapi v5 Admin UI](${meta.screenshot})`,
-    "",
+    ...optShot(label, meta.screenshot, "admin"),
     ...optShot(label, meta.paletteScreenshot, "palette"),
     sampleUiTable,
     buildContentTypesMarkdown(meta, details.contentTypes, t),
@@ -461,15 +462,14 @@ export function buildLocalizedOverviewMarkdown(
     `pnpm add ${meta.npmName}`,
     "```",
     "",
-    `![${label} — Strapi v5 Admin UI](${meta.screenshot})`,
-    "",
+    ...optShot(label, meta.screenshot, "admin"),
     ...optShot(label, meta.paletteScreenshot, "palette"),
     ...optShot(label, meta.settingsScreenshot, "settings"),
     `## ${t.featuresHeading}`,
     "",
     `- [${t.exploreUseCasesLink}](${prefixUrl}/${meta.slug}/use-cases/)`,
     `- [${t.exploreGuideLink}](${prefixUrl}/${meta.slug}/guide/)`,
-    `- [${t.exploreApiLink}](/strapi-plugin-${meta.slug.replace(/^strapi-plugin-/, "")}/api/)`,
+    ...(meta.schemaFile ? [`- [${t.exploreApiLink}](/${meta.slug}/api/)`] : []),
     "",
     buildContentTypesMarkdown(
       meta,

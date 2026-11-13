@@ -4,7 +4,7 @@ description: "Campo personalizado WYSIWYG TipTap v3 + Edifice IO con 49 funcione
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-tiptap-editor` · **Plugin ID**: `tiptap-editor` · **Category**: `Editorial & SEO` · **Version**: `1.3.0` · **Routes**: `10`
+> **Package**: `@vicacha-devs/strapi-plugin-tiptap-editor` · **Plugin ID**: `tiptap-editor` · **Category**: `Editorial & SEO` · **Version**: `1.3.1` · **Routes**: `10`
 
 Campo personalizado WYSIWYG TipTap v3 + Edifice IO con 49 funciones configurables, componentes personalizados por esquema, estudio de imagen Canvas HTML5, grabadora de voz y sanitización DOMPurify + SSRF.
 

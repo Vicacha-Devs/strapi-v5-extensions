@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Bookings & Reservations (@vicacha-devs/strapi-plugin-bookings)
-  version: 1.1.0
+  version: 1.1.1
   description: Generic Strapi v5 Bookings, Appointments, Resource Scheduling & Time-Slot Availability Engine
     powered by @vicacha-devs/strapi-plugin-calendar
 servers:

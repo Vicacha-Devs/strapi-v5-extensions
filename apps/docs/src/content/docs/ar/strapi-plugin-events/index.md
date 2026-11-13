@@ -4,7 +4,7 @@ description: "إدارة الفعاليات والتحكم في السعة وا�
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-events` · **Plugin ID**: `events` · **Category**: `Scheduling & Operations` · **Version**: `1.1.0` · **Routes**: `17`
+> **Package**: `@vicacha-devs/strapi-plugin-events` · **Plugin ID**: `events` · **Category**: `Scheduling & Operations` · **Version**: `1.1.1` · **Routes**: `17`
 
 إدارة الفعاليات والتحكم في السعة والترقية التلقائية لقوائم الانتظار وتسجيل الحضور الفوري وتصدير CSV والتكامل مع التقويم الموحد.
 

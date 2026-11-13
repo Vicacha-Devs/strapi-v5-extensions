@@ -4,7 +4,7 @@ description: "Çok dilli ses/video bölüm merkezi, SSRF korumalı YouTube/Vimeo
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-media-feeds` · **Plugin ID**: `media-feeds` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `11`
+> **Package**: `@vicacha-devs/strapi-plugin-media-feeds` · **Plugin ID**: `media-feeds` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `11`
 
 Çok dilli ses/video bölüm merkezi, SSRF korumalı YouTube/Vimeo OEmbed zenginleştirici, Apple/Spotify Podcast RSS 2.0 XML üreticisi ve canlı yayın durumu API'si.
 

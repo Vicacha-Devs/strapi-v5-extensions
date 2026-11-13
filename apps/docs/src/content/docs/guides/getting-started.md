@@ -134,7 +134,7 @@ pnpm strapi build
 pnpm strapi develop
 ```
 
-![Strapi v5 Host Dashboard with All 15 Plugins Enabled](/screenshots/dashboard-overview.png)
+![Strapi v5 Host Dashboard with All 17 Plugins Enabled](/screenshots/dashboard-overview.png)
 
 ---
 
@@ -146,7 +146,7 @@ If you are developing inside the `strapi-v5-extensions` monorepo:
 # 1. Install all dependencies across apps/* and packages/*
 pnpm install
 
-# 2. Build all 15 plugins (ESM + CJS + TypeScript declarations)
+# 2. Build all 17 plugins (ESM + CJS + TypeScript declarations)
 pnpm build
 
 # 3. Run the full verification pipeline (oxfmt, oxlint, eslint, tsc, sdk-plugin, publint, tests)

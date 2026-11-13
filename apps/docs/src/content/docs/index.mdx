@@ -3,7 +3,7 @@ title: Vicacha Strapi v5 Extensions
 description: Enterprise Strapi v5 plugins for scheduling, events, bookings, digital certificates, donations, omnichannel broadcasts, media feeds, global search, rich-text editing, and SEO.
 template: splash
 hero:
-  tagline: 15 modular, cryptographically hardened, multi-locale Strapi v5 plugins with interactive OpenAPI specs and zero-config inter-plugin bridges.
+  tagline: 17 modular, cryptographically hardened, multi-locale Strapi v5 plugins with interactive OpenAPI specs and zero-config inter-plugin bridges.
   image:
     file: ../../../public/screenshots/dashboard-overview.png
   actions:
@@ -21,7 +21,7 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 ## Core Pillars
 
 <CardGrid stagger>
-  <Card title="15 Production Strapi v5 Plugins" icon="puzzle">
+  <Card title="17 Production Strapi v5 Plugins" icon="puzzle">
     Built natively on the Strapi v5 Document Service API
     (`strapi.documents(uid)`), Design System v2, and `@strapi/sdk-plugin`
     dual-bundle architecture.
@@ -43,25 +43,27 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
   </Card>
 </CardGrid>
 
-## Complete Plugin Matrix (15 Packages)
+## Complete Plugin Matrix (17 Packages)
 
-| Package                                                      | Strapi Plugin ID | Category               | Key Capabilities                                                                                                                               |
-| :----------------------------------------------------------- | :--------------- | :--------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Calendar & Scheduling](/strapi-plugin-calendar/)            | `calendar`       | Scheduling             | FullCalendar v6 workspace (5 views, 79 locales, RTL/LTR), CLDR Hijri/Hebrew/Persian secondary dates, RFC 5545 RRULE custom field, `.ics` feeds |
-| [Events, RSVP & Check-In](/strapi-plugin-events/)            | `events`         | Scheduling             | Event lifecycle, capacity & waitlist auto-promotion, QR/code attendee check-in workspace, corner spotlights, automatic `calendar` registration |
-| [Bookings & Reservations](/strapi-plugin-bookings/)          | `bookings`       | Scheduling             | Bookable resources, interval/window slot engine, token-verified reservations, approval ledger, automatic `calendar` registration               |
-| [Digital Certificates](/strapi-plugin-certificates/)         | `certificates`   | Trust & Finance        | Official credential templates, Ed25519 cryptographic signing, optional DocuSign e-signature envelopes, QR verification & PII masking           |
-| [Donations & Campaigns](/strapi-plugin-donations/)           | `donations`      | Trust & Finance        | Crowdfunding campaigns, multi-currency donor pledges, Wompi & Stripe HMAC webhooks, utility bill sponsorship, `certificates` bridge            |
-| [Inbox, Forms & Alert Banners](/strapi-plugin-inbox/)        | `inbox`          | Engagement             | Visual form builder, service-desk casework inbox, double opt-in subscribers, and site-wide emergency/announcement alert banners                |
-| [Omnichannel Broadcasts](/strapi-plugin-broadcasts/)         | `broadcasts`     | Engagement             | WhatsApp, Telegram & Email campaigns, event-driven automation rules, segmented recipient targeting, and delivery logs                          |
-| [Islam Suite](/strapi-plugin-islam/)                         | `islam`          | Community & Liturgical | Astronomical Salah/Iqamah/Jumu'ah engine, Qibla Great-Circle bearing, Hilal moon-sighting, Quran Foundation v4 OAuth2, Zakat/Nisab calculators |
-| [Media Feeds & Podcast RSS](/strapi-plugin-media-feeds/)     | `media-feeds`    | Content & Media        | Multi-language audio/video episodes & series, YouTube OEmbed enricher, Apple/Spotify Podcast RSS 2.0 feed, live stream status                  |
-| [Resources, Galleries & Glossary](/strapi-plugin-resources/) | `resources`      | Content & Media        | Hardened downloadable publications library, Media Library folder-synced photo galleries, and bilingual/phonetic glossary                       |
-| [Editorial Notes & Pins](/strapi-plugin-notes/)              | `notes`          | Editorial DX           | Polymorphic editorial notes attached to any Strapi document, pinned annotations, color labels, and Content Manager sidebar panel               |
-| [Global Command Search](/strapi-plugin-global-search/)       | `global-search`  | Editorial DX           | Instant `Cmd/Ctrl+K` command-palette search across all Strapi v5 content types with fuzzy matching and recent-item navigation                  |
-| [SEO & SERP Analyzer](/strapi-plugin-seo/)                   | `seo`            | SEO & Discovery        | Shared `shared.seo` component manager, live Google SERP & social card previews, and real-time keyword density analyzer                         |
-| [XML Sitemap & Hreflang](/strapi-plugin-sitemap/)            | `sitemap`        | SEO & Discovery        | Multilingual XML sitemap (`hreflang`), sitemap index splitting, custom URL rules, and `robots.txt` integration                                 |
-| [Tiptap Rich Text Editor](/strapi-plugin-tiptap-editor/)     | `tiptap-editor`  | Editorial DX           | TipTap v3 + Edifice IO WYSIWYG custom field, 49 features & 4 presets, custom components, Canvas image studio, voice recorder, SSRF/DOMPurify   |
+| Package                                                      | Strapi Plugin ID  | Category               | Key Capabilities                                                                                                                                                   |
+| :----------------------------------------------------------- | :---------------- | :--------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Calendar & Scheduling](/strapi-plugin-calendar/)            | `calendar`        | Scheduling             | FullCalendar v6 workspace (5 views, 79 locales, RTL/LTR), CLDR Hijri/Hebrew/Persian secondary dates, RFC 5545 RRULE custom field, `.ics` feeds                     |
+| [Events, RSVP & Check-In](/strapi-plugin-events/)            | `events`          | Scheduling             | Event lifecycle, capacity & waitlist auto-promotion, QR/code attendee check-in workspace, corner spotlights, automatic `calendar` registration                     |
+| [Bookings & Reservations](/strapi-plugin-bookings/)          | `bookings`        | Scheduling             | Bookable resources, interval/window slot engine, token-verified reservations, approval ledger, automatic `calendar` registration                                   |
+| [Digital Certificates](/strapi-plugin-certificates/)         | `certificates`    | Trust & Finance        | Official credential templates, Ed25519 cryptographic signing, optional DocuSign e-signature envelopes, QR verification & PII masking                               |
+| [Donations & Campaigns](/strapi-plugin-donations/)           | `donations`       | Trust & Finance        | Crowdfunding campaigns, multi-currency donor pledges, Wompi & Stripe HMAC webhooks, utility bill sponsorship, `certificates` bridge                                |
+| [Inbox, Forms & Alert Banners](/strapi-plugin-inbox/)        | `inbox`           | Engagement             | Visual form builder, service-desk casework inbox, double opt-in subscribers, and site-wide emergency/announcement alert banners                                    |
+| [Omnichannel Broadcasts](/strapi-plugin-broadcasts/)         | `broadcasts`      | Engagement             | WhatsApp, Telegram & Email campaigns, event-driven automation rules, segmented recipient targeting, and delivery logs                                              |
+| [Islam Suite](/strapi-plugin-islam/)                         | `islam`           | Community & Liturgical | Astronomical Salah/Iqamah/Jumu'ah engine, Qibla Great-Circle bearing, Hilal moon-sighting, Quran Foundation v4 OAuth2, Zakat/Nisab calculators                     |
+| [Media Feeds & Podcast RSS](/strapi-plugin-media-feeds/)     | `media-feeds`     | Content & Media        | Multi-language audio/video episodes & series, YouTube OEmbed enricher, Apple/Spotify Podcast RSS 2.0 feed, live stream status                                      |
+| [Resources, Galleries & Glossary](/strapi-plugin-resources/) | `resources`       | Content & Media        | Hardened downloadable publications library, Media Library folder-synced photo galleries, and bilingual/phonetic glossary                                           |
+| [Editorial Notes & Pins](/strapi-plugin-notes/)              | `notes`           | Editorial DX           | Polymorphic editorial notes attached to any Strapi document, pinned annotations, color labels, and Content Manager sidebar panel                                   |
+| [Global Command Search](/strapi-plugin-global-search/)       | `global-search`   | Editorial DX           | Instant `Cmd/Ctrl+K` command-palette search across all Strapi v5 content types with fuzzy matching and recent-item navigation                                      |
+| [SEO & SERP Analyzer](/strapi-plugin-seo/)                   | `seo`             | SEO & Discovery        | Shared `shared.seo` component manager, live Google SERP & social card previews, and real-time keyword density analyzer                                             |
+| [XML Sitemap & Hreflang](/strapi-plugin-sitemap/)            | `sitemap`         | SEO & Discovery        | Multilingual XML sitemap (`hreflang`), sitemap index splitting, custom URL rules, and `robots.txt` integration                                                     |
+| [Tiptap Rich Text Editor](/strapi-plugin-tiptap-editor/)     | `tiptap-editor`   | Editorial DX           | TipTap v3 + Edifice IO WYSIWYG custom field, 49 features & 4 presets, custom components, Canvas image studio, voice recorder, SSRF/DOMPurify                       |
+| [Collapsible Navigation](/strapi-plugin-collapsible-nav/)    | `collapsible-nav` | Admin Experience       | Strapi v4-style collapsible and pinnable left navigation with Pin/Unpin hover-to-peek, `localStorage` persistence, and zero-jump desktop transitions.              |
+| [OpenTelemetry Observability](/strapi-plugin-opentelemetry/) | `opentelemetry`   | Observability          | Vendor-neutral OTLP/HTTP traces and metrics, Document Service child spans, `strapi.log.error` capture, per-plugin attribution, and automatic secret/PII redaction. |
 
 ## Quick Installation
 
