@@ -1,0 +1,7 @@
+{
+  "plugin.name": "Navegación colapsable",
+  "toggle.expand": "Expandir navegación",
+  "toggle.collapse": "Colapsar navegación",
+  "pin.pin": "Fijar barra lateral abierta",
+  "pin.unpin": "Desfijar barra lateral (auto-colapsar)"
+}

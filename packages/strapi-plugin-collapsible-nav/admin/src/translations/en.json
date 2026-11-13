@@ -1,0 +1,7 @@
+{
+  "plugin.name": "Collapsible Nav",
+  "toggle.expand": "Expand navigation",
+  "toggle.collapse": "Collapse navigation",
+  "pin.pin": "Pin sidebar open",
+  "pin.unpin": "Unpin sidebar (auto-collapse)"
+}

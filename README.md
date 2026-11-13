@@ -22,6 +22,7 @@ strapi-v5-extensions/
 │   ├── strapi-plugin-broadcasts/       # @vicacha-devs/strapi-plugin-broadcasts — Omnichannel WhatsApp/Telegram/Email broadcasts
 │   ├── strapi-plugin-calendar/         # @vicacha-devs/strapi-plugin-calendar — FullCalendar v6 multi-source scheduling engine
 │   ├── strapi-plugin-certificates/     # @vicacha-devs/strapi-plugin-certificates — Ed25519 digital signing & QR verification
+│   ├── strapi-plugin-collapsible-nav/  # @vicacha-devs/strapi-plugin-collapsible-nav — Strapi v4-style collapsible & pinnable left navigation
 │   ├── strapi-plugin-donations/        # @vicacha-devs/strapi-plugin-donations — Campaigns, pledges, utility bills & calculators
 │   ├── strapi-plugin-events/           # @vicacha-devs/strapi-plugin-events — Events, spotlights, RRULE, RSVP/Waitlist & check-in
 │   ├── strapi-plugin-global-search/    # @vicacha-devs/strapi-plugin-global-search — Command-palette global search across content types
@@ -35,7 +36,7 @@ strapi-v5-extensions/
 │   └── strapi-plugin-tiptap-editor/    # @vicacha-devs/strapi-plugin-tiptap-editor — TipTap v3 + Edifice IO WYSIWYG editor, presets & custom components
 ├── scripts/
 │   ├── ensure-dist-types.ts            # Stubs missing entry .d.ts files so strapi-plugin verify passes (SDK layout: index.mjs + index.js)
-│   └── publint-all.ts                  # Strict publint validation across all 15 publishable plugins
+│   └── publint-all.ts                  # Strict publint validation across all 16 publishable plugins
 ├── commitlint.config.ts                # Conventional Commits + optional [TICKET-123] prefix (style check)
 ├── eslint.config.ts                    # Root ESLint v10 flat configuration
 ├── .oxfmtrc.json                       # Oxfmt code formatting configuration
@@ -47,11 +48,12 @@ strapi-v5-extensions/
 
 ---
 
-## Included Strapi v5 Plugins (15 Packages)
+## Included Strapi v5 Plugins (16 Packages)
 
 | Package | Strapi Plugin ID | Summary |
 | :--- | :--- | :--- |
 | [`@vicacha-devs/strapi-plugin-calendar`](./packages/strapi-plugin-calendar) | `calendar` | Unified FullCalendar v6 scheduling workspace (`/admin/plugins/calendar`, 5 views, 79 locales, RTL/LTR auto-direction, CLDR Hijri/Hebrew/Persian secondary calendars, RFC 5545 RRULE custom field, `.ics` feeds). Shared calendar/date engine for `events`, `bookings`, `broadcasts`, `certificates`, `donations`, `islam`, `media-feeds`, and `resources` (optional bridge in `inbox`). |
+| [`@vicacha-devs/strapi-plugin-collapsible-nav`](./packages/strapi-plugin-collapsible-nav) | `collapsible-nav` | Restores Strapi v4-style collapsible & expandable left navigation in Strapi v5 with Pin/Unpin (hover-to-peek), `localStorage` persistence, and zero-jump desktop transitions |
 | [`@vicacha-devs/strapi-plugin-events`](./packages/strapi-plugin-events) | `events` | Event lifecycle (`plugin::events.event`, `plugin::events.registration`), dedicated RSVP, Waitlist Auto-Promotion & Attendee Check-In Workspace (`/admin/plugins/events`), corner spotlights, and automatic source registration into `calendar` |
 | [`@vicacha-devs/strapi-plugin-bookings`](./packages/strapi-plugin-bookings) | `bookings` | Bookable resources (`plugin::bookings.resource`), timezone-aware interval/window slot availability, token-verified reservations (`plugin::bookings.booking`), dedicated Reservations Approval & Ledger Workspace (`/admin/plugins/bookings`), and automatic registration into `calendar` |
 | [`@vicacha-devs/strapi-plugin-certificates`](./packages/strapi-plugin-certificates) | `certificates` | Official credential templates (`plugin::certificates.template`), Ed25519 cryptographic signing (`plugin::certificates.certificate`), printable HTML/PDF, and public serial verification |
