@@ -30,13 +30,14 @@ strapi-v5-extensions/
 │   ├── strapi-plugin-islam/            # @vicacha-devs/strapi-plugin-islam — Salah, Qibla, Hijri/Hilal, Quran/Hadith & Zakat suite
 │   ├── strapi-plugin-media-feeds/      # @vicacha-devs/strapi-plugin-media-feeds — Audio/video archive, YouTube sync & Podcast RSS 2.0
 │   ├── strapi-plugin-notes/            # @vicacha-devs/strapi-plugin-notes — Polymorphic editorial notes, pins & activity logs
+│   ├── strapi-plugin-opentelemetry/    # @vicacha-devs/strapi-plugin-opentelemetry — Vendor-neutral OpenTelemetry error tracking & APM
 │   ├── strapi-plugin-resources/        # @vicacha-devs/strapi-plugin-resources — Publications library, photo galleries & glossary
 │   ├── strapi-plugin-seo/              # @vicacha-devs/strapi-plugin-seo — Strapi v5 SEO metadata & SERP analyzer
 │   ├── strapi-plugin-sitemap/          # @vicacha-devs/strapi-plugin-sitemap — Multilingual XML sitemap & robots.txt generator
 │   └── strapi-plugin-tiptap-editor/    # @vicacha-devs/strapi-plugin-tiptap-editor — TipTap v3 + Edifice IO WYSIWYG editor, presets & custom components
 ├── scripts/
 │   ├── ensure-dist-types.ts            # Stubs missing entry .d.ts files so strapi-plugin verify passes (SDK layout: index.mjs + index.js)
-│   └── publint-all.ts                  # Strict publint validation across all 16 publishable plugins
+│   └── publint-all.ts                  # Strict publint validation across all 17 publishable plugins
 ├── commitlint.config.ts                # Conventional Commits + optional [TICKET-123] prefix (style check)
 ├── eslint.config.ts                    # Root ESLint v10 flat configuration
 ├── .oxfmtrc.json                       # Oxfmt code formatting configuration
@@ -48,7 +49,7 @@ strapi-v5-extensions/
 
 ---
 
-## Included Strapi v5 Plugins (16 Packages)
+## Included Strapi v5 Plugins (17 Packages)
 
 | Package | Strapi Plugin ID | Summary |
 | :--- | :--- | :--- |
@@ -63,6 +64,7 @@ strapi-v5-extensions/
 | [`@vicacha-devs/strapi-plugin-islam`](./packages/strapi-plugin-islam) | `islam` | Astronomical Salah/Iqamah/Jumu'ah engine, Qibla bearing, Hilal moon-sighting (`plugin::islam.hilal-announcement`), Quran/Hadith/Dua hub (`plugin::islam.scripture-entry`), and Zakat/Nisab calculators |
 | [`@vicacha-devs/strapi-plugin-media-feeds`](./packages/strapi-plugin-media-feeds) | `media-feeds` | Multi-language audio/video episodes (`plugin::media-feeds.media-item`, `plugin::media-feeds.media-series`), YouTube/OEmbed enricher, Apple/Spotify Podcast RSS 2.0, and live stream status |
 | [`@vicacha-devs/strapi-plugin-notes`](./packages/strapi-plugin-notes) | `notes` | Polymorphic editorial notes (`plugin::notes.note`), pinned entry annotations, color labels, and content-manager sidebar integration |
+| [`@vicacha-devs/strapi-plugin-opentelemetry`](./packages/strapi-plugin-opentelemetry) | `opentelemetry` | Vendor-neutral OpenTelemetry error tracking & APM (`OTLP/HTTP` traces & metrics, Document Service child spans, `strapi.log.error` capture, per-plugin attribution, and automatic secret/PII redaction) |
 | [`@vicacha-devs/strapi-plugin-broadcasts`](./packages/strapi-plugin-broadcasts) | `broadcasts` | Omnichannel campaigns (`plugin::broadcasts.campaign`), event-driven automation rules (`plugin::broadcasts.automation-rule`), and delivery logs (`plugin::broadcasts.delivery-log`) |
 | [`@vicacha-devs/strapi-plugin-resources`](./packages/strapi-plugin-resources) | `resources` | Downloadable publications (`plugin::resources.publication`), photo gallery albums (`plugin::resources.gallery-album`), and bilingual/phonetic glossary (`plugin::resources.glossary-term`) |
 | [`@vicacha-devs/strapi-plugin-seo`](./packages/strapi-plugin-seo) | `seo` | Strapi v5 SEO component management, meta/social preview, and keyword density analysis with `ar`, `en`, `es`, `fr`, `pt-BR`, and `tr` translations |

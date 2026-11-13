@@ -1,0 +1,100 @@
+{
+  "name": "@vicacha-devs/strapi-plugin-opentelemetry",
+  "version": "1.0.0",
+  "description": "Vendor-neutral OpenTelemetry error tracking and performance monitoring (APM) plugin for Strapi v5.",
+  "keywords": [
+    "apm",
+    "error-tracking",
+    "monitoring",
+    "observability",
+    "opentelemetry",
+    "otlp",
+    "performance",
+    "strapi",
+    "strapi-plugin",
+    "strapi-v5",
+    "tracing"
+  ],
+  "homepage": "https://github.com/Vicacha-Devs/strapi-v5-extensions/tree/main/packages/strapi-plugin-opentelemetry#readme",
+  "bugs": {
+    "url": "https://github.com/Vicacha-Devs/strapi-v5-extensions/issues"
+  },
+  "license": "MIT",
+  "author": "Vicacha Devs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vicacha-Devs/strapi-v5-extensions.git",
+    "directory": "packages/strapi-plugin-opentelemetry"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./strapi-admin": {
+      "types": "./dist/admin/index.d.ts",
+      "source": "./admin/src/index.ts",
+      "import": "./dist/admin/index.mjs",
+      "require": "./dist/admin/index.js",
+      "default": "./dist/admin/index.js"
+    },
+    "./strapi-server": {
+      "types": "./dist/server/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "strapi-plugin build && node ../../scripts/ensure-dist-types.ts",
+    "test": "node --import ./tests/register-ts-resolver.ts --test tests/*.test.ts",
+    "test:ts": "npm run test:ts:front && npm run test:ts:back",
+    "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
+    "test:ts:front": "tsc --noEmit -p admin/tsconfig.json",
+    "verify": "strapi-plugin verify",
+    "watch": "strapi-plugin watch",
+    "watch:link": "strapi-plugin watch:link"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "~1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.56.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.57.2",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.57.2",
+    "@opentelemetry/resources": "^1.30.1",
+    "@opentelemetry/sdk-metrics": "^1.30.1",
+    "@opentelemetry/sdk-node": "^0.57.2",
+    "@opentelemetry/sdk-trace-base": "^1.30.1",
+    "@opentelemetry/semantic-conventions": "^1.30.0"
+  },
+  "devDependencies": {
+    "@strapi/sdk-plugin": "6.1.1",
+    "@strapi/strapi": "5.39.0",
+    "@types/node": "22.10.2",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vicacha-devs/typescript-config": "workspace:*",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "@strapi/strapi": "^5.0.0",
+    "react": "^17.0.0 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0 || ^19.0.0"
+  },
+  "engines": {
+    "node": ">=20.16.0",
+    "pnpm": ">=10.0.0"
+  },
+  "strapi": {
+    "name": "opentelemetry",
+    "displayName": "OpenTelemetry",
+    "description": "Vendor-neutral OpenTelemetry error tracking and performance monitoring (APM) for Strapi v5.",
+    "kind": "plugin"
+  }
+}

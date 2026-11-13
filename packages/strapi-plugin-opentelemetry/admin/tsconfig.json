@@ -1,0 +1,5 @@
+{
+  "extends": "../../typescript-config/strapi-admin.json",
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "../dist"]
+}
