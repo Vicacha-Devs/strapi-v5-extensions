@@ -4,7 +4,7 @@ description: "محرك المواقيت الفلكية للصلاة والأذا
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-islam` · **Plugin ID**: `islam` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `24`
+> **Package**: `@vicacha-devs/strapi-plugin-islam` · **Plugin ID**: `islam` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `24`
 
 محرك المواقيت الفلكية للصلاة والأذان والإقامة وبوصلة القبلة الكروية وتأكيد رؤية الهلال ومركز القرآن والحديث والأدعية وحاسبات الزكاة والنصاب.
 

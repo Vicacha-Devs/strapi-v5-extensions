@@ -4,7 +4,7 @@ description: "مولد خرائط الموقع XML وفهارسها لنظام S
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-sitemap` · **Plugin ID**: `sitemap` · **Category**: `Editorial & SEO` · **Version**: `1.2.0` · **Routes**: `7`
+> **Package**: `@vicacha-devs/strapi-plugin-sitemap` · **Plugin ID**: `sitemap` · **Category**: `Editorial & SEO` · **Version**: `1.2.1` · **Routes**: `7`
 
 مولد خرائط الموقع XML وفهارسها لنظام Strapi v5 مع دعم الروابط البديلة متعددة اللغات (hreflang) والروابط المخصصة.
 

@@ -4,7 +4,7 @@ description: "Centro de episodios de audio y video multilingüe, enriquecedor OE
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-media-feeds` · **Plugin ID**: `media-feeds` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `11`
+> **Package**: `@vicacha-devs/strapi-plugin-media-feeds` · **Plugin ID**: `media-feeds` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `11`
 
 Centro de episodios de audio y video multilingüe, enriquecedor OEmbed seguro contra SSRF, generador XML de Podcast RSS 2.0 para Apple/Spotify y estado de transmisión en vivo.
 

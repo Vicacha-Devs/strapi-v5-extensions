@@ -4,7 +4,7 @@ description: "مكتبة الإصدارات الرقمية مع تنزيلات �
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-resources` · **Plugin ID**: `resources` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `25`
+> **Package**: `@vicacha-devs/strapi-plugin-resources` · **Plugin ID**: `resources` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `25`
 
 مكتبة الإصدارات الرقمية مع تنزيلات محمية ومعارض الصور المتزامنة مع مكتبة الوسائط ومسرد المصطلحات متعدد اللغات مع النطق الصوتي.
 

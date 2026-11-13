@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Media Feeds & Podcast RSS (@vicacha-devs/strapi-plugin-media-feeds)
-  version: 1.1.0
+  version: 1.1.1
   description: Generic Strapi v5 Multi-Language Media Hub, YouTube & OEmbed Enricher, Apple/Spotify Podcast RSS
     2.0 Generator & Live Broadcast Status Plugin powered by @vicacha-devs/strapi-plugin-calendar
 servers:

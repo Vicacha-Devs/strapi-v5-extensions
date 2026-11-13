@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Omnichannel Broadcasts (@vicacha-devs/strapi-plugin-broadcasts)
-  version: 0.2.0
+  version: 0.2.1
   description: Omnichannel community broadcasts (Email newsletters, Telegram Bot & Channel/Forum topics,
     WhatsApp Cloud API / OpenWA / Evolution, EventHub automation rules, and double opt-in subscriber
     segmentation) for Strapi v5 with multi-language and multi-calendar support.

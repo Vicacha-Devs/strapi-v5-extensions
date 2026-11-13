@@ -1,9 +1,9 @@
 ---
 title: "إضافات Strapi v5 — فيكاتشا"
-description: "منظومة مؤسسية تضم 15 إضافة لنظام Strapi v5 تشمل التقويم والفعاليات والحجوزات والشهادات الرقمية والتبرعات والبث متعدد القنوات ومحرر النصوص Tiptap و SEO."
+description: "منظومة مؤسسية تضم 17 إضافة لنظام Strapi v5 تشمل التقويم والفعاليات والحجوزات والشهادات الرقمية والتبرعات والبث متعدد القنوات ومحرر النصوص Tiptap و SEO."
 template: splash
 hero:
-  tagline: "15 إضافة معيارية لنظام Strapi v5 مدعومة بالتوقيع الرقمي Ed25519 و 13 لغة (بما فيها العربية RTL) ومراجع OpenAPI التفاعلية والتكامل التلقائي."
+  tagline: "17 إضافة معيارية لنظام Strapi v5 مدعومة بالتوقيع الرقمي Ed25519 و 13 لغة (بما فيها العربية RTL) ومراجع OpenAPI التفاعلية والتكامل التلقائي."
   image:
     file: ../../../../public/screenshots/dashboard-overview.png
   actions:
@@ -21,7 +21,7 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
 ## الركائز الأساسية للمنظومة
 
 <CardGrid stagger>
-  <Card title="15 إضافة جاهزة للإنتاج على Strapi v5" icon="puzzle">
+  <Card title="17 إضافة جاهزة للإنتاج على Strapi v5" icon="puzzle">
     مبنية بالكامل باستخدام Document Service API (`strapi.documents(uid)`) ونظام
     التصميم Strapi Design System v2 وبنية الحزم المزدوجة.
   </Card>
@@ -43,22 +43,24 @@ import { Card, CardGrid } from "@astrojs/starlight/components";
   </Card>
 </CardGrid>
 
-## دليل الإضافات الكامل (15 حزمة)
+## دليل الإضافات الكامل (17 حزمة)
 
-| الإضافة                                                                 | معرف Strapi     | حزمة NPM                                    |
-| :---------------------------------------------------------------------- | :-------------- | :------------------------------------------ |
-| [الحجوزات والمواعيد](/ar/strapi-plugin-bookings/)                       | `bookings`      | `@vicacha-devs/strapi-plugin-bookings`      |
-| [البث متعدد القنوات](/ar/strapi-plugin-broadcasts/)                     | `broadcasts`    | `@vicacha-devs/strapi-plugin-broadcasts`    |
-| [التقويم والجدولة](/ar/strapi-plugin-calendar/)                         | `calendar`      | `@vicacha-devs/strapi-plugin-calendar`      |
-| [الشهادات الرقمية (Ed25519)](/ar/strapi-plugin-certificates/)           | `certificates`  | `@vicacha-devs/strapi-plugin-certificates`  |
-| [التبرعات والحملات](/ar/strapi-plugin-donations/)                       | `donations`     | `@vicacha-devs/strapi-plugin-donations`     |
-| [الفعاليات والتسجيل والحضور](/ar/strapi-plugin-events/)                 | `events`        | `@vicacha-devs/strapi-plugin-events`        |
-| [البحث الشامل السريع](/ar/strapi-plugin-global-search/)                 | `global-search` | `@vicacha-devs/strapi-plugin-global-search` |
-| [صندوق الوارد والنماذج والتنبيهات](/ar/strapi-plugin-inbox/)            | `inbox`         | `@vicacha-devs/strapi-plugin-inbox`         |
-| [المنظومة الإسلامية (الصلاة، القبلة، الهجري)](/ar/strapi-plugin-islam/) | `islam`         | `@vicacha-devs/strapi-plugin-islam`         |
-| [الوسائط المتعددة وخلاصات البودكاست](/ar/strapi-plugin-media-feeds/)    | `media-feeds`   | `@vicacha-devs/strapi-plugin-media-feeds`   |
-| [الملاحظات التحريرية والتثبيت](/ar/strapi-plugin-notes/)                | `notes`         | `@vicacha-devs/strapi-plugin-notes`         |
-| [الموارد والمعارض والمسرد](/ar/strapi-plugin-resources/)                | `resources`     | `@vicacha-devs/strapi-plugin-resources`     |
-| [تحسين محركات البحث (SEO)](/ar/strapi-plugin-seo/)                      | `seo`           | `@vicacha-devs/strapi-plugin-seo`           |
-| [خريطة الموقع XML و Hreflang](/ar/strapi-plugin-sitemap/)               | `sitemap`       | `@vicacha-devs/strapi-plugin-sitemap`       |
-| [محرر النصوص المنسقة Tiptap](/ar/strapi-plugin-tiptap-editor/)          | `tiptap-editor` | `@vicacha-devs/strapi-plugin-tiptap-editor` |
+| الإضافة                                                                 | معرف Strapi       | حزمة NPM                                      |
+| :---------------------------------------------------------------------- | :---------------- | :-------------------------------------------- |
+| [الحجوزات والمواعيد](/ar/strapi-plugin-bookings/)                       | `bookings`        | `@vicacha-devs/strapi-plugin-bookings`        |
+| [البث متعدد القنوات](/ar/strapi-plugin-broadcasts/)                     | `broadcasts`      | `@vicacha-devs/strapi-plugin-broadcasts`      |
+| [التقويم والجدولة](/ar/strapi-plugin-calendar/)                         | `calendar`        | `@vicacha-devs/strapi-plugin-calendar`        |
+| [الشهادات الرقمية (Ed25519)](/ar/strapi-plugin-certificates/)           | `certificates`    | `@vicacha-devs/strapi-plugin-certificates`    |
+| [التبرعات والحملات](/ar/strapi-plugin-donations/)                       | `donations`       | `@vicacha-devs/strapi-plugin-donations`       |
+| [الفعاليات والتسجيل والحضور](/ar/strapi-plugin-events/)                 | `events`          | `@vicacha-devs/strapi-plugin-events`          |
+| [البحث الشامل السريع](/ar/strapi-plugin-global-search/)                 | `global-search`   | `@vicacha-devs/strapi-plugin-global-search`   |
+| [صندوق الوارد والنماذج والتنبيهات](/ar/strapi-plugin-inbox/)            | `inbox`           | `@vicacha-devs/strapi-plugin-inbox`           |
+| [المنظومة الإسلامية (الصلاة، القبلة، الهجري)](/ar/strapi-plugin-islam/) | `islam`           | `@vicacha-devs/strapi-plugin-islam`           |
+| [الوسائط المتعددة وخلاصات البودكاست](/ar/strapi-plugin-media-feeds/)    | `media-feeds`     | `@vicacha-devs/strapi-plugin-media-feeds`     |
+| [الملاحظات التحريرية والتثبيت](/ar/strapi-plugin-notes/)                | `notes`           | `@vicacha-devs/strapi-plugin-notes`           |
+| [الموارد والمعارض والمسرد](/ar/strapi-plugin-resources/)                | `resources`       | `@vicacha-devs/strapi-plugin-resources`       |
+| [تحسين محركات البحث (SEO)](/ar/strapi-plugin-seo/)                      | `seo`             | `@vicacha-devs/strapi-plugin-seo`             |
+| [خريطة الموقع XML و Hreflang](/ar/strapi-plugin-sitemap/)               | `sitemap`         | `@vicacha-devs/strapi-plugin-sitemap`         |
+| [محرر النصوص المنسقة Tiptap](/ar/strapi-plugin-tiptap-editor/)          | `tiptap-editor`   | `@vicacha-devs/strapi-plugin-tiptap-editor`   |
+| [التنقل القابل للطي](/ar/strapi-plugin-collapsible-nav/)                | `collapsible-nav` | `@vicacha-devs/strapi-plugin-collapsible-nav` |
+| [المراقبة عبر OpenTelemetry](/ar/strapi-plugin-opentelemetry/)          | `opentelemetry`   | `@vicacha-devs/strapi-plugin-opentelemetry`   |

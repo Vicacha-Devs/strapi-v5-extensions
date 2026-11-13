@@ -87,6 +87,10 @@ export const PLUGIN_SAMPLE_CONFIG: Record<string, string> = {
   "media-feeds":
     '      podcastTitle: env("PODCAST_TITLE", "Community Lectures"),\n      podcastLanguage: "es",',
   "notes": "      enablePinning: true,\n      enableLocaleScoping: true,",
+  "collapsible-nav":
+    "      // No options: install, enable, and restart Strapi.",
+  "opentelemetry":
+    '      serviceName: env("OTEL_SERVICE_NAME", "strapi-backend"),\n      otlpEndpoint: env("OTEL_EXPORTER_OTLP_ENDPOINT", ""),\n      sampleRate: 1.0,',
   "resources":
     '      organizationName: env("RESOURCES_ORG_NAME", "Community Resource Center"),\n      defaultPublicationsFolderPath: "/resources/publications",\n      defaultGalleriesFolderPath: "/resources/galleries",\n      secondaryCalendar: "islamic-umalqura",\n      enableCloudinaryOptimization: true,\n      autoSyncMediaFolders: true,\n      maxPhotosPerAlbum: 200,',
   "seo": "      autoCreateComponent: true,",

@@ -16,10 +16,10 @@ strapi-v5-extensions/
 │   ├── eslint-config/                  # @vicacha-devs/eslint-config — Shared ESLint rules (max-lines <= 500)
 │   ├── plugin-shared/                  # @vicacha-devs/plugin-shared — Shared i18n, locale & validation utilities
 │   ├── typescript-config/              # @vicacha-devs/typescript-config — Shared Admin & Server tsconfigs
-│   └── strapi-plugin-*/                # 15 publishable @vicacha-devs/strapi-plugin-* packages
+│   └── strapi-plugin-*/                # 17 publishable @vicacha-devs/strapi-plugin-* packages
 ├── scripts/
-│   ├── ensure-esm-dist.ts              # Guarantees dist/package.json ({"type":"module"}) & entry .d.ts files
-│   ├── publint-all.ts                  # Strict publint validation across all 15 plugins
+│   ├── ensure-dist-types.ts            # Stubs missing entry .d.ts files so strapi-plugin verify passes
+│   ├── publint-all.ts                  # Strict publint validation across all 17 plugins
 │   └── release.ts                      # Per-package semantic-release & pnpm publish orchestrator
 ├── pnpm-workspace.yaml                 # Peer isolation & workspace linking rules
 └── turbo.json                          # Dependency-aware task pipeline

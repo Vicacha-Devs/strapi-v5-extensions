@@ -4,7 +4,7 @@ description: "Tüm Strapi v5 koleksiyon türleri, tekil türler ve iç içe bile
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-global-search` · **Plugin ID**: `global-search` · **Category**: `Editorial & SEO` · **Version**: `2.1.0` · **Routes**: `6`
+> **Package**: `@vicacha-devs/strapi-plugin-global-search` · **Plugin ID**: `global-search` · **Category**: `Editorial & SEO` · **Version**: `2.1.1` · **Routes**: `6`
 
 Tüm Strapi v5 koleksiyon türleri, tekil türler ve iç içe bileşenler genelinde Spotlight tarzı Cmd+K / Ctrl+K komut paleti ve küresel arama.
 

@@ -56,7 +56,7 @@ The documentation site in `apps/docs` automatically synchronizes with the plugin
 # Start interactive local development server at http://localhost:4321
 pnpm --filter @vicacha-devs/docs dev
 
-# 1. Generate OpenAPI 3.0.3 YAML schemas from all 15 plugins' server routes & content-types
+# 1. Generate OpenAPI 3.0.3 YAML schemas from all 17 plugins' server routes & content-types
 pnpm --filter @vicacha-devs/docs generate:openapi
 
 # 2. Sync package README.md files + generate localized (en, es, ar, tr) Overview & Guide pages

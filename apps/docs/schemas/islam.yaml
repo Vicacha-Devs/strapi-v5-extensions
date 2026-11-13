@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Islam Suite (Salah, Qibla, Hijri) (@vicacha-devs/strapi-plugin-islam)
-  version: 1.1.0
+  version: 1.1.1
   description: "Comprehensive Strapi v5 Islamic Liturgical, Scriptural & Fiqh Suite: Salah/Adhan/Iqamah
     Astronomical Engine, Qibla Spherical Compass, Hilal Moon-Sighting & Eid/Ramadan Operations,
     Quran/Hadith/Dua Hub, and Zakat/Nisab/Fitrana/Fidyah/Kaffarah Calculators powered by

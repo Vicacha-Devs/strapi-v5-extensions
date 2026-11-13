@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Resources, Galleries & Glossary (@vicacha-devs/strapi-plugin-resources)
-  version: 1.1.0
+  version: 1.1.1
   description: Generic Strapi v5 Digital Library Publications, Media Library Folder-Synced Photo Galleries &
     Multilingual A-Z Glossary Plugin powered by @strapi/upload and @vicacha-devs/strapi-plugin-calendar
 servers:

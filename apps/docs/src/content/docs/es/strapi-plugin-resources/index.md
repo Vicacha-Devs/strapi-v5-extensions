@@ -4,7 +4,7 @@ description: "Biblioteca de publicaciones digitales con descargas seguras, galer
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-resources` · **Plugin ID**: `resources` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `25`
+> **Package**: `@vicacha-devs/strapi-plugin-resources` · **Plugin ID**: `resources` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `25`
 
 Biblioteca de publicaciones digitales con descargas seguras, galerías fotográficas sincronizadas con carpetas de Media Library y glosario multilingüe con audio.
 

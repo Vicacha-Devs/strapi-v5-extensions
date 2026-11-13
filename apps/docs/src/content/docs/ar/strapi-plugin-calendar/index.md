@@ -4,7 +4,7 @@ description: "تقويم FullCalendar v6 متعدد المجموعات مع مح
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-calendar` · **Plugin ID**: `calendar` · **Category**: `Scheduling & Operations` · **Version**: `1.1.2` · **Routes**: `10`
+> **Package**: `@vicacha-devs/strapi-plugin-calendar` · **Plugin ID**: `calendar` · **Category**: `Scheduling & Operations` · **Version**: `1.1.3` · **Routes**: `10`
 
 تقويم FullCalendar v6 متعدد المجموعات مع محرك تكرار RRULE و RSCALE والتقويم الهجري أم القرى والتقاويم الثانوية وخلاصات iCal.
 

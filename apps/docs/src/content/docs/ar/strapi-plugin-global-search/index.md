@@ -4,7 +4,7 @@ description: "لوحة أوامر وبحث شامل فوري (Cmd+K / Ctrl+K) ع
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-global-search` · **Plugin ID**: `global-search` · **Category**: `Editorial & SEO` · **Version**: `2.1.0` · **Routes**: `6`
+> **Package**: `@vicacha-devs/strapi-plugin-global-search` · **Plugin ID**: `global-search` · **Category**: `Editorial & SEO` · **Version**: `2.1.1` · **Routes**: `6`
 
 لوحة أوامر وبحث شامل فوري (Cmd+K / Ctrl+K) عبر جميع أنواع المحتوى والمكونات المتداخلة في لوحة تحكم Strapi v5.
 

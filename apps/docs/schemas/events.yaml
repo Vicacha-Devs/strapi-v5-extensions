@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Events, RSVP & Check-In (@vicacha-devs/strapi-plugin-events)
-  version: 1.1.0
+  version: 1.1.1
   description: Production-grade Strapi v5 Events, RSVP Capacity, Automatic Waitlist Promotion, Attendee Check-In
     & iCal Plugin powered by @vicacha-devs/strapi-plugin-calendar
 servers:

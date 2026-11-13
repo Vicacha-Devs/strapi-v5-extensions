@@ -4,7 +4,7 @@ description: "Dinamik form oluşturucu, SLA takipli başvuru gelen kutusu, çift
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-inbox` · **Plugin ID**: `inbox` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `25`
+> **Package**: `@vicacha-devs/strapi-plugin-inbox` · **Plugin ID**: `inbox` · **Category**: `Community & Engagement` · **Version**: `1.1.2` · **Routes**: `25`
 
 Dinamik form oluşturucu, SLA takipli başvuru gelen kutusu, çift onaylı bülten aboneleri ve site genelinde acil uyarı bantları.
 

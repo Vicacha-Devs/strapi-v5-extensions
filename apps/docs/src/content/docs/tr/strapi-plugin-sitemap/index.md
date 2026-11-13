@@ -4,7 +4,7 @@ description: "Çok dilli hreflang alternatifleri, özel statik URL'ler ve XSL st
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-sitemap` · **Plugin ID**: `sitemap` · **Category**: `Editorial & SEO` · **Version**: `1.2.0` · **Routes**: `7`
+> **Package**: `@vicacha-devs/strapi-plugin-sitemap` · **Plugin ID**: `sitemap` · **Category**: `Editorial & SEO` · **Version**: `1.2.1` · **Routes**: `7`
 
 Çok dilli hreflang alternatifleri, özel statik URL'ler ve XSL stil sayfası ile Strapi v5 için otomatik XML Site Haritası ve Site Haritası İndeksi üreticisi.
 

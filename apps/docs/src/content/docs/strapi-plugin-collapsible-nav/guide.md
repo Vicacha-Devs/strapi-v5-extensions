@@ -1,0 +1,161 @@
+---
+title: "Collapsible Navigation — Developer Guide & Admin UI"
+description: "Complete developer reference, content-type schemas, use cases, server configuration, and Admin UI tour for @vicacha-devs/strapi-plugin-collapsible-nav."
+---
+
+## 1. Installation & Peer Setup
+
+```bash
+pnpm add @vicacha-devs/strapi-plugin-collapsible-nav
+```
+
+## 2. Server Configuration (`config/plugins.ts`)
+
+Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
+
+```ts
+// config/plugins.ts
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  "collapsible-nav": {
+    enabled: true,
+    config: {
+      // No options: install, enable, and restart Strapi.
+    },
+  },
+});
+```
+
+## 3. Strapi v5 Admin UI Tour
+
+Once enabled, the plugin registers its workspace and settings inside the Strapi v5 Admin panel using Strapi Design System v2 components:
+
+### Key Localized Admin UI Labels
+
+| Translation Key   | Rendered UI Label             |
+| :---------------- | :---------------------------- |
+| `plugin.name`     | Collapsible Nav               |
+| `toggle.expand`   | Expand navigation             |
+| `toggle.collapse` | Collapse navigation           |
+| `pin.pin`         | Pin sidebar open              |
+| `pin.unpin`       | Unpin sidebar (auto-collapse) |
+
+## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
+
+Registers no Content-Types, routes, or server services (`server/index.ts` exports an empty object). The admin entry registers the plugin and calls `initCollapsibleNav()` once from `bootstrap()`: a DOM controller that finds Strapi's main left navigation, adds a floating chevron toggle and a Pin/Unpin control, animates the width between `22.4rem` (expanded) and `5.6rem` (collapsed), and stores both choices in the browser's `localStorage` (`strapi-collapsible-nav:expanded` and `strapi-collapsible-nav:pinned`). It only activates at Strapi's `large` desktop breakpoint (`>= 1080px`).
+
+```mermaid
+flowchart LR
+  Boot["Strapi Admin bootstrap()"] --> Init["initCollapsibleNav()"]
+  Init --> Nav["Enhance Left Navigation (Chevron Toggle + Pin/Unpin)"]
+  Nav --> Store["localStorage: strapi-collapsible-nav:expanded / :pinned"]
+```
+
+### Where to Find Content-Type Entities in Strapi v5
+
+- **Every Admin Page**: the chevron toggle sits on the edge of the left navigation sidebar across `/admin/*`, with the Pin/Unpin control next to it.
+- **Browser Storage**: `localStorage` keys `strapi-collapsible-nav:expanded` and `strapi-collapsible-nav:pinned` (per browser profile, not per Strapi user).
+- **No Content-Types or API**: this plugin creates no entities, routes, settings page, or database tables.
+
+This plugin operates dynamically across existing Strapi `api::*` and `plugin::*` Content-Type entities without creating separate collection tables.
+
+## Strapi v5 Content Manager Integration (`/admin/content-manager`)
+
+> **Content Manager Sidebar Group**: `Applies to Strapi's left navigation on every admin page, including all Content Manager screens`
+
+### Content Manager Entities & Components
+
+- Strapi main left navigation (`NavBrand`, menu links, `NavUser`), enhanced in place with a chevron toggle and a Pin/Unpin control
+- Browser `localStorage` keys `strapi-collapsible-nav:expanded` and `strapi-collapsible-nav:pinned` (no Content-Type, route, or database table is created)
+
+### Why This Plugin Creates & Integrates Content Manager Entities
+
+`@vicacha-devs/strapi-plugin-collapsible-nav` does not add fields or panels to Content Manager documents. It gives editors more horizontal room while they work in Content Manager lists and edit views by letting them collapse the left navigation that Strapi v5 does not collapse on desktop.
+
+- **Wider Content Manager Lists and Edit Views**: collapse the sidebar to `5.6rem` icons to fit more columns and wider rich-text fields on screen.
+- **Zero Configuration, Zero Server Footprint**: install, enable, and restart Strapi; there are no options, routes, or install scripts.
+- **Per-Browser Preference**: the expanded and pinned state is remembered in `localStorage`, so each editor keeps their own layout.
+
+### How to Use in Strapi Content Manager (Step-by-Step)
+
+1. **Open Any Content Manager Screen**: go to `/admin/content-manager` on a desktop viewport (`>= 1080px`).
+2. **Click the Chevron Toggle**: use the control on the sidebar edge to collapse or expand the navigation.
+3. **Choose Pinned or Hover-to-Peek**: use Pin/Unpin to keep the labels visible, or leave the sidebar compact and hover it to read the labels.
+
+### Content Manager & Plugin Workspace Synchronization
+
+```mermaid
+flowchart LR
+  CM["Content Manager List or Edit View"] --> Toggle["Chevron Toggle (Collapse / Expand)"]
+  Toggle --> Space["More Horizontal Room for Fields and Tables"]
+  Toggle --> Remember["Preference Saved in localStorage"]
+```
+
+### Content Manager Use Cases & Editorial Workflows
+
+#### Content Manager Use Case 1 — Editing Wide Entries Without Horizontal Squeeze
+
+- **Why & What it is for**: Keep wide Content Manager tables and multi-column edit views readable on laptop screens by collapsing the navigation to icons.
+- **How to use in Content Manager**: Open a collection in `/admin/content-manager`, click the chevron toggle to collapse the sidebar, and reopen it later; the collapsed state is restored automatically.
+
+## 5. End-to-End Use Cases & Workflows
+
+### Use Case 1 — Reclaiming Workspace Width on Dense Admin Pages
+
+- **What it is for**: Give editors more room for wide Content Manager tables, the Calendar, and the Media Library by collapsing the left navigation to icons only (`5.6rem`).
+- **How it works**: Click the chevron toggle on the sidebar edge; the width animates between `22.4rem` and `5.6rem` while icons, the brand logo, and the user avatar stay anchored. The choice is saved in `strapi-collapsible-nav:expanded` and restored on the next visit.
+
+```mermaid
+flowchart LR
+  Toggle["Chevron Toggle on Sidebar Edge"] --> Width["Width 22.4rem <-> 5.6rem (260ms transition)"]
+  Width --> Persist["localStorage strapi-collapsible-nav:expanded"]
+```
+
+### Use Case 2 — Compact Sidebar with Hover-to-Peek (Unpinned Mode)
+
+- **What it is for**: Keep the navigation compact by default but still read the full labels on demand.
+- **How it works**: Unpin the sidebar with the Pin/Unpin control: it stays at `5.6rem` and expands on hover, then collapses again. Pin it to keep the labels visible. The state is saved in `strapi-collapsible-nav:pinned`.
+
+```mermaid
+flowchart LR
+  Pin["Pin / Unpin Control"] --> Mode{"Pinned?"}
+  Mode -- "Yes" --> Open["Stays Expanded (22.4rem)"]
+  Mode -- "No" --> Peek["Compact (5.6rem) + Expand on Hover"]
+```
+
+### Use Case 3 — Localized, Theme-Aware Labels for Multilingual Teams
+
+- **What it is for**: Show tooltips and control labels in each editor's language and in the active light or dark theme.
+- **How it works**: The controller reads each menu link's localized `aria-label` (plus the `NavBrand` and `NavUser` labels) so collapsed items keep readable tooltips; toggle and pin labels come from the plugin's `en`, `es`, `ar`, `fr`, and `tr` translations registered through `registerTrads`, and colors follow Strapi's `STRAPI_THEME` setting or the system preference.
+
+```mermaid
+flowchart LR
+  Links["Menu Links (localized aria-label)"] --> Tips["Tooltips on Collapsed Items"]
+  Trads["registerTrads: en, es, ar, fr, tr"] --> Labels["Toggle and Pin Labels"]
+  Theme["STRAPI_THEME or prefers-color-scheme"] --> Colors["Light / Dark Colors"]
+```
+
+## 6. REST API Endpoints (`content-api` & `admin`)
+
+| Method | Endpoint Path | Scope | Controller Handler | Auth |
+| :----- | :------------ | :---- | :----------------- | :--- |
+
+## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
+
+```ts
+// Registered services on plugin "collapsible-nav": "service"
+const pluginService = strapi.plugin("collapsible-nav")?.service("service");
+
+// Retrieving plugin settings via Strapi plugin store
+const store = strapi.store({ type: "plugin", name: "collapsible-nav" });
+const settings = await store.get({ key: "settings" });
+```
+
+## 8. Troubleshooting & Verification
+
+- **Admin panel changes not visible**: Run `pnpm strapi build` after modifying `config/plugins.ts`.
+- **Peer dependency isolation**: Keep `hoistPattern: ["*", "!@strapi/*"]` in `pnpm-workspace.yaml` so `@strapi/*` contexts are never duplicated.
+- **TypeScript type-checking**: Validate both `admin/tsconfig.json` and `server/tsconfig.json` via `pnpm --filter <pkg> test:ts`.

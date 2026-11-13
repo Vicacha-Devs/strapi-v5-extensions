@@ -4,7 +4,7 @@ description: "Güvenli indirmelere sahip dijital yayın kütüphanesi, Medya Kü
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-resources` · **Plugin ID**: `resources` · **Category**: `Community & Engagement` · **Version**: `1.1.0` · **Routes**: `25`
+> **Package**: `@vicacha-devs/strapi-plugin-resources` · **Plugin ID**: `resources` · **Category**: `Community & Engagement` · **Version**: `1.1.1` · **Routes**: `25`
 
 Güvenli indirmelere sahip dijital yayın kütüphanesi, Medya Kütüphanesi klasörleriyle senkronize fotoğraf galerileri ve sesli çok dilli sözlük.
 

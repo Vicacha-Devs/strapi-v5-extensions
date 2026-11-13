@@ -274,4 +274,66 @@ export const PLUGIN_CM_GUIDE_B: Record<string, PluginContentManagerGuide> = {
       ],
     ],
   },
+  "collapsible-nav": {
+    sidebarGroup:
+      "Applies to Strapi's left navigation on every admin page, including all Content Manager screens",
+    cmEntities: [
+      "Strapi main left navigation (`NavBrand`, menu links, `NavUser`), enhanced in place with a chevron toggle and a Pin/Unpin control",
+      "Browser `localStorage` keys `strapi-collapsible-nav:expanded` and `strapi-collapsible-nav:pinned` (no Content-Type, route, or database table is created)",
+    ],
+    whySummary:
+      "`@vicacha-devs/strapi-plugin-collapsible-nav` does not add fields or panels to Content Manager documents. It gives editors more horizontal room while they work in Content Manager lists and edit views by letting them collapse the left navigation that Strapi v5 does not collapse on desktop.",
+    whyBullets: [
+      "**Wider Content Manager Lists and Edit Views**: collapse the sidebar to `5.6rem` icons to fit more columns and wider rich-text fields on screen.",
+      "**Zero Configuration, Zero Server Footprint**: install, enable, and restart Strapi; there are no options, routes, or install scripts.",
+      "**Per-Browser Preference**: the expanded and pinned state is remembered in `localStorage`, so each editor keeps their own layout.",
+    ],
+    howToUseSteps: [
+      "**Open Any Content Manager Screen**: go to `/admin/content-manager` on a desktop viewport (`>= 1080px`).",
+      "**Click the Chevron Toggle**: use the control on the sidebar edge to collapse or expand the navigation.",
+      "**Choose Pinned or Hover-to-Peek**: use Pin/Unpin to keep the labels visible, or leave the sidebar compact and hover it to read the labels.",
+    ],
+    cmMermaid: `flowchart LR
+  CM["Content Manager List or Edit View"] --> Toggle["Chevron Toggle (Collapse / Expand)"]
+  Toggle --> Space["More Horizontal Room for Fields and Tables"]
+  Toggle --> Remember["Preference Saved in localStorage"]`,
+    cmUseCases: [
+      [
+        "Content Manager Use Case 1 — Editing Wide Entries Without Horizontal Squeeze",
+        "Keep wide Content Manager tables and multi-column edit views readable on laptop screens by collapsing the navigation to icons.",
+        "Open a collection in `/admin/content-manager`, click the chevron toggle to collapse the sidebar, and reopen it later; the collapsed state is restored automatically.",
+      ],
+    ],
+  },
+  "opentelemetry": {
+    sidebarGroup:
+      "No Content Manager panel; instruments the Document Service calls that Content Manager actions trigger",
+    cmEntities: [
+      "Document Service calls (`strapi.documents(...)`) made when editors create, update, publish, or delete entries in `/admin/content-manager`, recorded as `strapi.document.<action> <uid>` child spans",
+      "No Content-Type, route, or database table is created by this plugin",
+    ],
+    whySummary:
+      "`@vicacha-devs/strapi-plugin-opentelemetry` adds no Content Manager UI. Every create, update, publish, or delete an editor performs becomes a traced Document Service operation, so slow or failing saves can be tied to a specific content type and plugin in your observability backend.",
+    whyBullets: [
+      "**Per-Content-Type Visibility**: spans carry `strapi.document.uid`, `strapi.document.action`, and `strapi.plugin` (for `plugin::*` UIDs).",
+      "**Opt-Out per Environment**: set `captureDocumentService: false` to stop wrapping Document Service calls without disabling HTTP tracing.",
+      "**Safe by Default**: payloads and user identity beyond `enduser.id` are never attached to spans, and error text is redacted before export.",
+    ],
+    howToUseSteps: [
+      "**Enable the Plugin**: add `opentelemetry` to `config/plugins.ts` and set `OTEL_EXPORTER_OTLP_ENDPOINT` (or `OTEL_CONSOLE_EXPORTER=true` locally).",
+      "**Work Normally in Content Manager**: save or publish entries in `/admin/content-manager`.",
+      "**Inspect the Traces**: search your backend for `strapi.document.update` (or `create`, `publish`, `delete`) spans filtered by `strapi.document.uid`.",
+    ],
+    cmMermaid: `flowchart LR
+  CM["Editor Saves or Publishes in Content Manager"] --> DS["Document Service Call"]
+  DS --> Span["Child Span strapi.document.<action> <uid>"]
+  Span --> Backend["OTLP Backend (Filter by uid and strapi.plugin)"]`,
+    cmUseCases: [
+      [
+        "Content Manager Use Case 1 — Diagnosing Slow Publishes",
+        "Identify which content type and plugin make publishing slow, without logging any entry content.",
+        "Publish an entry in `/admin/content-manager`, then find the `strapi.document.publish <uid>` span under the request trace and compare its duration with other content types.",
+      ],
+    ],
+  },
 };

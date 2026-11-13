@@ -455,6 +455,8 @@ async function main(): Promise<void> {
     const pkgJson = JSON.parse(
       readFileSync(join(pkgDir, "package.json"), "utf8")
     ) as { version?: string; description?: string };
+    // No HTTP routes means no OpenAPI spec to generate.
+    if (!pluginMeta.schemaFile) continue;
     const routes = await loadPluginRoutes(pkgDir, pluginMeta.pluginId);
     const { schemas: ctSchemas, entriesMeta } = loadContentTypeSchemas(pkgDir);
 

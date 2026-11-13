@@ -4,7 +4,7 @@ description: "Planificador FullCalendar v6 multicolección, motor de recurrencia
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-calendar` · **Plugin ID**: `calendar` · **Category**: `Scheduling & Operations` · **Version**: `1.1.2` · **Routes**: `10`
+> **Package**: `@vicacha-devs/strapi-plugin-calendar` · **Plugin ID**: `calendar` · **Category**: `Scheduling & Operations` · **Version**: `1.1.3` · **Routes**: `10`
 
 Planificador FullCalendar v6 multicolección, motor de recurrencia RRULE + RSCALE, calendarios secundarios CLDR (Hijri, Hebreo, Persa) y canales iCal (.ics).
 

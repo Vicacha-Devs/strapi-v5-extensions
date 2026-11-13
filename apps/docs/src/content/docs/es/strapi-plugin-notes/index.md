@@ -4,7 +4,7 @@ description: "Notas editoriales polimórficas, etiquetas por categoría, anotaci
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-notes` · **Plugin ID**: `notes` · **Category**: `Editorial & SEO` · **Version**: `1.1.2` · **Routes**: `8`
+> **Package**: `@vicacha-devs/strapi-plugin-notes` · **Plugin ID**: `notes` · **Category**: `Editorial & SEO` · **Version**: `1.1.3` · **Routes**: `8`
 
 Notas editoriales polimórficas, etiquetas por categoría, anotaciones fijadas en el panel lateral del Content Manager y centro global de notas.
 

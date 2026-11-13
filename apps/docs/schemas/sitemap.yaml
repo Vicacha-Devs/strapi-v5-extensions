@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: XML Sitemap & Hreflang (@vicacha-devs/strapi-plugin-sitemap)
-  version: 1.2.0
+  version: 1.2.1
   description: XML Sitemap and Sitemap Index generator for Strapi v5 with multilingual i18n, custom URLs, image
     thumbnails, and excluded path rules.
 servers:

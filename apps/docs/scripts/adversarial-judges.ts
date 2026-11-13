@@ -106,7 +106,9 @@ function judge2Completeness(): JudgeResult {
   const failures: string[] = [];
   for (const p of plugins) {
     const schemaPath = join(SCHEMAS_ROOT, `${p.schemaFile}.yaml`);
-    if (!existsSync(schemaPath)) {
+    if (!p.schemaFile) {
+      // Plugin exposes no HTTP routes, so there is no OpenAPI spec to check.
+    } else if (!existsSync(schemaPath)) {
       failures.push(`Missing OpenAPI schema: schemas/${p.schemaFile}.yaml`);
     } else {
       const yamlText = readFileSync(schemaPath, "utf8");
@@ -132,7 +134,7 @@ function judge2Completeness(): JudgeResult {
           `${p.slug}/${pageName} is missing Pele Mermaid diagrams (\`\`\`mermaid)`
         );
       }
-      if (!text.includes(p.screenshot)) {
+      if (p.screenshot && !text.includes(p.screenshot)) {
         failures.push(
           `${p.slug}/${pageName} is missing Playwright screenshot ${p.screenshot}`
         );
@@ -260,7 +262,7 @@ function judge4VisualAndLinks(): JudgeResult {
   const expectedShots = [
     "dashboard-overview.png",
     ...plugins.flatMap((p) => [
-      p.screenshot.replace("/screenshots/", ""),
+      ...(p.screenshot ? [p.screenshot.replace("/screenshots/", "")] : []),
       ...(p.contentManagerScreenshot
         ? [p.contentManagerScreenshot.replace("/screenshots/", "")]
         : []),

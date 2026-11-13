@@ -366,4 +366,92 @@ export const PLUGIN_ENTITY_GUIDE_B: Record<string, PluginEntityGuideEntry> = {
       ],
     ],
   },
+  "collapsible-nav": {
+    howItWorks:
+      "Registers no Content-Types, routes, or server services (`server/index.ts` exports an empty object). The admin entry registers the plugin and calls `initCollapsibleNav()` once from `bootstrap()`: a DOM controller that finds Strapi's main left navigation, adds a floating chevron toggle and a Pin/Unpin control, animates the width between `22.4rem` (expanded) and `5.6rem` (collapsed), and stores both choices in the browser's `localStorage` (`strapi-collapsible-nav:expanded` and `strapi-collapsible-nav:pinned`). It only activates at Strapi's `large` desktop breakpoint (`>= 1080px`).",
+    whereToFind: [
+      "**Every Admin Page**: the chevron toggle sits on the edge of the left navigation sidebar across `/admin/*`, with the Pin/Unpin control next to it.",
+      "**Browser Storage**: `localStorage` keys `strapi-collapsible-nav:expanded` and `strapi-collapsible-nav:pinned` (per browser profile, not per Strapi user).",
+      "**No Content-Types or API**: this plugin creates no entities, routes, settings page, or database tables.",
+    ],
+    entityMermaid: `flowchart LR
+  Boot["Strapi Admin bootstrap()"] --> Init["initCollapsibleNav()"]
+  Init --> Nav["Enhance Left Navigation (Chevron Toggle + Pin/Unpin)"]
+  Nav --> Store["localStorage: strapi-collapsible-nav:expanded / :pinned"]`,
+    useCases: [
+      [
+        "Use Case 1 — Reclaiming Workspace Width on Dense Admin Pages",
+        "Give editors more room for wide Content Manager tables, the Calendar, and the Media Library by collapsing the left navigation to icons only (`5.6rem`).",
+        "Click the chevron toggle on the sidebar edge; the width animates between `22.4rem` and `5.6rem` while icons, the brand logo, and the user avatar stay anchored. The choice is saved in `strapi-collapsible-nav:expanded` and restored on the next visit.",
+        `flowchart LR
+  Toggle["Chevron Toggle on Sidebar Edge"] --> Width["Width 22.4rem <-> 5.6rem (260ms transition)"]
+  Width --> Persist["localStorage strapi-collapsible-nav:expanded"]`,
+      ],
+      [
+        "Use Case 2 — Compact Sidebar with Hover-to-Peek (Unpinned Mode)",
+        "Keep the navigation compact by default but still read the full labels on demand.",
+        "Unpin the sidebar with the Pin/Unpin control: it stays at `5.6rem` and expands on hover, then collapses again. Pin it to keep the labels visible. The state is saved in `strapi-collapsible-nav:pinned`.",
+        `flowchart LR
+  Pin["Pin / Unpin Control"] --> Mode{"Pinned?"}
+  Mode -- "Yes" --> Open["Stays Expanded (22.4rem)"]
+  Mode -- "No" --> Peek["Compact (5.6rem) + Expand on Hover"]`,
+      ],
+      [
+        "Use Case 3 — Localized, Theme-Aware Labels for Multilingual Teams",
+        "Show tooltips and control labels in each editor's language and in the active light or dark theme.",
+        "The controller reads each menu link's localized `aria-label` (plus the `NavBrand` and `NavUser` labels) so collapsed items keep readable tooltips; toggle and pin labels come from the plugin's `en`, `es`, `ar`, `fr`, and `tr` translations registered through `registerTrads`, and colors follow Strapi's `STRAPI_THEME` setting or the system preference.",
+        `flowchart LR
+  Links["Menu Links (localized aria-label)"] --> Tips["Tooltips on Collapsed Items"]
+  Trads["registerTrads: en, es, ar, fr, tr"] --> Labels["Toggle and Pin Labels"]
+  Theme["STRAPI_THEME or prefers-color-scheme"] --> Colors["Light / Dark Colors"]`,
+      ],
+    ],
+  },
+  "opentelemetry": {
+    howItWorks:
+      "Registers no Content-Types, routes, or admin pages. When `enabled`, the server `register()` lifecycle validates the config, starts the OpenTelemetry Node SDK (OTLP/HTTP traces and metrics plus auto-instrumentations), hooks `strapi.log.error`, adds a request middleware (HTTP spans, the `http.server.request.duration` histogram, and the `http.server.errors` counter), and, when `captureDocumentService` is `true`, wraps Document Service calls in child spans named `strapi.document.<action> <uid>`. `bootstrap()` logs the active exporter and `destroy()` flushes buffered spans and metrics. All exported error text passes through built-in secret and PII redaction.",
+    whereToFind: [
+      "**Strapi Boot Log**: `[opentelemetry] Active for service ...` is logged from `bootstrap()` with the service name and the exporter target (`otlpEndpoint`, `console`, or `no-exporter`).",
+      "**Your OTLP Backend**: traces and metrics arrive at `<otlpEndpoint>/v1/traces` and `<otlpEndpoint>/v1/metrics` in SigNoz, Grafana, Sentry OTLP ingest, or any OTLP/HTTP collector.",
+      "**Strapi Config**: `config/plugins.ts` -> `opentelemetry.config`, validated at boot by `validateOtelConfig`.",
+      "**No Admin UI or Content-Types**: this plugin creates no entities, routes, settings page, or database tables.",
+    ],
+    entityMermaid: `flowchart LR
+  Req["Koa Request"] --> MW["Request Middleware (HTTP span, duration, errors)"]
+  Docs["Document Service Calls"] --> Spans["Child Spans strapi.document.<action> <uid>"]
+  Log["strapi.log.error"] --> Events["Exception Span Events + strapi.log.errors"]
+  MW --> Redact["SanitizingSpanExporter (Secret and PII Redaction)"]
+  Spans --> Redact
+  Events --> Redact
+  Redact --> OTLP["OTLP/HTTP Traces and Metrics"]`,
+    useCases: [
+      [
+        "Use Case 1 — Tracing Slow or Failing Requests Across Plugins",
+        "Find which plugin makes an endpoint slow or failing, using the `strapi.plugin` attribute derived from `plugin::<name>.<model>` UIDs and plugin route paths (for example `/api/bookings/...` -> `bookings`).",
+        "Point `otlpEndpoint` at your collector; each request produces an HTTP span with `http.route`, `http.response.status_code`, and `strapi.plugin`, and `http.server.request.duration` is recorded by method, route, and status.",
+        `flowchart LR
+  Request["GET /api/bookings/slots"] --> Span["HTTP Span (http.route, status, strapi.plugin = bookings)"]
+  Span --> Histogram["http.server.request.duration"]
+  Histogram --> Backend["OTLP Backend Dashboard"]`,
+      ],
+      [
+        "Use Case 2 — Capturing Caught Errors from Plugins and Background Jobs",
+        "Surface errors that plugins, email lifecycles, or background jobs catch and only log, which would otherwise never reach an error tracker.",
+        "The plugin hooks `strapi.log.error`, records each call as an `exception` span event, and counts it in `strapi.log.errors`; unhandled request errors also log `trace_id`, `span_id`, `method`, `path`, and `plugin` for log-trace correlation.",
+        `flowchart LR
+  Caught["Plugin Catches Error and Calls strapi.log.error"] --> Hook["Logger Hook"]
+  Hook --> Event["exception Span Event + strapi.log.errors Counter"]
+  Event --> Correlate["Logs Carry trace_id and span_id"]`,
+      ],
+      [
+        "Use Case 3 — Shipping Telemetry Without Leaking Secrets or PII",
+        "Send traces to a third-party backend while keeping credentials and personal data out of them.",
+        "Request bodies, `Authorization`, `Cookie`, and user emails or names are never attached to spans. Error text is redacted for `Bearer`/`Basic` tokens, URL credentials, sensitive query parameters, and email addresses, and is length-bounded before redaction so pathological input cannot stall the sanitizer.",
+        `flowchart LR
+  Error["Error Message or Stack"] --> Bound["Bound Input Length"]
+  Bound --> Redact["Redact Tokens, URL Credentials, Query Secrets, Emails"]
+  Redact --> Export["Export to OTLP Backend"]`,
+      ],
+    ],
+  },
 };
