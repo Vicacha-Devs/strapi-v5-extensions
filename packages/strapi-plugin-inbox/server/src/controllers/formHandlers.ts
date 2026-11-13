@@ -24,13 +24,9 @@ function normalizeSubmitPayload(
   return nestedData ? { ...rawBody, ...nestedData } : rawBody;
 }
 
-function resolveClientIp(ctx: ControllerCtx): string {
+export function resolveClientIp(ctx: ControllerCtx): string {
   const directIp = (ctx as unknown as { ip?: string }).ip || ctx.request.ip;
-  if (directIp && directIp.trim()) return directIp.trim();
-  const forwarded = ctx.request.headers?.["x-forwarded-for"]
-    ?.split(",")[0]
-    ?.trim();
-  return forwarded || "127.0.0.1";
+  return directIp && directIp.trim() ? directIp.trim() : "127.0.0.1";
 }
 
 function isAuthenticatedAdminContext(ctx: ControllerCtx): boolean {
