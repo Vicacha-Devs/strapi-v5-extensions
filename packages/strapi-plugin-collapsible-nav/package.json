@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-collapsible-nav",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Restores Strapi v4-style collapsible/expandable left navigation sidebar in the Strapi v5 admin panel.",
   "keywords": [
     "admin",

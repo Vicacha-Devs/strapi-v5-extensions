@@ -1,6 +1,6 @@
 {
   "name": "@vicacha-devs/strapi-plugin-opentelemetry",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Vendor-neutral OpenTelemetry error tracking and performance monitoring (APM) plugin for Strapi v5.",
   "keywords": [
     "apm",

@@ -1,5 +1,11 @@
 # @vicacha-devs/strapi-plugin-inbox
 
+## 1.1.2
+
+### Patch Changes
+
+- 7b57b78: Resolve the form submission client IP only from the server-provided `ctx.ip`, no longer falling back to the spoofable `X-Forwarded-For` header when computing rate-limit keys.
+
 ## 1.1.1
 
 ### Patch Changes
