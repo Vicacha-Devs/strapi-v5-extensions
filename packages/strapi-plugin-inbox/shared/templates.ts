@@ -254,6 +254,32 @@ export const STARTER_FORM_TEMPLATES: readonly FormStarterTemplate[] = [
             ar: "تفاصيل الطلب والملاحظات",
           },
         },
+        {
+          id: "fld_supporting_documents",
+          type: "file",
+          name: "supportingDocuments",
+          label: "Supporting Documents",
+          helpText:
+            "Attach ID, certificates, or supporting PDFs/images (up to 5 files, 10 MB each).",
+          required: false,
+          width: "full",
+          accept: ".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx",
+          maxSizeMb: 10,
+          multiple: true,
+          maxFiles: 5,
+          localizedLabels: {
+            es: "Documentos de soporte",
+            en: "Supporting Documents",
+            ar: "المستندات الداعمة",
+            tr: "Destekleyici Belgeler",
+          },
+          localizedHelpTexts: {
+            es: "Adjunta documento de identidad, certificados o PDFs/imágenes de soporte (máx. 5 archivos, 10 MB cada uno).",
+            en: "Attach ID, certificates, or supporting PDFs/images (up to 5 files, 10 MB each).",
+            ar: "أرفق بطاقة الهوية أو الشهادات أو ملفات PDF/الصور الداعمة (بحد أقصى 5 ملفات، 10 ميجابايت لكل ملف).",
+            tr: "Kimlik, sertifika veya destekleyici PDF/görseller ekleyin (en fazla 5 dosya, her biri 10 MB).",
+          },
+        },
       ],
       checklistTemplate: [
         {

@@ -20,6 +20,7 @@ const LOCALIZED_REQUIRED_FALLBACK: Record<string, (label: string) => string> = {
   es: (label) => `${label} es obligatorio`,
   en: (label) => `${label} is required`,
   ar: (label) => `${label} مطلوب`,
+  tr: (label) => `${label} zorunludur`,
 };
 
 export function isValueEmpty(value: unknown): boolean {

@@ -8,6 +8,7 @@ import {
   type FormTranslation,
   type SubmissionPriority,
 } from "../../../shared";
+import { fileFieldConfig } from "./fileFieldConfig";
 
 export interface EmbeddedInboxMetadata {
   category?: FormCategory;
@@ -69,7 +70,7 @@ function resolveFieldWidth(width?: string): "half" | "third" | "full" {
 function mapFieldToCms(f: FormField, idx: number): Record<string, unknown> {
   const mapped: Record<string, unknown> = {
     id: pick(f.id, `fld_${idx + 1}`),
-    type: f.type === "file" ? "text" : f.type,
+    type: f.type,
     name: f.name,
     label: f.label,
     placeholder: pick(f.placeholder, ""),
@@ -94,6 +95,7 @@ function mapFieldToCms(f: FormField, idx: number): Record<string, unknown> {
         : { type: v.type, value: v.value, message: v.message }
     ),
   };
+  Object.assign(mapped, fileFieldConfig(f));
   if (f.localizedLabels) mapped.localizedLabels = f.localizedLabels;
   if (f.localizedPlaceholders)
     mapped.localizedPlaceholders = f.localizedPlaceholders;
@@ -309,10 +311,12 @@ function mapCmsFieldToInbox(
     pick(cf.width as string | undefined, prev?.width)
   );
 
+  const resolvedType = pick(cf.type as FormField["type"], prev?.type, "text");
+
   return {
     ...prev,
     id: fieldId,
-    type: pick(cf.type as FormField["type"], prev?.type, "text"),
+    type: resolvedType,
     name: fieldName,
     label: String(pick(cf.label, prev?.label, fieldName)),
     placeholder: resolveOptionalString(cf.placeholder, prev?.placeholder),
@@ -321,6 +325,10 @@ function mapCmsFieldToInbox(
     required: Boolean(pickDef(cf.required, prev?.required, false)),
     width,
     ...(mergedOptions ? { options: mergedOptions } : {}),
+    ...fileFieldConfig(
+      { ...cf, type: resolvedType } as unknown as FormField,
+      prev
+    ),
     validation: Array.isArray(cf.validation)
       ? (cf.validation as FormField["validation"])
       : prev?.validation,
