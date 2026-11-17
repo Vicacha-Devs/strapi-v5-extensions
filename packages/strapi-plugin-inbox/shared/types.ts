@@ -58,6 +58,10 @@ export interface FormField {
   localizedLabels?: Record<string, string>;
   localizedPlaceholders?: Record<string, string>;
   localizedHelpTexts?: Record<string, string>;
+  accept?: string;
+  maxSizeMb?: number;
+  multiple?: boolean;
+  maxFiles?: number;
 }
 
 export interface ChecklistItem {

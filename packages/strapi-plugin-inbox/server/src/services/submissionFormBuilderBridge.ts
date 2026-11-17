@@ -13,6 +13,7 @@ import {
   type InboxSettings,
   type SubmissionRecord,
 } from "../../../shared";
+import { fileFieldConfig } from "./fileFieldConfig";
 
 let mirroringToFormBuilderCms = false;
 
@@ -59,6 +60,7 @@ export async function mirrorSubmissionToFormBuilderCms(
         type: f.type,
         order: idx,
         options: f.options,
+        ...fileFieldConfig(f),
       }));
     const cmsSub = await strapi.db
       .query(FORM_BUILDER_CMS_SUBMISSION_UID)
