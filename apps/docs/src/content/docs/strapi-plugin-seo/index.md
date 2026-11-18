@@ -48,14 +48,42 @@ From any content manager view for a content-type that contains the SEO component
 `./config/plugins.ts`
 
 ```ts
-export default () => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultVal?: string) => string;
+}) => ({
   // ...
   seo: {
     enabled: true,
+    config: {
+      autoCreateComponent: true,
+      autoPopulateOnSave: true,
+      generateTitle: ({ doc }) =>
+        typeof doc.title === "string" ? doc.title : null,
+      generateDescription: ({ doc }) =>
+        typeof doc.excerpt === "string" ? doc.excerpt : null,
+      generateImage: ({ doc }) => doc.coverImage ?? doc.image ?? null,
+      generateURL: ({ doc }) =>
+        typeof doc.slug === "string"
+          ? `${env("PUBLIC_SITE_URL", "")}/${doc.slug}`
+          : null,
+    },
   },
   // ...
 });
 ```
+
+### Configuration Options
+
+| Option                | Type                      | Default | Description                                                                                                                                             |
+| :-------------------- | :------------------------ | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `autoCreateComponent` | `boolean`                 | `false` | Automatically creates `shared.seo` and `shared.open-graph` on bootstrap if missing.                                                                     |
+| `autoPopulateOnSave`  | `boolean`                 | `false` | Registers a `strapi.documents.use` middleware that fills empty `metaTitle`, `metaDescription`, `metaImage`, and `canonicalURL` fields on create/update. |
+| `generateTitle`       | `(ctx) => string \| null` | —       | Custom title generator (`{ uid, doc, locale, strapi }`), truncated to 60 chars.                                                                         |
+| `generateDescription` | `(ctx) => string \| null` | —       | Custom description generator, truncated to 160 chars.                                                                                                   |
+| `generateImage`       | `(ctx) => unknown`        | —       | Custom social image resolver.                                                                                                                           |
+| `generateURL`         | `(ctx) => string \| null` | —       | Custom canonical URL generator.                                                                                                                         |
 
 Then, you'll need to build your admin panel:
 
@@ -76,11 +104,12 @@ You'll be able from the SEO settings page to import a `shared.seo` & `shared.met
 
 ## EditView SEO button
 
-Once you create your SEO component in the edit view inside the Content Manager, the SEO button will appear on the the [right-links injection zone](https://docs.strapi.io/developer-docs/latest/developer-resources/plugin-api-reference/admin-panel.html#injection-zones-api). You'll be able to:
+Once you create your SEO component in the edit view inside the Content Manager, the SEO button will appear on the [right-links injection zone](https://docs.strapi.io/developer-docs/latest/developer-resources/plugin-api-reference/admin-panel.html#injection-zones-api). You'll be able to:
 
-- Manage the meta title & description of your content and preview it in SERP.
+- Manage the meta title & description of your content and preview it in SERP (with `noindex` directive awareness).
+- Auto-generate SEO metadata from the current document via `POST /seo/generate`.
 - Manage your meta social tags (Facebook & Twitter) and preview your post.
-- Analyze your content a little deeper via an SEO analysis of your content.
+- Validate JSON-LD `structuredData` (`@context` and `@type` checks) and run a deep SEO analysis of your content.
 
 ## Content-Type Entities & Where to Find Them
 

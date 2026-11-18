@@ -4,7 +4,7 @@ description: "Gestor del componente compartido SEO y redes sociales, vista previ
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.1.2` · **Routes**: `5`
+> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.1.2` · **Routes**: `6`
 
 Gestor del componente compartido SEO y redes sociales, vista previa en vivo de Google SERP y OpenGraph/X, y analizador de densidad de palabras clave.
 
@@ -160,5 +160,6 @@ flowchart LR
 | `GET`  | `/seo/component`     | `admin` | `seo.findSeoComponent`   | Bearer JWT    |
 | `POST` | `/seo/component`     | `admin` | `seo.createSeoComponent` | Bearer JWT    |
 | `GET`  | `/seo/content-types` | `admin` | `seo.findContentTypes`   | Bearer JWT    |
+| `POST` | `/seo/generate`      | `admin` | `seo.generateSeo`        | Bearer JWT    |
 | `GET`  | `/seo/settings`      | `admin` | `settings.getSettings`   | Bearer JWT    |
 | `POST` | `/seo/settings`      | `admin` | `settings.setSettings`   | Bearer JWT    |

@@ -184,6 +184,7 @@ flowchart LR
 | `GET`  | `/seo/component`     | `admin` | `seo.findSeoComponent`   | Bearer JWT |
 | `POST` | `/seo/component`     | `admin` | `seo.createSeoComponent` | Bearer JWT |
 | `GET`  | `/seo/content-types` | `admin` | `seo.findContentTypes`   | Bearer JWT |
+| `POST` | `/seo/generate`      | `admin` | `seo.generateSeo`        | Bearer JWT |
 | `GET`  | `/seo/settings`      | `admin` | `settings.getSettings`   | Bearer JWT |
 | `POST` | `/seo/settings`      | `admin` | `settings.setSettings`   | Bearer JWT |
 
