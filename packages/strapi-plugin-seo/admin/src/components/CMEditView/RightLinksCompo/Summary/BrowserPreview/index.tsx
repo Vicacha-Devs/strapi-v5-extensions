@@ -21,15 +21,20 @@ import { Serp } from "./Serp";
 
 interface BrowserPreviewProps {
   modifiedData: ContentManagerFormValues;
+  previewUrl?: string | null;
 }
 
-export const BrowserPreview = ({ modifiedData }: BrowserPreviewProps) => {
+export const BrowserPreview = ({
+  modifiedData,
+  previewUrl,
+}: BrowserPreviewProps) => {
   const { formatMessage } = useIntl();
 
   const seo: SeoComponentValues | null = modifiedData?.seo ?? null;
   const metaTitle = seo?.metaTitle ?? null;
   const metaDescription = seo?.metaDescription ?? null;
   const keywords = seo?.keywords ?? null;
+  const resolvedUrl = seo?.canonicalURL || previewUrl || null;
 
   return (
     <Modal.Content labelledBy="title">
@@ -51,7 +56,11 @@ export const BrowserPreview = ({ modifiedData }: BrowserPreviewProps) => {
           <Flex direction="column" gap={2} alignItems="flex-start">
             {metaTitle && metaDescription && (
               <Box paddingBottom={6}>
-                <Serp metaTitle={metaTitle} metaDescription={metaDescription} />
+                <Serp
+                  metaTitle={metaTitle}
+                  metaDescription={metaDescription}
+                  url={resolvedUrl}
+                />
               </Box>
             )}
 

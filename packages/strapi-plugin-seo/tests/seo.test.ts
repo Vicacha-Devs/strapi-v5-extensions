@@ -11,7 +11,13 @@ import { getRegularImageAltTexts } from "../admin/src/components/CMEditView/util
 import { getRichTextAndBlocksFields } from "../admin/src/components/CMEditView/utils/getRichTextAndBlocksFields.ts";
 import { getRichTextData } from "../admin/src/components/CMEditView/utils/getRichTextData.ts";
 import serverPlugin from "../server/src/index.ts";
-import { DEFAULT_SEO_CHECKS, PLUGIN_ID } from "../shared/index.ts";
+import {
+  DEFAULT_SEO_CHECKS,
+  PLUGIN_ID,
+  findSeoAttributeName,
+  hasNoIndexDirective,
+  validateStructuredData,
+} from "../shared/index.ts";
 
 const createMockStrapi = () => {
   const storeData = new Map<string, unknown>();
@@ -136,7 +142,7 @@ describe("strapi-plugin-seo", () => {
     const seoRoutes = serverPlugin.routes.seo.routes;
     const settingsRoutes = serverPlugin.routes.settings.routes;
     const allRoutes = [...seoRoutes, ...settingsRoutes];
-    assert.equal(allRoutes.length, 5);
+    assert.equal(allRoutes.length, 6);
 
     for (const route of allRoutes) {
       const policies = route.config?.policies ?? [];
@@ -369,6 +375,96 @@ describe("strapi-plugin-seo", () => {
         "__proto__"
       ),
       false
+    );
+  });
+
+  it("supports dynamic shared.seo field detection, noindex directives, and JSON-LD validation", () => {
+    assert.equal(
+      findSeoAttributeName({
+        meta: { type: "component", component: "shared.seo" },
+      }),
+      "meta"
+    );
+    assert.equal(
+      findSeoAttributeName({
+        title: { type: "string" },
+      }),
+      null
+    );
+
+    assert.equal(hasNoIndexDirective("noindex, nofollow"), true);
+    assert.equal(hasNoIndexDirective("index, follow"), false);
+    assert.equal(hasNoIndexDirective(null), false);
+
+    assert.equal(
+      validateStructuredData({
+        "@context": "https://schema.org",
+        "@type": "Article",
+      }).valid,
+      true
+    );
+    assert.equal(
+      validateStructuredData("{bad json").reason,
+      "invalid_json"
+    );
+    assert.equal(
+      validateStructuredData({ foo: "bar" }).reason,
+      "missing_jsonld_keys"
+    );
+  });
+
+  it("generates SEO metadata from plugin config hooks and falls back to doc fields", async () => {
+    const strapi = createMockStrapi();
+    strapi.config = {
+      get(key: string) {
+        if (key === "plugin::seo") {
+          return {
+            generateTitle: ({ doc, locale }: any) =>
+              `Mezquita (${locale ?? "es"}) — ${doc.title}`,
+            generateDescription: ({ doc }: any) => doc.excerpt,
+            generateURL: ({ doc, locale }: any) =>
+              `https://mezquitabogota.org/${locale ?? "es"}/articles/${doc.slug}`,
+          };
+        }
+        return {};
+      },
+    };
+
+    const seoSvc = strapi.plugin("seo").service("seo");
+    const generated = await seoSvc.generateSeoMetadata({
+      uid: "api::article.article",
+      doc: {
+        title: "Khutbah del Viernes",
+        excerpt: "Resumen semanal de la khutbah en Bogotá.",
+        slug: "khutbah-viernes",
+      },
+      locale: "es",
+    });
+
+    assert.equal(generated.metaTitle, "Mezquita (es) — Khutbah del Viernes");
+    assert.equal(
+      generated.metaDescription,
+      "Resumen semanal de la khutbah en Bogotá."
+    );
+    assert.equal(
+      generated.canonicalURL,
+      "https://mezquitabogota.org/es/articles/khutbah-viernes"
+    );
+
+    const populated = await seoSvc.autoPopulateSeoData({
+      uid: "api::article.article",
+      doc: {
+        title: "Khutbah del Viernes",
+        excerpt: "Resumen semanal de la khutbah en Bogotá.",
+        slug: "khutbah-viernes",
+      },
+      locale: "es",
+      seoFieldName: "seo",
+    });
+    assert.equal(populated?.metaTitle, "Mezquita (es) — Khutbah del Viernes");
+    assert.equal(
+      populated?.canonicalURL,
+      "https://mezquitabogota.org/es/articles/khutbah-viernes"
     );
   });
 });

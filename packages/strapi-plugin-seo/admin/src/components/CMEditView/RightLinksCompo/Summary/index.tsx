@@ -1,14 +1,17 @@
 import {
+  Badge,
   Box,
   Button,
+  Flex,
   Modal,
   TextButton,
   Typography,
 } from "@strapi/design-system";
-import { ArrowRight, Eye } from "@strapi/icons";
+import { ArrowRight, Eye, Pencil } from "@strapi/icons";
 import {
   unstable_useContentManagerContext as useContentManagerContext,
   unstable_useDocument as useDocument,
+  useFetchClient,
 } from "@strapi/strapi/admin";
 import * as React from "react";
 import { useIntl } from "react-intl";
@@ -18,9 +21,12 @@ import {
   type ContentManagerFormValues,
   type ContentTypeSchemaInfo,
   DEFAULT_SEO_CHECKS,
+  type GeneratedSeoMetadata,
   type SeoCheckerAction,
   type SeoChecksConfig,
   type SeoChecksState,
+  type SeoComponentValues,
+  hasNoIndexDirective,
 } from "../../../../../../shared";
 import { useSettingsApi } from "../../../../hooks/useSettingsApi";
 import { getTrad } from "../../../../utils/getTrad";
@@ -105,20 +111,40 @@ const computeAllChecks = (
   };
 };
 
-export const Summary = () => {
+interface SummaryProps {
+  seoFieldName?: string;
+}
+
+export const Summary = ({ seoFieldName = "seo" }: SummaryProps) => {
   const { formatMessage } = useIntl();
   const { getSettings } = useSettingsApi();
+  const { post } = useFetchClient();
 
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [generatedUrl, setGeneratedUrl] = React.useState<string | null>(null);
   const [seoChecksConfig, setSeoChecksConfig] =
     React.useState<SeoChecksConfig>(DEFAULT_SEO_CHECKS);
   const [checks, dispatch] = React.useReducer(reducer, initialState);
 
   const { model, collectionType, id, form, contentType, components } =
     useContentManagerContext();
-  const { values: modifiedData } = form;
+  const { values: modifiedData, onChange } = form as {
+    values: ContentManagerFormValues;
+    onChange?: (name: string, value: unknown) => void;
+  };
 
-  const { metaTitle, metaDescription, openGraph } = modifiedData.seo ?? {};
+  const rawSeo = (modifiedData?.[seoFieldName] ?? null) as SeoComponentValues | null;
+  const normalizedModifiedData = React.useMemo<ContentManagerFormValues>(
+    () =>
+      seoFieldName === "seo"
+        ? modifiedData
+        : { ...modifiedData, seo: rawSeo },
+    [modifiedData, rawSeo, seoFieldName]
+  );
+
+  const { metaTitle, metaDescription, openGraph, metaRobots } = rawSeo ?? {};
+  const isNoIndex = hasNoIndexDirective(metaRobots);
 
   const { document } = useDocument({
     model,
@@ -128,6 +154,43 @@ export const Summary = () => {
 
   const updatedAt = document?.updatedAt ?? modifiedData?.updatedAt ?? null;
   const uid = contentType?.uid ?? "";
+
+  const handleAutoGenerate = React.useCallback(async () => {
+    setIsGenerating(true);
+    try {
+      const locale =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get(
+              "plugins[i18n][locale]"
+            )
+          : null;
+      const { data } = await post<GeneratedSeoMetadata>("/seo/generate", {
+        uid,
+        doc: modifiedData,
+        locale,
+      });
+      if (data) {
+        const nextSeo: Record<string, unknown> = {
+          ...(rawSeo ?? {}),
+        };
+        if (data.metaTitle) nextSeo.metaTitle = data.metaTitle;
+        if (data.metaDescription)
+          nextSeo.metaDescription = data.metaDescription;
+        if (data.metaImage && !nextSeo.metaImage)
+          nextSeo.metaImage = data.metaImage;
+        if (data.canonicalURL && !nextSeo.canonicalURL)
+          nextSeo.canonicalURL = data.canonicalURL;
+        if (data.canonicalURL) setGeneratedUrl(data.canonicalURL);
+        if (typeof onChange === "function") {
+          onChange(seoFieldName, nextSeo);
+        }
+      }
+    } catch {
+      // Ignore generation errors in UI
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [modifiedData, onChange, post, rawSeo, seoFieldName, uid]);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -156,7 +219,7 @@ export const Summary = () => {
   React.useEffect(() => {
     const status = computeAllChecks(
       seoChecksConfig,
-      modifiedData,
+      normalizedModifiedData,
       components,
       contentType,
       updatedAt
@@ -165,27 +228,97 @@ export const Summary = () => {
       type: "UPDATE_FOR_PREVIEW",
       value: status,
     });
-  }, [seoChecksConfig, modifiedData, components, contentType, updatedAt]);
+  }, [
+    seoChecksConfig,
+    normalizedModifiedData,
+    components,
+    contentType,
+    updatedAt,
+  ]);
+
+  const titleLen = typeof metaTitle === "string" ? metaTitle.length : 0;
+  const descLen =
+    typeof metaDescription === "string" ? metaDescription.length : 0;
 
   return (
     <SeoCheckerContext.Provider value={dispatch}>
       <Box paddingTop={4} width="100%">
-        <Typography
-          tag="h2"
-          variant="sigma"
-          textTransform="uppercase"
-          textColor="neutral600"
-        >
-          {formatMessage({
-            id: getTrad("Plugin.name"),
-            defaultMessage: "SEO Plugin",
-          })}
-        </Typography>
+        <Flex justifyContent="space-between" alignItems="center" gap={2}>
+          <Typography
+            tag="h2"
+            variant="sigma"
+            textTransform="uppercase"
+            textColor="neutral600"
+          >
+            {formatMessage({
+              id: getTrad("Plugin.name"),
+              defaultMessage: "SEO Plugin",
+            })}
+          </Typography>
+          {isNoIndex && (
+            <Badge active={false}>
+              {formatMessage({
+                id: getTrad("Badge.noindex"),
+                defaultMessage: "noindex",
+              })}
+            </Badge>
+          )}
+        </Flex>
+
+        <Box paddingTop={2}>
+          <Button
+            fullWidth
+            variant="tertiary"
+            startIcon={<Pencil />}
+            loading={isGenerating}
+            onClick={handleAutoGenerate}
+          >
+            {formatMessage({
+              id: getTrad("Button.auto-generate"),
+              defaultMessage: "Auto-generate SEO",
+            })}
+          </Button>
+        </Box>
+
+        <Box paddingTop={2}>
+          <Flex justifyContent="space-between">
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage({
+                id: getTrad("Length.title"),
+                defaultMessage: "Title",
+              })}
+            </Typography>
+            <Typography
+              variant="pi"
+              textColor={
+                titleLen === 0 || titleLen > 60 ? "danger600" : "success600"
+              }
+            >
+              {titleLen}/60
+            </Typography>
+          </Flex>
+          <Flex justifyContent="space-between" paddingTop={1}>
+            <Typography variant="pi" textColor="neutral600">
+              {formatMessage({
+                id: getTrad("Length.description"),
+                defaultMessage: "Description",
+              })}
+            </Typography>
+            <Typography
+              variant="pi"
+              textColor={
+                descLen < 50 || descLen > 160 ? "danger600" : "success600"
+              }
+            >
+              {descLen}/160
+            </Typography>
+          </Flex>
+        </Box>
 
         {metaTitle && metaDescription && (
           <Modal.Root>
             <Modal.Trigger>
-              <Box paddingTop={1}>
+              <Box paddingTop={2}>
                 <Button fullWidth variant="secondary" startIcon={<Eye />}>
                   {formatMessage({
                     id: getTrad("Button.browser-preview"),
@@ -194,7 +327,10 @@ export const Summary = () => {
                 </Button>
               </Box>
             </Modal.Trigger>
-            <BrowserPreview modifiedData={modifiedData} />
+            <BrowserPreview
+              modifiedData={normalizedModifiedData}
+              previewUrl={generatedUrl}
+            />
           </Modal.Root>
         )}
 
@@ -210,7 +346,7 @@ export const Summary = () => {
                 </Button>
               </Box>
             </Modal.Trigger>
-            <OpenGraphPreview modifiedData={modifiedData} />
+            <OpenGraphPreview modifiedData={normalizedModifiedData} />
           </Modal.Root>
         )}
 
@@ -229,7 +365,7 @@ export const Summary = () => {
           </Modal.Trigger>
           <SeoChecks
             updatedAt={document?.updatedAt ?? null}
-            modifiedData={modifiedData}
+            modifiedData={normalizedModifiedData}
             components={components}
             contentType={contentType}
             checks={checks}

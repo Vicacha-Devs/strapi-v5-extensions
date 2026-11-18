@@ -41,5 +41,13 @@ export const seoRoutes = {
         policies: READ_POLICIES,
       },
     },
+    {
+      method: "POST",
+      path: "/generate",
+      handler: "seo.generateSeo",
+      config: {
+        policies: READ_POLICIES,
+      },
+    },
   ],
 };
