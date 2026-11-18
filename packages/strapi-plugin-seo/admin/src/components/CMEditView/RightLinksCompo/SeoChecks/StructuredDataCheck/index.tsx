@@ -46,7 +46,10 @@ export const StructuredDataCheck = ({
         }),
         qualityVerdict: qualityVerdict.bad,
       };
-    } else if (validation.reason === "invalid_json" || validation.reason === "not_object") {
+    } else if (
+      validation.reason === "invalid_json" ||
+      validation.reason === "not_object"
+    ) {
       status = {
         message: formatMessage({
           id: getTrad("SEOChecks.structuredDataCheck.invalid-json"),

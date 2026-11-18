@@ -248,7 +248,12 @@ export function validateStructuredData(
   if (typeof value === "string") {
     const trimmed = value.trim();
     if (!trimmed) {
-      return { valid: false, hasContext: false, hasType: false, reason: "empty" };
+      return {
+        valid: false,
+        hasContext: false,
+        hasType: false,
+        reason: "empty",
+      };
     }
     try {
       parsed = JSON.parse(trimmed);

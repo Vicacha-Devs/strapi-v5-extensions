@@ -60,7 +60,10 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     }
   }
 
-  if (cfg.autoPopulateOnSave && typeof strapiAny.documents?.use === "function") {
+  if (
+    cfg.autoPopulateOnSave &&
+    typeof strapiAny.documents?.use === "function"
+  ) {
     strapiAny.documents.use(async (context, next) => {
       if (context.action === "create" || context.action === "update") {
         const uid = context.uid;

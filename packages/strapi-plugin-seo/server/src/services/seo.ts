@@ -157,10 +157,7 @@ export const seoService = ({ strapi }: { strapi: Core.Strapi }) => ({
       strapi,
     };
 
-    const pickString = (
-      val: unknown,
-      maxLen?: number
-    ): string | null => {
+    const pickString = (val: unknown, maxLen?: number): string | null => {
       if (typeof val !== "string") return null;
       const trimmed = val.trim();
       if (!trimmed) return null;

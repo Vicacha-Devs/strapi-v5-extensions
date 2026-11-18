@@ -403,10 +403,7 @@ describe("strapi-plugin-seo", () => {
       }).valid,
       true
     );
-    assert.equal(
-      validateStructuredData("{bad json").reason,
-      "invalid_json"
-    );
+    assert.equal(validateStructuredData("{bad json").reason, "invalid_json");
     assert.equal(
       validateStructuredData({ foo: "bar" }).reason,
       "missing_jsonld_keys"

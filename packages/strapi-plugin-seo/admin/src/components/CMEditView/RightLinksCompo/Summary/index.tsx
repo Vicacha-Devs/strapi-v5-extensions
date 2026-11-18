@@ -134,12 +134,11 @@ export const Summary = ({ seoFieldName = "seo" }: SummaryProps) => {
     onChange?: (name: string, value: unknown) => void;
   };
 
-  const rawSeo = (modifiedData?.[seoFieldName] ?? null) as SeoComponentValues | null;
+  const rawSeo = (modifiedData?.[seoFieldName] ??
+    null) as SeoComponentValues | null;
   const normalizedModifiedData = React.useMemo<ContentManagerFormValues>(
     () =>
-      seoFieldName === "seo"
-        ? modifiedData
-        : { ...modifiedData, seo: rawSeo },
+      seoFieldName === "seo" ? modifiedData : { ...modifiedData, seo: rawSeo },
     [modifiedData, rawSeo, seoFieldName]
   );
 
@@ -171,7 +170,7 @@ export const Summary = ({ seoFieldName = "seo" }: SummaryProps) => {
       });
       if (data) {
         const nextSeo: Record<string, unknown> = {
-          ...(rawSeo ?? {}),
+          ...rawSeo,
         };
         if (data.metaTitle) nextSeo.metaTitle = data.metaTitle;
         if (data.metaDescription)
