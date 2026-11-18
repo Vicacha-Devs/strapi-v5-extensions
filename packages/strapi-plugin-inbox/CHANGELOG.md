@@ -1,5 +1,11 @@
 # @vicacha-devs/strapi-plugin-inbox
 
+## 1.1.4
+
+### Patch Changes
+
+- d4f5b39: Document the SEO plugin configuration options, `/seo/generate` and JSON-LD validation, and note `tr` fallbacks and file-field metadata in the inbox README.
+
 ## 1.1.3
 
 ### Patch Changes
