@@ -45,16 +45,16 @@ Per-locale URL pattern, priority, and changefreq mapping for a Strapi Content-Ty
 
 > **Kind**: `collectionType` · **DB Table**: `strapi_5_sitemap_plugin_content_types` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `type` | `string` | No | — |
-| `langcode` | `string` | No | — |
-| `pattern` | `string` | No | — |
-| `priority` | `float` | No | — |
-| `frequency` | `string` | No | — |
-| `lastModified` | `string` | No | — |
-| `thumbnail` | `string` | No | — |
-| `populateLinkedModels` | `string` | No | — |
+| Alan (Attribute)       | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--------------------- | :---------- | :------ | :-------------------- |
+| `type`                 | `string`    | No      | —                     |
+| `langcode`             | `string`    | No      | —                     |
+| `pattern`              | `string`    | No      | —                     |
+| `priority`             | `float`     | No      | —                     |
+| `frequency`            | `string`    | No      | —                     |
+| `lastModified`         | `string`    | No      | —                     |
+| `thumbnail`            | `string`    | No      | —                     |
+| `populateLinkedModels` | `string`    | No      | —                     |
 
 ### `plugin::sitemap.sitemap-content-type-single-url` — Sitemap Single URL
 
@@ -63,10 +63,10 @@ Custom static URL entry included alongside dynamic CMS entries in sitemap.xml
 > **Kind**: `collectionType` · **DB Table**: `strapi_5_sitemap_plugin_content_type_single_urls` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
 | Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `slug` | `string` | No | — |
-| `priority` | `float` | No | — |
-| `frequency` | `string` | No | — |
+| :--------------- | :---------- | :------ | :-------------------- |
+| `slug`           | `string`    | No      | —                     |
+| `priority`       | `float`     | No      | —                     |
+| `frequency`      | `string`    | No      | —                     |
 
 ### `plugin::sitemap.sitemap-option` — Sitemap Options
 
@@ -74,12 +74,12 @@ Global sitemap configuration (baseUrl, excludedUrls, useSitemapIndex, sitemapDef
 
 > **Kind**: `singleType` · **DB Table**: `strapi_5_sitemap_plugin_options` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `baseUrl` | `string` | No | — |
-| `excludedUrls` | `json` | No | default: `[]` |
-| `useSitemapIndex` | `boolean` | No | default: `false` |
-| `sitemapDefinitions` | `json` | No | default: `[]` |
+| Alan (Attribute)     | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :------------------- | :---------- | :------ | :-------------------- |
+| `baseUrl`            | `string`    | No      | —                     |
+| `excludedUrls`       | `json`      | No      | default: `[]`         |
+| `useSitemapIndex`    | `boolean`   | No      | default: `false`      |
+| `sitemapDefinitions` | `json`      | No      | default: `[]`         |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
@@ -165,12 +165,12 @@ flowchart LR
 
 ## 4. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/sitemap/sitemap.xml` | `content-api` | `controller.getSitemap` | Bearer JWT |
-| `GET` | `/api/sitemap/sitemap-{slug}.xml` | `content-api` | `controller.getSitemapBySlug` | Bearer JWT |
-| `GET` | `/sitemap/settings` | `admin` | `controller.getSettings` | Bearer JWT |
-| `PUT` | `/sitemap/settings` | `admin` | `controller.updateSettings` | Bearer JWT |
-| `GET` | `/sitemap/content-types` | `admin` | `controller.getContentTypes` | Bearer JWT |
-| `GET` | `/sitemap/locales` | `admin` | `controller.getLocales` | Bearer JWT |
-| `GET` | `/sitemap/allowed-fields` | `admin` | `controller.getAllowedFields` | Bearer JWT |
+| Metot | Uç Nokta Yolu                     | Kapsam        | Denetleyici (Handler)         | Kimlik Doğrulama |
+| :---- | :-------------------------------- | :------------ | :---------------------------- | :--------------- |
+| `GET` | `/api/sitemap/sitemap.xml`        | `content-api` | `controller.getSitemap`       | Bearer JWT       |
+| `GET` | `/api/sitemap/sitemap-{slug}.xml` | `content-api` | `controller.getSitemapBySlug` | Bearer JWT       |
+| `GET` | `/sitemap/settings`               | `admin`       | `controller.getSettings`      | Bearer JWT       |
+| `PUT` | `/sitemap/settings`               | `admin`       | `controller.updateSettings`   | Bearer JWT       |
+| `GET` | `/sitemap/content-types`          | `admin`       | `controller.getContentTypes`  | Bearer JWT       |
+| `GET` | `/sitemap/locales`                | `admin`       | `controller.getLocales`       | Bearer JWT       |
+| `GET` | `/sitemap/allowed-fields`         | `admin`       | `controller.getAllowedFields` | Bearer JWT       |

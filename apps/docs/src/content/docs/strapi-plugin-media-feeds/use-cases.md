@@ -29,32 +29,32 @@ Generic multi-language video, podcast, audio lecture, YouTube item, or live broa
 
 > **Kind**: `collectionType` · **DB Table**: `media_feed_items` · **Admin Location**: `/admin/content-manager/collection-types/plugin::media-feeds.media-item` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | — |
-| `slug` | `uid` | Yes | — |
-| `description` | `text` | Yes | — |
-| `transcript` | `richtext` | No | — |
-| `type` | `string` | Yes | default: `"video"` |
-| `provider` | `enumeration` | No | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
-| `externalId` | `string` | No | — |
-| `sourceUrl` | `string` | No | — |
-| `embedUrl` | `string` | No | — |
-| `speaker` | `string` | No | — |
-| `speakerSlug` | `string` | No | — |
-| `seriesSlug` | `string` | No | — |
-| `duration` | `string` | No | — |
-| `publishedAtLabel` | `string` | No | — |
-| `imageUrl` | `string` | No | — |
-| `imageAlt` | `string` | No | — |
-| `thumbnail` | `media` | No | — |
-| `audioFile` | `media` | No | — |
-| `transcriptFile` | `media` | No | — |
-| `spokenLanguages` | `json` | No | default: `["es"]` |
-| `languageTracks` | `json` | No | default: `[]` |
-| `chapters` | `json` | No | default: `[]` |
-| `featured` | `boolean` | No | default: `false` |
-| `isLive` | `boolean` | No | default: `false` |
+| Attribute          | Strapi Type   | Required | Constraints / Target                                                                              |
+| :----------------- | :------------ | :------- | :------------------------------------------------------------------------------------------------ |
+| `title`            | `string`      | Yes      | —                                                                                                 |
+| `slug`             | `uid`         | Yes      | —                                                                                                 |
+| `description`      | `text`        | Yes      | —                                                                                                 |
+| `transcript`       | `richtext`    | No       | —                                                                                                 |
+| `type`             | `string`      | Yes      | default: `"video"`                                                                                |
+| `provider`         | `enumeration` | No       | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
+| `externalId`       | `string`      | No       | —                                                                                                 |
+| `sourceUrl`        | `string`      | No       | —                                                                                                 |
+| `embedUrl`         | `string`      | No       | —                                                                                                 |
+| `speaker`          | `string`      | No       | —                                                                                                 |
+| `speakerSlug`      | `string`      | No       | —                                                                                                 |
+| `seriesSlug`       | `string`      | No       | —                                                                                                 |
+| `duration`         | `string`      | No       | —                                                                                                 |
+| `publishedAtLabel` | `string`      | No       | —                                                                                                 |
+| `imageUrl`         | `string`      | No       | —                                                                                                 |
+| `imageAlt`         | `string`      | No       | —                                                                                                 |
+| `thumbnail`        | `media`       | No       | —                                                                                                 |
+| `audioFile`        | `media`       | No       | —                                                                                                 |
+| `transcriptFile`   | `media`       | No       | —                                                                                                 |
+| `spokenLanguages`  | `json`        | No       | default: `["es"]`                                                                                 |
+| `languageTracks`   | `json`        | No       | default: `[]`                                                                                     |
+| `chapters`         | `json`        | No       | default: `[]`                                                                                     |
+| `featured`         | `boolean`     | No       | default: `false`                                                                                  |
+| `isLive`           | `boolean`     | No       | default: `false`                                                                                  |
 
 ### `plugin::media-feeds.media-series` — Media Series & Podcast Show
 
@@ -62,21 +62,21 @@ Generic multi-language podcast show, video playlist, or lecture series
 
 > **Kind**: `collectionType` · **DB Table**: `media_feed_series` · **Admin Location**: `/admin/content-manager/collection-types/plugin::media-feeds.media-series` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | — |
-| `slug` | `uid` | Yes | — |
-| `description` | `text` | Yes | — |
-| `author` | `string` | No | — |
-| `coverImageUrl` | `string` | No | — |
-| `category` | `string` | No | default: `"Education"` |
-| `defaultType` | `string` | No | default: `"podcast"` |
-| `spokenLanguages` | `json` | No | default: `["es","en","ar","tr"]` |
-| `rssEnabled` | `boolean` | No | default: `true` |
-| `youtubePlaylistId` | `string` | No | — |
-| `spotifyShowUrl` | `string` | No | — |
-| `applePodcastsUrl` | `string` | No | — |
-| `active` | `boolean` | No | default: `true` |
+| Attribute           | Strapi Type | Required | Constraints / Target             |
+| :------------------ | :---------- | :------- | :------------------------------- |
+| `title`             | `string`    | Yes      | —                                |
+| `slug`              | `uid`       | Yes      | —                                |
+| `description`       | `text`      | Yes      | —                                |
+| `author`            | `string`    | No       | —                                |
+| `coverImageUrl`     | `string`    | No       | —                                |
+| `category`          | `string`    | No       | default: `"Education"`           |
+| `defaultType`       | `string`    | No       | default: `"podcast"`             |
+| `spokenLanguages`   | `json`      | No       | default: `["es","en","ar","tr"]` |
+| `rssEnabled`        | `boolean`   | No       | default: `true`                  |
+| `youtubePlaylistId` | `string`    | No       | —                                |
+| `spotifyShowUrl`    | `string`    | No       | —                                |
+| `applePodcastsUrl`  | `string`    | No       | —                                |
+| `active`            | `boolean`   | No       | default: `true`                  |
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 

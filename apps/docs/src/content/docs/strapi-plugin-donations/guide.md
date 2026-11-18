@@ -15,8 +15,12 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "donations": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  donations: {
     enabled: true,
     config: {
       baseCurrency: "USD",
@@ -37,16 +41,16 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key | Rendered UI Label |
-| :--- | :--- |
-| `evidence.type.paid_receipt` | Paid Utility / Service Bill Receipt |
-| `donations.evidence.type.paid_receipt` | Paid Utility / Service Bill Receipt |
-| `evidence.type.photo_gallery` | Equipment & Donated Assets Photo Gallery |
-| `donations.evidence.type.photo_gallery` | Equipment & Donated Assets Photo Gallery |
-| `evidence.type.delivery_report` | Seasonal / Aid Gift Distribution Report |
-| `donations.evidence.type.delivery_report` | Seasonal / Aid Gift Distribution Report |
-| `evidence.type.audit_document` | Financial Audit & Official Voucher |
-| `donations.evidence.type.audit_document` | Financial Audit & Official Voucher |
+| Translation Key                           | Rendered UI Label                        |
+| :---------------------------------------- | :--------------------------------------- |
+| `evidence.type.paid_receipt`              | Paid Utility / Service Bill Receipt      |
+| `donations.evidence.type.paid_receipt`    | Paid Utility / Service Bill Receipt      |
+| `evidence.type.photo_gallery`             | Equipment & Donated Assets Photo Gallery |
+| `donations.evidence.type.photo_gallery`   | Equipment & Donated Assets Photo Gallery |
+| `evidence.type.delivery_report`           | Seasonal / Aid Gift Distribution Report  |
+| `donations.evidence.type.delivery_report` | Seasonal / Aid Gift Distribution Report  |
+| `evidence.type.audit_document`            | Financial Audit & Official Voucher       |
+| `donations.evidence.type.audit_document`  | Financial Audit & Official Voucher       |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -71,38 +75,38 @@ Generic fundraising campaign, operational utility invoice, or micro-need
 
 > **Kind**: `collectionType` · **DB Table**: `vicacha_donation_campaigns` · **Admin Location**: `/admin/content-manager/collection-types/plugin::donations.campaign` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | — |
-| `slug` | `uid` | Yes | — |
-| `description` | `text` | Yes | — |
-| `body` | `richtext` | No | — |
-| `campaignKind` | `enumeration` | Yes | enum: `major_campaign, utility_invoice, micro_need`; default: `"major_campaign"` |
-| `categoryKey` | `string` | Yes | default: `"general_fund"` |
-| `goalAmount` | `decimal` | Yes | — |
-| `raisedAmount` | `decimal` | No | default: `0` |
-| `currency` | `customField` | Yes | customField: `plugin::donations.currency`; default: `"COP"` |
-| `donorCount` | `integer` | No | default: `0` |
-| `isUrgent` | `boolean` | No | default: `false` |
-| `isFeatured` | `boolean` | No | default: `false` |
-| `isActive` | `boolean` | No | default: `true` |
-| `startDate` | `date` | No | — |
-| `endDate` | `date` | No | — |
-| `dueDate` | `date` | No | — |
-| `billingPeriod` | `string` | No | — |
-| `invoiceReference` | `string` | No | — |
-| `invoiceProvider` | `string` | No | — |
-| `invoiceStatus` | `enumeration` | No | enum: `open, partially_funded, paid, overdue`; default: `"open"` |
-| `suggestedAmounts` | `json` | No | — |
-| `allowCustomAmount` | `boolean` | No | default: `true` |
-| `allowFullBalancePayoff` | `boolean` | No | default: `true` |
-| `ctaLabel` | `string` | No | — |
-| `ctaHref` | `string` | No | — |
-| `coverUrl` | `string` | No | — |
-| `invoiceDocumentUrl` | `string` | No | — |
-| `paymentGatewayUrl` | `string` | No | — |
-| `icon` | `string` | No | — |
-| `evidences` | `json` | No | — |
+| Attribute                | Strapi Type   | Required | Constraints / Target                                                             |
+| :----------------------- | :------------ | :------- | :------------------------------------------------------------------------------- |
+| `title`                  | `string`      | Yes      | —                                                                                |
+| `slug`                   | `uid`         | Yes      | —                                                                                |
+| `description`            | `text`        | Yes      | —                                                                                |
+| `body`                   | `richtext`    | No       | —                                                                                |
+| `campaignKind`           | `enumeration` | Yes      | enum: `major_campaign, utility_invoice, micro_need`; default: `"major_campaign"` |
+| `categoryKey`            | `string`      | Yes      | default: `"general_fund"`                                                        |
+| `goalAmount`             | `decimal`     | Yes      | —                                                                                |
+| `raisedAmount`           | `decimal`     | No       | default: `0`                                                                     |
+| `currency`               | `customField` | Yes      | customField: `plugin::donations.currency`; default: `"COP"`                      |
+| `donorCount`             | `integer`     | No       | default: `0`                                                                     |
+| `isUrgent`               | `boolean`     | No       | default: `false`                                                                 |
+| `isFeatured`             | `boolean`     | No       | default: `false`                                                                 |
+| `isActive`               | `boolean`     | No       | default: `true`                                                                  |
+| `startDate`              | `date`        | No       | —                                                                                |
+| `endDate`                | `date`        | No       | —                                                                                |
+| `dueDate`                | `date`        | No       | —                                                                                |
+| `billingPeriod`          | `string`      | No       | —                                                                                |
+| `invoiceReference`       | `string`      | No       | —                                                                                |
+| `invoiceProvider`        | `string`      | No       | —                                                                                |
+| `invoiceStatus`          | `enumeration` | No       | enum: `open, partially_funded, paid, overdue`; default: `"open"`                 |
+| `suggestedAmounts`       | `json`        | No       | —                                                                                |
+| `allowCustomAmount`      | `boolean`     | No       | default: `true`                                                                  |
+| `allowFullBalancePayoff` | `boolean`     | No       | default: `true`                                                                  |
+| `ctaLabel`               | `string`      | No       | —                                                                                |
+| `ctaHref`                | `string`      | No       | —                                                                                |
+| `coverUrl`               | `string`      | No       | —                                                                                |
+| `invoiceDocumentUrl`     | `string`      | No       | —                                                                                |
+| `paymentGatewayUrl`      | `string`      | No       | —                                                                                |
+| `icon`                   | `string`      | No       | —                                                                                |
+| `evidences`              | `json`        | No       | —                                                                                |
 
 ### `plugin::donations.pledge` — Donation Pledge & Contribution
 
@@ -110,33 +114,33 @@ Donor pledge, utility bill payment, or verified donation record
 
 > **Kind**: `collectionType` · **DB Table**: `vicacha_donation_pledges` · **Admin Location**: `/admin/content-manager/collection-types/plugin::donations.pledge` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `referenceCode` | `string` | Yes | — |
-| `donorName` | `string` | Yes | — |
-| `donorEmail` | `email` | Yes | — |
-| `donorPhone` | `string` | No | — |
-| `donorTaxId` | `string` | No | — |
-| `donorTaxIdType` | `string` | No | — |
-| `isAnonymous` | `boolean` | No | default: `false` |
-| `amount` | `decimal` | Yes | — |
-| `currency` | `customField` | Yes | customField: `plugin::donations.currency`; default: `"COP"` |
-| `convertedBaseAmount` | `decimal` | No | default: `0` |
-| `categoryKey` | `string` | Yes | default: `"general_fund"` |
-| `campaignSlug` | `string` | No | — |
-| `campaignKind` | `enumeration` | No | enum: `major_campaign, utility_invoice, micro_need`; default: `"major_campaign"` |
-| `coversRemainingBalance` | `boolean` | No | default: `false` |
-| `paymentChannel` | `enumeration` | Yes | enum: `bank_transfer, digital_wallet, card_gateway, qr_code, cash, other`; default: `"bank_transfer"` |
-| `paymentProvider` | `string` | No | — |
-| `transactionReference` | `string` | No | — |
-| `receiptProofUrl` | `string` | No | — |
-| `donorNotes` | `text` | No | — |
-| `status` | `enumeration` | Yes | enum: `pending, verified, rejected, certificate_issued`; default: `"pending"` |
-| `verifiedAt` | `datetime` | No | — |
-| `verifiedBy` | `string` | No | — |
-| `certificateSerialNumber` | `string` | No | — |
-| `certificateVerifyUrl` | `string` | No | — |
-| `locale` | `string` | No | default: `"en"` |
+| Attribute                 | Strapi Type   | Required | Constraints / Target                                                                                  |
+| :------------------------ | :------------ | :------- | :---------------------------------------------------------------------------------------------------- |
+| `referenceCode`           | `string`      | Yes      | —                                                                                                     |
+| `donorName`               | `string`      | Yes      | —                                                                                                     |
+| `donorEmail`              | `email`       | Yes      | —                                                                                                     |
+| `donorPhone`              | `string`      | No       | —                                                                                                     |
+| `donorTaxId`              | `string`      | No       | —                                                                                                     |
+| `donorTaxIdType`          | `string`      | No       | —                                                                                                     |
+| `isAnonymous`             | `boolean`     | No       | default: `false`                                                                                      |
+| `amount`                  | `decimal`     | Yes      | —                                                                                                     |
+| `currency`                | `customField` | Yes      | customField: `plugin::donations.currency`; default: `"COP"`                                           |
+| `convertedBaseAmount`     | `decimal`     | No       | default: `0`                                                                                          |
+| `categoryKey`             | `string`      | Yes      | default: `"general_fund"`                                                                             |
+| `campaignSlug`            | `string`      | No       | —                                                                                                     |
+| `campaignKind`            | `enumeration` | No       | enum: `major_campaign, utility_invoice, micro_need`; default: `"major_campaign"`                      |
+| `coversRemainingBalance`  | `boolean`     | No       | default: `false`                                                                                      |
+| `paymentChannel`          | `enumeration` | Yes      | enum: `bank_transfer, digital_wallet, card_gateway, qr_code, cash, other`; default: `"bank_transfer"` |
+| `paymentProvider`         | `string`      | No       | —                                                                                                     |
+| `transactionReference`    | `string`      | No       | —                                                                                                     |
+| `receiptProofUrl`         | `string`      | No       | —                                                                                                     |
+| `donorNotes`              | `text`        | No       | —                                                                                                     |
+| `status`                  | `enumeration` | Yes      | enum: `pending, verified, rejected, certificate_issued`; default: `"pending"`                         |
+| `verifiedAt`              | `datetime`    | No       | —                                                                                                     |
+| `verifiedBy`              | `string`      | No       | —                                                                                                     |
+| `certificateSerialNumber` | `string`      | No       | —                                                                                                     |
+| `certificateVerifyUrl`    | `string`      | No       | —                                                                                                     |
+| `locale`                  | `string`      | No       | default: `"en"`                                                                                       |
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 
@@ -245,24 +249,24 @@ flowchart LR
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path | Scope | Controller Handler | Auth |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/donations/campaigns` | `content-api` | `content-api.listCampaigns` | Public |
-| `GET` | `/api/donations/invoices` | `content-api` | `content-api.listUtilityInvoices` | Public |
-| `GET` | `/api/donations/utility-invoices` | `content-api` | `content-api.listUtilityInvoices` | Public |
-| `GET` | `/api/donations/campaigns/{slug}` | `content-api` | `content-api.getCampaignBySlug` | Public |
-| `GET` | `/api/donations/calculator` | `content-api` | `content-api.getCalculatorAndDirectory` | Public |
-| `POST` | `/api/donations/calculate` | `content-api` | `content-api.calculateAssessment` | Public |
-| `POST` | `/api/donations/pledges` | `content-api` | `content-api.submitPledge` | Public |
-| `POST` | `/api/donations/webhook` | `content-api` | `content-api.handleWebhook` | Public |
-| `GET` | `/donations/settings` | `admin` | `admin.getSettings` | Bearer JWT |
-| `PUT` | `/donations/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
-| `GET` | `/donations/overview` | `admin` | `admin.getOverview` | Bearer JWT |
-| `POST` | `/donations/campaigns` | `admin` | `admin.createCampaign` | Bearer JWT |
-| `PUT` | `/donations/campaigns/{identifier}` | `admin` | `admin.updateCampaign` | Bearer JWT |
-| `POST` | `/donations/campaigns/{identifier}/evidences` | `admin` | `admin.addEvidence` | Bearer JWT |
-| `DELETE` | `/donations/campaigns/{identifier}/evidences/{evidenceId}` | `admin` | `admin.removeEvidence` | Bearer JWT |
-| `POST` | `/donations/pledges/{referenceCode}/verify` | `admin` | `admin.verifyPledge` | Bearer JWT |
+| Method   | Endpoint Path                                              | Scope         | Controller Handler                      | Auth       |
+| :------- | :--------------------------------------------------------- | :------------ | :-------------------------------------- | :--------- |
+| `GET`    | `/api/donations/campaigns`                                 | `content-api` | `content-api.listCampaigns`             | Public     |
+| `GET`    | `/api/donations/invoices`                                  | `content-api` | `content-api.listUtilityInvoices`       | Public     |
+| `GET`    | `/api/donations/utility-invoices`                          | `content-api` | `content-api.listUtilityInvoices`       | Public     |
+| `GET`    | `/api/donations/campaigns/{slug}`                          | `content-api` | `content-api.getCampaignBySlug`         | Public     |
+| `GET`    | `/api/donations/calculator`                                | `content-api` | `content-api.getCalculatorAndDirectory` | Public     |
+| `POST`   | `/api/donations/calculate`                                 | `content-api` | `content-api.calculateAssessment`       | Public     |
+| `POST`   | `/api/donations/pledges`                                   | `content-api` | `content-api.submitPledge`              | Public     |
+| `POST`   | `/api/donations/webhook`                                   | `content-api` | `content-api.handleWebhook`             | Public     |
+| `GET`    | `/donations/settings`                                      | `admin`       | `admin.getSettings`                     | Bearer JWT |
+| `PUT`    | `/donations/settings`                                      | `admin`       | `admin.updateSettings`                  | Bearer JWT |
+| `GET`    | `/donations/overview`                                      | `admin`       | `admin.getOverview`                     | Bearer JWT |
+| `POST`   | `/donations/campaigns`                                     | `admin`       | `admin.createCampaign`                  | Bearer JWT |
+| `PUT`    | `/donations/campaigns/{identifier}`                        | `admin`       | `admin.updateCampaign`                  | Bearer JWT |
+| `POST`   | `/donations/campaigns/{identifier}/evidences`              | `admin`       | `admin.addEvidence`                     | Bearer JWT |
+| `DELETE` | `/donations/campaigns/{identifier}/evidences/{evidenceId}` | `admin`       | `admin.removeEvidence`                  | Bearer JWT |
+| `POST`   | `/donations/pledges/{referenceCode}/verify`                | `admin`       | `admin.verifyPledge`                    | Bearer JWT |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

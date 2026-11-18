@@ -3,6 +3,7 @@ title: "Inbox, Forms & Alert Banners (@vicacha-devs/strapi-plugin-inbox)"
 description: "Generic Strapi v5 Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscriber Lists & Site-Wide Alert Banners (forked & extended from devCluna/strapi-plugin-form-builder-cms)"
 prev: false
 ---
+
 Generic **Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscribers & Site-Wide Alert Banners** for **Strapi v5**, powered by [`@vicacha-devs/strapi-plugin-calendar`](../strapi-plugin-calendar), [`@vicacha-devs/strapi-plugin-bookings`](../strapi-plugin-bookings), and [`@vicacha-devs/strapi-plugin-certificates`](../strapi-plugin-certificates).
 
 ---
@@ -30,12 +31,11 @@ Enable the plugin in `config/plugins.ts`:
 
 ```ts
 export default () => ({
-  "inbox": {
+  inbox: {
     enabled: true,
   },
 });
 ```
-
 
 ## Content-Type Entities & Where to Find Them
 

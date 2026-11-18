@@ -3,6 +3,7 @@ title: "Media Feeds & Podcast RSS (@vicacha-devs/strapi-plugin-media-feeds)"
 description: "Generic Strapi v5 Multi-Language Media Hub, YouTube & OEmbed Enricher, Apple/Spotify Podcast RSS 2.0 Generator & Live Broadcast Status Plugin powered by @vicacha-devs/strapi-plugin-calendar"
 prev: false
 ---
+
 Generic **Multi-Language Audio/Video Media Hub, YouTube & OEmbed Enricher, Apple/Spotify Podcast RSS 2.0 Generator & Live Broadcast Status Plugin** for **Strapi v5**, powered by [`@vicacha-devs/strapi-plugin-calendar`](../strapi-plugin-calendar).
 
 ---
@@ -35,7 +36,6 @@ export default () => ({
   },
 });
 ```
-
 
 ## Content-Type Entities & Where to Find Them
 

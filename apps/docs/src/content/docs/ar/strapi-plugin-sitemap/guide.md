@@ -15,8 +15,12 @@ pnpm add @vicacha-devs/strapi-plugin-sitemap
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "sitemap": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  sitemap: {
     enabled: true,
     config: {
       hostname: env("SITEMAP_HOSTNAME", "https://example.org"),
@@ -36,16 +40,16 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة | النص المعروض في الواجهة |
-| :--- | :--- |
-| `plugin.name` | خريطة الموقع |
-| `plugin.section.item` | الإعدادات |
-| `settings.title` | خريطة الموقع (Sitemap) |
-| `settings.subtitle` | إعدادات ملف XML لخريطة الموقع وفهرس الخرائط |
-| `settings.showSitemap` | عرض خريطة الموقع |
-| `settings.baseUrl.title` | الرابط الأساسي (Base URL) |
+| مفتاح الترجمة                  | النص المعروض في الواجهة                              |
+| :----------------------------- | :--------------------------------------------------- |
+| `plugin.name`                  | خريطة الموقع                                         |
+| `plugin.section.item`          | الإعدادات                                             |
+| `settings.title`               | خريطة الموقع (Sitemap)                               |
+| `settings.subtitle`            | إعدادات ملف XML لخريطة الموقع وفهرس الخرائط          |
+| `settings.showSitemap`         | عرض خريطة الموقع                                     |
+| `settings.baseUrl.title`       | الرابط الأساسي (Base URL)                             |
 | `settings.baseUrl.description` | أدخل الرابط الأساسي المستخدم لجميع عناصر خريطة الموقع |
-| `settings.baseUrl.placeholder` | https://example.com |
+| `settings.baseUrl.placeholder` | https://example.com                                  |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -70,16 +74,16 @@ Per-locale URL pattern, priority, and changefreq mapping for a Strapi Content-Ty
 
 > **Kind**: `collectionType` · **DB Table**: `strapi_5_sitemap_plugin_content_types` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
-| :--- | :--- | :--- | :--- |
-| `type` | `string` | No | — |
-| `langcode` | `string` | No | — |
-| `pattern` | `string` | No | — |
-| `priority` | `float` | No | — |
-| `frequency` | `string` | No | — |
-| `lastModified` | `string` | No | — |
-| `thumbnail` | `string` | No | — |
-| `populateLinkedModels` | `string` | No | — |
+| الحقل                  | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--------------------- | :-------------- | :----- | :--------------- |
+| `type`                 | `string`        | No     | —                |
+| `langcode`             | `string`        | No     | —                |
+| `pattern`              | `string`        | No     | —                |
+| `priority`             | `float`         | No     | —                |
+| `frequency`            | `string`        | No     | —                |
+| `lastModified`         | `string`        | No     | —                |
+| `thumbnail`            | `string`        | No     | —                |
+| `populateLinkedModels` | `string`        | No     | —                |
 
 ### `plugin::sitemap.sitemap-content-type-single-url` — Sitemap Single URL
 
@@ -87,11 +91,11 @@ Custom static URL entry included alongside dynamic CMS entries in sitemap.xml
 
 > **Kind**: `collectionType` · **DB Table**: `strapi_5_sitemap_plugin_content_type_single_urls` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
-| :--- | :--- | :--- | :--- |
-| `slug` | `string` | No | — |
-| `priority` | `float` | No | — |
-| `frequency` | `string` | No | — |
+| الحقل       | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :---------- | :-------------- | :----- | :--------------- |
+| `slug`      | `string`        | No     | —                |
+| `priority`  | `float`         | No     | —                |
+| `frequency` | `string`        | No     | —                |
 
 ### `plugin::sitemap.sitemap-option` — Sitemap Options
 
@@ -99,12 +103,12 @@ Global sitemap configuration (baseUrl, excludedUrls, useSitemapIndex, sitemapDef
 
 > **Kind**: `singleType` · **DB Table**: `strapi_5_sitemap_plugin_options` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
-| :--- | :--- | :--- | :--- |
-| `baseUrl` | `string` | No | — |
-| `excludedUrls` | `json` | No | default: `[]` |
-| `useSitemapIndex` | `boolean` | No | default: `false` |
-| `sitemapDefinitions` | `json` | No | default: `[]` |
+| الحقل                | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :------------------- | :-------------- | :----- | :--------------- |
+| `baseUrl`            | `string`        | No     | —                |
+| `excludedUrls`       | `json`          | No     | default: `[]`    |
+| `useSitemapIndex`    | `boolean`       | No     | default: `false` |
+| `sitemapDefinitions` | `json`          | No     | default: `[]`    |
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
@@ -190,15 +194,15 @@ flowchart LR
 
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/sitemap/sitemap.xml` | `content-api` | `controller.getSitemap` | Bearer JWT |
-| `GET` | `/api/sitemap/sitemap-{slug}.xml` | `content-api` | `controller.getSitemapBySlug` | Bearer JWT |
-| `GET` | `/sitemap/settings` | `admin` | `controller.getSettings` | Bearer JWT |
-| `PUT` | `/sitemap/settings` | `admin` | `controller.updateSettings` | Bearer JWT |
-| `GET` | `/sitemap/content-types` | `admin` | `controller.getContentTypes` | Bearer JWT |
-| `GET` | `/sitemap/locales` | `admin` | `controller.getLocales` | Bearer JWT |
-| `GET` | `/sitemap/allowed-fields` | `admin` | `controller.getAllowedFields` | Bearer JWT |
+| الطريقة | مسار نقطة النهاية                 | النطاق        | المعالج (Handler)             | المصادقة   |
+| :------ | :-------------------------------- | :------------ | :---------------------------- | :--------- |
+| `GET`   | `/api/sitemap/sitemap.xml`        | `content-api` | `controller.getSitemap`       | Bearer JWT |
+| `GET`   | `/api/sitemap/sitemap-{slug}.xml` | `content-api` | `controller.getSitemapBySlug` | Bearer JWT |
+| `GET`   | `/sitemap/settings`               | `admin`       | `controller.getSettings`      | Bearer JWT |
+| `PUT`   | `/sitemap/settings`               | `admin`       | `controller.updateSettings`   | Bearer JWT |
+| `GET`   | `/sitemap/content-types`          | `admin`       | `controller.getContentTypes`  | Bearer JWT |
+| `GET`   | `/sitemap/locales`                | `admin`       | `controller.getLocales`       | Bearer JWT |
+| `GET`   | `/sitemap/allowed-fields`         | `admin`       | `controller.getAllowedFields` | Bearer JWT |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 
@@ -207,10 +211,12 @@ flowchart LR
 const pluginService = strapi.plugin("sitemap")?.service("service");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi.documents("plugin::sitemap.sitemap-content-type").findMany({
-  limit: 25,
-  sort: "createdAt:desc",
-});
+const records = await strapi
+  .documents("plugin::sitemap.sitemap-content-type")
+  .findMany({
+    limit: 25,
+    sort: "createdAt:desc",
+  });
 ```
 
 ## 8. استكشاف الأخطاء والتحقق من الجودة

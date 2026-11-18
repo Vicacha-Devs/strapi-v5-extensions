@@ -15,8 +15,12 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "notes": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  notes: {
     enabled: true,
     config: {
       enablePinning: true,
@@ -36,16 +40,16 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key | Rendered UI Label |
-| :--- | :--- |
-| `plugin.name` | Notes |
-| `notes.loading` | Loading Content ... |
-| `notes.notification.loadError` | Unable to load notes. |
-| `notes.notification.created` | Note has been successfully created. |
-| `notes.notification.createError` | Failed to create note. |
-| `notes.notification.updated` | Note has been successfully updated. |
-| `notes.notification.updateError` | Failed to update note. |
-| `notes.notification.deleted` | Note has been successfully deleted. |
+| Translation Key                  | Rendered UI Label                   |
+| :------------------------------- | :---------------------------------- |
+| `plugin.name`                    | Notes                               |
+| `notes.loading`                  | Loading Content ...                 |
+| `notes.notification.loadError`   | Unable to load notes.               |
+| `notes.notification.created`     | Note has been successfully created. |
+| `notes.notification.createError` | Failed to create note.              |
+| `notes.notification.updated`     | Note has been successfully updated. |
+| `notes.notification.updateError` | Failed to update note.              |
+| `notes.notification.deleted`     | Note has been successfully deleted. |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -70,18 +74,18 @@ Editorial notes attached to Content Manager entity records
 
 > **Kind**: `collectionType` · **DB Table**: `notes` · **Admin Location**: Internal (`/admin/plugins/notes`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | max: 255 |
-| `content` | `text` | No | — |
-| `category` | `enumeration` | Yes | enum: `general, todo, blocker, idea`; default: `"general"` |
-| `isPinned` | `boolean` | No | default: `false` |
-| `entityId` | `integer` | No | — |
-| `entityDocumentId` | `string` | No | max: 128 |
-| `entitySlug` | `string` | Yes | max: 160 |
-| `entityLocale` | `string` | No | max: 32 |
-| `createdByName` | `string` | No | max: 120 |
-| `updatedByName` | `string` | No | max: 120 |
+| Attribute          | Strapi Type   | Required | Constraints / Target                                       |
+| :----------------- | :------------ | :------- | :--------------------------------------------------------- |
+| `title`            | `string`      | Yes      | max: 255                                                   |
+| `content`          | `text`        | No       | —                                                          |
+| `category`         | `enumeration` | Yes      | enum: `general, todo, blocker, idea`; default: `"general"` |
+| `isPinned`         | `boolean`     | No       | default: `false`                                           |
+| `entityId`         | `integer`     | No       | —                                                          |
+| `entityDocumentId` | `string`      | No       | max: 128                                                   |
+| `entitySlug`       | `string`      | Yes      | max: 160                                                   |
+| `entityLocale`     | `string`      | No       | max: 32                                                    |
+| `createdByName`    | `string`      | No       | max: 120                                                   |
+| `updatedByName`    | `string`      | No       | max: 120                                                   |
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 
@@ -169,16 +173,16 @@ flowchart LR
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path | Scope | Controller Handler | Auth |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/notes/notes` | `admin` | `notesController.find` | Bearer JWT |
-| `GET` | `/notes/notes/stats` | `admin` | `notesController.stats` | Bearer JWT |
-| `GET` | `/notes/notes/{id}` | `admin` | `notesController.findOne` | Bearer JWT |
-| `POST` | `/notes/notes` | `admin` | `notesController.create` | Bearer JWT |
-| `PUT` | `/notes/notes/{id}` | `admin` | `notesController.update` | Bearer JWT |
-| `DELETE` | `/notes/notes/{id}` | `admin` | `notesController.delete` | Bearer JWT |
-| `GET` | `/api/notes/notes` | `content-api` | `notesController.find` | Bearer JWT |
-| `GET` | `/api/notes/notes/{id}` | `content-api` | `notesController.findOne` | Bearer JWT |
+| Method   | Endpoint Path           | Scope         | Controller Handler        | Auth       |
+| :------- | :---------------------- | :------------ | :------------------------ | :--------- |
+| `GET`    | `/notes/notes`          | `admin`       | `notesController.find`    | Bearer JWT |
+| `GET`    | `/notes/notes/stats`    | `admin`       | `notesController.stats`   | Bearer JWT |
+| `GET`    | `/notes/notes/{id}`     | `admin`       | `notesController.findOne` | Bearer JWT |
+| `POST`   | `/notes/notes`          | `admin`       | `notesController.create`  | Bearer JWT |
+| `PUT`    | `/notes/notes/{id}`     | `admin`       | `notesController.update`  | Bearer JWT |
+| `DELETE` | `/notes/notes/{id}`     | `admin`       | `notesController.delete`  | Bearer JWT |
+| `GET`    | `/api/notes/notes`      | `content-api` | `notesController.find`    | Bearer JWT |
+| `GET`    | `/api/notes/notes/{id}` | `content-api` | `notesController.findOne` | Bearer JWT |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

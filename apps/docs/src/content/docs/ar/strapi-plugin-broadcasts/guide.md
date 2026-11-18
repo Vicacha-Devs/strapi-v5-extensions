@@ -15,8 +15,12 @@ pnpm add @vicacha-devs/strapi-plugin-broadcasts
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "broadcasts": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  broadcasts: {
     enabled: true,
     config: {
       defaultSenderName: env("BROADCASTS_SENDER_NAME", "Community Hub"),
@@ -36,16 +40,16 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة | النص المعروض في الواجهة |
-| :--- | :--- |
-| `checkbox.enable_dry_run_sandbox_mode` | تفعيل وضع المحاكاة التجريبي (Dry-Run) |
-| `checkbox.enable_email_designer_5_html_template_bridge` | تفعيل جسر قوالب HTML لـ Email Designer 5 |
-| `checkbox.enable_eventhub_auto_broadcast_triggers` | تفعيل مشغلات البث التلقائي عبر EventHub |
-| `checkbox.enable_telegram_transport` | تفعيل النقل عبر تيليغرام |
-| `checkbox.enable_whatsapp_transport` | تفعيل النقل عبر واتساب |
-| `checkbox.segment_confirmed_subscribers_via_inbox_bridge` | تقسيم المشتركين المؤكدين عبر جسر Inbox |
-| `common.activate` | تفعيل |
-| `common.active` | نشط |
+| مفتاح الترجمة                                             | النص المعروض في الواجهة                  |
+| :-------------------------------------------------------- | :--------------------------------------- |
+| `checkbox.enable_dry_run_sandbox_mode`                    | تفعيل وضع المحاكاة التجريبي (Dry-Run)    |
+| `checkbox.enable_email_designer_5_html_template_bridge`   | تفعيل جسر قوالب HTML لـ Email Designer 5 |
+| `checkbox.enable_eventhub_auto_broadcast_triggers`        | تفعيل مشغلات البث التلقائي عبر EventHub   |
+| `checkbox.enable_telegram_transport`                      | تفعيل النقل عبر تيليغرام                 |
+| `checkbox.enable_whatsapp_transport`                      | تفعيل النقل عبر واتساب                   |
+| `checkbox.segment_confirmed_subscribers_via_inbox_bridge` | تقسيم المشتركين المؤكدين عبر جسر Inbox   |
+| `common.activate`                                         | تفعيل                                    |
+| `common.active`                                           | نشط                                      |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -71,24 +75,24 @@ EventHub-driven automated multi-channel broadcast rule
 
 > **Kind**: `collectionType` · **DB Table**: `broadcast_automation_rules` · **Admin Location**: `/admin/content-manager/collection-types/plugin::broadcasts.automation-rule` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
-| :--- | :--- | :--- | :--- |
-| `name` | `string` | Yes | — |
-| `slug` | `uid` | Yes | — |
-| `eventName` | `string` | Yes | — |
-| `targetContentType` | `string` | No | — |
-| `topic` | `string` | Yes | default: `"announcements"` |
-| `channels` | `json` | Yes | default: `["telegram"]` |
-| `active` | `boolean` | No | default: `true` |
-| `priority` | `enumeration` | No | enum: `low, normal, high, urgent`; default: `"normal"` |
-| `subjectTemplate` | `string` | Yes | — |
-| `bodyTextTemplate` | `text` | Yes | — |
-| `bodyHtmlTemplate` | `richtext` | No | — |
-| `ctaLabelTemplate` | `string` | No | — |
-| `ctaUrlTemplate` | `string` | No | — |
-| `translations` | `json` | No | default: `{}` |
-| `lastTriggeredAt` | `datetime` | No | — |
-| `triggerCount` | `integer` | No | default: `0` |
+| الحقل               | النوع في Strapi | إلزامي | القيود / العلاقات                                       |
+| :------------------ | :-------------- | :----- | :----------------------------------------------------- |
+| `name`              | `string`        | Yes    | —                                                      |
+| `slug`              | `uid`           | Yes    | —                                                      |
+| `eventName`         | `string`        | Yes    | —                                                      |
+| `targetContentType` | `string`        | No     | —                                                      |
+| `topic`             | `string`        | Yes    | default: `"announcements"`                             |
+| `channels`          | `json`          | Yes    | default: `["telegram"]`                                |
+| `active`            | `boolean`       | No     | default: `true`                                        |
+| `priority`          | `enumeration`   | No     | enum: `low, normal, high, urgent`; default: `"normal"` |
+| `subjectTemplate`   | `string`        | Yes    | —                                                      |
+| `bodyTextTemplate`  | `text`          | Yes    | —                                                      |
+| `bodyHtmlTemplate`  | `richtext`      | No     | —                                                      |
+| `ctaLabelTemplate`  | `string`        | No     | —                                                      |
+| `ctaUrlTemplate`    | `string`        | No     | —                                                      |
+| `translations`      | `json`          | No     | default: `{}`                                          |
+| `lastTriggeredAt`   | `datetime`      | No     | —                                                      |
+| `triggerCount`      | `integer`       | No     | default: `0`                                           |
 
 ### `plugin::broadcasts.campaign` — Broadcast Campaign
 
@@ -96,32 +100,32 @@ Omnichannel Email, Telegram & WhatsApp broadcast campaign
 
 > **Kind**: `collectionType` · **DB Table**: `broadcast_campaigns` · **Admin Location**: `/admin/content-manager/collection-types/plugin::broadcasts.campaign` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | — |
-| `slug` | `uid` | Yes | — |
-| `topic` | `string` | Yes | default: `"announcements"` |
-| `channels` | `json` | Yes | default: `["email","telegram"]` |
-| `priority` | `enumeration` | Yes | enum: `low, normal, high, urgent`; default: `"normal"` |
-| `status` | `enumeration` | Yes | enum: `draft, scheduled, sending, sent, failed, cancelled`; default: `"draft"` |
-| `scheduledAt` | `datetime` | No | — |
-| `sentAt` | `datetime` | No | — |
-| `subject` | `string` | Yes | — |
-| `bodyText` | `text` | Yes | — |
-| `bodyHtml` | `richtext` | No | — |
-| `ctaLabel` | `string` | No | — |
-| `ctaUrl` | `string` | No | — |
-| `mediaUrl` | `string` | No | — |
-| `emailTemplateRef` | `string` | No | — |
-| `whatsappTemplateName` | `string` | No | — |
-| `whatsappGroupIds` | `json` | No | default: `[]` |
-| `telegramChatId` | `string` | No | — |
-| `telegramThreadId` | `integer` | No | — |
-| `translations` | `json` | No | default: `{}` |
-| `secondaryDate` | `json` | No | default: `{}` |
-| `secondaryDateLabel` | `string` | No | — |
-| `stats` | `json` | No | default: `{}` |
-| `metadata` | `json` | No | default: `{}` |
+| الحقل                  | النوع في Strapi | إلزامي | القيود / العلاقات                                                               |
+| :--------------------- | :-------------- | :----- | :----------------------------------------------------------------------------- |
+| `title`                | `string`        | Yes    | —                                                                              |
+| `slug`                 | `uid`           | Yes    | —                                                                              |
+| `topic`                | `string`        | Yes    | default: `"announcements"`                                                     |
+| `channels`             | `json`          | Yes    | default: `["email","telegram"]`                                                |
+| `priority`             | `enumeration`   | Yes    | enum: `low, normal, high, urgent`; default: `"normal"`                         |
+| `status`               | `enumeration`   | Yes    | enum: `draft, scheduled, sending, sent, failed, cancelled`; default: `"draft"` |
+| `scheduledAt`          | `datetime`      | No     | —                                                                              |
+| `sentAt`               | `datetime`      | No     | —                                                                              |
+| `subject`              | `string`        | Yes    | —                                                                              |
+| `bodyText`             | `text`          | Yes    | —                                                                              |
+| `bodyHtml`             | `richtext`      | No     | —                                                                              |
+| `ctaLabel`             | `string`        | No     | —                                                                              |
+| `ctaUrl`               | `string`        | No     | —                                                                              |
+| `mediaUrl`             | `string`        | No     | —                                                                              |
+| `emailTemplateRef`     | `string`        | No     | —                                                                              |
+| `whatsappTemplateName` | `string`        | No     | —                                                                              |
+| `whatsappGroupIds`     | `json`          | No     | default: `[]`                                                                  |
+| `telegramChatId`       | `string`        | No     | —                                                                              |
+| `telegramThreadId`     | `integer`       | No     | —                                                                              |
+| `translations`         | `json`          | No     | default: `{}`                                                                  |
+| `secondaryDate`        | `json`          | No     | default: `{}`                                                                  |
+| `secondaryDateLabel`   | `string`        | No     | —                                                                              |
+| `stats`                | `json`          | No     | default: `{}`                                                                  |
+| `metadata`             | `json`          | No     | default: `{}`                                                                  |
 
 ### `plugin::broadcasts.delivery-log` — Broadcast Delivery Log
 
@@ -129,19 +133,19 @@ Idempotent, PII-masked multi-channel delivery audit log
 
 > **Kind**: `collectionType` · **DB Table**: `broadcast_delivery_logs` · **Admin Location**: `/admin/content-manager/collection-types/plugin::broadcasts.delivery-log` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
-| :--- | :--- | :--- | :--- |
-| `idempotencyKey` | `string` | Yes | — |
-| `campaignSlug` | `string` | Yes | — |
-| `channel` | `enumeration` | Yes | enum: `email, telegram, whatsapp` |
-| `driver` | `string` | Yes | — |
-| `recipientMasked` | `string` | Yes | — |
-| `locale` | `string` | Yes | default: `"es"` |
-| `status` | `enumeration` | Yes | enum: `sent, simulated, skipped_duplicate, failed` |
-| `externalMessageId` | `string` | No | — |
-| `errorMessage` | `text` | No | — |
-| `sentAt` | `datetime` | Yes | — |
-| `secondaryDateLabel` | `string` | No | — |
+| الحقل                | النوع في Strapi | إلزامي | القيود / العلاقات                                   |
+| :------------------- | :-------------- | :----- | :------------------------------------------------- |
+| `idempotencyKey`     | `string`        | Yes    | —                                                  |
+| `campaignSlug`       | `string`        | Yes    | —                                                  |
+| `channel`            | `enumeration`   | Yes    | enum: `email, telegram, whatsapp`                  |
+| `driver`             | `string`        | Yes    | —                                                  |
+| `recipientMasked`    | `string`        | Yes    | —                                                  |
+| `locale`             | `string`        | Yes    | default: `"es"`                                    |
+| `status`             | `enumeration`   | Yes    | enum: `sent, simulated, skipped_duplicate, failed` |
+| `externalMessageId`  | `string`        | No     | —                                                  |
+| `errorMessage`       | `text`          | No     | —                                                  |
+| `sentAt`             | `datetime`      | Yes    | —                                                  |
+| `secondaryDateLabel` | `string`        | No     | —                                                  |
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
@@ -240,23 +244,23 @@ flowchart LR
 
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/api/broadcasts/public/channels` | `content-api` | `broadcastController.listPublicChannels` | Public |
-| `GET` | `/api/broadcasts/public/archive` | `content-api` | `broadcastController.listPublicArchive` | Public |
-| `GET` | `/broadcasts/settings` | `admin` | `broadcastController.getSettings` | Bearer JWT |
-| `PUT` | `/broadcasts/settings` | `admin` | `broadcastController.updateSettings` | Bearer JWT |
-| `GET` | `/broadcasts/templates` | `admin` | `broadcastController.listStarterTemplates` | Bearer JWT |
-| `GET` | `/broadcasts/email-templates` | `admin` | `broadcastController.listEmailTemplates` | Bearer JWT |
-| `GET` | `/broadcasts/campaigns` | `admin` | `broadcastController.listCampaigns` | Bearer JWT |
-| `POST` | `/broadcasts/campaigns` | `admin` | `broadcastController.createCampaign` | Bearer JWT |
-| `PUT` | `/broadcasts/campaigns/{documentId}` | `admin` | `broadcastController.updateCampaign` | Bearer JWT |
-| `POST` | `/broadcasts/campaigns/from-template` | `admin` | `broadcastController.createFromTemplate` | Bearer JWT |
-| `POST` | `/broadcasts/campaigns/{documentId}/send` | `admin` | `broadcastController.sendCampaign` | Bearer JWT |
-| `GET` | `/broadcasts/automation-rules` | `admin` | `broadcastController.listAutomationRules` | Bearer JWT |
-| `POST` | `/broadcasts/automation-rules` | `admin` | `broadcastController.createAutomationRule` | Bearer JWT |
-| `PUT` | `/broadcasts/automation-rules/{documentId}` | `admin` | `broadcastController.updateAutomationRule` | Bearer JWT |
-| `GET` | `/broadcasts/delivery-logs` | `admin` | `broadcastController.listDeliveryLogs` | Bearer JWT |
+| الطريقة | مسار نقطة النهاية                           | النطاق        | المعالج (Handler)                          | المصادقة   |
+| :------ | :------------------------------------------ | :------------ | :----------------------------------------- | :--------- |
+| `GET`   | `/api/broadcasts/public/channels`           | `content-api` | `broadcastController.listPublicChannels`   | Public     |
+| `GET`   | `/api/broadcasts/public/archive`            | `content-api` | `broadcastController.listPublicArchive`    | Public     |
+| `GET`   | `/broadcasts/settings`                      | `admin`       | `broadcastController.getSettings`          | Bearer JWT |
+| `PUT`   | `/broadcasts/settings`                      | `admin`       | `broadcastController.updateSettings`       | Bearer JWT |
+| `GET`   | `/broadcasts/templates`                     | `admin`       | `broadcastController.listStarterTemplates` | Bearer JWT |
+| `GET`   | `/broadcasts/email-templates`               | `admin`       | `broadcastController.listEmailTemplates`   | Bearer JWT |
+| `GET`   | `/broadcasts/campaigns`                     | `admin`       | `broadcastController.listCampaigns`        | Bearer JWT |
+| `POST`  | `/broadcasts/campaigns`                     | `admin`       | `broadcastController.createCampaign`       | Bearer JWT |
+| `PUT`   | `/broadcasts/campaigns/{documentId}`        | `admin`       | `broadcastController.updateCampaign`       | Bearer JWT |
+| `POST`  | `/broadcasts/campaigns/from-template`       | `admin`       | `broadcastController.createFromTemplate`   | Bearer JWT |
+| `POST`  | `/broadcasts/campaigns/{documentId}/send`   | `admin`       | `broadcastController.sendCampaign`         | Bearer JWT |
+| `GET`   | `/broadcasts/automation-rules`              | `admin`       | `broadcastController.listAutomationRules`  | Bearer JWT |
+| `POST`  | `/broadcasts/automation-rules`              | `admin`       | `broadcastController.createAutomationRule` | Bearer JWT |
+| `PUT`   | `/broadcasts/automation-rules/{documentId}` | `admin`       | `broadcastController.updateAutomationRule` | Bearer JWT |
+| `GET`   | `/broadcasts/delivery-logs`                 | `admin`       | `broadcastController.listDeliveryLogs`     | Bearer JWT |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 
@@ -265,10 +269,12 @@ flowchart LR
 const pluginService = strapi.plugin("broadcasts")?.service("transportService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi.documents("plugin::broadcasts.automation-rule").findMany({
-  limit: 25,
-  sort: "createdAt:desc",
-});
+const records = await strapi
+  .documents("plugin::broadcasts.automation-rule")
+  .findMany({
+    limit: 25,
+    sort: "createdAt:desc",
+  });
 ```
 
 ## 8. استكشاف الأخطاء والتحقق من الجودة

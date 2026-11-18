@@ -15,8 +15,12 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "seo": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  seo: {
     enabled: true,
     config: {
       autoCreateComponent: true,
@@ -35,12 +39,12 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı | Arayüz Metni |
-| :--- | :--- |
-| `Good` | İyi |
-| `Improvements` | Geliştirilebilir |
-| `Bad` | Kötü |
-| `Information` | Bilgi |
+| Çeviri Anahtarı | Arayüz Metni     |
+| :-------------- | :--------------- |
+| `Good`          | İyi              |
+| `Improvements`  | Geliştirilebilir |
+| `Bad`           | Kötü             |
+| `Information`   | Bilgi            |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -66,12 +70,12 @@ Shared Strapi component (shared.open-graph) managed in Content-Type Builder and 
 > **Kind**: `component` · **DB Table**: `components_shared_open_graphs` · **Admin Location**: `/admin/plugins/content-type-builder` (Component) · **Draft & Publish**: `No` · **i18n**: `Yes`
 
 | Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `ogTitle` | `string` | Yes | max: 70 |
-| `ogDescription` | `string` | Yes | max: 200 |
-| `ogImage` | `media` | No | — |
-| `ogUrl` | `string` | No | — |
-| `ogType` | `string` | No | — |
+| :--------------- | :---------- | :------ | :-------------------- |
+| `ogTitle`        | `string`    | Yes     | max: 70               |
+| `ogDescription`  | `string`    | Yes     | max: 200              |
+| `ogImage`        | `media`     | No      | —                     |
+| `ogUrl`          | `string`    | No      | —                     |
+| `ogType`         | `string`    | No      | —                     |
 
 ### `shared.seo` — Component: seo
 
@@ -79,21 +83,21 @@ Shared Strapi component (shared.seo) managed in Content-Type Builder and Content
 
 > **Kind**: `component` · **DB Table**: `components_shared_seos` · **Admin Location**: `/admin/plugins/content-type-builder` (Component) · **Draft & Publish**: `No` · **i18n**: `Yes`
 
-| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `metaTitle` | `string` | Yes | max: 60 |
-| `metaDescription` | `string` | Yes | max: 160 |
-| `metaImage` | `media` | No | — |
-| `openGraph` | `component` | No | component: `shared.open-graph` |
-| `keywords` | `text` | No | — |
-| `metaRobots` | `string` | No | — |
-| `metaViewport` | `string` | No | — |
-| `canonicalURL` | `string` | No | — |
-| `structuredData` | `json` | No | — |
+| Alan (Attribute)  | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki          |
+| :---------------- | :---------- | :------ | :----------------------------- |
+| `metaTitle`       | `string`    | Yes     | max: 60                        |
+| `metaDescription` | `string`    | Yes     | max: 160                       |
+| `metaImage`       | `media`     | No      | —                              |
+| `openGraph`       | `component` | No      | component: `shared.open-graph` |
+| `keywords`        | `text`      | No      | —                              |
+| `metaRobots`      | `string`    | No      | —                              |
+| `metaViewport`    | `string`    | No      | —                              |
+| `canonicalURL`    | `string`    | No      | —                              |
+| `structuredData`  | `json`      | No      | —                              |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
-> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `Components (`shared.seo` — **SEO & Metadata** & `shared.open-graph` — **Open Graph (Social Sharing)**) inside Content Manager Edit Views`
+> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `Components (`shared.seo`— **SEO & Metadata** &`shared.open-graph` — **Open Graph (Social Sharing)**) inside Content Manager Edit Views`
 
 ### İçerik Yöneticisi Varlıkları ve Bileşenleri
 
@@ -175,14 +179,14 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/seo/component` | `admin` | `seo.findSeoComponent` | Bearer JWT |
-| `POST` | `/seo/component` | `admin` | `seo.createSeoComponent` | Bearer JWT |
-| `GET` | `/seo/content-types` | `admin` | `seo.findContentTypes` | Bearer JWT |
-| `POST` | `/seo/generate` | `admin` | `seo.generateSeo` | Bearer JWT |
-| `GET` | `/seo/settings` | `admin` | `settings.getSettings` | Bearer JWT |
-| `POST` | `/seo/settings` | `admin` | `settings.setSettings` | Bearer JWT |
+| Metot  | Uç Nokta Yolu        | Kapsam  | Denetleyici (Handler)    | Kimlik Doğrulama |
+| :----- | :------------------- | :------ | :----------------------- | :--------------- |
+| `GET`  | `/seo/component`     | `admin` | `seo.findSeoComponent`   | Bearer JWT       |
+| `POST` | `/seo/component`     | `admin` | `seo.createSeoComponent` | Bearer JWT       |
+| `GET`  | `/seo/content-types` | `admin` | `seo.findContentTypes`   | Bearer JWT       |
+| `POST` | `/seo/generate`      | `admin` | `seo.generateSeo`        | Bearer JWT       |
+| `GET`  | `/seo/settings`      | `admin` | `settings.getSettings`   | Bearer JWT       |
+| `POST` | `/seo/settings`      | `admin` | `settings.setSettings`   | Bearer JWT       |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

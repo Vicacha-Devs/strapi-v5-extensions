@@ -29,12 +29,12 @@ Shared Strapi component (shared.open-graph) managed in Content-Type Builder and 
 > **Kind**: `component` · **DB Table**: `components_shared_open_graphs` · **Admin Location**: `/admin/plugins/content-type-builder` (Component) · **Draft & Publish**: `No` · **i18n**: `Yes`
 
 | Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `ogTitle` | `string` | Yes | max: 70 |
-| `ogDescription` | `string` | Yes | max: 200 |
-| `ogImage` | `media` | No | — |
-| `ogUrl` | `string` | No | — |
-| `ogType` | `string` | No | — |
+| :--------------- | :---------- | :------ | :-------------------- |
+| `ogTitle`        | `string`    | Yes     | max: 70               |
+| `ogDescription`  | `string`    | Yes     | max: 200              |
+| `ogImage`        | `media`     | No      | —                     |
+| `ogUrl`          | `string`    | No      | —                     |
+| `ogType`         | `string`    | No      | —                     |
 
 ### `shared.seo` — Component: seo
 
@@ -42,21 +42,21 @@ Shared Strapi component (shared.seo) managed in Content-Type Builder and Content
 
 > **Kind**: `component` · **DB Table**: `components_shared_seos` · **Admin Location**: `/admin/plugins/content-type-builder` (Component) · **Draft & Publish**: `No` · **i18n**: `Yes`
 
-| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `metaTitle` | `string` | Yes | max: 60 |
-| `metaDescription` | `string` | Yes | max: 160 |
-| `metaImage` | `media` | No | — |
-| `openGraph` | `component` | No | component: `shared.open-graph` |
-| `keywords` | `text` | No | — |
-| `metaRobots` | `string` | No | — |
-| `metaViewport` | `string` | No | — |
-| `canonicalURL` | `string` | No | — |
-| `structuredData` | `json` | No | — |
+| Alan (Attribute)  | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki          |
+| :---------------- | :---------- | :------ | :----------------------------- |
+| `metaTitle`       | `string`    | Yes     | max: 60                        |
+| `metaDescription` | `string`    | Yes     | max: 160                       |
+| `metaImage`       | `media`     | No      | —                              |
+| `openGraph`       | `component` | No      | component: `shared.open-graph` |
+| `keywords`        | `text`      | No      | —                              |
+| `metaRobots`      | `string`    | No      | —                              |
+| `metaViewport`    | `string`    | No      | —                              |
+| `canonicalURL`    | `string`    | No      | —                              |
+| `structuredData`  | `json`      | No      | —                              |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
-> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `Components (`shared.seo` — **SEO & Metadata** & `shared.open-graph` — **Open Graph (Social Sharing)**) inside Content Manager Edit Views`
+> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `Components (`shared.seo`— **SEO & Metadata** &`shared.open-graph` — **Open Graph (Social Sharing)**) inside Content Manager Edit Views`
 
 ### İçerik Yöneticisi Varlıkları ve Bileşenleri
 

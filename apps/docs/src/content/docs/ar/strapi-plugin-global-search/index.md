@@ -47,7 +47,7 @@ flowchart LR
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
-> **مجموعة الشريط الجانبي في مدير المحتوى**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
+> **مجموعة الشريط الجانبي في مدير المحتوى**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
 
 ### الكيانات والمكونات المسجلة في مدير المحتوى
 
@@ -129,11 +129,11 @@ flowchart LR
 
 ## 4. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/global-search/search` | `admin` | `search.find` | Bearer JWT |
-| `GET` | `/global-search/schema` | `admin` | `schema.find` | Bearer JWT |
-| `GET` | `/global-search/schema/all` | `admin` | `schema.findAll` | Bearer JWT |
-| `GET` | `/global-search/settings` | `admin` | `settings.find` | Bearer JWT |
-| `PUT` | `/global-search/settings` | `admin` | `settings.update` | Bearer JWT |
-| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset` | Bearer JWT |
+| الطريقة | مسار نقطة النهاية               | النطاق  | المعالج (Handler) | المصادقة   |
+| :------ | :------------------------------ | :------ | :---------------- | :--------- |
+| `GET`   | `/global-search/search`         | `admin` | `search.find`     | Bearer JWT |
+| `GET`   | `/global-search/schema`         | `admin` | `schema.find`     | Bearer JWT |
+| `GET`   | `/global-search/schema/all`     | `admin` | `schema.findAll`  | Bearer JWT |
+| `GET`   | `/global-search/settings`       | `admin` | `settings.find`   | Bearer JWT |
+| `PUT`   | `/global-search/settings`       | `admin` | `settings.update` | Bearer JWT |
+| `POST`  | `/global-search/settings/reset` | `admin` | `settings.reset`  | Bearer JWT |

@@ -3,6 +3,7 @@ title: "Collapsible Navigation (@vicacha-devs/strapi-plugin-collapsible-nav)"
 description: "Restores Strapi v4-style collapsible/expandable left navigation sidebar in the Strapi v5 admin panel."
 prev: false
 ---
+
 [![Strapi 5](https://img.shields.io/badge/strapi-v5-blue)](https://strapi.io)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -50,12 +51,13 @@ pnpm build && pnpm develop
 
 ## Controls & Persistence
 
-| Control | Location | Behavior |
-| :--- | :--- | :--- |
-| **Chevron Toggle** | Bottom-right edge of sidebar | Expands/collapses when pinned; pins open if clicked while unpinned. |
+| Control                | Location                           | Behavior                                                                                           |
+| :--------------------- | :--------------------------------- | :------------------------------------------------------------------------------------------------- |
+| **Chevron Toggle**     | Bottom-right edge of sidebar       | Expands/collapses when pinned; pins open if clicked while unpinned.                                |
 | **Pin / Unpin Button** | Top-right of expanded brand header | Locks sidebar open (`pinned: true`) or enables auto-collapse with hover-to-peek (`pinned: false`). |
 
 State is persisted per browser in `localStorage`:
+
 - `strapi-collapsible-nav:expanded` (`"true"` | `"false"`, default `"true"`)
 - `strapi-collapsible-nav:pinned` (`"true"` | `"false"`, default `"true"`)
 
@@ -64,6 +66,7 @@ State is persisted per browser in `localStorage`:
 ## How It Works
 
 Strapi v5's `LeftMenu` / `MainNav` component renders an icon-only desktop sidebar without an official plugin override slot. At `bootstrap()`, this plugin:
+
 1. Injects desktop-scoped CSS (`#strapi-collapsible-nav-styles`) into `document.head`.
 2. Observes `<nav>` via `MutationObserver` to keep dynamically mounted plugin links synchronized.
 3. Hydrates `.scn-nav-label` spans from each link's `aria-label`, reveals `NavBrand` / `NavUser` accessible text when expanded, and mounts accessible `<button>` controls for toggling and pinning.
@@ -73,7 +76,6 @@ Strapi v5's `LeftMenu` / `MainNav` component renders an icon-only desktop sideba
 ## License
 
 MIT © Vicacha Devs
-
 
 ## Content-Type Entities & Where to Find Them
 

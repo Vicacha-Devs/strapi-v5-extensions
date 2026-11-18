@@ -29,28 +29,28 @@ Reservation, appointment, or resource slot booking
 
 > **Kind**: `collectionType` · **DB Table**: `bookings` · **Admin Location**: `/admin/content-manager/collection-types/plugin::bookings.booking` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `bookingCode` | `string` | Yes | max: 48 |
-| `title` | `string` | No | max: 200 |
-| `resource` | `relation` | No | target: `plugin::bookings.resource` |
-| `customerName` | `string` | Yes | max: 120 |
-| `customerEmail` | `email` | Yes | — |
-| `customerPhone` | `string` | No | max: 40 |
-| `organization` | `string` | No | max: 160 |
-| `startDate` | `datetime` | Yes | — |
-| `endDate` | `datetime` | Yes | — |
-| `slotLabel` | `string` | No | max: 80 |
-| `timezone` | `string` | No | max: 64; default: `"UTC"` |
-| `partySize` | `integer` | Yes | default: `1` |
-| `status` | `enumeration` | Yes | enum: `pending, confirmed, completed, cancelled, no_show`; default: `"pending"` |
-| `preferredLanguage` | `string` | No | max: 16 |
-| `assignedHost` | `string` | No | max: 120 |
-| `notes` | `text` | No | max: 2000 |
-| `internalNotes` | `text` | No | max: 2000; `private: true` |
-| `cancelTokenHash` | `string` | No | max: 128; `private: true` |
-| `sourceCollection` | `string` | No | default: `"plugin::bookings.booking"` |
-| `metadata` | `json` | No | — |
+| Alan (Attribute)    | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                           |
+| :------------------ | :------------ | :------ | :------------------------------------------------------------------------------ |
+| `bookingCode`       | `string`      | Yes     | max: 48                                                                         |
+| `title`             | `string`      | No      | max: 200                                                                        |
+| `resource`          | `relation`    | No      | target: `plugin::bookings.resource`                                             |
+| `customerName`      | `string`      | Yes     | max: 120                                                                        |
+| `customerEmail`     | `email`       | Yes     | —                                                                               |
+| `customerPhone`     | `string`      | No      | max: 40                                                                         |
+| `organization`      | `string`      | No      | max: 160                                                                        |
+| `startDate`         | `datetime`    | Yes     | —                                                                               |
+| `endDate`           | `datetime`    | Yes     | —                                                                               |
+| `slotLabel`         | `string`      | No      | max: 80                                                                         |
+| `timezone`          | `string`      | No      | max: 64; default: `"UTC"`                                                       |
+| `partySize`         | `integer`     | Yes     | default: `1`                                                                    |
+| `status`            | `enumeration` | Yes     | enum: `pending, confirmed, completed, cancelled, no_show`; default: `"pending"` |
+| `preferredLanguage` | `string`      | No      | max: 16                                                                         |
+| `assignedHost`      | `string`      | No      | max: 120                                                                        |
+| `notes`             | `text`        | No      | max: 2000                                                                       |
+| `internalNotes`     | `text`        | No      | max: 2000; `private: true`                                                      |
+| `cancelTokenHash`   | `string`      | No      | max: 128; `private: true`                                                       |
+| `sourceCollection`  | `string`      | No      | default: `"plugin::bookings.booking"`                                           |
+| `metadata`          | `json`        | No      | —                                                                               |
 
 ### `plugin::bookings.resource` — Booking Resource
 
@@ -58,35 +58,35 @@ Bookable service, appointment type, room, staff member, or equipment schedule
 
 > **Kind**: `collectionType` · **DB Table**: `booking_resources` · **Admin Location**: `/admin/content-manager/collection-types/plugin::bookings.resource` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `name` | `string` | Yes | max: 160 |
-| `slug` | `uid` | Yes | — |
-| `resourceType` | `enumeration` | Yes | enum: `service, appointment, room, staff, equipment, other`; default: `"service"` |
-| `description` | `text` | No | — |
-| `color` | `string` | No | max: 32; default: `"#0d9488"` |
-| `timezone` | `string` | No | max: 64; default: `"UTC"` |
-| `slotDurationMinutes` | `integer` | Yes | default: `60` |
-| `bufferBeforeMinutes` | `integer` | No | default: `0` |
-| `bufferAfterMinutes` | `integer` | No | default: `0` |
-| `capacityPerSlot` | `integer` | Yes | default: `1` |
-| `maxPartySize` | `integer` | No | default: `50` |
-| `minLeadTimeHours` | `integer` | No | default: `2` |
-| `maxAdvanceDays` | `integer` | No | default: `90` |
-| `requiresApproval` | `boolean` | No | default: `false` |
-| `weeklySchedule` | `json` | No | — |
-| `seasonalSchedules` | `json` | No | — |
-| `holidayRules` | `json` | No | — |
-| `blackoutDates` | `json` | No | — |
-| `recurrenceRule` | `string` | No | — |
-| `supportedLanguages` | `json` | No | — |
-| `assignedHosts` | `json` | No | — |
-| `location` | `string` | No | max: 240 |
-| `price` | `decimal` | No | default: `0` |
-| `currency` | `string` | No | max: 10; default: `"USD"` |
-| `isActive` | `boolean` | No | default: `true` |
-| `metadata` | `json` | No | — |
-| `bookings` | `relation` | No | target: `plugin::bookings.booking` |
+| Alan (Attribute)      | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                             |
+| :-------------------- | :------------ | :------ | :-------------------------------------------------------------------------------- |
+| `name`                | `string`      | Yes     | max: 160                                                                          |
+| `slug`                | `uid`         | Yes     | —                                                                                 |
+| `resourceType`        | `enumeration` | Yes     | enum: `service, appointment, room, staff, equipment, other`; default: `"service"` |
+| `description`         | `text`        | No      | —                                                                                 |
+| `color`               | `string`      | No      | max: 32; default: `"#0d9488"`                                                     |
+| `timezone`            | `string`      | No      | max: 64; default: `"UTC"`                                                         |
+| `slotDurationMinutes` | `integer`     | Yes     | default: `60`                                                                     |
+| `bufferBeforeMinutes` | `integer`     | No      | default: `0`                                                                      |
+| `bufferAfterMinutes`  | `integer`     | No      | default: `0`                                                                      |
+| `capacityPerSlot`     | `integer`     | Yes     | default: `1`                                                                      |
+| `maxPartySize`        | `integer`     | No      | default: `50`                                                                     |
+| `minLeadTimeHours`    | `integer`     | No      | default: `2`                                                                      |
+| `maxAdvanceDays`      | `integer`     | No      | default: `90`                                                                     |
+| `requiresApproval`    | `boolean`     | No      | default: `false`                                                                  |
+| `weeklySchedule`      | `json`        | No      | —                                                                                 |
+| `seasonalSchedules`   | `json`        | No      | —                                                                                 |
+| `holidayRules`        | `json`        | No      | —                                                                                 |
+| `blackoutDates`       | `json`        | No      | —                                                                                 |
+| `recurrenceRule`      | `string`      | No      | —                                                                                 |
+| `supportedLanguages`  | `json`        | No      | —                                                                                 |
+| `assignedHosts`       | `json`        | No      | —                                                                                 |
+| `location`            | `string`      | No      | max: 240                                                                          |
+| `price`               | `decimal`     | No      | default: `0`                                                                      |
+| `currency`            | `string`      | No      | max: 10; default: `"USD"`                                                         |
+| `isActive`            | `boolean`     | No      | default: `true`                                                                   |
+| `metadata`            | `json`        | No      | —                                                                                 |
+| `bookings`            | `relation`    | No      | target: `plugin::bookings.booking`                                                |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 

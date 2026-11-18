@@ -15,7 +15,11 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   "collapsible-nav": {
     enabled: true,
     config: {
@@ -31,13 +35,13 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción | Texto en Interfaz |
-| :--- | :--- |
-| `plugin.name` | Navegación colapsable |
-| `toggle.expand` | Expandir navegación |
-| `toggle.collapse` | Colapsar navegación |
-| `pin.pin` | Fijar barra lateral abierta |
-| `pin.unpin` | Desfijar barra lateral (auto-colapsar) |
+| Clave de Traducción | Texto en Interfaz                      |
+| :------------------ | :------------------------------------- |
+| `plugin.name`       | Navegación colapsable                  |
+| `toggle.expand`     | Expandir navegación                    |
+| `toggle.collapse`   | Colapsar navegación                    |
+| `pin.pin`           | Fijar barra lateral abierta            |
+| `pin.unpin`         | Desfijar barra lateral (auto-colapsar) |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 
@@ -137,7 +141,7 @@ flowchart LR
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
 | Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
-| :--- | :--- | :--- | :--- | :--- |
+| :----- | :---------------- | :----- | :---------- | :------------ |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 

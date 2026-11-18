@@ -15,8 +15,12 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "opentelemetry": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  opentelemetry: {
     enabled: true,
     config: {
       serviceName: env("OTEL_SERVICE_NAME", "strapi-backend"),
@@ -30,7 +34,6 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
 ## 3. Strapi v5 Yönetim Arayüzü (Admin UI) Turu
 
 Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanarak çalışma alanını ve ayarlarını yönetim paneline kaydeder:
-
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -136,7 +139,7 @@ flowchart LR
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
 | Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
-| :--- | :--- | :--- | :--- | :--- |
+| :---- | :------------ | :----- | :-------------------- | :--------------- |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

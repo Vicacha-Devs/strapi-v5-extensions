@@ -121,4 +121,4 @@ flowchart LR
 ## 4. Endpoints REST API (`content-api` y `admin`)
 
 | Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
-| :--- | :--- | :--- | :--- | :--- |
+| :----- | :---------------- | :----- | :---------- | :------------ |

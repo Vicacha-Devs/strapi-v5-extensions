@@ -45,13 +45,13 @@ Shared Strapi component (shared.open-graph) managed in Content-Type Builder and 
 
 > **Kind**: `component` · **DB Table**: `components_shared_open_graphs` · **Admin Location**: `/admin/plugins/content-type-builder` (Component) · **Draft & Publish**: `No` · **i18n**: `Yes`
 
-| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
-| :--- | :--- | :--- | :--- |
-| `ogTitle` | `string` | Yes | max: 70 |
-| `ogDescription` | `string` | Yes | max: 200 |
-| `ogImage` | `media` | No | — |
-| `ogUrl` | `string` | No | — |
-| `ogType` | `string` | No | — |
+| Atributo        | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :-------------- | :------------- | :-------- | :----------------------- |
+| `ogTitle`       | `string`       | Yes       | max: 70                  |
+| `ogDescription` | `string`       | Yes       | max: 200                 |
+| `ogImage`       | `media`        | No        | —                        |
+| `ogUrl`         | `string`       | No        | —                        |
+| `ogType`        | `string`       | No        | —                        |
 
 ### `shared.seo` — Component: seo
 
@@ -59,21 +59,21 @@ Shared Strapi component (shared.seo) managed in Content-Type Builder and Content
 
 > **Kind**: `component` · **DB Table**: `components_shared_seos` · **Admin Location**: `/admin/plugins/content-type-builder` (Component) · **Draft & Publish**: `No` · **i18n**: `Yes`
 
-| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
-| :--- | :--- | :--- | :--- |
-| `metaTitle` | `string` | Yes | max: 60 |
-| `metaDescription` | `string` | Yes | max: 160 |
-| `metaImage` | `media` | No | — |
-| `openGraph` | `component` | No | component: `shared.open-graph` |
-| `keywords` | `text` | No | — |
-| `metaRobots` | `string` | No | — |
-| `metaViewport` | `string` | No | — |
-| `canonicalURL` | `string` | No | — |
-| `structuredData` | `json` | No | — |
+| Atributo          | Tipo en Strapi | Requerido | Restricciones / Relación       |
+| :---------------- | :------------- | :-------- | :----------------------------- |
+| `metaTitle`       | `string`       | Yes       | max: 60                        |
+| `metaDescription` | `string`       | Yes       | max: 160                       |
+| `metaImage`       | `media`        | No        | —                              |
+| `openGraph`       | `component`    | No        | component: `shared.open-graph` |
+| `keywords`        | `text`         | No        | —                              |
+| `metaRobots`      | `string`       | No        | —                              |
+| `metaViewport`    | `string`       | No        | —                              |
+| `canonicalURL`    | `string`       | No        | —                              |
+| `structuredData`  | `json`         | No        | —                              |
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 
-> **Grupo en la Barra Lateral del Content Manager**: `Components (`shared.seo` — **SEO & Metadata** & `shared.open-graph` — **Open Graph (Social Sharing)**) inside Content Manager Edit Views`
+> **Grupo en la Barra Lateral del Content Manager**: `Components (`shared.seo`— **SEO & Metadata** &`shared.open-graph` — **Open Graph (Social Sharing)**) inside Content Manager Edit Views`
 
 ### Entidades y Componentes en el Content Manager
 
@@ -155,11 +155,11 @@ flowchart LR
 
 ## 4. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/seo/component` | `admin` | `seo.findSeoComponent` | Bearer JWT |
-| `POST` | `/seo/component` | `admin` | `seo.createSeoComponent` | Bearer JWT |
-| `GET` | `/seo/content-types` | `admin` | `seo.findContentTypes` | Bearer JWT |
-| `POST` | `/seo/generate` | `admin` | `seo.generateSeo` | Bearer JWT |
-| `GET` | `/seo/settings` | `admin` | `settings.getSettings` | Bearer JWT |
-| `POST` | `/seo/settings` | `admin` | `settings.setSettings` | Bearer JWT |
+| Método | Ruta del Endpoint    | Ámbito  | Controlador              | Autenticación |
+| :----- | :------------------- | :------ | :----------------------- | :------------ |
+| `GET`  | `/seo/component`     | `admin` | `seo.findSeoComponent`   | Bearer JWT    |
+| `POST` | `/seo/component`     | `admin` | `seo.createSeoComponent` | Bearer JWT    |
+| `GET`  | `/seo/content-types` | `admin` | `seo.findContentTypes`   | Bearer JWT    |
+| `POST` | `/seo/generate`      | `admin` | `seo.generateSeo`        | Bearer JWT    |
+| `GET`  | `/seo/settings`      | `admin` | `settings.getSettings`   | Bearer JWT    |
+| `POST` | `/seo/settings`      | `admin` | `settings.setSettings`   | Bearer JWT    |

@@ -15,8 +15,12 @@ pnpm add @vicacha-devs/strapi-plugin-calendar
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "calendar": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  calendar: {
     enabled: true,
     config: {
       defaultView: "dayGridMonth",
@@ -36,16 +40,16 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة | النص المعروض في الواجهة |
-| :--- | :--- |
-| `settings.theme.breeze.label` | نسيم (سماوي وأردوازي — افتراضي) |
-| `settings.theme.breeze.description` | شبكة عالية التباين باللون الأزرق السماوي والأردوازي مع شارات هجرية كهرمانية دافئة |
-| `settings.theme.emerald.label` | المسجد الزمردي (أخضر زمردي وذهبي) |
-| `settings.theme.emerald.description` | ترويسات باللون الأخضر الزمردي الإسلامي مع إبرازات ذهبية دافئة للتقويم الثانوي |
-| `settings.theme.sandstone.label` | الحجر الرملي الأندلسي (ألوان ترابية دافئة) |
-| `settings.theme.sandstone.description` | نغمات التيراكوتا والرق الدافئة المستوحاة من الأفنية الأندلسية |
-| `settings.theme.midnight.label` | مرصد منتصف الليل (داكن) |
-| `settings.theme.midnight.description` | لوحة داكنة عميقة مع لمسات سماوية وذهبية مضيئة |
+| مفتاح الترجمة                          | النص المعروض في الواجهة                                                         |
+| :------------------------------------- | :------------------------------------------------------------------------------ |
+| `settings.theme.breeze.label`          | نسيم (سماوي وأردوازي — افتراضي)                                                 |
+| `settings.theme.breeze.description`    | شبكة عالية التباين باللون الأزرق السماوي والأردوازي مع شارات هجرية كهرمانية دافئة |
+| `settings.theme.emerald.label`         | المسجد الزمردي (أخضر زمردي وذهبي)                                               |
+| `settings.theme.emerald.description`   | ترويسات باللون الأخضر الزمردي الإسلامي مع إبرازات ذهبية دافئة للتقويم الثانوي      |
+| `settings.theme.sandstone.label`       | الحجر الرملي الأندلسي (ألوان ترابية دافئة)                                       |
+| `settings.theme.sandstone.description` | نغمات التيراكوتا والرق الدافئة المستوحاة من الأفنية الأندلسية                     |
+| `settings.theme.midnight.label`        | مرصد منتصف الليل (داكن)                                                         |
+| `settings.theme.midnight.description`  | لوحة داكنة عميقة مع لمسات سماوية وذهبية مضيئة                                   |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -168,18 +172,18 @@ flowchart LR
 
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/calendar/calendar` | `admin` | `admin.getCalendar` | Bearer JWT |
-| `POST` | `/calendar/calendar/reschedule` | `admin` | `admin.reschedule` | Bearer JWT |
-| `POST` | `/calendar/calendar/quick-create` | `admin` | `admin.quickCreate` | Bearer JWT |
-| `GET` | `/calendar/content-types` | `admin` | `admin.getContentTypes` | Bearer JWT |
-| `GET` | `/calendar/settings` | `admin` | `admin.getSettings` | Bearer JWT |
-| `PUT` | `/calendar/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
-| `POST` | `/calendar/clear-settings` | `admin` | `admin.clearSettings` | Bearer JWT |
-| `GET` | `/api/calendar/occurrences` | `content-api` | `content-api.getOccurrences` | Bearer JWT |
-| `GET` | `/api/calendar/feed.ics` | `content-api` | `content-api.downloadFeedIcs` | Bearer JWT |
-| `GET` | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT |
+| الطريقة | مسار نقطة النهاية                       | النطاق        | المعالج (Handler)              | المصادقة   |
+| :------ | :-------------------------------------- | :------------ | :----------------------------- | :--------- |
+| `GET`   | `/calendar/calendar`                    | `admin`       | `admin.getCalendar`            | Bearer JWT |
+| `POST`  | `/calendar/calendar/reschedule`         | `admin`       | `admin.reschedule`             | Bearer JWT |
+| `POST`  | `/calendar/calendar/quick-create`       | `admin`       | `admin.quickCreate`            | Bearer JWT |
+| `GET`   | `/calendar/content-types`               | `admin`       | `admin.getContentTypes`        | Bearer JWT |
+| `GET`   | `/calendar/settings`                    | `admin`       | `admin.getSettings`            | Bearer JWT |
+| `PUT`   | `/calendar/settings`                    | `admin`       | `admin.updateSettings`         | Bearer JWT |
+| `POST`  | `/calendar/clear-settings`              | `admin`       | `admin.clearSettings`          | Bearer JWT |
+| `GET`   | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Bearer JWT |
+| `GET`   | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Bearer JWT |
+| `GET`   | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 

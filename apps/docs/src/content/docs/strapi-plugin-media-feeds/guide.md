@@ -15,7 +15,11 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   "media-feeds": {
     enabled: true,
     config: {
@@ -36,16 +40,16 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key | Rendered UI Label |
-| :--- | :--- |
-| `common.disabled` | Disabled |
-| `common.enabled` | Enabled |
-| `common.remove` | Remove |
-| `field.author_organization` | Author / Organization |
-| `field.default_locale` | Default Locale |
-| `field.live_broadcast_title` | Live Broadcast Title |
-| `field.live_event_slug` | Linked Event Slug (Optional) |
-| `field.live_schedule_label` | Schedule / Broadcast Window Label |
+| Translation Key              | Rendered UI Label                 |
+| :--------------------------- | :-------------------------------- |
+| `common.disabled`            | Disabled                          |
+| `common.enabled`             | Enabled                           |
+| `common.remove`              | Remove                            |
+| `field.author_organization`  | Author / Organization             |
+| `field.default_locale`       | Default Locale                    |
+| `field.live_broadcast_title` | Live Broadcast Title              |
+| `field.live_event_slug`      | Linked Event Slug (Optional)      |
+| `field.live_schedule_label`  | Schedule / Broadcast Window Label |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -71,32 +75,32 @@ Generic multi-language video, podcast, audio lecture, YouTube item, or live broa
 
 > **Kind**: `collectionType` · **DB Table**: `media_feed_items` · **Admin Location**: `/admin/content-manager/collection-types/plugin::media-feeds.media-item` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | — |
-| `slug` | `uid` | Yes | — |
-| `description` | `text` | Yes | — |
-| `transcript` | `richtext` | No | — |
-| `type` | `string` | Yes | default: `"video"` |
-| `provider` | `enumeration` | No | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
-| `externalId` | `string` | No | — |
-| `sourceUrl` | `string` | No | — |
-| `embedUrl` | `string` | No | — |
-| `speaker` | `string` | No | — |
-| `speakerSlug` | `string` | No | — |
-| `seriesSlug` | `string` | No | — |
-| `duration` | `string` | No | — |
-| `publishedAtLabel` | `string` | No | — |
-| `imageUrl` | `string` | No | — |
-| `imageAlt` | `string` | No | — |
-| `thumbnail` | `media` | No | — |
-| `audioFile` | `media` | No | — |
-| `transcriptFile` | `media` | No | — |
-| `spokenLanguages` | `json` | No | default: `["es"]` |
-| `languageTracks` | `json` | No | default: `[]` |
-| `chapters` | `json` | No | default: `[]` |
-| `featured` | `boolean` | No | default: `false` |
-| `isLive` | `boolean` | No | default: `false` |
+| Attribute          | Strapi Type   | Required | Constraints / Target                                                                              |
+| :----------------- | :------------ | :------- | :------------------------------------------------------------------------------------------------ |
+| `title`            | `string`      | Yes      | —                                                                                                 |
+| `slug`             | `uid`         | Yes      | —                                                                                                 |
+| `description`      | `text`        | Yes      | —                                                                                                 |
+| `transcript`       | `richtext`    | No       | —                                                                                                 |
+| `type`             | `string`      | Yes      | default: `"video"`                                                                                |
+| `provider`         | `enumeration` | No       | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
+| `externalId`       | `string`      | No       | —                                                                                                 |
+| `sourceUrl`        | `string`      | No       | —                                                                                                 |
+| `embedUrl`         | `string`      | No       | —                                                                                                 |
+| `speaker`          | `string`      | No       | —                                                                                                 |
+| `speakerSlug`      | `string`      | No       | —                                                                                                 |
+| `seriesSlug`       | `string`      | No       | —                                                                                                 |
+| `duration`         | `string`      | No       | —                                                                                                 |
+| `publishedAtLabel` | `string`      | No       | —                                                                                                 |
+| `imageUrl`         | `string`      | No       | —                                                                                                 |
+| `imageAlt`         | `string`      | No       | —                                                                                                 |
+| `thumbnail`        | `media`       | No       | —                                                                                                 |
+| `audioFile`        | `media`       | No       | —                                                                                                 |
+| `transcriptFile`   | `media`       | No       | —                                                                                                 |
+| `spokenLanguages`  | `json`        | No       | default: `["es"]`                                                                                 |
+| `languageTracks`   | `json`        | No       | default: `[]`                                                                                     |
+| `chapters`         | `json`        | No       | default: `[]`                                                                                     |
+| `featured`         | `boolean`     | No       | default: `false`                                                                                  |
+| `isLive`           | `boolean`     | No       | default: `false`                                                                                  |
 
 ### `plugin::media-feeds.media-series` — Media Series & Podcast Show
 
@@ -104,21 +108,21 @@ Generic multi-language podcast show, video playlist, or lecture series
 
 > **Kind**: `collectionType` · **DB Table**: `media_feed_series` · **Admin Location**: `/admin/content-manager/collection-types/plugin::media-feeds.media-series` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | — |
-| `slug` | `uid` | Yes | — |
-| `description` | `text` | Yes | — |
-| `author` | `string` | No | — |
-| `coverImageUrl` | `string` | No | — |
-| `category` | `string` | No | default: `"Education"` |
-| `defaultType` | `string` | No | default: `"podcast"` |
-| `spokenLanguages` | `json` | No | default: `["es","en","ar","tr"]` |
-| `rssEnabled` | `boolean` | No | default: `true` |
-| `youtubePlaylistId` | `string` | No | — |
-| `spotifyShowUrl` | `string` | No | — |
-| `applePodcastsUrl` | `string` | No | — |
-| `active` | `boolean` | No | default: `true` |
+| Attribute           | Strapi Type | Required | Constraints / Target             |
+| :------------------ | :---------- | :------- | :------------------------------- |
+| `title`             | `string`    | Yes      | —                                |
+| `slug`              | `uid`       | Yes      | —                                |
+| `description`       | `text`      | Yes      | —                                |
+| `author`            | `string`    | No       | —                                |
+| `coverImageUrl`     | `string`    | No       | —                                |
+| `category`          | `string`    | No       | default: `"Education"`           |
+| `defaultType`       | `string`    | No       | default: `"podcast"`             |
+| `spokenLanguages`   | `json`      | No       | default: `["es","en","ar","tr"]` |
+| `rssEnabled`        | `boolean`   | No       | default: `true`                  |
+| `youtubePlaylistId` | `string`    | No       | —                                |
+| `spotifyShowUrl`    | `string`    | No       | —                                |
+| `applePodcastsUrl`  | `string`    | No       | —                                |
+| `active`            | `boolean`   | No       | default: `true`                  |
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 
@@ -208,19 +212,19 @@ flowchart LR
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path | Scope | Controller Handler | Auth |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/media-feeds/overview` | `admin` | `admin.getOverview` | Bearer JWT |
-| `GET` | `/media-feeds/settings` | `admin` | `admin.getSettings` | Bearer JWT |
-| `PUT` | `/media-feeds/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
-| `POST` | `/media-feeds/enrich-url` | `admin` | `admin.enrichUrl` | Bearer JWT |
-| `POST` | `/media-feeds/sync-youtube` | `admin` | `admin.syncYouTube` | Bearer JWT |
-| `GET` | `/api/media-feeds/episodes` | `content-api` | `content-api.listEpisodes` | Public |
-| `GET` | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public |
-| `GET` | `/api/media-feeds/series` | `content-api` | `content-api.listSeries` | Public |
-| `GET` | `/api/media-feeds/live` | `content-api` | `content-api.getLiveStatus` | Public |
-| `GET` | `/api/media-feeds/rss.xml` | `content-api` | `content-api.getRssXml` | Public |
-| `GET` | `/api/media-feeds/podcast.xml` | `content-api` | `content-api.getRssXml` | Public |
+| Method | Endpoint Path                      | Scope         | Controller Handler             | Auth       |
+| :----- | :--------------------------------- | :------------ | :----------------------------- | :--------- |
+| `GET`  | `/media-feeds/overview`            | `admin`       | `admin.getOverview`            | Bearer JWT |
+| `GET`  | `/media-feeds/settings`            | `admin`       | `admin.getSettings`            | Bearer JWT |
+| `PUT`  | `/media-feeds/settings`            | `admin`       | `admin.updateSettings`         | Bearer JWT |
+| `POST` | `/media-feeds/enrich-url`          | `admin`       | `admin.enrichUrl`              | Bearer JWT |
+| `POST` | `/media-feeds/sync-youtube`        | `admin`       | `admin.syncYouTube`            | Bearer JWT |
+| `GET`  | `/api/media-feeds/episodes`        | `content-api` | `content-api.listEpisodes`     | Public     |
+| `GET`  | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public     |
+| `GET`  | `/api/media-feeds/series`          | `content-api` | `content-api.listSeries`       | Public     |
+| `GET`  | `/api/media-feeds/live`            | `content-api` | `content-api.getLiveStatus`    | Public     |
+| `GET`  | `/api/media-feeds/rss.xml`         | `content-api` | `content-api.getRssXml`        | Public     |
+| `GET`  | `/api/media-feeds/podcast.xml`     | `content-api` | `content-api.getRssXml`        | Public     |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 
@@ -229,10 +233,12 @@ flowchart LR
 const pluginService = strapi.plugin("media-feeds")?.service("feedService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi.documents("plugin::media-feeds.media-item").findMany({
-  limit: 25,
-  sort: "createdAt:desc",
-});
+const records = await strapi
+  .documents("plugin::media-feeds.media-item")
+  .findMany({
+    limit: 25,
+    sort: "createdAt:desc",
+  });
 ```
 
 ## 8. Troubleshooting & Verification

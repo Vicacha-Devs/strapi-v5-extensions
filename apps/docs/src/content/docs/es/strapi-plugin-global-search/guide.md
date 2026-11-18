@@ -15,7 +15,11 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   "global-search": {
     enabled: true,
     config: {
@@ -39,16 +43,16 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción | Texto en Interfaz |
-| :--- | :--- |
-| `plugin.name` | Búsqueda Global |
+| Clave de Traducción  | Texto en Interfaz                                          |
+| :------------------- | :--------------------------------------------------------- |
+| `plugin.name`        | Búsqueda Global                                            |
 | `plugin.description` | Busca en todos los tipos de contenido desde un solo lugar. |
-| `settings.section` | Búsqueda Global |
-| `settings.link` | Configuración |
-| `common.searching` | Buscando… |
-| `common.no_results` | Sin resultados para “{query}”. |
-| `common.on` | Sí |
-| `common.off` | No |
+| `settings.section`   | Búsqueda Global                                            |
+| `settings.link`      | Configuración                                              |
+| `common.searching`   | Buscando…                                                  |
+| `common.no_results`  | Sin resultados para “{query}”.                             |
+| `common.on`          | Sí                                                         |
+| `common.off`         | No                                                         |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 
@@ -73,7 +77,7 @@ Este plugin opera dinámicamente sobre las entidades Content-Type existentes de 
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 
-> **Grupo en la Barra Lateral del Content Manager**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
+> **Grupo en la Barra Lateral del Content Manager**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
 
 ### Entidades y Componentes en el Content Manager
 
@@ -155,14 +159,14 @@ flowchart LR
 
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/global-search/search` | `admin` | `search.find` | Bearer JWT |
-| `GET` | `/global-search/schema` | `admin` | `schema.find` | Bearer JWT |
-| `GET` | `/global-search/schema/all` | `admin` | `schema.findAll` | Bearer JWT |
-| `GET` | `/global-search/settings` | `admin` | `settings.find` | Bearer JWT |
-| `PUT` | `/global-search/settings` | `admin` | `settings.update` | Bearer JWT |
-| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset` | Bearer JWT |
+| Método | Ruta del Endpoint               | Ámbito  | Controlador       | Autenticación |
+| :----- | :------------------------------ | :------ | :---------------- | :------------ |
+| `GET`  | `/global-search/search`         | `admin` | `search.find`     | Bearer JWT    |
+| `GET`  | `/global-search/schema`         | `admin` | `schema.find`     | Bearer JWT    |
+| `GET`  | `/global-search/schema/all`     | `admin` | `schema.findAll`  | Bearer JWT    |
+| `GET`  | `/global-search/settings`       | `admin` | `settings.find`   | Bearer JWT    |
+| `PUT`  | `/global-search/settings`       | `admin` | `settings.update` | Bearer JWT    |
+| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset`  | Bearer JWT    |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 

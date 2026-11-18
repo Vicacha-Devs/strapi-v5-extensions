@@ -3,6 +3,7 @@ title: "Islam Suite (Salah, Qibla, Hijri) (@vicacha-devs/strapi-plugin-islam)"
 description: "Comprehensive Strapi v5 Islamic Liturgical, Scriptural & Fiqh Suite: Salah/Adhan/Iqamah Astronomical Engine, Qibla Spherical Compass, Hilal Moon-Sighting & Eid/Ramadan Operations, Quran/Hadith/Dua Hub, and Zakat/Nisab/Fitrana/Fidyah/Kaffarah Calculators powered by @vicacha-devs/strapi-plugin-calendar"
 prev: false
 ---
+
 Comprehensive Strapi v5 Islamic Liturgical, Scriptural & Fiqh Suite for Mosques, Islamic Cultural Centers, and Community Platforms.
 
 ## 5 Core Pillars
@@ -16,7 +17,7 @@ Comprehensive Strapi v5 Islamic Liturgical, Scriptural & Fiqh Suite for Mosques,
    - Bidirectional Gregorian ↔ Hijri conversion (`islamic-umalqura` + tabular fallback) with Imam Hilal moon-sighting day offset (`-2` to `+2` days) and explicit Gregorian date confirmation.
    - Automatic countdowns for Ramadan, Laylat al-Qadr, Eid al-Fitr, Day of Arafah, Eid al-Adha, Islamic New Year, Day of Ashura, Mawlid al-Nabi, and Isra & Mi'raj, with Ecosystem Bridges to `@vicacha-devs/strapi-plugin-calendar`, `@vicacha-devs/strapi-plugin-inbox`, and `@vicacha-devs/strapi-plugin-donations`.
 4. **Quran, Hadith & Dua / Adhkar Hub**
-   - Complete 114 Surah directory + curated Quranic Ayat, Prophetic Hadiths, Hisnul Muslim Duas & Adhkar (with Tasbih repetition counts), 99 Names of Allah (*Asma-ul-Husna*), Digital Tasbih presets, Five Pillars & Shahada reference, and Daily Inspiration with Imam Pin Override.
+   - Complete 114 Surah directory + curated Quranic Ayat, Prophetic Hadiths, Hisnul Muslim Duas & Adhkar (with Tasbih repetition counts), 99 Names of Allah (_Asma-ul-Husna_), Digital Tasbih presets, Five Pillars & Shahada reference, and Daily Inspiration with Imam Pin Override.
 5. **Fiqh Financial Calculators (Zakat al-Mal, Nisab, Zakat al-Fitr, Fidyah, Kaffarah & Hawl)**
    - Live/Fallback Gold (`85g` Common / `87.48g` Classical) & Silver (`595g` Common / `612.36g` Classical) Nisab thresholds in `COP`, `USD`, `EUR`, and `TRY` with `24K`, `22K`, `21K`, `18K`, `14K` gold carat purity math, agricultural Ushr (`5%` / `10%`), Zakat al-Fitr per-person calculator, Fidyah/Kaffarah calculator, and `354`-day Lunar Hawl maturity tracker.
 
@@ -30,12 +31,11 @@ Enable the plugin in `config/plugins.ts`:
 
 ```ts
 export default () => ({
-  "islam": {
+  islam: {
     enabled: true,
   },
 });
 ```
-
 
 ## Content-Type Entities & Where to Find Them
 

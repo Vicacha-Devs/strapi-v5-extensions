@@ -15,8 +15,12 @@ pnpm add @vicacha-devs/strapi-plugin-opentelemetry
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "opentelemetry": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  opentelemetry: {
     enabled: true,
     config: {
       serviceName: env("OTEL_SERVICE_NAME", "strapi-backend"),
@@ -30,7 +34,6 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
 ## 3. جولة في واجهة الإدارة (Strapi v5 Admin UI — دعم RTL)
 
 بمجرد تفعيل الإضافة، يتم تسجيل مساحة العمل والإعدادات داخل لوحة تحكم Strapi v5 مع دعم كامل للغة العربية واتجاه RTL:
-
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -136,7 +139,7 @@ flowchart LR
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
 | الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
-| :--- | :--- | :--- | :--- | :--- |
+| :------ | :---------------- | :----- | :---------------- | :------- |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 

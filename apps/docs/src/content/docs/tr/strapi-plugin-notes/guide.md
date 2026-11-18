@@ -15,8 +15,12 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "notes": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  notes: {
     enabled: true,
     config: {
       enablePinning: true,
@@ -36,16 +40,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı | Arayüz Metni |
-| :--- | :--- |
-| `plugin.name` | Notlar |
-| `notes.loading` | İçerik yükleniyor ... |
-| `notes.notification.loadError` | Notlar yüklenemedi. |
-| `notes.notification.created` | Not başarıyla oluşturuldu. |
-| `notes.notification.createError` | Not oluşturulamadı. |
-| `notes.notification.updated` | Not başarıyla güncellendi. |
-| `notes.notification.updateError` | Not güncellenemedi. |
-| `notes.notification.deleted` | Not başarıyla silindi. |
+| Çeviri Anahtarı                  | Arayüz Metni               |
+| :------------------------------- | :------------------------- |
+| `plugin.name`                    | Notlar                     |
+| `notes.loading`                  | İçerik yükleniyor ...      |
+| `notes.notification.loadError`   | Notlar yüklenemedi.        |
+| `notes.notification.created`     | Not başarıyla oluşturuldu. |
+| `notes.notification.createError` | Not oluşturulamadı.        |
+| `notes.notification.updated`     | Not başarıyla güncellendi. |
+| `notes.notification.updateError` | Not güncellenemedi.        |
+| `notes.notification.deleted`     | Not başarıyla silindi.     |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -70,18 +74,18 @@ Editorial notes attached to Content Manager entity records
 
 > **Kind**: `collectionType` · **DB Table**: `notes` · **Admin Location**: Internal (`/admin/plugins/notes`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | max: 255 |
-| `content` | `text` | No | — |
-| `category` | `enumeration` | Yes | enum: `general, todo, blocker, idea`; default: `"general"` |
-| `isPinned` | `boolean` | No | default: `false` |
-| `entityId` | `integer` | No | — |
-| `entityDocumentId` | `string` | No | max: 128 |
-| `entitySlug` | `string` | Yes | max: 160 |
-| `entityLocale` | `string` | No | max: 32 |
-| `createdByName` | `string` | No | max: 120 |
-| `updatedByName` | `string` | No | max: 120 |
+| Alan (Attribute)   | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                      |
+| :----------------- | :------------ | :------ | :--------------------------------------------------------- |
+| `title`            | `string`      | Yes     | max: 255                                                   |
+| `content`          | `text`        | No      | —                                                          |
+| `category`         | `enumeration` | Yes     | enum: `general, todo, blocker, idea`; default: `"general"` |
+| `isPinned`         | `boolean`     | No      | default: `false`                                           |
+| `entityId`         | `integer`     | No      | —                                                          |
+| `entityDocumentId` | `string`      | No      | max: 128                                                   |
+| `entitySlug`       | `string`      | Yes     | max: 160                                                   |
+| `entityLocale`     | `string`      | No      | max: 32                                                    |
+| `createdByName`    | `string`      | No      | max: 120                                                   |
+| `updatedByName`    | `string`      | No      | max: 120                                                   |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
@@ -169,16 +173,16 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/notes/notes` | `admin` | `notesController.find` | Bearer JWT |
-| `GET` | `/notes/notes/stats` | `admin` | `notesController.stats` | Bearer JWT |
-| `GET` | `/notes/notes/{id}` | `admin` | `notesController.findOne` | Bearer JWT |
-| `POST` | `/notes/notes` | `admin` | `notesController.create` | Bearer JWT |
-| `PUT` | `/notes/notes/{id}` | `admin` | `notesController.update` | Bearer JWT |
-| `DELETE` | `/notes/notes/{id}` | `admin` | `notesController.delete` | Bearer JWT |
-| `GET` | `/api/notes/notes` | `content-api` | `notesController.find` | Bearer JWT |
-| `GET` | `/api/notes/notes/{id}` | `content-api` | `notesController.findOne` | Bearer JWT |
+| Metot    | Uç Nokta Yolu           | Kapsam        | Denetleyici (Handler)     | Kimlik Doğrulama |
+| :------- | :---------------------- | :------------ | :------------------------ | :--------------- |
+| `GET`    | `/notes/notes`          | `admin`       | `notesController.find`    | Bearer JWT       |
+| `GET`    | `/notes/notes/stats`    | `admin`       | `notesController.stats`   | Bearer JWT       |
+| `GET`    | `/notes/notes/{id}`     | `admin`       | `notesController.findOne` | Bearer JWT       |
+| `POST`   | `/notes/notes`          | `admin`       | `notesController.create`  | Bearer JWT       |
+| `PUT`    | `/notes/notes/{id}`     | `admin`       | `notesController.update`  | Bearer JWT       |
+| `DELETE` | `/notes/notes/{id}`     | `admin`       | `notesController.delete`  | Bearer JWT       |
+| `GET`    | `/api/notes/notes`      | `content-api` | `notesController.find`    | Bearer JWT       |
+| `GET`    | `/api/notes/notes/{id}` | `content-api` | `notesController.findOne` | Bearer JWT       |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

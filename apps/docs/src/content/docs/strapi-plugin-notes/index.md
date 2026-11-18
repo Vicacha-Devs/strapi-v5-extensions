@@ -3,6 +3,7 @@ title: "Editorial Notes & Pins (@vicacha-devs/strapi-plugin-notes)"
 description: "Strapi v5 Entity Notes plugin (forked & evolved from strapi-community/strapi-plugin-notes) with Audit Logs-style modal metadata (Created/Updated At & By), pinned notes, category badges, document/locale scoping, and a Global Notes Hub."
 prev: false
 ---
+
 A Strapi v5 plugin (forked and modernized from [`strapi-community/strapi-plugin-notes`](https://github.com/strapi-community/strapi-plugin-notes)) that enables editorial teams to attach rich, categorized, and pinned notes to any Content Manager entry and browse all notes from a centralized Admin Hub.
 
 ## Key Features
@@ -33,12 +34,11 @@ Enable the plugin in `config/plugins.ts`:
 
 ```ts
 export default () => ({
-  "notes": {
+  notes: {
     enabled: true,
   },
 });
 ```
-
 
 ## Content-Type Entities & Where to Find Them
 

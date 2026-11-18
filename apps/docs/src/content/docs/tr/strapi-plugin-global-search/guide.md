@@ -15,7 +15,11 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
   "global-search": {
     enabled: true,
     config: {
@@ -39,16 +43,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı | Arayüz Metni |
-| :--- | :--- |
-| `plugin.name` | Genel Arama |
+| Çeviri Anahtarı      | Arayüz Metni                                |
+| :------------------- | :------------------------------------------ |
+| `plugin.name`        | Genel Arama                                 |
 | `plugin.description` | Tüm içerik türlerini tek bir yerden arayın. |
-| `settings.section` | Genel Arama |
-| `settings.link` | Yapılandırma |
-| `common.searching` | Aranıyor… |
-| `common.no_results` | “{query}” için sonuç bulunamadı. |
-| `common.on` | Açık |
-| `common.off` | Kapalı |
+| `settings.section`   | Genel Arama                                 |
+| `settings.link`      | Yapılandırma                                |
+| `common.searching`   | Aranıyor…                                   |
+| `common.no_results`  | “{query}” için sonuç bulunamadı.            |
+| `common.on`          | Açık                                        |
+| `common.off`         | Kapalı                                      |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -73,7 +77,7 @@ Bu eklenti, doğrudan mevcut Strapi içerik türü varlıkları (`api::*` ve `pl
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
-> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
+> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
 
 ### İçerik Yöneticisi Varlıkları ve Bileşenleri
 
@@ -155,14 +159,14 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/global-search/search` | `admin` | `search.find` | Bearer JWT |
-| `GET` | `/global-search/schema` | `admin` | `schema.find` | Bearer JWT |
-| `GET` | `/global-search/schema/all` | `admin` | `schema.findAll` | Bearer JWT |
-| `GET` | `/global-search/settings` | `admin` | `settings.find` | Bearer JWT |
-| `PUT` | `/global-search/settings` | `admin` | `settings.update` | Bearer JWT |
-| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset` | Bearer JWT |
+| Metot  | Uç Nokta Yolu                   | Kapsam  | Denetleyici (Handler) | Kimlik Doğrulama |
+| :----- | :------------------------------ | :------ | :-------------------- | :--------------- |
+| `GET`  | `/global-search/search`         | `admin` | `search.find`         | Bearer JWT       |
+| `GET`  | `/global-search/schema`         | `admin` | `schema.find`         | Bearer JWT       |
+| `GET`  | `/global-search/schema/all`     | `admin` | `schema.findAll`      | Bearer JWT       |
+| `GET`  | `/global-search/settings`       | `admin` | `settings.find`       | Bearer JWT       |
+| `PUT`  | `/global-search/settings`       | `admin` | `settings.update`     | Bearer JWT       |
+| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset`      | Bearer JWT       |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

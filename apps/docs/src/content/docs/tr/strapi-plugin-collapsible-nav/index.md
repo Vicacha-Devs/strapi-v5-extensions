@@ -115,4 +115,4 @@ flowchart LR
 ## 4. REST API Uç Noktaları (`content-api` ve `admin`)
 
 | Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
-| :--- | :--- | :--- | :--- | :--- |
+| :---- | :------------ | :----- | :-------------------- | :--------------- |

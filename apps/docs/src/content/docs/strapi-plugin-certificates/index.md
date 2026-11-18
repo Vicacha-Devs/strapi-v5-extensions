@@ -3,6 +3,7 @@ title: "Digital Certificates (Ed25519) (@vicacha-devs/strapi-plugin-certificates
 description: "Generic Strapi v5 Official Certificates, Cryptographic Ed25519 Signing, Printable Credentials & QR Verification Plugin powered by @vicacha-devs/strapi-plugin-calendar"
 prev: false
 ---
+
 Generic **Official Certificates, Cryptographic Ed25519 Signing, Printable Credentials & Public Serial Verification Plugin** for **Strapi v5**, powered by [`@vicacha-devs/strapi-plugin-calendar`](../strapi-plugin-calendar).
 
 ---
@@ -30,12 +31,11 @@ Enable the plugin in `config/plugins.ts`:
 
 ```ts
 export default () => ({
-  "certificates": {
+  certificates: {
     enabled: true,
   },
 });
 ```
-
 
 ## Content-Type Entities & Where to Find Them
 

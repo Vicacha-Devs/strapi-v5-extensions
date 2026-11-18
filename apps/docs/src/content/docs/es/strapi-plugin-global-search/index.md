@@ -47,7 +47,7 @@ Este plugin opera dinámicamente sobre las entidades Content-Type existentes de 
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 
-> **Grupo en la Barra Lateral del Content Manager**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
+> **Grupo en la Barra Lateral del Content Manager**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
 
 ### Entidades y Componentes en el Content Manager
 
@@ -129,11 +129,11 @@ flowchart LR
 
 ## 4. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/global-search/search` | `admin` | `search.find` | Bearer JWT |
-| `GET` | `/global-search/schema` | `admin` | `schema.find` | Bearer JWT |
-| `GET` | `/global-search/schema/all` | `admin` | `schema.findAll` | Bearer JWT |
-| `GET` | `/global-search/settings` | `admin` | `settings.find` | Bearer JWT |
-| `PUT` | `/global-search/settings` | `admin` | `settings.update` | Bearer JWT |
-| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset` | Bearer JWT |
+| Método | Ruta del Endpoint               | Ámbito  | Controlador       | Autenticación |
+| :----- | :------------------------------ | :------ | :---------------- | :------------ |
+| `GET`  | `/global-search/search`         | `admin` | `search.find`     | Bearer JWT    |
+| `GET`  | `/global-search/schema`         | `admin` | `schema.find`     | Bearer JWT    |
+| `GET`  | `/global-search/schema/all`     | `admin` | `schema.findAll`  | Bearer JWT    |
+| `GET`  | `/global-search/settings`       | `admin` | `settings.find`   | Bearer JWT    |
+| `PUT`  | `/global-search/settings`       | `admin` | `settings.update` | Bearer JWT    |
+| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset`  | Bearer JWT    |

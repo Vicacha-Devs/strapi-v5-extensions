@@ -15,8 +15,12 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "opentelemetry": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  opentelemetry: {
     enabled: true,
     config: {
       serviceName: env("OTEL_SERVICE_NAME", "strapi-backend"),
@@ -30,7 +34,6 @@ export default ({ env }: { env: (key: string, defaultValue?: string) => string }
 ## 3. Strapi v5 Admin UI Tour
 
 Once enabled, the plugin registers its workspace and settings inside the Strapi v5 Admin panel using Strapi Design System v2 components:
-
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -136,7 +139,7 @@ flowchart LR
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
 | Method | Endpoint Path | Scope | Controller Handler | Auth |
-| :--- | :--- | :--- | :--- | :--- |
+| :----- | :------------ | :---- | :----------------- | :--- |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

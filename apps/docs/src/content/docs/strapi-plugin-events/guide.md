@@ -15,8 +15,12 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "events": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  events: {
     enabled: true,
     config: {
       defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
@@ -37,16 +41,16 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key | Rendered UI Label |
-| :--- | :--- |
-| `sidePanel.title` | Events & RSVP Summary |
+| Translation Key                | Rendered UI Label          |
+| :----------------------------- | :------------------------- |
+| `sidePanel.title`              | Events & RSVP Summary      |
 | `sidePanel.secondaryCalendars` | Alternative Calendar Dates |
-| `sidePanel.rsvpStatus` | RSVP & Capacity |
-| `sidePanel.full` | Full / Waitlist |
-| `sidePanel.open` | Open |
-| `sidePanel.confirmedSeats` | Confirmed Seats |
-| `sidePanel.checkedIn` | Checked In |
-| `sidePanel.waitlisted` | Waitlisted Seats |
+| `sidePanel.rsvpStatus`         | RSVP & Capacity            |
+| `sidePanel.full`               | Full / Waitlist            |
+| `sidePanel.open`               | Open                       |
+| `sidePanel.confirmedSeats`     | Confirmed Seats            |
+| `sidePanel.checkedIn`          | Checked In                 |
+| `sidePanel.waitlisted`         | Waitlisted Seats           |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -71,36 +75,36 @@ Recurring & single events managed by strapi-plugin-events
 
 > **Kind**: `collectionType` · **DB Table**: `plugin_events_items` · **Admin Location**: `/admin/content-manager/collection-types/plugin::events.event` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | max: 200 |
-| `slug` | `uid` | Yes | — |
-| `summary` | `text` | No | max: 500 |
-| `description` | `richtext` | No | — |
-| `startDate` | `datetime` | Yes | — |
-| `endDate` | `datetime` | No | — |
-| `allDay` | `boolean` | No | default: `false` |
-| `timezone` | `string` | No | default: `"UTC"` |
-| `recurrence` | `customField` | No | customField: `plugin::events.rrule` |
-| `eventStatus` | `enumeration` | Yes | enum: `scheduled, cancelled, postponed, rescheduled`; default: `"scheduled"` |
-| `locationType` | `enumeration` | No | enum: `in_person, online, hybrid`; default: `"in_person"` |
-| `location` | `string` | No | — |
-| `virtualUrl` | `string` | No | — |
-| `category` | `string` | No | default: `"general"` |
-| `speaker` | `string` | No | — |
-| `speakerSlug` | `string` | No | — |
-| `color` | `string` | No | default: `"#0D9488"` |
-| `featured` | `boolean` | No | default: `false` |
-| `rsvpEnabled` | `boolean` | No | default: `false` |
-| `capacity` | `integer` | No | — |
-| `waitlistEnabled` | `boolean` | No | default: `true` |
-| `maxGuestsPerRegistration` | `integer` | No | default: `5` |
-| `registrationDeadline` | `datetime` | No | — |
-| `alternateDates` | `json` | No | — |
-| `poster` | `media` | No | — |
-| `actionLinks` | `json` | No | — |
-| `spotlightConfig` | `json` | No | — |
-| `metadata` | `json` | No | — |
+| Attribute                  | Strapi Type   | Required | Constraints / Target                                                         |
+| :------------------------- | :------------ | :------- | :--------------------------------------------------------------------------- |
+| `title`                    | `string`      | Yes      | max: 200                                                                     |
+| `slug`                     | `uid`         | Yes      | —                                                                            |
+| `summary`                  | `text`        | No       | max: 500                                                                     |
+| `description`              | `richtext`    | No       | —                                                                            |
+| `startDate`                | `datetime`    | Yes      | —                                                                            |
+| `endDate`                  | `datetime`    | No       | —                                                                            |
+| `allDay`                   | `boolean`     | No       | default: `false`                                                             |
+| `timezone`                 | `string`      | No       | default: `"UTC"`                                                             |
+| `recurrence`               | `customField` | No       | customField: `plugin::events.rrule`                                          |
+| `eventStatus`              | `enumeration` | Yes      | enum: `scheduled, cancelled, postponed, rescheduled`; default: `"scheduled"` |
+| `locationType`             | `enumeration` | No       | enum: `in_person, online, hybrid`; default: `"in_person"`                    |
+| `location`                 | `string`      | No       | —                                                                            |
+| `virtualUrl`               | `string`      | No       | —                                                                            |
+| `category`                 | `string`      | No       | default: `"general"`                                                         |
+| `speaker`                  | `string`      | No       | —                                                                            |
+| `speakerSlug`              | `string`      | No       | —                                                                            |
+| `color`                    | `string`      | No       | default: `"#0D9488"`                                                         |
+| `featured`                 | `boolean`     | No       | default: `false`                                                             |
+| `rsvpEnabled`              | `boolean`     | No       | default: `false`                                                             |
+| `capacity`                 | `integer`     | No       | —                                                                            |
+| `waitlistEnabled`          | `boolean`     | No       | default: `true`                                                              |
+| `maxGuestsPerRegistration` | `integer`     | No       | default: `5`                                                                 |
+| `registrationDeadline`     | `datetime`    | No       | —                                                                            |
+| `alternateDates`           | `json`        | No       | —                                                                            |
+| `poster`                   | `media`       | No       | —                                                                            |
+| `actionLinks`              | `json`        | No       | —                                                                            |
+| `spotlightConfig`          | `json`        | No       | —                                                                            |
+| `metadata`                 | `json`        | No       | —                                                                            |
 
 ### `plugin::events.registration` — Event Registration (RSVP)
 
@@ -108,22 +112,22 @@ Attendee RSVPs, waitlists, and check-ins managed by strapi-plugin-events
 
 > **Kind**: `collectionType` · **DB Table**: `plugin_events_registrations` · **Admin Location**: `/admin/content-manager/collection-types/plugin::events.registration` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Attribute | Strapi Type | Required | Constraints / Target |
-| :--- | :--- | :--- | :--- |
-| `eventUid` | `string` | Yes | default: `"plugin::events.event"` |
-| `eventDocumentId` | `string` | Yes | — |
-| `eventTitle` | `string` | No | — |
-| `occurrenceDate` | `string` | Yes | — |
-| `attendeeName` | `string` | Yes | max: 160 |
-| `attendeeEmail` | `email` | Yes | — |
-| `attendeePhone` | `string` | No | max: 50 |
-| `guestsCount` | `integer` | Yes | default: `1` |
-| `status` | `enumeration` | Yes | enum: `confirmed, waitlisted, cancelled, checked_in`; default: `"confirmed"` |
-| `checkInToken` | `string` | No | `private: true` |
-| `checkedInAt` | `datetime` | No | — |
-| `locale` | `string` | No | default: `"es"` |
-| `notes` | `text` | No | max: 2000 |
-| `metadata` | `json` | No | — |
+| Attribute         | Strapi Type   | Required | Constraints / Target                                                         |
+| :---------------- | :------------ | :------- | :--------------------------------------------------------------------------- |
+| `eventUid`        | `string`      | Yes      | default: `"plugin::events.event"`                                            |
+| `eventDocumentId` | `string`      | Yes      | —                                                                            |
+| `eventTitle`      | `string`      | No       | —                                                                            |
+| `occurrenceDate`  | `string`      | Yes      | —                                                                            |
+| `attendeeName`    | `string`      | Yes      | max: 160                                                                     |
+| `attendeeEmail`   | `email`       | Yes      | —                                                                            |
+| `attendeePhone`   | `string`      | No       | max: 50                                                                      |
+| `guestsCount`     | `integer`     | Yes      | default: `1`                                                                 |
+| `status`          | `enumeration` | Yes      | enum: `confirmed, waitlisted, cancelled, checked_in`; default: `"confirmed"` |
+| `checkInToken`    | `string`      | No       | `private: true`                                                              |
+| `checkedInAt`     | `datetime`    | No       | —                                                                            |
+| `locale`          | `string`      | No       | default: `"es"`                                                              |
+| `notes`           | `text`        | No       | max: 2000                                                                    |
+| `metadata`        | `json`        | No       | —                                                                            |
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 
@@ -222,25 +226,25 @@ flowchart LR
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path | Scope | Controller Handler | Auth |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/events/settings` | `admin` | `admin.getSettings` | Bearer JWT |
-| `PUT` | `/events/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
-| `GET` | `/events/calendar` | `admin` | `admin.getCalendar` | Bearer JWT |
-| `POST` | `/events/calendar/reschedule` | `admin` | `admin.reschedule` | Bearer JWT |
-| `POST` | `/events/calendar/quick-create` | `admin` | `admin.quickCreate` | Bearer JWT |
-| `GET` | `/events/stats/{documentId}` | `admin` | `admin.getEventStats` | Bearer JWT |
-| `GET` | `/events/registrations` | `admin` | `admin.listRegistrations` | Bearer JWT |
-| `GET` | `/events/registrations/export.csv` | `admin` | `admin.exportRegistrationsCsv` | Bearer JWT |
-| `POST` | `/events/registrations/{documentId}/status` | `admin` | `admin.updateRegistrationStatus` | Bearer JWT |
-| `POST` | `/events/registrations/{documentId}/check-in` | `admin` | `admin.checkIn` | Bearer JWT |
-| `GET` | `/api/events/occurrences` | `content-api` | `content-api.listOccurrences` | Bearer JWT |
-| `GET` | `/api/events/spotlights` | `content-api` | `content-api.listSpotlights` | Bearer JWT |
-| `GET` | `/api/events/feed.ics` | `content-api` | `content-api.downloadFeedIcs` | Bearer JWT |
-| `GET` | `/api/events/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventInviteIcs` | Bearer JWT |
-| `GET` | `/api/events/{documentId}/stats` | `content-api` | `content-api.getEventStats` | Bearer JWT |
-| `POST` | `/api/events/{documentId}/register` | `content-api` | `content-api.registerAttendee` | Bearer JWT |
-| `POST` | `/api/events/registrations/{token}/cancel` | `content-api` | `content-api.cancelRegistration` | Bearer JWT |
+| Method | Endpoint Path                                 | Scope         | Controller Handler                   | Auth       |
+| :----- | :-------------------------------------------- | :------------ | :----------------------------------- | :--------- |
+| `GET`  | `/events/settings`                            | `admin`       | `admin.getSettings`                  | Bearer JWT |
+| `PUT`  | `/events/settings`                            | `admin`       | `admin.updateSettings`               | Bearer JWT |
+| `GET`  | `/events/calendar`                            | `admin`       | `admin.getCalendar`                  | Bearer JWT |
+| `POST` | `/events/calendar/reschedule`                 | `admin`       | `admin.reschedule`                   | Bearer JWT |
+| `POST` | `/events/calendar/quick-create`               | `admin`       | `admin.quickCreate`                  | Bearer JWT |
+| `GET`  | `/events/stats/{documentId}`                  | `admin`       | `admin.getEventStats`                | Bearer JWT |
+| `GET`  | `/events/registrations`                       | `admin`       | `admin.listRegistrations`            | Bearer JWT |
+| `GET`  | `/events/registrations/export.csv`            | `admin`       | `admin.exportRegistrationsCsv`       | Bearer JWT |
+| `POST` | `/events/registrations/{documentId}/status`   | `admin`       | `admin.updateRegistrationStatus`     | Bearer JWT |
+| `POST` | `/events/registrations/{documentId}/check-in` | `admin`       | `admin.checkIn`                      | Bearer JWT |
+| `GET`  | `/api/events/occurrences`                     | `content-api` | `content-api.listOccurrences`        | Bearer JWT |
+| `GET`  | `/api/events/spotlights`                      | `content-api` | `content-api.listSpotlights`         | Bearer JWT |
+| `GET`  | `/api/events/feed.ics`                        | `content-api` | `content-api.downloadFeedIcs`        | Bearer JWT |
+| `GET`  | `/api/events/{documentId}/invite.ics`         | `content-api` | `content-api.downloadEventInviteIcs` | Bearer JWT |
+| `GET`  | `/api/events/{documentId}/stats`              | `content-api` | `content-api.getEventStats`          | Bearer JWT |
+| `POST` | `/api/events/{documentId}/register`           | `content-api` | `content-api.registerAttendee`       | Bearer JWT |
+| `POST` | `/api/events/registrations/{token}/cancel`    | `content-api` | `content-api.cancelRegistration`     | Bearer JWT |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

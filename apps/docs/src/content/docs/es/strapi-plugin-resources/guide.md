@@ -15,8 +15,12 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
-  "resources": {
+export default ({
+  env,
+}: {
+  env: (key: string, defaultValue?: string) => string;
+}) => ({
+  resources: {
     enabled: true,
     config: {
       organizationName: env("RESOURCES_ORG_NAME", "Community Resource Center"),
@@ -41,16 +45,16 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción | Texto en Interfaz |
-| :--- | :--- |
-| `page.ui.resources_media_galleries_glossary` | Recursos, Galerías Multimedia y Glosario |
+| Clave de Traducción                                        | Texto en Interfaz                                      |
+| :--------------------------------------------------------- | :----------------------------------------------------- |
+| `page.ui.resources_media_galleries_glossary`               | Recursos, Galerías Multimedia y Glosario               |
 | `page.ui.add_digital_library_publication_media_library_pd` | Añadir Publicación de Biblioteca Digital (PDF / eBook) |
-| `field.publication_title` | Título de la Publicación |
-| `placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf` | ej., Guía de Bienvenida y Etiqueta de la Mezquita |
-| `page.ui.display_title_shown_in_the_public_digital_librar` | Título visible en la Biblioteca Digital pública |
-| `field.publication_category` | Categoría de Publicación |
-| `placeholder.select_category` | Seleccionar categoría |
-| `page.ui.guide_visitor_prayer_guide` | Guía de Visita y Oración |
+| `field.publication_title`                                  | Título de la Publicación                               |
+| `placeholder.e_g_gu_a_de_bienvenida_a_la_mezquita_pdf`     | ej., Guía de Bienvenida y Etiqueta de la Mezquita      |
+| `page.ui.display_title_shown_in_the_public_digital_librar` | Título visible en la Biblioteca Digital pública        |
+| `field.publication_category`                               | Categoría de Publicación                               |
+| `placeholder.select_category`                              | Seleccionar categoría                                  |
+| `page.ui.guide_visitor_prayer_guide`                       | Guía de Visita y Oración                               |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 
@@ -77,23 +81,23 @@ Curated photo and video albums synced with Strapi v5 Media Library folders and C
 
 > **Kind**: `collectionType` · **DB Table**: `resources_gallery_albums` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.gallery-album` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | max: 200 |
-| `slug` | `uid` | Yes | — |
-| `description` | `text` | No | — |
-| `category` | `enumeration` | Yes | enum: `architecture, community, events, ramadan_eid, heritage, press`; default: `"community"` |
-| `coverPhoto` | `media` | No | — |
-| `photos` | `media` | No | — |
-| `mediaFolderId` | `integer` | No | — |
-| `mediaFolderPath` | `string` | No | max: 160 |
-| `eventDate` | `date` | No | — |
-| `secondaryDateOverride` | `string` | No | max: 80 |
-| `photographerCredit` | `string` | No | max: 140 |
-| `framingNotes` | `string` | No | max: 500 |
-| `featured` | `boolean` | No | default: `false` |
-| `sortOrder` | `integer` | No | default: `0` |
-| `photoCount` | `integer` | No | default: `0` |
+| Atributo                | Tipo en Strapi | Requerido | Restricciones / Relación                                                                      |
+| :---------------------- | :------------- | :-------- | :-------------------------------------------------------------------------------------------- |
+| `title`                 | `string`       | Yes       | max: 200                                                                                      |
+| `slug`                  | `uid`          | Yes       | —                                                                                             |
+| `description`           | `text`         | No        | —                                                                                             |
+| `category`              | `enumeration`  | Yes       | enum: `architecture, community, events, ramadan_eid, heritage, press`; default: `"community"` |
+| `coverPhoto`            | `media`        | No        | —                                                                                             |
+| `photos`                | `media`        | No        | —                                                                                             |
+| `mediaFolderId`         | `integer`      | No        | —                                                                                             |
+| `mediaFolderPath`       | `string`       | No        | max: 160                                                                                      |
+| `eventDate`             | `date`         | No        | —                                                                                             |
+| `secondaryDateOverride` | `string`       | No        | max: 80                                                                                       |
+| `photographerCredit`    | `string`       | No        | max: 140                                                                                      |
+| `framingNotes`          | `string`       | No        | max: 500                                                                                      |
+| `featured`              | `boolean`      | No        | default: `false`                                                                              |
+| `sortOrder`             | `integer`      | No        | default: `0`                                                                                  |
+| `photoCount`            | `integer`      | No        | default: `0`                                                                                  |
 
 ### `plugin::resources.glossary-term` — Resource Glossary Term
 
@@ -101,18 +105,18 @@ Multilingual A-Z glossary terms with native script, transliteration, and Strapi 
 
 > **Kind**: `collectionType` · **DB Table**: `resources_glossary_terms` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.glossary-term` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
-| :--- | :--- | :--- | :--- |
-| `term` | `string` | Yes | max: 120 |
-| `slug` | `uid` | Yes | — |
-| `nativeScript` | `string` | No | max: 200 |
-| `transliteration` | `string` | No | max: 200 |
-| `definition` | `text` | Yes | — |
-| `category` | `enumeration` | Yes | enum: `beliefs, worship, ethics, history, community, general`; default: `"general"` |
-| `letterGroup` | `string` | No | max: 4; default: `"A"` |
-| `pronunciationAudio` | `media` | No | — |
-| `relatedTerms` | `json` | No | — |
-| `featured` | `boolean` | No | default: `false` |
+| Atributo             | Tipo en Strapi | Requerido | Restricciones / Relación                                                            |
+| :------------------- | :------------- | :-------- | :---------------------------------------------------------------------------------- |
+| `term`               | `string`       | Yes       | max: 120                                                                            |
+| `slug`               | `uid`          | Yes       | —                                                                                   |
+| `nativeScript`       | `string`       | No        | max: 200                                                                            |
+| `transliteration`    | `string`       | No        | max: 200                                                                            |
+| `definition`         | `text`         | Yes       | —                                                                                   |
+| `category`           | `enumeration`  | Yes       | enum: `beliefs, worship, ethics, history, community, general`; default: `"general"` |
+| `letterGroup`        | `string`       | No        | max: 4; default: `"A"`                                                              |
+| `pronunciationAudio` | `media`        | No        | —                                                                                   |
+| `relatedTerms`       | `json`         | No        | —                                                                                   |
+| `featured`           | `boolean`      | No        | default: `false`                                                                    |
 
 ### `plugin::resources.publication` — Resource Publication
 
@@ -120,26 +124,26 @@ Localized digital library books, guides, pamphlets, and press kit assets backed 
 
 > **Kind**: `collectionType` · **DB Table**: `resources_publications` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.publication` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
-| :--- | :--- | :--- | :--- |
-| `title` | `string` | Yes | max: 200 |
-| `slug` | `uid` | Yes | — |
-| `summary` | `text` | No | — |
-| `category` | `enumeration` | Yes | enum: `guide, book, pamphlet, press_kit, academic, general`; default: `"guide"` |
-| `file` | `media` | No | — |
-| `coverImage` | `media` | No | — |
-| `authorName` | `string` | No | max: 140 |
-| `authorSlug` | `string` | No | max: 140 |
-| `isbnOrReference` | `string` | No | max: 80 |
-| `pageCount` | `integer` | No | — |
-| `languageCode` | `string` | No | max: 10; default: `"es"` |
-| `publishedAtDate` | `date` | No | — |
-| `secondaryDateOverride` | `string` | No | max: 80 |
-| `mediaFolderPath` | `string` | No | max: 160 |
-| `externalDownloadUrl` | `string` | No | max: 500 |
-| `downloadCount` | `integer` | No | default: `0` |
-| `featured` | `boolean` | No | default: `false` |
-| `allowPublicDownload` | `boolean` | No | default: `true` |
+| Atributo                | Tipo en Strapi | Requerido | Restricciones / Relación                                                        |
+| :---------------------- | :------------- | :-------- | :------------------------------------------------------------------------------ |
+| `title`                 | `string`       | Yes       | max: 200                                                                        |
+| `slug`                  | `uid`          | Yes       | —                                                                               |
+| `summary`               | `text`         | No        | —                                                                               |
+| `category`              | `enumeration`  | Yes       | enum: `guide, book, pamphlet, press_kit, academic, general`; default: `"guide"` |
+| `file`                  | `media`        | No        | —                                                                               |
+| `coverImage`            | `media`        | No        | —                                                                               |
+| `authorName`            | `string`       | No        | max: 140                                                                        |
+| `authorSlug`            | `string`       | No        | max: 140                                                                        |
+| `isbnOrReference`       | `string`       | No        | max: 80                                                                         |
+| `pageCount`             | `integer`      | No        | —                                                                               |
+| `languageCode`          | `string`       | No        | max: 10; default: `"es"`                                                        |
+| `publishedAtDate`       | `date`         | No        | —                                                                               |
+| `secondaryDateOverride` | `string`       | No        | max: 80                                                                         |
+| `mediaFolderPath`       | `string`       | No        | max: 160                                                                        |
+| `externalDownloadUrl`   | `string`       | No        | max: 500                                                                        |
+| `downloadCount`         | `integer`      | No        | default: `0`                                                                    |
+| `featured`              | `boolean`      | No        | default: `false`                                                                |
+| `allowPublicDownload`   | `boolean`      | No        | default: `true`                                                                 |
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 
@@ -236,45 +240,49 @@ flowchart LR
 
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/resources/hub` | `admin` | `resourcesController.getAdminHubOverview` | Bearer JWT |
-| `GET` | `/resources/publications` | `admin` | `resourcesController.listAdminPublications` | Bearer JWT |
-| `POST` | `/resources/publications` | `admin` | `resourcesController.createPublication` | Bearer JWT |
-| `PUT` | `/resources/publications/{documentId}` | `admin` | `resourcesController.updatePublication` | Bearer JWT |
-| `DELETE` | `/resources/publications/{documentId}` | `admin` | `resourcesController.deletePublication` | Bearer JWT |
-| `GET` | `/resources/galleries` | `admin` | `resourcesController.listAdminGalleries` | Bearer JWT |
-| `POST` | `/resources/galleries` | `admin` | `resourcesController.createGalleryAlbum` | Bearer JWT |
-| `PUT` | `/resources/galleries/{documentId}` | `admin` | `resourcesController.updateGalleryAlbum` | Bearer JWT |
-| `DELETE` | `/resources/galleries/{documentId}` | `admin` | `resourcesController.deleteGalleryAlbum` | Bearer JWT |
-| `POST` | `/resources/galleries/{documentId}/sync-media-folder` | `admin` | `resourcesController.syncAlbumMediaFolder` | Bearer JWT |
-| `GET` | `/resources/glossary` | `admin` | `resourcesController.listAdminGlossary` | Bearer JWT |
-| `POST` | `/resources/glossary` | `admin` | `resourcesController.createGlossaryTerm` | Bearer JWT |
-| `PUT` | `/resources/glossary/{documentId}` | `admin` | `resourcesController.updateGlossaryTerm` | Bearer JWT |
-| `DELETE` | `/resources/glossary/{documentId}` | `admin` | `resourcesController.deleteGlossaryTerm` | Bearer JWT |
-| `GET` | `/resources/media-folders` | `admin` | `resourcesController.listMediaFolders` | Bearer JWT |
-| `GET` | `/resources/media-files` | `admin` | `resourcesController.listMediaFiles` | Bearer JWT |
-| `GET` | `/resources/settings` | `admin` | `resourcesController.getSettings` | Bearer JWT |
-| `PUT` | `/resources/settings` | `admin` | `resourcesController.updateSettings` | Bearer JWT |
-| `GET` | `/api/resources/hub` | `content-api` | `resourcesController.getHubOverview` | Public |
-| `GET` | `/api/resources/publications` | `content-api` | `resourcesController.listPublications` | Public |
-| `GET` | `/api/resources/publications/{slug}` | `content-api` | `resourcesController.getPublicationBySlug` | Public |
-| `POST` | `/api/resources/publications/{slug}/download` | `content-api` | `resourcesController.downloadPublication` | Public |
-| `GET` | `/api/resources/galleries` | `content-api` | `resourcesController.listGalleries` | Public |
-| `GET` | `/api/resources/galleries/{slug}` | `content-api` | `resourcesController.getGalleryBySlug` | Public |
-| `GET` | `/api/resources/glossary` | `content-api` | `resourcesController.listGlossary` | Public |
+| Método   | Ruta del Endpoint                                     | Ámbito        | Controlador                                 | Autenticación |
+| :------- | :---------------------------------------------------- | :------------ | :------------------------------------------ | :------------ |
+| `GET`    | `/resources/hub`                                      | `admin`       | `resourcesController.getAdminHubOverview`   | Bearer JWT    |
+| `GET`    | `/resources/publications`                             | `admin`       | `resourcesController.listAdminPublications` | Bearer JWT    |
+| `POST`   | `/resources/publications`                             | `admin`       | `resourcesController.createPublication`     | Bearer JWT    |
+| `PUT`    | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.updatePublication`     | Bearer JWT    |
+| `DELETE` | `/resources/publications/{documentId}`                | `admin`       | `resourcesController.deletePublication`     | Bearer JWT    |
+| `GET`    | `/resources/galleries`                                | `admin`       | `resourcesController.listAdminGalleries`    | Bearer JWT    |
+| `POST`   | `/resources/galleries`                                | `admin`       | `resourcesController.createGalleryAlbum`    | Bearer JWT    |
+| `PUT`    | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.updateGalleryAlbum`    | Bearer JWT    |
+| `DELETE` | `/resources/galleries/{documentId}`                   | `admin`       | `resourcesController.deleteGalleryAlbum`    | Bearer JWT    |
+| `POST`   | `/resources/galleries/{documentId}/sync-media-folder` | `admin`       | `resourcesController.syncAlbumMediaFolder`  | Bearer JWT    |
+| `GET`    | `/resources/glossary`                                 | `admin`       | `resourcesController.listAdminGlossary`     | Bearer JWT    |
+| `POST`   | `/resources/glossary`                                 | `admin`       | `resourcesController.createGlossaryTerm`    | Bearer JWT    |
+| `PUT`    | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.updateGlossaryTerm`    | Bearer JWT    |
+| `DELETE` | `/resources/glossary/{documentId}`                    | `admin`       | `resourcesController.deleteGlossaryTerm`    | Bearer JWT    |
+| `GET`    | `/resources/media-folders`                            | `admin`       | `resourcesController.listMediaFolders`      | Bearer JWT    |
+| `GET`    | `/resources/media-files`                              | `admin`       | `resourcesController.listMediaFiles`        | Bearer JWT    |
+| `GET`    | `/resources/settings`                                 | `admin`       | `resourcesController.getSettings`           | Bearer JWT    |
+| `PUT`    | `/resources/settings`                                 | `admin`       | `resourcesController.updateSettings`        | Bearer JWT    |
+| `GET`    | `/api/resources/hub`                                  | `content-api` | `resourcesController.getHubOverview`        | Public        |
+| `GET`    | `/api/resources/publications`                         | `content-api` | `resourcesController.listPublications`      | Public        |
+| `GET`    | `/api/resources/publications/{slug}`                  | `content-api` | `resourcesController.getPublicationBySlug`  | Public        |
+| `POST`   | `/api/resources/publications/{slug}/download`         | `content-api` | `resourcesController.downloadPublication`   | Public        |
+| `GET`    | `/api/resources/galleries`                            | `content-api` | `resourcesController.listGalleries`         | Public        |
+| `GET`    | `/api/resources/galleries/{slug}`                     | `content-api` | `resourcesController.getGalleryBySlug`      | Public        |
+| `GET`    | `/api/resources/glossary`                             | `content-api` | `resourcesController.listGlossary`          | Public        |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 
 ```ts
 // Registered services on plugin "resources": "settings", "mediaLibraryService", "catalogService"
-const pluginService = strapi.plugin("resources")?.service("mediaLibraryService");
+const pluginService = strapi
+  .plugin("resources")
+  ?.service("mediaLibraryService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi.documents("plugin::resources.gallery-album").findMany({
-  limit: 25,
-  sort: "createdAt:desc",
-});
+const records = await strapi
+  .documents("plugin::resources.gallery-album")
+  .findMany({
+    limit: 25,
+    sort: "createdAt:desc",
+  });
 ```
 
 ## 8. Solución de Problemas y Verificación
