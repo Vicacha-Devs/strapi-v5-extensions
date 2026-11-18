@@ -15,11 +15,7 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "collapsible-nav": {
     enabled: true,
     config: {
@@ -35,13 +31,13 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı   | Arayüz Metni                                   |
-| :---------------- | :--------------------------------------------- |
-| `plugin.name`     | Daraltılabilir Menü                            |
-| `toggle.expand`   | Gezinmeyi genişlet                             |
-| `toggle.collapse` | Gezinmeyi daralt                               |
-| `pin.pin`         | Kenar çubuğunu sabitle                         |
-| `pin.unpin`       | Kenar çubuğunu serbest bırak (otomatik daralt) |
+| Çeviri Anahtarı | Arayüz Metni |
+| :--- | :--- |
+| `plugin.name` | Daraltılabilir Menü |
+| `toggle.expand` | Gezinmeyi genişlet |
+| `toggle.collapse` | Gezinmeyi daralt |
+| `pin.pin` | Kenar çubuğunu sabitle |
+| `pin.unpin` | Kenar çubuğunu serbest bırak (otomatik daralt) |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -141,7 +137,7 @@ flowchart LR
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
 | Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
-| :---- | :------------ | :----- | :-------------------- | :--------------- |
+| :--- | :--- | :--- | :--- | :--- |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

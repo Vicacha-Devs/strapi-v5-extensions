@@ -15,11 +15,7 @@ pnpm add @vicacha-devs/strapi-plugin-collapsible-nav
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "collapsible-nav": {
     enabled: true,
     config: {
@@ -35,13 +31,13 @@ export default ({
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة     | النص المعروض في الواجهة                  |
-| :---------------- | :--------------------------------------- |
-| `plugin.name`     | قائمة جانبية قابلة للطي                  |
-| `toggle.expand`   | توسيع القائمة                            |
-| `toggle.collapse` | طي القائمة                               |
-| `pin.pin`         | تثبيت القائمة الجانبية مفتوحة            |
-| `pin.unpin`       | إلغاء تثبيت القائمة الجانبية (طي تلقائي) |
+| مفتاح الترجمة | النص المعروض في الواجهة |
+| :--- | :--- |
+| `plugin.name` | قائمة جانبية قابلة للطي |
+| `toggle.expand` | توسيع القائمة |
+| `toggle.collapse` | طي القائمة |
+| `pin.pin` | تثبيت القائمة الجانبية مفتوحة |
+| `pin.unpin` | إلغاء تثبيت القائمة الجانبية (طي تلقائي) |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -141,7 +137,7 @@ flowchart LR
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
 | الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
-| :------ | :---------------- | :----- | :---------------- | :------- |
+| :--- | :--- | :--- | :--- | :--- |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 

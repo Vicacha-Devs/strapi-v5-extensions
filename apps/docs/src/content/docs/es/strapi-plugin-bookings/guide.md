@@ -15,12 +15,8 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
-  bookings: {
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+  "bookings": {
     enabled: true,
     config: {
       defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
@@ -40,15 +36,15 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción                           | Texto en Interfaz                                                                         |
-| :-------------------------------------------- | :---------------------------------------------------------------------------------------- |
-| `settings.theme.breeze.label`                 | Brisa (Cielo y Pizarra — Predeterminado)                                                  |
-| `bookings.settings.theme.breeze.label`        | Brisa (Cielo y Pizarra — Predeterminado)                                                  |
-| `settings.theme.breeze.description`           | Cuadrícula azul cielo y pizarra de alto contraste con insignias Hijri en ámbar cálido     |
-| `bookings.settings.theme.breeze.description`  | Cuadrícula azul cielo y pizarra de alto contraste con insignias Hijri en ámbar cálido     |
-| `settings.theme.emerald.label`                | Mezquita Esmeralda (Verde Azulado y Oro)                                                  |
-| `bookings.settings.theme.emerald.label`       | Mezquita Esmeralda (Verde Azulado y Oro)                                                  |
-| `settings.theme.emerald.description`          | Encabezados verde esmeralda islámico con resaltados dorados para el calendario secundario |
+| Clave de Traducción | Texto en Interfaz |
+| :--- | :--- |
+| `settings.theme.breeze.label` | Brisa (Cielo y Pizarra — Predeterminado) |
+| `bookings.settings.theme.breeze.label` | Brisa (Cielo y Pizarra — Predeterminado) |
+| `settings.theme.breeze.description` | Cuadrícula azul cielo y pizarra de alto contraste con insignias Hijri en ámbar cálido |
+| `bookings.settings.theme.breeze.description` | Cuadrícula azul cielo y pizarra de alto contraste con insignias Hijri en ámbar cálido |
+| `settings.theme.emerald.label` | Mezquita Esmeralda (Verde Azulado y Oro) |
+| `bookings.settings.theme.emerald.label` | Mezquita Esmeralda (Verde Azulado y Oro) |
+| `settings.theme.emerald.description` | Encabezados verde esmeralda islámico con resaltados dorados para el calendario secundario |
 | `bookings.settings.theme.emerald.description` | Encabezados verde esmeralda islámico con resaltados dorados para el calendario secundario |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
@@ -75,28 +71,28 @@ Reservation, appointment, or resource slot booking
 
 > **Kind**: `collectionType` · **DB Table**: `bookings` · **Admin Location**: `/admin/content-manager/collection-types/plugin::bookings.booking` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo            | Tipo en Strapi | Requerido | Restricciones / Relación                                                        |
-| :------------------ | :------------- | :-------- | :------------------------------------------------------------------------------ |
-| `bookingCode`       | `string`       | Yes       | max: 48                                                                         |
-| `title`             | `string`       | No        | max: 200                                                                        |
-| `resource`          | `relation`     | No        | target: `plugin::bookings.resource`                                             |
-| `customerName`      | `string`       | Yes       | max: 120                                                                        |
-| `customerEmail`     | `email`        | Yes       | —                                                                               |
-| `customerPhone`     | `string`       | No        | max: 40                                                                         |
-| `organization`      | `string`       | No        | max: 160                                                                        |
-| `startDate`         | `datetime`     | Yes       | —                                                                               |
-| `endDate`           | `datetime`     | Yes       | —                                                                               |
-| `slotLabel`         | `string`       | No        | max: 80                                                                         |
-| `timezone`          | `string`       | No        | max: 64; default: `"UTC"`                                                       |
-| `partySize`         | `integer`      | Yes       | default: `1`                                                                    |
-| `status`            | `enumeration`  | Yes       | enum: `pending, confirmed, completed, cancelled, no_show`; default: `"pending"` |
-| `preferredLanguage` | `string`       | No        | max: 16                                                                         |
-| `assignedHost`      | `string`       | No        | max: 120                                                                        |
-| `notes`             | `text`         | No        | max: 2000                                                                       |
-| `internalNotes`     | `text`         | No        | max: 2000; `private: true`                                                      |
-| `cancelTokenHash`   | `string`       | No        | max: 128; `private: true`                                                       |
-| `sourceCollection`  | `string`       | No        | default: `"plugin::bookings.booking"`                                           |
-| `metadata`          | `json`         | No        | —                                                                               |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `bookingCode` | `string` | Yes | max: 48 |
+| `title` | `string` | No | max: 200 |
+| `resource` | `relation` | No | target: `plugin::bookings.resource` |
+| `customerName` | `string` | Yes | max: 120 |
+| `customerEmail` | `email` | Yes | — |
+| `customerPhone` | `string` | No | max: 40 |
+| `organization` | `string` | No | max: 160 |
+| `startDate` | `datetime` | Yes | — |
+| `endDate` | `datetime` | Yes | — |
+| `slotLabel` | `string` | No | max: 80 |
+| `timezone` | `string` | No | max: 64; default: `"UTC"` |
+| `partySize` | `integer` | Yes | default: `1` |
+| `status` | `enumeration` | Yes | enum: `pending, confirmed, completed, cancelled, no_show`; default: `"pending"` |
+| `preferredLanguage` | `string` | No | max: 16 |
+| `assignedHost` | `string` | No | max: 120 |
+| `notes` | `text` | No | max: 2000 |
+| `internalNotes` | `text` | No | max: 2000; `private: true` |
+| `cancelTokenHash` | `string` | No | max: 128; `private: true` |
+| `sourceCollection` | `string` | No | default: `"plugin::bookings.booking"` |
+| `metadata` | `json` | No | — |
 
 ### `plugin::bookings.resource` — Booking Resource
 
@@ -104,35 +100,35 @@ Bookable service, appointment type, room, staff member, or equipment schedule
 
 > **Kind**: `collectionType` · **DB Table**: `booking_resources` · **Admin Location**: `/admin/content-manager/collection-types/plugin::bookings.resource` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo              | Tipo en Strapi | Requerido | Restricciones / Relación                                                          |
-| :-------------------- | :------------- | :-------- | :-------------------------------------------------------------------------------- |
-| `name`                | `string`       | Yes       | max: 160                                                                          |
-| `slug`                | `uid`          | Yes       | —                                                                                 |
-| `resourceType`        | `enumeration`  | Yes       | enum: `service, appointment, room, staff, equipment, other`; default: `"service"` |
-| `description`         | `text`         | No        | —                                                                                 |
-| `color`               | `string`       | No        | max: 32; default: `"#0d9488"`                                                     |
-| `timezone`            | `string`       | No        | max: 64; default: `"UTC"`                                                         |
-| `slotDurationMinutes` | `integer`      | Yes       | default: `60`                                                                     |
-| `bufferBeforeMinutes` | `integer`      | No        | default: `0`                                                                      |
-| `bufferAfterMinutes`  | `integer`      | No        | default: `0`                                                                      |
-| `capacityPerSlot`     | `integer`      | Yes       | default: `1`                                                                      |
-| `maxPartySize`        | `integer`      | No        | default: `50`                                                                     |
-| `minLeadTimeHours`    | `integer`      | No        | default: `2`                                                                      |
-| `maxAdvanceDays`      | `integer`      | No        | default: `90`                                                                     |
-| `requiresApproval`    | `boolean`      | No        | default: `false`                                                                  |
-| `weeklySchedule`      | `json`         | No        | —                                                                                 |
-| `seasonalSchedules`   | `json`         | No        | —                                                                                 |
-| `holidayRules`        | `json`         | No        | —                                                                                 |
-| `blackoutDates`       | `json`         | No        | —                                                                                 |
-| `recurrenceRule`      | `string`       | No        | —                                                                                 |
-| `supportedLanguages`  | `json`         | No        | —                                                                                 |
-| `assignedHosts`       | `json`         | No        | —                                                                                 |
-| `location`            | `string`       | No        | max: 240                                                                          |
-| `price`               | `decimal`      | No        | default: `0`                                                                      |
-| `currency`            | `string`       | No        | max: 10; default: `"USD"`                                                         |
-| `isActive`            | `boolean`      | No        | default: `true`                                                                   |
-| `metadata`            | `json`         | No        | —                                                                                 |
-| `bookings`            | `relation`     | No        | target: `plugin::bookings.booking`                                                |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `name` | `string` | Yes | max: 160 |
+| `slug` | `uid` | Yes | — |
+| `resourceType` | `enumeration` | Yes | enum: `service, appointment, room, staff, equipment, other`; default: `"service"` |
+| `description` | `text` | No | — |
+| `color` | `string` | No | max: 32; default: `"#0d9488"` |
+| `timezone` | `string` | No | max: 64; default: `"UTC"` |
+| `slotDurationMinutes` | `integer` | Yes | default: `60` |
+| `bufferBeforeMinutes` | `integer` | No | default: `0` |
+| `bufferAfterMinutes` | `integer` | No | default: `0` |
+| `capacityPerSlot` | `integer` | Yes | default: `1` |
+| `maxPartySize` | `integer` | No | default: `50` |
+| `minLeadTimeHours` | `integer` | No | default: `2` |
+| `maxAdvanceDays` | `integer` | No | default: `90` |
+| `requiresApproval` | `boolean` | No | default: `false` |
+| `weeklySchedule` | `json` | No | — |
+| `seasonalSchedules` | `json` | No | — |
+| `holidayRules` | `json` | No | — |
+| `blackoutDates` | `json` | No | — |
+| `recurrenceRule` | `string` | No | — |
+| `supportedLanguages` | `json` | No | — |
+| `assignedHosts` | `json` | No | — |
+| `location` | `string` | No | max: 240 |
+| `price` | `decimal` | No | default: `0` |
+| `currency` | `string` | No | max: 10; default: `"USD"` |
+| `isActive` | `boolean` | No | default: `true` |
+| `metadata` | `json` | No | — |
+| `bookings` | `relation` | No | target: `plugin::bookings.booking` |
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 
@@ -244,25 +240,25 @@ flowchart LR
 
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint                        | Ámbito        | Controlador                         | Autenticación |
-| :----- | :--------------------------------------- | :------------ | :---------------------------------- | :------------ |
-| `GET`  | `/bookings/settings`                     | `admin`       | `admin.getSettings`                 | Bearer JWT    |
-| `PUT`  | `/bookings/settings`                     | `admin`       | `admin.updateSettings`              | Bearer JWT    |
-| `GET`  | `/bookings/schemas`                      | `admin`       | `admin.discoverSchemas`             | Bearer JWT    |
-| `GET`  | `/bookings/resources`                    | `admin`       | `admin.listResources`               | Bearer JWT    |
-| `POST` | `/bookings/resources`                    | `admin`       | `admin.saveResource`                | Bearer JWT    |
-| `GET`  | `/bookings/calendar`                     | `admin`       | `admin.getCalendar`                 | Bearer JWT    |
-| `POST` | `/bookings/bookings`                     | `admin`       | `admin.createBooking`               | Bearer JWT    |
-| `PUT`  | `/bookings/bookings/{documentId}/status` | `admin`       | `admin.updateBookingStatus`         | Bearer JWT    |
-| `POST` | `/bookings/bookings/reschedule`          | `admin`       | `admin.rescheduleBooking`           | Bearer JWT    |
-| `GET`  | `/bookings/export.csv`                   | `admin`       | `admin.exportCsv`                   | Bearer JWT    |
-| `GET`  | `/bookings/export.ics`                   | `admin`       | `admin.exportICal`                  | Bearer JWT    |
-| `GET`  | `/api/bookings/resources`                | `content-api` | `content-api.listPublicResources`   | Bearer JWT    |
-| `GET`  | `/api/bookings/available-slots`          | `content-api` | `content-api.getAvailableSlots`     | Bearer JWT    |
-| `POST` | `/api/bookings/reserve`                  | `content-api` | `content-api.createReservation`     | Bearer JWT    |
-| `POST` | `/api/bookings/reschedule`               | `content-api` | `content-api.rescheduleReservation` | Bearer JWT    |
-| `POST` | `/api/bookings/cancel`                   | `content-api` | `content-api.cancelReservation`     | Bearer JWT    |
-| `GET`  | `/api/bookings/feed.ics`                 | `content-api` | `content-api.getICalFeed`           | Bearer JWT    |
+| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/bookings/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/bookings/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `GET` | `/bookings/schemas` | `admin` | `admin.discoverSchemas` | Bearer JWT |
+| `GET` | `/bookings/resources` | `admin` | `admin.listResources` | Bearer JWT |
+| `POST` | `/bookings/resources` | `admin` | `admin.saveResource` | Bearer JWT |
+| `GET` | `/bookings/calendar` | `admin` | `admin.getCalendar` | Bearer JWT |
+| `POST` | `/bookings/bookings` | `admin` | `admin.createBooking` | Bearer JWT |
+| `PUT` | `/bookings/bookings/{documentId}/status` | `admin` | `admin.updateBookingStatus` | Bearer JWT |
+| `POST` | `/bookings/bookings/reschedule` | `admin` | `admin.rescheduleBooking` | Bearer JWT |
+| `GET` | `/bookings/export.csv` | `admin` | `admin.exportCsv` | Bearer JWT |
+| `GET` | `/bookings/export.ics` | `admin` | `admin.exportICal` | Bearer JWT |
+| `GET` | `/api/bookings/resources` | `content-api` | `content-api.listPublicResources` | Bearer JWT |
+| `GET` | `/api/bookings/available-slots` | `content-api` | `content-api.getAvailableSlots` | Bearer JWT |
+| `POST` | `/api/bookings/reserve` | `content-api` | `content-api.createReservation` | Bearer JWT |
+| `POST` | `/api/bookings/reschedule` | `content-api` | `content-api.rescheduleReservation` | Bearer JWT |
+| `POST` | `/api/bookings/cancel` | `content-api` | `content-api.cancelReservation` | Bearer JWT |
+| `GET` | `/api/bookings/feed.ics` | `content-api` | `content-api.getICalFeed` | Bearer JWT |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 

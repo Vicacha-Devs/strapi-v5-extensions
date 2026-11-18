@@ -3,7 +3,6 @@ title: "OpenTelemetry Observability (@vicacha-devs/strapi-plugin-opentelemetry)"
 description: "Vendor-neutral OpenTelemetry error tracking and performance monitoring (APM) plugin for Strapi v5."
 prev: false
 ---
-
 Vendor-neutral **OpenTelemetry** error tracking and performance monitoring (APM) plugin for **Strapi v5**.
 
 Instruments Node.js, HTTP/Koa requests, PostgreSQL/SQLite queries, Strapi v5 Document Service operations, and caught plugin errors (`strapi.log.error`), exporting traces and metrics over **OTLP/HTTP** to **SigNoz**, **Grafana Tempo / Alloy**, **Sentry OTLP**, **Datadog**, **Jaeger**, or any OpenTelemetry Collector.
@@ -45,30 +44,28 @@ export default ({ env }) => ({
 
 All options are validated at Strapi boot time by `validateOtelConfig`. Standard OpenTelemetry environment variables (`OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_HEADERS`) are automatically merged.
 
-| Option                   | Env Variable                  | Type                     | Default                                   | Description                                                    |
-| :----------------------- | :---------------------------- | :----------------------- | :---------------------------------------- | :------------------------------------------------------------- |
-| `enabled`                | `OTEL_ENABLED`                | `boolean`                | `true`                                    | Enable or disable SDK, middleware, and hooks                   |
-| `serviceName`            | `OTEL_SERVICE_NAME`           | `string`                 | `"strapi"`                                | Service name reported in `service.name`                        |
-| `serviceVersion`         | —                             | `string`                 | `"1.0.0"`                                 | Service version reported in `service.version`                  |
-| `environment`            | `NODE_ENV`                    | `string`                 | `process.env.NODE_ENV \|\| "development"` | Reported in `deployment.environment.name`                      |
-| `otlpEndpoint`           | `OTEL_EXPORTER_OTLP_ENDPOINT` | `string`                 | `""`                                      | Base OTLP/HTTP URL (exports to `/v1/traces` and `/v1/metrics`) |
-| `otlpHeaders`            | `OTEL_EXPORTER_OTLP_HEADERS`  | `Record<string, string>` | `{}`                                      | Auth/tenant headers (env format: `k1=v1,k2=v2`)                |
-| `sampleRate`             | `OTEL_TRACES_SAMPLE_RATE`     | `number` (`0..1`)        | `1.0`                                     | Root trace sampling ratio wrapped in `ParentBasedSampler`      |
-| `ignorePaths`            | —                             | `string[]`               | `["/_health", "/favicon.ico"]`            | URL path prefixes excluded from HTTP tracing/metrics           |
-| `captureDocumentService` | —                             | `boolean`                | `true`                                    | Wrap `strapi.documents.use(...)` calls in child spans          |
-| `consoleExporter`        | `OTEL_CONSOLE_EXPORTER`       | `boolean`                | `false`                                   | Export spans to stdout when `otlpEndpoint` is empty            |
-| `metricExportIntervalMs` | —                             | `number` (`>= 1000`)     | `60000`                                   | Interval in ms for `PeriodicExportingMetricReader`             |
+| Option | Env Variable | Type | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `enabled` | `OTEL_ENABLED` | `boolean` | `true` | Enable or disable SDK, middleware, and hooks |
+| `serviceName` | `OTEL_SERVICE_NAME` | `string` | `"strapi"` | Service name reported in `service.name` |
+| `serviceVersion` | — | `string` | `"1.0.0"` | Service version reported in `service.version` |
+| `environment` | `NODE_ENV` | `string` | `process.env.NODE_ENV \|\| "development"` | Reported in `deployment.environment.name` |
+| `otlpEndpoint` | `OTEL_EXPORTER_OTLP_ENDPOINT` | `string` | `""` | Base OTLP/HTTP URL (exports to `/v1/traces` and `/v1/metrics`) |
+| `otlpHeaders` | `OTEL_EXPORTER_OTLP_HEADERS` | `Record<string, string>` | `{}` | Auth/tenant headers (env format: `k1=v1,k2=v2`) |
+| `sampleRate` | `OTEL_TRACES_SAMPLE_RATE` | `number` (`0..1`) | `1.0` | Root trace sampling ratio wrapped in `ParentBasedSampler` |
+| `ignorePaths` | — | `string[]` | `["/_health", "/favicon.ico"]` | URL path prefixes excluded from HTTP tracing/metrics |
+| `captureDocumentService` | — | `boolean` | `true` | Wrap `strapi.documents.use(...)` calls in child spans |
+| `consoleExporter` | `OTEL_CONSOLE_EXPORTER` | `boolean` | `false` | Export spans to stdout when `otlpEndpoint` is empty |
+| `metricExportIntervalMs` | — | `number` (`>= 1000`) | `60000` | Interval in ms for `PeriodicExportingMetricReader` |
 
 ## Telemetry Emitted
 
 ### Span Attributes
-
 - **HTTP Requests**: `http.request.method`, `url.path`, `http.route`, `http.response.status_code`, `strapi.plugin` (when matched), `enduser.id` (when authenticated).
 - **Document Service**: `strapi.document.uid`, `strapi.document.action`, `strapi.plugin` (for `plugin::*` UIDs).
 - **Errors**: `exception` span event with sanitized `Error` + `SpanStatusCode.ERROR` on unhandled exceptions, HTTP `>= 500` responses, and `strapi.log.error(...)` calls.
 
 ### Metrics
-
 - `http.server.request.duration` (Histogram, `ms`) — Request latency by method, route, status/error type, and `strapi.plugin`.
 - `http.server.errors` (Counter) — Count of `>= 500` and unhandled HTTP errors.
 - `strapi.log.errors` (Counter) — Count of errors logged via `strapi.log.error`.
@@ -115,6 +112,7 @@ await tracer.startActiveSpan("bookings.syncCalendar", async (span) => {
   }
 });
 ```
+
 
 ## Content-Type Entities & Where to Find Them
 

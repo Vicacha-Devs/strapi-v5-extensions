@@ -29,16 +29,16 @@ Official Mosque Hilal Moon-Sighting confirmations for Ramadan, Eid al-Fitr, and 
 
 > **Kind**: `collectionType` · **DB Table**: `islam_hilal_announcements` · **Admin Location**: `/admin/content-manager/collection-types/plugin::islam.hilal-announcement` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل                    | النوع في Strapi | إلزامي | القيود / العلاقات                                                                           |
-| :----------------------- | :-------------- | :----- | :----------------------------------------------------------------------------------------- |
-| `occasion`               | `enumeration`   | Yes    | enum: `ramadan, eid_al_fitr, dhul_hijjah_eid_al_adha, monthly_hilal`; default: `"ramadan"` |
-| `hijriYear`              | `integer`       | Yes    | —                                                                                          |
-| `hijriMonth`             | `integer`       | Yes    | —                                                                                          |
-| `confirmedGregorianDate` | `string`        | Yes    | —                                                                                          |
-| `shiftingApplied`        | `string`        | No     | default: `"0"`                                                                             |
-| `approvedByImam`         | `string`        | No     | —                                                                                          |
-| `notes`                  | `json`          | No     | —                                                                                          |
-| `broadcastDispatched`    | `boolean`       | No     | default: `false`                                                                           |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `occasion` | `enumeration` | Yes | enum: `ramadan, eid_al_fitr, dhul_hijjah_eid_al_adha, monthly_hilal`; default: `"ramadan"` |
+| `hijriYear` | `integer` | Yes | — |
+| `hijriMonth` | `integer` | Yes | — |
+| `confirmedGregorianDate` | `string` | Yes | — |
+| `shiftingApplied` | `string` | No | default: `"0"` |
+| `approvedByImam` | `string` | No | — |
+| `notes` | `json` | No | — |
+| `broadcastDispatched` | `boolean` | No | default: `false` |
 
 ### `plugin::islam.scripture-entry` — Islam Scripture & Dua Entry
 
@@ -46,20 +46,20 @@ Custom curated Quranic Ayah, Prophetic Hadith, or Hisnul Muslim Dua/Adhkar entry
 
 > **Kind**: `collectionType` · **DB Table**: `islam_scripture_entries` · **Admin Location**: `/admin/content-manager/collection-types/plugin::islam.scripture-entry` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل                    | النوع في Strapi | إلزامي | القيود / العلاقات                            |
-| :----------------------- | :-------------- | :----- | :------------------------------------------ |
-| `entryKind`              | `enumeration`   | Yes    | enum: `ayah, hadith, dua`; default: `"dua"` |
-| `slug`                   | `string`        | Yes    | —                                           |
-| `referenceKey`           | `string`        | Yes    | —                                           |
-| `arabicText`             | `text`          | Yes    | —                                           |
-| `transliteration`        | `text`          | No     | —                                           |
-| `translations`           | `json`          | Yes    | —                                           |
-| `reflections`            | `json`          | No     | —                                           |
-| `gradingOrCategory`      | `string`        | No     | —                                           |
-| `recommendedRepetitions` | `integer`       | No     | default: `1`                                |
-| `audioUrl`               | `string`        | No     | —                                           |
-| `topicTags`              | `json`          | No     | —                                           |
-| `active`                 | `boolean`       | No     | default: `true`                             |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `entryKind` | `enumeration` | Yes | enum: `ayah, hadith, dua`; default: `"dua"` |
+| `slug` | `string` | Yes | — |
+| `referenceKey` | `string` | Yes | — |
+| `arabicText` | `text` | Yes | — |
+| `transliteration` | `text` | No | — |
+| `translations` | `json` | Yes | — |
+| `reflections` | `json` | No | — |
+| `gradingOrCategory` | `string` | No | — |
+| `recommendedRepetitions` | `integer` | No | default: `1` |
+| `audioUrl` | `string` | No | — |
+| `topicTags` | `json` | No | — |
+| `active` | `boolean` | No | default: `true` |
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 

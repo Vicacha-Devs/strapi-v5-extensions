@@ -15,12 +15,8 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
-  islam: {
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+  "islam": {
     enabled: true,
     config: {
       defaultLat: 4.6685,
@@ -47,16 +43,16 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción                                | Texto en Interfaz                              |
-| :------------------------------------------------- | :--------------------------------------------- |
+| Clave de Traducción | Texto en Interfaz |
+| :--- | :--- |
 | `page.ui.islam_liturgical_scriptural_fiqh_cockpit` | Panel Litúrgico, Escritural y de Fiqh Islámico |
-| `page.ui.1_salah_adhan_iqamah`                     | Salah, Adhan e Iqamah                          |
-| `page.ui.2_hilal_ramadan_eid`                      | Hilal, Ramadán y Eid                           |
-| `page.ui.3_quran_hadith_dua`                       | Corán, Hadiz y Dua                             |
-| `page.ui.4_zakat_nisab_qibla`                      | Zakat, Nisab y Qibla                           |
-| `page.ui.refresh`                                  | Actualizar                                     |
-| `page.ui.prayer_salah`                             | Oración (Salah)                                |
-| `page.ui.adhan_time`                               | Hora del Adhan                                 |
+| `page.ui.1_salah_adhan_iqamah` | Salah, Adhan e Iqamah |
+| `page.ui.2_hilal_ramadan_eid` | Hilal, Ramadán y Eid |
+| `page.ui.3_quran_hadith_dua` | Corán, Hadiz y Dua |
+| `page.ui.4_zakat_nisab_qibla` | Zakat, Nisab y Qibla |
+| `page.ui.refresh` | Actualizar |
+| `page.ui.prayer_salah` | Oración (Salah) |
+| `page.ui.adhan_time` | Hora del Adhan |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 
@@ -82,16 +78,16 @@ Official Mosque Hilal Moon-Sighting confirmations for Ramadan, Eid al-Fitr, and 
 
 > **Kind**: `collectionType` · **DB Table**: `islam_hilal_announcements` · **Admin Location**: `/admin/content-manager/collection-types/plugin::islam.hilal-announcement` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo                 | Tipo en Strapi | Requerido | Restricciones / Relación                                                                   |
-| :----------------------- | :------------- | :-------- | :----------------------------------------------------------------------------------------- |
-| `occasion`               | `enumeration`  | Yes       | enum: `ramadan, eid_al_fitr, dhul_hijjah_eid_al_adha, monthly_hilal`; default: `"ramadan"` |
-| `hijriYear`              | `integer`      | Yes       | —                                                                                          |
-| `hijriMonth`             | `integer`      | Yes       | —                                                                                          |
-| `confirmedGregorianDate` | `string`       | Yes       | —                                                                                          |
-| `shiftingApplied`        | `string`       | No        | default: `"0"`                                                                             |
-| `approvedByImam`         | `string`       | No        | —                                                                                          |
-| `notes`                  | `json`         | No        | —                                                                                          |
-| `broadcastDispatched`    | `boolean`      | No        | default: `false`                                                                           |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `occasion` | `enumeration` | Yes | enum: `ramadan, eid_al_fitr, dhul_hijjah_eid_al_adha, monthly_hilal`; default: `"ramadan"` |
+| `hijriYear` | `integer` | Yes | — |
+| `hijriMonth` | `integer` | Yes | — |
+| `confirmedGregorianDate` | `string` | Yes | — |
+| `shiftingApplied` | `string` | No | default: `"0"` |
+| `approvedByImam` | `string` | No | — |
+| `notes` | `json` | No | — |
+| `broadcastDispatched` | `boolean` | No | default: `false` |
 
 ### `plugin::islam.scripture-entry` — Islam Scripture & Dua Entry
 
@@ -99,20 +95,20 @@ Custom curated Quranic Ayah, Prophetic Hadith, or Hisnul Muslim Dua/Adhkar entry
 
 > **Kind**: `collectionType` · **DB Table**: `islam_scripture_entries` · **Admin Location**: `/admin/content-manager/collection-types/plugin::islam.scripture-entry` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo                 | Tipo en Strapi | Requerido | Restricciones / Relación                    |
-| :----------------------- | :------------- | :-------- | :------------------------------------------ |
-| `entryKind`              | `enumeration`  | Yes       | enum: `ayah, hadith, dua`; default: `"dua"` |
-| `slug`                   | `string`       | Yes       | —                                           |
-| `referenceKey`           | `string`       | Yes       | —                                           |
-| `arabicText`             | `text`         | Yes       | —                                           |
-| `transliteration`        | `text`         | No        | —                                           |
-| `translations`           | `json`         | Yes       | —                                           |
-| `reflections`            | `json`         | No        | —                                           |
-| `gradingOrCategory`      | `string`       | No        | —                                           |
-| `recommendedRepetitions` | `integer`      | No        | default: `1`                                |
-| `audioUrl`               | `string`       | No        | —                                           |
-| `topicTags`              | `json`         | No        | —                                           |
-| `active`                 | `boolean`      | No        | default: `true`                             |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `entryKind` | `enumeration` | Yes | enum: `ayah, hadith, dua`; default: `"dua"` |
+| `slug` | `string` | Yes | — |
+| `referenceKey` | `string` | Yes | — |
+| `arabicText` | `text` | Yes | — |
+| `transliteration` | `text` | No | — |
+| `translations` | `json` | Yes | — |
+| `reflections` | `json` | No | — |
+| `gradingOrCategory` | `string` | No | — |
+| `recommendedRepetitions` | `integer` | No | default: `1` |
+| `audioUrl` | `string` | No | — |
+| `topicTags` | `json` | No | — |
+| `active` | `boolean` | No | default: `true` |
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 
@@ -219,32 +215,32 @@ flowchart LR
 
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint                                 | Ámbito        | Controlador                          | Autenticación |
-| :----- | :------------------------------------------------ | :------------ | :----------------------------------- | :------------ |
-| `GET`  | `/islam/overview`                                 | `admin`       | `admin.getOverview`                  | Bearer JWT    |
-| `GET`  | `/islam/settings`                                 | `admin`       | `admin.getSettings`                  | Bearer JWT    |
-| `PUT`  | `/islam/settings`                                 | `admin`       | `admin.updateSettings`               | Bearer JWT    |
-| `POST` | `/islam/hilal/confirm`                            | `admin`       | `admin.confirmHilal`                 | Bearer JWT    |
-| `POST` | `/islam/scripture/pins`                           | `admin`       | `admin.updateDailyPins`              | Bearer JWT    |
-| `GET`  | `/api/islam/prayer-times`                         | `content-api` | `content-api.getPrayerTimes`         | Bearer JWT    |
-| `GET`  | `/api/islam/prayer-times/monthly`                 | `content-api` | `content-api.getMonthlyPrayerTimes`  | Bearer JWT    |
-| `GET`  | `/api/islam/prayer-times/calendar.ics`            | `content-api` | `content-api.getPrayerCalendarIcs`   | Bearer JWT    |
-| `GET`  | `/api/islam/qibla`                                | `content-api` | `content-api.getQibla`               | Bearer JWT    |
-| `GET`  | `/api/islam/hijri`                                | `content-api` | `content-api.getHijriAndObservances` | Bearer JWT    |
-| `GET`  | `/api/islam/hijri/convert`                        | `content-api` | `content-api.convertDate`            | Bearer JWT    |
-| `GET`  | `/api/islam/scripture`                            | `content-api` | `content-api.getScriptureHub`        | Bearer JWT    |
-| `GET`  | `/api/islam/scripture/daily`                      | `content-api` | `content-api.getDailyInspiration`    | Bearer JWT    |
-| `GET`  | `/api/islam/daily-inspiration`                    | `content-api` | `content-api.getDailyInspiration`    | Bearer JWT    |
-| `GET`  | `/api/islam/quran/chapters`                       | `content-api` | `content-api.getQuranChapters`       | Bearer JWT    |
-| `GET`  | `/api/islam/quran/chapters/{chapterNumber}`       | `content-api` | `content-api.getQuranChapterVerses`  | Bearer JWT    |
-| `GET`  | `/api/islam/quran/chapters/{chapterNumber}/info`  | `content-api` | `content-api.getQuranChapterInfo`    | Bearer JWT    |
-| `GET`  | `/api/islam/quran/chapters/{chapterNumber}/audio` | `content-api` | `content-api.getQuranChapterAudio`   | Bearer JWT    |
-| `GET`  | `/api/islam/quran/verses/{verseKey}`              | `content-api` | `content-api.getQuranVerseByKey`     | Bearer JWT    |
-| `GET`  | `/api/islam/quran/verses/{verseKey}/hadiths`      | `content-api` | `content-api.getQuranAyahHadiths`    | Bearer JWT    |
-| `GET`  | `/api/islam/quran/resources`                      | `content-api` | `content-api.getQuranResources`      | Bearer JWT    |
-| `GET`  | `/api/islam/nisab`                                | `content-api` | `content-api.getNisab`               | Bearer JWT    |
-| `POST` | `/api/islam/zakat/calculate`                      | `content-api` | `content-api.calculateZakat`         | Bearer JWT    |
-| `POST` | `/api/islam/fitrana-fidyah/calculate`             | `content-api` | `content-api.calculateFitranaFidyah` | Bearer JWT    |
+| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/islam/overview` | `admin` | `admin.getOverview` | Bearer JWT |
+| `GET` | `/islam/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/islam/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `POST` | `/islam/hilal/confirm` | `admin` | `admin.confirmHilal` | Bearer JWT |
+| `POST` | `/islam/scripture/pins` | `admin` | `admin.updateDailyPins` | Bearer JWT |
+| `GET` | `/api/islam/prayer-times` | `content-api` | `content-api.getPrayerTimes` | Bearer JWT |
+| `GET` | `/api/islam/prayer-times/monthly` | `content-api` | `content-api.getMonthlyPrayerTimes` | Bearer JWT |
+| `GET` | `/api/islam/prayer-times/calendar.ics` | `content-api` | `content-api.getPrayerCalendarIcs` | Bearer JWT |
+| `GET` | `/api/islam/qibla` | `content-api` | `content-api.getQibla` | Bearer JWT |
+| `GET` | `/api/islam/hijri` | `content-api` | `content-api.getHijriAndObservances` | Bearer JWT |
+| `GET` | `/api/islam/hijri/convert` | `content-api` | `content-api.convertDate` | Bearer JWT |
+| `GET` | `/api/islam/scripture` | `content-api` | `content-api.getScriptureHub` | Bearer JWT |
+| `GET` | `/api/islam/scripture/daily` | `content-api` | `content-api.getDailyInspiration` | Bearer JWT |
+| `GET` | `/api/islam/daily-inspiration` | `content-api` | `content-api.getDailyInspiration` | Bearer JWT |
+| `GET` | `/api/islam/quran/chapters` | `content-api` | `content-api.getQuranChapters` | Bearer JWT |
+| `GET` | `/api/islam/quran/chapters/{chapterNumber}` | `content-api` | `content-api.getQuranChapterVerses` | Bearer JWT |
+| `GET` | `/api/islam/quran/chapters/{chapterNumber}/info` | `content-api` | `content-api.getQuranChapterInfo` | Bearer JWT |
+| `GET` | `/api/islam/quran/chapters/{chapterNumber}/audio` | `content-api` | `content-api.getQuranChapterAudio` | Bearer JWT |
+| `GET` | `/api/islam/quran/verses/{verseKey}` | `content-api` | `content-api.getQuranVerseByKey` | Bearer JWT |
+| `GET` | `/api/islam/quran/verses/{verseKey}/hadiths` | `content-api` | `content-api.getQuranAyahHadiths` | Bearer JWT |
+| `GET` | `/api/islam/quran/resources` | `content-api` | `content-api.getQuranResources` | Bearer JWT |
+| `GET` | `/api/islam/nisab` | `content-api` | `content-api.getNisab` | Bearer JWT |
+| `POST` | `/api/islam/zakat/calculate` | `content-api` | `content-api.calculateZakat` | Bearer JWT |
+| `POST` | `/api/islam/fitrana-fidyah/calculate` | `content-api` | `content-api.calculateFitranaFidyah` | Bearer JWT |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 
@@ -253,12 +249,10 @@ flowchart LR
 const pluginService = strapi.plugin("islam")?.service("islamService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi
-  .documents("plugin::islam.hilal-announcement")
-  .findMany({
-    limit: 25,
-    sort: "createdAt:desc",
-  });
+const records = await strapi.documents("plugin::islam.hilal-announcement").findMany({
+  limit: 25,
+  sort: "createdAt:desc",
+});
 ```
 
 ## 8. Solución de Problemas y Verificación

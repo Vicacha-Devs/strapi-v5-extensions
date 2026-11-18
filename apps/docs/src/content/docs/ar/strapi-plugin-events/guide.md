@@ -15,12 +15,8 @@ pnpm add @vicacha-devs/strapi-plugin-calendar @vicacha-devs/strapi-plugin-events
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
-  events: {
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+  "events": {
     enabled: true,
     config: {
       defaultTimezone: env("CALENDAR_DEFAULT_TIMEZONE", "UTC"),
@@ -41,16 +37,16 @@ export default ({
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة                  | النص المعروض في الواجهة      |
-| :----------------------------- | :--------------------------- |
-| `sidePanel.title`              | ملخص الفعالية والحجوزات      |
+| مفتاح الترجمة | النص المعروض في الواجهة |
+| :--- | :--- |
+| `sidePanel.title` | ملخص الفعالية والحجوزات |
 | `sidePanel.secondaryCalendars` | التواريخ في التقاويم البديلة |
-| `sidePanel.rsvpStatus`         | الحجوزات والسعة              |
-| `sidePanel.full`               | مكتمل / قائمة الانتظار        |
-| `sidePanel.open`               | متاح                         |
-| `sidePanel.confirmedSeats`     | المقاعد المؤكدة              |
-| `sidePanel.checkedIn`          | تم تسجيل حضورهم              |
-| `sidePanel.waitlisted`         | في قائمة الانتظار             |
+| `sidePanel.rsvpStatus` | الحجوزات والسعة |
+| `sidePanel.full` | مكتمل / قائمة الانتظار |
+| `sidePanel.open` | متاح |
+| `sidePanel.confirmedSeats` | المقاعد المؤكدة |
+| `sidePanel.checkedIn` | تم تسجيل حضورهم |
+| `sidePanel.waitlisted` | في قائمة الانتظار |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -75,36 +71,36 @@ Recurring & single events managed by strapi-plugin-events
 
 > **Kind**: `collectionType` · **DB Table**: `plugin_events_items` · **Admin Location**: `/admin/content-manager/collection-types/plugin::events.event` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| الحقل                      | النوع في Strapi | إلزامي | القيود / العلاقات                                                             |
-| :------------------------- | :-------------- | :----- | :--------------------------------------------------------------------------- |
-| `title`                    | `string`        | Yes    | max: 200                                                                     |
-| `slug`                     | `uid`           | Yes    | —                                                                            |
-| `summary`                  | `text`          | No     | max: 500                                                                     |
-| `description`              | `richtext`      | No     | —                                                                            |
-| `startDate`                | `datetime`      | Yes    | —                                                                            |
-| `endDate`                  | `datetime`      | No     | —                                                                            |
-| `allDay`                   | `boolean`       | No     | default: `false`                                                             |
-| `timezone`                 | `string`        | No     | default: `"UTC"`                                                             |
-| `recurrence`               | `customField`   | No     | customField: `plugin::events.rrule`                                          |
-| `eventStatus`              | `enumeration`   | Yes    | enum: `scheduled, cancelled, postponed, rescheduled`; default: `"scheduled"` |
-| `locationType`             | `enumeration`   | No     | enum: `in_person, online, hybrid`; default: `"in_person"`                    |
-| `location`                 | `string`        | No     | —                                                                            |
-| `virtualUrl`               | `string`        | No     | —                                                                            |
-| `category`                 | `string`        | No     | default: `"general"`                                                         |
-| `speaker`                  | `string`        | No     | —                                                                            |
-| `speakerSlug`              | `string`        | No     | —                                                                            |
-| `color`                    | `string`        | No     | default: `"#0D9488"`                                                         |
-| `featured`                 | `boolean`       | No     | default: `false`                                                             |
-| `rsvpEnabled`              | `boolean`       | No     | default: `false`                                                             |
-| `capacity`                 | `integer`       | No     | —                                                                            |
-| `waitlistEnabled`          | `boolean`       | No     | default: `true`                                                              |
-| `maxGuestsPerRegistration` | `integer`       | No     | default: `5`                                                                 |
-| `registrationDeadline`     | `datetime`      | No     | —                                                                            |
-| `alternateDates`           | `json`          | No     | —                                                                            |
-| `poster`                   | `media`         | No     | —                                                                            |
-| `actionLinks`              | `json`          | No     | —                                                                            |
-| `spotlightConfig`          | `json`          | No     | —                                                                            |
-| `metadata`                 | `json`          | No     | —                                                                            |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | max: 200 |
+| `slug` | `uid` | Yes | — |
+| `summary` | `text` | No | max: 500 |
+| `description` | `richtext` | No | — |
+| `startDate` | `datetime` | Yes | — |
+| `endDate` | `datetime` | No | — |
+| `allDay` | `boolean` | No | default: `false` |
+| `timezone` | `string` | No | default: `"UTC"` |
+| `recurrence` | `customField` | No | customField: `plugin::events.rrule` |
+| `eventStatus` | `enumeration` | Yes | enum: `scheduled, cancelled, postponed, rescheduled`; default: `"scheduled"` |
+| `locationType` | `enumeration` | No | enum: `in_person, online, hybrid`; default: `"in_person"` |
+| `location` | `string` | No | — |
+| `virtualUrl` | `string` | No | — |
+| `category` | `string` | No | default: `"general"` |
+| `speaker` | `string` | No | — |
+| `speakerSlug` | `string` | No | — |
+| `color` | `string` | No | default: `"#0D9488"` |
+| `featured` | `boolean` | No | default: `false` |
+| `rsvpEnabled` | `boolean` | No | default: `false` |
+| `capacity` | `integer` | No | — |
+| `waitlistEnabled` | `boolean` | No | default: `true` |
+| `maxGuestsPerRegistration` | `integer` | No | default: `5` |
+| `registrationDeadline` | `datetime` | No | — |
+| `alternateDates` | `json` | No | — |
+| `poster` | `media` | No | — |
+| `actionLinks` | `json` | No | — |
+| `spotlightConfig` | `json` | No | — |
+| `metadata` | `json` | No | — |
 
 ### `plugin::events.registration` — Event Registration (RSVP)
 
@@ -112,22 +108,22 @@ Attendee RSVPs, waitlists, and check-ins managed by strapi-plugin-events
 
 > **Kind**: `collectionType` · **DB Table**: `plugin_events_registrations` · **Admin Location**: `/admin/content-manager/collection-types/plugin::events.registration` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل             | النوع في Strapi | إلزامي | القيود / العلاقات                                                             |
-| :---------------- | :-------------- | :----- | :--------------------------------------------------------------------------- |
-| `eventUid`        | `string`        | Yes    | default: `"plugin::events.event"`                                            |
-| `eventDocumentId` | `string`        | Yes    | —                                                                            |
-| `eventTitle`      | `string`        | No     | —                                                                            |
-| `occurrenceDate`  | `string`        | Yes    | —                                                                            |
-| `attendeeName`    | `string`        | Yes    | max: 160                                                                     |
-| `attendeeEmail`   | `email`         | Yes    | —                                                                            |
-| `attendeePhone`   | `string`        | No     | max: 50                                                                      |
-| `guestsCount`     | `integer`       | Yes    | default: `1`                                                                 |
-| `status`          | `enumeration`   | Yes    | enum: `confirmed, waitlisted, cancelled, checked_in`; default: `"confirmed"` |
-| `checkInToken`    | `string`        | No     | `private: true`                                                              |
-| `checkedInAt`     | `datetime`      | No     | —                                                                            |
-| `locale`          | `string`        | No     | default: `"es"`                                                              |
-| `notes`           | `text`          | No     | max: 2000                                                                    |
-| `metadata`        | `json`          | No     | —                                                                            |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `eventUid` | `string` | Yes | default: `"plugin::events.event"` |
+| `eventDocumentId` | `string` | Yes | — |
+| `eventTitle` | `string` | No | — |
+| `occurrenceDate` | `string` | Yes | — |
+| `attendeeName` | `string` | Yes | max: 160 |
+| `attendeeEmail` | `email` | Yes | — |
+| `attendeePhone` | `string` | No | max: 50 |
+| `guestsCount` | `integer` | Yes | default: `1` |
+| `status` | `enumeration` | Yes | enum: `confirmed, waitlisted, cancelled, checked_in`; default: `"confirmed"` |
+| `checkInToken` | `string` | No | `private: true` |
+| `checkedInAt` | `datetime` | No | — |
+| `locale` | `string` | No | default: `"es"` |
+| `notes` | `text` | No | max: 2000 |
+| `metadata` | `json` | No | — |
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
@@ -226,25 +222,25 @@ flowchart LR
 
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية                             | النطاق        | المعالج (Handler)                    | المصادقة   |
-| :------ | :-------------------------------------------- | :------------ | :----------------------------------- | :--------- |
-| `GET`   | `/events/settings`                            | `admin`       | `admin.getSettings`                  | Bearer JWT |
-| `PUT`   | `/events/settings`                            | `admin`       | `admin.updateSettings`               | Bearer JWT |
-| `GET`   | `/events/calendar`                            | `admin`       | `admin.getCalendar`                  | Bearer JWT |
-| `POST`  | `/events/calendar/reschedule`                 | `admin`       | `admin.reschedule`                   | Bearer JWT |
-| `POST`  | `/events/calendar/quick-create`               | `admin`       | `admin.quickCreate`                  | Bearer JWT |
-| `GET`   | `/events/stats/{documentId}`                  | `admin`       | `admin.getEventStats`                | Bearer JWT |
-| `GET`   | `/events/registrations`                       | `admin`       | `admin.listRegistrations`            | Bearer JWT |
-| `GET`   | `/events/registrations/export.csv`            | `admin`       | `admin.exportRegistrationsCsv`       | Bearer JWT |
-| `POST`  | `/events/registrations/{documentId}/status`   | `admin`       | `admin.updateRegistrationStatus`     | Bearer JWT |
-| `POST`  | `/events/registrations/{documentId}/check-in` | `admin`       | `admin.checkIn`                      | Bearer JWT |
-| `GET`   | `/api/events/occurrences`                     | `content-api` | `content-api.listOccurrences`        | Bearer JWT |
-| `GET`   | `/api/events/spotlights`                      | `content-api` | `content-api.listSpotlights`         | Bearer JWT |
-| `GET`   | `/api/events/feed.ics`                        | `content-api` | `content-api.downloadFeedIcs`        | Bearer JWT |
-| `GET`   | `/api/events/{documentId}/invite.ics`         | `content-api` | `content-api.downloadEventInviteIcs` | Bearer JWT |
-| `GET`   | `/api/events/{documentId}/stats`              | `content-api` | `content-api.getEventStats`          | Bearer JWT |
-| `POST`  | `/api/events/{documentId}/register`           | `content-api` | `content-api.registerAttendee`       | Bearer JWT |
-| `POST`  | `/api/events/registrations/{token}/cancel`    | `content-api` | `content-api.cancelRegistration`     | Bearer JWT |
+| الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/events/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/events/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `GET` | `/events/calendar` | `admin` | `admin.getCalendar` | Bearer JWT |
+| `POST` | `/events/calendar/reschedule` | `admin` | `admin.reschedule` | Bearer JWT |
+| `POST` | `/events/calendar/quick-create` | `admin` | `admin.quickCreate` | Bearer JWT |
+| `GET` | `/events/stats/{documentId}` | `admin` | `admin.getEventStats` | Bearer JWT |
+| `GET` | `/events/registrations` | `admin` | `admin.listRegistrations` | Bearer JWT |
+| `GET` | `/events/registrations/export.csv` | `admin` | `admin.exportRegistrationsCsv` | Bearer JWT |
+| `POST` | `/events/registrations/{documentId}/status` | `admin` | `admin.updateRegistrationStatus` | Bearer JWT |
+| `POST` | `/events/registrations/{documentId}/check-in` | `admin` | `admin.checkIn` | Bearer JWT |
+| `GET` | `/api/events/occurrences` | `content-api` | `content-api.listOccurrences` | Bearer JWT |
+| `GET` | `/api/events/spotlights` | `content-api` | `content-api.listSpotlights` | Bearer JWT |
+| `GET` | `/api/events/feed.ics` | `content-api` | `content-api.downloadFeedIcs` | Bearer JWT |
+| `GET` | `/api/events/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventInviteIcs` | Bearer JWT |
+| `GET` | `/api/events/{documentId}/stats` | `content-api` | `content-api.getEventStats` | Bearer JWT |
+| `POST` | `/api/events/{documentId}/register` | `content-api` | `content-api.registerAttendee` | Bearer JWT |
+| `POST` | `/api/events/registrations/{token}/cancel` | `content-api` | `content-api.cancelRegistration` | Bearer JWT |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 

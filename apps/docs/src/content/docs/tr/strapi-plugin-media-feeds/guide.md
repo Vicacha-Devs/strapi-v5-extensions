@@ -15,11 +15,7 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "media-feeds": {
     enabled: true,
     config: {
@@ -40,16 +36,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı              | Arayüz Metni                           |
-| :--------------------------- | :------------------------------------- |
-| `common.disabled`            | Devre Dışı                             |
-| `common.enabled`             | Etkin                                  |
-| `common.remove`              | Kaldır                                 |
-| `field.author_organization`  | Yazar / Kurum                          |
-| `field.default_locale`       | Varsayılan Dil                         |
-| `field.live_broadcast_title` | Canlı Yayın Başlığı                    |
-| `field.live_event_slug`      | Bağlı Etkinlik Kısa Adı (İsteğe Bağlı) |
-| `field.live_schedule_label`  | Program / Yayın Penceresi Etiketi      |
+| Çeviri Anahtarı | Arayüz Metni |
+| :--- | :--- |
+| `common.disabled` | Devre Dışı |
+| `common.enabled` | Etkin |
+| `common.remove` | Kaldır |
+| `field.author_organization` | Yazar / Kurum |
+| `field.default_locale` | Varsayılan Dil |
+| `field.live_broadcast_title` | Canlı Yayın Başlığı |
+| `field.live_event_slug` | Bağlı Etkinlik Kısa Adı (İsteğe Bağlı) |
+| `field.live_schedule_label` | Program / Yayın Penceresi Etiketi |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -75,32 +71,32 @@ Generic multi-language video, podcast, audio lecture, YouTube item, or live broa
 
 > **Kind**: `collectionType` · **DB Table**: `media_feed_items` · **Admin Location**: `/admin/content-manager/collection-types/plugin::media-feeds.media-item` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Alan (Attribute)   | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                                             |
-| :----------------- | :------------ | :------ | :------------------------------------------------------------------------------------------------ |
-| `title`            | `string`      | Yes     | —                                                                                                 |
-| `slug`             | `uid`         | Yes     | —                                                                                                 |
-| `description`      | `text`        | Yes     | —                                                                                                 |
-| `transcript`       | `richtext`    | No      | —                                                                                                 |
-| `type`             | `string`      | Yes     | default: `"video"`                                                                                |
-| `provider`         | `enumeration` | No      | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
-| `externalId`       | `string`      | No      | —                                                                                                 |
-| `sourceUrl`        | `string`      | No      | —                                                                                                 |
-| `embedUrl`         | `string`      | No      | —                                                                                                 |
-| `speaker`          | `string`      | No      | —                                                                                                 |
-| `speakerSlug`      | `string`      | No      | —                                                                                                 |
-| `seriesSlug`       | `string`      | No      | —                                                                                                 |
-| `duration`         | `string`      | No      | —                                                                                                 |
-| `publishedAtLabel` | `string`      | No      | —                                                                                                 |
-| `imageUrl`         | `string`      | No      | —                                                                                                 |
-| `imageAlt`         | `string`      | No      | —                                                                                                 |
-| `thumbnail`        | `media`       | No      | —                                                                                                 |
-| `audioFile`        | `media`       | No      | —                                                                                                 |
-| `transcriptFile`   | `media`       | No      | —                                                                                                 |
-| `spokenLanguages`  | `json`        | No      | default: `["es"]`                                                                                 |
-| `languageTracks`   | `json`        | No      | default: `[]`                                                                                     |
-| `chapters`         | `json`        | No      | default: `[]`                                                                                     |
-| `featured`         | `boolean`     | No      | default: `false`                                                                                  |
-| `isLive`           | `boolean`     | No      | default: `false`                                                                                  |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | — |
+| `slug` | `uid` | Yes | — |
+| `description` | `text` | Yes | — |
+| `transcript` | `richtext` | No | — |
+| `type` | `string` | Yes | default: `"video"` |
+| `provider` | `enumeration` | No | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
+| `externalId` | `string` | No | — |
+| `sourceUrl` | `string` | No | — |
+| `embedUrl` | `string` | No | — |
+| `speaker` | `string` | No | — |
+| `speakerSlug` | `string` | No | — |
+| `seriesSlug` | `string` | No | — |
+| `duration` | `string` | No | — |
+| `publishedAtLabel` | `string` | No | — |
+| `imageUrl` | `string` | No | — |
+| `imageAlt` | `string` | No | — |
+| `thumbnail` | `media` | No | — |
+| `audioFile` | `media` | No | — |
+| `transcriptFile` | `media` | No | — |
+| `spokenLanguages` | `json` | No | default: `["es"]` |
+| `languageTracks` | `json` | No | default: `[]` |
+| `chapters` | `json` | No | default: `[]` |
+| `featured` | `boolean` | No | default: `false` |
+| `isLive` | `boolean` | No | default: `false` |
 
 ### `plugin::media-feeds.media-series` — Media Series & Podcast Show
 
@@ -108,21 +104,21 @@ Generic multi-language podcast show, video playlist, or lecture series
 
 > **Kind**: `collectionType` · **DB Table**: `media_feed_series` · **Admin Location**: `/admin/content-manager/collection-types/plugin::media-feeds.media-series` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Alan (Attribute)    | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki            |
-| :------------------ | :---------- | :------ | :------------------------------- |
-| `title`             | `string`    | Yes     | —                                |
-| `slug`              | `uid`       | Yes     | —                                |
-| `description`       | `text`      | Yes     | —                                |
-| `author`            | `string`    | No      | —                                |
-| `coverImageUrl`     | `string`    | No      | —                                |
-| `category`          | `string`    | No      | default: `"Education"`           |
-| `defaultType`       | `string`    | No      | default: `"podcast"`             |
-| `spokenLanguages`   | `json`      | No      | default: `["es","en","ar","tr"]` |
-| `rssEnabled`        | `boolean`   | No      | default: `true`                  |
-| `youtubePlaylistId` | `string`    | No      | —                                |
-| `spotifyShowUrl`    | `string`    | No      | —                                |
-| `applePodcastsUrl`  | `string`    | No      | —                                |
-| `active`            | `boolean`   | No      | default: `true`                  |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | — |
+| `slug` | `uid` | Yes | — |
+| `description` | `text` | Yes | — |
+| `author` | `string` | No | — |
+| `coverImageUrl` | `string` | No | — |
+| `category` | `string` | No | default: `"Education"` |
+| `defaultType` | `string` | No | default: `"podcast"` |
+| `spokenLanguages` | `json` | No | default: `["es","en","ar","tr"]` |
+| `rssEnabled` | `boolean` | No | default: `true` |
+| `youtubePlaylistId` | `string` | No | — |
+| `spotifyShowUrl` | `string` | No | — |
+| `applePodcastsUrl` | `string` | No | — |
+| `active` | `boolean` | No | default: `true` |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
@@ -212,19 +208,19 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot  | Uç Nokta Yolu                      | Kapsam        | Denetleyici (Handler)          | Kimlik Doğrulama |
-| :----- | :--------------------------------- | :------------ | :----------------------------- | :--------------- |
-| `GET`  | `/media-feeds/overview`            | `admin`       | `admin.getOverview`            | Bearer JWT       |
-| `GET`  | `/media-feeds/settings`            | `admin`       | `admin.getSettings`            | Bearer JWT       |
-| `PUT`  | `/media-feeds/settings`            | `admin`       | `admin.updateSettings`         | Bearer JWT       |
-| `POST` | `/media-feeds/enrich-url`          | `admin`       | `admin.enrichUrl`              | Bearer JWT       |
-| `POST` | `/media-feeds/sync-youtube`        | `admin`       | `admin.syncYouTube`            | Bearer JWT       |
-| `GET`  | `/api/media-feeds/episodes`        | `content-api` | `content-api.listEpisodes`     | Public           |
-| `GET`  | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public           |
-| `GET`  | `/api/media-feeds/series`          | `content-api` | `content-api.listSeries`       | Public           |
-| `GET`  | `/api/media-feeds/live`            | `content-api` | `content-api.getLiveStatus`    | Public           |
-| `GET`  | `/api/media-feeds/rss.xml`         | `content-api` | `content-api.getRssXml`        | Public           |
-| `GET`  | `/api/media-feeds/podcast.xml`     | `content-api` | `content-api.getRssXml`        | Public           |
+| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/media-feeds/overview` | `admin` | `admin.getOverview` | Bearer JWT |
+| `GET` | `/media-feeds/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/media-feeds/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `POST` | `/media-feeds/enrich-url` | `admin` | `admin.enrichUrl` | Bearer JWT |
+| `POST` | `/media-feeds/sync-youtube` | `admin` | `admin.syncYouTube` | Bearer JWT |
+| `GET` | `/api/media-feeds/episodes` | `content-api` | `content-api.listEpisodes` | Public |
+| `GET` | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public |
+| `GET` | `/api/media-feeds/series` | `content-api` | `content-api.listSeries` | Public |
+| `GET` | `/api/media-feeds/live` | `content-api` | `content-api.getLiveStatus` | Public |
+| `GET` | `/api/media-feeds/rss.xml` | `content-api` | `content-api.getRssXml` | Public |
+| `GET` | `/api/media-feeds/podcast.xml` | `content-api` | `content-api.getRssXml` | Public |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 
@@ -233,12 +229,10 @@ flowchart LR
 const pluginService = strapi.plugin("media-feeds")?.service("feedService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi
-  .documents("plugin::media-feeds.media-item")
-  .findMany({
-    limit: 25,
-    sort: "createdAt:desc",
-  });
+const records = await strapi.documents("plugin::media-feeds.media-item").findMany({
+  limit: 25,
+  sort: "createdAt:desc",
+});
 ```
 
 ## 8. Sorun Giderme ve Doğrulama

@@ -15,11 +15,7 @@ pnpm add @vicacha-devs/strapi-plugin-global-search
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "global-search": {
     enabled: true,
     config: {
@@ -43,16 +39,16 @@ export default ({
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة        | النص المعروض في الواجهة                  |
-| :------------------- | :--------------------------------------- |
-| `plugin.name`        | البحث الشامل                             |
+| مفتاح الترجمة | النص المعروض في الواجهة |
+| :--- | :--- |
+| `plugin.name` | البحث الشامل |
 | `plugin.description` | ابحث في جميع أنواع المحتوى من مكان واحد. |
-| `settings.section`   | البحث الشامل                             |
-| `settings.link`      | الإعدادات                                 |
-| `common.searching`   | جارٍ البحث…                               |
-| `common.no_results`  | لا توجد نتائج لـ “{query}”.               |
-| `common.on`          | تفعيل                                    |
-| `common.off`         | إيقاف                                    |
+| `settings.section` | البحث الشامل |
+| `settings.link` | الإعدادات |
+| `common.searching` | جارٍ البحث… |
+| `common.no_results` | لا توجد نتائج لـ “{query}”. |
+| `common.on` | تفعيل |
+| `common.off` | إيقاف |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -77,7 +73,7 @@ flowchart LR
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
-> **مجموعة الشريط الجانبي في مدير المحتوى**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
+> **مجموعة الشريط الجانبي في مدير المحتوى**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
 
 ### الكيانات والمكونات المسجلة في مدير المحتوى
 
@@ -159,14 +155,14 @@ flowchart LR
 
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية               | النطاق  | المعالج (Handler) | المصادقة   |
-| :------ | :------------------------------ | :------ | :---------------- | :--------- |
-| `GET`   | `/global-search/search`         | `admin` | `search.find`     | Bearer JWT |
-| `GET`   | `/global-search/schema`         | `admin` | `schema.find`     | Bearer JWT |
-| `GET`   | `/global-search/schema/all`     | `admin` | `schema.findAll`  | Bearer JWT |
-| `GET`   | `/global-search/settings`       | `admin` | `settings.find`   | Bearer JWT |
-| `PUT`   | `/global-search/settings`       | `admin` | `settings.update` | Bearer JWT |
-| `POST`  | `/global-search/settings/reset` | `admin` | `settings.reset`  | Bearer JWT |
+| الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/global-search/search` | `admin` | `search.find` | Bearer JWT |
+| `GET` | `/global-search/schema` | `admin` | `schema.find` | Bearer JWT |
+| `GET` | `/global-search/schema/all` | `admin` | `schema.findAll` | Bearer JWT |
+| `GET` | `/global-search/settings` | `admin` | `settings.find` | Bearer JWT |
+| `PUT` | `/global-search/settings` | `admin` | `settings.update` | Bearer JWT |
+| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset` | Bearer JWT |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 

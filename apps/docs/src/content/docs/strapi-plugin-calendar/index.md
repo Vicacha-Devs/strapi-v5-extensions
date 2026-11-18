@@ -3,7 +3,6 @@ title: "Calendar & Scheduling (@vicacha-devs/strapi-plugin-calendar)"
 description: "Universal Multi-Source Calendar, FullCalendar v6 Scheduler, RFC 5545/7529 Recurrence (RRULE & RSCALE), Multi-Calendar Systems (Hijri, Hebrew, Persian, etc.), and iCal (.ics) plugin for Strapi v5."
 prev: false
 ---
-
 Enterprise, **100% generic Multi-Collection Calendar, Scheduler, Non-Gregorian `RSCALE` Recurrence, Dual-Calendar Overlay, and iCal (`.ics`) Syndication Plugin** for Strapi v5, powered by **FullCalendar v6** (`@fullcalendar/react`) and **Unicode CLDR / `@internationalized/date`**.
 
 ---
@@ -143,13 +142,11 @@ await calendarRegistry?.registerSource({
 ## 🌐 REST API Endpoints
 
 ### Content API (`/api/calendar/*`)
-
 - `GET /api/calendar/occurrences?from=2026-05-01T00:00:00Z&to=2026-05-31T23:59:59Z&sourceId=events`
 - `GET /api/calendar/feed.ics?sourceId=events&category=Religious`
 - `GET /api/calendar/:documentId/invite.ics`
 
 ### Admin API (`/calendar/*`)
-
 - `GET /calendar/calendar` — Fetch occurrences across all enabled sources
 - `POST /calendar/calendar/reschedule` — Drag-and-drop / resize reschedule handler
 - `POST /calendar/calendar/quick-create` — Slot selection quick-create handler
@@ -168,6 +165,7 @@ npm test
 ## 📄 License
 
 MIT © Vicacha Devs
+
 
 ## Content-Type Entities & Where to Find Them
 

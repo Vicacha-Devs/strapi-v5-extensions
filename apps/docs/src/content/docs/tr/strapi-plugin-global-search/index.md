@@ -47,7 +47,7 @@ Bu eklenti, doğrudan mevcut Strapi içerik türü varlıkları (`api::*` ve `pl
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
-> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
+> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
 
 ### İçerik Yöneticisi Varlıkları ve Bileşenleri
 
@@ -129,11 +129,11 @@ flowchart LR
 
 ## 4. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot  | Uç Nokta Yolu                   | Kapsam  | Denetleyici (Handler) | Kimlik Doğrulama |
-| :----- | :------------------------------ | :------ | :-------------------- | :--------------- |
-| `GET`  | `/global-search/search`         | `admin` | `search.find`         | Bearer JWT       |
-| `GET`  | `/global-search/schema`         | `admin` | `schema.find`         | Bearer JWT       |
-| `GET`  | `/global-search/schema/all`     | `admin` | `schema.findAll`      | Bearer JWT       |
-| `GET`  | `/global-search/settings`       | `admin` | `settings.find`       | Bearer JWT       |
-| `PUT`  | `/global-search/settings`       | `admin` | `settings.update`     | Bearer JWT       |
-| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset`      | Bearer JWT       |
+| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/global-search/search` | `admin` | `search.find` | Bearer JWT |
+| `GET` | `/global-search/schema` | `admin` | `schema.find` | Bearer JWT |
+| `GET` | `/global-search/schema/all` | `admin` | `schema.findAll` | Bearer JWT |
+| `GET` | `/global-search/settings` | `admin` | `settings.find` | Bearer JWT |
+| `PUT` | `/global-search/settings` | `admin` | `settings.update` | Bearer JWT |
+| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset` | Bearer JWT |

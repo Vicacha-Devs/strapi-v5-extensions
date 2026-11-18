@@ -45,18 +45,18 @@ Editorial notes attached to Content Manager entity records
 
 > **Kind**: `collectionType` · **DB Table**: `notes` · **Admin Location**: Internal (`/admin/plugins/notes`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل              | النوع في Strapi | إلزامي | القيود / العلاقات                                           |
-| :----------------- | :-------------- | :----- | :--------------------------------------------------------- |
-| `title`            | `string`        | Yes    | max: 255                                                   |
-| `content`          | `text`          | No     | —                                                          |
-| `category`         | `enumeration`   | Yes    | enum: `general, todo, blocker, idea`; default: `"general"` |
-| `isPinned`         | `boolean`       | No     | default: `false`                                           |
-| `entityId`         | `integer`       | No     | —                                                          |
-| `entityDocumentId` | `string`        | No     | max: 128                                                   |
-| `entitySlug`       | `string`        | Yes    | max: 160                                                   |
-| `entityLocale`     | `string`        | No     | max: 32                                                    |
-| `createdByName`    | `string`        | No     | max: 120                                                   |
-| `updatedByName`    | `string`        | No     | max: 120                                                   |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | max: 255 |
+| `content` | `text` | No | — |
+| `category` | `enumeration` | Yes | enum: `general, todo, blocker, idea`; default: `"general"` |
+| `isPinned` | `boolean` | No | default: `false` |
+| `entityId` | `integer` | No | — |
+| `entityDocumentId` | `string` | No | max: 128 |
+| `entitySlug` | `string` | Yes | max: 160 |
+| `entityLocale` | `string` | No | max: 32 |
+| `createdByName` | `string` | No | max: 120 |
+| `updatedByName` | `string` | No | max: 120 |
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
@@ -144,13 +144,13 @@ flowchart LR
 
 ## 4. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة  | مسار نقطة النهاية       | النطاق        | المعالج (Handler)         | المصادقة   |
-| :------- | :---------------------- | :------------ | :------------------------ | :--------- |
-| `GET`    | `/notes/notes`          | `admin`       | `notesController.find`    | Bearer JWT |
-| `GET`    | `/notes/notes/stats`    | `admin`       | `notesController.stats`   | Bearer JWT |
-| `GET`    | `/notes/notes/{id}`     | `admin`       | `notesController.findOne` | Bearer JWT |
-| `POST`   | `/notes/notes`          | `admin`       | `notesController.create`  | Bearer JWT |
-| `PUT`    | `/notes/notes/{id}`     | `admin`       | `notesController.update`  | Bearer JWT |
-| `DELETE` | `/notes/notes/{id}`     | `admin`       | `notesController.delete`  | Bearer JWT |
-| `GET`    | `/api/notes/notes`      | `content-api` | `notesController.find`    | Bearer JWT |
-| `GET`    | `/api/notes/notes/{id}` | `content-api` | `notesController.findOne` | Bearer JWT |
+| الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/notes/notes` | `admin` | `notesController.find` | Bearer JWT |
+| `GET` | `/notes/notes/stats` | `admin` | `notesController.stats` | Bearer JWT |
+| `GET` | `/notes/notes/{id}` | `admin` | `notesController.findOne` | Bearer JWT |
+| `POST` | `/notes/notes` | `admin` | `notesController.create` | Bearer JWT |
+| `PUT` | `/notes/notes/{id}` | `admin` | `notesController.update` | Bearer JWT |
+| `DELETE` | `/notes/notes/{id}` | `admin` | `notesController.delete` | Bearer JWT |
+| `GET` | `/api/notes/notes` | `content-api` | `notesController.find` | Bearer JWT |
+| `GET` | `/api/notes/notes/{id}` | `content-api` | `notesController.findOne` | Bearer JWT |

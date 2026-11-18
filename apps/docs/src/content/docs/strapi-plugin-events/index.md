@@ -3,7 +3,6 @@ title: "Events, RSVP & Check-In (@vicacha-devs/strapi-plugin-events)"
 description: "Production-grade Strapi v5 Events, RSVP Capacity, Automatic Waitlist Promotion, Attendee Check-In & iCal Plugin powered by @vicacha-devs/strapi-plugin-calendar"
 prev: false
 ---
-
 Enterprise-grade **Events, RFC 5545 Recurrence (`RRULE`), Multi-Calendar System Engine, RSVP/Capacity/Waitlist & iCal (`.ics`)** plugin for **Strapi v5**, powered by [`@vicacha-devs/strapi-plugin-calendar`](../strapi-plugin-calendar) as a required dependency.
 
 ---
@@ -38,41 +37,37 @@ export default ({ env }) => ({
   events: {
     enabled: true,
     config: {
-      defaultTimezone: env("EVENTS_TIMEZONE", "UTC"),
+      defaultTimezone: env('EVENTS_TIMEZONE', 'UTC'),
       defaultCapacity: 100,
       waitlistEnabledByDefault: true,
       defaultMaxGuestsPerRegistration: 5,
       sendRsvpEmails: true,
-      feedTitle: "Organization Events Calendar",
+      feedTitle: 'Organization Events Calendar',
 
       // 1. Optional Secondary Calendar Systems (Unicode CLDR or custom formatter ID)
       secondaryCalendars: [
         {
-          id: "hijri",
-          label: "Hijri (Umm al-Qura)",
-          intlCalendar: "islamic-umalqura",
-          dayOffset: env.int("HIJRI_DAY_OFFSET", 0),
-          overrideField: "hijriDate",
+          id: 'hijri',
+          label: 'Hijri (Umm al-Qura)',
+          intlCalendar: 'islamic-umalqura',
+          dayOffset: env.int('HIJRI_DAY_OFFSET', 0),
+          overrideField: 'hijriDate',
           enabled: true,
         },
       ],
 
       // 2. Optional Custom Recurrence Presets for Quick-Create & RRuleInput
       recurrencePresets: [
-        { id: "daily", label: "Daily", rrule: "FREQ=DAILY;INTERVAL=1" },
-        {
-          id: "weekly-fri",
-          label: "Weekly on Fridays",
-          rrule: "FREQ=WEEKLY;INTERVAL=1;BYDAY=FR",
-        },
-        { id: "monthly", label: "Monthly", rrule: "FREQ=MONTHLY;INTERVAL=1" },
+        { id: 'daily', label: 'Daily', rrule: 'FREQ=DAILY;INTERVAL=1' },
+        { id: 'weekly-fri', label: 'Weekly on Fridays', rrule: 'FREQ=WEEKLY;INTERVAL=1;BYDAY=FR' },
+        { id: 'monthly', label: 'Monthly', rrule: 'FREQ=MONTHLY;INTERVAL=1' },
       ],
 
       // 3. Optional Declarative Schema Extensions on plugin::events.event / registration
       schemaExtensions: {
         event: {
           hijriDate: {
-            type: "string",
+            type: 'string',
             pluginOptions: { i18n: { localized: true } },
           },
         },
@@ -81,26 +76,26 @@ export default ({ env }) => ({
       // 4. Mapped Collection Sources
       sources: [
         {
-          id: "public-events",
-          label: "Events",
-          uid: "api::event.event",
-          color: "#0D9488",
+          id: 'public-events',
+          label: 'Events',
+          uid: 'api::event.event',
+          color: '#0D9488',
           enabled: true,
           fields: {
-            title: "title",
-            startDate: "startDate",
-            endDate: "endDate",
-            rrule: "recurrence",
-            location: "location",
-            category: "category",
-            summary: "summary",
-            slug: "slug",
-            capacity: "capacity",
-            rsvpEnabled: "rsvpEnabled",
+            title: 'title',
+            startDate: 'startDate',
+            endDate: 'endDate',
+            rrule: 'recurrence',
+            location: 'location',
+            category: 'category',
+            summary: 'summary',
+            slug: 'slug',
+            capacity: 'capacity',
+            rsvpEnabled: 'rsvpEnabled',
             alternateDateFields: {
-              hijri: "hijriDate",
+              hijri: 'hijriDate',
             },
-            customFields: ["hijriDate", "featured"],
+            customFields: ['hijriDate', 'featured'],
           },
         },
       ],
@@ -119,17 +114,16 @@ To add a custom non-Intl date system (such as Fiscal Quarters or Academic Weeks)
 export default {
   bootstrap({ strapi }) {
     strapi
-      .plugin("events")
-      .service("occurrence")
-      .registerCalendarFormatter("custom-fiscal", (date, { compact }) => {
+      .plugin('events')
+      .service('occurrence')
+      .registerCalendarFormatter('custom-fiscal', (date, { compact }) => {
         const quarter = Math.floor(date.getUTCMonth() / 3) + 1;
-        return compact
-          ? `Q${quarter}`
-          : `FY${date.getUTCFullYear()} Q${quarter}`;
+        return compact ? `Q${quarter}` : `FY${date.getUTCFullYear()} Q${quarter}`;
       });
   },
 };
 ```
+
 
 ## Content-Type Entities & Where to Find Them
 

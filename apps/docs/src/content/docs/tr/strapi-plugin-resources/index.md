@@ -47,23 +47,23 @@ Curated photo and video albums synced with Strapi v5 Media Library folders and C
 
 > **Kind**: `collectionType` · **DB Table**: `resources_gallery_albums` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.gallery-album` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Alan (Attribute)        | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                                         |
-| :---------------------- | :------------ | :------ | :-------------------------------------------------------------------------------------------- |
-| `title`                 | `string`      | Yes     | max: 200                                                                                      |
-| `slug`                  | `uid`         | Yes     | —                                                                                             |
-| `description`           | `text`        | No      | —                                                                                             |
-| `category`              | `enumeration` | Yes     | enum: `architecture, community, events, ramadan_eid, heritage, press`; default: `"community"` |
-| `coverPhoto`            | `media`       | No      | —                                                                                             |
-| `photos`                | `media`       | No      | —                                                                                             |
-| `mediaFolderId`         | `integer`     | No      | —                                                                                             |
-| `mediaFolderPath`       | `string`      | No      | max: 160                                                                                      |
-| `eventDate`             | `date`        | No      | —                                                                                             |
-| `secondaryDateOverride` | `string`      | No      | max: 80                                                                                       |
-| `photographerCredit`    | `string`      | No      | max: 140                                                                                      |
-| `framingNotes`          | `string`      | No      | max: 500                                                                                      |
-| `featured`              | `boolean`     | No      | default: `false`                                                                              |
-| `sortOrder`             | `integer`     | No      | default: `0`                                                                                  |
-| `photoCount`            | `integer`     | No      | default: `0`                                                                                  |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | max: 200 |
+| `slug` | `uid` | Yes | — |
+| `description` | `text` | No | — |
+| `category` | `enumeration` | Yes | enum: `architecture, community, events, ramadan_eid, heritage, press`; default: `"community"` |
+| `coverPhoto` | `media` | No | — |
+| `photos` | `media` | No | — |
+| `mediaFolderId` | `integer` | No | — |
+| `mediaFolderPath` | `string` | No | max: 160 |
+| `eventDate` | `date` | No | — |
+| `secondaryDateOverride` | `string` | No | max: 80 |
+| `photographerCredit` | `string` | No | max: 140 |
+| `framingNotes` | `string` | No | max: 500 |
+| `featured` | `boolean` | No | default: `false` |
+| `sortOrder` | `integer` | No | default: `0` |
+| `photoCount` | `integer` | No | default: `0` |
 
 ### `plugin::resources.glossary-term` — Resource Glossary Term
 
@@ -71,18 +71,18 @@ Multilingual A-Z glossary terms with native script, transliteration, and Strapi 
 
 > **Kind**: `collectionType` · **DB Table**: `resources_glossary_terms` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.glossary-term` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Alan (Attribute)     | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                               |
-| :------------------- | :------------ | :------ | :---------------------------------------------------------------------------------- |
-| `term`               | `string`      | Yes     | max: 120                                                                            |
-| `slug`               | `uid`         | Yes     | —                                                                                   |
-| `nativeScript`       | `string`      | No      | max: 200                                                                            |
-| `transliteration`    | `string`      | No      | max: 200                                                                            |
-| `definition`         | `text`        | Yes     | —                                                                                   |
-| `category`           | `enumeration` | Yes     | enum: `beliefs, worship, ethics, history, community, general`; default: `"general"` |
-| `letterGroup`        | `string`      | No      | max: 4; default: `"A"`                                                              |
-| `pronunciationAudio` | `media`       | No      | —                                                                                   |
-| `relatedTerms`       | `json`        | No      | —                                                                                   |
-| `featured`           | `boolean`     | No      | default: `false`                                                                    |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `term` | `string` | Yes | max: 120 |
+| `slug` | `uid` | Yes | — |
+| `nativeScript` | `string` | No | max: 200 |
+| `transliteration` | `string` | No | max: 200 |
+| `definition` | `text` | Yes | — |
+| `category` | `enumeration` | Yes | enum: `beliefs, worship, ethics, history, community, general`; default: `"general"` |
+| `letterGroup` | `string` | No | max: 4; default: `"A"` |
+| `pronunciationAudio` | `media` | No | — |
+| `relatedTerms` | `json` | No | — |
+| `featured` | `boolean` | No | default: `false` |
 
 ### `plugin::resources.publication` — Resource Publication
 
@@ -90,26 +90,26 @@ Localized digital library books, guides, pamphlets, and press kit assets backed 
 
 > **Kind**: `collectionType` · **DB Table**: `resources_publications` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.publication` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Alan (Attribute)        | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                           |
-| :---------------------- | :------------ | :------ | :------------------------------------------------------------------------------ |
-| `title`                 | `string`      | Yes     | max: 200                                                                        |
-| `slug`                  | `uid`         | Yes     | —                                                                               |
-| `summary`               | `text`        | No      | —                                                                               |
-| `category`              | `enumeration` | Yes     | enum: `guide, book, pamphlet, press_kit, academic, general`; default: `"guide"` |
-| `file`                  | `media`       | No      | —                                                                               |
-| `coverImage`            | `media`       | No      | —                                                                               |
-| `authorName`            | `string`      | No      | max: 140                                                                        |
-| `authorSlug`            | `string`      | No      | max: 140                                                                        |
-| `isbnOrReference`       | `string`      | No      | max: 80                                                                         |
-| `pageCount`             | `integer`     | No      | —                                                                               |
-| `languageCode`          | `string`      | No      | max: 10; default: `"es"`                                                        |
-| `publishedAtDate`       | `date`        | No      | —                                                                               |
-| `secondaryDateOverride` | `string`      | No      | max: 80                                                                         |
-| `mediaFolderPath`       | `string`      | No      | max: 160                                                                        |
-| `externalDownloadUrl`   | `string`      | No      | max: 500                                                                        |
-| `downloadCount`         | `integer`     | No      | default: `0`                                                                    |
-| `featured`              | `boolean`     | No      | default: `false`                                                                |
-| `allowPublicDownload`   | `boolean`     | No      | default: `true`                                                                 |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | max: 200 |
+| `slug` | `uid` | Yes | — |
+| `summary` | `text` | No | — |
+| `category` | `enumeration` | Yes | enum: `guide, book, pamphlet, press_kit, academic, general`; default: `"guide"` |
+| `file` | `media` | No | — |
+| `coverImage` | `media` | No | — |
+| `authorName` | `string` | No | max: 140 |
+| `authorSlug` | `string` | No | max: 140 |
+| `isbnOrReference` | `string` | No | max: 80 |
+| `pageCount` | `integer` | No | — |
+| `languageCode` | `string` | No | max: 10; default: `"es"` |
+| `publishedAtDate` | `date` | No | — |
+| `secondaryDateOverride` | `string` | No | max: 80 |
+| `mediaFolderPath` | `string` | No | max: 160 |
+| `externalDownloadUrl` | `string` | No | max: 500 |
+| `downloadCount` | `integer` | No | default: `0` |
+| `featured` | `boolean` | No | default: `false` |
+| `allowPublicDownload` | `boolean` | No | default: `true` |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
@@ -206,15 +206,15 @@ flowchart LR
 
 ## 4. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot    | Uç Nokta Yolu                                         | Kapsam  | Denetleyici (Handler)                       | Kimlik Doğrulama |
-| :------- | :---------------------------------------------------- | :------ | :------------------------------------------ | :--------------- |
-| `GET`    | `/resources/hub`                                      | `admin` | `resourcesController.getAdminHubOverview`   | Bearer JWT       |
-| `GET`    | `/resources/publications`                             | `admin` | `resourcesController.listAdminPublications` | Bearer JWT       |
-| `POST`   | `/resources/publications`                             | `admin` | `resourcesController.createPublication`     | Bearer JWT       |
-| `PUT`    | `/resources/publications/{documentId}`                | `admin` | `resourcesController.updatePublication`     | Bearer JWT       |
-| `DELETE` | `/resources/publications/{documentId}`                | `admin` | `resourcesController.deletePublication`     | Bearer JWT       |
-| `GET`    | `/resources/galleries`                                | `admin` | `resourcesController.listAdminGalleries`    | Bearer JWT       |
-| `POST`   | `/resources/galleries`                                | `admin` | `resourcesController.createGalleryAlbum`    | Bearer JWT       |
-| `PUT`    | `/resources/galleries/{documentId}`                   | `admin` | `resourcesController.updateGalleryAlbum`    | Bearer JWT       |
-| `DELETE` | `/resources/galleries/{documentId}`                   | `admin` | `resourcesController.deleteGalleryAlbum`    | Bearer JWT       |
-| `POST`   | `/resources/galleries/{documentId}/sync-media-folder` | `admin` | `resourcesController.syncAlbumMediaFolder`  | Bearer JWT       |
+| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/resources/hub` | `admin` | `resourcesController.getAdminHubOverview` | Bearer JWT |
+| `GET` | `/resources/publications` | `admin` | `resourcesController.listAdminPublications` | Bearer JWT |
+| `POST` | `/resources/publications` | `admin` | `resourcesController.createPublication` | Bearer JWT |
+| `PUT` | `/resources/publications/{documentId}` | `admin` | `resourcesController.updatePublication` | Bearer JWT |
+| `DELETE` | `/resources/publications/{documentId}` | `admin` | `resourcesController.deletePublication` | Bearer JWT |
+| `GET` | `/resources/galleries` | `admin` | `resourcesController.listAdminGalleries` | Bearer JWT |
+| `POST` | `/resources/galleries` | `admin` | `resourcesController.createGalleryAlbum` | Bearer JWT |
+| `PUT` | `/resources/galleries/{documentId}` | `admin` | `resourcesController.updateGalleryAlbum` | Bearer JWT |
+| `DELETE` | `/resources/galleries/{documentId}` | `admin` | `resourcesController.deleteGalleryAlbum` | Bearer JWT |
+| `POST` | `/resources/galleries/{documentId}/sync-media-folder` | `admin` | `resourcesController.syncAlbumMediaFolder` | Bearer JWT |

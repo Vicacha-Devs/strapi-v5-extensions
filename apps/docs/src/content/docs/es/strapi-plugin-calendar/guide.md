@@ -15,12 +15,8 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
-  calendar: {
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+  "calendar": {
     enabled: true,
     config: {
       defaultView: "dayGridMonth",
@@ -40,16 +36,16 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción                    | Texto en Interfaz                                                                         |
-| :------------------------------------- | :---------------------------------------------------------------------------------------- |
-| `settings.theme.breeze.label`          | Brisa (Cielo y Pizarra — Predeterminado)                                                  |
-| `settings.theme.breeze.description`    | Cuadrícula azul cielo y pizarra de alto contraste con insignias Hijri en ámbar cálido     |
-| `settings.theme.emerald.label`         | Mezquita Esmeralda (Verde Azulado y Oro)                                                  |
-| `settings.theme.emerald.description`   | Encabezados verde esmeralda islámico con resaltados dorados para el calendario secundario |
-| `settings.theme.sandstone.label`       | Arenisca Andalusí (Tierra Cálida)                                                         |
-| `settings.theme.sandstone.description` | Tonos cálidos de terracota y pergamino inspirados en los patios andalusíes                |
-| `settings.theme.midnight.label`        | Observatorio de Medianoche (Pizarra Oscura)                                               |
-| `settings.theme.midnight.description`  | Lienzo oscuro en pizarra profunda con acentos luminosos en cian y dorado                  |
+| Clave de Traducción | Texto en Interfaz |
+| :--- | :--- |
+| `settings.theme.breeze.label` | Brisa (Cielo y Pizarra — Predeterminado) |
+| `settings.theme.breeze.description` | Cuadrícula azul cielo y pizarra de alto contraste con insignias Hijri en ámbar cálido |
+| `settings.theme.emerald.label` | Mezquita Esmeralda (Verde Azulado y Oro) |
+| `settings.theme.emerald.description` | Encabezados verde esmeralda islámico con resaltados dorados para el calendario secundario |
+| `settings.theme.sandstone.label` | Arenisca Andalusí (Tierra Cálida) |
+| `settings.theme.sandstone.description` | Tonos cálidos de terracota y pergamino inspirados en los patios andalusíes |
+| `settings.theme.midnight.label` | Observatorio de Medianoche (Pizarra Oscura) |
+| `settings.theme.midnight.description` | Lienzo oscuro en pizarra profunda con acentos luminosos en cian y dorado |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 
@@ -172,18 +168,18 @@ flowchart LR
 
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint                       | Ámbito        | Controlador                    | Autenticación |
-| :----- | :-------------------------------------- | :------------ | :----------------------------- | :------------ |
-| `GET`  | `/calendar/calendar`                    | `admin`       | `admin.getCalendar`            | Bearer JWT    |
-| `POST` | `/calendar/calendar/reschedule`         | `admin`       | `admin.reschedule`             | Bearer JWT    |
-| `POST` | `/calendar/calendar/quick-create`       | `admin`       | `admin.quickCreate`            | Bearer JWT    |
-| `GET`  | `/calendar/content-types`               | `admin`       | `admin.getContentTypes`        | Bearer JWT    |
-| `GET`  | `/calendar/settings`                    | `admin`       | `admin.getSettings`            | Bearer JWT    |
-| `PUT`  | `/calendar/settings`                    | `admin`       | `admin.updateSettings`         | Bearer JWT    |
-| `POST` | `/calendar/clear-settings`              | `admin`       | `admin.clearSettings`          | Bearer JWT    |
-| `GET`  | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Bearer JWT    |
-| `GET`  | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Bearer JWT    |
-| `GET`  | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT    |
+| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/calendar/calendar` | `admin` | `admin.getCalendar` | Bearer JWT |
+| `POST` | `/calendar/calendar/reschedule` | `admin` | `admin.reschedule` | Bearer JWT |
+| `POST` | `/calendar/calendar/quick-create` | `admin` | `admin.quickCreate` | Bearer JWT |
+| `GET` | `/calendar/content-types` | `admin` | `admin.getContentTypes` | Bearer JWT |
+| `GET` | `/calendar/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/calendar/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `POST` | `/calendar/clear-settings` | `admin` | `admin.clearSettings` | Bearer JWT |
+| `GET` | `/api/calendar/occurrences` | `content-api` | `content-api.getOccurrences` | Bearer JWT |
+| `GET` | `/api/calendar/feed.ics` | `content-api` | `content-api.downloadFeedIcs` | Bearer JWT |
+| `GET` | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 

@@ -3,7 +3,6 @@ title: "Inbox, Forms & Alert Banners (@vicacha-devs/strapi-plugin-inbox)"
 description: "Generic Strapi v5 Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscriber Lists & Site-Wide Alert Banners (forked & extended from devCluna/strapi-plugin-form-builder-cms)"
 prev: false
 ---
-
 Generic **Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscribers & Site-Wide Alert Banners** for **Strapi v5**, powered by [`@vicacha-devs/strapi-plugin-calendar`](../strapi-plugin-calendar), [`@vicacha-devs/strapi-plugin-bookings`](../strapi-plugin-bookings), and [`@vicacha-devs/strapi-plugin-certificates`](../strapi-plugin-certificates).
 
 ---
@@ -11,7 +10,7 @@ Generic **Visual Form Builder, Service-Desk Casework Inbox, Double Opt-In Subscr
 ## Key Features
 
 - **Dynamic Form Definitions & Service-Desk Workflows (`plugin::inbox.form`)**:
-  - Define custom intake forms and structured service-desk workflows (`GET /api/inbox/forms`, `GET /api/inbox/forms/:slug`) with field validation, rate limiting, and honeypot/CAPTCHA protection.
+  - Define custom intake forms and structured service-desk workflows (`GET /api/inbox/forms`, `GET /api/inbox/forms/:slug`) with field validation (`en`, `es`, `ar`, `tr` fallbacks), `file` upload field metadata (`accept`, `maxSizeMb`, `multiple`, `maxFiles`) synced with `strapi-plugin-form-builder-cms`, rate limiting, and honeypot/CAPTCHA protection.
 - **Casework Submissions & Cross-Plugin Bridges (`plugin::inbox.submission`)**:
   - Public submission endpoint (`POST /api/inbox/forms/:slug/submit`) with SLA tracking, priority tags, assignee routing, and one-click conversion into bookings (`@vicacha-devs/strapi-plugin-bookings`) or certificates (`@vicacha-devs/strapi-plugin-certificates`).
 - **Double Opt-In Newsletter Subscribers (`plugin::inbox.subscriber`)**:
@@ -31,11 +30,12 @@ Enable the plugin in `config/plugins.ts`:
 
 ```ts
 export default () => ({
-  inbox: {
+  "inbox": {
     enabled: true,
   },
 });
 ```
+
 
 ## Content-Type Entities & Where to Find Them
 

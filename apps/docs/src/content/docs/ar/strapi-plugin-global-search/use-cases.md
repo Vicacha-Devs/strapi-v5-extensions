@@ -28,7 +28,7 @@ flowchart LR
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
-> **مجموعة الشريط الجانبي في مدير المحتوى**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
+> **مجموعة الشريط الجانبي في مدير المحتوى**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
 
 ### الكيانات والمكونات المسجلة في مدير المحتوى
 

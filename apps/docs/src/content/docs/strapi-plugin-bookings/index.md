@@ -3,7 +3,6 @@ title: "Bookings & Reservations (@vicacha-devs/strapi-plugin-bookings)"
 description: "Generic Strapi v5 Bookings, Appointments, Resource Scheduling & Time-Slot Availability Engine powered by @vicacha-devs/strapi-plugin-calendar"
 prev: false
 ---
-
 Generic **Bookings, Appointments, Resource Scheduling & Time-Slot Availability Engine** for **Strapi v5**, powered by [`@vicacha-devs/strapi-plugin-calendar`](../strapi-plugin-calendar) as a required dependency.
 
 ---
@@ -37,11 +36,12 @@ Enable the plugin in `config/plugins.ts`:
 
 ```ts
 export default () => ({
-  bookings: {
+  "bookings": {
     enabled: true,
   },
 });
 ```
+
 
 ## Content-Type Entities & Where to Find Them
 

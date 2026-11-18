@@ -15,23 +15,12 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "tiptap-editor": {
     enabled: true,
     config: {
       presets: {
-        editorial: {
-          bold: true,
-          italic: true,
-          heading: { levels: [1, 2, 3] },
-          link: true,
-          mediaLibrary: true,
-          table: true,
-        },
+        editorial: { bold: true, italic: true, heading: { levels: [1, 2, 3] }, link: true, mediaLibrary: true, table: true },
       },
       settings: {
         defaultPreset: "editorial",
@@ -53,16 +42,16 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción                  | Texto en Interfaz                                                              |
-| :----------------------------------- | :----------------------------------------------------------------------------- |
-| `tiptap-editor.noPreset.message`     | No se ha configurado ningún ajuste preestablecido — mostrando el editor mínimo |
-| `tiptap-editor.loading`              | Cargando editor...                                                             |
-| `tiptap-editor.more`                 | Más                                                                            |
-| `tiptap-editor.error.message`        | El editor encontró un error y no pudo renderizarse.                            |
-| `tiptap-editor.error.retry`          | Reintentar                                                                     |
-| `tiptap-editor.richText.label`       | Texto enriquecido (Tiptap)                                                     |
-| `tiptap-editor.richText.description` | Utilice este campo para crear texto con formato mediante el editor Tiptap.     |
-| `tiptap-editor.section.format.label` | Formato de salida y contenido                                                  |
+| Clave de Traducción | Texto en Interfaz |
+| :--- | :--- |
+| `tiptap-editor.noPreset.message` | No se ha configurado ningún ajuste preestablecido — mostrando el editor mínimo |
+| `tiptap-editor.loading` | Cargando editor... |
+| `tiptap-editor.more` | Más |
+| `tiptap-editor.error.message` | El editor encontró un error y no pudo renderizarse. |
+| `tiptap-editor.error.retry` | Reintentar |
+| `tiptap-editor.richText.label` | Texto enriquecido (Tiptap) |
+| `tiptap-editor.richText.description` | Utilice este campo para crear texto con formato mediante el editor Tiptap. |
+| `tiptap-editor.section.format.label` | Formato de salida y contenido |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 
@@ -168,18 +157,18 @@ flowchart LR
 
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint                                  | Ámbito  | Controlador          | Autenticación |
-| :----- | :------------------------------------------------- | :------ | :------------------- | :------------ |
-| `GET`  | `/tiptap-editor/presets`                           | `admin` | `preset.find`        | Bearer JWT    |
-| `GET`  | `/tiptap-editor/presets/{name}`                    | `admin` | `preset.findOne`     | Bearer JWT    |
-| `GET`  | `/tiptap-editor/theme`                             | `admin` | `theme.find`         | Bearer JWT    |
-| `GET`  | `/tiptap-editor/settings`                          | `admin` | `settings.find`      | Bearer JWT    |
-| `PUT`  | `/tiptap-editor/settings`                          | `admin` | `settings.update`    | Bearer JWT    |
-| `GET`  | `/tiptap-editor/search`                            | `admin` | `search.search`      | Bearer JWT    |
-| `GET`  | `/tiptap-editor/get/{collectionName}/{documentId}` | `admin` | `search.getDocument` | Bearer JWT    |
-| `GET`  | `/tiptap-editor/identify/{collectionName}`         | `admin` | `search.identify`    | Bearer JWT    |
-| `GET`  | `/tiptap-editor/link-preview`                      | `admin` | `media.linkPreview`  | Bearer JWT    |
-| `POST` | `/tiptap-editor/upload-by-url`                     | `admin` | `media.uploadByUrl`  | Bearer JWT    |
+| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/tiptap-editor/presets` | `admin` | `preset.find` | Bearer JWT |
+| `GET` | `/tiptap-editor/presets/{name}` | `admin` | `preset.findOne` | Bearer JWT |
+| `GET` | `/tiptap-editor/theme` | `admin` | `theme.find` | Bearer JWT |
+| `GET` | `/tiptap-editor/settings` | `admin` | `settings.find` | Bearer JWT |
+| `PUT` | `/tiptap-editor/settings` | `admin` | `settings.update` | Bearer JWT |
+| `GET` | `/tiptap-editor/search` | `admin` | `search.search` | Bearer JWT |
+| `GET` | `/tiptap-editor/get/{collectionName}/{documentId}` | `admin` | `search.getDocument` | Bearer JWT |
+| `GET` | `/tiptap-editor/identify/{collectionName}` | `admin` | `search.identify` | Bearer JWT |
+| `GET` | `/tiptap-editor/link-preview` | `admin` | `media.linkPreview` | Bearer JWT |
+| `POST` | `/tiptap-editor/upload-by-url` | `admin` | `media.uploadByUrl` | Bearer JWT |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 

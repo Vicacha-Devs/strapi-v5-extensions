@@ -15,12 +15,8 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
-  calendar: {
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+  "calendar": {
     enabled: true,
     config: {
       defaultView: "dayGridMonth",
@@ -40,16 +36,16 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key                        | Rendered UI Label                                                         |
-| :------------------------------------- | :------------------------------------------------------------------------ |
-| `settings.theme.breeze.label`          | Breeze (Sky & Slate — Default)                                            |
-| `settings.theme.breeze.description`    | High-contrast sky-blue & crisp slate grid with warm amber Hijri badges    |
-| `settings.theme.emerald.label`         | Emerald Mosque (Teal & Gold)                                              |
-| `settings.theme.emerald.description`   | Islamic emerald-teal headers with warm gold secondary calendar highlights |
-| `settings.theme.sandstone.label`       | Andalusian Sandstone (Warm Earth)                                         |
-| `settings.theme.sandstone.description` | Warm terracotta and parchment tones inspired by Andalusian courtyards     |
-| `settings.theme.midnight.label`        | Midnight Observatory (Dark Slate)                                         |
-| `settings.theme.midnight.description`  | Deep slate dark-mode canvas with luminous cyan and gold accents           |
+| Translation Key | Rendered UI Label |
+| :--- | :--- |
+| `settings.theme.breeze.label` | Breeze (Sky & Slate — Default) |
+| `settings.theme.breeze.description` | High-contrast sky-blue & crisp slate grid with warm amber Hijri badges |
+| `settings.theme.emerald.label` | Emerald Mosque (Teal & Gold) |
+| `settings.theme.emerald.description` | Islamic emerald-teal headers with warm gold secondary calendar highlights |
+| `settings.theme.sandstone.label` | Andalusian Sandstone (Warm Earth) |
+| `settings.theme.sandstone.description` | Warm terracotta and parchment tones inspired by Andalusian courtyards |
+| `settings.theme.midnight.label` | Midnight Observatory (Dark Slate) |
+| `settings.theme.midnight.description` | Deep slate dark-mode canvas with luminous cyan and gold accents |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -172,18 +168,18 @@ flowchart LR
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path                           | Scope         | Controller Handler             | Auth       |
-| :----- | :-------------------------------------- | :------------ | :----------------------------- | :--------- |
-| `GET`  | `/calendar/calendar`                    | `admin`       | `admin.getCalendar`            | Bearer JWT |
-| `POST` | `/calendar/calendar/reschedule`         | `admin`       | `admin.reschedule`             | Bearer JWT |
-| `POST` | `/calendar/calendar/quick-create`       | `admin`       | `admin.quickCreate`            | Bearer JWT |
-| `GET`  | `/calendar/content-types`               | `admin`       | `admin.getContentTypes`        | Bearer JWT |
-| `GET`  | `/calendar/settings`                    | `admin`       | `admin.getSettings`            | Bearer JWT |
-| `PUT`  | `/calendar/settings`                    | `admin`       | `admin.updateSettings`         | Bearer JWT |
-| `POST` | `/calendar/clear-settings`              | `admin`       | `admin.clearSettings`          | Bearer JWT |
-| `GET`  | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Bearer JWT |
-| `GET`  | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Bearer JWT |
-| `GET`  | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT |
+| Method | Endpoint Path | Scope | Controller Handler | Auth |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/calendar/calendar` | `admin` | `admin.getCalendar` | Bearer JWT |
+| `POST` | `/calendar/calendar/reschedule` | `admin` | `admin.reschedule` | Bearer JWT |
+| `POST` | `/calendar/calendar/quick-create` | `admin` | `admin.quickCreate` | Bearer JWT |
+| `GET` | `/calendar/content-types` | `admin` | `admin.getContentTypes` | Bearer JWT |
+| `GET` | `/calendar/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/calendar/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `POST` | `/calendar/clear-settings` | `admin` | `admin.clearSettings` | Bearer JWT |
+| `GET` | `/api/calendar/occurrences` | `content-api` | `content-api.getOccurrences` | Bearer JWT |
+| `GET` | `/api/calendar/feed.ics` | `content-api` | `content-api.downloadFeedIcs` | Bearer JWT |
+| `GET` | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

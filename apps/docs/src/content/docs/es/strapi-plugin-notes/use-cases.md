@@ -28,18 +28,18 @@ Editorial notes attached to Content Manager entity records
 
 > **Kind**: `collectionType` · **DB Table**: `notes` · **Admin Location**: Internal (`/admin/plugins/notes`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo           | Tipo en Strapi | Requerido | Restricciones / Relación                                   |
-| :----------------- | :------------- | :-------- | :--------------------------------------------------------- |
-| `title`            | `string`       | Yes       | max: 255                                                   |
-| `content`          | `text`         | No        | —                                                          |
-| `category`         | `enumeration`  | Yes       | enum: `general, todo, blocker, idea`; default: `"general"` |
-| `isPinned`         | `boolean`      | No        | default: `false`                                           |
-| `entityId`         | `integer`      | No        | —                                                          |
-| `entityDocumentId` | `string`       | No        | max: 128                                                   |
-| `entitySlug`       | `string`       | Yes       | max: 160                                                   |
-| `entityLocale`     | `string`       | No        | max: 32                                                    |
-| `createdByName`    | `string`       | No        | max: 120                                                   |
-| `updatedByName`    | `string`       | No        | max: 120                                                   |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | max: 255 |
+| `content` | `text` | No | — |
+| `category` | `enumeration` | Yes | enum: `general, todo, blocker, idea`; default: `"general"` |
+| `isPinned` | `boolean` | No | default: `false` |
+| `entityId` | `integer` | No | — |
+| `entityDocumentId` | `string` | No | max: 128 |
+| `entitySlug` | `string` | Yes | max: 160 |
+| `entityLocale` | `string` | No | max: 32 |
+| `createdByName` | `string` | No | max: 120 |
+| `updatedByName` | `string` | No | max: 120 |
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 

@@ -15,23 +15,12 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "tiptap-editor": {
     enabled: true,
     config: {
       presets: {
-        editorial: {
-          bold: true,
-          italic: true,
-          heading: { levels: [1, 2, 3] },
-          link: true,
-          mediaLibrary: true,
-          table: true,
-        },
+        editorial: { bold: true, italic: true, heading: { levels: [1, 2, 3] }, link: true, mediaLibrary: true, table: true },
       },
       settings: {
         defaultPreset: "editorial",
@@ -53,16 +42,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı                      | Arayüz Metni                                                                |
-| :----------------------------------- | :-------------------------------------------------------------------------- |
-| `tiptap-editor.noPreset.message`     | Yapılandırılmış düzenleyici ön ayarı yok — minimal düzenleyici gösteriliyor |
-| `tiptap-editor.loading`              | Düzenleyici yükleniyor...                                                   |
-| `tiptap-editor.more`                 | Daha fazla                                                                  |
-| `tiptap-editor.error.message`        | Düzenleyici bir hatayla karşılaştı ve oluşturulamadı.                       |
-| `tiptap-editor.error.retry`          | Yeniden Dene                                                                |
-| `tiptap-editor.richText.label`       | Zengin Metin (Tiptap)                                                       |
-| `tiptap-editor.section.format.label` | Çıktı ve İçerik Biçimi                                                      |
-| `tiptap-editor.outputFormat.label`   | Çıktı Biçimi                                                                |
+| Çeviri Anahtarı | Arayüz Metni |
+| :--- | :--- |
+| `tiptap-editor.noPreset.message` | Yapılandırılmış düzenleyici ön ayarı yok — minimal düzenleyici gösteriliyor |
+| `tiptap-editor.loading` | Düzenleyici yükleniyor... |
+| `tiptap-editor.more` | Daha fazla |
+| `tiptap-editor.error.message` | Düzenleyici bir hatayla karşılaştı ve oluşturulamadı. |
+| `tiptap-editor.error.retry` | Yeniden Dene |
+| `tiptap-editor.richText.label` | Zengin Metin (Tiptap) |
+| `tiptap-editor.section.format.label` | Çıktı ve İçerik Biçimi |
+| `tiptap-editor.outputFormat.label` | Çıktı Biçimi |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -168,18 +157,18 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot  | Uç Nokta Yolu                                      | Kapsam  | Denetleyici (Handler) | Kimlik Doğrulama |
-| :----- | :------------------------------------------------- | :------ | :-------------------- | :--------------- |
-| `GET`  | `/tiptap-editor/presets`                           | `admin` | `preset.find`         | Bearer JWT       |
-| `GET`  | `/tiptap-editor/presets/{name}`                    | `admin` | `preset.findOne`      | Bearer JWT       |
-| `GET`  | `/tiptap-editor/theme`                             | `admin` | `theme.find`          | Bearer JWT       |
-| `GET`  | `/tiptap-editor/settings`                          | `admin` | `settings.find`       | Bearer JWT       |
-| `PUT`  | `/tiptap-editor/settings`                          | `admin` | `settings.update`     | Bearer JWT       |
-| `GET`  | `/tiptap-editor/search`                            | `admin` | `search.search`       | Bearer JWT       |
-| `GET`  | `/tiptap-editor/get/{collectionName}/{documentId}` | `admin` | `search.getDocument`  | Bearer JWT       |
-| `GET`  | `/tiptap-editor/identify/{collectionName}`         | `admin` | `search.identify`     | Bearer JWT       |
-| `GET`  | `/tiptap-editor/link-preview`                      | `admin` | `media.linkPreview`   | Bearer JWT       |
-| `POST` | `/tiptap-editor/upload-by-url`                     | `admin` | `media.uploadByUrl`   | Bearer JWT       |
+| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/tiptap-editor/presets` | `admin` | `preset.find` | Bearer JWT |
+| `GET` | `/tiptap-editor/presets/{name}` | `admin` | `preset.findOne` | Bearer JWT |
+| `GET` | `/tiptap-editor/theme` | `admin` | `theme.find` | Bearer JWT |
+| `GET` | `/tiptap-editor/settings` | `admin` | `settings.find` | Bearer JWT |
+| `PUT` | `/tiptap-editor/settings` | `admin` | `settings.update` | Bearer JWT |
+| `GET` | `/tiptap-editor/search` | `admin` | `search.search` | Bearer JWT |
+| `GET` | `/tiptap-editor/get/{collectionName}/{documentId}` | `admin` | `search.getDocument` | Bearer JWT |
+| `GET` | `/tiptap-editor/identify/{collectionName}` | `admin` | `search.identify` | Bearer JWT |
+| `GET` | `/tiptap-editor/link-preview` | `admin` | `media.linkPreview` | Bearer JWT |
+| `POST` | `/tiptap-editor/upload-by-url` | `admin` | `media.uploadByUrl` | Bearer JWT |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

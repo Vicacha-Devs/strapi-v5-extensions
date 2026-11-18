@@ -30,23 +30,23 @@ Curated photo and video albums synced with Strapi v5 Media Library folders and C
 
 > **Kind**: `collectionType` · **DB Table**: `resources_gallery_albums` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.gallery-album` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| الحقل                   | النوع في Strapi | إلزامي | القيود / العلاقات                                                                              |
-| :---------------------- | :-------------- | :----- | :-------------------------------------------------------------------------------------------- |
-| `title`                 | `string`        | Yes    | max: 200                                                                                      |
-| `slug`                  | `uid`           | Yes    | —                                                                                             |
-| `description`           | `text`          | No     | —                                                                                             |
-| `category`              | `enumeration`   | Yes    | enum: `architecture, community, events, ramadan_eid, heritage, press`; default: `"community"` |
-| `coverPhoto`            | `media`         | No     | —                                                                                             |
-| `photos`                | `media`         | No     | —                                                                                             |
-| `mediaFolderId`         | `integer`       | No     | —                                                                                             |
-| `mediaFolderPath`       | `string`        | No     | max: 160                                                                                      |
-| `eventDate`             | `date`          | No     | —                                                                                             |
-| `secondaryDateOverride` | `string`        | No     | max: 80                                                                                       |
-| `photographerCredit`    | `string`        | No     | max: 140                                                                                      |
-| `framingNotes`          | `string`        | No     | max: 500                                                                                      |
-| `featured`              | `boolean`       | No     | default: `false`                                                                              |
-| `sortOrder`             | `integer`       | No     | default: `0`                                                                                  |
-| `photoCount`            | `integer`       | No     | default: `0`                                                                                  |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | max: 200 |
+| `slug` | `uid` | Yes | — |
+| `description` | `text` | No | — |
+| `category` | `enumeration` | Yes | enum: `architecture, community, events, ramadan_eid, heritage, press`; default: `"community"` |
+| `coverPhoto` | `media` | No | — |
+| `photos` | `media` | No | — |
+| `mediaFolderId` | `integer` | No | — |
+| `mediaFolderPath` | `string` | No | max: 160 |
+| `eventDate` | `date` | No | — |
+| `secondaryDateOverride` | `string` | No | max: 80 |
+| `photographerCredit` | `string` | No | max: 140 |
+| `framingNotes` | `string` | No | max: 500 |
+| `featured` | `boolean` | No | default: `false` |
+| `sortOrder` | `integer` | No | default: `0` |
+| `photoCount` | `integer` | No | default: `0` |
 
 ### `plugin::resources.glossary-term` — Resource Glossary Term
 
@@ -54,18 +54,18 @@ Multilingual A-Z glossary terms with native script, transliteration, and Strapi 
 
 > **Kind**: `collectionType` · **DB Table**: `resources_glossary_terms` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.glossary-term` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| الحقل                | النوع في Strapi | إلزامي | القيود / العلاقات                                                                    |
-| :------------------- | :-------------- | :----- | :---------------------------------------------------------------------------------- |
-| `term`               | `string`        | Yes    | max: 120                                                                            |
-| `slug`               | `uid`           | Yes    | —                                                                                   |
-| `nativeScript`       | `string`        | No     | max: 200                                                                            |
-| `transliteration`    | `string`        | No     | max: 200                                                                            |
-| `definition`         | `text`          | Yes    | —                                                                                   |
-| `category`           | `enumeration`   | Yes    | enum: `beliefs, worship, ethics, history, community, general`; default: `"general"` |
-| `letterGroup`        | `string`        | No     | max: 4; default: `"A"`                                                              |
-| `pronunciationAudio` | `media`         | No     | —                                                                                   |
-| `relatedTerms`       | `json`          | No     | —                                                                                   |
-| `featured`           | `boolean`       | No     | default: `false`                                                                    |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `term` | `string` | Yes | max: 120 |
+| `slug` | `uid` | Yes | — |
+| `nativeScript` | `string` | No | max: 200 |
+| `transliteration` | `string` | No | max: 200 |
+| `definition` | `text` | Yes | — |
+| `category` | `enumeration` | Yes | enum: `beliefs, worship, ethics, history, community, general`; default: `"general"` |
+| `letterGroup` | `string` | No | max: 4; default: `"A"` |
+| `pronunciationAudio` | `media` | No | — |
+| `relatedTerms` | `json` | No | — |
+| `featured` | `boolean` | No | default: `false` |
 
 ### `plugin::resources.publication` — Resource Publication
 
@@ -73,26 +73,26 @@ Localized digital library books, guides, pamphlets, and press kit assets backed 
 
 > **Kind**: `collectionType` · **DB Table**: `resources_publications` · **Admin Location**: `/admin/content-manager/collection-types/plugin::resources.publication` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| الحقل                   | النوع في Strapi | إلزامي | القيود / العلاقات                                                                |
-| :---------------------- | :-------------- | :----- | :------------------------------------------------------------------------------ |
-| `title`                 | `string`        | Yes    | max: 200                                                                        |
-| `slug`                  | `uid`           | Yes    | —                                                                               |
-| `summary`               | `text`          | No     | —                                                                               |
-| `category`              | `enumeration`   | Yes    | enum: `guide, book, pamphlet, press_kit, academic, general`; default: `"guide"` |
-| `file`                  | `media`         | No     | —                                                                               |
-| `coverImage`            | `media`         | No     | —                                                                               |
-| `authorName`            | `string`        | No     | max: 140                                                                        |
-| `authorSlug`            | `string`        | No     | max: 140                                                                        |
-| `isbnOrReference`       | `string`        | No     | max: 80                                                                         |
-| `pageCount`             | `integer`       | No     | —                                                                               |
-| `languageCode`          | `string`        | No     | max: 10; default: `"es"`                                                        |
-| `publishedAtDate`       | `date`          | No     | —                                                                               |
-| `secondaryDateOverride` | `string`        | No     | max: 80                                                                         |
-| `mediaFolderPath`       | `string`        | No     | max: 160                                                                        |
-| `externalDownloadUrl`   | `string`        | No     | max: 500                                                                        |
-| `downloadCount`         | `integer`       | No     | default: `0`                                                                    |
-| `featured`              | `boolean`       | No     | default: `false`                                                                |
-| `allowPublicDownload`   | `boolean`       | No     | default: `true`                                                                 |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | max: 200 |
+| `slug` | `uid` | Yes | — |
+| `summary` | `text` | No | — |
+| `category` | `enumeration` | Yes | enum: `guide, book, pamphlet, press_kit, academic, general`; default: `"guide"` |
+| `file` | `media` | No | — |
+| `coverImage` | `media` | No | — |
+| `authorName` | `string` | No | max: 140 |
+| `authorSlug` | `string` | No | max: 140 |
+| `isbnOrReference` | `string` | No | max: 80 |
+| `pageCount` | `integer` | No | — |
+| `languageCode` | `string` | No | max: 10; default: `"es"` |
+| `publishedAtDate` | `date` | No | — |
+| `secondaryDateOverride` | `string` | No | max: 80 |
+| `mediaFolderPath` | `string` | No | max: 160 |
+| `externalDownloadUrl` | `string` | No | max: 500 |
+| `downloadCount` | `integer` | No | default: `0` |
+| `featured` | `boolean` | No | default: `false` |
+| `allowPublicDownload` | `boolean` | No | default: `true` |
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 

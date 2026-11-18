@@ -46,38 +46,38 @@ Cryptographically signed official certificate record with signatory and witness 
 
 > **Kind**: `collectionType` · **DB Table**: `certificates_records` · **Admin Location**: `/admin/content-manager/collection-types/plugin::certificates.certificate` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo                 | Tipo en Strapi | Requerido | Restricciones / Relación                                                              |
-| :----------------------- | :------------- | :-------- | :------------------------------------------------------------------------------------ |
-| `serialNumber`           | `string`       | Yes       | max: 64                                                                               |
-| `templateDocumentId`     | `string`       | Yes       | max: 120                                                                              |
-| `templateSlug`           | `string`       | Yes       | max: 120                                                                              |
-| `templateName`           | `string`       | Yes       | max: 160                                                                              |
-| `status`                 | `enumeration`  | Yes       | enum: `pending_approval, issued, revoked, expired`; default: `"pending_approval"`     |
-| `recipientFullName`      | `string`       | Yes       | max: 200                                                                              |
-| `recipientChosenName`    | `string`       | No        | max: 200                                                                              |
-| `recipientEmail`         | `email`        | No        | —                                                                                     |
-| `recipientPhone`         | `string`       | No        | max: 64                                                                               |
-| `recipientNationality`   | `string`       | No        | max: 120                                                                              |
-| `nationalIdMasked`       | `string`       | No        | max: 32                                                                               |
-| `nationalIdHash`         | `string`       | No        | max: 128; `private: true`                                                             |
-| `issuedAt`               | `string`       | Yes       | max: 40                                                                               |
-| `expiresAt`              | `string`       | No        | max: 40                                                                               |
-| `revokedAt`              | `string`       | No        | max: 40                                                                               |
-| `revocationReason`       | `text`         | No        | —                                                                                     |
-| `signatories`            | `json`         | No        | default: `[]`                                                                         |
-| `witnesses`              | `json`         | No        | default: `[]`                                                                         |
-| `customData`             | `json`         | No        | default: `{}`                                                                         |
-| `secondaryDates`         | `json`         | No        | default: `{}`                                                                         |
-| `canonicalPayloadHash`   | `string`       | Yes       | max: 128                                                                              |
-| `cryptographicSignature` | `text`         | Yes       | —                                                                                     |
-| `publicKeyFingerprint`   | `string`       | Yes       | max: 96                                                                               |
-| `verificationToken`      | `string`       | No        | max: 128; `private: true`                                                             |
-| `esignProvider`          | `enumeration`  | No        | enum: `none, docusign, webhook`; default: `"none"`                                    |
-| `esignEnvelopeId`        | `string`       | No        | max: 128                                                                              |
-| `esignEnvelopeStatus`    | `enumeration`  | No        | enum: `not_sent, sent, delivered, completed, declined, voided`; default: `"not_sent"` |
-| `esignCompletedAt`       | `string`       | No        | max: 40                                                                               |
-| `linkedBookingCode`      | `string`       | No        | max: 64                                                                               |
-| `notes`                  | `text`         | No        | —                                                                                     |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `serialNumber` | `string` | Yes | max: 64 |
+| `templateDocumentId` | `string` | Yes | max: 120 |
+| `templateSlug` | `string` | Yes | max: 120 |
+| `templateName` | `string` | Yes | max: 160 |
+| `status` | `enumeration` | Yes | enum: `pending_approval, issued, revoked, expired`; default: `"pending_approval"` |
+| `recipientFullName` | `string` | Yes | max: 200 |
+| `recipientChosenName` | `string` | No | max: 200 |
+| `recipientEmail` | `email` | No | — |
+| `recipientPhone` | `string` | No | max: 64 |
+| `recipientNationality` | `string` | No | max: 120 |
+| `nationalIdMasked` | `string` | No | max: 32 |
+| `nationalIdHash` | `string` | No | max: 128; `private: true` |
+| `issuedAt` | `string` | Yes | max: 40 |
+| `expiresAt` | `string` | No | max: 40 |
+| `revokedAt` | `string` | No | max: 40 |
+| `revocationReason` | `text` | No | — |
+| `signatories` | `json` | No | default: `[]` |
+| `witnesses` | `json` | No | default: `[]` |
+| `customData` | `json` | No | default: `{}` |
+| `secondaryDates` | `json` | No | default: `{}` |
+| `canonicalPayloadHash` | `string` | Yes | max: 128 |
+| `cryptographicSignature` | `text` | Yes | — |
+| `publicKeyFingerprint` | `string` | Yes | max: 96 |
+| `verificationToken` | `string` | No | max: 128; `private: true` |
+| `esignProvider` | `enumeration` | No | enum: `none, docusign, webhook`; default: `"none"` |
+| `esignEnvelopeId` | `string` | No | max: 128 |
+| `esignEnvelopeStatus` | `enumeration` | No | enum: `not_sent, sent, delivered, completed, declined, voided`; default: `"not_sent"` |
+| `esignCompletedAt` | `string` | No | max: 40 |
+| `linkedBookingCode` | `string` | No | max: 64 |
+| `notes` | `text` | No | — |
 
 ### `plugin::certificates.template` — Certificate Template
 
@@ -85,29 +85,29 @@ Reusable official certificate template with signatory rules, witness requirement
 
 > **Kind**: `collectionType` · **DB Table**: `certificates_templates` · **Admin Location**: `/admin/content-manager/collection-types/plugin::certificates.template` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo                | Tipo en Strapi | Requerido | Restricciones / Relación                           |
-| :---------------------- | :------------- | :-------- | :------------------------------------------------- |
-| `name`                  | `string`       | Yes       | max: 160                                           |
-| `slug`                  | `uid`          | Yes       | —                                                  |
-| `description`           | `text`         | No        | —                                                  |
-| `serialPrefix`          | `string`       | Yes       | max: 8; default: `"CERT"`                          |
-| `defaultValidityDays`   | `integer`      | No        | —                                                  |
-| `requiresWitnesses`     | `boolean`      | No        | default: `false`                                   |
-| `minWitnesses`          | `integer`      | No        | default: `0`                                       |
-| `requiresApproval`      | `boolean`      | No        | default: `true`                                    |
-| `esignEnabled`          | `boolean`      | No        | default: `false`                                   |
-| `esignProvider`         | `enumeration`  | No        | enum: `none, docusign, webhook`; default: `"none"` |
-| `organizationName`      | `string`       | Yes       | max: 200                                           |
-| `organizationSubheader` | `string`       | No        | max: 240                                           |
-| `headerText`            | `string`       | No        | max: 240                                           |
-| `titleText`             | `string`       | Yes       | max: 200                                           |
-| `bodyTemplate`          | `text`         | Yes       | —                                                  |
-| `footerText`            | `text`         | No        | —                                                  |
-| `defaultSignatories`    | `json`         | No        | default: `[]`                                      |
-| `customFieldsSchema`    | `json`         | No        | default: `[]`                                      |
-| `secondaryCalendars`    | `json`         | No        | default: `[]`                                      |
-| `accentColor`           | `string`       | No        | max: 16; default: `"#14532d"`                      |
-| `active`                | `boolean`      | No        | default: `true`                                    |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `name` | `string` | Yes | max: 160 |
+| `slug` | `uid` | Yes | — |
+| `description` | `text` | No | — |
+| `serialPrefix` | `string` | Yes | max: 8; default: `"CERT"` |
+| `defaultValidityDays` | `integer` | No | — |
+| `requiresWitnesses` | `boolean` | No | default: `false` |
+| `minWitnesses` | `integer` | No | default: `0` |
+| `requiresApproval` | `boolean` | No | default: `true` |
+| `esignEnabled` | `boolean` | No | default: `false` |
+| `esignProvider` | `enumeration` | No | enum: `none, docusign, webhook`; default: `"none"` |
+| `organizationName` | `string` | Yes | max: 200 |
+| `organizationSubheader` | `string` | No | max: 240 |
+| `headerText` | `string` | No | max: 240 |
+| `titleText` | `string` | Yes | max: 200 |
+| `bodyTemplate` | `text` | Yes | — |
+| `footerText` | `text` | No | — |
+| `defaultSignatories` | `json` | No | default: `[]` |
+| `customFieldsSchema` | `json` | No | default: `[]` |
+| `secondaryCalendars` | `json` | No | default: `[]` |
+| `accentColor` | `string` | No | max: 16; default: `"#14532d"` |
+| `active` | `boolean` | No | default: `true` |
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 
@@ -215,15 +215,15 @@ flowchart LR
 
 ## 4. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint                                       | Ámbito  | Controlador                  | Autenticación |
-| :----- | :------------------------------------------------------ | :------ | :--------------------------- | :------------ |
-| `GET`  | `/certificates/settings`                                | `admin` | `admin.getSettings`          | Bearer JWT    |
-| `PUT`  | `/certificates/settings`                                | `admin` | `admin.updateSettings`       | Bearer JWT    |
-| `POST` | `/certificates/settings/rotate-keys`                    | `admin` | `admin.rotateKeys`           | Bearer JWT    |
-| `GET`  | `/certificates/templates`                               | `admin` | `admin.listTemplates`        | Bearer JWT    |
-| `POST` | `/certificates/templates`                               | `admin` | `admin.createTemplate`       | Bearer JWT    |
-| `POST` | `/certificates/templates/seed`                          | `admin` | `admin.seedTemplates`        | Bearer JWT    |
-| `GET`  | `/certificates/certificates`                            | `admin` | `admin.listCertificates`     | Bearer JWT    |
-| `POST` | `/certificates/certificates/issue`                      | `admin` | `admin.issueCertificate`     | Bearer JWT    |
-| `POST` | `/certificates/certificates/{documentId}/send-docusign` | `admin` | `admin.sendDocuSignEnvelope` | Bearer JWT    |
-| `PUT`  | `/certificates/certificates/{documentId}/approve`       | `admin` | `admin.approveCertificate`   | Bearer JWT    |
+| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/certificates/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/certificates/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `POST` | `/certificates/settings/rotate-keys` | `admin` | `admin.rotateKeys` | Bearer JWT |
+| `GET` | `/certificates/templates` | `admin` | `admin.listTemplates` | Bearer JWT |
+| `POST` | `/certificates/templates` | `admin` | `admin.createTemplate` | Bearer JWT |
+| `POST` | `/certificates/templates/seed` | `admin` | `admin.seedTemplates` | Bearer JWT |
+| `GET` | `/certificates/certificates` | `admin` | `admin.listCertificates` | Bearer JWT |
+| `POST` | `/certificates/certificates/issue` | `admin` | `admin.issueCertificate` | Bearer JWT |
+| `POST` | `/certificates/certificates/{documentId}/send-docusign` | `admin` | `admin.sendDocuSignEnvelope` | Bearer JWT |
+| `PUT` | `/certificates/certificates/{documentId}/approve` | `admin` | `admin.approveCertificate` | Bearer JWT |

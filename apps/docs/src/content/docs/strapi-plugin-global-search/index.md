@@ -3,7 +3,6 @@ title: "Global Command Search (@vicacha-devs/strapi-plugin-global-search)"
 description: "Spotlight-style global search across every collection type and single type in the Strapi v5 admin panel. Zero configuration."
 prev: false
 ---
-
 [![npm version](https://img.shields.io/npm/v/@vicacha-devs/strapi-plugin-global-search.svg)](https://www.npmjs.com/package/@vicacha-devs/strapi-plugin-global-search)
 [![Strapi 5](https://img.shields.io/badge/strapi-v5-blue)](https://strapi.io)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -34,9 +33,9 @@ Enable it in `config/plugins.js` or `config/plugins.ts`:
 
 ```js
 module.exports = {
-  "global-search": {
-    enabled: true,
-  },
+	"global-search": {
+		enabled: true,
+	},
 };
 ```
 
@@ -62,16 +61,15 @@ Ties break on an exact-case match, then the shortest matching value, then the mo
 
 At bootstrap, the plugin mounts a lightweight React portal (`#global-search-portal-root`) on `document.body` so the command palette can be opened on **any** Strapi v5 Admin route — including inside Content Manager edit views and Settings pages:
 
-| Shortcut                                                     | Action                                                                          |
-| :----------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| Shortcut | Action |
+| :--- | :--- |
 | <kbd>⌘</kbd> + <kbd>K</kbd> / <kbd>Ctrl</kbd> + <kbd>K</kbd> | Toggle the Spotlight Command Palette from anywhere in the Strapi v5 Admin panel |
-| <kbd>↑</kbd> / <kbd>↓</kbd>                                  | Navigate up and down through ranked search results                              |
-| <kbd>↵</kbd> (`Enter`)                                       | Open the highlighted entry in the current tab via SPA router navigation         |
-| <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>↵</kbd>                  | Open the highlighted entry in a new browser tab                                 |
-| <kbd>Esc</kbd>                                               | Close the command palette and restore focus                                     |
+| <kbd>↑</kbd> / <kbd>↓</kbd> | Navigate up and down through ranked search results |
+| <kbd>↵</kbd> (`Enter`) | Open the highlighted entry in the current tab via SPA router navigation |
+| <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>↵</kbd> | Open the highlighted entry in a new browser tab |
+| <kbd>Esc</kbd> | Close the command palette and restore focus |
 
 Each result row displays:
-
 - **Entry Title & Highlighted Match** — matched query substrings are highlighted inline across both the main field and matched secondary/component fields (e.g., `Slug: historia-del-islam`).
 - **Document ID Badge** — quick reference to the Strapi v5 `documentId` (`#ikm8b47sijmgzv99g119h3a5`).
 - **Locale & Publication State Badges** — shows the active i18n locale (`en`, `es`, `ar`, `tr`) and `DRAFT` / `PUBLISHED` status alongside the human-readable Content-Type label (`Article & Course`, `Community Service`, `Resource Publication`).
@@ -82,24 +80,24 @@ Everything is optional and can be changed at **Settings → Global Search → Co
 
 ```js
 module.exports = {
-  "global-search": {
-    enabled: true,
-    config: {
-      minChars: 2, // minimum query length
-      debounce: 250, // ms to wait after the last keystroke
-      perTypeLimit: 20, // rows fetched per content type
-      maxResults: 100, // cap on the merged, ranked result set
-      deep: true, // search inside components
-      maxDepth: 3, // how many component levels to walk
-      includeDrafts: true, // include unpublished entries
-      includePluginContentTypes: true, // include visible plugin::* content types
-      queryTimeout: 4000, // per-content-type timeout in ms
-      concurrency: 8, // content types queried in parallel
-      excludedContentTypes: [], // e.g. ['api::log.log']
-      excludedFields: [], // e.g. ['api::article.article:body']
-      displayFields: {}, // extra fields in the result row, keyed by UID
-    },
-  },
+	"global-search": {
+		enabled: true,
+		config: {
+			minChars: 2, // minimum query length
+			debounce: 250, // ms to wait after the last keystroke
+			perTypeLimit: 20, // rows fetched per content type
+			maxResults: 100, // cap on the merged, ranked result set
+			deep: true, // search inside components
+			maxDepth: 3, // how many component levels to walk
+			includeDrafts: true, // include unpublished entries
+			includePluginContentTypes: true, // include visible plugin::* content types
+			queryTimeout: 4000, // per-content-type timeout in ms
+			concurrency: 8, // content types queried in parallel
+			excludedContentTypes: [], // e.g. ['api::log.log']
+			excludedFields: [], // e.g. ['api::article.article:body']
+			displayFields: {}, // extra fields in the result row, keyed by UID
+		},
+	},
 };
 ```
 
@@ -140,6 +138,7 @@ Public releases are published from GitHub Actions with [npm trusted publishing](
 
 MIT
 
+
 ## Content-Type Entities & Where to Find Them
 
 Operates as a universal zero-schema introspection engine over **all** registered Strapi v5 Content-Type entities (`api::*` collection types, single types, and `plugin::*` entities) plus nested components and dynamic zones. Uses `strapi.contentTypes` metadata and `strapi.documents(uid).findMany()` with RBAC permission filtering.
@@ -159,7 +158,7 @@ flowchart LR
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 
-> **Content Manager Sidebar Group**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
+> **Content Manager Sidebar Group**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
 
 ### Content Manager Entities & Components
 

@@ -3,7 +3,6 @@ title: "Tiptap Rich Text Editor (@vicacha-devs/strapi-plugin-tiptap-editor)"
 description: "Customizable Tiptap Rich Text Editor for Strapi v5 with presets, media embeds, tables, mathematics, callouts, slash commands, and custom components (forked & extended from @notum-cz/strapi-plugin-tiptap-editor)"
 prev: false
 ---
-
 TipTap v3 + Edifice IO WYSIWYG editor plugin for Strapi v5. Includes 49 configurable rich-text features, schema-driven custom components, Edifice IO multimedia & structured blocks, relational media & internal link sync, in-editor HTML5 Canvas image studio & voice recorder, speech tools, and WCAG 2.1 AA accessibility.
 
 ## Features
@@ -31,9 +30,9 @@ TipTap v3 + Edifice IO WYSIWYG editor plugin for Strapi v5. Includes 49 configur
 
 ## Supported Versions
 
-| Plugin Version | Strapi Version | Node.js Version                        | TipTap Version |
-| -------------- | -------------- | -------------------------------------- | -------------- |
-| `1.3.x+`       | `5.39.0`       | `^20.19.0 \|\| ^22.13.0 \|\| >=24.0.0` | `3.20.1`       |
+| Plugin Version | Strapi Version | Node.js Version | TipTap Version |
+| --- | --- | --- | --- |
+| `1.3.x+` | `5.39.0` | `^20.19.0 \|\| ^22.13.0 \|\| >=24.0.0` | `3.20.1` |
 
 ## Installation
 
@@ -52,18 +51,18 @@ The plugin uses a hybrid **preset + runtime settings** architecture:
 
 ### Built-In Presets
 
-| Preset Name | Included Features                                                                                                                                                                                                            |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `minimal`   | `bold`, `italic`                                                                                                                                                                                                             |
-| `default`   | `bold`, `italic`, `underline`, `strike`, `code`, `codeBlock`, `blockquote`, `bulletList`, `orderedList`, `hardBreak`, `horizontalRule`, `history`, `heading`, `link`, `table`, `textAlign`, `mediaLibrary`, `characterCount` |
-| `full`      | All **49** feature keys enabled                                                                                                                                                                                              |
-| `edifice`   | All **49** feature keys enabled (complete Edifice IO Playground experience)                                                                                                                                                  |
+| Preset Name | Included Features |
+| --- | --- |
+| `minimal` | `bold`, `italic` |
+| `default` | `bold`, `italic`, `underline`, `strike`, `code`, `codeBlock`, `blockquote`, `bulletList`, `orderedList`, `hardBreak`, `horizontalRule`, `history`, `heading`, `link`, `table`, `textAlign`, `mediaLibrary`, `characterCount` |
+| `full` | All **49** feature keys enabled |
+| `edifice` | All **49** feature keys enabled (complete Edifice IO Playground experience) |
 
 ### Defining Custom Presets (`config/plugins.ts`)
 
 ```ts
 export default () => ({
-  "tiptap-editor": {
+  'tiptap-editor': {
     config: {
       presets: {
         minimal: { bold: true, italic: true, link: true },
@@ -111,37 +110,37 @@ export default () => ({
 Components are enabled per preset under a `components` key mapping component names (`^[a-zA-Z][\w-]*$`, excluding `RESERVED_NODE_NAMES`) to `true`, `false`, or an options object:
 
 ```tsx
-import type { StrapiApp } from "@strapi/strapi/admin";
-import type { RichTextComponentSchema } from "@vicacha-devs/strapi-plugin-tiptap-editor/shared";
+import type { StrapiApp } from '@strapi/strapi/admin';
 import {
   defineRichTextComponent,
   registerRichTextComponent,
-} from "@vicacha-devs/strapi-plugin-tiptap-editor/strapi-admin";
+} from '@vicacha-devs/strapi-plugin-tiptap-editor/strapi-admin';
+import type { RichTextComponentSchema } from '@vicacha-devs/strapi-plugin-tiptap-editor/shared';
 
 export const calloutSchema: RichTextComponentSchema = {
-  name: "callout",
-  label: "Callout",
-  content: "block+",
+  name: 'callout',
+  label: 'Callout',
+  content: 'block+',
   attributes: {
     tone: {
-      default: "info",
+      default: 'info',
       form: {
-        type: "select",
-        label: "Tone",
+        type: 'select',
+        label: 'Tone',
         options: [
-          { value: "info", label: "Info" },
-          { value: "warning", label: "Warning" },
+          { value: 'info', label: 'Info' },
+          { value: 'warning', label: 'Warning' },
         ],
       },
     },
   },
 };
 
-const calloutComponent = defineRichTextComponent<{ tone: "info" | "warning" }>({
+const calloutComponent = defineRichTextComponent<{ tone: 'info' | 'warning' }>({
   ...calloutSchema,
-  label: { id: "app.components.callout.label", defaultMessage: "Callout" },
-  defaultAttrs: { tone: "info" },
-  validate: (attrs) => (attrs.tone ? null : { tone: "Tone is required" }),
+  label: { id: 'app.components.callout.label', defaultMessage: 'Callout' },
+  defaultAttrs: { tone: 'info' },
+  validate: (attrs) => (attrs.tone ? null : { tone: 'Tone is required' }),
 });
 
 export default {
@@ -163,40 +162,40 @@ export default {
 
 ### Inline Formatting, Typography & Semantic Marks
 
-| Key                                                                         | Description                                                                                     |
-| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Key | Description |
+| --- | --- |
 | `bold`, `italic`, `underline`, `strike`, `code`, `superscript`, `subscript` | Standard inline formatting marks (`<strong>`, `<em>`, `<u>`, `<s>`, `<code>`, `<sup>`, `<sub>`) |
-| `clearFormatting`                                                           | Strip all inline marks and reset block to paragraph                                             |
-| `leadParagraph`                                                             | Lead / intro paragraph (`<p class="lead-paragraph" data-lead="true">`)                          |
-| `abbr`                                                                      | Semantic abbreviation (`<abbr title="...">`) with modal                                         |
-| `language`                                                                  | WCAG 3.1.2 language & direction (`<span lang=".." dir="..">`)                                   |
-| `fontFamily`, `fontSize`, `lineHeight`                                      | Customizable font family, font size (`12px`–`40px`), and line height (`1.0`–`2.0`) selectors    |
-| `typography`                                                                | Smart typography input rules (`--` → `—`, `...` → `…`, `(c)` → `©`)                             |
+| `clearFormatting` | Strip all inline marks and reset block to paragraph |
+| `leadParagraph` | Lead / intro paragraph (`<p class="lead-paragraph" data-lead="true">`) |
+| `abbr` | Semantic abbreviation (`<abbr title="...">`) with modal |
+| `language` | WCAG 3.1.2 language & direction (`<span lang=".." dir="..">`) |
+| `fontFamily`, `fontSize`, `lineHeight` | Customizable font family, font size (`12px`–`40px`), and line height (`1.0`–`2.0`) selectors |
+| `typography` | Smart typography input rules (`--` → `—`, `...` → `…`, `(c)` → `©`) |
 
 ### Block Elements, Headings, Links, Tables & Colors
 
-| Key                                                                                                            | Description                                                                                                                                             |
-| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `blockquote`, `codeBlock`, `bulletList`, `orderedList`, `taskList`, `hardBreak`, `horizontalRule`, `history`   | Core block elements, interactive checklists, and undo/redo history                                                                                      |
-| `heading`                                                                                                      | Visual heading levels (`h1`–`h6`), independent SEO tag, and sanitized slug `id` attributes                                                              |
-| `link`                                                                                                         | External/internal hyperlinks with protocol validation (`https:`, `mailto:`)                                                                             |
-| `linker`                                                                                                       | Internal Strapi Document Linker chip & live search modal                                                                                                |
-| `table`                                                                                                        | Resizable tables with row/column controls, `cellBackground` color picker (`TableCellWithBackground`, `TableHeaderWithBackground`), and cell merge/split |
-| `textAlign`, `textColor`, `highlightColor`                                                                     | Paragraph/heading alignment and theme-driven text/highlight color pickers                                                                               |
-| `informationPane`, `accordion`, `columns`, `conversationHistory`, `pageBreak`, `tableOfContents`, `components` | Edifice IO callout boxes, `<details>` accordions, 2/3-col CSS grids, discussion logs, page breaks, dynamic TOC, and custom components                   |
+| Key | Description |
+| --- | --- |
+| `blockquote`, `codeBlock`, `bulletList`, `orderedList`, `taskList`, `hardBreak`, `horizontalRule`, `history` | Core block elements, interactive checklists, and undo/redo history |
+| `heading` | Visual heading levels (`h1`–`h6`), independent SEO tag, and sanitized slug `id` attributes |
+| `link` | External/internal hyperlinks with protocol validation (`https:`, `mailto:`) |
+| `linker` | Internal Strapi Document Linker chip & live search modal |
+| `table` | Resizable tables with row/column controls, `cellBackground` color picker (`TableCellWithBackground`, `TableHeaderWithBackground`), and cell merge/split |
+| `textAlign`, `textColor`, `highlightColor` | Paragraph/heading alignment and theme-driven text/highlight color pickers |
+| `informationPane`, `accordion`, `columns`, `conversationHistory`, `pageBreak`, `tableOfContents`, `components` | Edifice IO callout boxes, `<details>` accordions, 2/3-col CSS grids, discussion logs, page breaks, dynamic TOC, and custom components |
 
 ### Edifice IO Multimedia, Math, Emoji, Slash & Speech Tools
 
-| Key                                     | Description                                                                                                                             |
-| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `mediaLibrary`                          | Strapi Media Library images with alt/title/caption popover, metadata sync, resize handle, and HTML5 Canvas crop/rotate/flip/zoom studio |
-| `video`                                 | Strapi Media Library videos (`<video controls>`) or YouTube/Vimeo/MP4 embeds                                                            |
-| `audio`                                 | Strapi Media Library audio or in-browser `MediaRecorder` voice note recorder                                                            |
-| `attachment`                            | Downloadable file cards with filename, extension badge, MIME type, and size                                                             |
-| `iframe`                                | Sandboxed `https:` iframes (`sandbox="allow-scripts allow-popups"`, `allowedDomains`)                                                   |
-| `mathematics`, `emoji`, `slashCommands` | Inline/block LaTeX math, searchable emoji picker + `:shortcode:`, and `/` command palette                                               |
-| `speechToText`, `textToSpeech`          | Web Speech API voice dictation and read-aloud                                                                                           |
-| `characterCount`, `fullscreen`          | Live word/character/reading-time footer bar, fullscreen mode, read-only preview, and JSON/HTML/Markdown source inspector                |
+| Key | Description |
+| --- | --- |
+| `mediaLibrary` | Strapi Media Library images with alt/title/caption popover, metadata sync, resize handle, and HTML5 Canvas crop/rotate/flip/zoom studio |
+| `video` | Strapi Media Library videos (`<video controls>`) or YouTube/Vimeo/MP4 embeds |
+| `audio` | Strapi Media Library audio or in-browser `MediaRecorder` voice note recorder |
+| `attachment` | Downloadable file cards with filename, extension badge, MIME type, and size |
+| `iframe` | Sandboxed `https:` iframes (`sandbox="allow-scripts allow-popups"`, `allowedDomains`) |
+| `mathematics`, `emoji`, `slashCommands` | Inline/block LaTeX math, searchable emoji picker + `:shortcode:`, and `/` command palette |
+| `speechToText`, `textToSpeech` | Web Speech API voice dictation and read-aloud |
+| `characterCount`, `fullscreen` | Live word/character/reading-time footer bar, fullscreen mode, read-only preview, and JSON/HTML/Markdown source inspector |
 
 ## Accessibility (WCAG 2.1 AA) & Security
 
@@ -219,17 +218,18 @@ Import from `@vicacha-devs/strapi-plugin-tiptap-editor/strapi-admin`:
 
 All admin routes are mounted under `/tiptap-editor`:
 
-| Method        | Path                                              | Description                                                |
-| ------------- | ------------------------------------------------- | ---------------------------------------------------------- |
-| `GET`         | `/tiptap-editor/presets`                          | List all available preset names (built-in + custom)        |
-| `GET`         | `/tiptap-editor/presets/:preset`                  | Get resolved feature configuration for a preset            |
-| `GET`         | `/tiptap-editor/theme`                            | Get theme colors and custom CSS/stylesheet                 |
-| `GET` / `PUT` | `/tiptap-editor/settings`                         | Get or update runtime settings and preset overrides        |
-| `GET`         | `/tiptap-editor/search?q=<query>&locale=<locale>` | Search linkable Strapi collection documents                |
-| `GET`         | `/tiptap-editor/get/:collectionName/:documentId`  | Resolve a single Strapi document's label and publish state |
-| `GET`         | `/tiptap-editor/identify/:collectionName`         | Identify the human-readable title field for a collection   |
-| `GET`         | `/tiptap-editor/link-preview?url=<https_url>`     | DNS-aware SSRF-safe OpenGraph metadata preview             |
-| `POST`        | `/tiptap-editor/upload-by-url`                    | DNS-aware SSRF-safe remote media URL upload                |
+| Method | Path | Description |
+| --- | --- | --- |
+| `GET` | `/tiptap-editor/presets` | List all available preset names (built-in + custom) |
+| `GET` | `/tiptap-editor/presets/:preset` | Get resolved feature configuration for a preset |
+| `GET` | `/tiptap-editor/theme` | Get theme colors and custom CSS/stylesheet |
+| `GET` / `PUT` | `/tiptap-editor/settings` | Get or update runtime settings and preset overrides |
+| `GET` | `/tiptap-editor/search?q=<query>&locale=<locale>` | Search linkable Strapi collection documents |
+| `GET` | `/tiptap-editor/get/:collectionName/:documentId` | Resolve a single Strapi document's label and publish state |
+| `GET` | `/tiptap-editor/identify/:collectionName` | Identify the human-readable title field for a collection |
+| `GET` | `/tiptap-editor/link-preview?url=<https_url>` | DNS-aware SSRF-safe OpenGraph metadata preview |
+| `POST` | `/tiptap-editor/upload-by-url` | DNS-aware SSRF-safe remote media URL upload |
+
 
 ## Content-Type Entities & Where to Find Them
 

@@ -15,12 +15,8 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
-  inbox: {
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+  "inbox": {
     enabled: true,
     config: {
       enableRateLimiting: true,
@@ -40,16 +36,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı                                           | Arayüz Metni                                       |
-| :-------------------------------------------------------- | :------------------------------------------------- |
+| Çeviri Anahtarı | Arayüz Metni |
+| :--- | :--- |
 | `page.ui.inbox_visual_form_builder_service_desk_casework` | Inbox, Visual Form Builder & Service-Desk Casework |
-| `page.ui.starter_form_templates_active_forms`             | Starter Form Templates & Active Forms              |
-| `page.ui.slug`                                            | Slug                                               |
-| `page.ui.title`                                           | Başlık                                             |
-| `page.ui.category`                                        | Kategori                                           |
-| `page.ui.fields`                                          | Fields                                             |
-| `page.ui.checklist`                                       | Checklist                                          |
-| `page.ui.submissions`                                     | Submissions                                        |
+| `page.ui.starter_form_templates_active_forms` | Starter Form Templates & Active Forms |
+| `page.ui.slug` | Slug |
+| `page.ui.title` | Başlık |
+| `page.ui.category` | Kategori |
+| `page.ui.fields` | Fields |
+| `page.ui.checklist` | Checklist |
+| `page.ui.submissions` | Submissions |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -75,20 +71,20 @@ Time-bounded multi-language urgent announcement ticker / banner
 
 > **Kind**: `collectionType` · **DB Table**: `inbox_alert_banners` · **Admin Location**: `/admin/content-manager/collection-types/plugin::inbox.alert-banner` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute) | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                         |
-| :--------------- | :------------ | :------ | :------------------------------------------------------------ |
-| `code`           | `string`      | Yes     | —                                                             |
-| `title`          | `string`      | Yes     | —                                                             |
-| `message`        | `text`        | Yes     | —                                                             |
-| `severity`       | `enumeration` | Yes     | enum: `info, warning, urgent, celebration`; default: `"info"` |
-| `ctaLabel`       | `string`      | No      | —                                                             |
-| `ctaUrl`         | `string`      | No      | —                                                             |
-| `dismissible`    | `boolean`     | No      | default: `true`                                               |
-| `active`         | `boolean`     | No      | default: `true`                                               |
-| `priority`       | `integer`     | No      | default: `10`                                                 |
-| `startsAt`       | `datetime`    | No      | —                                                             |
-| `endsAt`         | `datetime`    | No      | —                                                             |
-| `translations`   | `json`        | No      | default: `{}`                                                 |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `code` | `string` | Yes | — |
+| `title` | `string` | Yes | — |
+| `message` | `text` | Yes | — |
+| `severity` | `enumeration` | Yes | enum: `info, warning, urgent, celebration`; default: `"info"` |
+| `ctaLabel` | `string` | No | — |
+| `ctaUrl` | `string` | No | — |
+| `dismissible` | `boolean` | No | default: `true` |
+| `active` | `boolean` | No | default: `true` |
+| `priority` | `integer` | No | default: `10` |
+| `startsAt` | `datetime` | No | — |
+| `endsAt` | `datetime` | No | — |
+| `translations` | `json` | No | default: `{}` |
 
 ### `plugin::inbox.submission` — Inbox Submission
 
@@ -96,30 +92,30 @@ Form submission & Service-Desk Casework ticket
 
 > **Kind**: `collectionType` · **DB Table**: `inbox_submissions` · **Admin Location**: `/admin/content-manager/collection-types/plugin::inbox.submission` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute)          | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                                        |
-| :------------------------ | :------------ | :------ | :------------------------------------------------------------------------------------------- |
-| `referenceCode`           | `string`      | Yes     | —                                                                                            |
-| `formSlug`                | `string`      | Yes     | —                                                                                            |
-| `formTitle`               | `string`      | No      | —                                                                                            |
-| `category`                | `enumeration` | No      | enum: `contact, service_desk, inquiry, application, volunteer, custom`; default: `"contact"` |
-| `status`                  | `enumeration` | Yes     | enum: `new, read, under_review, scheduled, completed, rejected, archived`; default: `"new"`  |
-| `priority`                | `enumeration` | Yes     | enum: `low, normal, high, urgent`; default: `"normal"`                                       |
-| `department`              | `string`      | No      | default: `"general"`                                                                         |
-| `locale`                  | `string`      | No      | default: `"es"`                                                                              |
-| `applicantName`           | `string`      | No      | —                                                                                            |
-| `applicantEmail`          | `email`       | No      | —                                                                                            |
-| `applicantPhone`          | `string`      | No      | —                                                                                            |
-| `data`                    | `json`        | Yes     | default: `{}`                                                                                |
-| `checklistItems`          | `json`        | No      | default: `[]`                                                                                |
-| `staffNotes`              | `text`        | No      | —                                                                                            |
-| `assignedTo`              | `string`      | No      | —                                                                                            |
-| `linkedBookingId`         | `string`      | No      | —                                                                                            |
-| `linkedCertificateNumber` | `string`      | No      | —                                                                                            |
-| `formBuilderSubmissionId` | `integer`     | No      | —                                                                                            |
-| `ipAddress`               | `string`      | No      | `private: true`                                                                              |
-| `userAgent`               | `string`      | No      | `private: true`                                                                              |
-| `submittedAt`             | `datetime`    | Yes     | —                                                                                            |
-| `secondaryDate`           | `json`        | No      | —                                                                                            |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `referenceCode` | `string` | Yes | — |
+| `formSlug` | `string` | Yes | — |
+| `formTitle` | `string` | No | — |
+| `category` | `enumeration` | No | enum: `contact, service_desk, inquiry, application, volunteer, custom`; default: `"contact"` |
+| `status` | `enumeration` | Yes | enum: `new, read, under_review, scheduled, completed, rejected, archived`; default: `"new"` |
+| `priority` | `enumeration` | Yes | enum: `low, normal, high, urgent`; default: `"normal"` |
+| `department` | `string` | No | default: `"general"` |
+| `locale` | `string` | No | default: `"es"` |
+| `applicantName` | `string` | No | — |
+| `applicantEmail` | `email` | No | — |
+| `applicantPhone` | `string` | No | — |
+| `data` | `json` | Yes | default: `{}` |
+| `checklistItems` | `json` | No | default: `[]` |
+| `staffNotes` | `text` | No | — |
+| `assignedTo` | `string` | No | — |
+| `linkedBookingId` | `string` | No | — |
+| `linkedCertificateNumber` | `string` | No | — |
+| `formBuilderSubmissionId` | `integer` | No | — |
+| `ipAddress` | `string` | No | `private: true` |
+| `userAgent` | `string` | No | `private: true` |
+| `submittedAt` | `datetime` | Yes | — |
+| `secondaryDate` | `json` | No | — |
 
 ### `plugin::inbox.subscriber` — Inbox Subscriber
 
@@ -127,19 +123,19 @@ Double Opt-In newsletter and community topic subscriber
 
 > **Kind**: `collectionType` · **DB Table**: `inbox_subscribers` · **Admin Location**: `/admin/content-manager/collection-types/plugin::inbox.subscriber` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute)   | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                          |
-| :----------------- | :------------ | :------ | :------------------------------------------------------------- |
-| `email`            | `email`       | Yes     | —                                                              |
-| `fullName`         | `string`      | No      | —                                                              |
-| `phone`            | `string`      | No      | —                                                              |
-| `locale`           | `string`      | No      | default: `"es"`                                                |
-| `topics`           | `json`        | No      | default: `["announcements"]`                                   |
-| `status`           | `enumeration` | Yes     | enum: `pending, confirmed, unsubscribed`; default: `"pending"` |
-| `confirmToken`     | `string`      | No      | `private: true`                                                |
-| `unsubscribeToken` | `string`      | Yes     | `private: true`                                                |
-| `confirmedAt`      | `datetime`    | No      | —                                                              |
-| `unsubscribedAt`   | `datetime`    | No      | —                                                              |
-| `sourceFormSlug`   | `string`      | No      | —                                                              |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `email` | `email` | Yes | — |
+| `fullName` | `string` | No | — |
+| `phone` | `string` | No | — |
+| `locale` | `string` | No | default: `"es"` |
+| `topics` | `json` | No | default: `["announcements"]` |
+| `status` | `enumeration` | Yes | enum: `pending, confirmed, unsubscribed`; default: `"pending"` |
+| `confirmToken` | `string` | No | `private: true` |
+| `unsubscribeToken` | `string` | Yes | `private: true` |
+| `confirmedAt` | `datetime` | No | — |
+| `unsubscribedAt` | `datetime` | No | — |
+| `sourceFormSlug` | `string` | No | — |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
@@ -236,33 +232,33 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot  | Uç Nokta Yolu                                       | Kapsam        | Denetleyici (Handler)                  | Kimlik Doğrulama |
-| :----- | :-------------------------------------------------- | :------------ | :------------------------------------- | :--------------- |
-| `GET`  | `/api/inbox/forms`                                  | `content-api` | `inboxController.listForms`            | Public           |
-| `GET`  | `/api/inbox/forms/{slug}`                           | `content-api` | `inboxController.getFormBySlug`        | Public           |
-| `POST` | `/api/inbox/forms/{slug}/submit`                    | `content-api` | `inboxController.submitForm`           | Public           |
-| `POST` | `/api/inbox/subscribers`                            | `content-api` | `inboxController.subscribe`            | Public           |
-| `GET`  | `/api/inbox/subscribers/confirm/{token}`            | `content-api` | `inboxController.confirmSubscription`  | Public           |
-| `GET`  | `/api/inbox/subscribers/unsubscribe/{token}`        | `content-api` | `inboxController.unsubscribe`          | Public           |
-| `GET`  | `/api/inbox/public/unsubscribe`                     | `content-api` | `inboxController.unsubscribe`          | Public           |
-| `GET`  | `/api/inbox/alerts`                                 | `content-api` | `inboxController.getActiveAlerts`      | Public           |
-| `GET`  | `/inbox/settings`                                   | `admin`       | `inboxController.getSettings`          | Bearer JWT       |
-| `PUT`  | `/inbox/settings`                                   | `admin`       | `inboxController.updateSettings`       | Bearer JWT       |
-| `GET`  | `/inbox/templates`                                  | `admin`       | `inboxController.listTemplates`        | Bearer JWT       |
-| `GET`  | `/inbox/form-builder-forms`                         | `admin`       | `inboxController.listFormBuilderForms` | Bearer JWT       |
-| `POST` | `/inbox/forms/sync-builder`                         | `admin`       | `inboxController.syncFormBuilder`      | Bearer JWT       |
-| `GET`  | `/inbox/forms`                                      | `admin`       | `inboxController.listForms`            | Bearer JWT       |
-| `POST` | `/inbox/forms`                                      | `admin`       | `inboxController.saveForm`             | Bearer JWT       |
-| `POST` | `/inbox/forms/from-template`                        | `admin`       | `inboxController.createFromTemplate`   | Bearer JWT       |
-| `GET`  | `/inbox/submissions`                                | `admin`       | `inboxController.listSubmissions`      | Bearer JWT       |
-| `PUT`  | `/inbox/submissions/{documentId}/casework`          | `admin`       | `inboxController.updateCasework`       | Bearer JWT       |
-| `POST` | `/inbox/submissions/{documentId}/schedule-booking`  | `admin`       | `inboxController.scheduleBooking`      | Bearer JWT       |
-| `POST` | `/inbox/submissions/{documentId}/issue-certificate` | `admin`       | `inboxController.issueCertificate`     | Bearer JWT       |
-| `GET`  | `/inbox/submissions/export-csv`                     | `admin`       | `inboxController.exportCsv`            | Bearer JWT       |
-| `POST` | `/inbox/captcha/test`                               | `admin`       | `inboxController.testCaptcha`          | Bearer JWT       |
-| `GET`  | `/inbox/subscribers`                                | `admin`       | `inboxController.listSubscribers`      | Bearer JWT       |
-| `GET`  | `/inbox/alerts`                                     | `admin`       | `inboxController.getActiveAlerts`      | Bearer JWT       |
-| `POST` | `/inbox/alerts`                                     | `admin`       | `inboxController.upsertAlertBanner`    | Bearer JWT       |
+| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/inbox/forms` | `content-api` | `inboxController.listForms` | Public |
+| `GET` | `/api/inbox/forms/{slug}` | `content-api` | `inboxController.getFormBySlug` | Public |
+| `POST` | `/api/inbox/forms/{slug}/submit` | `content-api` | `inboxController.submitForm` | Public |
+| `POST` | `/api/inbox/subscribers` | `content-api` | `inboxController.subscribe` | Public |
+| `GET` | `/api/inbox/subscribers/confirm/{token}` | `content-api` | `inboxController.confirmSubscription` | Public |
+| `GET` | `/api/inbox/subscribers/unsubscribe/{token}` | `content-api` | `inboxController.unsubscribe` | Public |
+| `GET` | `/api/inbox/public/unsubscribe` | `content-api` | `inboxController.unsubscribe` | Public |
+| `GET` | `/api/inbox/alerts` | `content-api` | `inboxController.getActiveAlerts` | Public |
+| `GET` | `/inbox/settings` | `admin` | `inboxController.getSettings` | Bearer JWT |
+| `PUT` | `/inbox/settings` | `admin` | `inboxController.updateSettings` | Bearer JWT |
+| `GET` | `/inbox/templates` | `admin` | `inboxController.listTemplates` | Bearer JWT |
+| `GET` | `/inbox/form-builder-forms` | `admin` | `inboxController.listFormBuilderForms` | Bearer JWT |
+| `POST` | `/inbox/forms/sync-builder` | `admin` | `inboxController.syncFormBuilder` | Bearer JWT |
+| `GET` | `/inbox/forms` | `admin` | `inboxController.listForms` | Bearer JWT |
+| `POST` | `/inbox/forms` | `admin` | `inboxController.saveForm` | Bearer JWT |
+| `POST` | `/inbox/forms/from-template` | `admin` | `inboxController.createFromTemplate` | Bearer JWT |
+| `GET` | `/inbox/submissions` | `admin` | `inboxController.listSubmissions` | Bearer JWT |
+| `PUT` | `/inbox/submissions/{documentId}/casework` | `admin` | `inboxController.updateCasework` | Bearer JWT |
+| `POST` | `/inbox/submissions/{documentId}/schedule-booking` | `admin` | `inboxController.scheduleBooking` | Bearer JWT |
+| `POST` | `/inbox/submissions/{documentId}/issue-certificate` | `admin` | `inboxController.issueCertificate` | Bearer JWT |
+| `GET` | `/inbox/submissions/export-csv` | `admin` | `inboxController.exportCsv` | Bearer JWT |
+| `POST` | `/inbox/captcha/test` | `admin` | `inboxController.testCaptcha` | Bearer JWT |
+| `GET` | `/inbox/subscribers` | `admin` | `inboxController.listSubscribers` | Bearer JWT |
+| `GET` | `/inbox/alerts` | `admin` | `inboxController.getActiveAlerts` | Bearer JWT |
+| `POST` | `/inbox/alerts` | `admin` | `inboxController.upsertAlertBanner` | Bearer JWT |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

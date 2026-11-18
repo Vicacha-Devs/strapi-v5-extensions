@@ -28,36 +28,36 @@ Recurring & single events managed by strapi-plugin-events
 
 > **Kind**: `collectionType` · **DB Table**: `plugin_events_items` · **Admin Location**: `/admin/content-manager/collection-types/plugin::events.event` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| Alan (Attribute)           | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                        |
-| :------------------------- | :------------ | :------ | :--------------------------------------------------------------------------- |
-| `title`                    | `string`      | Yes     | max: 200                                                                     |
-| `slug`                     | `uid`         | Yes     | —                                                                            |
-| `summary`                  | `text`        | No      | max: 500                                                                     |
-| `description`              | `richtext`    | No      | —                                                                            |
-| `startDate`                | `datetime`    | Yes     | —                                                                            |
-| `endDate`                  | `datetime`    | No      | —                                                                            |
-| `allDay`                   | `boolean`     | No      | default: `false`                                                             |
-| `timezone`                 | `string`      | No      | default: `"UTC"`                                                             |
-| `recurrence`               | `customField` | No      | customField: `plugin::events.rrule`                                          |
-| `eventStatus`              | `enumeration` | Yes     | enum: `scheduled, cancelled, postponed, rescheduled`; default: `"scheduled"` |
-| `locationType`             | `enumeration` | No      | enum: `in_person, online, hybrid`; default: `"in_person"`                    |
-| `location`                 | `string`      | No      | —                                                                            |
-| `virtualUrl`               | `string`      | No      | —                                                                            |
-| `category`                 | `string`      | No      | default: `"general"`                                                         |
-| `speaker`                  | `string`      | No      | —                                                                            |
-| `speakerSlug`              | `string`      | No      | —                                                                            |
-| `color`                    | `string`      | No      | default: `"#0D9488"`                                                         |
-| `featured`                 | `boolean`     | No      | default: `false`                                                             |
-| `rsvpEnabled`              | `boolean`     | No      | default: `false`                                                             |
-| `capacity`                 | `integer`     | No      | —                                                                            |
-| `waitlistEnabled`          | `boolean`     | No      | default: `true`                                                              |
-| `maxGuestsPerRegistration` | `integer`     | No      | default: `5`                                                                 |
-| `registrationDeadline`     | `datetime`    | No      | —                                                                            |
-| `alternateDates`           | `json`        | No      | —                                                                            |
-| `poster`                   | `media`       | No      | —                                                                            |
-| `actionLinks`              | `json`        | No      | —                                                                            |
-| `spotlightConfig`          | `json`        | No      | —                                                                            |
-| `metadata`                 | `json`        | No      | —                                                                            |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | max: 200 |
+| `slug` | `uid` | Yes | — |
+| `summary` | `text` | No | max: 500 |
+| `description` | `richtext` | No | — |
+| `startDate` | `datetime` | Yes | — |
+| `endDate` | `datetime` | No | — |
+| `allDay` | `boolean` | No | default: `false` |
+| `timezone` | `string` | No | default: `"UTC"` |
+| `recurrence` | `customField` | No | customField: `plugin::events.rrule` |
+| `eventStatus` | `enumeration` | Yes | enum: `scheduled, cancelled, postponed, rescheduled`; default: `"scheduled"` |
+| `locationType` | `enumeration` | No | enum: `in_person, online, hybrid`; default: `"in_person"` |
+| `location` | `string` | No | — |
+| `virtualUrl` | `string` | No | — |
+| `category` | `string` | No | default: `"general"` |
+| `speaker` | `string` | No | — |
+| `speakerSlug` | `string` | No | — |
+| `color` | `string` | No | default: `"#0D9488"` |
+| `featured` | `boolean` | No | default: `false` |
+| `rsvpEnabled` | `boolean` | No | default: `false` |
+| `capacity` | `integer` | No | — |
+| `waitlistEnabled` | `boolean` | No | default: `true` |
+| `maxGuestsPerRegistration` | `integer` | No | default: `5` |
+| `registrationDeadline` | `datetime` | No | — |
+| `alternateDates` | `json` | No | — |
+| `poster` | `media` | No | — |
+| `actionLinks` | `json` | No | — |
+| `spotlightConfig` | `json` | No | — |
+| `metadata` | `json` | No | — |
 
 ### `plugin::events.registration` — Event Registration (RSVP)
 
@@ -65,22 +65,22 @@ Attendee RSVPs, waitlists, and check-ins managed by strapi-plugin-events
 
 > **Kind**: `collectionType` · **DB Table**: `plugin_events_registrations` · **Admin Location**: `/admin/content-manager/collection-types/plugin::events.registration` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Alan (Attribute)  | Strapi Türü   | Zorunlu | Kısıtlamalar / İlişki                                                        |
-| :---------------- | :------------ | :------ | :--------------------------------------------------------------------------- |
-| `eventUid`        | `string`      | Yes     | default: `"plugin::events.event"`                                            |
-| `eventDocumentId` | `string`      | Yes     | —                                                                            |
-| `eventTitle`      | `string`      | No      | —                                                                            |
-| `occurrenceDate`  | `string`      | Yes     | —                                                                            |
-| `attendeeName`    | `string`      | Yes     | max: 160                                                                     |
-| `attendeeEmail`   | `email`       | Yes     | —                                                                            |
-| `attendeePhone`   | `string`      | No      | max: 50                                                                      |
-| `guestsCount`     | `integer`     | Yes     | default: `1`                                                                 |
-| `status`          | `enumeration` | Yes     | enum: `confirmed, waitlisted, cancelled, checked_in`; default: `"confirmed"` |
-| `checkInToken`    | `string`      | No      | `private: true`                                                              |
-| `checkedInAt`     | `datetime`    | No      | —                                                                            |
-| `locale`          | `string`      | No      | default: `"es"`                                                              |
-| `notes`           | `text`        | No      | max: 2000                                                                    |
-| `metadata`        | `json`        | No      | —                                                                            |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `eventUid` | `string` | Yes | default: `"plugin::events.event"` |
+| `eventDocumentId` | `string` | Yes | — |
+| `eventTitle` | `string` | No | — |
+| `occurrenceDate` | `string` | Yes | — |
+| `attendeeName` | `string` | Yes | max: 160 |
+| `attendeeEmail` | `email` | Yes | — |
+| `attendeePhone` | `string` | No | max: 50 |
+| `guestsCount` | `integer` | Yes | default: `1` |
+| `status` | `enumeration` | Yes | enum: `confirmed, waitlisted, cancelled, checked_in`; default: `"confirmed"` |
+| `checkInToken` | `string` | No | `private: true` |
+| `checkedInAt` | `datetime` | No | — |
+| `locale` | `string` | No | default: `"es"` |
+| `notes` | `text` | No | max: 2000 |
+| `metadata` | `json` | No | — |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 

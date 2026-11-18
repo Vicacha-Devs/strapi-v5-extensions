@@ -126,15 +126,15 @@ flowchart LR
 
 ## 4. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot  | Uç Nokta Yolu                                      | Kapsam  | Denetleyici (Handler) | Kimlik Doğrulama |
-| :----- | :------------------------------------------------- | :------ | :-------------------- | :--------------- |
-| `GET`  | `/tiptap-editor/presets`                           | `admin` | `preset.find`         | Bearer JWT       |
-| `GET`  | `/tiptap-editor/presets/{name}`                    | `admin` | `preset.findOne`      | Bearer JWT       |
-| `GET`  | `/tiptap-editor/theme`                             | `admin` | `theme.find`          | Bearer JWT       |
-| `GET`  | `/tiptap-editor/settings`                          | `admin` | `settings.find`       | Bearer JWT       |
-| `PUT`  | `/tiptap-editor/settings`                          | `admin` | `settings.update`     | Bearer JWT       |
-| `GET`  | `/tiptap-editor/search`                            | `admin` | `search.search`       | Bearer JWT       |
-| `GET`  | `/tiptap-editor/get/{collectionName}/{documentId}` | `admin` | `search.getDocument`  | Bearer JWT       |
-| `GET`  | `/tiptap-editor/identify/{collectionName}`         | `admin` | `search.identify`     | Bearer JWT       |
-| `GET`  | `/tiptap-editor/link-preview`                      | `admin` | `media.linkPreview`   | Bearer JWT       |
-| `POST` | `/tiptap-editor/upload-by-url`                     | `admin` | `media.uploadByUrl`   | Bearer JWT       |
+| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/tiptap-editor/presets` | `admin` | `preset.find` | Bearer JWT |
+| `GET` | `/tiptap-editor/presets/{name}` | `admin` | `preset.findOne` | Bearer JWT |
+| `GET` | `/tiptap-editor/theme` | `admin` | `theme.find` | Bearer JWT |
+| `GET` | `/tiptap-editor/settings` | `admin` | `settings.find` | Bearer JWT |
+| `PUT` | `/tiptap-editor/settings` | `admin` | `settings.update` | Bearer JWT |
+| `GET` | `/tiptap-editor/search` | `admin` | `search.search` | Bearer JWT |
+| `GET` | `/tiptap-editor/get/{collectionName}/{documentId}` | `admin` | `search.getDocument` | Bearer JWT |
+| `GET` | `/tiptap-editor/identify/{collectionName}` | `admin` | `search.identify` | Bearer JWT |
+| `GET` | `/tiptap-editor/link-preview` | `admin` | `media.linkPreview` | Bearer JWT |
+| `POST` | `/tiptap-editor/upload-by-url` | `admin` | `media.uploadByUrl` | Bearer JWT |

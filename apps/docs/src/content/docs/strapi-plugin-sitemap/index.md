@@ -3,7 +3,6 @@ title: "XML Sitemap & Hreflang (@vicacha-devs/strapi-plugin-sitemap)"
 description: "XML Sitemap and Sitemap Index generator for Strapi v5 with multilingual i18n, custom URLs, image thumbnails, and excluded path rules."
 prev: false
 ---
-
 XML Sitemap and Sitemap Index generator for Strapi v5 with automatic multilingual (`i18n` + `xhtml:link` `hreflang`) alternates, collection & plugin content-type URL patterns, nested relation and component placeholders, Google Image Sitemap (`xmlns:image`) support, custom static URLs, and excluded path rules.
 
 ## Key Features
@@ -83,9 +82,9 @@ Configure everything in **Settings → Sitemap**:
 
 Patterns use `[field]` placeholders filled from each entry:
 
-| Pattern                   | Result                                                               |
-| ------------------------- | -------------------------------------------------------------------- |
-| `/blog/[slug]`            | `/blog/my-post`                                                      |
+| Pattern | Result |
+| --- | --- |
+| `/blog/[slug]` | `/blog/my-post` |
 | `/[category.slug]/[slug]` | `/news/my-post` (relation fields; enable **Populate linked models**) |
 
 - An entry is skipped when a plain placeholder (e.g. `[slug]`) has no value.
@@ -108,6 +107,7 @@ This package uses the plugin id `sitemap` instead of `strapi-5-sitemap-plugin`, 
 ```bash
 pnpm --filter @vicacha-devs/strapi-plugin-sitemap test   # builds first, then runs node:test
 ```
+
 
 ## Content-Type Entities & Where to Find Them
 

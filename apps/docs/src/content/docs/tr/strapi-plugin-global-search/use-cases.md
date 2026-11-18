@@ -28,7 +28,7 @@ Bu eklenti, doğrudan mevcut Strapi içerik türü varlıkları (`api::*` ve `pl
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
-> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
+> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
 
 ### İçerik Yöneticisi Varlıkları ve Bileşenleri
 

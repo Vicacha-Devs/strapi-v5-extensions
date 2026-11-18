@@ -15,23 +15,12 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "tiptap-editor": {
     enabled: true,
     config: {
       presets: {
-        editorial: {
-          bold: true,
-          italic: true,
-          heading: { levels: [1, 2, 3] },
-          link: true,
-          mediaLibrary: true,
-          table: true,
-        },
+        editorial: { bold: true, italic: true, heading: { levels: [1, 2, 3] }, link: true, mediaLibrary: true, table: true },
       },
       settings: {
         defaultPreset: "editorial",
@@ -53,16 +42,16 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key                      | Rendered UI Label                                          |
-| :----------------------------------- | :--------------------------------------------------------- |
-| `tiptap-editor.noPreset.message`     | No editor preset configured — showing minimal editor       |
-| `tiptap-editor.loading`              | Loading editor...                                          |
-| `tiptap-editor.more`                 | More                                                       |
-| `tiptap-editor.error.message`        | The editor encountered an error and could not render.      |
-| `tiptap-editor.error.retry`          | Retry                                                      |
-| `tiptap-editor.richText.label`       | Rich Text (Tiptap)                                         |
+| Translation Key | Rendered UI Label |
+| :--- | :--- |
+| `tiptap-editor.noPreset.message` | No editor preset configured — showing minimal editor |
+| `tiptap-editor.loading` | Loading editor... |
+| `tiptap-editor.more` | More |
+| `tiptap-editor.error.message` | The editor encountered an error and could not render. |
+| `tiptap-editor.error.retry` | Retry |
+| `tiptap-editor.richText.label` | Rich Text (Tiptap) |
 | `tiptap-editor.richText.description` | Use this field to create formatted text via Tiptap editor. |
-| `tiptap-editor.section.format.label` | Output & Content Format                                    |
+| `tiptap-editor.section.format.label` | Output & Content Format |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -168,18 +157,18 @@ flowchart LR
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path                                      | Scope   | Controller Handler   | Auth       |
-| :----- | :------------------------------------------------- | :------ | :------------------- | :--------- |
-| `GET`  | `/tiptap-editor/presets`                           | `admin` | `preset.find`        | Bearer JWT |
-| `GET`  | `/tiptap-editor/presets/{name}`                    | `admin` | `preset.findOne`     | Bearer JWT |
-| `GET`  | `/tiptap-editor/theme`                             | `admin` | `theme.find`         | Bearer JWT |
-| `GET`  | `/tiptap-editor/settings`                          | `admin` | `settings.find`      | Bearer JWT |
-| `PUT`  | `/tiptap-editor/settings`                          | `admin` | `settings.update`    | Bearer JWT |
-| `GET`  | `/tiptap-editor/search`                            | `admin` | `search.search`      | Bearer JWT |
-| `GET`  | `/tiptap-editor/get/{collectionName}/{documentId}` | `admin` | `search.getDocument` | Bearer JWT |
-| `GET`  | `/tiptap-editor/identify/{collectionName}`         | `admin` | `search.identify`    | Bearer JWT |
-| `GET`  | `/tiptap-editor/link-preview`                      | `admin` | `media.linkPreview`  | Bearer JWT |
-| `POST` | `/tiptap-editor/upload-by-url`                     | `admin` | `media.uploadByUrl`  | Bearer JWT |
+| Method | Endpoint Path | Scope | Controller Handler | Auth |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/tiptap-editor/presets` | `admin` | `preset.find` | Bearer JWT |
+| `GET` | `/tiptap-editor/presets/{name}` | `admin` | `preset.findOne` | Bearer JWT |
+| `GET` | `/tiptap-editor/theme` | `admin` | `theme.find` | Bearer JWT |
+| `GET` | `/tiptap-editor/settings` | `admin` | `settings.find` | Bearer JWT |
+| `PUT` | `/tiptap-editor/settings` | `admin` | `settings.update` | Bearer JWT |
+| `GET` | `/tiptap-editor/search` | `admin` | `search.search` | Bearer JWT |
+| `GET` | `/tiptap-editor/get/{collectionName}/{documentId}` | `admin` | `search.getDocument` | Bearer JWT |
+| `GET` | `/tiptap-editor/identify/{collectionName}` | `admin` | `search.identify` | Bearer JWT |
+| `GET` | `/tiptap-editor/link-preview` | `admin` | `media.linkPreview` | Bearer JWT |
+| `POST` | `/tiptap-editor/upload-by-url` | `admin` | `media.uploadByUrl` | Bearer JWT |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

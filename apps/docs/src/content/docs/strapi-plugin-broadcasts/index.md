@@ -3,7 +3,6 @@ title: "Omnichannel Broadcasts (@vicacha-devs/strapi-plugin-broadcasts)"
 description: "Omnichannel community broadcasts (Email newsletters, Telegram Bot & Channel/Forum topics, WhatsApp Cloud API / OpenWA / Evolution, EventHub automation rules, and double opt-in subscriber segmentation) for Strapi v5 with multi-language and multi-calendar support."
 prev: false
 ---
-
 Omnichannel Community Broadcasts & EventHub Automation Engine for Strapi v5:
 
 - **Multi-Channel Transports**:
@@ -29,11 +28,12 @@ Enable the plugin in `config/plugins.ts`:
 
 ```ts
 export default () => ({
-  broadcasts: {
+  "broadcasts": {
     enabled: true,
   },
 });
 ```
+
 
 ## Content-Type Entities & Where to Find Them
 

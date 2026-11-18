@@ -15,12 +15,8 @@ Strapi v5 projenizin `config/plugins.ts` dosyasına eklenti yapılandırmasını
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
-  calendar: {
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+  "calendar": {
     enabled: true,
     config: {
       defaultView: "dayGridMonth",
@@ -40,16 +36,16 @@ Etkinleştirildiğinde eklenti, Strapi Design System v2 bileşenlerini kullanara
 
 ### Yerelleştirilmiş Arayüz Etiketleri (Türkçe)
 
-| Çeviri Anahtarı                        | Arayüz Metni                                                                      |
-| :------------------------------------- | :-------------------------------------------------------------------------------- |
-| `settings.theme.breeze.label`          | Esinti (Gök Mavisi ve Kayrak — Varsayılan)                                        |
-| `settings.theme.breeze.description`    | Sıcak kehribar Hicri rozetlerle yüksek kontrastlı gök mavisi ve net kayrak ızgara |
-| `settings.theme.emerald.label`         | Zümrüt Camii (Camgöbeği ve Altın)                                                 |
-| `settings.theme.emerald.description`   | Sıcak altın ikincil takvim vurgularıyla İslami zümrüt yeşili başlıklar            |
-| `settings.theme.sandstone.label`       | Endülüs Kumtaşı (Sıcak Toprak)                                                    |
-| `settings.theme.sandstone.description` | Endülüs avlularından ilham alan sıcak pişmiş toprak ve parşömen tonları           |
-| `settings.theme.midnight.label`        | Gece Yarısı Gözlemevi (Koyu Kayrak)                                               |
-| `settings.theme.midnight.description`  | Parlak camgöbeği ve altın vurgulara sahip derin koyu mod tuvali                   |
+| Çeviri Anahtarı | Arayüz Metni |
+| :--- | :--- |
+| `settings.theme.breeze.label` | Esinti (Gök Mavisi ve Kayrak — Varsayılan) |
+| `settings.theme.breeze.description` | Sıcak kehribar Hicri rozetlerle yüksek kontrastlı gök mavisi ve net kayrak ızgara |
+| `settings.theme.emerald.label` | Zümrüt Camii (Camgöbeği ve Altın) |
+| `settings.theme.emerald.description` | Sıcak altın ikincil takvim vurgularıyla İslami zümrüt yeşili başlıklar |
+| `settings.theme.sandstone.label` | Endülüs Kumtaşı (Sıcak Toprak) |
+| `settings.theme.sandstone.description` | Endülüs avlularından ilham alan sıcak pişmiş toprak ve parşömen tonları |
+| `settings.theme.midnight.label` | Gece Yarısı Gözlemevi (Koyu Kayrak) |
+| `settings.theme.midnight.description` | Parlak camgöbeği ve altın vurgulara sahip derin koyu mod tuvali |
 
 ## 4. İçerik Türü Varlıkları, Konumları ve Şemaları (`strapi.documents`)
 
@@ -172,18 +168,18 @@ flowchart LR
 
 ## 6. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot  | Uç Nokta Yolu                           | Kapsam        | Denetleyici (Handler)          | Kimlik Doğrulama |
-| :----- | :-------------------------------------- | :------------ | :----------------------------- | :--------------- |
-| `GET`  | `/calendar/calendar`                    | `admin`       | `admin.getCalendar`            | Bearer JWT       |
-| `POST` | `/calendar/calendar/reschedule`         | `admin`       | `admin.reschedule`             | Bearer JWT       |
-| `POST` | `/calendar/calendar/quick-create`       | `admin`       | `admin.quickCreate`            | Bearer JWT       |
-| `GET`  | `/calendar/content-types`               | `admin`       | `admin.getContentTypes`        | Bearer JWT       |
-| `GET`  | `/calendar/settings`                    | `admin`       | `admin.getSettings`            | Bearer JWT       |
-| `PUT`  | `/calendar/settings`                    | `admin`       | `admin.updateSettings`         | Bearer JWT       |
-| `POST` | `/calendar/clear-settings`              | `admin`       | `admin.clearSettings`          | Bearer JWT       |
-| `GET`  | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Bearer JWT       |
-| `GET`  | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Bearer JWT       |
-| `GET`  | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT       |
+| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/calendar/calendar` | `admin` | `admin.getCalendar` | Bearer JWT |
+| `POST` | `/calendar/calendar/reschedule` | `admin` | `admin.reschedule` | Bearer JWT |
+| `POST` | `/calendar/calendar/quick-create` | `admin` | `admin.quickCreate` | Bearer JWT |
+| `GET` | `/calendar/content-types` | `admin` | `admin.getContentTypes` | Bearer JWT |
+| `GET` | `/calendar/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/calendar/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `POST` | `/calendar/clear-settings` | `admin` | `admin.clearSettings` | Bearer JWT |
+| `GET` | `/api/calendar/occurrences` | `content-api` | `content-api.getOccurrences` | Bearer JWT |
+| `GET` | `/api/calendar/feed.ics` | `content-api` | `content-api.downloadFeedIcs` | Bearer JWT |
+| `GET` | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT |
 
 ## 7. Sunucu Tarafı Programatik Kullanım (`strapi.plugin` ve `strapi.documents`)
 

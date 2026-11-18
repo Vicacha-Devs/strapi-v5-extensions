@@ -15,11 +15,7 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "collapsible-nav": {
     enabled: true,
     config: {
@@ -35,13 +31,13 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key   | Rendered UI Label             |
-| :---------------- | :---------------------------- |
-| `plugin.name`     | Collapsible Nav               |
-| `toggle.expand`   | Expand navigation             |
-| `toggle.collapse` | Collapse navigation           |
-| `pin.pin`         | Pin sidebar open              |
-| `pin.unpin`       | Unpin sidebar (auto-collapse) |
+| Translation Key | Rendered UI Label |
+| :--- | :--- |
+| `plugin.name` | Collapsible Nav |
+| `toggle.expand` | Expand navigation |
+| `toggle.collapse` | Collapse navigation |
+| `pin.pin` | Pin sidebar open |
+| `pin.unpin` | Unpin sidebar (auto-collapse) |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -141,7 +137,7 @@ flowchart LR
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
 | Method | Endpoint Path | Scope | Controller Handler | Auth |
-| :----- | :------------ | :---- | :----------------- | :--- |
+| :--- | :--- | :--- | :--- | :--- |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

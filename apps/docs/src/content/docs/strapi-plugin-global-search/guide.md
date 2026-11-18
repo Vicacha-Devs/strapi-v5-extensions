@@ -15,11 +15,7 @@ Add the plugin configuration to your Strapi v5 `config/plugins.ts` file:
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "global-search": {
     enabled: true,
     config: {
@@ -43,16 +39,16 @@ Once enabled, the plugin registers its workspace and settings inside the Strapi 
 
 ### Key Localized Admin UI Labels
 
-| Translation Key      | Rendered UI Label                         |
-| :------------------- | :---------------------------------------- |
-| `plugin.name`        | Global Search                             |
+| Translation Key | Rendered UI Label |
+| :--- | :--- |
+| `plugin.name` | Global Search |
 | `plugin.description` | Search every content type from one place. |
-| `settings.section`   | Global Search                             |
-| `settings.link`      | Configuration                             |
-| `common.searching`   | Searching…                                |
-| `common.no_results`  | No results for “{query}”.                 |
-| `common.on`          | On                                        |
-| `common.off`         | Off                                       |
+| `settings.section` | Global Search |
+| `settings.link` | Configuration |
+| `common.searching` | Searching… |
+| `common.no_results` | No results for “{query}”. |
+| `common.on` | On |
+| `common.off` | Off |
 
 ## 4. Content-Type Entities, Locations & Schemas (`strapi.documents`)
 
@@ -77,7 +73,7 @@ This plugin operates dynamically across existing Strapi `api::*` and `plugin::*`
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 
-> **Content Manager Sidebar Group**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
+> **Content Manager Sidebar Group**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
 
 ### Content Manager Entities & Components
 
@@ -159,14 +155,14 @@ flowchart LR
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path                   | Scope   | Controller Handler | Auth       |
-| :----- | :------------------------------ | :------ | :----------------- | :--------- |
-| `GET`  | `/global-search/search`         | `admin` | `search.find`      | Bearer JWT |
-| `GET`  | `/global-search/schema`         | `admin` | `schema.find`      | Bearer JWT |
-| `GET`  | `/global-search/schema/all`     | `admin` | `schema.findAll`   | Bearer JWT |
-| `GET`  | `/global-search/settings`       | `admin` | `settings.find`    | Bearer JWT |
-| `PUT`  | `/global-search/settings`       | `admin` | `settings.update`  | Bearer JWT |
-| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset`   | Bearer JWT |
+| Method | Endpoint Path | Scope | Controller Handler | Auth |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/global-search/search` | `admin` | `search.find` | Bearer JWT |
+| `GET` | `/global-search/schema` | `admin` | `schema.find` | Bearer JWT |
+| `GET` | `/global-search/schema/all` | `admin` | `schema.findAll` | Bearer JWT |
+| `GET` | `/global-search/settings` | `admin` | `settings.find` | Bearer JWT |
+| `PUT` | `/global-search/settings` | `admin` | `settings.update` | Bearer JWT |
+| `POST` | `/global-search/settings/reset` | `admin` | `settings.reset` | Bearer JWT |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 

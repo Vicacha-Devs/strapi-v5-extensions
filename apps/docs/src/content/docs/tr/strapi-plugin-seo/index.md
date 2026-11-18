@@ -4,7 +4,7 @@ description: "Paylaşılan SEO ve sosyal meta bileşen yöneticisi, canlı Googl
 prev: false
 ---
 
-> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.1.2` · **Routes**: `5`
+> **Package**: `@vicacha-devs/strapi-plugin-seo` · **Plugin ID**: `seo` · **Category**: `Editorial & SEO` · **Version**: `2.1.2` · **Routes**: `6`
 
 Paylaşılan SEO ve sosyal meta bileşen yöneticisi, canlı Google SERP ve OpenGraph/X önizleme kartları ve gerçek zamanlı anahtar kelime yoğunluğu analizörü.
 
@@ -46,12 +46,12 @@ Shared Strapi component (shared.open-graph) managed in Content-Type Builder and 
 > **Kind**: `component` · **DB Table**: `components_shared_open_graphs` · **Admin Location**: `/admin/plugins/content-type-builder` (Component) · **Draft & Publish**: `No` · **i18n**: `Yes`
 
 | Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
-| :--------------- | :---------- | :------ | :-------------------- |
-| `ogTitle`        | `string`    | Yes     | max: 70               |
-| `ogDescription`  | `string`    | Yes     | max: 200              |
-| `ogImage`        | `media`     | No      | —                     |
-| `ogUrl`          | `string`    | No      | —                     |
-| `ogType`         | `string`    | No      | —                     |
+| :--- | :--- | :--- | :--- |
+| `ogTitle` | `string` | Yes | max: 70 |
+| `ogDescription` | `string` | Yes | max: 200 |
+| `ogImage` | `media` | No | — |
+| `ogUrl` | `string` | No | — |
+| `ogType` | `string` | No | — |
 
 ### `shared.seo` — Component: seo
 
@@ -59,21 +59,21 @@ Shared Strapi component (shared.seo) managed in Content-Type Builder and Content
 
 > **Kind**: `component` · **DB Table**: `components_shared_seos` · **Admin Location**: `/admin/plugins/content-type-builder` (Component) · **Draft & Publish**: `No` · **i18n**: `Yes`
 
-| Alan (Attribute)  | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki          |
-| :---------------- | :---------- | :------ | :----------------------------- |
-| `metaTitle`       | `string`    | Yes     | max: 60                        |
-| `metaDescription` | `string`    | Yes     | max: 160                       |
-| `metaImage`       | `media`     | No      | —                              |
-| `openGraph`       | `component` | No      | component: `shared.open-graph` |
-| `keywords`        | `text`      | No      | —                              |
-| `metaRobots`      | `string`    | No      | —                              |
-| `metaViewport`    | `string`    | No      | —                              |
-| `canonicalURL`    | `string`    | No      | —                              |
-| `structuredData`  | `json`      | No      | —                              |
+| Alan (Attribute) | Strapi Türü | Zorunlu | Kısıtlamalar / İlişki |
+| :--- | :--- | :--- | :--- |
+| `metaTitle` | `string` | Yes | max: 60 |
+| `metaDescription` | `string` | Yes | max: 160 |
+| `metaImage` | `media` | No | — |
+| `openGraph` | `component` | No | component: `shared.open-graph` |
+| `keywords` | `text` | No | — |
+| `metaRobots` | `string` | No | — |
+| `metaViewport` | `string` | No | — |
+| `canonicalURL` | `string` | No | — |
+| `structuredData` | `json` | No | — |
 
 ## Strapi v5 İçerik Yöneticisi (Content Manager) Entegrasyonu (`/admin/content-manager`)
 
-> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `Components (`shared.seo`— **SEO & Metadata** &`shared.open-graph` — **Open Graph (Social Sharing)**) inside Content Manager Edit Views`
+> **İçerik Yöneticisi Kenar Çubuğu Grubu**: `Components (`shared.seo` — **SEO & Metadata** & `shared.open-graph` — **Open Graph (Social Sharing)**) inside Content Manager Edit Views`
 
 ### İçerik Yöneticisi Varlıkları ve Bileşenleri
 
@@ -155,10 +155,11 @@ flowchart LR
 
 ## 4. REST API Uç Noktaları (`content-api` ve `admin`)
 
-| Metot  | Uç Nokta Yolu        | Kapsam  | Denetleyici (Handler)    | Kimlik Doğrulama |
-| :----- | :------------------- | :------ | :----------------------- | :--------------- |
-| `GET`  | `/seo/component`     | `admin` | `seo.findSeoComponent`   | Bearer JWT       |
-| `POST` | `/seo/component`     | `admin` | `seo.createSeoComponent` | Bearer JWT       |
-| `GET`  | `/seo/content-types` | `admin` | `seo.findContentTypes`   | Bearer JWT       |
-| `GET`  | `/seo/settings`      | `admin` | `settings.getSettings`   | Bearer JWT       |
-| `POST` | `/seo/settings`      | `admin` | `settings.setSettings`   | Bearer JWT       |
+| Metot | Uç Nokta Yolu | Kapsam | Denetleyici (Handler) | Kimlik Doğrulama |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/seo/component` | `admin` | `seo.findSeoComponent` | Bearer JWT |
+| `POST` | `/seo/component` | `admin` | `seo.createSeoComponent` | Bearer JWT |
+| `GET` | `/seo/content-types` | `admin` | `seo.findContentTypes` | Bearer JWT |
+| `POST` | `/seo/generate` | `admin` | `seo.generateSeo` | Bearer JWT |
+| `GET` | `/seo/settings` | `admin` | `settings.getSettings` | Bearer JWT |
+| `POST` | `/seo/settings` | `admin` | `settings.setSettings` | Bearer JWT |

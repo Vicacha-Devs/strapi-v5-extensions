@@ -28,7 +28,7 @@ This plugin operates dynamically across existing Strapi `api::*` and `plugin::*`
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 
-> **Content Manager Sidebar Group**: `All Content Manager Collection Types & Single Types (`Cmd+K`/`Ctrl+K`)`
+> **Content Manager Sidebar Group**: `All Content Manager Collection Types & Single Types (`Cmd+K` / `Ctrl+K`)`
 
 ### Content Manager Entities & Components
 

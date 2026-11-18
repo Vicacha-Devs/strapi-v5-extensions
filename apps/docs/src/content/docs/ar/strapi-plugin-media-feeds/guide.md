@@ -15,11 +15,7 @@ pnpm add @vicacha-devs/strapi-plugin-media-feeds
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
   "media-feeds": {
     enabled: true,
     config: {
@@ -40,16 +36,16 @@ export default ({
 
 ### نماذج من نصوص الواجهة المعربة (العربية)
 
-| مفتاح الترجمة                | النص المعروض في الواجهة          |
-| :--------------------------- | :------------------------------- |
-| `common.disabled`            | معطّل                             |
-| `common.enabled`             | مفعّل                             |
-| `common.remove`              | إزالة                            |
-| `field.author_organization`  | المؤلف / المنظمة                 |
-| `field.default_locale`       | اللغة الافتراضية                  |
-| `field.live_broadcast_title` | عنوان البث المباشر               |
-| `field.live_event_slug`      | معرّف الفعالية المرتبطة (اختياري) |
-| `field.live_schedule_label`  | الجدول الزمني / تسمية نافذة البث |
+| مفتاح الترجمة | النص المعروض في الواجهة |
+| :--- | :--- |
+| `common.disabled` | معطّل |
+| `common.enabled` | مفعّل |
+| `common.remove` | إزالة |
+| `field.author_organization` | المؤلف / المنظمة |
+| `field.default_locale` | اللغة الافتراضية |
+| `field.live_broadcast_title` | عنوان البث المباشر |
+| `field.live_event_slug` | معرّف الفعالية المرتبطة (اختياري) |
+| `field.live_schedule_label` | الجدول الزمني / تسمية نافذة البث |
 
 ## 4. كيانات أنواع المحتوى ومواقعها ومخططاتها (`strapi.documents`)
 
@@ -75,32 +71,32 @@ Generic multi-language video, podcast, audio lecture, YouTube item, or live broa
 
 > **Kind**: `collectionType` · **DB Table**: `media_feed_items` · **Admin Location**: `/admin/content-manager/collection-types/plugin::media-feeds.media-item` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| الحقل              | النوع في Strapi | إلزامي | القيود / العلاقات                                                                                  |
-| :----------------- | :-------------- | :----- | :------------------------------------------------------------------------------------------------ |
-| `title`            | `string`        | Yes    | —                                                                                                 |
-| `slug`             | `uid`           | Yes    | —                                                                                                 |
-| `description`      | `text`          | Yes    | —                                                                                                 |
-| `transcript`       | `richtext`      | No     | —                                                                                                 |
-| `type`             | `string`        | Yes    | default: `"video"`                                                                                |
-| `provider`         | `enumeration`   | No     | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
-| `externalId`       | `string`        | No     | —                                                                                                 |
-| `sourceUrl`        | `string`        | No     | —                                                                                                 |
-| `embedUrl`         | `string`        | No     | —                                                                                                 |
-| `speaker`          | `string`        | No     | —                                                                                                 |
-| `speakerSlug`      | `string`        | No     | —                                                                                                 |
-| `seriesSlug`       | `string`        | No     | —                                                                                                 |
-| `duration`         | `string`        | No     | —                                                                                                 |
-| `publishedAtLabel` | `string`        | No     | —                                                                                                 |
-| `imageUrl`         | `string`        | No     | —                                                                                                 |
-| `imageAlt`         | `string`        | No     | —                                                                                                 |
-| `thumbnail`        | `media`         | No     | —                                                                                                 |
-| `audioFile`        | `media`         | No     | —                                                                                                 |
-| `transcriptFile`   | `media`         | No     | —                                                                                                 |
-| `spokenLanguages`  | `json`          | No     | default: `["es"]`                                                                                 |
-| `languageTracks`   | `json`          | No     | default: `[]`                                                                                     |
-| `chapters`         | `json`          | No     | default: `[]`                                                                                     |
-| `featured`         | `boolean`       | No     | default: `false`                                                                                  |
-| `isLive`           | `boolean`       | No     | default: `false`                                                                                  |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | — |
+| `slug` | `uid` | Yes | — |
+| `description` | `text` | Yes | — |
+| `transcript` | `richtext` | No | — |
+| `type` | `string` | Yes | default: `"video"` |
+| `provider` | `enumeration` | No | enum: `youtube, spotify, apple_podcasts, vimeo, soundcloud, direct, upload`; default: `"youtube"` |
+| `externalId` | `string` | No | — |
+| `sourceUrl` | `string` | No | — |
+| `embedUrl` | `string` | No | — |
+| `speaker` | `string` | No | — |
+| `speakerSlug` | `string` | No | — |
+| `seriesSlug` | `string` | No | — |
+| `duration` | `string` | No | — |
+| `publishedAtLabel` | `string` | No | — |
+| `imageUrl` | `string` | No | — |
+| `imageAlt` | `string` | No | — |
+| `thumbnail` | `media` | No | — |
+| `audioFile` | `media` | No | — |
+| `transcriptFile` | `media` | No | — |
+| `spokenLanguages` | `json` | No | default: `["es"]` |
+| `languageTracks` | `json` | No | default: `[]` |
+| `chapters` | `json` | No | default: `[]` |
+| `featured` | `boolean` | No | default: `false` |
+| `isLive` | `boolean` | No | default: `false` |
 
 ### `plugin::media-feeds.media-series` — Media Series & Podcast Show
 
@@ -108,21 +104,21 @@ Generic multi-language podcast show, video playlist, or lecture series
 
 > **Kind**: `collectionType` · **DB Table**: `media_feed_series` · **Admin Location**: `/admin/content-manager/collection-types/plugin::media-feeds.media-series` · **Draft & Publish**: `Yes` · **i18n**: `Yes`
 
-| الحقل               | النوع في Strapi | إلزامي | القيود / العلاقات                 |
-| :------------------ | :-------------- | :----- | :------------------------------- |
-| `title`             | `string`        | Yes    | —                                |
-| `slug`              | `uid`           | Yes    | —                                |
-| `description`       | `text`          | Yes    | —                                |
-| `author`            | `string`        | No     | —                                |
-| `coverImageUrl`     | `string`        | No     | —                                |
-| `category`          | `string`        | No     | default: `"Education"`           |
-| `defaultType`       | `string`        | No     | default: `"podcast"`             |
-| `spokenLanguages`   | `json`          | No     | default: `["es","en","ar","tr"]` |
-| `rssEnabled`        | `boolean`       | No     | default: `true`                  |
-| `youtubePlaylistId` | `string`        | No     | —                                |
-| `spotifyShowUrl`    | `string`        | No     | —                                |
-| `applePodcastsUrl`  | `string`        | No     | —                                |
-| `active`            | `boolean`       | No     | default: `true`                  |
+| الحقل | النوع في Strapi | إلزامي | القيود / العلاقات |
+| :--- | :--- | :--- | :--- |
+| `title` | `string` | Yes | — |
+| `slug` | `uid` | Yes | — |
+| `description` | `text` | Yes | — |
+| `author` | `string` | No | — |
+| `coverImageUrl` | `string` | No | — |
+| `category` | `string` | No | default: `"Education"` |
+| `defaultType` | `string` | No | default: `"podcast"` |
+| `spokenLanguages` | `json` | No | default: `["es","en","ar","tr"]` |
+| `rssEnabled` | `boolean` | No | default: `true` |
+| `youtubePlaylistId` | `string` | No | — |
+| `spotifyShowUrl` | `string` | No | — |
+| `applePodcastsUrl` | `string` | No | — |
+| `active` | `boolean` | No | default: `true` |
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
@@ -212,19 +208,19 @@ flowchart LR
 
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية                  | النطاق        | المعالج (Handler)              | المصادقة   |
-| :------ | :--------------------------------- | :------------ | :----------------------------- | :--------- |
-| `GET`   | `/media-feeds/overview`            | `admin`       | `admin.getOverview`            | Bearer JWT |
-| `GET`   | `/media-feeds/settings`            | `admin`       | `admin.getSettings`            | Bearer JWT |
-| `PUT`   | `/media-feeds/settings`            | `admin`       | `admin.updateSettings`         | Bearer JWT |
-| `POST`  | `/media-feeds/enrich-url`          | `admin`       | `admin.enrichUrl`              | Bearer JWT |
-| `POST`  | `/media-feeds/sync-youtube`        | `admin`       | `admin.syncYouTube`            | Bearer JWT |
-| `GET`   | `/api/media-feeds/episodes`        | `content-api` | `content-api.listEpisodes`     | Public     |
-| `GET`   | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public     |
-| `GET`   | `/api/media-feeds/series`          | `content-api` | `content-api.listSeries`       | Public     |
-| `GET`   | `/api/media-feeds/live`            | `content-api` | `content-api.getLiveStatus`    | Public     |
-| `GET`   | `/api/media-feeds/rss.xml`         | `content-api` | `content-api.getRssXml`        | Public     |
-| `GET`   | `/api/media-feeds/podcast.xml`     | `content-api` | `content-api.getRssXml`        | Public     |
+| الطريقة | مسار نقطة النهاية | النطاق | المعالج (Handler) | المصادقة |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/media-feeds/overview` | `admin` | `admin.getOverview` | Bearer JWT |
+| `GET` | `/media-feeds/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/media-feeds/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `POST` | `/media-feeds/enrich-url` | `admin` | `admin.enrichUrl` | Bearer JWT |
+| `POST` | `/media-feeds/sync-youtube` | `admin` | `admin.syncYouTube` | Bearer JWT |
+| `GET` | `/api/media-feeds/episodes` | `content-api` | `content-api.listEpisodes` | Public |
+| `GET` | `/api/media-feeds/episodes/{slug}` | `content-api` | `content-api.getEpisodeBySlug` | Public |
+| `GET` | `/api/media-feeds/series` | `content-api` | `content-api.listSeries` | Public |
+| `GET` | `/api/media-feeds/live` | `content-api` | `content-api.getLiveStatus` | Public |
+| `GET` | `/api/media-feeds/rss.xml` | `content-api` | `content-api.getRssXml` | Public |
+| `GET` | `/api/media-feeds/podcast.xml` | `content-api` | `content-api.getRssXml` | Public |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 
@@ -233,12 +229,10 @@ flowchart LR
 const pluginService = strapi.plugin("media-feeds")?.service("feedService");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi
-  .documents("plugin::media-feeds.media-item")
-  .findMany({
-    limit: 25,
-    sort: "createdAt:desc",
-  });
+const records = await strapi.documents("plugin::media-feeds.media-item").findMany({
+  limit: 25,
+  sort: "createdAt:desc",
+});
 ```
 
 ## 8. استكشاف الأخطاء والتحقق من الجودة

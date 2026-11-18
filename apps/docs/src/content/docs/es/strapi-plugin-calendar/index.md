@@ -143,15 +143,15 @@ flowchart LR
 
 ## 4. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint                       | Ámbito        | Controlador                    | Autenticación |
-| :----- | :-------------------------------------- | :------------ | :----------------------------- | :------------ |
-| `GET`  | `/calendar/calendar`                    | `admin`       | `admin.getCalendar`            | Bearer JWT    |
-| `POST` | `/calendar/calendar/reschedule`         | `admin`       | `admin.reschedule`             | Bearer JWT    |
-| `POST` | `/calendar/calendar/quick-create`       | `admin`       | `admin.quickCreate`            | Bearer JWT    |
-| `GET`  | `/calendar/content-types`               | `admin`       | `admin.getContentTypes`        | Bearer JWT    |
-| `GET`  | `/calendar/settings`                    | `admin`       | `admin.getSettings`            | Bearer JWT    |
-| `PUT`  | `/calendar/settings`                    | `admin`       | `admin.updateSettings`         | Bearer JWT    |
-| `POST` | `/calendar/clear-settings`              | `admin`       | `admin.clearSettings`          | Bearer JWT    |
-| `GET`  | `/api/calendar/occurrences`             | `content-api` | `content-api.getOccurrences`   | Bearer JWT    |
-| `GET`  | `/api/calendar/feed.ics`                | `content-api` | `content-api.downloadFeedIcs`  | Bearer JWT    |
-| `GET`  | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT    |
+| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/calendar/calendar` | `admin` | `admin.getCalendar` | Bearer JWT |
+| `POST` | `/calendar/calendar/reschedule` | `admin` | `admin.reschedule` | Bearer JWT |
+| `POST` | `/calendar/calendar/quick-create` | `admin` | `admin.quickCreate` | Bearer JWT |
+| `GET` | `/calendar/content-types` | `admin` | `admin.getContentTypes` | Bearer JWT |
+| `GET` | `/calendar/settings` | `admin` | `admin.getSettings` | Bearer JWT |
+| `PUT` | `/calendar/settings` | `admin` | `admin.updateSettings` | Bearer JWT |
+| `POST` | `/calendar/clear-settings` | `admin` | `admin.clearSettings` | Bearer JWT |
+| `GET` | `/api/calendar/occurrences` | `content-api` | `content-api.getOccurrences` | Bearer JWT |
+| `GET` | `/api/calendar/feed.ics` | `content-api` | `content-api.downloadFeedIcs` | Bearer JWT |
+| `GET` | `/api/calendar/{documentId}/invite.ics` | `content-api` | `content-api.downloadEventIcs` | Bearer JWT |

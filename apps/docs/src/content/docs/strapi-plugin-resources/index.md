@@ -3,7 +3,6 @@ title: "Resources, Galleries & Glossary (@vicacha-devs/strapi-plugin-resources)"
 description: "Generic Strapi v5 Digital Library Publications, Media Library Folder-Synced Photo Galleries & Multilingual A-Z Glossary Plugin powered by @strapi/upload and @vicacha-devs/strapi-plugin-calendar"
 prev: false
 ---
-
 Reusable **Strapi v5 Media Library, Digital Publications, Photo Galleries & Glossary Plugin** (`plugin::resources`) built natively on top of Strapi v5's `@strapi/upload` (`plugin::upload.file` & `plugin::upload.folder`) and `@vicacha-devs/strapi-plugin-calendar`.
 
 ## Features
@@ -85,6 +84,7 @@ export default ({ env }) => ({
   },
 });
 ```
+
 
 ## Content-Type Entities & Where to Find Them
 

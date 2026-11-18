@@ -15,12 +15,8 @@ Agregue la configuración del plugin en el archivo `config/plugins.ts` de su apl
 
 ```ts
 // config/plugins.ts
-export default ({
-  env,
-}: {
-  env: (key: string, defaultValue?: string) => string;
-}) => ({
-  sitemap: {
+export default ({ env }: { env: (key: string, defaultValue?: string) => string }) => ({
+  "sitemap": {
     enabled: true,
     config: {
       hostname: env("SITEMAP_HOSTNAME", "https://example.org"),
@@ -40,16 +36,16 @@ Una vez habilitado, el plugin registra su espacio de trabajo y ajustes dentro de
 
 ### Etiquetas Localizadas de la Interfaz (Español)
 
-| Clave de Traducción            | Texto en Interfaz                                                        |
-| :----------------------------- | :----------------------------------------------------------------------- |
-| `plugin.name`                  | Mapa del sitio                                                           |
-| `plugin.section.item`          | Configuración                                                            |
-| `settings.title`               | Mapa del sitio (Sitemap)                                                 |
-| `settings.subtitle`            | Configuración del archivo XML de mapa del sitio e índice de sitemaps     |
-| `settings.showSitemap`         | Ver Sitemap                                                              |
-| `settings.baseUrl.title`       | URL Base                                                                 |
+| Clave de Traducción | Texto en Interfaz |
+| :--- | :--- |
+| `plugin.name` | Mapa del sitio |
+| `plugin.section.item` | Configuración |
+| `settings.title` | Mapa del sitio (Sitemap) |
+| `settings.subtitle` | Configuración del archivo XML de mapa del sitio e índice de sitemaps |
+| `settings.showSitemap` | Ver Sitemap |
+| `settings.baseUrl.title` | URL Base |
 | `settings.baseUrl.description` | Ingrese la URL base utilizada para todas las entradas del mapa del sitio |
-| `settings.baseUrl.placeholder` | https://ejemplo.com                                                      |
+| `settings.baseUrl.placeholder` | https://ejemplo.com |
 
 ## 4. Entidades Content-Type, Ubicación y Esquemas (`strapi.documents`)
 
@@ -74,16 +70,16 @@ Per-locale URL pattern, priority, and changefreq mapping for a Strapi Content-Ty
 
 > **Kind**: `collectionType` · **DB Table**: `strapi_5_sitemap_plugin_content_types` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo               | Tipo en Strapi | Requerido | Restricciones / Relación |
-| :--------------------- | :------------- | :-------- | :----------------------- |
-| `type`                 | `string`       | No        | —                        |
-| `langcode`             | `string`       | No        | —                        |
-| `pattern`              | `string`       | No        | —                        |
-| `priority`             | `float`        | No        | —                        |
-| `frequency`            | `string`       | No        | —                        |
-| `lastModified`         | `string`       | No        | —                        |
-| `thumbnail`            | `string`       | No        | —                        |
-| `populateLinkedModels` | `string`       | No        | —                        |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `type` | `string` | No | — |
+| `langcode` | `string` | No | — |
+| `pattern` | `string` | No | — |
+| `priority` | `float` | No | — |
+| `frequency` | `string` | No | — |
+| `lastModified` | `string` | No | — |
+| `thumbnail` | `string` | No | — |
+| `populateLinkedModels` | `string` | No | — |
 
 ### `plugin::sitemap.sitemap-content-type-single-url` — Sitemap Single URL
 
@@ -91,11 +87,11 @@ Custom static URL entry included alongside dynamic CMS entries in sitemap.xml
 
 > **Kind**: `collectionType` · **DB Table**: `strapi_5_sitemap_plugin_content_type_single_urls` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo    | Tipo en Strapi | Requerido | Restricciones / Relación |
-| :---------- | :------------- | :-------- | :----------------------- |
-| `slug`      | `string`       | No        | —                        |
-| `priority`  | `float`        | No        | —                        |
-| `frequency` | `string`       | No        | —                        |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `slug` | `string` | No | — |
+| `priority` | `float` | No | — |
+| `frequency` | `string` | No | — |
 
 ### `plugin::sitemap.sitemap-option` — Sitemap Options
 
@@ -103,12 +99,12 @@ Global sitemap configuration (baseUrl, excludedUrls, useSitemapIndex, sitemapDef
 
 > **Kind**: `singleType` · **DB Table**: `strapi_5_sitemap_plugin_options` · **Admin Location**: Internal (`/admin/plugins/sitemap`) · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Atributo             | Tipo en Strapi | Requerido | Restricciones / Relación |
-| :------------------- | :------------- | :-------- | :----------------------- |
-| `baseUrl`            | `string`       | No        | —                        |
-| `excludedUrls`       | `json`         | No        | default: `[]`            |
-| `useSitemapIndex`    | `boolean`      | No        | default: `false`         |
-| `sitemapDefinitions` | `json`         | No        | default: `[]`            |
+| Atributo | Tipo en Strapi | Requerido | Restricciones / Relación |
+| :--- | :--- | :--- | :--- |
+| `baseUrl` | `string` | No | — |
+| `excludedUrls` | `json` | No | default: `[]` |
+| `useSitemapIndex` | `boolean` | No | default: `false` |
+| `sitemapDefinitions` | `json` | No | default: `[]` |
 
 ## Integración con el Content Manager de Strapi v5 (`/admin/content-manager`)
 
@@ -194,15 +190,15 @@ flowchart LR
 
 ## 6. Endpoints REST API (`content-api` y `admin`)
 
-| Método | Ruta del Endpoint                 | Ámbito        | Controlador                   | Autenticación |
-| :----- | :-------------------------------- | :------------ | :---------------------------- | :------------ |
-| `GET`  | `/api/sitemap/sitemap.xml`        | `content-api` | `controller.getSitemap`       | Bearer JWT    |
-| `GET`  | `/api/sitemap/sitemap-{slug}.xml` | `content-api` | `controller.getSitemapBySlug` | Bearer JWT    |
-| `GET`  | `/sitemap/settings`               | `admin`       | `controller.getSettings`      | Bearer JWT    |
-| `PUT`  | `/sitemap/settings`               | `admin`       | `controller.updateSettings`   | Bearer JWT    |
-| `GET`  | `/sitemap/content-types`          | `admin`       | `controller.getContentTypes`  | Bearer JWT    |
-| `GET`  | `/sitemap/locales`                | `admin`       | `controller.getLocales`       | Bearer JWT    |
-| `GET`  | `/sitemap/allowed-fields`         | `admin`       | `controller.getAllowedFields` | Bearer JWT    |
+| Método | Ruta del Endpoint | Ámbito | Controlador | Autenticación |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/sitemap/sitemap.xml` | `content-api` | `controller.getSitemap` | Bearer JWT |
+| `GET` | `/api/sitemap/sitemap-{slug}.xml` | `content-api` | `controller.getSitemapBySlug` | Bearer JWT |
+| `GET` | `/sitemap/settings` | `admin` | `controller.getSettings` | Bearer JWT |
+| `PUT` | `/sitemap/settings` | `admin` | `controller.updateSettings` | Bearer JWT |
+| `GET` | `/sitemap/content-types` | `admin` | `controller.getContentTypes` | Bearer JWT |
+| `GET` | `/sitemap/locales` | `admin` | `controller.getLocales` | Bearer JWT |
+| `GET` | `/sitemap/allowed-fields` | `admin` | `controller.getAllowedFields` | Bearer JWT |
 
 ## 7. Uso Programático en el Servidor (`strapi.plugin` y `strapi.documents`)
 
@@ -211,12 +207,10 @@ flowchart LR
 const pluginService = strapi.plugin("sitemap")?.service("service");
 
 // Querying records via the Strapi v5 Document Service API
-const records = await strapi
-  .documents("plugin::sitemap.sitemap-content-type")
-  .findMany({
-    limit: 25,
-    sort: "createdAt:desc",
-  });
+const records = await strapi.documents("plugin::sitemap.sitemap-content-type").findMany({
+  limit: 25,
+  sort: "createdAt:desc",
+});
 ```
 
 ## 8. Solución de Problemas y Verificación

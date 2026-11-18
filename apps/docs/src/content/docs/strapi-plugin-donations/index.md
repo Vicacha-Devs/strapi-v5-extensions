@@ -3,7 +3,6 @@ title: "Donations & Campaigns (@vicacha-devs/strapi-plugin-donations)"
 description: "Generic Strapi v5 Crowdfunding Campaigns, Pledges, Rule-Based Assessment & Commodity Threshold Calculator, Payment Webhooks & Tax Certificate Bridge powered by @vicacha-devs/strapi-plugin-calendar and @vicacha-devs/strapi-plugin-certificates"
 prev: false
 ---
-
 Generic **Crowdfunding Campaigns, Donor Pledges, Utility Invoice Sponsorship, Commodity Assessment Calculator & Tax Certificate Bridge** for **Strapi v5**, powered by [`@vicacha-devs/strapi-plugin-calendar`](../strapi-plugin-calendar) and [`@vicacha-devs/strapi-plugin-certificates`](../strapi-plugin-certificates).
 
 ---
@@ -30,11 +29,12 @@ Enable the plugin in `config/plugins.ts`:
 
 ```ts
 export default () => ({
-  donations: {
+  "donations": {
     enabled: true,
   },
 });
 ```
+
 
 ## Content-Type Entities & Where to Find Them
 
