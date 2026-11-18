@@ -951,6 +951,10 @@
           "link": "/strapi-plugin-seo/api/operations/getseocontenttypes/"
         },
         {
+          "label": "Generate Seo",
+          "link": "/strapi-plugin-seo/api/operations/postseogenerate/"
+        },
+        {
           "label": "Get Settings",
           "link": "/strapi-plugin-seo/api/operations/getseosettings/"
         },

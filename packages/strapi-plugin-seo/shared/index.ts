@@ -169,3 +169,132 @@ export interface RichTextAnalysisResult {
   keywordsDensity: KeywordDensityMap;
   emptyAltCount: EmptyAltCount;
 }
+
+export interface SeoGeneratorContext {
+  uid: string;
+  doc: Record<string, unknown>;
+  locale?: string | null;
+  strapi?: unknown;
+}
+
+export type SeoGeneratorFn<T = string> = (
+  ctx: SeoGeneratorContext
+) => Promise<T | null | undefined> | T | null | undefined;
+
+export interface SeoPluginConfig {
+  autoCreateComponent?: boolean;
+  autoPopulateOnSave?: boolean;
+  generateTitle?: SeoGeneratorFn<string>;
+  generateDescription?: SeoGeneratorFn<string>;
+  generateImage?: SeoGeneratorFn<unknown>;
+  generateURL?: SeoGeneratorFn<string>;
+}
+
+export interface GeneratedSeoMetadata {
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  metaImage?: unknown;
+  canonicalURL?: string | null;
+}
+
+export interface StructuredDataValidationResult {
+  valid: boolean;
+  hasContext: boolean;
+  hasType: boolean;
+  reason?: string;
+}
+
+/**
+ * Finds the root attribute name on a content-type schema that references `shared.seo`
+ * (preferring `seo` if present, otherwise returning the first matching attribute).
+ */
+export function findSeoAttributeName(
+  attributes?: Record<string, SchemaAttribute> | null
+): string | null {
+  if (!attributes || typeof attributes !== "object") return null;
+  const seoAttr = attributes.seo;
+  if (seoAttr && seoAttr.component === "shared.seo") {
+    return "seo";
+  }
+  for (const [name, attr] of Object.entries(attributes)) {
+    if (attr && attr.component === "shared.seo") {
+      return name;
+    }
+  }
+  return null;
+}
+
+/**
+ * Returns true if the comma-separated `metaRobots` string contains a `noindex` directive.
+ */
+export function hasNoIndexDirective(metaRobots?: string | null): boolean {
+  if (typeof metaRobots !== "string" || !metaRobots.trim()) return false;
+  return metaRobots
+    .split(",")
+    .some((part) => part.trim().toLowerCase() === "noindex");
+}
+
+/**
+ * Validates JSON-LD structured data: ensures valid JSON object/array and checks for `@context` and `@type`.
+ */
+export function validateStructuredData(
+  value: unknown
+): StructuredDataValidationResult {
+  if (value === null || value === undefined) {
+    return { valid: false, hasContext: false, hasType: false, reason: "empty" };
+  }
+
+  let parsed: unknown = value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return {
+        valid: false,
+        hasContext: false,
+        hasType: false,
+        reason: "empty",
+      };
+    }
+    try {
+      parsed = JSON.parse(trimmed);
+    } catch {
+      return {
+        valid: false,
+        hasContext: false,
+        hasType: false,
+        reason: "invalid_json",
+      };
+    }
+  }
+
+  const items = Array.isArray(parsed) ? parsed : [parsed];
+  const objects = items.filter(
+    (item): item is Record<string, unknown> =>
+      Boolean(item) && typeof item === "object" && !Array.isArray(item)
+  );
+  if (objects.length === 0) {
+    return {
+      valid: false,
+      hasContext: false,
+      hasType: false,
+      reason: "not_object",
+    };
+  }
+
+  const hasContext = objects.some(
+    (obj) =>
+      typeof obj["@context"] === "string" && obj["@context"].trim().length > 0
+  );
+  const hasType = objects.some(
+    (obj) =>
+      (typeof obj["@type"] === "string" && obj["@type"].trim().length > 0) ||
+      (Array.isArray(obj["@type"]) && obj["@type"].length > 0)
+  );
+
+  return {
+    valid: hasContext && hasType,
+    hasContext,
+    hasType,
+    ...(!hasContext || !hasType ? { reason: "missing_jsonld_keys" } : {}),
+  };
+}
