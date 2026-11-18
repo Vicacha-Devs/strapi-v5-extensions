@@ -1,5 +1,15 @@
 # @vicacha-devs/strapi-plugin-seo
 
+## 2.2.0
+
+### Minor Changes
+
+- 08e420b: Add a `POST /seo/generate` endpoint with server-side SEO generation, bootstrap wiring and an expanded edit-view summary panel.
+
+### Patch Changes
+
+- d4f5b39: Document the SEO plugin configuration options, `/seo/generate` and JSON-LD validation, and note `tr` fallbacks and file-field metadata in the inbox README.
+
 ## 2.1.2
 
 ### Patch Changes
