@@ -202,7 +202,7 @@ flowchart LR
 
 ### Use Case 1 — Omnichannel Manual & Scheduled Community Campaigns
 
-- **What it is for**: Dispatch announcements simultaneously across Email (SMTP/Resend), Telegram Bot channels/threads, and WhatsApp Cloud API.
+- **What it is for**: Dispatch announcements simultaneously across Email (Resend SMTP / Email Designer 5), Telegram Bot channels/threads, and WhatsApp (Meta Cloud API or self-hosted `rmyndharis/OpenWA` via `POST /api/sessions/{sessionId}/messages/send-text` with `X-API-Key`).
 - **How it works**: Create a `plugin::broadcasts.campaign` entity with `channels: ['email', 'telegram', 'whatsapp']`, preview via `POST /broadcasts/campaigns/{id}/dry-run`, and dispatch via `POST /broadcasts/campaigns/{id}/send`.
 
 ```mermaid

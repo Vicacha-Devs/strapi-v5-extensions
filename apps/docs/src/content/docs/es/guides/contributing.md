@@ -17,3 +17,15 @@ pnpm --filter @vicacha-devs/docs build
 pnpm --filter @vicacha-devs/docs test:judges
 pnpm format:check && pnpm lint && pnpm verify
 ```
+
+## Generador de Plugins y Centro de Control QA
+
+Crea nuevos plugins con paridad de 5 idiomas (`en/es/ar/tr/fr`), pruebas offline y conexión opcional al `apps/dashboard`, y ejecuta verificaciones QA multi-repositorio:
+
+```bash
+pnpm plugin:new -- announcements --display-name "Announcements" --with-content-type --wire-dashboard
+pnpm qa:doctor && pnpm qa:judges && pnpm qa:verify && pnpm qa:report
+pnpm qa:docker:up && pnpm qa:smoke && pnpm qa:e2e && pnpm qa:docker:down
+```
+
+La infraestructura QA (`docker-compose.qa.yml`) usa puertos aislados en `127.0.0.1` (`5434/6381/8110/1027`) y el flujo `.github/workflows/qa-e2e.yml` ejecuta pruebas smoke y Playwright del Dashboard automáticamente.

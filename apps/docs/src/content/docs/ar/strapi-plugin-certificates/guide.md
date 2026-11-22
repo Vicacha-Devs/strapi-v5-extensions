@@ -104,7 +104,7 @@ Cryptographically signed official certificate record with signatory and witness 
 | `cryptographicSignature` | `text`          | Yes    | —                                                                                     |
 | `publicKeyFingerprint`   | `string`        | Yes    | max: 96                                                                               |
 | `verificationToken`      | `string`        | No     | max: 128; `private: true`                                                             |
-| `esignProvider`          | `enumeration`   | No     | enum: `none, docusign, webhook`; default: `"none"`                                    |
+| `esignProvider`          | `enumeration`   | No     | enum: `none, docusign, docuseal, webhook`; default: `"none"`                          |
 | `esignEnvelopeId`        | `string`        | No     | max: 128                                                                              |
 | `esignEnvelopeStatus`    | `enumeration`   | No     | enum: `not_sent, sent, delivered, completed, declined, voided`; default: `"not_sent"` |
 | `esignCompletedAt`       | `string`        | No     | max: 40                                                                               |
@@ -117,29 +117,29 @@ Reusable official certificate template with signatory rules, witness requirement
 
 > **Kind**: `collectionType` · **DB Table**: `certificates_templates` · **Admin Location**: `/admin/content-manager/collection-types/plugin::certificates.template` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| الحقل                   | النوع في Strapi | إلزامي | القيود / العلاقات                                   |
-| :---------------------- | :-------------- | :----- | :------------------------------------------------- |
-| `name`                  | `string`        | Yes    | max: 160                                           |
-| `slug`                  | `uid`           | Yes    | —                                                  |
-| `description`           | `text`          | No     | —                                                  |
-| `serialPrefix`          | `string`        | Yes    | max: 8; default: `"CERT"`                          |
-| `defaultValidityDays`   | `integer`       | No     | —                                                  |
-| `requiresWitnesses`     | `boolean`       | No     | default: `false`                                   |
-| `minWitnesses`          | `integer`       | No     | default: `0`                                       |
-| `requiresApproval`      | `boolean`       | No     | default: `true`                                    |
-| `esignEnabled`          | `boolean`       | No     | default: `false`                                   |
-| `esignProvider`         | `enumeration`   | No     | enum: `none, docusign, webhook`; default: `"none"` |
-| `organizationName`      | `string`        | Yes    | max: 200                                           |
-| `organizationSubheader` | `string`        | No     | max: 240                                           |
-| `headerText`            | `string`        | No     | max: 240                                           |
-| `titleText`             | `string`        | Yes    | max: 200                                           |
-| `bodyTemplate`          | `text`          | Yes    | —                                                  |
-| `footerText`            | `text`          | No     | —                                                  |
-| `defaultSignatories`    | `json`          | No     | default: `[]`                                      |
-| `customFieldsSchema`    | `json`          | No     | default: `[]`                                      |
-| `secondaryCalendars`    | `json`          | No     | default: `[]`                                      |
-| `accentColor`           | `string`        | No     | max: 16; default: `"#14532d"`                      |
-| `active`                | `boolean`       | No     | default: `true`                                    |
+| الحقل                   | النوع في Strapi | إلزامي | القيود / العلاقات                                             |
+| :---------------------- | :-------------- | :----- | :----------------------------------------------------------- |
+| `name`                  | `string`        | Yes    | max: 160                                                     |
+| `slug`                  | `uid`           | Yes    | —                                                            |
+| `description`           | `text`          | No     | —                                                            |
+| `serialPrefix`          | `string`        | Yes    | max: 8; default: `"CERT"`                                    |
+| `defaultValidityDays`   | `integer`       | No     | —                                                            |
+| `requiresWitnesses`     | `boolean`       | No     | default: `false`                                             |
+| `minWitnesses`          | `integer`       | No     | default: `0`                                                 |
+| `requiresApproval`      | `boolean`       | No     | default: `true`                                              |
+| `esignEnabled`          | `boolean`       | No     | default: `false`                                             |
+| `esignProvider`         | `enumeration`   | No     | enum: `none, docusign, docuseal, webhook`; default: `"none"` |
+| `organizationName`      | `string`        | Yes    | max: 200                                                     |
+| `organizationSubheader` | `string`        | No     | max: 240                                                     |
+| `headerText`            | `string`        | No     | max: 240                                                     |
+| `titleText`             | `string`        | Yes    | max: 200                                                     |
+| `bodyTemplate`          | `text`          | Yes    | —                                                            |
+| `footerText`            | `text`          | No     | —                                                            |
+| `defaultSignatories`    | `json`          | No     | default: `[]`                                                |
+| `customFieldsSchema`    | `json`          | No     | default: `[]`                                                |
+| `secondaryCalendars`    | `json`          | No     | default: `[]`                                                |
+| `accentColor`           | `string`        | No     | max: 16; default: `"#14532d"`                                |
+| `active`                | `boolean`       | No     | default: `true`                                              |
 
 ## التكامل مع مدير المحتوى في Strapi v5 (`/admin/content-manager`)
 
@@ -247,32 +247,33 @@ flowchart LR
 
 ## 6. نقاط النهاية البرمجية REST API (`content-api` و `admin`)
 
-| الطريقة | مسار نقطة النهاية                                       | النطاق        | المعالج (Handler)                   | المصادقة   |
-| :------ | :------------------------------------------------------ | :------------ | :---------------------------------- | :--------- |
-| `GET`   | `/certificates/settings`                                | `admin`       | `admin.getSettings`                 | Bearer JWT |
-| `PUT`   | `/certificates/settings`                                | `admin`       | `admin.updateSettings`              | Bearer JWT |
-| `POST`  | `/certificates/settings/rotate-keys`                    | `admin`       | `admin.rotateKeys`                  | Bearer JWT |
-| `GET`   | `/certificates/templates`                               | `admin`       | `admin.listTemplates`               | Bearer JWT |
-| `POST`  | `/certificates/templates`                               | `admin`       | `admin.createTemplate`              | Bearer JWT |
-| `POST`  | `/certificates/templates/seed`                          | `admin`       | `admin.seedTemplates`               | Bearer JWT |
-| `GET`   | `/certificates/certificates`                            | `admin`       | `admin.listCertificates`            | Bearer JWT |
-| `POST`  | `/certificates/certificates/issue`                      | `admin`       | `admin.issueCertificate`            | Bearer JWT |
-| `POST`  | `/certificates/certificates/{documentId}/send-docusign` | `admin`       | `admin.sendDocuSignEnvelope`        | Bearer JWT |
-| `PUT`   | `/certificates/certificates/{documentId}/approve`       | `admin`       | `admin.approveCertificate`          | Bearer JWT |
-| `PUT`   | `/certificates/certificates/{documentId}/revoke`        | `admin`       | `admin.revokeCertificate`           | Bearer JWT |
-| `GET`   | `/certificates/certificates/{documentId}/print`         | `admin`       | `admin.printCertificate`            | Bearer JWT |
-| `GET`   | `/certificates/certificates/export/csv`                 | `admin`       | `admin.exportCsv`                   | Bearer JWT |
-| `GET`   | `/api/certificates/templates`                           | `content-api` | `content-api.listPublicTemplates`   | Public     |
-| `GET`   | `/api/certificates/public-key`                          | `content-api` | `content-api.getPublicKey`          | Public     |
-| `POST`  | `/api/certificates/apply`                               | `content-api` | `content-api.applyCertificate`      | Public     |
-| `GET`   | `/api/certificates/verify/{serial}`                     | `content-api` | `content-api.verifyBySerial`        | Public     |
-| `GET`   | `/api/certificates/verify/{serial}/print`               | `content-api` | `content-api.downloadPrintableHtml` | Public     |
-| `POST`  | `/api/certificates/webhooks/docusign`                   | `content-api` | `content-api.docusignWebhook`       | Public     |
+| الطريقة | مسار نقطة النهاية                                       | النطاق        | المعالج (Handler)                   | المصادقة      |
+| :------ | :------------------------------------------------------ | :------------ | :---------------------------------- | :------------ |
+| `GET`   | `/certificates/settings`                                | `admin`       | `admin.getSettings`                 | Bearer JWT    |
+| `PUT`   | `/certificates/settings`                                | `admin`       | `admin.updateSettings`              | Bearer JWT    |
+| `POST`  | `/certificates/settings/rotate-keys`                    | `admin`       | `admin.rotateKeys`                  | Bearer JWT    |
+| `GET`   | `/certificates/templates`                               | `admin`       | `admin.listTemplates`               | Bearer JWT    |
+| `POST`  | `/certificates/templates`                               | `admin`       | `admin.createTemplate`              | Bearer JWT    |
+| `POST`  | `/certificates/templates/seed`                          | `admin`       | `admin.seedTemplates`               | Bearer JWT    |
+| `GET`   | `/certificates/certificates`                            | `admin`       | `admin.listCertificates`            | Bearer JWT    |
+| `POST`  | `/certificates/certificates/issue`                      | `admin`       | `admin.issueCertificate`            | Bearer JWT    |
+| `POST`  | `/certificates/certificates/{documentId}/send-docusign` | `admin`       | `admin.sendDocuSignEnvelope`        | Bearer JWT    |
+| `PUT`   | `/certificates/certificates/{documentId}/approve`       | `admin`       | `admin.approveCertificate`          | Bearer JWT    |
+| `PUT`   | `/certificates/certificates/{documentId}/revoke`        | `admin`       | `admin.revokeCertificate`           | Bearer JWT    |
+| `GET`   | `/certificates/certificates/{documentId}/print`         | `admin`       | `admin.printCertificate`            | Bearer JWT    |
+| `GET`   | `/certificates/certificates/export/csv`                 | `admin`       | `admin.exportCsv`                   | Bearer JWT    |
+| `GET`   | `/api/certificates/templates`                           | `content-api` | `content-api.listPublicTemplates`   | Public        |
+| `GET`   | `/api/certificates/public-key`                          | `content-api` | `content-api.getPublicKey`          | Public        |
+| `POST`  | `/api/certificates/apply`                               | `content-api` | `content-api.applyCertificate`      | Public        |
+| `GET`   | `/api/certificates/verify/{serial}`                     | `content-api` | `content-api.verifyBySerial`        | Public        |
+| `GET`   | `/api/certificates/verify/{serial}/print`               | `content-api` | `content-api.downloadPrintableHtml` | Public        |
+| `POST`  | `/api/certificates/webhooks/docusign`                   | `content-api` | `content-api.docusignWebhook`       | Public (HMAC) |
+| `POST`  | `/api/certificates/webhooks/docuseal`                   | `content-api` | `content-api.docusealWebhook`       | Public (HMAC) |
 
 ## 7. الاستخدام البرمجي داخل الخادم (`strapi.plugin` و `strapi.documents`)
 
 ```ts
-// Registered services on plugin "certificates": "settings", "issuance", "docusign"
+// Registered services on plugin "certificates": "settings", "issuance", "docusign", "docuseal"
 const pluginService = strapi.plugin("certificates")?.service("issuance");
 
 // Querying records via the Strapi v5 Document Service API

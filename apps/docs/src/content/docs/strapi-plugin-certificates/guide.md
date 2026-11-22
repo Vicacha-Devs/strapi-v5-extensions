@@ -104,7 +104,7 @@ Cryptographically signed official certificate record with signatory and witness 
 | `cryptographicSignature` | `text`        | Yes      | —                                                                                     |
 | `publicKeyFingerprint`   | `string`      | Yes      | max: 96                                                                               |
 | `verificationToken`      | `string`      | No       | max: 128; `private: true`                                                             |
-| `esignProvider`          | `enumeration` | No       | enum: `none, docusign, webhook`; default: `"none"`                                    |
+| `esignProvider`          | `enumeration` | No       | enum: `none, docusign, docuseal, webhook`; default: `"none"`                          |
 | `esignEnvelopeId`        | `string`      | No       | max: 128                                                                              |
 | `esignEnvelopeStatus`    | `enumeration` | No       | enum: `not_sent, sent, delivered, completed, declined, voided`; default: `"not_sent"` |
 | `esignCompletedAt`       | `string`      | No       | max: 40                                                                               |
@@ -117,29 +117,29 @@ Reusable official certificate template with signatory rules, witness requirement
 
 > **Kind**: `collectionType` · **DB Table**: `certificates_templates` · **Admin Location**: `/admin/content-manager/collection-types/plugin::certificates.template` · **Draft & Publish**: `No` · **i18n**: `No`
 
-| Attribute               | Strapi Type   | Required | Constraints / Target                               |
-| :---------------------- | :------------ | :------- | :------------------------------------------------- |
-| `name`                  | `string`      | Yes      | max: 160                                           |
-| `slug`                  | `uid`         | Yes      | —                                                  |
-| `description`           | `text`        | No       | —                                                  |
-| `serialPrefix`          | `string`      | Yes      | max: 8; default: `"CERT"`                          |
-| `defaultValidityDays`   | `integer`     | No       | —                                                  |
-| `requiresWitnesses`     | `boolean`     | No       | default: `false`                                   |
-| `minWitnesses`          | `integer`     | No       | default: `0`                                       |
-| `requiresApproval`      | `boolean`     | No       | default: `true`                                    |
-| `esignEnabled`          | `boolean`     | No       | default: `false`                                   |
-| `esignProvider`         | `enumeration` | No       | enum: `none, docusign, webhook`; default: `"none"` |
-| `organizationName`      | `string`      | Yes      | max: 200                                           |
-| `organizationSubheader` | `string`      | No       | max: 240                                           |
-| `headerText`            | `string`      | No       | max: 240                                           |
-| `titleText`             | `string`      | Yes      | max: 200                                           |
-| `bodyTemplate`          | `text`        | Yes      | —                                                  |
-| `footerText`            | `text`        | No       | —                                                  |
-| `defaultSignatories`    | `json`        | No       | default: `[]`                                      |
-| `customFieldsSchema`    | `json`        | No       | default: `[]`                                      |
-| `secondaryCalendars`    | `json`        | No       | default: `[]`                                      |
-| `accentColor`           | `string`      | No       | max: 16; default: `"#14532d"`                      |
-| `active`                | `boolean`     | No       | default: `true`                                    |
+| Attribute               | Strapi Type   | Required | Constraints / Target                                         |
+| :---------------------- | :------------ | :------- | :----------------------------------------------------------- |
+| `name`                  | `string`      | Yes      | max: 160                                                     |
+| `slug`                  | `uid`         | Yes      | —                                                            |
+| `description`           | `text`        | No       | —                                                            |
+| `serialPrefix`          | `string`      | Yes      | max: 8; default: `"CERT"`                                    |
+| `defaultValidityDays`   | `integer`     | No       | —                                                            |
+| `requiresWitnesses`     | `boolean`     | No       | default: `false`                                             |
+| `minWitnesses`          | `integer`     | No       | default: `0`                                                 |
+| `requiresApproval`      | `boolean`     | No       | default: `true`                                              |
+| `esignEnabled`          | `boolean`     | No       | default: `false`                                             |
+| `esignProvider`         | `enumeration` | No       | enum: `none, docusign, docuseal, webhook`; default: `"none"` |
+| `organizationName`      | `string`      | Yes      | max: 200                                                     |
+| `organizationSubheader` | `string`      | No       | max: 240                                                     |
+| `headerText`            | `string`      | No       | max: 240                                                     |
+| `titleText`             | `string`      | Yes      | max: 200                                                     |
+| `bodyTemplate`          | `text`        | Yes      | —                                                            |
+| `footerText`            | `text`        | No       | —                                                            |
+| `defaultSignatories`    | `json`        | No       | default: `[]`                                                |
+| `customFieldsSchema`    | `json`        | No       | default: `[]`                                                |
+| `secondaryCalendars`    | `json`        | No       | default: `[]`                                                |
+| `accentColor`           | `string`      | No       | max: 16; default: `"#14532d"`                                |
+| `active`                | `boolean`     | No       | default: `true`                                              |
 
 ## Strapi v5 Content Manager Integration (`/admin/content-manager`)
 
@@ -233,46 +233,48 @@ flowchart LR
 
 ![Digital Certificates (Ed25519) — Strapi v5 Settings Panel](/screenshots/certificates-settings.png)
 
-### Use Case 4 — DocuSign / Webhook Multi-Party E-Signature Attestation
+### Use Case 4 — Self-Hosted DocuSeal / DocuSign Multi-Party E-Signature Attestation
 
-- **What it is for**: Route pending certificates to signatories and witnesses via DocuSign envelopes and automatically transition status upon completion.
-- **How it works**: Webhook events hit `POST /api/certificates/webhooks/esign` (verified with constant-time HMAC-SHA256) and update `esignEnvelopeStatus` on `plugin::certificates.certificate`.
+- **What it is for**: Route pending certificates to signatories and witnesses via **self-hosted DocuSeal** (`ESIGN_PROVIDER=docuseal`, `$0`) or **DocuSign**, and automatically Ed25519-seal the certificate upon completion.
+- **Branded Signing Invites (`ESIGN_EMAIL_DELIVERY_MODE=strapi`)**: For self-hosted DocuSeal, the plugin defaults to sending `send_email: false`, validating each signer's `embed_src` URL, and dispatching 100% branded HTML invites via `strapi-plugin-email-designer-5` (`ESIGN_EMAIL_DESIGNER_TEMPLATE_ID`) or `strapi.plugin("email")` (e.g. Resend SMTP).
+- **How it works**: Webhook events hit `POST /api/certificates/webhooks/docuseal` (or `/docusign`), pass fail-closed constant-time HMAC-SHA256 verification (`DOCUSEAL_WEBHOOK_SECRET`), and auto-approve + Ed25519-seal `plugin::certificates.certificate`.
 
 ```mermaid
 flowchart LR
-  Envelope["DocuSign Envelope Sent to Signatories"] --> Webhook["POST /api/certificates/webhooks/esign"]
+  Envelope["DocuSeal (send_email: false) + Branded Strapi Invite"] --> Webhook["POST /api/certificates/webhooks/docuseal"]
   Webhook --> Hmac["timingSafeEqual HMAC-SHA256 Verification"]
-  Hmac --> Activate["Update esignEnvelopeStatus = completed & status = active"]
+  Hmac --> Activate["Update esignEnvelopeStatus = completed & Ed25519 Seal"]
 ```
 
 ## 6. REST API Endpoints (`content-api` & `admin`)
 
-| Method | Endpoint Path                                           | Scope         | Controller Handler                  | Auth       |
-| :----- | :------------------------------------------------------ | :------------ | :---------------------------------- | :--------- |
-| `GET`  | `/certificates/settings`                                | `admin`       | `admin.getSettings`                 | Bearer JWT |
-| `PUT`  | `/certificates/settings`                                | `admin`       | `admin.updateSettings`              | Bearer JWT |
-| `POST` | `/certificates/settings/rotate-keys`                    | `admin`       | `admin.rotateKeys`                  | Bearer JWT |
-| `GET`  | `/certificates/templates`                               | `admin`       | `admin.listTemplates`               | Bearer JWT |
-| `POST` | `/certificates/templates`                               | `admin`       | `admin.createTemplate`              | Bearer JWT |
-| `POST` | `/certificates/templates/seed`                          | `admin`       | `admin.seedTemplates`               | Bearer JWT |
-| `GET`  | `/certificates/certificates`                            | `admin`       | `admin.listCertificates`            | Bearer JWT |
-| `POST` | `/certificates/certificates/issue`                      | `admin`       | `admin.issueCertificate`            | Bearer JWT |
-| `POST` | `/certificates/certificates/{documentId}/send-docusign` | `admin`       | `admin.sendDocuSignEnvelope`        | Bearer JWT |
-| `PUT`  | `/certificates/certificates/{documentId}/approve`       | `admin`       | `admin.approveCertificate`          | Bearer JWT |
-| `PUT`  | `/certificates/certificates/{documentId}/revoke`        | `admin`       | `admin.revokeCertificate`           | Bearer JWT |
-| `GET`  | `/certificates/certificates/{documentId}/print`         | `admin`       | `admin.printCertificate`            | Bearer JWT |
-| `GET`  | `/certificates/certificates/export/csv`                 | `admin`       | `admin.exportCsv`                   | Bearer JWT |
-| `GET`  | `/api/certificates/templates`                           | `content-api` | `content-api.listPublicTemplates`   | Public     |
-| `GET`  | `/api/certificates/public-key`                          | `content-api` | `content-api.getPublicKey`          | Public     |
-| `POST` | `/api/certificates/apply`                               | `content-api` | `content-api.applyCertificate`      | Public     |
-| `GET`  | `/api/certificates/verify/{serial}`                     | `content-api` | `content-api.verifyBySerial`        | Public     |
-| `GET`  | `/api/certificates/verify/{serial}/print`               | `content-api` | `content-api.downloadPrintableHtml` | Public     |
-| `POST` | `/api/certificates/webhooks/docusign`                   | `content-api` | `content-api.docusignWebhook`       | Public     |
+| Method | Endpoint Path                                           | Scope         | Controller Handler                  | Auth          |
+| :----- | :------------------------------------------------------ | :------------ | :---------------------------------- | :------------ |
+| `GET`  | `/certificates/settings`                                | `admin`       | `admin.getSettings`                 | Bearer JWT    |
+| `PUT`  | `/certificates/settings`                                | `admin`       | `admin.updateSettings`              | Bearer JWT    |
+| `POST` | `/certificates/settings/rotate-keys`                    | `admin`       | `admin.rotateKeys`                  | Bearer JWT    |
+| `GET`  | `/certificates/templates`                               | `admin`       | `admin.listTemplates`               | Bearer JWT    |
+| `POST` | `/certificates/templates`                               | `admin`       | `admin.createTemplate`              | Bearer JWT    |
+| `POST` | `/certificates/templates/seed`                          | `admin`       | `admin.seedTemplates`               | Bearer JWT    |
+| `GET`  | `/certificates/certificates`                            | `admin`       | `admin.listCertificates`            | Bearer JWT    |
+| `POST` | `/certificates/certificates/issue`                      | `admin`       | `admin.issueCertificate`            | Bearer JWT    |
+| `POST` | `/certificates/certificates/{documentId}/send-docusign` | `admin`       | `admin.sendDocuSignEnvelope`        | Bearer JWT    |
+| `PUT`  | `/certificates/certificates/{documentId}/approve`       | `admin`       | `admin.approveCertificate`          | Bearer JWT    |
+| `PUT`  | `/certificates/certificates/{documentId}/revoke`        | `admin`       | `admin.revokeCertificate`           | Bearer JWT    |
+| `GET`  | `/certificates/certificates/{documentId}/print`         | `admin`       | `admin.printCertificate`            | Bearer JWT    |
+| `GET`  | `/certificates/certificates/export/csv`                 | `admin`       | `admin.exportCsv`                   | Bearer JWT    |
+| `GET`  | `/api/certificates/templates`                           | `content-api` | `content-api.listPublicTemplates`   | Public        |
+| `GET`  | `/api/certificates/public-key`                          | `content-api` | `content-api.getPublicKey`          | Public        |
+| `POST` | `/api/certificates/apply`                               | `content-api` | `content-api.applyCertificate`      | Public        |
+| `GET`  | `/api/certificates/verify/{serial}`                     | `content-api` | `content-api.verifyBySerial`        | Public        |
+| `GET`  | `/api/certificates/verify/{serial}/print`               | `content-api` | `content-api.downloadPrintableHtml` | Public        |
+| `POST` | `/api/certificates/webhooks/docusign`                   | `content-api` | `content-api.docusignWebhook`       | Public (HMAC) |
+| `POST` | `/api/certificates/webhooks/docuseal`                   | `content-api` | `content-api.docusealWebhook`       | Public (HMAC) |
 
 ## 7. Programmatic Server Usage (`strapi.plugin` & `strapi.documents`)
 
 ```ts
-// Registered services on plugin "certificates": "settings", "issuance", "docusign"
+// Registered services on plugin "certificates": "settings", "issuance", "docusign", "docuseal"
 const pluginService = strapi.plugin("certificates")?.service("issuance");
 
 // Querying records via the Strapi v5 Document Service API
