@@ -26,6 +26,9 @@
     ".astro/**",
     "**/.astro/**",
     ".turbo/**",
+    ".qa/**",
+    "apps/dashboard/e2e/**",
+    "apps/dashboard/playwright.config.ts",
     "node_modules/**",
     "**/node_modules/**",
     "**/public/vendor/**"

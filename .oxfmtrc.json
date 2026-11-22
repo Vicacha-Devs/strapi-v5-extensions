@@ -36,6 +36,8 @@
     "apps/docs/schemas/**",
     ".turbo",
     "**/.turbo/**",
+    ".qa",
+    "**/.qa/**",
     "node_modules",
     "**/node_modules/**",
     "yarn.lock",

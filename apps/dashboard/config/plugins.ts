@@ -124,6 +124,14 @@ export default ({
   "media-feeds": {
     enabled: true,
   },
+  "opentelemetry": {
+    enabled: true,
+    config: {
+      serviceName: env("OTEL_SERVICE_NAME", "vicacha-strapi-dashboard"),
+      otlpEndpoint: env("OTEL_EXPORTER_OTLP_ENDPOINT", ""),
+      consoleExporter: false,
+    },
+  },
   "resources": {
     enabled: true,
   },

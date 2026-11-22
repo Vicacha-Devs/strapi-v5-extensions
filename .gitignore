@@ -28,6 +28,7 @@ test-results/
 .envrc
 !.env.example
 !.env.sample
+!.env.qa.example
 *recovery_codes*
 npm_recovery_codes*
 *.pem
@@ -46,3 +47,9 @@ coverage/
 
 # Archify scratch directory
 .archify/
+
+# CodeGraph index
+.codegraph/
+
+# QA outputs
+.qa/
