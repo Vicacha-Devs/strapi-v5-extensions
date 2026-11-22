@@ -73,6 +73,7 @@ jobs:
           DATABASE_FILENAME: .tmp/qa-ci.db
           STRAPI_DASHBOARD_URL: http://127.0.0.1:1338
         run: |
+          mkdir -p apps/dashboard/public/uploads
           APP_KEYS="$(openssl rand -hex 16),$(openssl rand -hex 16)" \
           API_TOKEN_SALT="$(openssl rand -hex 16)" \
           ADMIN_JWT_SECRET="$(openssl rand -hex 32)" \
