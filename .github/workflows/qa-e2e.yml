@@ -28,6 +28,7 @@ jobs:
         with:
           node-version: "24"
           cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
       - name: Run offline QA verification & build HTML Control Center
         run: pnpm qa:verify
       - name: Upload QA Control Center HTML & JSON
@@ -42,7 +43,8 @@ jobs:
 
   dashboard-e2e:
     name: Strapi Dashboard Boot Smoke & Playwright E2E
-    runs-on: ubuntu-latest
+    # Playwright does not support Chromium on ubuntu-26.04 (ubuntu-latest) yet
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
