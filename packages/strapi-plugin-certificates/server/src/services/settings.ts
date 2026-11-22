@@ -80,7 +80,11 @@ function normalizeEsignProvider(
   providerRaw: string,
   enabled: boolean
 ): DocuSignProviderConfig["provider"] {
-  if (providerRaw === "docusign" || providerRaw === "webhook") {
+  if (
+    providerRaw === "docusign" ||
+    providerRaw === "docuseal" ||
+    providerRaw === "webhook"
+  ) {
     return providerRaw;
   }
   return enabled ? "docusign" : "none";
@@ -97,24 +101,66 @@ function sanitizeESignConfig(
   fallback: DocuSignProviderConfig
 ): DocuSignProviderConfig {
   const obj = toRecordObject(raw);
+  const envProvider = process.env.ESIGN_PROVIDER?.trim().toLowerCase();
+  const envDocuSealBaseUrl = process.env.DOCUSEAL_BASE_URL?.trim();
   const envAccountId = process.env.DOCUSIGN_ACCOUNT_ID?.trim();
   const envBaseUrl = process.env.DOCUSIGN_BASE_URL?.trim();
   const envIntegrationKey = process.env.DOCUSIGN_INTEGRATION_KEY?.trim();
 
+  const inferredEnvProvider =
+    envProvider ||
+    (envDocuSealBaseUrl ? "docuseal" : envAccountId ? "docusign" : "");
   const enabled = Boolean(
-    obj.enabled ?? fallback.enabled ?? Boolean(envAccountId)
+    obj.enabled ??
+    fallback.enabled ??
+    Boolean(envDocuSealBaseUrl || envAccountId)
   );
-  const providerRaw = pickFirstString(obj.provider, fallback.provider, "none");
+  const providerRaw = pickFirstString(
+    obj.provider,
+    fallback.provider,
+    inferredEnvProvider,
+    "none"
+  );
+  const provider = normalizeEsignProvider(providerRaw, Boolean(obj.enabled));
+  const defaultBaseUrlForProvider =
+    provider === "docuseal"
+      ? envDocuSealBaseUrl || "https://api.docuseal.com"
+      : envBaseUrl || DEFAULT_ESIGN_CONFIG.baseUrl;
+  const envDeliveryMode =
+    process.env.ESIGN_EMAIL_DELIVERY_MODE?.trim().toLowerCase();
+  const rawDeliveryMode = pickFirstString(
+    obj.emailDeliveryMode,
+    fallback.provider === provider ? fallback.emailDeliveryMode : undefined,
+    envDeliveryMode
+  );
+  const emailDeliveryMode: DocuSignProviderConfig["emailDeliveryMode"] =
+    rawDeliveryMode === "strapi" || rawDeliveryMode === "provider"
+      ? rawDeliveryMode
+      : provider === "docuseal"
+        ? "strapi"
+        : "provider";
+  const rawTemplateId =
+    obj.emailDesignerTemplateId ??
+    fallback.emailDesignerTemplateId ??
+    (process.env.ESIGN_EMAIL_DESIGNER_TEMPLATE_ID
+      ? Number(process.env.ESIGN_EMAIL_DESIGNER_TEMPLATE_ID)
+      : undefined);
+  const emailDesignerTemplateId =
+    typeof rawTemplateId === "number" &&
+    Number.isInteger(rawTemplateId) &&
+    rawTemplateId > 0
+      ? rawTemplateId
+      : undefined;
 
   return {
     enabled,
-    provider: normalizeEsignProvider(providerRaw, Boolean(obj.enabled)),
+    provider,
     baseUrl: stripTrailingSlashes(
       pickFirstString(
         obj.baseUrl,
-        envBaseUrl,
+        provider === "docuseal" ? envDocuSealBaseUrl : envBaseUrl,
         fallback.baseUrl,
-        DEFAULT_ESIGN_CONFIG.baseUrl
+        defaultBaseUrlForProvider
       )
     ),
     accountId: pickFirstString(obj.accountId, envAccountId, fallback.accountId),
@@ -128,6 +174,8 @@ function sanitizeESignConfig(
       fallback.emailSubjectPrefix,
       DEFAULT_ESIGN_CONFIG.emailSubjectPrefix
     ),
+    emailDeliveryMode,
+    ...(emailDesignerTemplateId ? { emailDesignerTemplateId } : {}),
   };
 }
 

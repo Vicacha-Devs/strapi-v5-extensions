@@ -9,7 +9,17 @@ export type CertificateStatus =
   | "revoked"
   | "expired";
 
-export type ESignProviderType = "none" | "docusign" | "webhook";
+export type ESignProviderType = "none" | "docusign" | "docuseal" | "webhook";
+
+export type ESignEmailDeliveryMode = "provider" | "strapi";
+
+export interface DocuSealSignerLink {
+  role: string;
+  email: string;
+  name: string;
+  embedSrc: string;
+  submitterId?: string;
+}
 
 export type ESignEnvelopeStatus =
   | "not_sent"
@@ -26,6 +36,8 @@ export interface DocuSignProviderConfig {
   accountId: string;
   integrationKey?: string;
   emailSubjectPrefix?: string;
+  emailDeliveryMode?: ESignEmailDeliveryMode;
+  emailDesignerTemplateId?: number;
 }
 
 export interface CertificateSignatory {

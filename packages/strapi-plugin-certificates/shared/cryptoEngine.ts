@@ -224,3 +224,39 @@ export function verifyDocuSignWebhookHmac(
     computedBase64
   );
 }
+
+export function computeDocuSealWebhookHmac(
+  rawPayload: string,
+  webhookSecret: string,
+  timestamp?: string
+): string {
+  const signedContent = timestamp ? `${timestamp}.${rawPayload}` : rawPayload;
+  return createHmac("sha256", webhookSecret)
+    .update(signedContent, "utf8")
+    .digest("hex");
+}
+
+export function verifyDocuSealWebhookHmac(
+  rawPayload: string,
+  signatureHeader?: string,
+  webhookSecret?: string
+): boolean {
+  if (!rawPayload || !signatureHeader || !webhookSecret) {
+    return false;
+  }
+  const trimmed = String(signatureHeader).trim();
+  const dotIdx = trimmed.indexOf(".");
+  if (dotIdx > 0 && dotIdx < trimmed.length - 1) {
+    const timestamp = trimmed.slice(0, dotIdx);
+    const sigHex = trimmed.slice(dotIdx + 1).replace(/^sha256=/i, "");
+    const computed = computeDocuSealWebhookHmac(
+      rawPayload,
+      webhookSecret,
+      timestamp
+    );
+    return verifyTokenConstantTime(sigHex.toLowerCase(), computed);
+  }
+  const cleanHex = trimmed.replace(/^sha256=/i, "").toLowerCase();
+  const computed = computeDocuSealWebhookHmac(rawPayload, webhookSecret);
+  return verifyTokenConstantTime(cleanHex, computed);
+}

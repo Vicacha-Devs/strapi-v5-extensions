@@ -59,6 +59,14 @@ interface DocuSignServiceContract {
   }>;
 }
 
+interface DocuSealServiceContract {
+  sendSubmissionForCertificate(documentId: string): Promise<{
+    envelopeId: string;
+    envelopeStatus: ESignEnvelopeStatus;
+    certificate: CertificateRecord;
+  }>;
+}
+
 export interface KoaContext {
   query: Record<string, string | undefined>;
   params: Record<string, string | undefined>;
@@ -79,6 +87,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>("issuance");
   const getDocuSign = () =>
     strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>("docusign");
+  const getDocuSeal = () =>
+    strapi.plugin(PLUGIN_ID).service<DocuSealServiceContract>("docuseal");
+
+  const dispatchActiveESign = async (documentId: string) => {
+    const currentSettings = await getSettings().getSettings();
+    if (currentSettings.esign?.provider === "docuseal") {
+      return getDocuSeal().sendSubmissionForCertificate(documentId);
+    }
+    return getDocuSign().sendEnvelopeForCertificate(documentId);
+  };
 
   return {
     async getSettings(ctx: KoaContext) {
@@ -143,9 +161,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
           autoApprove,
         });
         if (body.sendViaESign === true) {
-          const sent = await getDocuSign().sendEnvelopeForCertificate(
-            data.documentId
-          );
+          const sent = await dispatchActiveESign(data.documentId);
           data = sent.certificate;
         }
         ctx.body = { data };
@@ -162,12 +178,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
         return ctx.badRequest("documentId is required");
       }
       try {
-        const result =
-          await getDocuSign().sendEnvelopeForCertificate(documentId);
+        const result = await dispatchActiveESign(documentId);
         ctx.body = { data: result };
       } catch (err) {
         return ctx.badRequest(
-          (err as Error).message || "Failed to dispatch DocuSign envelope"
+          (err as Error).message || "Failed to dispatch eSignature request"
         );
       }
     },
