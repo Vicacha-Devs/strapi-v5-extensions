@@ -1,0 +1,99 @@
+name: QA Control Center & Dashboard E2E
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-e2e-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  qa-offline:
+    name: QA Doctor, Adversarial Judges & Plugin Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Build shared workspace package (resolved via dist by plugin tests)
+        run: pnpm --filter @vicacha-devs/plugin-shared build
+      - name: Run offline QA verification & build HTML Control Center
+        run: pnpm qa:verify
+      - name: Upload QA Control Center HTML & JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strapi-extensions-qa-dashboard
+          path: |
+            .qa/dashboard.html
+            .qa/report.json
+          retention-days: 14
+
+  dashboard-e2e:
+    name: Strapi Dashboard Boot Smoke & Playwright E2E
+    # Playwright does not support Chromium on ubuntu-26.04 (ubuntu-latest) yet
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm dashboard:build
+      - name: Install Playwright Chromium
+        working-directory: ./apps/dashboard
+        run: pnpm dlx --package=@playwright/test@1.53.0 playwright install --with-deps chromium
+      - name: Boot Strapi Dashboard on loopback 127.0.0.1:1338 & run smoke + E2E
+        env:
+          HOST: 127.0.0.1
+          PORT: "1338"
+          DATABASE_CLIENT: sqlite
+          DATABASE_FILENAME: .tmp/qa-ci.db
+          STRAPI_DASHBOARD_URL: http://127.0.0.1:1338
+        run: |
+          mkdir -p apps/dashboard/public/uploads
+          APP_KEYS="$(openssl rand -hex 16),$(openssl rand -hex 16)" \
+          API_TOKEN_SALT="$(openssl rand -hex 16)" \
+          ADMIN_JWT_SECRET="$(openssl rand -hex 32)" \
+          TRANSFER_TOKEN_SALT="$(openssl rand -hex 16)" \
+          JWT_SECRET="$(openssl rand -hex 32)" \
+          ENCRYPTION_KEY="$(openssl rand -hex 16)" \
+          pnpm dashboard:start &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID 2>/dev/null || true" EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:1338/_health >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          pnpm qa:smoke
+          (cd apps/dashboard && pnpm dlx --package=@playwright/test@1.53.0 playwright test --config playwright.config.ts)
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: strapi-dashboard-playwright-report
+          path: apps/dashboard/playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore

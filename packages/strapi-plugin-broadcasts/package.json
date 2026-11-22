@@ -77,7 +77,7 @@
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "6.1.1",
-    "@strapi/strapi": "^5.39.0",
+    "@strapi/strapi": "^5.63.0",
     "@vicacha-devs/eslint-config": "workspace:*",
     "@vicacha-devs/plugin-shared": "workspace:*",
     "@vicacha-devs/strapi-plugin-calendar": "workspace:*",

@@ -16,3 +16,15 @@ pnpm --filter @vicacha-devs/docs build
 pnpm --filter @vicacha-devs/docs test:judges
 pnpm format:check && pnpm lint && pnpm verify
 ```
+
+## Eklenti Oluşturucu ve QA Kontrol Merkezi
+
+5 dil desteği (`en/es/ar/tr/fr`), çevrimdışı testler ve isteğe bağlı `apps/dashboard` bağlantısı ile yeni Strapi v5 eklentileri oluşturun ve çoklu depo QA raporları üretin:
+
+```bash
+pnpm plugin:new -- announcements --display-name "Announcements" --with-content-type --wire-dashboard
+pnpm qa:doctor && pnpm qa:judges && pnpm qa:verify && pnpm qa:report
+pnpm qa:docker:up && pnpm qa:smoke && pnpm qa:e2e && pnpm qa:docker:down
+```
+
+Yalıtılmış QA altyapısı (`docker-compose.qa.yml`) yalnızca `127.0.0.1` (`5434/6381/8110/1027`) üzerinde çalışır ve `.github/workflows/qa-e2e.yml` Dashboard Playwright E2E testlerini otomatik olarak çalıştırır.

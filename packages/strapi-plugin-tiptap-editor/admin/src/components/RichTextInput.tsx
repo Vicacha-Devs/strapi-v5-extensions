@@ -387,26 +387,18 @@ const RichTextInput = forwardRef<HTMLDivElement, RichTextInputProps>(
       Promise.resolve()
         .then(() => {
           if (typeof getFetchClient !== "function") return undefined;
-          return getFetchClient().get("/tiptap-editor/settings");
+          return getFetchClient().get<{
+            defaultPreset?: string;
+            enableRelationalSync?: boolean;
+            defaultOutputFormat?: TiptapOutputFormat;
+          }>("/tiptap-editor/settings");
         })
-        .then(
-          (
-            res:
-              | {
-                  data?: {
-                    defaultPreset?: string;
-                    enableRelationalSync?: boolean;
-                    defaultOutputFormat?: TiptapOutputFormat;
-                  };
-                }
-              | undefined
-          ) => {
-            if (!mounted) return;
-            setRuntimeSettings(parseLoadedRuntimeSettings(res?.data));
-            setSettingsLoadFailed(false);
-            setIsSettingsLoading(false);
-          }
-        )
+        .then((res) => {
+          if (!mounted) return;
+          setRuntimeSettings(parseLoadedRuntimeSettings(res?.data));
+          setSettingsLoadFailed(false);
+          setIsSettingsLoading(false);
+        })
         .catch(() => {
           if (mounted) {
             setRuntimeSettings(DEFAULT_RUNTIME_SETTINGS);

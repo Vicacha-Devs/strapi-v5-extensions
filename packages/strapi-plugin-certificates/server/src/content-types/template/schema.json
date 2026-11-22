@@ -62,7 +62,7 @@
     },
     "esignProvider": {
       "type": "enumeration",
-      "enum": ["none", "docusign", "webhook"],
+      "enum": ["none", "docusign", "docuseal", "webhook"],
       "default": "none"
     },
     "organizationName": {

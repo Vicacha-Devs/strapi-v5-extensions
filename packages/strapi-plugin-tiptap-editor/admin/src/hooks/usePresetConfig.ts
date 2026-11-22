@@ -39,7 +39,7 @@ export function usePresetConfig(presetName?: string): PresetConfigResult {
     const fetchPreset = async () => {
       setIsLoading(true);
       try {
-        const response = await get(
+        const response = await get<TiptapPresetConfig>(
           `/tiptap-editor/presets/${normalizedPresetName}`
         );
         if (!mounted) return;

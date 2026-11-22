@@ -166,29 +166,25 @@ export function ImageNodeView({
     if (!assetId) return;
     const requestId = ++fillRequestRef.current;
     const requestedAssetId = assetId;
-    get(`/upload/files/${requestedAssetId}`)
-      .then(
-        (res: {
-          data?: {
-            name?: string;
-            alternativeText?: string | null;
-            caption?: string | null;
-          };
-        }) => {
-          if (
-            requestId !== fillRequestRef.current ||
-            requestedAssetId !== assetIdRef.current
-          ) {
-            return;
-          }
-          const file = res.data;
-          if (!file) return;
-          updateAttributes({
-            alt: file.alternativeText ?? file.name ?? "",
-            caption: file.caption || null,
-          });
+    get<{
+      name?: string;
+      alternativeText?: string | null;
+      caption?: string | null;
+    }>(`/upload/files/${requestedAssetId}`)
+      .then((res) => {
+        if (
+          requestId !== fillRequestRef.current ||
+          requestedAssetId !== assetIdRef.current
+        ) {
+          return;
         }
-      )
+        const file = res.data;
+        if (!file) return;
+        updateAttributes({
+          alt: file.alternativeText ?? file.name ?? "",
+          caption: file.caption || null,
+        });
+      })
       .catch(() => {});
   }
 

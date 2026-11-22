@@ -9,6 +9,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const calendarPkgRoot = resolvePath(currentDir, "../../strapi-plugin-calendar");
+const pluginSharedEntryUrl = pathToFileURL(
+  resolvePath(currentDir, "../../plugin-shared/src/index.ts")
+).href;
 const intlDateShimUrl = pathToFileURL(
   resolvePath(calendarPkgRoot, "tests/intl-date-shim.mjs")
 ).href;
@@ -17,6 +20,9 @@ registerHooks({
   resolve(specifier: string, context: any, nextResolve: any) {
     if (specifier === "@internationalized/date") {
       return { url: intlDateShimUrl, shortCircuit: true };
+    }
+    if (specifier === "@vicacha-devs/plugin-shared") {
+      return { url: pluginSharedEntryUrl, shortCircuit: true };
     }
     if (specifier === "@vicacha-devs/strapi-plugin-calendar/shared") {
       return {

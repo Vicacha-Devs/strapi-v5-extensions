@@ -64,6 +64,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.plugin(PLUGIN_ID).service<IssuanceServiceContract>("issuance");
   const getDocuSign = () =>
     strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>("docusign");
+  const getDocuSeal = () =>
+    strapi.plugin(PLUGIN_ID).service<DocuSignServiceContract>("docuseal");
 
   return {
     async listPublicTemplates(ctx: KoaContext) {
@@ -244,6 +246,44 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       } catch (err) {
         return ctx.forbidden(
           (err as Error).message || "DocuSign webhook verification failed"
+        );
+      }
+    },
+
+    async docusealWebhook(ctx: KoaContext) {
+      const ipKey = `webhook:docuseal:${ctx.ip || "unknown"}`;
+      if (!checkRateLimit(ipKey, 60, 60_000)) {
+        ctx.status = 429;
+        ctx.body = { error: { message: "Webhook rate limit exceeded." } };
+        return;
+      }
+
+      const payload = (ctx.request.body || {}) as Record<string, unknown>;
+      const rawBody =
+        typeof ctx.request.rawBody === "string" && ctx.request.rawBody
+          ? ctx.request.rawBody
+          : JSON.stringify(payload);
+      const signatureHeader =
+        ctx.headers?.["x-docuseal-signature"] ||
+        ctx.headers?.["X-Docuseal-Signature"];
+
+      try {
+        const result = await getDocuSeal().handleWebhookEvent({
+          rawBody,
+          signatureHeader,
+          payload,
+        });
+        ctx.body = {
+          data: {
+            envelopeId: result.envelopeId,
+            envelopeStatus: result.envelopeStatus,
+            serialNumber: result.certificate.serialNumber,
+            status: result.certificate.status,
+          },
+        };
+      } catch (err) {
+        return ctx.forbidden(
+          (err as Error).message || "DocuSeal webhook verification failed"
         );
       }
     },

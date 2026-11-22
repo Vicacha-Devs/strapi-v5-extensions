@@ -118,7 +118,9 @@ function asObj<T>(val: unknown): T {
 
 function asEsignProvider(val: unknown): ESignProviderType {
   const raw = asStr(val, "none");
-  return raw === "docusign" || raw === "webhook" ? raw : "none";
+  return raw === "docusign" || raw === "docuseal" || raw === "webhook"
+    ? raw
+    : "none";
 }
 
 function asNonNegativeInt(val: unknown, fallback = 0): number {

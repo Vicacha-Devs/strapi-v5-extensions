@@ -70,8 +70,8 @@ export function SettingsPage() {
 
   useEffect(() => {
     let mounted = true;
-    get("/tiptap-editor/settings")
-      .then((res: { data?: TiptapRuntimeSettings }) => {
+    get<TiptapRuntimeSettings>("/tiptap-editor/settings")
+      .then((res) => {
         if (!mounted || !res?.data) return;
         const loaded: TiptapRuntimeSettings = {
           ...DEFAULT_RUNTIME_SETTINGS,
@@ -97,8 +97,8 @@ export function SettingsPage() {
 
   useEffect(() => {
     let mounted = true;
-    get("/tiptap-editor/presets?includeBuiltIn=true")
-      .then((res: { data?: { presets?: string[] } }) => {
+    get<{ presets?: string[] }>("/tiptap-editor/presets?includeBuiltIn=true")
+      .then((res) => {
         if (mounted && Array.isArray(res?.data?.presets)) {
           setAvailablePresets(res.data.presets);
         }
@@ -117,8 +117,10 @@ export function SettingsPage() {
     )
       ? ((BUILT_IN_PRESETS[selectedPreset] ?? {}) as Record<string, unknown>)
       : {};
-    get(`/tiptap-editor/presets/${encodeURIComponent(selectedPreset)}`)
-      .then((res: { data?: Record<string, unknown> }) => {
+    get<Record<string, unknown>>(
+      `/tiptap-editor/presets/${encodeURIComponent(selectedPreset)}`
+    )
+      .then((res) => {
         if (mounted) {
           setBasePreset(res?.data ?? builtInSelected);
         }
@@ -283,7 +285,10 @@ export function SettingsPage() {
         ...settings,
         allowedIframeDomains: domains,
       };
-      const res = await put("/tiptap-editor/settings", payload);
+      const res = await put<TiptapRuntimeSettings>(
+        "/tiptap-editor/settings",
+        payload
+      );
       if (res?.data) {
         setSettings({
           ...DEFAULT_RUNTIME_SETTINGS,

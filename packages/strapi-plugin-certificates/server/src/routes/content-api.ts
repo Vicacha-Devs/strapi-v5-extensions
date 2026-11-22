@@ -37,5 +37,11 @@ export default {
       handler: "content-api.docusignWebhook",
       config: { auth: false },
     },
+    {
+      method: "POST",
+      path: "/webhooks/docuseal",
+      handler: "content-api.docusealWebhook",
+      config: { auth: false },
+    },
   ],
 };

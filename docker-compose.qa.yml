@@ -1,0 +1,60 @@
+# Port-isolated QA infrastructure for @vicacha-devs/strapi-v5-extensions
+# All ports strictly bound to 127.0.0.1 (loopback only) — zero collision with
+# central-mosque-bogota (5433), vicacha-travels (5435), or medusa-plugins (5436).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: strapi_ext_qa_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${QA_POSTGRES_DB:-strapi_ext_qa}
+      POSTGRES_USER: ${QA_POSTGRES_USER:-strapi_qa}
+      POSTGRES_PASSWORD: ${QA_POSTGRES_PASSWORD:?QA_POSTGRES_PASSWORD must be set in .env.qa}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - strapi_ext_qa_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: strapi_ext_qa_valkey
+    restart: unless-stopped
+    command: ["valkey-server", "--save", "", "--loglevel", "warning"]
+    ports:
+      - "127.0.0.1:6381:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  typesense:
+    image: typesense/typesense:27.1
+    container_name: strapi_ext_qa_typesense
+    restart: unless-stopped
+    environment:
+      TYPESENSE_DATA_DIR: /data
+      TYPESENSE_API_KEY: ${QA_TYPESENSE_API_KEY:?QA_TYPESENSE_API_KEY must be set in .env.qa}
+      TYPESENSE_ENABLE_CORS: "true"
+    ports:
+      - "127.0.0.1:8110:8108"
+    volumes:
+      - strapi_ext_qa_typesense:/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: strapi_ext_qa_mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1027:1025"
+      - "127.0.0.1:8027:8025"
+
+volumes:
+  strapi_ext_qa_pg:
+  strapi_ext_qa_typesense:

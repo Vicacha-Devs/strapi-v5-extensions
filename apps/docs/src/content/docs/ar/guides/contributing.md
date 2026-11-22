@@ -17,3 +17,15 @@ pnpm --filter @vicacha-devs/docs build
 pnpm --filter @vicacha-devs/docs test:judges
 pnpm format:check && pnpm lint && pnpm verify
 ```
+
+## مُنشئ الإضافات ومركز التحكم في الجودة (QA)
+
+أنشئ إضافات Strapi v5 جديدة تلقائياً بتكافؤ ترجمة لـ 5 لغات (`en/es/ar/tr/fr`) واختبارات محلية وربط اختياري مع `apps/dashboard`:
+
+```bash
+pnpm plugin:new -- announcements --display-name "Announcements" --with-content-type --wire-dashboard
+pnpm qa:doctor && pnpm qa:judges && pnpm qa:verify && pnpm qa:report
+pnpm qa:docker:up && pnpm qa:smoke && pnpm qa:e2e && pnpm qa:docker:down
+```
+
+تعمل حاويات الجودة المعزولة (`docker-compose.qa.yml`) حصرياً على `127.0.0.1` (`5434/6381/8110/1027`)، ويُشغّل مسار `.github/workflows/qa-e2e.yml` اختبارات Playwright للوحة التحكم تلقائياً.

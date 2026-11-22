@@ -62,6 +62,16 @@ const isAllowedPluginContentType = (name: string): boolean => {
   return !BLACKLISTED_PLUGINS.includes(pluginPrefix);
 };
 
+const pickString = (val: unknown, maxLen?: number): string | null => {
+  if (typeof val !== "string") return null;
+  const trimmed = val.trim();
+  if (!trimmed) return null;
+  if (maxLen && trimmed.length > maxLen) {
+    return `${trimmed.slice(0, maxLen - 1).trimEnd()}…`;
+  }
+  return trimmed;
+};
+
 export const seoService = ({ strapi }: { strapi: Core.Strapi }) => ({
   getSeoComponent() {
     const seoComponent = strapi.components?.["shared.seo"];
@@ -155,16 +165,6 @@ export const seoService = ({ strapi }: { strapi: Core.Strapi }) => ({
       doc: params.doc ?? {},
       locale: params.locale ?? null,
       strapi,
-    };
-
-    const pickString = (val: unknown, maxLen?: number): string | null => {
-      if (typeof val !== "string") return null;
-      const trimmed = val.trim();
-      if (!trimmed) return null;
-      if (maxLen && trimmed.length > maxLen) {
-        return `${trimmed.slice(0, maxLen - 1).trimEnd()}…`;
-      }
-      return trimmed;
     };
 
     const rawTitle = cfg.generateTitle

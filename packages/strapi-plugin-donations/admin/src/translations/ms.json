@@ -424,5 +424,8 @@
   "placeholder.add_currency_iso": "+ Tambah / Togol Mata Wang ISO 4217...",
   "settings.tab.currency": "Mata Wang, Penyetempatan & Teks Kaya",
   "settings.tab.categories": "Kategori Sumbangan ({count})",
-  "settings.tab.certificates": "Jambatan Sijil Cukai Kriptografi"
+  "settings.tab.certificates": "Jambatan Sijil Cukai Kriptografi",
+  "field.supported_locales": "Bahasa yang Disokong",
+  "field.supported_donor_currencies": "Mata Wang Penderma yang Disokong (ISO 4217)",
+  "placeholder.select_supported_locales": "Pilih bahasa yang disokong..."
 }

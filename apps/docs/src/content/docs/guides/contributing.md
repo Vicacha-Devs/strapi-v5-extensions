@@ -13,8 +13,10 @@ The monorepo uses a fast, modern Rust + TypeScript quality toolchain modeled aft
 | **Oxlint**              | `.oxlintrc.json`                        | `pnpm lint:oxc`                     | Fast static analysis (`typescript`, `unicorn`, `oxc`, `import` plugins)                                                |
 | **ESLint v10**          | `eslint.config.ts`                      | `pnpm lint:eslint`                  | Flat config enforcing `max-lines: 500`, `sonarjs`, `jsx-a11y`, and JSON validation                                     |
 | **TypeScript 5.9**      | `tsconfig.json`                         | `pnpm check`                        | Strict `tsc --noEmit` across both `admin/tsconfig.json` and `server/tsconfig.json`                                     |
-| **Strapi SDK**          | `package.json`                          | `pnpm verify:sdk`                   | Runs `strapi-plugin verify` across all 15 plugins                                                                      |
+| **Strapi SDK**          | `package.json`                          | `pnpm verify:sdk`                   | Runs `strapi-plugin verify` across all 17 plugins                                                                      |
 | **Publint**             | `scripts/publint-all.ts`                | `pnpm publint`                      | Packs each plugin with `pnpm` and enforces `publint({ strict: true })`                                                 |
+| **Plugin Scaffolder**   | `scripts/create-plugin.ts`              | `pnpm plugin:new -- <slug>`         | Generates a compliant Strapi v5 plugin with 5-locale i18n, dual tsconfigs, offline tests & dashboard wiring            |
+| **QA Control Center**   | `scripts/qa/*`, `docker-compose.qa.yml` | `pnpm qa:verify` / `pnpm qa:report` | Offline doctor, adversarial judges, multi-repo HTML Control Center (`.qa/dashboard.html`) & Dashboard Playwright E2E   |
 | **Husky + lint-staged** | `.husky/*`, `.lintstagedrc.json`        | Git hooks                           | Runs `commitlint` on `commit-msg`, `lint-staged` on `pre-commit`, and `lint + check + test` on `pre-push`              |
 | **Semantic Release**    | `.releaserc.json`, `scripts/release.ts` | `pnpm release` / `pnpm release:dry` | Per-package conventional-commit version calculation, changelog generation, and `pnpm publish` with npm OIDC provenance |
 
@@ -79,3 +81,28 @@ pnpm --filter @vicacha-devs/docs test:judges
 1. **Register the package** in `apps/docs/docs-packages.ts` with its `slug`, `dir`, `npmName`, `pluginId`, `label`, `category`, `schemaFile`, `screenshot`, `settingsScreenshot`, and localized `summary` (`en`, `es`, `ar`, `tr`).
 2. **Document Content-Type entities & use cases** in `apps/docs/scripts/lib/plugin-use-cases.ts` so `sync-readmes.ts` and `capture-screenshots.ts` include full Strapi v5 entity paths, workflows, and screenshots.
 3. **Run `pnpm --filter @vicacha-devs/docs build && pnpm --filter @vicacha-devs/docs test:judges`** to generate the OpenAPI spec, sync all 4 locales, and verify all 5 adversarial judges pass.
+
+---
+
+## Automated Plugin Scaffolding & QA Control Center
+
+Create new plugins and run cross-repo quality checks without manual boilerplate:
+
+```bash
+# Scaffold a new Strapi v5 plugin with 5-locale i18n parity & optional dashboard wiring
+pnpm plugin:new -- announcements --display-name "Announcements" --with-content-type --wire-dashboard
+
+# Run offline QA doctor, adversarial judges, plugin unit suites & generate .qa/dashboard.html
+pnpm qa:doctor
+pnpm qa:judges
+pnpm qa:verify
+pnpm qa:report
+
+# Boot port-isolated 127.0.0.1 QA infra (Postgres 5434, Valkey 6381, Typesense 8110, Mailpit 1027)
+pnpm qa:docker:up
+pnpm qa:smoke
+pnpm qa:e2e
+pnpm qa:docker:down
+```
+
+CI runs Dashboard boot smoke tests and Playwright Admin E2E automatically via `.github/workflows/qa-e2e.yml`, uploading `.qa/dashboard.html` and the Playwright HTML report as artifacts.

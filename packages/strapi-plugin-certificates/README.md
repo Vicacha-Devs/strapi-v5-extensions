@@ -10,8 +10,9 @@ Generic **Official Certificates, Cryptographic Ed25519 Signing, Printable Creden
   - Configurable credential types (e.g., Shahada / Declaration of Faith, Nikah / Marriage, Course Completion, Tax-Deductible Donation Receipt) with customizable HTML/CSS layouts, placeholders, required applicant fields, and witness requirements.
 - **Cryptographic Ed25519 Signing & Verification (`plugin::certificates.certificate`)**:
   - Signs issued certificate payloads (`serialNumber`, `recipientName`, `templateSlug`, `issuedAt`, `canonicalPayloadHash`) using **Ed25519** (`node:crypto`) and exposes the public verification key at `GET /api/certificates/public-key` and verification endpoint at `GET /api/certificates/verify/:serial`.
-- **Self-Service Applications & Printable Credentials**:
-  - Public application intake (`POST /api/certificates/apply`), printable HTML/PDF rendering (`GET /api/certificates/verify/:serial/print`), and DocuSign webhook status sync (`POST /api/certificates/webhooks/docusign`).
+- **Self-Service Applications, Printable Credentials & E-Signatures**:
+  - Public application intake (`POST /api/certificates/apply`), printable HTML/PDF rendering (`GET /api/certificates/verify/:serial/print`), and multi-party e-signature routing via **self-hosted DocuSeal** (`ESIGN_PROVIDER=docuseal`, `POST /api/certificates/webhooks/docuseal`) or **DocuSign** (`POST /api/certificates/webhooks/docusign`) with constant-time HMAC-SHA256 webhook verification.
+  - **100% Branded Signing Invites (`ESIGN_EMAIL_DELIVERY_MODE=strapi`)**: Defaults to passing `send_email: false` to DocuSeal, validating returned `embed_src` signing URLs, and dispatching branded HTML signing invites through `strapi-plugin-email-designer-5` (`ESIGN_EMAIL_DESIGNER_TEMPLATE_ID`) or `strapi.plugin('email')` (e.g., Resend SMTP).
 - **Calendar Bridge**:
   - Automatically syncs ceremony/appointment dates into `@vicacha-devs/strapi-plugin-calendar`.
 - **13-Locale Admin UI**:

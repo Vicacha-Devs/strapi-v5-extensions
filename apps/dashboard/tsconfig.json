@@ -3,6 +3,7 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
+    "noEmit": false,
     "outDir": "dist",
     "rootDir": "."
   },
@@ -14,6 +15,10 @@
     ".cache/",
     ".tmp/",
     ".strapi/",
-    "src/admin/"
+    "src/admin/",
+    "e2e/",
+    "playwright.config.ts",
+    "playwright-report/",
+    "test-results/"
   ]
 }

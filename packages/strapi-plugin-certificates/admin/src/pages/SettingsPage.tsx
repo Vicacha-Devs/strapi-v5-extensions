@@ -13,6 +13,7 @@ import { useIntl } from "react-intl";
 
 import { PLUGIN_ID } from "../../../shared/pluginId";
 import type { CertificatesPluginSettings } from "../../../shared/types";
+import { ESignSettingsTab } from "../components/ESignSettingsTab";
 import {
   Code,
   gridStyle,
@@ -296,82 +297,11 @@ export const SettingsPage: React.FC = () => {
             </Box>
           </TabPanelBox>
 
-          <TabPanelBox value="docusign">
-            <Typography variant="beta" fontWeight="bold">
-              {t(
-                "settings.ui.2_optional_docusign_e_signature_service",
-                "Optional DocuSign E-Signature Service"
-              )}
-            </Typography>
-            <Box marginTop={1}>
-              <Typography variant="pi" textColor="neutral600">
-                {t("settings.ui.secrets_prefix", "Secrets")} (
-                <Code>DOCUSIGN_ACCESS_TOKEN</Code>{" "}
-                {t("settings.ui.and_conjunction", "&")}{" "}
-                <Code>DOCUSIGN_WEBHOOK_SECRET</Code>){" "}
-                {t(
-                  "settings.ui.secrets_loaded_from_env",
-                  "are loaded from environment variables. Connect webhook endpoint:"
-                )}{" "}
-                <Code>
-                  {t(
-                    "settings.ui.endpoint_docusign_webhook",
-                    "POST /api/certificates/webhooks/docusign"
-                  )}
-                </Code>
-              </Typography>
-            </Box>
-            <Flex direction="column" gap={4} marginTop={4} alignItems="stretch">
-              <Box
-                padding={4}
-                background="neutral100"
-                hasRadius
-                style={SUB_CARD_BORDER}
-              >
-                {renderCheckbox(
-                  settings.esign?.enabled ?? false,
-                  (enabled) =>
-                    updateEsign({
-                      enabled,
-                      provider: enabled ? "docusign" : "none",
-                    }),
-                  t(
-                    "checkbox.enable_docusign_esignature_multi_party_envelope_",
-                    "Enable DocuSign eSignature multi-party envelope routing for Witnesses & Signatories"
-                  )
-                )}
-              </Box>
-              <Box style={gridStyle(2)}>
-                {renderField(
-                  t(
-                    "field.docusign_rest_api_base_url_https",
-                    "DocuSign REST API Base URL (HTTPS)"
-                  ),
-                  t(
-                    "settings.ui.docusign_rest_api_endpoint_demo_sandbox_or_produ",
-                    "DocuSign REST API endpoint (demo sandbox or production account URI)."
-                  ),
-                  t(
-                    "placeholder.e_g_https_demo_docusign_net_restapi",
-                    "e.g., https://demo.docusign.net/restapi"
-                  ),
-                  settings.esign?.baseUrl ||
-                    "https://demo.docusign.net/restapi",
-                  (baseUrl) => updateEsign({ baseUrl })
-                )}
-                {renderField(
-                  t("field.docusign_account_id", "DocuSign Account ID"),
-                  t(
-                    "settings.ui.docusign_api_account_guid_used_when_dispatching_",
-                    "DocuSign API Account GUID used when dispatching signature envelopes."
-                  ),
-                  t("placeholder.e_g_a1b2c3d4", "e.g., a1b2c3d4-..."),
-                  settings.esign?.accountId || "ds-account-bogota-central",
-                  (accountId) => updateEsign({ accountId })
-                )}
-              </Box>
-            </Flex>
-          </TabPanelBox>
+          <ESignSettingsTab
+            esign={settings.esign}
+            t={t}
+            updateEsign={updateEsign}
+          />
 
           <TabPanelBox value="keys">
             <Flex

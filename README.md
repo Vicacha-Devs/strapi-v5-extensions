@@ -36,8 +36,12 @@ strapi-v5-extensions/
 │   ├── strapi-plugin-sitemap/          # @vicacha-devs/strapi-plugin-sitemap — Multilingual XML sitemap & robots.txt generator
 │   └── strapi-plugin-tiptap-editor/    # @vicacha-devs/strapi-plugin-tiptap-editor — TipTap v3 + Edifice IO WYSIWYG editor, presets & custom components
 ├── scripts/
+│   ├── create-plugin.ts                # Strapi v5 plugin scaffolder CLI (5-locale i18n, dual tsconfigs, tests & dashboard wiring)
 │   ├── ensure-dist-types.ts            # Stubs missing entry .d.ts files so strapi-plugin verify passes (SDK layout: index.mjs + index.js)
-│   └── publint-all.ts                  # Strict publint validation across all 17 publishable plugins
+│   ├── publint-all.ts                  # Strict publint validation across all 17 publishable plugins
+│   └── qa/                             # Doctor, adversarial judges, offline workspace resolver, verify, HTML Control Center & smoke
+├── docker-compose.qa.yml               # Port-isolated 127.0.0.1 QA infra (Postgres 5434, Valkey 6381, Typesense 8110, Mailpit 1027)
+├── .env.qa.example                     # QA Docker environment template (copy to .env.qa)
 ├── commitlint.config.ts                # Conventional Commits + optional [TICKET-123] prefix (style check)
 ├── eslint.config.ts                    # Root ESLint v10 flat configuration
 ├── .oxfmtrc.json                       # Oxfmt code formatting configuration
@@ -84,7 +88,7 @@ strapi-v5-extensions/
 4. **Multilingual Admin i18n Parity**:
    Every plugin ships with verified translation key parity across the 5 core locales (`en`, `es`, `ar`, `tr`, `fr`), with **10 Admin locales** across the 11 domain and operations plugins (`calendar`, `events`, `bookings`, `broadcasts`, `certificates`, `donations`, `inbox`, `islam`, `media-feeds`, `notes`, `resources` — covering regional sets across `de`, `pt`, `it`, `nl`, `pl`, `ru`, `id`, `ms`, `ur`, `zh`), **11 locales** (`ar`, `cs`, `de`, `en`, `es`, `fr`, `it`, `nl`, `pl`, `pt`, `tr`) in `tiptap-editor`, **6 locales** (`+ pt-BR`) in `seo` and `sitemap`, and **5 locales** in `global-search`.
 5. **NPM Package Quality & Changesets Releases (`publint` + `@strapi/sdk-plugin` + Trusted Publishing)**:
-   All 15 plugins are validated with `strapi-plugin verify` and strict `publint` (`pack: "pnpm"`). Independent per-package versions and changelogs are managed via [Changesets](https://changesets.dev) ("Version Packages" PRs) and published via npm OIDC Trusted Publishing with provenance.
+   All 17 plugins are validated with `strapi-plugin verify` and strict `publint` (`pack: "pnpm"`). Independent per-package versions and changelogs are managed via [Changesets](https://changesets.dev) ("Version Packages" PRs) and published via npm OIDC Trusted Publishing with provenance.
 
 ---
 
@@ -102,14 +106,14 @@ pnpm format:check
 pnpm lint
 pnpm lint:fix
 
-# Build or clean all 15 Strapi v5 plugins via Turborepo
+# Build or clean all 17 Strapi v5 plugins via Turborepo
 pnpm build
 pnpm clean
 
 # Run strict TypeScript checks (Admin + Server) across all packages
 pnpm check
 
-# Validate all 15 plugin packages with @strapi/sdk-plugin and strict publint
+# Validate all 17 plugin packages with @strapi/sdk-plugin and strict publint
 pnpm verify:sdk
 pnpm publint
 
@@ -118,6 +122,23 @@ pnpm test
 
 # Run the complete verification pipeline (format:check + lint + build + check + verify:sdk + publint + test)
 pnpm verify
+
+# Scaffold a new Strapi v5 plugin (5-locale i18n, dual tsconfigs, offline tests & optional dashboard wiring)
+pnpm plugin:new -- announcements --display-name "Announcements" --with-content-type --wire-dashboard
+# Preview scaffolded files without writing:
+pnpm plugin:new -- announcements --dry-run
+
+# QA Control Center, environment doctor & adversarial judges (runs offline in seconds)
+pnpm qa:doctor
+pnpm qa:judges
+pnpm qa:verify          # generates .qa/report.json & interactive .qa/dashboard.html
+pnpm qa:report          # aggregates sibling Vicacha repos into multi-repo HTML Control Center
+
+# Port-isolated Docker QA stack (127.0.0.1: Postgres 5434, Valkey 6381, Typesense 8110, Mailpit 1027)
+pnpm qa:docker:up
+pnpm qa:smoke
+pnpm qa:e2e
+pnpm qa:docker:down
 
 # Develop the Strapi v5 host dashboard app or Starlight documentation site
 pnpm dashboard:dev
