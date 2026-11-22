@@ -20,10 +20,8 @@ export function PresetSelect({ value, onChange, name }: PresetSelectProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    get("/tiptap-editor/presets")
-      .then((res: { data?: { presets?: string[] } }) =>
-        setPresets(res.data?.presets ?? [])
-      )
+    get<{ presets?: string[] }>("/tiptap-editor/presets")
+      .then((res) => setPresets(res.data?.presets ?? []))
       .catch(() => setPresets([]))
       .finally(() => setIsLoading(false));
   }, [get]);

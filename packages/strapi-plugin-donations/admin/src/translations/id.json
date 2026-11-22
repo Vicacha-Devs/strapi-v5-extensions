@@ -424,5 +424,8 @@
   "placeholder.add_currency_iso": "+ Tambah / Alihkan Mata Uang ISO 4217...",
   "settings.tab.currency": "Mata Uang, Lokalisasi & Teks Kaya",
   "settings.tab.categories": "Kategori Donasi ({count})",
-  "settings.tab.certificates": "Jembatan Sertifikat Pajak Kriptografi"
+  "settings.tab.certificates": "Jembatan Sertifikat Pajak Kriptografi",
+  "field.supported_locales": "Bahasa yang Didukung",
+  "field.supported_donor_currencies": "Mata Uang Donatur yang Didukung (ISO 4217)",
+  "placeholder.select_supported_locales": "Pilih bahasa yang didukung..."
 }

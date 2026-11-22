@@ -229,7 +229,12 @@ export function useTiptapEditor(
   // Initial content only, like `useEditor` itself. Nothing is written back here: loading must not
   // dirty the form; the stripped nodes are only lost if the editor saves afterwards.
   const [prepared] = useState(() =>
-    prepareEditorContent(field.value, schema, defaultValue, outputFormat)
+    prepareEditorContent(
+      field.value as string | JSONContent | null | undefined,
+      schema,
+      defaultValue,
+      outputFormat
+    )
   );
   const { unknownNodeTypes, unknownMarkTypes } = prepared;
 

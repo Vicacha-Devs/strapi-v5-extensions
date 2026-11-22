@@ -118,9 +118,9 @@ const Initializer = ({ setPlugin }: InitializerProps) => {
       let themeStyles: { stylesheet?: string; css?: string } = {};
 
       try {
-        const { data } = await get("/tiptap-editor/theme");
+        const { data } = await get<TiptapThemeConfig>("/tiptap-editor/theme");
         if (data && typeof data === "object" && Object.keys(data).length > 0) {
-          setThemeCache(data as TiptapThemeConfig);
+          setThemeCache(data);
 
           if (typeof data.css === "string" && data.css) {
             themeStyles = { css: data.css };

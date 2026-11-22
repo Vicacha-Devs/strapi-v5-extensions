@@ -424,5 +424,8 @@
   "placeholder.add_currency_iso": "+ ISO 4217 کرنسی شامل / تبدیل کریں...",
   "settings.tab.currency": "کرنسی، زبانیں اور رچ ٹیکسٹ",
   "settings.tab.categories": "عطیات کے زمرہ جات ({count})",
-  "settings.tab.certificates": "کرپٹوگرافک ٹیکس سرٹیفکیٹس برج"
+  "settings.tab.certificates": "کرپٹوگرافک ٹیکس سرٹیفکیٹس برج",
+  "field.supported_locales": "تعاون یافتہ زبانیں",
+  "field.supported_donor_currencies": "تعاون یافتہ عطیہ دہندہ کرنسیاں (ISO 4217)",
+  "placeholder.select_supported_locales": "تعاون یافتہ زبانیں منتخب کریں..."
 }

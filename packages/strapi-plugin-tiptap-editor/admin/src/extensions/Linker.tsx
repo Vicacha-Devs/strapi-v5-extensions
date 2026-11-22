@@ -108,11 +108,11 @@ export function LinkerNodeView(props: NodeViewProps) {
     import("@strapi/strapi/admin")
       .then(({ getFetchClient }) => {
         if (typeof getFetchClient !== "function") return undefined;
-        return getFetchClient().get(
+        return getFetchClient().get<SearchHit>(
           `/${PLUGIN_ID}/get/${encodeURIComponent(collectionName)}/${encodeURIComponent(documentId)}`
         );
       })
-      .then((res: { data?: SearchHit } | undefined) => {
+      .then((res) => {
         if (!cancelled && res?.data?.label) {
           setResolvedLabel(res.data.label);
         }
@@ -278,21 +278,15 @@ export function useLinker(
       import("@strapi/strapi/admin")
         .then(({ getFetchClient }) => {
           if (typeof getFetchClient !== "function") return undefined;
-          return getFetchClient().get(
-            `/${PLUGIN_ID}/search?q=${encodeURIComponent(trimmed)}`
-          );
+          return getFetchClient().get<{
+            results?: Record<string, SearchHit[]>;
+          }>(`/${PLUGIN_ID}/search?q=${encodeURIComponent(trimmed)}`);
         })
-        .then(
-          (
-            res:
-              | { data?: { results?: Record<string, SearchHit[]> } }
-              | undefined
-          ) => {
-            if (!cancelled) {
-              setResults(res?.data?.results || {});
-            }
+        .then((res) => {
+          if (!cancelled) {
+            setResults(res?.data?.results || {});
           }
-        )
+        })
         .catch(() => {
           if (!cancelled) setResults({});
         })

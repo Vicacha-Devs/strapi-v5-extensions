@@ -66,7 +66,10 @@ export async function uploadFileToStrapi(
   try {
     const { getFetchClient } = await import("@strapi/strapi/admin");
     const { post } = getFetchClient();
-    const { data: payload } = await post("/upload", formData);
+    const { data: payload } = await post<
+      | UploadedStrapiAsset[]
+      | { data?: UploadedStrapiAsset | UploadedStrapiAsset[] }
+    >("/upload", formData);
 
     const uploaded = Array.isArray(payload)
       ? payload[0]
