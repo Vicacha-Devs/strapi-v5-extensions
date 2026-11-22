@@ -65,6 +65,10 @@ jobs:
       - name: Install Playwright Chromium
         working-directory: ./apps/dashboard
         run: pnpm dlx --package=@playwright/test@1.53.0 playwright install --with-deps chromium
+      - name: Diagnose compiled Strapi config
+        run: |
+          ls -la apps/dashboard/dist apps/dashboard/dist/config || true
+          cat apps/dashboard/dist/config/database.js || true
       - name: Boot Strapi Dashboard on loopback 127.0.0.1:1338 & run smoke + E2E
         env:
           HOST: 127.0.0.1
