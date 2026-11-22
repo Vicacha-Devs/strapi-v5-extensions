@@ -21,12 +21,10 @@ test.describe("Strapi v5 Extensions Dashboard — Health, Auth & Admin E2E", () 
 
     await page.goto("/admin", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveTitle(/Strapi/i);
-    const hasHeadingOrMain = await page
-      .locator("main, h1, form")
-      .first()
-      .isVisible()
-      .catch(() => false);
-    expect(hasHeadingOrMain).toBeTruthy();
+    // The admin is a SPA: wait for it to render instead of checking once.
+    await expect(page.locator("main, h1, form").first()).toBeVisible({
+      timeout: 20_000,
+    });
     expect(pageErrors).toEqual([]);
   });
 });

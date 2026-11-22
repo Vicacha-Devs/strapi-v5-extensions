@@ -1,7 +1,7 @@
 {
   "*": ["oxfmt --no-error-on-unmatched-pattern"],
   "*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}": [
-    "oxlint --fix",
+    "oxlint --fix --no-error-on-unmatched-pattern",
     "eslint --fix --no-warn-ignored"
   ],
   "*.json": ["eslint --fix --no-warn-ignored"]
