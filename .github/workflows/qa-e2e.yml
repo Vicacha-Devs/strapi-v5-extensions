@@ -29,6 +29,8 @@ jobs:
           node-version: "24"
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
+      - name: Build shared workspace package (resolved via dist by plugin tests)
+        run: pnpm --filter @vicacha-devs/plugin-shared build
       - name: Run offline QA verification & build HTML Control Center
         run: pnpm qa:verify
       - name: Upload QA Control Center HTML & JSON
