@@ -343,21 +343,24 @@ export async function sendViaSelfHostedGateway(
   const endpoint =
     driver === "evolution"
       ? `${baseUrl}/message/sendText/${session}`
-      : `${baseUrl}/api/sendText`;
+      : `${baseUrl}/api/sessions/${session}/messages/send-text`;
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
   if (settings.whatsappGatewayApiKey) {
-    headers.apikey = settings.whatsappGatewayApiKey;
-    headers["X-Api-Key"] = settings.whatsappGatewayApiKey;
+    if (driver === "evolution") {
+      headers.apikey = settings.whatsappGatewayApiKey;
+    } else {
+      headers["X-API-Key"] = settings.whatsappGatewayApiKey;
+      headers.Authorization = `Bearer ${settings.whatsappGatewayApiKey}`;
+    }
   }
 
   const body =
     driver === "evolution"
       ? { number: target.evolutionNumber, text: fullText }
       : {
-          session: rawSession,
           chatId: target.chatId,
           text: fullText,
         };

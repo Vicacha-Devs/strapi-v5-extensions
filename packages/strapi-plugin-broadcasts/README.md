@@ -5,7 +5,7 @@ Omnichannel Community Broadcasts & EventHub Automation Engine for Strapi v5:
 - **Multi-Channel Transports**:
   - **Email Newsletters**: Dispatches via `strapi.plugin('email')` (and optional `strapi-plugin-email-designer-5` templates) with `List-Unsubscribe` headers and per-subscriber `{{unsubscribeUrl}}`.
   - **Telegram Bot & Channel/Supergroup Broadcasts**: Dispatches rich HTML messages with inline CTA buttons (`InlineKeyboardMarkup`) and optional Forum topic thread (`message_thread_id`) routing.
-  - **WhatsApp Broadcasts**: Supports **Meta WhatsApp Cloud API** (`meta-cloud` — WABA templates & text) and self-hosted gateways (**OpenWA / WAHA / Evolution API**) with E.164 phone normalization.
+  - **WhatsApp Broadcasts**: Supports **Meta WhatsApp Cloud API** (`meta-cloud` — WABA templates & text) and self-hosted gateways (**`rmyndharis/OpenWA`** via `POST /api/sessions/{sessionId}/messages/send-text` with `X-API-Key` + `Authorization: Bearer`, **WAHA**, and **Evolution API**) with E.164 phone normalization and HTTPS SSRF guards.
   - **Dry-Run Sandbox Mode**: Automatically records simulated deliveries when `dryRun: true` or when external provider tokens are not configured.
 - **Ecosystem Bridges**:
   - **`@vicacha-devs/strapi-plugin-inbox` Bridge**: Segments confirmed double opt-in subscribers (`plugin::inbox.subscriber`) by `topic` and `locale`, selecting each subscriber's localized campaign copy (`es`, `en`, `ar`, `tr`, etc.).
